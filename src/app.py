@@ -10,7 +10,7 @@ from src.api.get_request_status import GetRequestStatus
 from src.config.provider_config_manager import ProviderConfigManager
 from src.config.provider_template_manager import ProviderTemplateManager
 from src.database.database_handler import DatabaseHandler
-from src.aws.aws_handler import AWSHandler
+from aws.aws_handler.aws_handler import AWSHandler
 from src.helpers.utils import load_json_data
 from helpers.aws_template_wizard import interactive_template_creation
 from src.helpers.logger import setup_logging

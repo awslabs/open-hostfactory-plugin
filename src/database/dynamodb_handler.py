@@ -1,6 +1,6 @@
 import boto3
 from typing import Any, Dict, Optional, List
-from .base_database_handler import BaseDatabaseHandler
+from .database_handler_interface import BaseDatabaseHandler
 from src.helpers.logger import setup_logging
 
 logger = setup_logging()

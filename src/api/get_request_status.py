@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Any, List
 from src.database.database_handler import DatabaseHandler
-from src.aws.aws_handler import AWSHandler
+from aws.aws_handler.aws_handler import AWSHandler
 from src.models.provider.request import Request, RequestType, RequestStatus
 from src.models.provider.machine import Machine, MachineStatus
 from src.helpers.logger import setup_logging

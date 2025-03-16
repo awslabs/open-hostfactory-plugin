@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
-from .base_database_handler import BaseDatabaseHandler
+from .database_handler_interface import BaseDatabaseHandler
 from .json_handler import JSONHandler  # Default backend
 from ..models.provider.request import Request
 from ..models.provider.machine import Machine
-from ..models.database.database_interface import Database
+from ..models.database_interface import Database
 from src.helpers.logger import setup_logging
 
 logger = setup_logging()

@@ -3,7 +3,7 @@ from typing import Dict, Any
 from src.models.provider.request import Request, RequestType, RequestStatus
 from src.config.provider_template_manager import ProviderTemplateManager
 from src.database.database_handler import DatabaseHandler
-from src.aws.aws_handler import AWSHandler
+from aws.aws_handler.aws_handler import AWSHandler
 from src.helpers.logger import setup_logging
 
 logger = setup_logging()

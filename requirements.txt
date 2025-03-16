@@ -1,6 +1,18 @@
-boto3==1.36.2
+# Core dependencies
+boto3==1.36.2  # AWS SDK for Python
 botocore==1.36.3
 argparse==1.4.0
-# jsonlib==1.6.1
-structlog==25.1.0
-pyyaml!=6.0.0,!=5.4.0,!=5.4.1 # pyyaml is broken with cython 3 https://github.com/yaml/pyyaml/issues/724
+pydantic==2.10.3  # Data validation and settings management
+sqlalchemy==2.0.38  # SQL toolkit and ORM
+tinydb==4.8.0  # Lightweight document-oriented database for JSON storage
+dynaconf==3.2.4  # Centralized configuration management
+structlog==25.1.0  # Structured logging for better observability
+
+# Optional dependencies for tracing and debugging
+opentelemetry-api==1.30.0  # OpenTelemetry API for distributed tracing
+opentelemetry-sdk==1.30.0  # OpenTelemetry SDK
+opentelemetry-instrumentation-boto==0.51b0  # Instrument Boto3 calls
+
+# Testing and development tools
+pytest==7.3.1  # Testing framework
+pytest-cov==4.0.0  # Coverage reporting for pytest

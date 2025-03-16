@@ -1,3 +1,4 @@
 awscpinst
 awscpinst/*
 **/*.log
+.aider*

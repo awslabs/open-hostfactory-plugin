@@ -3,7 +3,7 @@ import os
 import shutil
 from typing import Any, Dict, Optional, List
 from datetime import datetime
-from .base_database_handler import BaseDatabaseHandler
+from .database_handler_interface import BaseDatabaseHandler
 from src.helpers.logger import setup_logging
 
 logger = setup_logging()

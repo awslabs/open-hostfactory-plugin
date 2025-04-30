@@ -1,0 +1,18 @@
+# .coveragerc
+[run]
+source = src
+branch = True
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    pass
+    raise ImportError
+ignore_errors = True
+omit =
+    tests/*
+    setup.py

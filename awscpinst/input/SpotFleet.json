@@ -1,1 +1,1 @@
-{ "template": { "templateId": "SpotFleet", "numMachines":  2 } }
+{ "template": { "templateId": "SpotFleet", "machineCount":  2 } }

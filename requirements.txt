@@ -1,18 +1,25 @@
 # Core dependencies
-boto3==1.36.2  # AWS SDK for Python
+boto3==1.36.2
 botocore==1.36.3
-argparse==1.4.0
-pydantic==2.10.3  # Data validation and settings management
-sqlalchemy==2.0.38  # SQL toolkit and ORM
-tinydb==4.8.0  # Lightweight document-oriented database for JSON storage
-dynaconf==3.2.4  # Centralized configuration management
-structlog==25.1.0  # Structured logging for better observability
+pydantic==2.10.3
+sqlalchemy==2.0.38
+dynaconf==3.2.4
+structlog==25.1.0
+opentelemetry-api==1.30.0
+opentelemetry-sdk==1.30.0
+opentelemetry-instrumentation-boto==0.51b0
 
-# Optional dependencies for tracing and debugging
-opentelemetry-api==1.30.0  # OpenTelemetry API for distributed tracing
-opentelemetry-sdk==1.30.0  # OpenTelemetry SDK
-opentelemetry-instrumentation-boto==0.51b0  # Instrument Boto3 calls
+# Testing dependencies
+pytest>=7.4.3
+pytest-cov>=4.1.0
+pytest-env>=1.1.1
+pytest-mock>=3.12.0
+pytest-xdist>=3.3.1
+moto>=4.2.7
+coverage>=7.3.2
 
-# Testing and development tools
-pytest==7.3.1  # Testing framework
-pytest-cov==4.0.0  # Coverage reporting for pytest
+# Development tools
+black>=23.3.0
+isort>=5.12.0
+mypy>=1.3.0
+pylint>=2.17.3pytest-mock>=3.12.0

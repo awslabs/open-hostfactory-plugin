@@ -1,10 +1,10 @@
 #!/bin/bash
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-PARENT_DIR="$(dirname "$SCRIPT_DIR")"
-PYTHON_SCRIPT="${PARENT_DIR}/src/app.py"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-export PYTHONPATH="$PYTHONPATH:$SCRIPT_DIR"
+# Add project root to PYTHONPATH
+export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH}"
 
 # Check if Python is available
 if command -v python3 &> /dev/null; then
@@ -17,4 +17,4 @@ else
 fi
 
 # Execute the Python script with all arguments passed to this script
-$PYTHON_CMD "$PYTHON_SCRIPT" "$@"
+exec $PYTHON_CMD "${PROJECT_ROOT}/src/app.py" "$@"

@@ -1,144 +1,369 @@
+# src/api/request_machines.py
+from typing import Dict, Any, Optional
 import logging
-from typing import Dict, Any
-from src.models.provider.request import Request, RequestType, RequestStatus
-from src.config.provider_template_manager import ProviderTemplateManager
-from src.database.database_handler import DatabaseHandler
-from aws.aws_handler.aws_handler import AWSHandler
-from src.helpers.logger import setup_logging
-
-logger = setup_logging()
-
+import uuid
+from src.application.request.service import RequestApplicationService
+from src.domain.template.exceptions import TemplateNotFoundError
+from src.domain.request.exceptions import RequestValidationError
+from src.infrastructure.exceptions import InfrastructureError
+from src.infrastructure.aws.exceptions import ResourceNotFoundError
+from infrastructure.monitoring.metrics import MetricsCollector
+from infrastructure.protection.rate_limiter import RateLimiter
 
 class RequestMachines:
-    """
-    API to request machines based on a specific template.
-    """
+    """Enhanced API endpoint for requesting machines."""
 
-    def __init__(self, aws_handler: AWSHandler, db_handler: DatabaseHandler, template_manager: ProviderTemplateManager):
-        """
-        Initialize RequestMachines with dependencies.
+    def __init__(self, 
+                 request_service: RequestApplicationService,
+                 rate_limiter: Optional[RateLimiter] = None,
+                 metrics: Optional[MetricsCollector] = None):
+        self._service = request_service
+        self._rate_limiter = rate_limiter
+        self._metrics = metrics
+        self._logger = logging.getLogger(__name__)
 
-        :param aws_handler: Instance of AWSHandler to manage AWS operations.
-        :param db_handler: Instance of DatabaseHandler to manage database operations.
-        :param template_manager: Instance of ProviderTemplateManager to manage templates.
+    def execute(self,
+                input_data: Optional[Dict[str, Any]] = None,
+                all_flag: bool = False,
+                long: bool = False,
+                clean: bool = False,
+                context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        self.aws_handler = aws_handler
-        self.db_handler = db_handler
-        self.template_manager = template_manager
+        Request machines using specified template.
 
-    def execute(self, input_data: dict) -> Dict[str, Any]:
-        """
-        Request machines based on a specific template.
+        Args:
+            input_data: Request input data
+            all_flag: Not used for this endpoint but included for interface consistency
+            long: Not used for this endpoint but included for interface consistency
+            context: Request context information
 
-        :param input_data: A dictionary containing the input data for the request.
-                           Example: {"templateId": "RunInstances", "numMachines": 2}
-        :return: A response with request ID and status or an error message.
+        Returns:
+            Dict containing request status and details
         """
+        context = context or {}
+        correlation_id = context.get('correlation_id', str(uuid.uuid4()))
+        start_time = self._metrics.start_timer() if self._metrics else None
+
         try:
-            logger.info("Processing request for machines.")
+            if all_flag:
+                # Get all templates
+                templates = self._service.get_template_service().get_available_templates()
+                results = []
+                
+                for template in templates['templates']:
+                    try:
+                        # Create request for each template with its maxNumber
+                        request = self._service.create_request(
+                            template_id=template['templateId'],
+                            num_machines=template['maxNumber'],
+                            timeout=input_data.get('timeout', 3600) if input_data else 3600,
+                            tags=input_data.get('tags') if input_data else None,
+                            metadata=context
+                        )
+                        results.append({
+                            "templateId": template['templateId'],
+                            "requestId": str(request.request_id),
+                            "numRequested": template['maxNumber']
+                        })
+                        self._logger.info(
+                            f"Created request for template {template['templateId']}",
+                            extra={
+                                'request_id': str(request.request_id),
+                                'correlation_id': correlation_id,
+                                'template_id': template['templateId']
+                            }
+                        )
+                    except Exception as e:
+                        self._logger.error(
+                            f"Failed to create request for template {template['templateId']}",
+                            exc_info=True,
+                            extra={
+                                'correlation_id': correlation_id,
+                                'template_id': template['templateId'],
+                                'error': str(e)
+                            }
+                        )
+                        results.append({
+                            "templateId": template['templateId'],
+                            "error": str(e)
+                        })
 
-            # Parse and validate input data
-            parsed_data = self._parse_input_data(input_data)
+                return {
+                    "message": "Processed all templates",
+                    "results": results,
+                    "metadata": {
+                        "correlation_id": correlation_id,
+                        "timestamp": context.get('timestamp')
+                    }
+                }
 
-            # Validate the template and machine count
-            template = self.template_manager.get_template(parsed_data["templateId"])
-            if not template:
-                raise ValueError(f"Template with ID '{parsed_data['templateId']}' not found.")
-            if parsed_data["machineCount"] > template.maxNumber:
-                raise ValueError(
-                    f"Requested machine count ({parsed_data['machineCount']}) exceeds maximum allowed "
-                    f"({template.maxNumber}) for template {parsed_data['templateId']}."
+            # Validate input
+            self._validate_input(input_data)
+
+            # Check rate limit
+            if self._rate_limiter:
+                self._rate_limiter.check_rate_limit(
+                    key=context.get('client_ip', 'default')
                 )
 
-            # Generate a unique request ID for an acquire request
-            request_id = Request.generate_request_id(request_type=RequestType.ACQUIRE)
-            logger.info(f"Generated request ID: {request_id}")
+            # Extract request parameters
+            template_data = input_data['template']
+            template_id = template_data['templateId']
+            num_machines = int(template_data['machineCount'])
 
-            # Create a Request object and save it in the database
-            request = Request(
-                requestId=request_id,
-                requestType=RequestType.ACQUIRE,
-                numRequested=parsed_data["machineCount"],
-                templateId=parsed_data["templateId"],
-                status=RequestStatus.RUNNING,
-                awsHandler=template.awsHandler,
-                message="Request initiated."
+            # Log request initiation
+            self._logger.info(
+                "Requesting machines",
+                extra={
+                    'correlation_id': correlation_id,
+                    'template_id': template_id,
+                    'machine_count': num_machines,
+                    'client_ip': context.get('client_ip'),
+                    'user_agent': context.get('user_agent')
+                }
             )
-            self.db_handler.add_request(request)
-            logger.info(f"Request {request_id} saved to database.")
 
-            # Process the acquire request by calling AWS but do not save machines yet
-            return self._process_request(request)
+            # Create request with metadata
+            request = self._service.create_request(
+                template_id=template_id,
+                num_machines=num_machines,
+                timeout=input_data.get('timeout', 3600),
+                tags=input_data.get('tags'),
+                metadata={
+                    'source_ip': context.get('client_ip'),
+                    'user_agent': context.get('user_agent'),
+                    'created_by': context.get('user_id'),
+                    'correlation_id': correlation_id
+                }
+            )
+
+            # Log request ID immediately after creation
+            request_id = str(request.request_id)
+            self._logger.info(
+                f"Created request with ID: {request_id}",
+                extra={
+                    'request_id': request_id,
+                    'correlation_id': correlation_id,
+                    'template_id': template_id,
+                    'machine_count': num_machines
+                }
+            )
+
+            # Create launch template
+            try:
+                launch_template = self._service.create_launch_template(request)
+                self._logger.info(
+                    f"Created launch template for request {request_id}",
+                    extra={
+                        'request_id': request_id,
+                        'correlation_id': correlation_id,
+                        'launch_template_id': launch_template['LaunchTemplateId'],
+                        'launch_template_version': launch_template['Version']
+                    }
+                )
+            except Exception as e:
+                self._logger.error(
+                    f"Failed to create launch template for request {request_id}",
+                    exc_info=True,
+                    extra={
+                        'request_id': request_id,
+                        'correlation_id': correlation_id,
+                        'error': str(e)
+                    }
+                )
+                raise
+
+            # Create AWS resources
+            try:
+                aws_resource_id = self._service.create_aws_resources(request)
+                self._logger.info(
+                    f"Created AWS resources for request {request_id}",
+                    extra={
+                        'request_id': request_id,
+                        'correlation_id': correlation_id,
+                        'resource_id': aws_resource_id
+                    }
+                )
+            except Exception as e:
+                self._logger.error(
+                    f"Failed to create AWS resources for request {request_id}",
+                    exc_info=True,
+                    extra={
+                        'request_id': request_id,
+                        'correlation_id': correlation_id,
+                        'error': str(e)
+                    }
+                )
+                raise
+
+            # Record metrics
+            if self._metrics:
+                self._metrics.record_success(
+                    'request_machines',
+                    start_time,
+                    {
+                        'template_id': template_id,
+                        'machine_count': num_machines,
+                        'correlation_id': correlation_id,
+                        'request_id': request_id
+                    }
+                )
+
+            # Return response in HostFactory format
+            return {
+                "requestId": request_id,
+                "message": "Request VM success from AWS.",
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "template_id": template_id,
+                    "machine_count": num_machines,
+                    "timestamp": context.get('timestamp'),
+                    "request_id": request_id
+                }
+            }
+
+        except (ValueError, KeyError) as e:
+            self._handle_error(
+                "Invalid input data",
+                e,
+                correlation_id,
+                start_time
+            )
+            return {
+                "error": "Invalid input format",
+                "message": str(e),
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "error_type": "ValidationError"
+                }
+            }
+
+        except TemplateNotFoundError as e:
+            self._handle_error(
+                "Template not found",
+                e,
+                correlation_id,
+                start_time
+            )
+            return {
+                "error": str(e),
+                "message": "Template not found",
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "error_type": "TemplateNotFoundError"
+                }
+            }
+
+        except RequestValidationError as e:
+            self._handle_error(
+                "Request validation failed",
+                e,
+                correlation_id,
+                start_time
+            )
+            return {
+                "error": str(e),
+                "message": "Failed to validate request",
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "error_type": "RequestValidationError"
+                }
+            }
+
+        except ResourceNotFoundError as e:
+            self._handle_error(
+                "Resource not found",
+                e,
+                correlation_id,
+                start_time
+            )
+            return {
+                "error": "Resource not found",
+                "message": str(e),
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "error_type": "ResourceNotFoundError",
+                    "resource_type": "subnet" if "subnet" in str(e) else "other"
+                }
+            }
+
+        except InfrastructureError as e:
+            self._handle_error(
+                "Infrastructure error",
+                e,
+                correlation_id,
+                start_time
+            )
+            return {
+                "error": "Infrastructure error",
+                "message": str(e),
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "error_type": "InfrastructureError"
+                }
+            }
 
         except Exception as e:
-            logger.error(f"Error requesting machines: {e}", exc_info=True)
-            return {"error": str(e)}
+            self._handle_error(
+                "Unexpected error requesting machines",
+                e,
+                correlation_id,
+                start_time
+            )
+            return {
+                "error": "Internal server error",
+                "message": "Failed to request machines",
+                "metadata": {
+                    "correlation_id": correlation_id,
+                    "error_type": "InternalError"
+                }
+            }
 
-    def _parse_input_data(self, input_data: dict) -> Dict[str, Any]:
-        """
-        Parse and validate input data for requesting machines.
-
-        :param input_data: The raw input data.
-                           Example: {"template": {"templateId": "RunInstances", "numMachines": 2}}
-        :return: Parsed and validated input data.
-                 Example: {"templateId": "RunInstances", "machineCount": 2}
-        """
+    def _validate_input(self, input_data: Dict[str, Any]) -> None:
+        """Validate request input data."""
         if not isinstance(input_data, dict):
-            raise ValueError("Input data must be a dictionary.")
+            raise ValueError("Input must be a dictionary")
 
-        if "template" not in input_data or not isinstance(input_data["template"], dict):
-            raise ValueError("Input data must include a 'template' key with a dictionary value.")
+        if 'template' not in input_data:
+            raise ValueError("Input must include 'template' key")
 
-        template_data = input_data["template"]
-        if "templateId" not in template_data or "numMachines" not in template_data:
-            raise ValueError("Input data must include 'templateId' and 'numMachines' within the 'template' dictionary.")
+        template_data = input_data['template']
+        if not isinstance(template_data, dict):
+            raise ValueError("Template data must be a dictionary")
+
+        required_fields = ['templateId', 'machineCount']
+        for field in required_fields:
+            if field not in template_data:
+                raise ValueError(f"Missing required field: {field}")
 
         try:
-            machine_count = int(template_data["numMachines"])
+            machine_count = int(template_data['machineCount'])
+            if machine_count <= 0:
+                raise ValueError("Machine count must be positive")
         except ValueError:
-            raise ValueError("'numMachines' must be an integer.")
+            raise ValueError("Invalid machine count")
 
-        return {
-            "templateId": template_data["templateId"],
-            "machineCount": machine_count,
-        }
+    def _handle_error(self, 
+                     message: str, 
+                     error: Exception, 
+                     correlation_id: Optional[str],
+                     start_time: Optional[float]) -> None:
+        """Handle and log errors with metrics."""
+        self._logger.error(
+            message,
+            exc_info=error,
+            extra={
+                'correlation_id': correlation_id,
+                'error_type': error.__class__.__name__
+            }
+        )
 
-    def _process_request(self, request: Request) -> Dict[str, Any]:
-        """
-        Process an acquire request by initiating provisioning via AWS.
-
-        :param request: The Request object representing the acquire operation.
-        :return: A response with the request ID and status.
-        """
-        try:
-            logger.info(f"Processing acquire request {request.requestId}.")
-
-            # Call AWSHandler to initiate provisioning (but do not save machines yet)
-            aws_response = self.aws_handler.initiate_provisioning(request)
-
-            # Update the request status in the database based on AWS response
-            if aws_response.status == RequestStatus.RUNNING:
-                request.message = "AWS provisioning initiated successfully."
-                self.db_handler.update_request(request)
-                logger.info(f"Request {request.requestId} updated to 'running' in database.")
-                return {
-                    "requestId": request.requestId,
-                    "status": request.status.value,
-                    "message": request.message,
+        if self._metrics:
+            self._metrics.record_error(
+                'request_machines',
+                start_time,
+                {
+                    'error_type': error.__class__.__name__,
+                    'correlation_id': correlation_id
                 }
-            else:
-                # Handle failure case
-                request.status = RequestStatus.COMPLETE_WITH_ERRORS
-                request.message = f"AWS provisioning failed. Error: {aws_response.message}"
-                self.db_handler.update_request(request)
-                logger.error(f"Request {request.requestId} failed. Error: {aws_response.message}")
-                return {
-                    "requestId": request.requestId,
-                    "status": request.status.value,
-                    "message": request.message,
-                    "error": aws_response.message,
-                }
-
-        except Exception as e:
-            logger.error(f"Error processing acquire request {request.requestId}: {e}", exc_info=True)
-            return {"error": str(e)}
+            )

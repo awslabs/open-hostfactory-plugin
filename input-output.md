@@ -15,6 +15,27 @@ getAvailableTemplates.sh -f /tmp/hf_in_tvXQSo
 ```
 
 
+```{
+  "templates":
+  [
+    {
+      "templateId": "(mandatory)(string) unique name for the template",
+      "maxNumber": "(mandatory)(numeric) max hosts that can be provisioned",
+      "attributes":  
+      {
+          "type": "(mandatory) ["String", "type of VM. Supported values are any EGO_MACHINE_TYPE including X86_64, NTX64, etc"]",
+          "ncpus": "(mandatory) ["Numeric", "number of CPUs per host "]",
+          "nram": "(mandatory) ["Numeric", "minimum RAM required per host"]"      
+      },
+      "attr_1": (optional) additional host provider specific attributes in JSON format,  
+      ...       
+      "attr_n": "(optional) additional host provider specific attributes in JSON format" 
+     },
+   ...
+   ]
+}
+```
+
 Output
 ```
 [egoadmin@ip-10-0-59-217 ~]$ cat getAvailableTemplates.log
@@ -50,6 +71,30 @@ Output
 }
 ```
 
+
+```
+{
+ "message": "(optional)(string) Any additional message the caller should know",
+ "templates": [
+    {
+    "templateId": "(mandatory)(string) Unique ID to identify this template in the host provider",
+    "maxNumber": "(mandatory)(numeric) Maximum number of machines that can be provisioned with this template configuration. Use -1to indicate an unlimited number of machines of this template",
+    "availableNumber": "(optional)(numeric) Number of machines that can be currently provisioned with this template",  
+    "requestedMachines": "(optional)(list of strings)["Names of machines provisioned from this template"],
+      "attributes":  
+      {
+          "type": "(mandatory) ["String", "type of VM. Supported values are any EGO_MACHINE_TYPE including X86_64, NTX64, etc"]",
+          "ncpus": "(mandatory) ["Numeric", "number of CPUs per host "]",
+          "nram": "(mandatory) ["Numeric", "minimum RAM required per host"]"      
+      },
+      "attr_1": "(optional) additional host provider specific attributes in JSON format",  
+      ...       
+      "attr_n": "(optional) additional host provider specific attributes in JSON format" 
+     },
+   ...
+   ]
+} 
+```
 ---------------------------------------------------------------------------------------------------------------------
 
 requestMachines

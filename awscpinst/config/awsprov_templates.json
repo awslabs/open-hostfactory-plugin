@@ -2,7 +2,8 @@
   "templates": [
     {
       "templateId": "EC2FleetInstant",
-      "awshandler": "EC2FleetInstant",
+      "awsHandler": "EC2Fleet",
+      "fleetType": "instant",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -18,7 +19,8 @@
     },
     {
       "templateId": "EC2FleetMaintain",
-      "awshandler": "EC2FleetMaintain",
+      "awsHandler": "EC2Fleet",
+      "fleetType": "maintain",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -34,7 +36,8 @@
     },
     {
       "templateId": "EC2FleetRequest",
-      "awshandler": "EC2FleetRequest",
+      "awsHandler": "EC2Fleet",
+      "fleetType": "request",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -50,7 +53,8 @@
     },
     {
       "templateId": "EC2Fleet",
-      "awshandler": "EC2Fleet",
+      "awsHandler": "EC2Fleet",
+      "fleetType": "instant",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -66,7 +70,8 @@
     },
     {
       "templateId": "SpotFleet",
-      "awshandler": "SpotFleet",
+      "awsHandler": "SpotFleet",
+      "fleetType": "request",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -82,7 +87,8 @@
     },
     {
       "templateId": "SpotFleetRequest",
-      "awshandler": "SpotFleetRequest",
+      "awsHandler": "SpotFleet",
+      "fleetType": "request",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -98,7 +104,8 @@
     },
     {
       "templateId": "SpotFleetMaintain",
-      "awshandler": "SpotFleetMaintain",
+      "awsHandler": "SpotFleet",
+      "fleetType": "maintain",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -114,7 +121,7 @@
     },
     {
       "templateId": "ASG",
-      "awshandler": "ASG",
+      "awsHandler": "ASG",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -130,7 +137,7 @@
     },
     {
       "templateId": "RunInstances",
-      "awshandler": "RunInstances",
+      "awsHandler": "RunInstances",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],

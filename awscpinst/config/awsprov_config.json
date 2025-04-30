@@ -1,9 +1,7 @@
 {
-  "AWS_CREDENTIAL_FILE": "/path/to/aws/credentials",
   "AWS_REGION": "eu-west-1",
-  "AWS_KEY_FILE": "/path/to/aws/key.pem",
-  "AWS_PROXY_HOST": "",
-  "AWS_PROXY_PORT": "",
-  "LOG_DESTINATION": "file",
-  "AWS_SPOT_FLEET_ROLE_ARN": "arn:aws:iam::476686234447:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet"
+  "LOGGING_CONFIG": {
+    "level": "INFO",
+    "destination": "file"
+  }
 }

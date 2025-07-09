@@ -2,7 +2,7 @@
   "templates": [
     {
       "templateId": "EC2FleetInstant",
-      "awsHandler": "EC2Fleet",
+      "providerApi": "EC2Fleet",
       "fleetType": "instant",
       "maxNumber": 2,
       "attributes": {
@@ -19,7 +19,7 @@
     },
     {
       "templateId": "EC2FleetMaintain",
-      "awsHandler": "EC2Fleet",
+      "providerApi": "EC2Fleet",
       "fleetType": "maintain",
       "maxNumber": 2,
       "attributes": {
@@ -36,7 +36,7 @@
     },
     {
       "templateId": "EC2FleetRequest",
-      "awsHandler": "EC2Fleet",
+      "providerApi": "EC2Fleet",
       "fleetType": "request",
       "maxNumber": 2,
       "attributes": {
@@ -53,7 +53,7 @@
     },
     {
       "templateId": "EC2Fleet",
-      "awsHandler": "EC2Fleet",
+      "providerApi": "EC2Fleet",
       "fleetType": "instant",
       "maxNumber": 2,
       "attributes": {
@@ -70,7 +70,7 @@
     },
     {
       "templateId": "SpotFleet",
-      "awsHandler": "SpotFleet",
+      "providerApi": "SpotFleet",
       "fleetType": "request",
       "maxNumber": 2,
       "attributes": {
@@ -87,7 +87,7 @@
     },
     {
       "templateId": "SpotFleetRequest",
-      "awsHandler": "SpotFleet",
+      "providerApi": "SpotFleet",
       "fleetType": "request",
       "maxNumber": 2,
       "attributes": {
@@ -104,7 +104,7 @@
     },
     {
       "templateId": "SpotFleetMaintain",
-      "awsHandler": "SpotFleet",
+      "providerApi": "SpotFleet",
       "fleetType": "maintain",
       "maxNumber": 2,
       "attributes": {
@@ -121,7 +121,7 @@
     },
     {
       "templateId": "ASG",
-      "awsHandler": "ASG",
+      "providerApi": "ASG",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],
@@ -137,7 +137,7 @@
     },
     {
       "templateId": "RunInstances",
-      "awsHandler": "RunInstances",
+      "providerApi": "RunInstances",
       "maxNumber": 2,
       "attributes": {
         "type": ["String", "X86_64"],

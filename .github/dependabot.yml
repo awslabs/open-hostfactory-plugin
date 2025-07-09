@@ -1,0 +1,84 @@
+version: 2
+updates:
+  # Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore(dev)"
+      include: "scope"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "aws-samples/hostfactory-maintainers"
+    assignees:
+      - "aws-samples/hostfactory-maintainers"
+    groups:
+      dev-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    versioning-strategy: auto
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    vendor: true
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "aws-samples/hostfactory-maintainers"
+    assignees:
+      - "aws-samples/hostfactory-maintainers"
+    groups:
+      actions:
+        patterns:
+          - "*"
+    versioning-strategy: increase
+
+  # Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "aws-samples/hostfactory-maintainers"
+    assignees:
+      - "aws-samples/hostfactory-maintainers"
+    groups:
+      docker:
+        patterns:
+          - "*"
+    versioning-strategy: auto

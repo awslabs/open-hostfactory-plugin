@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import json
 import os
 import random
@@ -174,11 +176,40 @@ class HostFactoryMock:
             return {"error": "Failed to get templates", "message": res['stderr']}
 
         try:
-            result = json.loads(res['stdout'])
-            log.info(f"response: {json.dumps(result, indent=4)}")
-            return result
+            # Extract the JSON part from stdout
+            stdout = res['stdout']
+            # Find the JSON part (starts with '{' and ends with '}')
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Fix common JSON formatting issues
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                
+                result = json.loads(json_str)
+                log.info(f"response: {json.dumps(result, indent=4)}")
+                return result
+            else:
+                log.error("Could not find JSON in response")
+                return {"error": "Invalid response format", "message": "Could not find JSON in response"}
         except json.JSONDecodeError as e:
             log.error(f"Error parsing template response: {e}")
+            # Try to fix the JSON manually
+            stdout = res['stdout']
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Add missing comma after templates array
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                try:
+                    result = json.loads(json_str)
+                    log.info(f"Fixed JSON response: {json.dumps(result, indent=4)}")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
             return {"error": "Invalid response format", "message": str(e)}
 
     def request_machines(self, template_name: str, machine_count: int) -> Dict[str, Any]:
@@ -204,11 +235,40 @@ class HostFactoryMock:
             return {"error": "Failed to request machines", "message": res['stderr']}
 
         try:
-            result = json.loads(res['stdout'])
-            log.info(f"response: {json.dumps(result, indent=4)}")
-            return result
+            # Extract the JSON part from stdout
+            stdout = res['stdout']
+            # Find the JSON part (starts with '{' and ends with '}')
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Fix common JSON formatting issues
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                
+                result = json.loads(json_str)
+                log.info(f"response: {json.dumps(result, indent=4)}")
+                return result
+            else:
+                log.error("Could not find JSON in response")
+                return {"error": "Invalid response format", "message": "Could not find JSON in response"}
         except json.JSONDecodeError as e:
             log.error(f"Error parsing request response: {e}")
+            # Try to fix the JSON manually
+            stdout = res['stdout']
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Add missing comma after templates array
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                try:
+                    result = json.loads(json_str)
+                    log.info(f"Fixed JSON response: {json.dumps(result, indent=4)}")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
             return {"error": "Invalid response format", "message": str(e)}
 
     def get_request_status(self, request_id: str) -> Dict[str, Any]:
@@ -238,15 +298,41 @@ class HostFactoryMock:
             }
 
         try:
-            result = json.loads(res['stdout'])
-            log.info(f"response: {json.dumps(result, indent=4)}")
-            return result
+            # Extract the JSON part from stdout
+            stdout = res['stdout']
+            # Find the JSON part (starts with '{' and ends with '}')
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Fix common JSON formatting issues
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                
+                result = json.loads(json_str)
+                log.info(f"response: {json.dumps(result, indent=4)}")
+                return result
+            else:
+                log.error("Could not find JSON in response")
+                return {"error": "Invalid response format", "message": "Could not find JSON in response"}
         except json.JSONDecodeError as e:
             log.error(f"Error parsing status response: {e}")
-            return {
-                "error": "Invalid response format",
-                "message": str(e)
-            }
+            # Try to fix the JSON manually
+            stdout = res['stdout']
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Add missing comma after templates array
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                try:
+                    result = json.loads(json_str)
+                    log.info(f"Fixed JSON response: {json.dumps(result, indent=4)}")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
+            return {"error": "Invalid response format", "message": str(e)}
 
     def request_return_machines(self, machine_names: List[str]) -> Dict[str, Any]:
         """Request machines to be returned."""
@@ -267,11 +353,40 @@ class HostFactoryMock:
             return {"error": "Failed to return machines", "message": res['stderr']}
 
         try:
-            result = json.loads(res['stdout'])
-            log.info(f"response: {json.dumps(result, indent=4)}")
-            return result
+            # Extract the JSON part from stdout
+            stdout = res['stdout']
+            # Find the JSON part (starts with '{' and ends with '}')
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Fix common JSON formatting issues
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                
+                result = json.loads(json_str)
+                log.info(f"response: {json.dumps(result, indent=4)}")
+                return result
+            else:
+                log.error("Could not find JSON in response")
+                return {"error": "Invalid response format", "message": "Could not find JSON in response"}
         except json.JSONDecodeError as e:
             log.error(f"Error parsing return response: {e}")
+            # Try to fix the JSON manually
+            stdout = res['stdout']
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Add missing comma after templates array
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                try:
+                    result = json.loads(json_str)
+                    log.info(f"Fixed JSON response: {json.dumps(result, indent=4)}")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
             return {"error": "Invalid response format", "message": str(e)}
 
     def get_return_requests(self, machine_names: List[str]) -> Dict[str, Any]:
@@ -293,11 +408,40 @@ class HostFactoryMock:
             return {"error": "Failed to get return requests", "message": res['stderr']}
 
         try:
-            result = json.loads(res['stdout'])
-            log.info(f"response: {json.dumps(result, indent=4)}")
-            return result
+            # Extract the JSON part from stdout
+            stdout = res['stdout']
+            # Find the JSON part (starts with '{' and ends with '}')
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Fix common JSON formatting issues
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                
+                result = json.loads(json_str)
+                log.info(f"response: {json.dumps(result, indent=4)}")
+                return result
+            else:
+                log.error("Could not find JSON in response")
+                return {"error": "Invalid response format", "message": "Could not find JSON in response"}
         except json.JSONDecodeError as e:
             log.error(f"Error parsing return requests response: {e}")
+            # Try to fix the JSON manually
+            stdout = res['stdout']
+            json_start = stdout.find('{')
+            json_end = stdout.rfind('}') + 1
+            if json_start >= 0 and json_end > json_start:
+                json_str = stdout[json_start:json_end]
+                # Add missing comma after templates array
+                json_str = json_str.replace(']\n  "', '],\n  "')
+                try:
+                    result = json.loads(json_str)
+                    log.info(f"Fixed JSON response: {json.dumps(result, indent=4)}")
+                    return result
+                except json.JSONDecodeError:
+                    pass
+            
             return {"error": "Invalid response format", "message": str(e)}
 
 def parse_arguments():

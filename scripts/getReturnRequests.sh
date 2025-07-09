@@ -1,2 +1,2 @@
 #!/bin/bash
-"$(dirname "$0")/invoke_provider.sh" getReturnRequests "$@"
+"$(dirname "$0")/invoke_provider.sh" requests list "$@"

@@ -1,0 +1,195 @@
+# Docker Compose for Production Deployment
+# Optimized for production with security and performance
+
+version: '3.8'
+
+services:
+  # Production REST API service
+  ohfp-api:
+    image: ohfp-api:${VERSION:-latest}
+    container_name: ohfp-api-prod
+    restart: always
+    
+    # Environment variables for production
+    environment:
+      # Server configuration
+      HF_SERVER_ENABLED: true
+      HF_SERVER_HOST: 0.0.0.0
+      HF_SERVER_PORT: 8000
+      HF_SERVER_WORKERS: ${HF_SERVER_WORKERS:-4}
+      HF_SERVER_LOG_LEVEL: info
+      HF_SERVER_DOCS_ENABLED: ${HF_SERVER_DOCS_ENABLED:-false}
+      HF_SERVER_RELOAD: false
+      
+      # Authentication configuration (production)
+      HF_AUTH_ENABLED: ${HF_AUTH_ENABLED:-true}
+      HF_AUTH_STRATEGY: ${HF_AUTH_STRATEGY:-bearer_token}
+      HF_AUTH_BEARER_SECRET_KEY: ${HF_AUTH_BEARER_SECRET_KEY}
+      HF_AUTH_BEARER_TOKEN_EXPIRY: ${HF_AUTH_BEARER_TOKEN_EXPIRY:-3600}
+      
+      # AWS configuration
+      HF_PROVIDER_TYPE: aws
+      HF_PROVIDER_AWS_REGION: ${AWS_REGION:-us-east-1}
+      
+      # AWS credentials via IAM roles (recommended)
+      AWS_DEFAULT_REGION: ${AWS_REGION:-us-east-1}
+      
+      # Logging configuration
+      HF_LOGGING_LEVEL: INFO
+      HF_LOGGING_CONSOLE_ENABLED: true
+      HF_LOGGING_FILE_ENABLED: true
+      HF_LOGGING_FILE_PATH: /app/logs/app.log
+      
+      # Storage configuration
+      HF_STORAGE_STRATEGY: ${HF_STORAGE_STRATEGY:-json}
+      HF_STORAGE_BASE_PATH: /app/data
+      
+      # Security
+      HF_SERVER_REQUIRE_HTTPS: ${HF_SERVER_REQUIRE_HTTPS:-false}
+      HF_SERVER_TRUSTED_HOSTS: ${HF_SERVER_TRUSTED_HOSTS:-*}
+    
+    # Volume mounts for production
+    volumes:
+      # Configuration (read-only)
+      - ./config/production.json:/app/config/docker.json:ro
+      # Data persistence
+      - ohfp-prod-data:/app/data
+      # Logs
+      - ohfp-prod-logs:/app/logs
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    
+    # Logging for production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+        compress: "true"
+    
+    # Network
+    networks:
+      - ohfp-prod-network
+
+  # Production Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: ohfp-nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx-prod.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/ssl:/etc/nginx/ssl:ro
+      - ohfp-prod-logs:/var/log/nginx
+    depends_on:
+      - ohfp-api
+    networks:
+      - ohfp-prod-network
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:noexec,nosuid,size=100m
+      - /var/run:noexec,nosuid,size=100m
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  # Production monitoring (optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ohfp-prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ohfp-prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - ohfp-prod-network
+    profiles:
+      - monitoring
+
+  # Production log aggregation (optional)
+  fluentd:
+    image: fluent/fluentd:v1.16-debian-1
+    container_name: ohfp-fluentd
+    restart: always
+    volumes:
+      - ./docker/fluentd.conf:/fluentd/etc/fluent.conf:ro
+      - ohfp-prod-logs:/var/log/ohfp:ro
+    networks:
+      - ohfp-prod-network
+    profiles:
+      - logging
+
+# Production volumes
+volumes:
+  ohfp-prod-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}
+  ohfp-prod-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_PATH:-./logs}
+  ohfp-prometheus-data:
+    driver: local
+
+# Production network
+networks:
+  ohfp-prod-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

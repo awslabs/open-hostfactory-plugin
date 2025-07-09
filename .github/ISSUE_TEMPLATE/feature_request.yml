@@ -1,0 +1,123 @@
+name: feature-request
+description: Suggest an idea for this project
+title: "[Feature]: "
+labels: ["enhancement"]
+assignees:
+  - hostfactory-maintainers
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new feature! Please provide as much detail as possible to help us understand your idea.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem is.
+      placeholder: I'm always frustrated when [...]
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+      placeholder: |
+        I would like to see [...]
+        
+        Example usage:
+        ```python
+        # Your code example here
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered.
+      placeholder: |
+        Alternative approaches could be:
+        1. ...
+        2. ...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have
+        - Important
+        - Critical
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: What area of the project does this feature affect?
+      options:
+        - Core functionality
+        - AWS integration
+        - Template management
+        - Request handling
+        - Monitoring/Metrics
+        - Documentation
+        - Developer experience
+        - Other (specify in context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: |
+        Add any other context about the feature request here.
+        - Use cases
+        - Related features or projects
+        - Implementation ideas
+        - Performance considerations
+      render: markdown
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Implementation details
+      description: |
+        If you have specific ideas about how to implement this feature, please share them.
+        This could include:
+        - Technical approach
+        - Required changes
+        - Potential challenges
+        - Testing considerations
+      render: markdown
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution
+      description: Would you be interested in contributing to this feature?
+      options:
+        - label: I would like to help implement this feature
+          required: false
+        - label: I have read the contributing guidelines
+          required: true
+        - label: I have searched existing issues and confirmed this is not a duplicate
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your feature suggestion! We'll review it and get back to you soon.
+        
+        Remember:
+        - Features should align with the project's goals
+        - Consider backward compatibility
+        - Think about the impact on existing users

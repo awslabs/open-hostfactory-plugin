@@ -1,2 +1,2 @@
 #!/bin/bash
-"$(dirname "$0")/invoke_provider.sh" requestMachines "$@"
+"$(dirname "$0")/invoke_provider.sh" machines request "$@"

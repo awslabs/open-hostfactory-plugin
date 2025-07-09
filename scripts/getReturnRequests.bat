@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0invoke_provider.bat" getReturnRequests %*
+call "%~dp0invoke_provider.bat" requests list %*

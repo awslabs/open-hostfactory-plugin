@@ -1,7 +1,174 @@
-awscpinst
-awscpinst/*
-**/*.log
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+
+# Temporary and debug files
+debug_entry_point.py
+*_debug.py
+temp_*.py
+
+# Log files
+*.log
+*.log.*
+logs/
+hfmock.log
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.egg
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Testing
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Documentation
+docs-backup/
+site/
+
+# Memory Bank (Internal)
+memory-bank/
+htmlcov/
+.tox/
+nosetests.xml
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.db
+*.sqlite3
+*.sqlite
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# AWS
+.aws/
+*.pem
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraformrc
+terraform.rc
+
+# Application specific
+config/config.json
+data/
+monitoring/grafana/data/
+monitoring/prometheus/data/
+awscpinst/
 .aider*
-__pycache__
-htmlcov
-.pytest_cache
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*~.nib
+*.pid
+*.seed
+*.pid.lock
+
+# Backup files (comprehensive)
+*.bak
+*.backup
+*.backup.*
+*~
+*.orig
+*.rej
+.backups/
+*_backup
+*_backup.*
+*.old
+*.save
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.pyc
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Local development
+local_settings.py
+instance/
+.webassets-cache

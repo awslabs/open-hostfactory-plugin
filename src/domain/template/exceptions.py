@@ -1,15 +1,29 @@
-from src.domain.core.exceptions import DomainException, ResourceNotFoundError
-from typing import Dict
+"""Template domain exceptions."""
+from src.domain.base.exceptions import DomainException, ValidationError, EntityNotFoundError
 
-class TemplateNotFoundError(ResourceNotFoundError):
-    """Raised when a template cannot be found."""
+
+class TemplateException(DomainException):
+    """Base exception for template domain errors."""
+
+
+class TemplateNotFoundError(EntityNotFoundError):
+    """Raised when a template is not found."""
+    
     def __init__(self, template_id: str):
         super().__init__("Template", template_id)
 
-class TemplateValidationError(DomainException):
+
+class TemplateValidationError(ValidationError):
     """Raised when template validation fails."""
-    def __init__(self, template_id: str, errors: Dict[str, str]):
-        message = f"Template validation failed for {template_id}: {', '.join(f'{k}: {v}' for k, v in errors.items())}"
-        super().__init__(message)
-        self.template_id = template_id
-        self.errors = errors
+
+
+class InvalidTemplateConfigurationError(TemplateException):
+    """Raised when template configuration is invalid."""
+
+
+class TemplateAlreadyExistsError(TemplateException):
+    """Raised when attempting to create a template that already exists."""
+    
+    def __init__(self, template_id: str):
+        message = f"Template with ID '{template_id}' already exists"
+        super().__init__(message, "TEMPLATE_ALREADY_EXISTS", {"template_id": template_id})

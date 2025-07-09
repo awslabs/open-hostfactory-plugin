@@ -1,0 +1,77 @@
+#compdef ohfp open-hostfactory-plugin
+
+_ohfp() {
+    local context state line
+    
+    _arguments -C \
+        '--config[Configuration file path]:file:_files' \
+        '--log-level[Logging level]:(DEBUG INFO WARNING ERROR CRITICAL)' \
+        '--format[Output format]:(json yaml table)' \
+        '--output[Output file path]:file:_files' \
+        '--quiet[Suppress non-essential output]' \
+        '--verbose[Verbose output]' \
+        '--dry-run[Show what would be done]' \
+        '--completion[Generate shell completion script]:(bash zsh)' \
+        '--version[Show version information]' \
+        '--help[Show help message]' \
+        '1:resource:(templates machines requests providers storage system config)' \
+        '*::arg:->args'
+    
+    case $state in
+        args)
+            case $words[1] in
+                templates)
+                    _arguments \
+                        '1:action:(list show validate reload)' \
+                        '--provider-api[Filter by provider API type]:provider:' \
+                        '--config-path[Configuration file path]:file:_files' \
+                        '*::template_args:_files'
+                    ;;
+                machines)
+                    _arguments \
+                        '1:action:(request return list show terminate)' \
+                        '--data[Additional JSON data]:json:' \
+                        '--wait[Wait for completion]' \
+                        '--force[Force operation]' \
+                        '--status[Filter by machine status]:status:' \
+                        '--template[Filter by template ID]:template:' \
+                        '*::machine_args:_files'
+                    ;;
+                requests)
+                    _arguments \
+                        '1:action:(status list show cancel)' \
+                        '--status[Filter by request status]:status:' \
+                        '--limit[Limit number of results]:limit:' \
+                        '*::request_args:_files'
+                    ;;
+                providers)
+                    _arguments \
+                        '1:action:(health list metrics select exec)' \
+                        '--provider[Provider name]:provider:' \
+                        '--command[Command to execute]:command:' \
+                        '*::provider_args:_files'
+                    ;;
+                storage)
+                    _arguments \
+                        '1:action:(list show migrate test)' \
+                        '--source[Source storage type]:source:' \
+                        '--target[Target storage type]:target:' \
+                        '*::storage_args:_files'
+                    ;;
+                system)
+                    _arguments \
+                        '1:action:(status init-db)' \
+                        '*::system_args:_files'
+                    ;;
+                config)
+                    _arguments \
+                        '1:action:(show validate reload)' \
+                        '*::config_args:_files'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_ohfp "$@"
+

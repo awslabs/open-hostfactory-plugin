@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0invoke_provider.bat" getAvailableTemplates %*
+call "%~dp0invoke_provider.bat" templates list %*

@@ -1,7 +1,3 @@
 {
-  "AWS_REGION": "eu-west-1",
-  "LOGGING_CONFIG": {
-    "level": "INFO",
-    "destination": "file"
-  }
+  "AWS_REGION": "eu-west-1"
 }

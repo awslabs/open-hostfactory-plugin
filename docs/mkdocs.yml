@@ -1,0 +1,149 @@
+site_name: Open Host Factory Plugin
+site_description: Provider-agnostic Host Factory plugin for IBM Spectrum Symphony
+site_url: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin
+repo_url: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin
+repo_name: open-hostfactory-plugin
+
+# Proper docs structure: mkdocs.yml in docs/, markdown files in docs/docs/
+docs_dir: docs
+site_dir: site
+
+# GitLab-specific settings
+edit_uri: -/edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["..", "../src"]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: false
+            docstring_style: google
+            merge_init_into_class: true
+            show_signature_annotations: true
+            show_bases: true
+            show_inheritance_diagram: false
+            filters: ["!^_"]
+            heading_level: 1
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: getting_started/quick_start.md
+    - Installation: user_guide/installation.md
+    - Configuration: user_guide/configuration.md
+  - User Guide:
+    - Templates: user_guide/templates.md
+    - Requests: user_guide/requests.md
+    - Storage Strategies: user_guide/storage_strategies.md
+    - Monitoring: user_guide/monitoring.md
+    - Troubleshooting: user_guide/troubleshooting.md
+    - Deployment: user_guide/deployment.md
+  - Architecture & Development:
+    - Architecture:
+      - System Overview: architecture/system_overview.md
+      - Clean Architecture: architecture/clean_architecture.md
+      - System Diagrams: architecture/system_diagrams.md
+      - CQRS Pattern: architecture/cqrs_pattern.md
+      - Dependency Injection: architecture/dependency_injection.md
+    - Design Patterns:
+      - Strategy Pattern: patterns/strategy_pattern.md
+      - Factory Pattern: patterns/factory_pattern.md
+      - Repository Pattern: patterns/repository_pattern.md
+      - Ports and Adapters: patterns/ports_and_adapters.md
+    - Engineering Practices:
+      - SOLID Principles: engineering/solid_principles.md
+      - DRY Principle: engineering/dry_principle.md
+      - Separation of Concerns: engineering/separation_of_concerns.md
+      - Dependency Inversion: engineering/dependency_inversion.md
+    - Developer Guide:
+      - Architecture Overview: developer_guide/architecture.md
+      - CQRS Implementation: developer_guide/cqrs.md
+      - Dependency Injection: developer_guide/dependency_injection.md
+      - Data Models: developer_guide/data_models.md
+      - Event System: developer_guide/events.md
+      - Provider System: developer_guide/providers.md
+      - Resilience Patterns: developer_guide/resilience.md
+      - Development Setup: developer_guide/development.md
+      - Testing: development/testing.md
+  - Deployment & Operations:
+    - Deployment:
+      - Overview: deployment/readme.md
+      - Docker Deployment: deployment/docker.md
+      - Cloud Platforms: deployment/cloud_platforms.md
+      - Traditional Deployment: deployment/traditional.md
+      - Security: deployment/security.md
+      - Monitoring: deployment/monitoring.md
+    - Operations:
+      - Backup and Recovery: operational/backup_recovery.md
+      - Migration: operational/migration.md
+      - Performance: operational/performance.md
+      - Monitoring: operational/monitoring.md
+      - Tools: operational/tools.md
+    - HostFactory Integration:
+      - Integration Guide: hostfactory/integration_guide.md
+      - Requirements Compliance: hostfactory/requirements_compliance.md
+      - Feature Mapping: hostfactory/feature_mapping.md
+      - Deployment Scenarios: hostfactory/deployment_scenarios.md
+  - Reference:
+    - API Reference: api/readme.md
+    - Testing Guide: testing/readme.md
+    - Configuration Guide: configuration-guide.md
+    - Guides & Patterns:
+      - Provider Strategy: provider_strategy_guide.md
+      - Provider Pattern: provider_strategy_pattern_guide.md
+      - Storage Registry: storage_registry_pattern.md
+      - Unified Format: unified_format_system.md
+      - Import Guidelines: import_guidelines.md
+      - Versioning: versioning_guide.md
+      - Architecture Assessment: architectural_assessment.md

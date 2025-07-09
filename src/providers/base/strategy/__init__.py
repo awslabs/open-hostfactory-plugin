@@ -1,0 +1,280 @@
+"""Provider Strategy Pattern - Base strategy interfaces and implementations.
+
+This package implements the Strategy pattern for provider operations,
+enabling runtime selection and switching of provider strategies while
+maintaining clean separation of concerns and SOLID principles compliance.
+
+Key Components:
+- ProviderStrategy: Abstract base class for all provider strategies
+- ProviderContext: Context for managing and executing strategies
+- ProviderSelector: Algorithms for selecting optimal strategies
+- CompositeProviderStrategy: Multi-provider composition and orchestration
+- FallbackProviderStrategy: Resilience and failover capabilities
+- LoadBalancingProviderStrategy: Performance optimization and load distribution
+- Value Objects: Operation, Result, Capabilities, Health status
+
+Usage Example:
+    from src.providers.base.strategy import (
+        ProviderContext,
+        ProviderOperation,
+        ProviderOperationType,
+        SelectorFactory,
+        SelectionPolicy,
+        CompositeProviderStrategy,
+        FallbackProviderStrategy,
+        LoadBalancingProviderStrategy
+    )
+    
+    # Create context with strategy selection
+    context = ProviderContext()
+    selector = SelectorFactory.create_selector(SelectionPolicy.PERFORMANCE_BASED)
+    
+    # Register strategies
+    context.register_strategy(aws_strategy)
+    context.register_strategy(azure_strategy)
+    
+    # Or use advanced strategies
+    composite = CompositeProviderStrategy([aws_strategy, azure_strategy])
+    fallback = FallbackProviderStrategy(aws_strategy, [azure_strategy])
+    load_balancer = LoadBalancingProviderStrategy([aws_strategy, azure_strategy])
+    
+    # Execute operations
+    operation = ProviderOperation(
+        operation_type=ProviderOperationType.CREATE_INSTANCES,
+        parameters={'count': 5, 'template_id': 'web-server'}
+    )
+    
+    result = context.execute_operation(operation)
+"""
+
+# Core strategy pattern interfaces
+from .provider_strategy import (
+    ProviderStrategy,
+    ProviderOperation,
+    ProviderResult,
+    ProviderCapabilities,
+    ProviderHealthStatus,
+    ProviderOperationType
+)
+
+# Strategy context and management
+from .provider_context import (
+    ProviderContext,
+    StrategyMetrics
+)
+
+# Strategy selection algorithms
+from .provider_selector import (
+    ProviderSelector,
+    SelectionPolicy,
+    SelectionCriteria,
+    SelectionResult,
+    SelectorFactory,
+    FirstAvailableSelector,
+    RoundRobinSelector,
+    PerformanceBasedSelector,
+    RandomSelector
+)
+
+# Advanced strategy patterns
+from .composite_strategy import (
+    CompositeProviderStrategy,
+    CompositionConfig,
+    CompositionMode,
+    AggregationPolicy,
+    StrategyExecutionResult
+)
+
+from .fallback_strategy import (
+    FallbackProviderStrategy,
+    FallbackConfig,
+    FallbackMode,
+    CircuitState,
+    CircuitBreakerState
+)
+
+from .load_balancing_strategy import (
+    LoadBalancingProviderStrategy,
+    LoadBalancingConfig,
+    LoadBalancingAlgorithm,
+    HealthCheckMode,
+    StrategyStats
+)
+
+# Version and metadata
+__version__ = "1.0.0"
+__author__ = "Symphony Team"
+__description__ = "Provider Strategy Pattern Implementation"
+
+# Public API exports
+__all__ = [
+    # Core interfaces
+    "ProviderStrategy",
+    "ProviderOperation",
+    "ProviderResult",
+    "ProviderCapabilities",
+    "ProviderHealthStatus",
+    "ProviderOperationType",
+    
+    # Context management
+    "ProviderContext",
+    "StrategyMetrics",
+    
+    # Selection algorithms
+    "ProviderSelector",
+    "SelectionPolicy",
+    "SelectionCriteria",
+    "SelectionResult",
+    "SelectorFactory",
+    "FirstAvailableSelector",
+    "RoundRobinSelector",
+    "PerformanceBasedSelector",
+    "RandomSelector",
+    
+    # Advanced strategies
+    "CompositeProviderStrategy",
+    "CompositionConfig",
+    "CompositionMode",
+    "AggregationPolicy",
+    "StrategyExecutionResult",
+    
+    "FallbackProviderStrategy",
+    "FallbackConfig",
+    "FallbackMode",
+    "CircuitState",
+    "CircuitBreakerState",
+    
+    "LoadBalancingProviderStrategy",
+    "LoadBalancingConfig",
+    "LoadBalancingAlgorithm",
+    "HealthCheckMode",
+    "StrategyStats",
+]
+
+# Convenience functions
+def create_provider_context(logger=None) -> ProviderContext:
+    """
+    Create a new provider context with default configuration.
+    
+    Args:
+        logger: Optional logger instance
+        
+    Returns:
+        Configured ProviderContext instance
+    """
+    context = ProviderContext(logger=logger)
+    
+    # Load strategies from the provider registry
+    try:
+        from src.infrastructure.registry.provider_registry import get_provider_registry
+        registry = get_provider_registry()
+        
+        # Get all registered providers and create strategies for them
+        registered_providers = registry.get_registered_providers()
+        for provider_type in registered_providers:
+            try:
+                strategy = registry.get_provider_strategy(provider_type)
+                if strategy:
+                    context.register_strategy(strategy)
+                    if logger:
+                        logger.info(f"Loaded strategy for provider: {provider_type}")
+            except Exception as e:
+                if logger:
+                    logger.warning(f"Failed to load strategy for provider {provider_type}: {e}")
+        
+        # Also check for registered provider instances
+        registered_instances = registry.get_registered_provider_instances()
+        for instance_name in registered_instances:
+            try:
+                # Get the registration to find the provider type
+                registration = registry.get_provider_instance_registration(instance_name)
+                if registration:
+                    # Get the actual provider config from configuration manager
+                    from src.config.manager import get_config_manager
+                    config_manager = get_config_manager()
+                    provider_config = config_manager.get_provider_config()
+                    
+                    # Find the matching provider instance config
+                    provider_instance_config = None
+                    for provider_instance in provider_config.get_active_providers():
+                        if provider_instance.name == instance_name:
+                            provider_instance_config = provider_instance.config
+                            break
+                    
+                    if provider_instance_config:
+                        # Create strategy using the actual instance config
+                        strategy = registry.create_strategy_from_instance(instance_name, provider_instance_config)
+                        if strategy:
+                            context.register_strategy(strategy)
+                        if logger:
+                            logger.info(f"Loaded strategy for provider instance: {registration.provider_type}:{instance_name}")
+            except Exception as e:
+                if logger:
+                    logger.warning(f"Failed to load strategy for provider instance {instance_name}: {e}")
+                        
+    except Exception as e:
+        if logger:
+            logger.error(f"Failed to load strategies from provider registry: {e}")
+    
+    return context
+
+
+def create_selector(policy: SelectionPolicy, logger=None) -> ProviderSelector:
+    """
+    Create a provider selector for the given policy.
+    
+    Args:
+        policy: Selection policy to use
+        logger: Optional logger instance
+        
+    Returns:
+        ProviderSelector instance
+    """
+    return SelectorFactory.create_selector(policy, logger)
+
+
+def create_composite_strategy(strategies: list, config: CompositionConfig = None, logger=None) -> CompositeProviderStrategy:
+    """
+    Create a composite provider strategy.
+    
+    Args:
+        strategies: List of provider strategies to compose
+        config: Optional composition configuration
+        logger: Optional logger instance
+        
+    Returns:
+        CompositeProviderStrategy instance
+    """
+    return CompositeProviderStrategy(strategies, config, logger)
+
+
+def create_fallback_strategy(primary: ProviderStrategy, fallbacks: list, config: FallbackConfig = None, logger=None) -> FallbackProviderStrategy:
+    """
+    Create a fallback provider strategy.
+    
+    Args:
+        primary: Primary provider strategy
+        fallbacks: List of fallback strategies
+        config: Optional fallback configuration
+        logger: Optional logger instance
+        
+    Returns:
+        FallbackProviderStrategy instance
+    """
+    return FallbackProviderStrategy(primary, fallbacks, config, logger)
+
+
+def create_load_balancing_strategy(strategies: list, weights: dict = None, config: LoadBalancingConfig = None, logger=None) -> LoadBalancingProviderStrategy:
+    """
+    Create a load balancing provider strategy.
+    
+    Args:
+        strategies: List of provider strategies to load balance
+        weights: Optional weights for each strategy
+        config: Optional load balancing configuration
+        logger: Optional logger instance
+        
+    Returns:
+        LoadBalancingProviderStrategy instance
+    """
+    return LoadBalancingProviderStrategy(strategies, weights, config, logger)

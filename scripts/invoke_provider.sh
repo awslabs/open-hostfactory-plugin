@@ -1,10 +1,13 @@
 #!/bin/bash
 
+# Configuration - can be overridden by environment variables
+USE_LOCAL_DEV=${USE_LOCAL_DEV:-false}
+PACKAGE_NAME=${OHFP_PACKAGE_NAME:-"open-hostfactory-plugin"}
+PACKAGE_COMMAND=${OHFP_COMMAND:-"ohfp"}
+
+# Get script directory and project root
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-
-# Add project root to PYTHONPATH
-export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH}"
 
 # Check if Python is available
 if command -v python3 &> /dev/null; then
@@ -16,5 +19,39 @@ else
     exit 1
 fi
 
-# Execute the Python script with all arguments passed to this script
-exec $PYTHON_CMD "${PROJECT_ROOT}/src/app.py" "$@"
+# Determine execution mode
+if [ "$USE_LOCAL_DEV" = "true" ] || [ "$USE_LOCAL_DEV" = "1" ]; then
+    # Local development mode - use src/run.py from project root
+    echo "Using local development mode (src/run.py)" >&2
+    
+    # Add project root to PYTHONPATH
+    export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH}"
+    
+    # Check if src/run.py exists
+    if [ ! -f "${PROJECT_ROOT}/src/run.py" ]; then
+        echo "Error: src/run.py not found at ${PROJECT_ROOT}/src/run.py" >&2
+        echo "Make sure you're running from the correct directory or install the package." >&2
+        exit 1
+    fi
+    
+    # Execute the Python script with all arguments
+    exec $PYTHON_CMD "${PROJECT_ROOT}/src/run.py" "$@"
+    
+else
+    # Package mode - use installed command
+    echo "Using installed package mode ($PACKAGE_COMMAND)" >&2
+    
+    # Check if package command is available
+    if ! command -v "$PACKAGE_COMMAND" &> /dev/null; then
+        echo "Error: $PACKAGE_COMMAND command not found" >&2
+        echo "" >&2
+        echo "Options:" >&2
+        echo "  1. Install package: pip install $PACKAGE_NAME" >&2
+        echo "  2. Use local development: USE_LOCAL_DEV=true $0 $*" >&2
+        echo "  3. Install in dev mode: ./dev-tools/package/install-dev.sh" >&2
+        exit 1
+    fi
+    
+    # Execute the installed command with all arguments
+    exec "$PACKAGE_COMMAND" "--legacy" "$@"
+fi

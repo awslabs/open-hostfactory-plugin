@@ -1,0 +1,731 @@
+"""Configuration loading utilities."""
+from __future__ import annotations
+import os
+import json
+from pathlib import Path
+from typing import Dict, Any, Optional, TypeVar
+
+from src.domain.base.exceptions import ConfigurationError
+from src.config import (
+    validate_config,
+    AppConfig
+)
+
+T = TypeVar('T')
+
+# Use lazy import to avoid circular dependency
+def _get_logger():
+    """Lazy import of logger to avoid circular dependency."""
+    from src.infrastructure.logging.logger import get_logger
+    return get_logger(__name__)
+
+# Create logger instance lazily
+logger = None
+
+def get_config_logger():
+    """Get logger instance with lazy initialization."""
+    global logger
+    if logger is None:
+        logger = _get_logger()
+    return logger
+
+class ConfigurationLoader:
+    """
+    Configuration loader that handles loading from multiple sources.
+    
+    This class is responsible for loading configuration from:
+    - Environment variables
+    - Configuration files
+    - Legacy configuration files
+    - Default values
+    
+    It provides a unified interface for loading configuration with:
+    - Type safety through dataclasses
+    - Support for legacy and new configuration formats
+    - Environment variable overrides
+    - Configuration validation
+    """
+    
+    # Environment variable mappings
+    ENV_MAPPING = {
+        'AWS_REGION': ('aws', 'region'),
+        'AWS_PROFILE': ('aws', 'profile'),
+        'AWS_ROLE_ARN': ('aws', 'role_arn'),
+        'AWS_ACCESS_KEY_ID': ('aws', 'access_key_id'),
+        'AWS_SECRET_ACCESS_KEY': ('aws', 'secret_access_key'),
+        'AWS_SESSION_TOKEN': ('aws', 'session_token'),
+        'AWS_ENDPOINT_URL': ('aws', 'endpoint_url'),
+        # Symphony AWS configuration fields
+        'AWS_CREDENTIAL_FILE': ('aws', 'credential_file'),
+        'AWS_KEY_FILE': ('aws', 'key_file'),
+        'AWS_PROXY_HOST': ('aws', 'proxy_host'),
+        'AWS_PROXY_PORT': ('aws', 'proxy_port'),
+        'AWS_CONNECTION_TIMEOUT_MS': ('aws', 'connection_timeout_ms'),
+        'AWS_REQUEST_RETRY_ATTEMPTS': ('aws', 'request_retry_attempts'),
+        'AWS_INSTANCE_PENDING_TIMEOUT_SEC': ('aws', 'instance_pending_timeout_sec'),
+        'AWS_DESCRIBE_REQUEST_RETRY_ATTEMPTS': ('aws', 'describe_request_retry_attempts'),
+        'AWS_DESCRIBE_REQUEST_INTERVAL': ('aws', 'describe_request_interval'),
+        # Logging configuration
+        'LOG_LEVEL': ('logging', 'level'),
+        'LOG_FILE': ('logging', 'file_path'),
+        'LOG_CONSOLE_ENABLED': ('logging', 'console_enabled'),
+        'ACCEPT_PROPAGATED_LOG_SETTING': ('logging', 'accept_propagated_setting'),
+        # Events configuration
+        'EVENTS_STORE_TYPE': ('events', 'store_type'),
+        'EVENTS_STORE_PATH': ('events', 'store_path'),
+        'EVENTS_PUBLISHER_TYPE': ('events', 'publisher_type'),
+        'EVENTS_ENABLE_LOGGING': ('events', 'enable_logging'),
+        # Application configuration
+        'ENVIRONMENT': ('environment',),
+        'DEBUG': ('debug',),
+        'REQUEST_TIMEOUT': ('request_timeout',),
+        'MAX_MACHINES_PER_REQUEST': ('max_machines_per_request',)
+    }
+    
+    # Host Factory environment variables
+    HF_ENV_VARS = {
+        'HF_PROVIDER_WORKDIR': 'workdir',
+        'HF_PROVIDER_LOGDIR': 'logs',
+        'HF_PROVIDER_CONFDIR': 'config',
+        'HF_PROVIDER_EVENTSDIR': 'events',
+        'HF_PROVIDER_SNAPSHOTSDIR': 'snapshots',
+        'HF_PROVIDER_NAME': 'provider_name',
+        'HF_TEMPLATE_AMI_RESOLUTION_ENABLED': 'template.ami_resolution.enabled',
+        'HF_TEMPLATE_AMI_RESOLUTION_FALLBACK_ON_FAILURE': 'template.ami_resolution.fallback_on_failure',
+        'HF_TEMPLATE_AMI_RESOLUTION_CACHE_ENABLED': 'template.ami_resolution.cache_enabled'
+    }
+    
+    # Default configuration file name
+    DEFAULT_CONFIG_FILENAME = 'default_config.json'
+    
+    @classmethod
+    def load(cls, config_path: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Load configuration from multiple sources with proper precedence.
+        
+        Precedence order (highest to lowest):
+        1. Environment variables (highest precedence)
+        2. Explicit config file (if config_path provided)
+        3. HF_PROVIDER_CONFDIR/config.json (provider-specific)
+        4. config/config.json (fallback)
+        5. Legacy configuration (awsprov_config.json, awsprov_templates.json)
+        6. default_config.json (lowest precedence)
+        
+        Args:
+            config_path: Optional path to configuration file
+            
+        Returns:
+            Loaded configuration dictionary
+            
+        Raises:
+            ConfigurationError: If configuration loading fails
+        """
+        # Start with default configuration (lowest precedence)
+        config = cls._load_default_config()
+        
+        # Load legacy configuration for backward compatibility
+        legacy_config = cls._load_legacy_config()
+        if legacy_config:
+            cls._merge_config(config, legacy_config)
+            get_config_logger().info("Loaded legacy configuration")
+        
+        # Load main config.json with proper precedence (HF_PROVIDER_CONFDIR first, then config/)
+        main_config = cls._load_config_file('conf', 'config.json', required=False)
+        if main_config:
+            cls._merge_config(config, main_config)
+            get_config_logger().info("Loaded main configuration")
+        
+        # Load explicit configuration file if provided (higher precedence)
+        if config_path:
+            get_config_logger().debug(f"Loading user configuration from: {config_path}")
+            
+            # Extract filename from path for file resolution
+            filename = os.path.basename(config_path) if config_path else 'config.json'
+            
+            file_config = cls._load_config_file('conf', filename, explicit_path=config_path, required=False)
+            if file_config:
+                cls._merge_config(config, file_config)
+                get_config_logger().info(f"Loaded user configuration")
+            else:
+                get_config_logger().warning(f"User configuration file not found: {config_path}")
+        
+        # Override with environment variables (highest precedence)
+        cls._load_from_env(config)
+        
+        return config
+    
+    @classmethod
+    def _load_default_config(cls) -> Dict[str, Any]:
+        """
+        Load default configuration from file.
+        
+        First tries to load from HF_PROVIDER_CONFDIR, then falls back to local config.
+        
+        Returns:
+            Default configuration dictionary
+        """
+        get_config_logger().debug("Loading default configuration")
+        
+        # Use file loading method
+        config = cls._load_config_file('conf', cls.DEFAULT_CONFIG_FILENAME, required=False)
+        
+        if config:
+            get_config_logger().info("Loaded default configuration successfully")
+            return config
+        else:
+            get_config_logger().warning(
+                f"Failed to load default configuration from any location. "
+                "Using empty configuration."
+            )
+            return {}
+    
+    @classmethod
+    def create_app_config(cls, config: Dict[str, Any]) -> AppConfig:
+        """
+        Create typed AppConfig from configuration dictionary using Pydantic.
+        
+        Args:
+            config: Configuration dictionary
+            
+        Returns:
+            Typed AppConfig object
+            
+        Raises:
+            ConfigurationError: If configuration is invalid
+        """
+        try:
+            # Validate and create AppConfig using Pydantic
+            app_config = validate_config(config)
+            get_config_logger().debug("Configuration validated with Pydantic")
+            return app_config
+            
+        except ValueError as e:
+            # Convert Pydantic validation errors to ConfigurationError
+            raise ConfigurationError("App", f"Configuration validation failed: {str(e)}")
+        except KeyError as e:
+            raise ConfigurationError("App", f"Missing required configuration: {str(e)}")
+        except Exception as e:
+            raise ConfigurationError("App", f"Failed to create typed configuration: {str(e)}")
+    
+    @classmethod
+    def _load_legacy_config(cls) -> Optional[Dict[str, Any]]:
+        """
+        Load legacy configuration from HF_PROVIDER_CONFDIR.
+        
+        Returns:
+            Converted legacy configuration or None if not available
+        """
+        get_config_logger().debug("Loading legacy configuration")
+        
+        # Use file loading method for legacy config
+        legacy_config = cls._load_config_file('legacy', 'awsprov_config.json', required=False)
+        
+        if not legacy_config:
+            get_config_logger().debug("No legacy configuration found")
+            return None
+
+        # Load templates if available
+        templates_config = cls._load_config_file('legacy', 'awsprov_templates.json', required=False)
+        if not templates_config:
+            templates_config = {}
+
+        try:
+            # Convert legacy config to new format
+            converted_config = cls._convert_legacy_config(legacy_config, templates_config)
+            get_config_logger().info("Successfully loaded and converted legacy configuration")
+            return converted_config
+        except Exception as e:
+            get_config_logger().warning(f"Failed to convert legacy configuration: {str(e)}")
+            return None
+    
+    @classmethod
+    def _convert_legacy_config(
+        cls, legacy_config: Dict[str, Any], templates_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Convert legacy configuration format to new format.
+        
+        Args:
+            legacy_config: Legacy configuration dictionary
+            templates_config: Legacy templates configuration dictionary
+            
+        Returns:
+            Configuration in new format
+        """
+        # Get environment variables
+        hf_provider_logdir = os.environ.get('HF_PROVIDER_LOGDIR', 'logs')
+        hf_provider_workdir = os.environ.get('HF_PROVIDER_WORKDIR', 'workdir')
+        
+        # Create new configuration structure
+        aws_config = {
+            "region": legacy_config.get('AWS_REGION', 'us-east-1'),
+            "profile": legacy_config.get('AWS_PROFILE', 'default'),
+            # Symphony configuration fields
+            "credential_file": legacy_config.get('AWS_CREDENTIAL_FILE'),
+            "key_file": legacy_config.get('AWS_KEY_FILE'),
+            "endpoint_url": legacy_config.get('AWS_ENDPOINT_URL'),
+            "proxy_host": legacy_config.get('AWS_PROXY_HOST'),
+            "proxy_port": cls._convert_value(legacy_config.get('AWS_PROXY_PORT', '0')),
+            "connection_timeout_ms": cls._convert_value(legacy_config.get('AWS_CONNECTION_TIMEOUT_MS', '10000')),
+            "request_retry_attempts": cls._convert_value(legacy_config.get('AWS_REQUEST_RETRY_ATTEMPTS', '0')),
+            "instance_pending_timeout_sec": cls._convert_value(legacy_config.get('AWS_INSTANCE_PENDING_TIMEOUT_SEC', '180')),
+            "describe_request_retry_attempts": cls._convert_value(legacy_config.get('AWS_DESCRIBE_REQUEST_RETRY_ATTEMPTS', '0')),
+            "describe_request_interval": cls._convert_value(legacy_config.get('AWS_DESCRIBE_REQUEST_INTERVAL', '0'))
+        }
+        
+        # Create new configuration structure with provider namespace
+        config = {
+            "version": "2.0.0",
+            "provider": {
+                "type": "aws",
+                "aws": aws_config
+            },
+            "logging": {
+                "level": legacy_config.get('LOGGING_CONFIG', {}).get('level', 'INFO'),
+                "file_path": os.path.join(hf_provider_logdir, 'app.log'),
+                "console_enabled": legacy_config.get('LOGGING_CONFIG', {}).get('destination') != 'file',
+                "accept_propagated_setting": cls._convert_value(legacy_config.get('ACCEPT_PROPAGATED_LOG_SETTING', 'false'))
+            },
+            "template": {
+                "default_image_id": "ami-12345678",
+                "default_instance_type": "t2.micro",
+                "subnet_ids": ["subnet-12345678"],
+                "security_group_ids": ["sg-12345678"]
+            },
+            "events": {
+                "store_type": "memory",
+                "publisher_type": "composite",
+                "enable_logging": True
+            },
+            "environment": legacy_config.get('ENVIRONMENT', 'development'),
+            "debug": legacy_config.get('DEBUG', False),
+            "request_timeout": legacy_config.get('REQUEST_TIMEOUT', 300),
+            "max_machines_per_request": legacy_config.get('MAX_MACHINES_PER_REQUEST', 100),
+            "storage": {
+                "strategy": "json",
+                "json_strategy": {
+                    "storage_type": "single_file",
+                    "base_path": hf_provider_workdir,
+                    "filenames": {
+                        "single_file": "request_database.json"
+                    }
+                }
+            }
+        }
+        
+        # Extract template information if available
+        if templates_config and 'templates' in templates_config:
+            # Get the first template for default values
+            if templates_config['templates']:
+                first_template = templates_config['templates'][0]
+                
+                # Basic template fields
+                config['template']['default_image_id'] = first_template.get('imageId', config['template']['default_image_id'])
+                config['template']['default_instance_type'] = first_template.get('vmType', config['template']['default_instance_type'])
+                
+                # Handle subnet IDs (can be string or array)
+                if 'subnetId' in first_template:
+                    subnet_id = first_template['subnetId']
+                    if isinstance(subnet_id, list):
+                        config['template']['subnet_ids'] = subnet_id
+                    else:
+                        config['template']['subnet_ids'] = [subnet_id]
+                
+                # Security group IDs
+                if 'securityGroupIds' in first_template:
+                    config['template']['security_group_ids'] = first_template['securityGroupIds']
+                
+                # Symphony template fields
+                config['template']['default_price_type'] = first_template.get('priceType', 'ondemand')
+                
+                # VM types handling
+                if 'vmType' in first_template:
+                    config['template']['default_vm_type'] = first_template['vmType']
+                
+                if 'vmTypes' in first_template:
+                    config['template']['default_vm_types'] = first_template['vmTypes']
+                
+                if 'vmTypesOnDemand' in first_template:
+                    config['template']['default_vm_types_on_demand'] = first_template['vmTypesOnDemand']
+                
+                if 'vmTypesPriority' in first_template:
+                    config['template']['default_vm_types_priority'] = first_template['vmTypesPriority']
+                
+                # Fleet role
+                if 'fleetRole' in first_template:
+                    config['template']['default_fleet_role'] = first_template['fleetRole']
+                
+                # Spot price
+                if 'maxSpotPrice' in first_template:
+                    config['template']['default_max_spot_price'] = cls._convert_value(first_template['maxSpotPrice'])
+                
+                # Spot fleet request expiry
+                if 'spotFleetRequestExpiry' in first_template:
+                    config['template']['default_spot_fleet_request_expiry'] = cls._convert_value(first_template['spotFleetRequestExpiry'])
+                
+                # Allocation strategies
+                if 'allocationStrategy' in first_template:
+                    config['template']['default_allocation_strategy'] = first_template['allocationStrategy']
+                
+                if 'allocationStrategyOnDemand' in first_template:
+                    config['template']['default_allocation_strategy_on_demand'] = first_template['allocationStrategyOnDemand']
+                
+                # Percent on demand
+                if 'percentOnDemand' in first_template:
+                    config['template']['default_percent_on_demand'] = cls._convert_value(first_template['percentOnDemand'])
+                
+                # Pools count
+                if 'poolsCount' in first_template:
+                    config['template']['default_pools_count'] = cls._convert_value(first_template['poolsCount'])
+                
+                # Volume settings
+                if 'volumeType' in first_template:
+                    config['template']['default_volume_type'] = first_template['volumeType']
+                
+                if 'iops' in first_template:
+                    config['template']['default_iops'] = cls._convert_value(first_template['iops'])
+                
+                if 'rootDeviceVolumeSize' in first_template:
+                    config['template']['default_root_device_volume_size'] = cls._convert_value(first_template['rootDeviceVolumeSize'])
+        
+        return config
+    
+    @classmethod
+    def _load_from_file(cls, config_path: str) -> Optional[Dict[str, Any]]:
+        """
+        Load configuration from file.
+        
+        Args:
+            config_path: Path to configuration file
+            
+        Returns:
+            Loaded configuration or None if file not found
+            
+        Raises:
+            ConfigurationError: If file cannot be loaded
+        """
+        try:
+            path = Path(config_path)
+            if not path.exists():
+                get_config_logger().warning(f"Configuration file not found: {config_path}")
+                return None
+
+            with path.open() as f:
+                return json.load(f)
+
+        except json.JSONDecodeError as e:
+            raise ConfigurationError("File", f"Invalid JSON in configuration file: {str(e)}")
+        except Exception as e:
+            raise ConfigurationError("File", f"Failed to load configuration file: {str(e)}")
+
+    @classmethod
+    def _load_config_file(cls, file_type: str, filename: str, 
+                                  explicit_path: Optional[str] = None,
+                                  required: bool = False) -> Optional[Dict[str, Any]]:
+        """
+        Unified method for loading any configuration file with consistent priority:
+        1. Explicit path (if provided and contains directory)
+        2. HF_PROVIDER_*DIR + filename (if file exists)
+        3. Default directory + filename
+        
+        Args:
+            file_type: Type of file ('conf', 'template', 'legacy', 'log', 'work', 'events', 'snapshots')
+            filename: Name of the file
+            explicit_path: Explicit path provided by user (optional)
+            required: Whether the file is required (affects logging level)
+            
+        Returns:
+            Loaded configuration or None if file not found
+            
+        Raises:
+            ConfigurationError: If file cannot be loaded
+        """
+        get_config_logger().debug(f"Loading config file: type={file_type}, filename={filename}, explicit_path={explicit_path}")
+        
+        # Resolve the file path using centralized logic
+        # In practice, this would be refactored to use a static method or utility
+        resolved_path = cls._resolve_file_path(file_type, filename, explicit_path)
+        
+        if resolved_path:
+            get_config_logger().info(f"Loading {file_type} configuration from: {resolved_path}")
+            return cls._load_from_file(resolved_path)
+        else:
+            if required:
+                get_config_logger().error(f"Required {file_type} configuration file not found: {filename}")
+            else:
+                get_config_logger().debug(f"Optional {file_type} configuration file not found: {filename}")
+            return None
+
+    @classmethod
+    def _resolve_file_path(cls, file_type: str, filename: str, explicit_path: Optional[str] = None) -> Optional[str]:
+        """
+        Resolve file path using centralized logic (static version of ConfigurationManager.resolve_file).
+        
+        Args:
+            file_type: Type of file ('conf', 'template', 'legacy', 'log', 'work', 'events', 'snapshots')
+            filename: Name of the file
+            explicit_path: Explicit path provided by user (optional)
+            
+        Returns:
+            Resolved file path or None if not found
+        """
+        get_config_logger().debug(f"Resolving file path: type={file_type}, filename={filename}, explicit_path={explicit_path}")
+        
+        # 1. If explicit path provided and contains directory, use it directly
+        if explicit_path and os.path.dirname(explicit_path):
+            get_config_logger().debug(f"Using explicit path with directory: {explicit_path}")
+            return explicit_path if os.path.exists(explicit_path) else None
+        
+        # If explicit_path is just a filename, use it as the filename
+        if explicit_path and not os.path.dirname(explicit_path):
+            filename = explicit_path
+            get_config_logger().debug(f"Using explicit filename: {filename}")
+        
+        # 2. Try environment variable directory + filename
+        env_dir = None
+        env_var_name = None
+        
+        if file_type in ['conf', 'template', 'legacy']:
+            env_dir = os.environ.get('HF_PROVIDER_CONFDIR')
+            env_var_name = 'HF_PROVIDER_CONFDIR'
+        elif file_type == 'log':
+            env_dir = os.environ.get('HF_PROVIDER_LOGDIR')
+            env_var_name = 'HF_PROVIDER_LOGDIR'
+        elif file_type == 'work':
+            env_dir = os.environ.get('HF_PROVIDER_WORKDIR')
+            env_var_name = 'HF_PROVIDER_WORKDIR'
+        elif file_type == 'events':
+            env_dir = os.environ.get('HF_PROVIDER_EVENTSDIR')
+            env_var_name = 'HF_PROVIDER_EVENTSDIR'
+        elif file_type == 'snapshots':
+            env_dir = os.environ.get('HF_PROVIDER_SNAPSHOTSDIR')
+            env_var_name = 'HF_PROVIDER_SNAPSHOTSDIR'
+        
+        if env_dir:
+            env_path = os.path.join(env_dir, filename)
+            if os.path.exists(env_path):
+                get_config_logger().debug(f"Found file using {env_var_name}: {env_path}")
+                return env_path
+            else:
+                get_config_logger().debug(f"File not found in {env_var_name} directory: {env_path}")
+        
+        # 3. Fall back to default directory + filename
+        default_dirs = {
+            'conf': 'config',
+            'template': 'config',
+            'legacy': 'config',
+            'log': 'logs',
+            'work': 'data',
+            'events': 'events',
+            'snapshots': 'snapshots'
+        }
+        
+        default_dir = default_dirs.get(file_type, 'config')
+        
+        # Build path relative to project root
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        fallback_path = os.path.join(project_root, default_dir, filename)
+        
+        # Always return the fallback path, even if file doesn't exist
+        # This allows the caller to decide whether to create the file or handle the missing file
+        get_config_logger().debug(f"Using fallback path: {fallback_path}")
+        return fallback_path
+    
+    @classmethod
+    def _load_from_env(cls, config: Dict[str, Any]) -> None:
+        """
+        Load configuration from environment variables.
+        
+        Args:
+            config: Configuration dictionary to update
+        """
+        # Direct environment variables
+        for env_var, config_path in cls.ENV_MAPPING.items():
+            if env_var in os.environ:
+                value = cls._convert_value(os.environ[env_var])
+                current = config
+                for i, key in enumerate(config_path):
+                    if i == len(config_path) - 1:
+                        current[key] = value
+                    else:
+                        current = current.setdefault(key, {})
+
+        # Process Host Factory environment variables
+        cls._process_hf_env_vars(config)
+
+        # HF_ prefixed environment variables (legacy support)
+        env_prefix = 'HF_'
+        for key, value in os.environ.items():
+            if key.startswith(env_prefix) and key not in cls.HF_ENV_VARS:
+                config_key = key[len(env_prefix):].upper()
+                
+                # Handle nested configuration using double underscore
+                if '__' in config_key:
+                    parts = config_key.split('__')
+                    current = config
+                    for part in parts[:-1]:
+                        current = current.setdefault(part, {})
+                    current[parts[-1]] = cls._convert_value(value)
+                else:
+                    # Add to root config
+                    config[config_key] = cls._convert_value(value)
+
+        get_config_logger().debug("Loaded configuration from environment variables")
+    
+    @classmethod
+    def _process_hf_env_vars(cls, config: Dict[str, Any]) -> None:
+        """
+        Process Host Factory environment variables.
+        
+        Args:
+            config: Configuration dictionary to update
+        """
+        # Get environment variables
+        workdir = os.environ.get('HF_PROVIDER_WORKDIR')
+        logdir = os.environ.get('HF_PROVIDER_LOGDIR')
+        confdir = os.environ.get('HF_PROVIDER_CONFDIR')
+        eventsdir = os.environ.get('HF_PROVIDER_EVENTSDIR')
+        snapshotsdir = os.environ.get('HF_PROVIDER_SNAPSHOTSDIR')
+        
+        # Set up logging path based on HF_PROVIDER_LOGDIR
+        if logdir:
+            config.setdefault('logging', {})['file_path'] = os.path.join(logdir, 'app.log')
+            get_config_logger().debug(f"Set logging file_path to {os.path.join(logdir, 'app.log')}")
+        elif workdir:
+            log_dir = os.path.join(workdir, 'logs')
+            config.setdefault('logging', {})['file_path'] = os.path.join(log_dir, 'app.log')
+            get_config_logger().debug(f"Set logging file_path to {os.path.join(log_dir, 'app.log')}")
+        
+        # Set up storage paths based on workdir
+        if workdir:
+            # Update JSON storage strategy
+            storage = config.setdefault('storage', {})
+            json_strategy = storage.setdefault('json_strategy', {})
+            json_strategy['base_path'] = workdir
+            get_config_logger().debug(f"Set JSON storage base_path to {workdir}")
+            
+            # Update SQL storage strategy if using SQLite
+            sql_strategy = storage.setdefault('sql_strategy', {})
+            if sql_strategy.get('type', 'sqlite') == 'sqlite':
+                # Always use workdir for SQLite, regardless of host value
+                sql_strategy['name'] = os.path.join(workdir, 'database.db')
+                get_config_logger().debug(f"Set SQLite database path to {os.path.join(workdir, 'database.db')}")
+        
+        # Set up config paths based on HF_PROVIDER_CONFDIR
+        if confdir:
+            # Template paths are now handled by unified file resolution
+            # No need to override them here since the template loading will use resolve_file()
+            get_config_logger().debug(f"HF_PROVIDER_CONFDIR set to: {confdir} (template paths will be resolved dynamically)")
+            
+        # Set up events paths based on HF_PROVIDER_EVENTSDIR
+        if eventsdir:
+            events_config = config.setdefault('events', {})
+            events_config['store_path'] = eventsdir
+            events_config['default_events_path'] = eventsdir
+            get_config_logger().debug(f"Set events store_path to {eventsdir}")
+        elif workdir:
+            events_dir = os.path.join(workdir, 'events')
+            events_config = config.setdefault('events', {})
+            events_config['default_events_path'] = events_dir
+            get_config_logger().debug(f"Set events default_events_path to {events_dir}")
+            
+        # Set up snapshots paths based on HF_PROVIDER_SNAPSHOTSDIR
+        if snapshotsdir:
+            events_config = config.setdefault('events', {})
+            events_config['snapshot_store_path'] = snapshotsdir
+            events_config['default_snapshots_path'] = snapshotsdir
+            get_config_logger().debug(f"Set snapshots snapshot_store_path to {snapshotsdir}")
+        elif workdir:
+            snapshots_dir = os.path.join(workdir, 'snapshots')
+            events_config = config.setdefault('events', {})
+            events_config['default_snapshots_path'] = snapshots_dir
+            get_config_logger().debug(f"Set snapshots default_snapshots_path to {snapshots_dir}")
+        
+        # Process AMI resolution environment variables
+        ami_resolution_enabled = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_ENABLED')
+        ami_resolution_fallback = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_FALLBACK_ON_FAILURE')
+        ami_resolution_cache = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_CACHE_ENABLED')
+        
+        if any([ami_resolution_enabled, ami_resolution_fallback, ami_resolution_cache]):
+            template_config = config.setdefault('template', {})
+            ami_resolution_config = template_config.setdefault('ami_resolution', {})
+            
+            if ami_resolution_enabled is not None:
+                ami_resolution_config['enabled'] = cls._convert_value(ami_resolution_enabled)
+                get_config_logger().debug(f"Set ami_resolution.enabled to {ami_resolution_config['enabled']}")
+            
+            if ami_resolution_fallback is not None:
+                ami_resolution_config['fallback_on_failure'] = cls._convert_value(ami_resolution_fallback)
+                get_config_logger().debug(f"Set ami_resolution.fallback_on_failure to {ami_resolution_config['fallback_on_failure']}")
+            
+            if ami_resolution_cache is not None:
+                ami_resolution_config['cache_enabled'] = cls._convert_value(ami_resolution_cache)
+                get_config_logger().debug(f"Set ami_resolution.cache_enabled to {ami_resolution_config['cache_enabled']}")
+    
+    @classmethod
+    def _convert_value(cls, value: str) -> Any:
+        """
+        Convert string values to appropriate types.
+        
+        Args:
+            value: String value to convert
+            
+        Returns:
+            Converted value
+        """
+        # Try to convert to boolean
+        if value.lower() in ('true', 'false'):
+            return value.lower() == 'true'
+        
+        # Try to convert to integer
+        try:
+            return int(value)
+        except ValueError:
+            pass
+        
+        # Try to convert to float
+        try:
+            return float(value)
+        except ValueError:
+            pass
+        
+        # Try to convert to JSON
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            pass
+        
+        # Return as string if no conversion possible
+        return value
+    
+    @classmethod
+    def _merge_config(cls, base: Dict[str, Any], update: Dict[str, Any]) -> None:
+        """
+        Merge update configuration into base configuration.
+        
+        Args:
+            base: Base configuration to update
+            update: Update configuration
+        """
+        for key, value in update.items():
+            if (
+                key in base 
+                and isinstance(base[key], dict) 
+                and isinstance(value, dict)
+            ):
+                cls._merge_config(base[key], value)
+            else:
+                base[key] = value
+    
+    @classmethod
+    def _deep_copy(cls, obj: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Create a deep copy of a dictionary.
+        
+        Args:
+            obj: Dictionary to copy
+            
+        Returns:
+            Deep copy of dictionary
+        """
+        return json.loads(json.dumps(obj))

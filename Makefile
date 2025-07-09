@@ -1,18 +1,343 @@
-# Makefile
-.PHONY: test test-cov test-html clean
+# Makefile for Open Host Factory Plugin
 
-PYTHONPATH := $(shell pwd)
-export PYTHONPATH
+.PHONY: help install dev-install test test-unit test-integration test-e2e test-all test-cov test-html test-parallel test-quick test-performance test-aws lint format security clean build docs docs-serve docs-build run version-bump
 
-test:
-	pytest -v
+# Python settings
+PYTHON := python3
+VENV := .venv
+BIN := $(VENV)/bin
 
-test-cov:
-	pytest --cov=src --cov-report=term-missing
+# Project settings
+PROJECT := open-hostfactory-plugin
+PACKAGE := src
+TESTS := tests
+CONFIG := config/config.json
 
-test-html:
-	pytest --cov=src --cov-report=html
+# Coverage settings
+COVERAGE_REPORT := coverage.xml
+COVERAGE_HTML := htmlcov
+
+# Test settings
+PYTEST_ARGS := -v --tb=short --durations=10
+PYTEST_COV_ARGS := --cov=$(PACKAGE) --cov-report=term-missing --cov-branch --no-cov-on-fail
+PYTEST_TIMEOUT := --timeout=300
+PYTEST_MAXFAIL := --maxfail=5
+
+# Documentation settings
+DOCS_DIR := docs
+DOCS_BUILD_DIR := $(DOCS_DIR)/site
+
+help:  ## Show this help message
+	@echo 'Usage: make [target]'
+	@echo ''
+	@echo 'Targets:'
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+# Installation targets
+install: $(VENV)/bin/activate  ## Install production dependencies
+	$(BIN)/pip install -r requirements.txt
+
+dev-install: $(VENV)/bin/activate  ## Install development dependencies
+	./dev-tools/package/install-dev.sh
+
+$(VENV)/bin/activate: requirements.txt
+	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
+	$(BIN)/pip install --upgrade pip
+	$(BIN)/pip install -r requirements.txt
+	touch $(VENV)/bin/activate
+
+# Testing targets (using dev-tools)
+test: test-quick  ## Run quick test suite (alias for test-quick)
+
+test-unit: dev-install  ## Run unit tests only
+	$(PYTHON) dev-tools/testing/run_tests.py --unit
+
+test-integration: dev-install  ## Run integration tests only
+	$(PYTHON) dev-tools/testing/run_tests.py --integration
+
+test-e2e: dev-install  ## Run end-to-end tests only
+	$(PYTHON) dev-tools/testing/run_tests.py --e2e
+
+test-all: dev-install  ## Run all tests
+	$(PYTHON) dev-tools/testing/run_tests.py
+
+test-parallel: dev-install  ## Run tests in parallel
+	$(PYTHON) dev-tools/testing/run_tests.py --parallel
+
+test-quick: dev-install  ## Run quick test suite (unit + fast integration)
+	$(PYTHON) dev-tools/testing/run_tests.py --unit --fast
+
+test-performance: dev-install  ## Run performance tests
+	$(PYTHON) dev-tools/testing/run_tests.py --markers slow
+
+test-aws: dev-install  ## Run AWS-specific tests
+	$(PYTHON) dev-tools/testing/run_tests.py --markers aws
+
+test-cov: dev-install  ## Run tests with coverage report
+	$(PYTHON) dev-tools/testing/run_tests.py --coverage
+
+test-html: dev-install  ## Run tests with HTML coverage report
+	$(PYTHON) dev-tools/testing/run_tests.py --html-coverage
 	@echo "Coverage report generated in htmlcov/index.html"
 
-clean:
-	rm -rf .coverage htmlcov/ .pytest_cache/ __pycache__/ */__pycache__/ */*/__pycache__/
+test-report: dev-install  ## Generate comprehensive test report
+	$(PYTHON) dev-tools/testing/run_tests.py --coverage --html-coverage
+
+# Code quality targets
+lint: dev-install  ## Run all linting checks
+	@echo "Running Black (code formatting)..."
+	$(BIN)/black --check $(PACKAGE) $(TESTS)
+	@echo "Running isort (import sorting)..."
+	$(BIN)/isort --check-only $(PACKAGE) $(TESTS)
+	@echo "Running flake8 (style guide)..."
+	$(BIN)/flake8 $(PACKAGE) $(TESTS)
+	@echo "Running mypy (type checking)..."
+	$(BIN)/mypy $(PACKAGE)
+	@echo "Running pylint (code analysis)..."
+	$(BIN)/pylint $(PACKAGE)
+
+format: dev-install  ## Format code (Black + isort)
+	$(BIN)/black $(PACKAGE) $(TESTS)
+	$(BIN)/isort $(PACKAGE) $(TESTS)
+
+security: dev-install  ## Run security checks
+	@echo "Running bandit (security linter)..."
+	$(BIN)/bandit -r $(PACKAGE) -f json -o bandit-report.json || echo "Security issues found - check bandit-report.json"
+	@echo "Running safety (dependency vulnerability check)..."
+	$(BIN)/safety check || echo "Vulnerable dependencies found"
+
+# Completion targets
+generate-completions:     ## Generate completion scripts (bash and zsh)
+	@echo "Generating bash completion..."
+	$(PYTHON) src/run.py --completion bash > dev-tools/completions/bash/ohfp-completion.bash
+	@echo "Generating zsh completion..."
+	$(PYTHON) src/run.py --completion zsh > dev-tools/completions/zsh/_ohfp
+	@echo "✅ Completion scripts generated in dev-tools/completions/"
+
+install-completions:      ## Install completions for current user
+	./dev-tools/scripts/install-completions.sh
+
+install-bash-completions: ## Install bash completions only
+	./dev-tools/scripts/install-completions.sh bash
+
+install-zsh-completions:  ## Install zsh completions only
+	./dev-tools/scripts/install-completions.sh zsh
+
+uninstall-completions:    ## Remove installed completions
+	./dev-tools/scripts/install-completions.sh --uninstall
+
+test-completions:         ## Test completion generation
+	@echo "Testing bash completion generation..."
+	@$(PYTHON) src/run.py --completion bash > /dev/null && echo "✅ Bash completion generation works"
+	@echo "Testing zsh completion generation..."
+	@$(PYTHON) src/run.py --completion zsh > /dev/null && echo "✅ Zsh completion generation works"
+
+# Documentation targets
+docs: docs-build  ## Build documentation (alias for docs-build)
+
+docs-build: dev-install  ## Build documentation
+	@echo "Building documentation with MkDocs..."
+	cd $(DOCS_DIR) && ../$(BIN)/mkdocs build
+	@echo "Documentation built in $(DOCS_BUILD_DIR)/"
+
+docs-serve:  ## Serve documentation locally with live reload
+	@echo "Starting versioned documentation server at http://127.0.0.1:8000"
+	@echo "Press Ctrl+C to stop the server"
+	@if [ ! -f "$(BIN)/mike" ]; then \
+		echo "Mike not found, installing development dependencies..."; \
+		$(MAKE) dev-install; \
+	fi
+	cd $(DOCS_DIR) && ../$(BIN)/mike serve
+
+docs-serve-dev:  ## Serve documentation in development mode (non-versioned)
+	@echo "Starting development documentation server at http://127.0.0.1:8000"
+	@echo "Press Ctrl+C to stop the server"
+	@if [ ! -f "$(BIN)/mkdocs" ]; then \
+		echo "MkDocs not found, installing development dependencies..."; \
+		$(MAKE) dev-install; \
+	fi
+	cd $(DOCS_DIR) && ../$(BIN)/mkdocs serve
+
+docs-deploy: dev-install  ## Deploy documentation to GitHub Pages
+	cd $(DOCS_DIR) && ../$(BIN)/mike deploy --push --update-aliases $(VERSION) latest
+
+docs-deploy-version: dev-install  ## Deploy specific version (usage: make docs-deploy-version VERSION=1.0.0)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make docs-deploy-version VERSION=1.0.0"; \
+		exit 1; \
+	fi
+	cd $(DOCS_DIR) && ../$(BIN)/mike deploy --push --update-aliases $(VERSION) latest
+
+docs-list-versions:  ## List all documentation versions
+	@if [ ! -f "$(BIN)/mike" ]; then \
+		echo "Mike not found, installing development dependencies..."; \
+		$(MAKE) dev-install; \
+	fi
+	cd $(DOCS_DIR) && ../$(BIN)/mike list
+
+docs-delete-version:  ## Delete a documentation version (usage: make docs-delete-version VERSION=1.0.0)
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Usage: make docs-delete-version VERSION=1.0.0"; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(BIN)/mike" ]; then \
+		echo "Mike not found, installing development dependencies..."; \
+		$(MAKE) dev-install; \
+	fi
+	cd $(DOCS_DIR) && ../$(BIN)/mike delete $(VERSION)
+
+docs-deploy-gitlab:  ## Deploy documentation to GitLab Pages (production)
+	@echo "🚀 Triggering GitLab Pages production deployment..."
+	@echo "📍 Documentation will be available at: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
+	@echo "💡 Push to main branch to trigger deployment"
+	git push origin main
+
+docs-deploy-staging:  ## Deploy documentation to GitLab Pages (staging)
+	@echo "🚀 Triggering GitLab Pages staging deployment..."
+	@echo "📍 Documentation will be available at: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
+	@echo "💡 Push to develop branch to trigger deployment"
+	git push origin develop
+
+docs-check-gitlab:  ## Check GitLab Pages deployment status
+	@echo "🔍 Production URL: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
+	@echo "🔍 Staging URL:    https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
+	@echo "🔧 GitLab Project: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin"
+	@echo "📊 CI/CD Pipelines: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin/-/pipelines"
+
+docs-clean:  ## Clean documentation build files
+	rm -rf $(DOCS_BUILD_DIR)
+
+# Version management targets
+version-bump-patch:  ## Bump patch version (0.1.0 -> 0.1.1)
+	./dev-tools/package/version-bump.sh patch
+
+version-bump-minor:  ## Bump minor version (0.1.0 -> 0.2.0)
+	./dev-tools/package/version-bump.sh minor
+
+version-bump-major:  ## Bump major version (0.1.0 -> 1.0.0)
+	./dev-tools/package/version-bump.sh major
+
+version-bump:  ## Show version bump help
+	./dev-tools/package/version-bump.sh
+
+# Build targets (using dev-tools)
+build: clean dev-install  ## Build package
+	./dev-tools/package/build.sh
+
+build-test: build  ## Build and test package installation
+	./dev-tools/package/test-install.sh
+
+# CI/CD targets
+ci: dev-install lint security test-all test-report  ## Run full CI pipeline
+	@echo "CI pipeline completed successfully!"
+
+ci-quick: dev-install lint test-quick  ## Run quick CI pipeline
+	@echo "Quick CI pipeline completed successfully!"
+
+# Cleanup targets
+clean:  ## Clean up build artifacts
+	rm -rf build/
+	rm -rf dist/
+	rm -rf *.egg-info
+	rm -rf .pytest_cache/
+	rm -rf .coverage
+	rm -rf $(COVERAGE_HTML)/
+	rm -f $(COVERAGE_REPORT)
+	rm -f test-results.xml
+	rm -f bandit-report.json
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -name "*.pyc" -delete 2>/dev/null || true
+
+clean-all: clean docs-clean  ## Clean everything including virtual environment
+	rm -rf $(VENV)
+
+# Application targets
+run: install  ## Run application
+	$(PYTHON) src/run.py
+
+run-dev: dev-install  ## Run application in development mode
+	$(PYTHON) src/run.py --log-level DEBUG
+
+# Development targets
+dev-setup: dev-install  ## Set up development environment
+	@echo "Development environment setup complete!"
+	@echo "Available commands:"
+	@echo "  make test          - Run tests"
+	@echo "  make docs-serve    - Start documentation server"
+	@echo "  make lint          - Run code quality checks"
+	@echo "  make format        - Format code"
+
+# Package management targets
+install-package: build  ## Install package locally
+	$(BIN)/pip install dist/*.whl
+
+uninstall-package:  ## Uninstall package
+	$(BIN)/pip uninstall $(PROJECT) -y
+
+reinstall-package: uninstall-package install-package  ## Reinstall package
+
+# Database targets (if needed)
+init-db: install  ## Initialize database
+	$(PYTHON) src/run.py system init-db
+
+# Configuration targets
+create-config:  ## Create default config file
+	@if [ ! -f $(CONFIG) ]; then \
+		mkdir -p config; \
+		cp config/config.example.json $(CONFIG); \
+		echo "Created $(CONFIG)"; \
+	else \
+		echo "$(CONFIG) already exists"; \
+	fi
+
+validate-config: install  ## Validate configuration
+	$(PYTHON) src/run.py config validate
+
+# Docker targets
+docker-build:  ## Build Docker image
+	docker build -t $(PROJECT):latest .
+
+docker-run:  ## Run Docker container
+	docker run -p 8000:8000 $(PROJECT):latest
+
+docker-compose-up:  ## Start with docker-compose
+	docker-compose up -d
+
+docker-compose-down:  ## Stop docker-compose
+	docker-compose down
+
+# Quick development workflow
+dev: dev-install format lint test-quick  ## Quick development workflow (format, lint, test)
+	@echo "Development workflow completed successfully!"
+
+# Show project status
+status:  ## Show project status and useful commands
+	@echo "=== Open Host Factory Plugin Status ==="
+	@echo ""
+	@echo "📁 Project Structure:"
+	@echo "  Source code:     $(PACKAGE)/"
+	@echo "  Tests:          $(TESTS)/"
+	@echo "  Documentation:  $(DOCS_DIR)/"
+	@echo "  Dev tools:      dev-tools/"
+	@echo ""
+	@echo "🔧 Quick Commands:"
+	@echo "  make dev-setup     - Set up development environment"
+	@echo "  make test          - Run tests"
+	@echo "  make docs-serve    - Start documentation server"
+	@echo "  make dev           - Quick development workflow"
+	@echo ""
+	@echo "📚 Documentation:"
+	@echo "  Local docs:     make docs-serve (versioned)"
+	@echo "  Dev docs:       make docs-serve-dev (non-versioned)"
+	@echo "  Build docs:     make docs-build"
+	@echo "  GitLab Pages:   https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin (production)"
+	@echo "  Staging Pages:  https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
+	@echo "  Deploy prod:    make docs-deploy-gitlab"
+	@echo "  Deploy staging: make docs-deploy-staging"
+	@echo "  List versions:  make docs-list-versions"
+	@echo "  Deploy version: make docs-deploy-version VERSION=1.0.0"
+	@echo ""
+	@echo "🚀 Version Management:"
+	@echo "  Patch version:  make version-bump-patch"
+	@echo "  Minor version:  make version-bump-minor"
+	@echo "  Major version:  make version-bump-major"

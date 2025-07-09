@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "provider": {
+    "active_provider": "test-aws",
+    "selection_policy": "FIRST_AVAILABLE",
+    "providers": [
+      {
+        "name": "test-aws",
+        "type": "aws",
+        "enabled": true,
+        "priority": 1,
+        "config": {
+          "region": "us-east-1",
+          "profile": "default"
+        }
+      }
+    ]
+  },
+  "logging": {
+    "level": "DEBUG",
+    "file_path": "logs/test.log",
+    "console_enabled": true
+  },
+  "storage": {
+    "strategy": "json",
+    "json_strategy": {
+      "storage_type": "single_file",
+      "base_path": "test_data",
+      "filenames": {
+        "single_file": "test_database.json"
+      }
+    }
+  },
+  "template": {
+    "default_image_id": "ami-12345678",
+    "default_instance_type": "t2.micro",
+    "subnet_ids": ["subnet-12345678"],
+    "security_group_ids": ["sg-12345678"]
+  }
+}

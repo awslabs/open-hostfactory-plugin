@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0invoke_provider.bat" getRequestStatus %*
+call "%~dp0invoke_provider.bat" requests status %*

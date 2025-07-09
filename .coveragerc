@@ -2,17 +2,52 @@
 [run]
 source = src
 branch = True
-
-[report]
-exclude_lines =
-    pragma: no cover
-    def __repr__
-    if self.debug:
-    raise NotImplementedError
-    if __name__ == .__main__.:
-    pass
-    raise ImportError
-ignore_errors = True
+parallel = True
 omit =
     tests/*
     setup.py
+    run.py
+    */__init__.py
+    */migrations/*
+    */scripts/*
+    */docs/*
+    */config/*
+    */.venv/*
+    */venv/*
+
+[paths]
+source =
+    src/
+    */site-packages/
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+exclude_lines =
+    pragma: no cover
+    pragma: nocover
+    def __repr__
+    def __str__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    pass
+    raise ImportError
+    except ImportError:
+    def main
+    if TYPE_CHECKING:
+    \.\.\.$
+ignore_errors = True
+
+[html]
+directory = htmlcov
+title = Open Host Factory Plugin Coverage Report
+
+[xml]
+output = coverage.xml

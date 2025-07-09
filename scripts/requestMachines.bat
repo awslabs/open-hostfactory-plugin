@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0invoke_provider.bat" requestMachines %*
+call "%~dp0invoke_provider.bat" machines request %*

@@ -1,0 +1,37 @@
+{
+  "templates": [
+    {
+      "templateId": "test-template-1",
+      "providerApi": "EC2Fleet",
+      "fleetType": "instant",
+      "maxNumber": 1,
+      "attributes": {
+        "type": ["String", "X86_64"],
+        "ncores": ["Numeric", "1"],
+        "ncpus": ["Numeric", "1"],
+        "nram": ["Numeric", "1024"]
+      },
+      "imageId": "ami-12345678",
+      "subnetId": "subnet-12345678",
+      "vmType": "t2.micro",
+      "keyName": "test-key",
+      "securityGroupIds": ["sg-12345678"]
+    },
+    {
+      "templateId": "test-template-2",
+      "providerApi": "RunInstances",
+      "maxNumber": 2,
+      "attributes": {
+        "type": ["String", "X86_64"],
+        "ncores": ["Numeric", "2"],
+        "ncpus": ["Numeric", "1"],
+        "nram": ["Numeric", "2048"]
+      },
+      "imageId": "ami-87654321",
+      "subnetId": "subnet-87654321",
+      "vmType": "t2.small",
+      "keyName": "test-key",
+      "securityGroupIds": ["sg-87654321"]
+    }
+  ]
+}

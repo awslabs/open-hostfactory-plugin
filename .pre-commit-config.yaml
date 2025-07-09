@@ -1,0 +1,27 @@
+# Pre-commit hooks configuration
+repos:
+  - repo: local
+    hooks:
+      - id: validate-imports
+        name: Validate Python Imports
+        entry: python scripts/validate_imports.py
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Validate that all critical imports work correctly"
+      
+      - id: test-import-validation
+        name: Run Import Validation Tests
+        entry: python -m pytest tests/test_import_validation.py -v
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Run comprehensive import validation tests"
+      
+      - id: check-deprecated-imports
+        name: Check for Deprecated Imports
+        entry: bash -c 'grep -r "from.*request.*value_objects.*import.*MachineStatus" . --include="*.py" && echo "❌ Found deprecated MachineStatus import" && exit 1 || echo "✅ No deprecated imports found"'
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Check for deprecated import patterns"

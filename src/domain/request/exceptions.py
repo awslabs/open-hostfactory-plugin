@@ -1,30 +1,36 @@
-from src.domain.core.exceptions import DomainException, ResourceNotFoundError
-from typing import Dict, List
+"""Request domain exceptions."""
+from src.domain.base.exceptions import DomainException, ValidationError, EntityNotFoundError
 
-class RequestNotFoundError(ResourceNotFoundError):
-    """Raised when a request cannot be found."""
+
+class RequestException(DomainException):
+    """Base exception for request domain errors."""
+
+
+class RequestNotFoundError(EntityNotFoundError):
+    """Raised when a request is not found."""
+    
     def __init__(self, request_id: str):
         super().__init__("Request", request_id)
 
-class RequestValidationError(DomainException):
+
+class RequestValidationError(ValidationError):
     """Raised when request validation fails."""
-    def __init__(self, request_id: str, errors: Dict[str, str]):
-        super().__init__(f"Request validation failed for {request_id}")
-        self.request_id = request_id
-        self.errors = errors
 
-class InvalidRequestStateError(DomainException):
+
+class InvalidRequestStateError(RequestException):
     """Raised when attempting an invalid request state transition."""
-    def __init__(self, request_id: str, current_state: str, attempted_state: str):
-        super().__init__(
-            f"Cannot transition request {request_id} from {current_state} to {attempted_state}"
-        )
-        self.request_id = request_id
-        self.current_state = current_state
-        self.attempted_state = attempted_state
+    
+    def __init__(self, current_state: str, attempted_state: str):
+        message = f"Cannot transition request from {current_state} to {attempted_state}"
+        super().__init__(message, "INVALID_REQUEST_STATE_TRANSITION", {
+            "current_state": current_state,
+            "attempted_state": attempted_state
+        })
 
-class MachineAllocationError(DomainException):
-    """Raised when there's an error allocating machines to a request."""
-    def __init__(self, request_id: str, message: str):
-        super().__init__(f"Machine allocation failed for request {request_id}: {message}")
-        self.request_id = request_id
+
+class RequestProcessingError(RequestException):
+    """Raised when request processing fails."""
+
+
+class RequestTimeoutError(RequestException):
+    """Raised when request processing times out."""

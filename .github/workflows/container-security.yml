@@ -116,7 +116,7 @@ jobs:
         sarif_file: hadolint-results.sarif
 
     - name: Upload container security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: container-security-reports

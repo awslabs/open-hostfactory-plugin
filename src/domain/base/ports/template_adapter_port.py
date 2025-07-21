@@ -1,90 +1,110 @@
-"""Template Adapter Port - Provider-specific template operations interface."""
+"""Template Adapter Port
+
+Defines the interface for template operations across different providers.
+This port allows different providers to implement their own template adapters
+while maintaining a consistent interface.
+"""
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
-from src.domain.template.aggregate import Template
+from typing import Dict, Any, List, Optional
+from datetime import datetime
+
+from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.base.contracts.template_contract import TemplateContract, TemplateValidationResult
 
 
 class TemplateAdapterPort(ABC):
-    """Port for provider-specific template operations.
+    """
+    Port interface for template adapters.
     
-    This port defines the interface for provider-specific template operations
-    such as validation, field resolution, and provider-specific processing.
-    
-    Implementations should provide:
-    - Template validation specific to the provider
-    - Field resolution (e.g., AMI ID resolution for AWS)
-    - Provider-specific template processing
-    - Template field extension and enhancement
+    This interface defines the contract that all provider-specific
+    template adapters must implement.
     """
     
     @abstractmethod
-    def validate_template(self, template: Template) -> List[str]:
+    async def get_template_by_id(self, template_id: str) -> Optional[TemplateContract]:
         """
-        Validate template for provider-specific requirements.
+        Get a template by its ID.
         
         Args:
-            template: Template domain entity to validate
+            template_id: The template identifier
             
         Returns:
-            List of validation error messages (empty if valid)
+            TemplateContract if found, None otherwise
         """
         pass
     
     @abstractmethod
-    def extend_template_fields(self, template: Template) -> Template:
+    async def get_all_templates(self) -> List[TemplateContract]:
         """
-        Extend template with provider-specific fields and processing.
+        Get all available templates.
+        
+        Returns:
+            List of all TemplateContract objects
+        """
+        pass
+    
+    @abstractmethod
+    async def get_templates_by_provider_api(self, provider_api: str) -> List[TemplateContract]:
+        """
+        Get templates filtered by provider API.
         
         Args:
-            template: Template domain entity to extend
+            provider_api: The provider API to filter by
             
         Returns:
-            Enhanced template with provider-specific fields
+            List of TemplateContract objects for the specified provider API
         """
         pass
     
     @abstractmethod
-    def resolve_template_references(self, template: Template) -> Template:
+    async def validate_template(self, template: TemplateContract) -> TemplateValidationResult:
         """
-        Resolve provider-specific references in template (e.g., AMI aliases, SSM parameters).
+        Validate a template configuration.
         
         Args:
-            template: Template with potential references to resolve
+            template: The template to validate
             
         Returns:
-            Template with resolved references
+            TemplateValidationResult containing validation results
         """
         pass
     
     @abstractmethod
-    def get_supported_fields(self) -> List[str]:
+    async def save_template(self, template: TemplateContract) -> None:
         """
-        Get list of fields supported by this provider adapter.
-        
-        Returns:
-            List of supported field names
-        """
-        pass
-    
-    @abstractmethod
-    def validate_field_values(self, template: Template) -> Dict[str, str]:
-        """
-        Validate provider-specific field values.
+        Save a template.
         
         Args:
-            template: Template to validate
-            
-        Returns:
-            Dictionary mapping field names to validation error messages
+            template: The template to save
         """
         pass
     
     @abstractmethod
-    def get_provider_api(self) -> str:
+    async def delete_template(self, template_id: str) -> None:
         """
-        Get the provider API identifier for this adapter.
+        Delete a template.
+        
+        Args:
+            template_id: The template identifier to delete
+        """
+        pass
+    
+    @abstractmethod
+    def get_supported_provider_apis(self) -> List[str]:
+        """
+        Get the list of provider APIs supported by this adapter.
         
         Returns:
-            Provider API identifier (e.g., 'EC2Fleet', 'SpotFleet')
+            List of supported provider API names
+        """
+        pass
+    
+    @abstractmethod
+    def get_adapter_info(self) -> Dict[str, Any]:
+        """
+        Get information about this adapter.
+        
+        Returns:
+            Dictionary containing adapter metadata
         """
         pass

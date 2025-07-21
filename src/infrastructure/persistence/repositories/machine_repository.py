@@ -18,56 +18,109 @@ class MachineSerializer:
         self.logger = get_logger(__name__)
     
     def to_dict(self, machine: Machine) -> Dict[str, Any]:
-        """Convert Machine aggregate to dictionary."""
+        """Convert Machine aggregate to dictionary with enhanced fields."""
         try:
             return {
-                'machine_id': str(machine.machine_id.value),
-                'instance_id': str(machine.instance_id.value) if machine.instance_id else None,
+                # Core machine identification
+                'instance_id': str(machine.instance_id.value),
                 'template_id': machine.template_id,
                 'request_id': machine.request_id,
+                'provider_type': machine.provider_type,
+                
+                # Machine configuration
+                'instance_type': str(machine.instance_type.value),
+                'image_id': machine.image_id,
+                
+                # Network configuration
+                'private_ip': machine.private_ip,
+                'public_ip': machine.public_ip,
+                'subnet_id': machine.subnet_id,
+                'security_group_ids': machine.security_group_ids,
+                
+                # Machine state
                 'status': machine.status.value,
-                'instance_type': machine.instance_type.value if machine.instance_type else None,
-                'availability_zone': machine.availability_zone,
-                'private_ip': str(machine.private_ip.value) if machine.private_ip else None,
-                'public_ip': str(machine.public_ip.value) if machine.public_ip else None,
+                'status_reason': machine.status_reason,
+                
+                # Lifecycle timestamps
                 'launch_time': machine.launch_time.isoformat() if machine.launch_time else None,
                 'termination_time': machine.termination_time.isoformat() if machine.termination_time else None,
-                'tags': dict(machine.tags.value) if machine.tags else {},
+                
+                # Tags and metadata
+                'tags': machine.tags.to_dict() if machine.tags else {},
                 'metadata': machine.metadata or {},
-                'created_at': machine.created_at.isoformat(),
-                'updated_at': machine.updated_at.isoformat()
+                
+                # Provider-specific data
+                'provider_data': machine.provider_data or {},
+                
+                # Versioning
+                'version': machine.version,
+                
+                # Base entity fields
+                'created_at': machine.created_at.isoformat() if machine.created_at else None,
+                'updated_at': machine.updated_at.isoformat() if machine.updated_at else None,
+                
+                # Schema version for migration support
+                'schema_version': '2.0.0'
             }
         except Exception as e:
-            self.logger.error(f"Failed to serialize machine {machine.machine_id}: {e}")
+            self.logger.error(f"Failed to serialize machine {machine.instance_id}: {e}")
             raise
     
     def from_dict(self, data: Dict[str, Any]) -> Machine:
-        """Convert dictionary to Machine aggregate."""
+        """Convert dictionary to Machine aggregate with enhanced field support."""
         try:
+            from src.domain.base.value_objects import InstanceType, Tags
+            from src.domain.machine.machine_status import MachineStatus
+            
             # Parse datetime fields
             launch_time = datetime.fromisoformat(data['launch_time']) if data.get('launch_time') else None
             termination_time = datetime.fromisoformat(data['termination_time']) if data.get('termination_time') else None
-            created_at = datetime.fromisoformat(data['created_at'])
-            updated_at = datetime.fromisoformat(data['updated_at'])
+            created_at = datetime.fromisoformat(data['created_at']) if data.get('created_at') else None
+            updated_at = datetime.fromisoformat(data['updated_at']) if data.get('updated_at') else None
             
-            # Create machine using factory method
-            machine = Machine.create_from_data(
-                machine_id=MachineId(data['machine_id']),
-                instance_id=InstanceId(data['instance_id']) if data.get('instance_id') else None,
-                template_id=data['template_id'],
-                request_id=data['request_id'],
-                status=MachineStatus(data['status']),
-                instance_type=data.get('instance_type'),
-                availability_zone=data.get('availability_zone'),
-                private_ip=data.get('private_ip'),
-                public_ip=data.get('public_ip'),
-                launch_time=launch_time,
-                termination_time=termination_time,
-                tags=data.get('tags', {}),
-                metadata=data.get('metadata', {}),
-                created_at=created_at,
-                updated_at=updated_at
-            )
+            # Build machine data with enhanced fields
+            machine_data = {
+                # Core machine identification
+                'instance_id': InstanceId(value=data['instance_id']),
+                'template_id': data['template_id'],
+                'request_id': data.get('request_id'),
+                'provider_type': data.get('provider_type', 'aws'),
+                
+                # Machine configuration
+                'instance_type': InstanceType(value=data['instance_type']),
+                'image_id': data['image_id'],
+                
+                # Network configuration
+                'private_ip': data.get('private_ip'),
+                'public_ip': data.get('public_ip'),
+                'subnet_id': data.get('subnet_id'),
+                'security_group_ids': data.get('security_group_ids', []),
+                
+                # Machine state
+                'status': MachineStatus(data.get('status', MachineStatus.PENDING.value)),
+                'status_reason': data.get('status_reason'),
+                
+                # Lifecycle timestamps
+                'launch_time': launch_time,
+                'termination_time': termination_time,
+                
+                # Tags and metadata
+                'tags': Tags(tags=data.get('tags', {})),
+                'metadata': data.get('metadata', {}),
+                
+                # Provider-specific data
+                'provider_data': data.get('provider_data', {}),
+                
+                # Versioning
+                'version': data.get('version', 0),
+                
+                # Base entity fields
+                'created_at': created_at,
+                'updated_at': updated_at
+            }
+            
+            # Create machine using model_validate to handle all fields properly
+            machine = Machine.model_validate(machine_data)
             
             return machine
             
@@ -89,19 +142,19 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
     def save(self, machine: Machine) -> List[Any]:
         """Save machine using storage strategy and return extracted events."""
         try:
-            # Save the machine
+            # Save the machine using instance_id as the key
             machine_data = self.serializer.to_dict(machine)
-            self.storage_strategy.save(str(machine.machine_id.value), machine_data)
+            self.storage_strategy.save(str(machine.instance_id.value), machine_data)
             
             # Extract events from the aggregate
             events = machine.get_domain_events()
             machine.clear_domain_events()
             
-            self.logger.debug(f"Saved machine {machine.machine_id} and extracted {len(events)} events")
+            self.logger.debug(f"Saved machine {machine.instance_id} and extracted {len(events)} events")
             return events
             
         except Exception as e:
-            self.logger.error(f"Failed to save machine {machine.machine_id}: {e}")
+            self.logger.error(f"Failed to save machine {machine.instance_id}: {e}")
             raise
     
     @handle_infrastructure_exceptions(context="machine_repository_get_by_id")
@@ -162,7 +215,11 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
         try:
             criteria = {"request_id": request_id}
             data_list = self.storage_strategy.find_by_criteria(criteria)
-            return [self.serializer.from_dict(data) for data in data_list]
+            
+            # Filter to only machine records (must have instance_id field)
+            machine_data_list = [data for data in data_list if 'instance_id' in data]
+            
+            return [self.serializer.from_dict(data) for data in machine_data_list]
         except Exception as e:
             self.logger.error(f"Failed to find machines by request_id {request_id}: {e}")
             raise

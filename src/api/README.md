@@ -91,7 +91,7 @@ handler = GetAvailableTemplatesCLIHandler(application_service)
 result = handler.handle(cli_command)
 ```
 
-## ⚠️ IMPORTANT NOTES
+## IMPORTANT NOTES
 
 1. **Not Currently Used:** These handlers are not called by any active code paths
 2. **Future Implementation:** Designed for upcoming REST API feature

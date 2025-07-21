@@ -1,11 +1,21 @@
 """Request models for API handlers."""
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field, ConfigDict
-from src.application.dto.base import to_camel
+
+
+def to_camel(snake_str: str) -> str:
+    """Convert snake_case to camelCase for API boundary."""
+    components = snake_str.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
 
 
 class BaseRequestModel(BaseModel):
-    """Base class for all request models with automatic camelCase conversion."""
+    """
+    Base class for API request models with camelCase support.
+    
+    These models handle external API requests that use camelCase format.
+    This is appropriate at the API boundary layer.
+    """
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,  # Allow populating by field name (snake_case)

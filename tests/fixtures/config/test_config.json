@@ -1,20 +1,27 @@
 {
   "version": "2.0.0",
   "provider": {
-    "active_provider": "test-aws",
+    "active_provider": "aws-test",
     "selection_policy": "FIRST_AVAILABLE",
     "providers": [
       {
-        "name": "test-aws",
+        "name": "aws-test",
         "type": "aws",
         "enabled": true,
         "priority": 1,
         "config": {
           "region": "us-east-1",
-          "profile": "default"
+          "profile": "default",
+          "access_key_id": "testing",
+          "secret_access_key": "testing"
         }
       }
     ]
+  },
+  "scheduler": {
+    "type": "hostfactory",
+    "config_root": "config",
+    "templates_file_name": "awsprov_templates.json"
   },
   "logging": {
     "level": "DEBUG",
@@ -35,6 +42,7 @@
     "default_image_id": "ami-12345678",
     "default_instance_type": "t2.micro",
     "subnet_ids": ["subnet-12345678"],
-    "security_group_ids": ["sg-12345678"]
+    "security_group_ids": ["sg-12345678"],
+    "templates_file_path": "config/awsprov_templates.json"
   }
 }

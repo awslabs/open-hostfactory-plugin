@@ -1,0 +1,292 @@
+{
+  "machines": {
+    "basic_machine": {
+      "machine_id": "i-1234567890abcdef0",
+      "name": "test-machine-001",
+      "request_id": "req-123456",
+      "provider_name": "aws-primary",
+      "provider_type": "aws",
+      "provider_api": "RunInstances",
+      "resource_id": "req-123456",
+      "result": "succeed",
+      "status": "running",
+      "private_ip_address": "10.0.1.10",
+      "public_ip_address": "54.123.45.67",
+      "launch_time": 1642694400,
+      "message": "",
+      "instance_type": "t2.micro",
+      "price_type": "ondemand",
+      "instance_tags": "Environment=test;Project=hostfactory",
+      "cloud_host_id": "i-1234567890abcdef0"
+    },
+    "spot_fleet_machine": {
+      "machine_id": "i-0987654321fedcba0",
+      "name": "spot-machine-001",
+      "request_id": "req-spot-789",
+      "provider_name": "aws-primary",
+      "provider_type": "aws",
+      "provider_api": "SpotFleet",
+      "resource_id": "sfr-12345678",
+      "result": "succeed",
+      "status": "running",
+      "private_ip_address": "10.0.2.20",
+      "public_ip_address": null,
+      "launch_time": 1642698000,
+      "message": "",
+      "instance_type": "t2.small",
+      "price_type": "spot",
+      "instance_tags": "Environment=production;Project=spot-test",
+      "cloud_host_id": "i-0987654321fedcba0"
+    },
+    "ec2_fleet_machine": {
+      "machine_id": "i-abcdef1234567890",
+      "name": "fleet-machine-001",
+      "request_id": "req-fleet-456",
+      "provider_name": "aws-secondary",
+      "provider_type": "aws",
+      "provider_api": "EC2Fleet",
+      "resource_id": "fleet-87654321",
+      "result": "succeed",
+      "status": "running",
+      "private_ip_address": "10.0.3.30",
+      "public_ip_address": "34.56.78.90",
+      "launch_time": 1642701600,
+      "message": "",
+      "instance_type": "t3.medium",
+      "price_type": "ondemand",
+      "instance_tags": "Environment=staging;Team=platform",
+      "cloud_host_id": "i-abcdef1234567890"
+    },
+    "asg_machine": {
+      "machine_id": "i-fedcba0987654321",
+      "name": "asg-machine-001",
+      "request_id": "req-asg-321",
+      "provider_name": "aws-primary",
+      "provider_type": "aws",
+      "provider_api": "AutoScalingGroup",
+      "resource_id": "asg-web-tier",
+      "result": "succeed",
+      "status": "running",
+      "private_ip_address": "10.0.4.40",
+      "public_ip_address": null,
+      "launch_time": 1642705200,
+      "message": "",
+      "instance_type": "t2.small",
+      "price_type": "ondemand",
+      "instance_tags": "Environment=production;Service=web-tier",
+      "cloud_host_id": "i-fedcba0987654321"
+    },
+    "failed_machine": {
+      "machine_id": "i-failed123456789",
+      "name": "failed-machine-001",
+      "request_id": "req-failed-999",
+      "provider_name": "aws-primary",
+      "provider_type": "aws",
+      "provider_api": "SpotFleet",
+      "resource_id": "sfr-failed123",
+      "result": "fail",
+      "status": "terminated",
+      "private_ip_address": "10.0.5.50",
+      "public_ip_address": null,
+      "launch_time": 1642708800,
+      "message": "Instance terminated due to Spot interruption",
+      "instance_type": "t2.micro",
+      "price_type": "spot",
+      "instance_tags": "Environment=test;Status=failed",
+      "cloud_host_id": "i-failed123456789"
+    },
+    "executing_machine": {
+      "machine_id": "i-executing123456",
+      "name": "executing-machine-001",
+      "request_id": "req-executing-777",
+      "provider_name": "aws-primary",
+      "provider_type": "aws",
+      "provider_api": "EC2Fleet",
+      "resource_id": "fleet-executing",
+      "result": "executing",
+      "status": "pending",
+      "private_ip_address": "10.0.6.60",
+      "public_ip_address": null,
+      "launch_time": 1642712400,
+      "message": "Instance is starting up",
+      "instance_type": "t3.small",
+      "price_type": "ondemand",
+      "instance_tags": "Environment=test;Status=starting",
+      "cloud_host_id": "i-executing123456"
+    }
+  },
+  "machine_collections": {
+    "spot_fleet_collection": [
+      {
+        "machine_id": "i-spot001",
+        "name": "spot-fleet-001",
+        "request_id": "req-spot-collection",
+        "provider_name": "aws-primary",
+        "provider_type": "aws",
+        "provider_api": "SpotFleet",
+        "resource_id": "sfr-collection123",
+        "result": "succeed",
+        "status": "running",
+        "private_ip_address": "10.0.10.10",
+        "launch_time": 1642716000,
+        "instance_type": "t2.micro",
+        "price_type": "spot"
+      },
+      {
+        "machine_id": "i-spot002",
+        "name": "spot-fleet-002",
+        "request_id": "req-spot-collection",
+        "provider_name": "aws-primary",
+        "provider_type": "aws",
+        "provider_api": "SpotFleet",
+        "resource_id": "sfr-collection123",
+        "result": "succeed",
+        "status": "running",
+        "private_ip_address": "10.0.10.11",
+        "launch_time": 1642716060,
+        "instance_type": "t2.small",
+        "price_type": "spot"
+      },
+      {
+        "machine_id": "i-spot003",
+        "name": "spot-fleet-003",
+        "request_id": "req-spot-collection",
+        "provider_name": "aws-primary",
+        "provider_type": "aws",
+        "provider_api": "SpotFleet",
+        "resource_id": "sfr-collection123",
+        "result": "succeed",
+        "status": "running",
+        "private_ip_address": "10.0.10.12",
+        "launch_time": 1642716120,
+        "instance_type": "t3.micro",
+        "price_type": "spot"
+      }
+    ],
+    "mixed_provider_collection": [
+      {
+        "machine_id": "i-mixed001",
+        "name": "mixed-001",
+        "request_id": "req-mixed-test",
+        "provider_name": "aws-primary",
+        "provider_type": "aws",
+        "provider_api": "SpotFleet",
+        "resource_id": "sfr-mixed123",
+        "result": "succeed",
+        "status": "running",
+        "private_ip_address": "10.0.20.10",
+        "launch_time": 1642719600,
+        "instance_type": "t2.micro",
+        "price_type": "spot"
+      },
+      {
+        "machine_id": "i-mixed002",
+        "name": "mixed-002",
+        "request_id": "req-mixed-test",
+        "provider_name": "aws-secondary",
+        "provider_type": "aws",
+        "provider_api": "EC2Fleet",
+        "resource_id": "fleet-mixed456",
+        "result": "succeed",
+        "status": "running",
+        "private_ip_address": "10.0.20.11",
+        "launch_time": 1642719660,
+        "instance_type": "t3.small",
+        "price_type": "ondemand"
+      }
+    ]
+  },
+  "hf_output_examples": {
+    "single_machine_response": {
+      "requestId": "req-123456",
+      "status": "succeed",
+      "message": "Request completed successfully",
+      "machines": [
+        {
+          "machineId": "i-1234567890abcdef0",
+          "name": "test-machine-001",
+          "result": "succeed",
+          "status": "running",
+          "privateIpAddress": "10.0.1.10",
+          "publicIpAddress": "54.123.45.67",
+          "launchtime": 1642694400,
+          "message": "",
+          "priceType": "ondemand",
+          "instanceType": "t2.micro",
+          "instanceTags": "Environment=test;Project=hostfactory",
+          "cloudHostId": "i-1234567890abcdef0"
+        }
+      ]
+    },
+    "multi_machine_response": {
+      "requestId": "req-spot-collection",
+      "status": "succeed",
+      "message": "Spot Fleet request completed successfully",
+      "machines": [
+        {
+          "machineId": "i-spot001",
+          "name": "spot-fleet-001",
+          "result": "succeed",
+          "status": "running",
+          "privateIpAddress": "10.0.10.10",
+          "publicIpAddress": "",
+          "launchtime": 1642716000,
+          "message": "",
+          "priceType": "spot",
+          "instanceType": "t2.micro",
+          "instanceTags": "",
+          "cloudHostId": "i-spot001"
+        },
+        {
+          "machineId": "i-spot002",
+          "name": "spot-fleet-002",
+          "result": "succeed",
+          "status": "running",
+          "privateIpAddress": "10.0.10.11",
+          "publicIpAddress": "",
+          "launchtime": 1642716060,
+          "message": "",
+          "priceType": "spot",
+          "instanceType": "t2.small",
+          "instanceTags": "",
+          "cloudHostId": "i-spot002"
+        },
+        {
+          "machineId": "i-spot003",
+          "name": "spot-fleet-003",
+          "result": "succeed",
+          "status": "running",
+          "privateIpAddress": "10.0.10.12",
+          "publicIpAddress": "",
+          "launchtime": 1642716120,
+          "message": "",
+          "priceType": "spot",
+          "instanceType": "t3.micro",
+          "instanceTags": "",
+          "cloudHostId": "i-spot003"
+        }
+      ]
+    },
+    "failed_request_response": {
+      "requestId": "req-failed-999",
+      "status": "fail",
+      "message": "Request failed due to insufficient capacity",
+      "machines": [
+        {
+          "machineId": "i-failed123456789",
+          "name": "failed-machine-001",
+          "result": "fail",
+          "status": "terminated",
+          "privateIpAddress": "10.0.5.50",
+          "publicIpAddress": "",
+          "launchtime": 1642708800,
+          "message": "Instance terminated due to Spot interruption",
+          "priceType": "spot",
+          "instanceType": "t2.micro",
+          "instanceTags": "Environment=test;Status=failed",
+          "cloudHostId": "i-failed123456789"
+        }
+      ]
+    }
+  }
+}

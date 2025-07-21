@@ -8,7 +8,7 @@ rather than the factory importing them directly.
 Clean Architecture Compliance:
 - Infrastructure layer provides factory mechanism
 - Interface layer handlers register themselves
-- No Infrastructure → Interface dependencies
+- No Infrastructure -> Interface dependencies
 """
 from typing import Dict, Type, Optional, TYPE_CHECKING
 import importlib
@@ -32,7 +32,7 @@ class APIHandlerFactory:
     
     This factory uses a registration pattern where handlers register themselves,
     eliminating the need for the factory to import handler classes directly.
-    This maintains Clean Architecture by avoiding Infrastructure → Interface dependencies.
+    This maintains Clean Architecture by avoiding Infrastructure -> Interface dependencies.
     """
     
     _handlers: Dict[str, Type] = {}
@@ -196,7 +196,7 @@ def get_api_handler_factory() -> APIHandlerFactory:
     return api_handler_factory
 
 
-# This eliminates the architectural violation of Infrastructure → Interface
+# This eliminates the architectural violation of Infrastructure -> Interface
 # Example handler registration (done in handler modules):
 #
 # from src.infrastructure.utilities.factories.api_handler_factory import get_api_handler_factory

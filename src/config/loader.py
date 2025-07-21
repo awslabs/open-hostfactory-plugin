@@ -92,7 +92,7 @@ class ConfigurationLoader:
         'HF_PROVIDER_NAME': 'provider_name',
         'HF_TEMPLATE_AMI_RESOLUTION_ENABLED': 'template.ami_resolution.enabled',
         'HF_TEMPLATE_AMI_RESOLUTION_FALLBACK_ON_FAILURE': 'template.ami_resolution.fallback_on_failure',
-        'HF_TEMPLATE_AMI_RESOLUTION_CACHE_ENABLED': 'template.ami_resolution.cache_enabled'
+        'HF_TEMPLATE_AMI_RESOLUTION_CACHE_FILE': 'template.ami_resolution.persistent_cache_file'
     }
     
     # Default configuration file name
@@ -123,12 +123,6 @@ class ConfigurationLoader:
         # Start with default configuration (lowest precedence)
         config = cls._load_default_config()
         
-        # Load legacy configuration for backward compatibility
-        legacy_config = cls._load_legacy_config()
-        if legacy_config:
-            cls._merge_config(config, legacy_config)
-            get_config_logger().info("Loaded legacy configuration")
-        
         # Load main config.json with proper precedence (HF_PROVIDER_CONFDIR first, then config/)
         main_config = cls._load_config_file('conf', 'config.json', required=False)
         if main_config:
@@ -151,6 +145,10 @@ class ConfigurationLoader:
         
         # Override with environment variables (highest precedence)
         cls._load_from_env(config)
+        
+        # Expand environment variables in the final configuration
+        from src.config.utils.env_expansion import expand_config_env_vars
+        config = expand_config_env_vars(config)
         
         return config
     
@@ -206,189 +204,6 @@ class ConfigurationLoader:
             raise ConfigurationError("App", f"Missing required configuration: {str(e)}")
         except Exception as e:
             raise ConfigurationError("App", f"Failed to create typed configuration: {str(e)}")
-    
-    @classmethod
-    def _load_legacy_config(cls) -> Optional[Dict[str, Any]]:
-        """
-        Load legacy configuration from HF_PROVIDER_CONFDIR.
-        
-        Returns:
-            Converted legacy configuration or None if not available
-        """
-        get_config_logger().debug("Loading legacy configuration")
-        
-        # Use file loading method for legacy config
-        legacy_config = cls._load_config_file('legacy', 'awsprov_config.json', required=False)
-        
-        if not legacy_config:
-            get_config_logger().debug("No legacy configuration found")
-            return None
-
-        # Load templates if available
-        templates_config = cls._load_config_file('legacy', 'awsprov_templates.json', required=False)
-        if not templates_config:
-            templates_config = {}
-
-        try:
-            # Convert legacy config to new format
-            converted_config = cls._convert_legacy_config(legacy_config, templates_config)
-            get_config_logger().info("Successfully loaded and converted legacy configuration")
-            return converted_config
-        except Exception as e:
-            get_config_logger().warning(f"Failed to convert legacy configuration: {str(e)}")
-            return None
-    
-    @classmethod
-    def _convert_legacy_config(
-        cls, legacy_config: Dict[str, Any], templates_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """
-        Convert legacy configuration format to new format.
-        
-        Args:
-            legacy_config: Legacy configuration dictionary
-            templates_config: Legacy templates configuration dictionary
-            
-        Returns:
-            Configuration in new format
-        """
-        # Get environment variables
-        hf_provider_logdir = os.environ.get('HF_PROVIDER_LOGDIR', 'logs')
-        hf_provider_workdir = os.environ.get('HF_PROVIDER_WORKDIR', 'workdir')
-        
-        # Create new configuration structure
-        aws_config = {
-            "region": legacy_config.get('AWS_REGION', 'us-east-1'),
-            "profile": legacy_config.get('AWS_PROFILE', 'default'),
-            # Symphony configuration fields
-            "credential_file": legacy_config.get('AWS_CREDENTIAL_FILE'),
-            "key_file": legacy_config.get('AWS_KEY_FILE'),
-            "endpoint_url": legacy_config.get('AWS_ENDPOINT_URL'),
-            "proxy_host": legacy_config.get('AWS_PROXY_HOST'),
-            "proxy_port": cls._convert_value(legacy_config.get('AWS_PROXY_PORT', '0')),
-            "connection_timeout_ms": cls._convert_value(legacy_config.get('AWS_CONNECTION_TIMEOUT_MS', '10000')),
-            "request_retry_attempts": cls._convert_value(legacy_config.get('AWS_REQUEST_RETRY_ATTEMPTS', '0')),
-            "instance_pending_timeout_sec": cls._convert_value(legacy_config.get('AWS_INSTANCE_PENDING_TIMEOUT_SEC', '180')),
-            "describe_request_retry_attempts": cls._convert_value(legacy_config.get('AWS_DESCRIBE_REQUEST_RETRY_ATTEMPTS', '0')),
-            "describe_request_interval": cls._convert_value(legacy_config.get('AWS_DESCRIBE_REQUEST_INTERVAL', '0'))
-        }
-        
-        # Create new configuration structure with provider namespace
-        config = {
-            "version": "2.0.0",
-            "provider": {
-                "type": "aws",
-                "aws": aws_config
-            },
-            "logging": {
-                "level": legacy_config.get('LOGGING_CONFIG', {}).get('level', 'INFO'),
-                "file_path": os.path.join(hf_provider_logdir, 'app.log'),
-                "console_enabled": legacy_config.get('LOGGING_CONFIG', {}).get('destination') != 'file',
-                "accept_propagated_setting": cls._convert_value(legacy_config.get('ACCEPT_PROPAGATED_LOG_SETTING', 'false'))
-            },
-            "template": {
-                "default_image_id": "ami-12345678",
-                "default_instance_type": "t2.micro",
-                "subnet_ids": ["subnet-12345678"],
-                "security_group_ids": ["sg-12345678"]
-            },
-            "events": {
-                "store_type": "memory",
-                "publisher_type": "composite",
-                "enable_logging": True
-            },
-            "environment": legacy_config.get('ENVIRONMENT', 'development'),
-            "debug": legacy_config.get('DEBUG', False),
-            "request_timeout": legacy_config.get('REQUEST_TIMEOUT', 300),
-            "max_machines_per_request": legacy_config.get('MAX_MACHINES_PER_REQUEST', 100),
-            "storage": {
-                "strategy": "json",
-                "json_strategy": {
-                    "storage_type": "single_file",
-                    "base_path": hf_provider_workdir,
-                    "filenames": {
-                        "single_file": "request_database.json"
-                    }
-                }
-            }
-        }
-        
-        # Extract template information if available
-        if templates_config and 'templates' in templates_config:
-            # Get the first template for default values
-            if templates_config['templates']:
-                first_template = templates_config['templates'][0]
-                
-                # Basic template fields
-                config['template']['default_image_id'] = first_template.get('imageId', config['template']['default_image_id'])
-                config['template']['default_instance_type'] = first_template.get('vmType', config['template']['default_instance_type'])
-                
-                # Handle subnet IDs (can be string or array)
-                if 'subnetId' in first_template:
-                    subnet_id = first_template['subnetId']
-                    if isinstance(subnet_id, list):
-                        config['template']['subnet_ids'] = subnet_id
-                    else:
-                        config['template']['subnet_ids'] = [subnet_id]
-                
-                # Security group IDs
-                if 'securityGroupIds' in first_template:
-                    config['template']['security_group_ids'] = first_template['securityGroupIds']
-                
-                # Symphony template fields
-                config['template']['default_price_type'] = first_template.get('priceType', 'ondemand')
-                
-                # VM types handling
-                if 'vmType' in first_template:
-                    config['template']['default_vm_type'] = first_template['vmType']
-                
-                if 'vmTypes' in first_template:
-                    config['template']['default_vm_types'] = first_template['vmTypes']
-                
-                if 'vmTypesOnDemand' in first_template:
-                    config['template']['default_vm_types_on_demand'] = first_template['vmTypesOnDemand']
-                
-                if 'vmTypesPriority' in first_template:
-                    config['template']['default_vm_types_priority'] = first_template['vmTypesPriority']
-                
-                # Fleet role
-                if 'fleetRole' in first_template:
-                    config['template']['default_fleet_role'] = first_template['fleetRole']
-                
-                # Spot price
-                if 'maxSpotPrice' in first_template:
-                    config['template']['default_max_spot_price'] = cls._convert_value(first_template['maxSpotPrice'])
-                
-                # Spot fleet request expiry
-                if 'spotFleetRequestExpiry' in first_template:
-                    config['template']['default_spot_fleet_request_expiry'] = cls._convert_value(first_template['spotFleetRequestExpiry'])
-                
-                # Allocation strategies
-                if 'allocationStrategy' in first_template:
-                    config['template']['default_allocation_strategy'] = first_template['allocationStrategy']
-                
-                if 'allocationStrategyOnDemand' in first_template:
-                    config['template']['default_allocation_strategy_on_demand'] = first_template['allocationStrategyOnDemand']
-                
-                # Percent on demand
-                if 'percentOnDemand' in first_template:
-                    config['template']['default_percent_on_demand'] = cls._convert_value(first_template['percentOnDemand'])
-                
-                # Pools count
-                if 'poolsCount' in first_template:
-                    config['template']['default_pools_count'] = cls._convert_value(first_template['poolsCount'])
-                
-                # Volume settings
-                if 'volumeType' in first_template:
-                    config['template']['default_volume_type'] = first_template['volumeType']
-                
-                if 'iops' in first_template:
-                    config['template']['default_iops'] = cls._convert_value(first_template['iops'])
-                
-                if 'rootDeviceVolumeSize' in first_template:
-                    config['template']['default_root_device_volume_size'] = cls._convert_value(first_template['rootDeviceVolumeSize'])
-        
-        return config
     
     @classmethod
     def _load_from_file(cls, config_path: str) -> Optional[Dict[str, Any]]:
@@ -644,9 +459,9 @@ class ConfigurationLoader:
         # Process AMI resolution environment variables
         ami_resolution_enabled = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_ENABLED')
         ami_resolution_fallback = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_FALLBACK_ON_FAILURE')
-        ami_resolution_cache = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_CACHE_ENABLED')
+        ami_resolution_cache_file = os.environ.get('HF_TEMPLATE_AMI_RESOLUTION_CACHE_FILE')
         
-        if any([ami_resolution_enabled, ami_resolution_fallback, ami_resolution_cache]):
+        if any([ami_resolution_enabled, ami_resolution_fallback, ami_resolution_cache_file]):
             template_config = config.setdefault('template', {})
             ami_resolution_config = template_config.setdefault('ami_resolution', {})
             
@@ -658,9 +473,9 @@ class ConfigurationLoader:
                 ami_resolution_config['fallback_on_failure'] = cls._convert_value(ami_resolution_fallback)
                 get_config_logger().debug(f"Set ami_resolution.fallback_on_failure to {ami_resolution_config['fallback_on_failure']}")
             
-            if ami_resolution_cache is not None:
-                ami_resolution_config['cache_enabled'] = cls._convert_value(ami_resolution_cache)
-                get_config_logger().debug(f"Set ami_resolution.cache_enabled to {ami_resolution_config['cache_enabled']}")
+            if ami_resolution_cache_file is not None:
+                ami_resolution_config['persistent_cache_file'] = ami_resolution_cache_file
+                get_config_logger().debug(f"Set ami_resolution.persistent_cache_file to {ami_resolution_config['persistent_cache_file']}")
     
     @classmethod
     def _convert_value(cls, value: str) -> Any:

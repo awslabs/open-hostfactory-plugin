@@ -15,6 +15,7 @@ from functools import wraps
 from src.domain.base.events import DomainEvent
 from src.domain.base.ports import LoggingPort, EventPublisherPort, ErrorHandlingPort
 from src.application.interfaces.command_handler import CommandHandler
+from src.application.interfaces.command_query import QueryHandler
 from src.application.dto.base import BaseCommand, BaseResponse
 from src.infrastructure.error.exception_handler import InfrastructureErrorResponse
 
@@ -189,15 +190,12 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
         Handle command with monitoring and event publishing.
         
         Template method that provides consistent command handling
-        across all command handlers using proper error management.
+        across all command handlers.
         """
         operation_id = f"{self.__class__.__name__}.handle"
         
-        # Use base handler error management instead of try/catch
-        return await self.handle_with_error_management(
-            lambda: self._execute_command_with_monitoring(command, operation_id),
-            context=f"command_handling_{operation_id}"
-        )
+        # Execute command directly without error wrapper that causes issues
+        return await self._execute_command_with_monitoring(command, operation_id)
     
     async def _execute_command_with_monitoring(self, command: TCommand, operation_id: str) -> TResponse:
         """Execute command with monitoring - separated for error handling."""
@@ -248,7 +246,7 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
                 await self.event_publisher.publish(event)
 
 
-class BaseQueryHandler(BaseHandler, Generic[TQuery, TResult]):
+class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
     """
     Base for all CQRS query handlers.
     
@@ -260,12 +258,12 @@ class BaseQueryHandler(BaseHandler, Generic[TQuery, TResult]):
         super().__init__(logger, error_handler)
         self._cache: Dict[str, Any] = {}
     
-    def handle(self, query: TQuery) -> TResult:
+    async def handle(self, query: TQuery) -> TResult:
         """
         Handle query with monitoring and caching.
         
         Template method that provides consistent query handling
-        across all query handlers.
+        across all query handlers. Now async for consistency with commands.
         """
         # Apply monitoring
         operation_id = f"{self.__class__.__name__}.handle"
@@ -282,8 +280,8 @@ class BaseQueryHandler(BaseHandler, Generic[TQuery, TResult]):
                     self.logger.debug(f"Cache hit for query: {cache_key}")
                 return self._cache[cache_key]
             
-            # Execute query
-            result = self.execute_query(query)
+            # Execute query (now async)
+            result = await self.execute_query(query)
             
             # Cache result if enabled
             if cache_key and self.is_cacheable(query, result):
@@ -318,11 +316,12 @@ class BaseQueryHandler(BaseHandler, Generic[TQuery, TResult]):
         return False
     
     @abstractmethod
-    def execute_query(self, query: TQuery) -> TResult:
+    async def execute_query(self, query: TQuery) -> TResult:
         """
         Execute the specific query logic.
         
         Must be implemented by concrete query handlers.
+        Now async for consistency with command handlers.
         """
         pass
 

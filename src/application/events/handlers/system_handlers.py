@@ -1,99 +1,98 @@
 """
-System Event Handlers - DRY-compliant handlers using new architecture.
+System Event Handlers - CQRS-aligned handlers using BaseEventHandler pattern.
 
-These handlers replace the duplicated code in consolidated_event_handlers.py
-with a clean, maintainable architecture following DDD/SOLID/DRY principles.
+These handlers follow the same architectural patterns as BaseCommandHandler and
+BaseQueryHandler, ensuring consistency across all handler types in the CQRS system.
 """
 from typing import Optional
 
-# Import the new base classes and decorator
-from src.application.events.base import LoggingEventHandler
+from src.application.base.event_handlers import BaseLoggingEventHandler
 from src.application.events.decorators import event_handler
-
-# Import types - using string imports to avoid circular dependencies
-try:
-    from src.domain.base.events import DomainEvent
-    from src.domain.base.ports import LoggingPort
-except ImportError:
-    # Fallback for testing or when dependencies aren't available
-    DomainEvent = object
-    LoggingPort = object
+from src.domain.base.events import DomainEvent
+from src.domain.base.ports import LoggingPort, ErrorHandlingPort, EventPublisherPort
 
 
 @event_handler("SystemStartedEvent")
-class SystemStartedHandler(LoggingEventHandler):
-    """Handle system startup events - DRY compliant."""
+class SystemStartedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle system startup events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format system started message."""
-        fields = self.extract_fields(event, {
-            'version': 'unknown',
-            'environment': 'unknown',
-            'startup_time': None,
-            'configuration_loaded': True
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize system started handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format system started log message."""
+        version = getattr(event, 'version', 'unknown')
+        startup_time = getattr(event, 'startup_time', 'unknown')
         
-        message = (
-            f"System started: {fields['version']} | "
-            f"Environment: {fields['environment']}"
+        return (
+            f"System started successfully | "
+            f"Version: {version} | "
+            f"Startup time: {startup_time}s"
         )
-        
-        if fields['startup_time']:
-            message += f" | Startup time: {self.format_duration(fields['startup_time'])}"
-        
-        if not fields['configuration_loaded']:
-            message += " | Warning: Configuration not fully loaded"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - info for system startup."""
+        return 'info'
 
 
 @event_handler("SystemShutdownEvent")
-class SystemShutdownHandler(LoggingEventHandler):
-    """Handle system shutdown events - DRY compliant."""
+class SystemShutdownHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle system shutdown events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format system shutdown message."""
-        fields = self.extract_fields(event, {
-            'shutdown_reason': 'Normal shutdown',
-            'graceful': True,
-            'uptime': None,
-            'pending_requests': 0
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize system shutdown handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format system shutdown log message."""
+        reason = getattr(event, 'shutdown_reason', 'unknown')
+        graceful = getattr(event, 'graceful_shutdown', True)
         
-        message = (
-            f"System shutdown: {fields['shutdown_reason']} | "
-            f"Graceful: {fields['graceful']}"
+        shutdown_type = "graceful" if graceful else "forced"
+        
+        return (
+            f"System shutdown initiated | "
+            f"Type: {shutdown_type} | "
+            f"Reason: {reason}"
         )
-        
-        if fields['uptime']:
-            message += f" | Uptime: {self.format_duration(fields['uptime'])}"
-        
-        if fields['pending_requests'] > 0:
-            message += f" | Pending requests: {fields['pending_requests']}"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - warning for forced shutdowns."""
+        graceful = getattr(event, 'graceful_shutdown', True)
+        return 'info' if graceful else 'warning'
 
 
 @event_handler("ConfigurationUpdatedEvent")
-class ConfigurationUpdatedHandler(LoggingEventHandler):
-    """Handle configuration update events - DRY compliant."""
+class ConfigurationUpdatedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle configuration update events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format configuration updated message."""
-        fields = self.extract_fields(event, {
-            'config_section': 'unknown',
-            'changes_count': 0,
-            'reload_required': False,
-            'updated_by': 'system'
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize configuration updated handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format configuration updated log message."""
+        config_section = getattr(event, 'config_section', 'unknown')
+        changed_keys = getattr(event, 'changed_keys', [])
         
-        message = (
-            f"Configuration updated: {fields['config_section']} | "
-            f"Changes: {fields['changes_count']} | "
-            f"By: {fields['updated_by']}"
+        keys_str = ', '.join(changed_keys) if changed_keys else 'unknown'
+        
+        return (
+            f"Configuration updated | "
+            f"Section: {config_section} | "
+            f"Changed keys: {keys_str}"
         )
-        
-        if fields['reload_required']:
-            message += " | Reload required"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - info for configuration updates."""
+        return 'info'

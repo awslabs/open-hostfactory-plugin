@@ -2,10 +2,6 @@
 import logging
 from src.domain.base.events import DomainEvent
 
-# =============================================================================
-# AWS CLIENT EVENT HANDLERS
-# =============================================================================
-
 def handle_aws_client_operation(event: DomainEvent) -> None:
     """Handle AWS client operation events."""
     from src.application.events.handlers.system_handlers import system_handler

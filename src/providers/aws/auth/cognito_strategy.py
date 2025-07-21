@@ -261,7 +261,8 @@ class CognitoAuthStrategy(AuthPort):
             # This is a simplified implementation
             import requests
             
-            response = requests.get(self.jwks_url)
+            # Add timeout to prevent hanging connections (security best practice)
+            response = requests.get(self.jwks_url, timeout=30)
             jwks = response.json()
             
             for key in jwks.get('keys', []):

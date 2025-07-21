@@ -17,11 +17,21 @@ class EventHandlerRegistry:
         """
         Decorator to register event handlers.
         
+        CQRS event handlers use ONLY this decorator - Handler Discovery System 
+        automatically registers them in the DI container. Do NOT use @injectable 
+        with CQRS event handlers.
+        
         Usage:
-            @event_handler("MachineCreatedEvent")
-            class MachineCreatedHandler(LoggingEventHandler):
+            @event_handler("MachineCreatedEvent")  # ONLY decorator needed
+            class MachineCreatedHandler(BaseLoggingEventHandler[DomainEvent]):
+                # Handler Discovery System automatically registers this in DI
                 def format_message(self, event: DomainEvent) -> str:
                     return f"Machine created: {event.aggregate_id}"
+        
+        For non-CQRS services, use @injectable:
+            @injectable  # For regular services, NOT handlers
+            class MyService:
+                ...
         
         Args:
             event_type: The event type this handler processes

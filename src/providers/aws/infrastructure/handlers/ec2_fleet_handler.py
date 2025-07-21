@@ -30,8 +30,7 @@ from datetime import datetime
 from botocore.exceptions import ClientError
 
 from src.domain.request.aggregate import Request
-from src.domain.template.aggregate import Template
-from src.providers.aws.domain.template.value_objects import ProviderHandlerType, AWSFleetType
+from src.providers.aws.domain.template.value_objects import ProviderApi, AWSFleetType
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSValidationError, AWSEntityNotFoundError, AWSInfrastructureError
@@ -40,16 +39,22 @@ from src.infrastructure.resilience import CircuitBreakerOpenError
 from src.providers.aws.utilities.aws_operations import AWSOperations
 from src.domain.base.ports import LoggingPort
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
-from src.infrastructure.template.sync_configuration_store import SyncTemplateConfigurationStore
+from src.infrastructure.di.container import get_container
+from src.infrastructure.di.buses import QueryBus
+from src.application.dto.queries import GetTemplateQuery
 from src.domain.base.dependency_injection import injectable
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
+from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
+from src.providers.aws.domain.template.aggregate import AWSTemplate
+from src.infrastructure.utilities.common.serialization import serialize_enum
 
 @injectable
 class EC2FleetHandler(AWSHandler):
     """Handler for EC2 Fleet operations."""
     
     def __init__(self, aws_client, logger: LoggingPort, aws_ops: AWSOperations, 
-                 template_config_store: SyncTemplateConfigurationStore, request_adapter: RequestAdapterPort = None):
+                 launch_template_manager: AWSLaunchTemplateManager,
+                 request_adapter: RequestAdapterPort = None):
         """
         Initialize the EC2 Fleet handler.
         
@@ -57,59 +62,90 @@ class EC2FleetHandler(AWSHandler):
             aws_client: AWS client instance
             logger: Logger for logging messages
             aws_ops: AWS operations utility
-            template_config_store: Template configuration store for retrieving templates
+            launch_template_manager: Launch template manager for AWS-specific operations
             request_adapter: Optional request adapter for terminating instances
         """
         # Use enhanced base class initialization - eliminates duplication
-        super().__init__(aws_client, logger, aws_ops, template_config_store, request_adapter)
+        super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
 
     @handle_infrastructure_exceptions(context="ec2_fleet_creation")
-    def acquire_hosts(self, request: Request, template: Template) -> str:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
         """
         Create an EC2 Fleet to acquire hosts.
-        Returns the Fleet ID.
+        Returns structured result with resource IDs and instance data.
         """
-        return self.aws_ops.execute_with_standard_error_handling(
-            operation=lambda: self._create_fleet_internal(request, template),
-            operation_name="create EC2 fleet",
-            context="EC2Fleet"
-        )
+        try:
+            fleet_id = self.aws_ops.execute_with_standard_error_handling(
+                operation=lambda: self._create_fleet_internal(request, aws_template),
+                operation_name="create EC2 fleet",
+                context="EC2Fleet"
+            )
+            
+            # Get instance details based on fleet type
+            instances = []
+            if aws_template.fleet_type == 'instant':
+                # For instant fleets, instance IDs are in metadata
+                instance_ids = request.metadata.get('instance_ids', [])
+                if instance_ids:
+                    instance_details = self._get_instance_details(instance_ids)
+                    instances = self._format_instance_data(instance_details, fleet_id)
+            
+            return {
+                'success': True,
+                'resource_ids': [fleet_id],
+                'instances': instances,
+                'provider_data': {
+                    'resource_type': 'ec2_fleet', 
+                    'fleet_type': aws_template.fleet_type
+                }
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'resource_ids': [],
+                'instances': [],
+                'error_message': str(e)
+            }
 
-    def _create_fleet_internal(self, request: Request, template: Template) -> str:
+    def _create_fleet_internal(self, request: Request, aws_template: AWSTemplate) -> str:
         """Internal method for EC2 Fleet creation with pure business logic."""
         # Validate prerequisites
-        self._validate_prerequisites(template)
+        self._validate_prerequisites(aws_template)
         
         # Validate fleet type
-        if not template.fleet_type:
+        if not aws_template.fleet_type:
             raise AWSValidationError("Fleet type is required for EC2Fleet")
             
-        # Validate fleet type using configuration-driven logic
-        temp_fleet = AWSFleetType.REQUEST  # Temporary instance for validation
-        valid_types = temp_fleet.get_valid_types_for_handler(ProviderHandlerType.EC2_FLEET)
+        # Validate fleet type using existing validation system
+        from src.providers.aws.infrastructure.adapters.aws_validation_adapter import create_aws_validation_adapter
+        
+        validation_adapter = create_aws_validation_adapter(self._logger)
+        valid_types = validation_adapter.get_valid_fleet_types_for_api("EC2Fleet")
+        
         try:
-            fleet_type = AWSFleetType(template.fleet_type.lower())
+            fleet_type = AWSFleetType(aws_template.fleet_type.lower())
             if fleet_type.value not in valid_types:
                 raise ValueError  # Will be caught by the except block below
         except ValueError:
-            raise AWSValidationError(f"Invalid EC2 fleet type: {template.fleet_type}. "
+            raise AWSValidationError(f"Invalid EC2 fleet type: {aws_template.fleet_type}. "
                                f"Must be one of: {', '.join(valid_types)}")
 
-        # Create launch template directly without additional retry wrapper
-        launch_template = self.create_launch_template(template, request)
+        # Create launch template using the new manager
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
         
-        # Store launch template info in request
-        request.set_launch_template_info(
-            launch_template['LaunchTemplateId'],
-            launch_template['Version']
-        )
+        # Store launch template info in request (if request has this method)
+        if hasattr(request, 'set_launch_template_info'):
+            request.set_launch_template_info(
+                launch_template_result.template_id,
+                launch_template_result.version
+            )
 
         # Create fleet configuration
         fleet_config = self._create_fleet_config(
-            template=template,
+            template=aws_template,
             request=request,
-            launch_template_id=launch_template['LaunchTemplateId'],
-            launch_template_version=launch_template['Version']
+            launch_template_id=launch_template_result.template_id,
+            launch_template_version=launch_template_result.version
         )
 
         # Create the fleet with circuit breaker for critical operation
@@ -144,8 +180,19 @@ class EC2FleetHandler(AWSHandler):
 
         return fleet_id
 
+    def _format_instance_data(self, instance_details: List[Dict[str, Any]], resource_id: str) -> List[Dict[str, Any]]:
+        """Format AWS instance details to standard structure."""
+        return [{
+            'instance_id': inst['InstanceId'],
+            'resource_id': resource_id,
+            'status': inst['State'],
+            'private_ip': inst.get('PrivateIpAddress'),
+            'public_ip': inst.get('PublicIpAddress'),
+            'launch_time': inst.get('LaunchTime')
+        } for inst in instance_details]
+
     def _create_fleet_config(self,
-                           template: Template,
+                           template: AWSTemplate,
                            request: Request,
                            launch_template_id: str,
                            launch_template_version: str) -> Dict[str, Any]:
@@ -158,7 +205,7 @@ class EC2FleetHandler(AWSHandler):
                 }
             }],
             'TargetCapacitySpecification': {
-                'TotalTargetCapacity': request.machine_count
+                'TotalTargetCapacity': request.requested_count
             },
             'Type': template.fleet_type,
             'TagSpecifications': [{
@@ -170,23 +217,13 @@ class EC2FleetHandler(AWSHandler):
                     {'Key': 'CreatedBy', 'Value': 'HostFactory'},
                     {'Key': 'CreatedAt', 'Value': datetime.utcnow().isoformat()}
                 ]
-            }, {
-                'ResourceType': 'instance',
-                'Tags': [
-                    {'Key': 'Name', 'Value': f"hf-{request.request_id}"},
-                    {'Key': 'RequestId', 'Value': str(request.request_id)},
-                    {'Key': 'TemplateId', 'Value': str(template.template_id)},
-                    {'Key': 'CreatedBy', 'Value': 'HostFactory'},
-                    {'Key': 'CreatedAt', 'Value': datetime.utcnow().isoformat()}
-                ]
             }]
         }
 
         # Add template tags if any
         if template.tags:
-            instance_tags = [{'Key': k, 'Value': v} for k, v in template.tags.items()]
-            fleet_config['TagSpecifications'][0]['Tags'].extend(instance_tags)
-            fleet_config['TagSpecifications'][1]['Tags'].extend(instance_tags)
+            fleet_tags = [{'Key': k, 'Value': v} for k, v in template.tags.items()]
+            fleet_config['TagSpecifications'][0]['Tags'].extend(fleet_tags)
 
         # Add fleet type specific configurations
         if template.fleet_type == AWSFleetType.MAINTAIN.value:
@@ -214,8 +251,8 @@ class EC2FleetHandler(AWSHandler):
         elif price_type == "heterogeneous":
             # For heterogeneous fleets, we need to specify both on-demand and spot capacities
             percent_on_demand = template.percent_on_demand or 0
-            on_demand_count = int(request.machine_count * percent_on_demand / 100)
-            spot_count = request.machine_count - on_demand_count
+            on_demand_count = int(request.requested_count * percent_on_demand / 100)
+            spot_count = request.requested_count - on_demand_count
             
             fleet_config['TargetCapacitySpecification']['OnDemandTargetCapacity'] = on_demand_count
             fleet_config['TargetCapacitySpecification']['SpotTargetCapacity'] = spot_count
@@ -239,9 +276,9 @@ class EC2FleetHandler(AWSHandler):
                 fleet_config['SpotOptions']['MaxTotalPrice'] = str(template.max_spot_price)
 
         # Add overrides with weighted capacity if multiple instance types are specified
-        if template.vm_types:
+        if template.instance_types:
             overrides = []
-            for instance_type, weight in template.vm_types.items():
+            for instance_type, weight in template.instance_types.items():
                 override = {
                     'InstanceType': instance_type,
                     'WeightedCapacity': weight
@@ -250,9 +287,9 @@ class EC2FleetHandler(AWSHandler):
             fleet_config['LaunchTemplateConfigs'][0]['Overrides'] = overrides
             
             # Add on-demand instance types for heterogeneous fleets
-            if price_type == "heterogeneous" and template.vm_types_on_demand:
+            if price_type == "heterogeneous" and template.instance_types_ondemand:
                 on_demand_overrides = []
-                for instance_type, weight in template.vm_types_on_demand.items():
+                for instance_type, weight in template.instance_types_ondemand.items():
                     override = {
                         'InstanceType': instance_type,
                         'WeightedCapacity': weight
@@ -268,10 +305,10 @@ class EC2FleetHandler(AWSHandler):
                 fleet_config['LaunchTemplateConfigs'][0]['Overrides'] = []
             
             # If we have both instance types and subnets, create all combinations
-            if template.vm_types:
+            if template.instance_types:
                 overrides = []
                 for subnet_id in template.subnet_ids:
-                    for instance_type, weight in template.vm_types.items():
+                    for instance_type, weight in template.instance_types.items():
                         override = {
                             'SubnetId': subnet_id,
                             'InstanceType': instance_type,
@@ -280,8 +317,8 @@ class EC2FleetHandler(AWSHandler):
                         overrides.append(override)
                         
                     # Add on-demand instance types for heterogeneous fleets
-                    if price_type == "heterogeneous" and template.vm_types_on_demand:
-                        for instance_type, weight in template.vm_types_on_demand.items():
+                    if price_type == "heterogeneous" and template.instance_types_ondemand:
+                        for instance_type, weight in template.instance_types_ondemand.items():
                             override = {
                                 'SubnetId': subnet_id,
                                 'InstanceType': instance_type,
@@ -324,15 +361,16 @@ class EC2FleetHandler(AWSHandler):
             if not request.resource_id:
                 raise AWSInfrastructureError("No Fleet ID found in request")
 
-            # Get template to determine fleet type
-            # Get template from configuration store
-            template_dto = self._template_config_store.get_template_by_id(str(request.template_id))
-            if not template_dto:
-                raise AWSEntityNotFoundError(f"Template {request.template_id} not found")
+            # Get template using CQRS QueryBus
+            container = get_container()
+            query_bus = container.get(QueryBus)
+            if not query_bus:
+                raise AWSInfrastructureError("QueryBus not available")
             
-            # Convert DTO to domain object
-            from src.infrastructure.template.mappers import TemplateMapper
-            template = TemplateMapper.from_dto(template_dto)
+            query = GetTemplateQuery(template_id=str(request.template_id))
+            template = query_bus.execute(query)
+            if not template:
+                raise AWSEntityNotFoundError(f"Template {request.template_id} not found")
             
             # Ensure fleet_type is not None
             fleet_type_value = template.metadata.get('aws', {}).get('fleet_type', 'instant')

@@ -13,7 +13,7 @@ from src.application.machine.commands import (
     ConvertBatchMachineStatusCommand,
     ValidateProviderStateCommand
 )
-from src.application.machine.handlers import (
+from src.application.commands.machine_handlers import (
     ConvertMachineStatusCommandHandler,
     ConvertBatchMachineStatusCommandHandler,
     ValidateProviderStateCommandHandler

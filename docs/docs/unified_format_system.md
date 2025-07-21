@@ -1,23 +1,23 @@
-# Unified Format System
+# Template Format System
 
 ## Overview
 
-The Open Host Factory Plugin implements a unified format system that handles both field selection and field naming through a single, cohesive approach. This eliminates the previous dual-system complexity while maintaining full compatibility with IBM Symphony Host Factory requirements.
+The Open Host Factory Plugin implements a comprehensive format system that handles both field selection and field naming through a single, cohesive approach. This eliminates the previous dual-system complexity while maintaining full compatibility with IBM Symphony Host Factory requirements.
 
 ## Architecture
 
 ### Before: Dual System (Eliminated)
 ```
-[[]] Separate HF format methods + camelCase methods
-[[]] convert_to_hf_minimal() + convert_to_legacy()
-[[]] Duplicate logic and maintenance overhead
+- Separate HF format methods + camelCase methods
+- convert_to_hf_minimal() + convert_to_legacy()
+- Duplicate logic and maintenance overhead
 ```
 
-### After: Unified System [[]]
+### After: Integrated System
 ```
-[[]] Single convert_templates() method
-[[]] Two orthogonal parameters control behavior
-[[]] Clean separation of concerns
+- Single convert_templates() method
+- Two orthogonal parameters control behavior
+- Clean separation of concerns
 ```
 
 ## Core Method
@@ -29,7 +29,7 @@ def convert_templates(
     use_camel_case: bool = False
 ) -> Dict[str, Any]:
     """
-    Unified template conversion method.
+    Template conversion method.
     
     Args:
         templates: List of Template domain objects
@@ -87,10 +87,10 @@ All other fields use automatic conversion:
 ```
 
 ### Benefits
-- [[]] **Special cases handled**: Business logic preserved
-- [[]] **Future-proof**: New fields automatically converted
-- [[]] **No maintenance**: No manual mapping updates needed
-- [[]] **Consistent**: No mixed case outputs
+- **Special cases handled**: Business logic preserved
+- **Future-proof**: New fields automatically converted
+- **No maintenance**: No manual mapping updates needed
+- **Consistent**: No mixed case outputs
 
 ## CLI Flag Mapping
 
@@ -178,19 +178,19 @@ All other fields use automatic conversion:
 ## Implementation Benefits
 
 ### Code Quality
-- [[]] **DRY Principle**: No duplicate conversion logic
-- [[]] **Single Responsibility**: One method handles all conversions
-- [[]] **Maintainability**: New fields automatically handled
-- [[]] **Testability**: Single method to test all scenarios
+- **DRY Principle**: No duplicate conversion logic
+- **Single Responsibility**: One method handles all conversions
+- **Maintainability**: New fields automatically handled
+- **Testability**: Single method to test all scenarios
 
 ### User Experience
-- [[]] **Consistent**: Predictable behavior across all combinations
-- [[]] **Flexible**: All 4 combinations supported
-- [[]] **Compatible**: IBM Symphony Host Factory compliant
-- [[]] **Future-proof**: New fields automatically converted
+- **Consistent**: Predictable behavior across all combinations
+- **Flexible**: All 4 combinations supported
+- **Compatible**: IBM Symphony Host Factory compliant
+- **Future-proof**: New fields automatically converted
 
 ### Architecture
-- [[]] **Clean**: Clear separation of concerns
-- [[]] **Extensible**: Easy to add new format options
-- [[]] **Maintainable**: Single source of truth for conversions
-- [[]] **Robust**: Comprehensive error handling and validation
+- **Clean**: Clear separation of concerns
+- **Extensible**: Easy to add new format options
+- **Maintainable**: Single source of truth for conversions
+- **Robust**: Comprehensive error handling and validation

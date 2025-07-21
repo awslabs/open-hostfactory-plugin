@@ -34,16 +34,47 @@ help:  ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # Installation targets
-install: $(VENV)/bin/activate  ## Install production dependencies
+install: $(VENV)/bin/activate  ## Install production dependencies (smart: uv if available, else pip)
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "INFO: Using uv for faster installation..."; \
+		uv pip install -r requirements.txt; \
+	else \
+		echo "INFO: Using pip (uv not available)..."; \
+		$(BIN)/pip install -r requirements.txt; \
+	fi
+
+install-pip: $(VENV)/bin/activate  ## Install production dependencies (force pip)
 	$(BIN)/pip install -r requirements.txt
 
-dev-install: $(VENV)/bin/activate  ## Install development dependencies
+install-uv: $(VENV)/bin/activate  ## Install production dependencies (force uv)
+	uv pip install -r requirements.txt
+
+dev-install: $(VENV)/bin/activate  ## Install development dependencies (smart: uv if available, else pip)
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "INFO: Using uv for faster development setup..."; \
+		uv pip install -e ".[dev]"; \
+	else \
+		echo "INFO: Using pip (uv not available)..."; \
+		./dev-tools/package/install-dev.sh; \
+	fi
+
+dev-install-pip: $(VENV)/bin/activate  ## Install development dependencies (force pip)
 	./dev-tools/package/install-dev.sh
+
+dev-install-uv: $(VENV)/bin/activate  ## Install development dependencies (force uv)
+	uv pip install -e ".[dev]"
 
 $(VENV)/bin/activate: requirements.txt
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
-	$(BIN)/pip install --upgrade pip
-	$(BIN)/pip install -r requirements.txt
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "INFO: Using uv for virtual environment setup..."; \
+		uv pip install --upgrade pip; \
+		uv pip install -r requirements.txt; \
+	else \
+		echo "INFO: Using pip for virtual environment setup..."; \
+		$(BIN)/pip install --upgrade pip; \
+		$(BIN)/pip install -r requirements.txt; \
+	fi
 	touch $(VENV)/bin/activate
 
 # Testing targets (using dev-tools)
@@ -84,7 +115,23 @@ test-report: dev-install  ## Generate comprehensive test report
 	$(PYTHON) dev-tools/testing/run_tests.py --coverage --html-coverage
 
 # Code quality targets
-lint: dev-install  ## Run all linting checks
+quality-check: dev-install  ## Run professional quality checks
+	@echo "Running professional quality checks..."
+	$(PYTHON) dev-tools/scripts/quality_check.py --strict
+
+quality-check-fix: dev-install  ## Run quality checks with auto-fix
+	@echo "Running professional quality checks with auto-fix..."
+	$(PYTHON) dev-tools/scripts/quality_check.py --fix
+
+quality-check-files: dev-install  ## Run quality checks on specific files (usage: make quality-check-files FILES="file1.py file2.py")
+	@if [ -z "$(FILES)" ]; then \
+		echo "Error: FILES is required. Usage: make quality-check-files FILES=\"file1.py file2.py\""; \
+		exit 1; \
+	fi
+	@echo "Running professional quality checks on specified files..."
+	$(PYTHON) dev-tools/scripts/quality_check.py --strict --files $(FILES)
+
+lint: dev-install quality-check  ## Run all linting checks including quality checks
 	@echo "Running Black (code formatting)..."
 	$(BIN)/black --check $(PACKAGE) $(TESTS)
 	@echo "Running isort (import sorting)..."
@@ -103,8 +150,116 @@ format: dev-install  ## Format code (Black + isort)
 security: dev-install  ## Run security checks
 	@echo "Running bandit (security linter)..."
 	$(BIN)/bandit -r $(PACKAGE) -f json -o bandit-report.json || echo "Security issues found - check bandit-report.json"
+	$(BIN)/bandit -r $(PACKAGE) -f sarif -o bandit-results.sarif || echo "Security issues found - check bandit-results.sarif"
 	@echo "Running safety (dependency vulnerability check)..."
 	$(BIN)/safety check || echo "Vulnerable dependencies found"
+
+security-container: ## Run container security scans
+	@echo "Running container security scans..."
+	@if ! command -v trivy >/dev/null 2>&1; then \
+		echo "Installing Trivy..."; \
+		curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin; \
+	fi
+	@echo "Building Docker image for security scan..."
+	docker build -t $(PROJECT):security-scan .
+	@echo "Running Trivy vulnerability scan..."
+	trivy image --format sarif --output trivy-results.sarif $(PROJECT):security-scan
+	trivy image --format json --output trivy-results.json $(PROJECT):security-scan
+	@echo "Running Hadolint Dockerfile scan..."
+	@if ! command -v hadolint >/dev/null 2>&1; then \
+		echo "Installing Hadolint..."; \
+		wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64; \
+		chmod +x hadolint; \
+		sudo mv hadolint /usr/local/bin/; \
+	fi
+	hadolint Dockerfile --format sarif > hadolint-results.sarif || echo "Dockerfile issues found"
+
+security-full: security security-container  ## Run all security scans including container
+
+sbom-generate: dev-install ## Generate Software Bill of Materials (SBOM)
+	@echo "Generating SBOM files..."
+	@if ! command -v syft >/dev/null 2>&1; then \
+		echo "Installing Syft..."; \
+		curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin; \
+	fi
+	@echo "Installing pip-audit for Python SBOM..."
+	$(BIN)/pip install pip-audit
+	@echo "Generating Python dependency SBOM..."
+	$(BIN)/pip-audit --format=cyclonedx-json --output=python-sbom-cyclonedx.json
+	$(BIN)/pip-audit --format=spdx-json --output=python-sbom-spdx.json
+	@echo "Generating project SBOM with Syft..."
+	syft . -o spdx-json=project-sbom-spdx.json
+	syft . -o cyclonedx-json=project-sbom-cyclonedx.json
+	@echo "Building Docker image for container SBOM..."
+	docker build -t $(PROJECT):sbom-scan .
+	@echo "Generating container SBOM..."
+	syft $(PROJECT):sbom-scan -o spdx-json=container-sbom-spdx.json
+	syft $(PROJECT):sbom-scan -o cyclonedx-json=container-sbom-cyclonedx.json
+	@echo "SBOM files generated successfully"
+
+security-scan: dev-install  ## Run comprehensive security scan using dev-tools
+	@echo "Running comprehensive security scan..."
+	$(PYTHON) dev-tools/security/security_scan.py
+
+security-validate-sarif: dev-install  ## Validate SARIF files
+	@echo "Validating SARIF files..."
+	$(PYTHON) dev-tools/security/validate_sarif.py *.sarif
+
+security-report: security-full sbom-generate  ## Generate comprehensive security report
+	@echo "## Security Report Generated" > security-report.md
+	@echo "" >> security-report.md
+	@echo "### Files Generated:" >> security-report.md
+	@echo "- bandit-report.json (Security issues)" >> security-report.md
+	@echo "- bandit-results.sarif (Security SARIF)" >> security-report.md
+	@echo "- trivy-results.json (Container vulnerabilities)" >> security-report.md
+	@echo "- trivy-results.sarif (Container SARIF)" >> security-report.md
+	@echo "- hadolint-results.sarif (Dockerfile issues)" >> security-report.md
+	@echo "- *-sbom-*.json (Software Bill of Materials)" >> security-report.md
+	@echo "" >> security-report.md
+	@echo "Security report generated in security-report.md"
+
+# Architecture Quality Gates
+architecture-check: dev-install  ## Run architecture compliance checks
+	@echo "Running architecture quality checks..."
+	$(PYTHON) scripts/check_file_sizes.py --warn-only
+	$(PYTHON) scripts/validate_cqrs.py --warn-only
+	$(PYTHON) scripts/check_architecture.py --warn-only
+
+file-size-report: dev-install  ## Generate file size report
+	@echo "Generating file size report..."
+	$(PYTHON) scripts/check_file_sizes.py --report
+
+architecture-report: dev-install  ## Generate detailed architecture report
+	@echo "Generating architecture dependency report..."
+	$(PYTHON) scripts/check_architecture.py --report
+
+# Architecture Documentation Generation
+docs-generate: dev-install  ## Auto-generate architecture documentation
+	@echo "Generating architecture documentation..."
+	$(PYTHON) scripts/generate_arch_docs.py
+	$(PYTHON) scripts/generate_dependency_graphs.py
+
+docs-metrics: dev-install  ## Generate architecture metrics report only
+	@echo "Generating architecture metrics..."
+	$(PYTHON) scripts/generate_arch_docs.py --metrics-only
+
+docs-diagrams: dev-install  ## Generate dependency diagrams only
+	@echo "Generating dependency diagrams..."
+	$(PYTHON) scripts/generate_dependency_graphs.py
+
+docs-update: docs-generate  ## Update and build documentation
+	@echo "Building documentation site..."
+	cd docs && mkdocs build
+
+docs-serve: docs-generate  ## Generate docs and serve locally
+	@echo "Serving documentation locally..."
+	cd docs && mkdocs serve
+
+quality-gates: lint test architecture-check  ## Run all quality gates
+	@echo "All quality gates completed successfully!"
+
+quality-full: lint test architecture-check docs-generate  ## Run quality gates and generate docs
+	@echo "Full quality check and documentation generation completed!"
 
 # Completion targets
 generate-completions:     ## Generate completion scripts (bash and zsh)
@@ -112,7 +267,7 @@ generate-completions:     ## Generate completion scripts (bash and zsh)
 	$(PYTHON) src/run.py --completion bash > dev-tools/completions/bash/ohfp-completion.bash
 	@echo "Generating zsh completion..."
 	$(PYTHON) src/run.py --completion zsh > dev-tools/completions/zsh/_ohfp
-	@echo "✅ Completion scripts generated in dev-tools/completions/"
+	@echo "SUCCESS: Completion scripts generated in dev-tools/completions/"
 
 install-completions:      ## Install completions for current user
 	./dev-tools/scripts/install-completions.sh
@@ -128,9 +283,9 @@ uninstall-completions:    ## Remove installed completions
 
 test-completions:         ## Test completion generation
 	@echo "Testing bash completion generation..."
-	@$(PYTHON) src/run.py --completion bash > /dev/null && echo "✅ Bash completion generation works"
+	@$(PYTHON) src/run.py --completion bash > /dev/null && echo "SUCCESS: Bash completion generation works"
 	@echo "Testing zsh completion generation..."
-	@$(PYTHON) src/run.py --completion zsh > /dev/null && echo "✅ Zsh completion generation works"
+	@$(PYTHON) src/run.py --completion zsh > /dev/null && echo "SUCCESS: Zsh completion generation works"
 
 # Documentation targets
 docs: docs-build  ## Build documentation (alias for docs-build)
@@ -187,22 +342,22 @@ docs-delete-version:  ## Delete a documentation version (usage: make docs-delete
 	cd $(DOCS_DIR) && ../$(BIN)/mike delete $(VERSION)
 
 docs-deploy-gitlab:  ## Deploy documentation to GitLab Pages (production)
-	@echo "🚀 Triggering GitLab Pages production deployment..."
-	@echo "📍 Documentation will be available at: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
-	@echo "💡 Push to main branch to trigger deployment"
+	@echo "INFO: Triggering GitLab Pages production deployment..."
+	@echo "INFO: Documentation will be available at: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
+	@echo "TIP: Push to main branch to trigger deployment"
 	git push origin main
 
 docs-deploy-staging:  ## Deploy documentation to GitLab Pages (staging)
-	@echo "🚀 Triggering GitLab Pages staging deployment..."
-	@echo "📍 Documentation will be available at: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
-	@echo "💡 Push to develop branch to trigger deployment"
+	@echo "INFO: Triggering GitLab Pages staging deployment..."
+	@echo "INFO: Documentation will be available at: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
+	@echo "TIP: Push to develop branch to trigger deployment"
 	git push origin develop
 
 docs-check-gitlab:  ## Check GitLab Pages deployment status
-	@echo "🔍 Production URL: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
-	@echo "🔍 Staging URL:    https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
-	@echo "🔧 GitLab Project: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin"
-	@echo "📊 CI/CD Pipelines: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin/-/pipelines"
+	@echo "INFO: Production URL: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
+	@echo "INFO: Staging URL:    https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
+	@echo "INFO: GitLab Project: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin"
+	@echo "INFO: CI/CD Pipelines: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin/-/pipelines"
 
 docs-clean:  ## Clean documentation build files
 	rm -rf $(DOCS_BUILD_DIR)
@@ -320,7 +475,7 @@ status:  ## Show project status and useful commands
 	@echo "  Documentation:  $(DOCS_DIR)/"
 	@echo "  Dev tools:      dev-tools/"
 	@echo ""
-	@echo "🔧 Quick Commands:"
+	@echo "INFO: Quick Commands:"
 	@echo "  make dev-setup     - Set up development environment"
 	@echo "  make test          - Run tests"
 	@echo "  make docs-serve    - Start documentation server"
@@ -337,7 +492,75 @@ status:  ## Show project status and useful commands
 	@echo "  List versions:  make docs-list-versions"
 	@echo "  Deploy version: make docs-deploy-version VERSION=1.0.0"
 	@echo ""
-	@echo "🚀 Version Management:"
+	@echo "INFO: Version Management:"
 	@echo "  Patch version:  make version-bump-patch"
 	@echo "  Minor version:  make version-bump-minor"
 	@echo "  Major version:  make version-bump-major"
+
+# UV-specific targets for performance optimization
+uv-lock: ## Generate uv lock file for reproducible builds
+	@if ! command -v uv >/dev/null 2>&1; then \
+		echo "ERROR: uv not available. Install with: pip install uv"; \
+		exit 1; \
+	fi
+	@echo "INFO: Generating uv lock files..."
+	uv pip compile pyproject.toml --output-file requirements.lock
+	uv pip compile pyproject.toml --extra dev --output-file requirements-dev.lock
+	@echo "SUCCESS: Lock files generated: requirements.lock, requirements-dev.lock"
+
+uv-sync: ## Sync environment with uv lock files
+	@if ! command -v uv >/dev/null 2>&1; then \
+		echo "ERROR: uv not available. Install with: pip install uv"; \
+		exit 1; \
+	fi
+	@if [ -f requirements.lock ]; then \
+		echo "INFO: Syncing with uv lock file..."; \
+		uv pip sync requirements.lock; \
+	else \
+		echo "ERROR: No lock file found. Run 'make uv-lock' first."; \
+		exit 1; \
+	fi
+
+uv-sync-dev: ## Sync development environment with uv lock files
+	@if ! command -v uv >/dev/null 2>&1; then \
+		echo "ERROR: uv not available. Install with: pip install uv"; \
+		exit 1; \
+	fi
+	@if [ -f requirements-dev.lock ]; then \
+		echo "INFO: Syncing development environment with uv lock file..."; \
+		uv pip sync requirements-dev.lock; \
+	else \
+		echo "ERROR: No dev lock file found. Run 'make uv-lock' first."; \
+		exit 1; \
+	fi
+
+uv-check: ## Check if uv is available and show version
+	@if command -v uv >/dev/null 2>&1; then \
+		echo "SUCCESS: uv is available: $$(uv --version)"; \
+		echo "INFO: Performance comparison:"; \
+		echo "  • uv is typically 10-100x faster than pip"; \
+		echo "  • Better dependency resolution and error messages"; \
+		echo "  • Use 'make dev-install-uv' for faster development setup"; \
+	else \
+		echo "ERROR: uv not available"; \
+		echo "INFO: Install with: pip install uv"; \
+		echo "INFO: Or use system package manager: brew install uv"; \
+	fi
+
+uv-benchmark: ## Benchmark uv vs pip installation speed
+	@echo "INFO: Benchmarking uv vs pip installation speed..."
+	@echo "This will create temporary virtual environments for testing."
+	@echo ""
+	@if ! command -v uv >/dev/null 2>&1; then \
+		echo "ERROR: uv not available for benchmarking"; \
+		exit 1; \
+	fi
+	@echo "INFO: Testing pip installation speed..."
+	@time (python -m venv .venv-pip-test && .venv-pip-test/bin/pip install -e ".[dev]" > /dev/null 2>&1)
+	@echo ""
+	@echo "INFO: Testing uv installation speed..."
+	@time (python -m venv .venv-uv-test && uv pip install -e ".[dev]" --python .venv-uv-test/bin/python > /dev/null 2>&1)
+	@echo ""
+	@echo "INFO: Cleaning up test environments..."
+	@rm -rf .venv-pip-test .venv-uv-test
+	@echo "SUCCESS: Benchmark complete!"

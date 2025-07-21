@@ -1,18 +1,17 @@
 """Core resource manager interface - provider-agnostic resource management."""
 from typing import Dict, Any, List, Optional, Protocol, runtime_checkable
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.domain.base.value_objects import ResourceId
 
 
 class ResourceConfig(BaseModel):
     """Base configuration for cloud resources."""
+    model_config = ConfigDict(extra="allow")  # Allow resource-specific config fields
+    
     resource_type: str
     name: Optional[str] = None
     tags: Dict[str, str] = {}
-    
-    class Config:
-        extra = "allow"  # Allow resource-specific config fields
 
 
 @runtime_checkable

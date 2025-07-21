@@ -1,6 +1,7 @@
 """Main application configuration schema."""
+import os
 from typing import Dict, Any, Optional
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .template_schema import TemplateConfig
 from .storage_schema import StorageConfig
@@ -12,6 +13,7 @@ from .common_schema import (
 )
 from .provider_strategy_schema import ProviderConfig
 from .server_schema import ServerConfig
+from .scheduler_schema import SchedulerConfig
 
 
 class AppConfig(BaseModel):
@@ -19,6 +21,7 @@ class AppConfig(BaseModel):
     
     version: str = Field("2.0.0", description="Configuration version")
     provider: ProviderConfig
+    scheduler: SchedulerConfig = Field(default_factory=SchedulerConfig)
     naming: NamingConfig = Field(default_factory=lambda: NamingConfig())
     logging: LoggingConfig = Field(default_factory=lambda: LoggingConfig())
     template: Optional[TemplateConfig] = None
@@ -47,7 +50,26 @@ class AppConfig(BaseModel):
             ))
         return self
     
-    @validator('environment')
+    def get_config_file_path(self) -> str:
+        """Build full config file path using scheduler + provider type."""
+        config_root = self.scheduler.get_config_root()
+        # Extract provider type from active_provider (e.g., "aws-default" -> "aws")
+        provider_type = self.provider.active_provider.split('-')[0]
+        # Generate provider-specific config file name
+        config_file = f"{provider_type}prov_config.json"
+        return os.path.join(config_root, config_file)
+    
+    def get_templates_file_path(self) -> str:
+        """Build full templates file path using scheduler + provider type."""
+        config_root = self.scheduler.get_config_root()
+        # Extract provider type from active_provider (e.g., "aws-default" -> "aws")
+        provider_type = self.provider.active_provider.split('-')[0]
+        # Generate provider-specific templates file name
+        templates_file = f"{provider_type}prov_templates.json"
+        return os.path.join(config_root, templates_file)
+    
+    @field_validator('environment')
+    @classmethod
     def validate_environment(cls, v: str) -> str:
         """
         Validate environment.
@@ -66,14 +88,16 @@ class AppConfig(BaseModel):
             raise ValueError(f"Environment must be one of {valid_environments}")
         return v
     
-    @validator('request_timeout')
+    @field_validator('request_timeout')
+    @classmethod
     def validate_request_timeout(cls, v: int) -> int:
         """Validate request timeout."""
         if v < 0:
             raise ValueError("Request timeout must be positive")
         return v
     
-    @validator('max_machines_per_request')
+    @field_validator('max_machines_per_request')
+    @classmethod
     def validate_max_machines(cls, v: int) -> int:
         """Validate max machines per request."""
         if v < 1:

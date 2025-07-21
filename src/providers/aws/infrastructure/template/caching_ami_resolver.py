@@ -1,27 +1,29 @@
-"""Caching AMI resolver with fallback capabilities."""
-from src.config import AMIResolutionConfig
+"""AMI resolver with caching capabilities."""
+import os
+from typing import Optional
+from src.providers.aws.configuration.template_extension import AMIResolutionConfig
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.template.ami_cache import RuntimeAMICache
 from src.domain.base.ports import LoggingPort, ConfigurationPort
+from src.domain.base.ports.template_resolver_port import TemplateResolverPort
 from src.domain.base.exceptions import InfrastructureError
 from src.domain.base.dependency_injection import injectable
+from src.config.schemas.performance_schema import PerformanceConfig
 
 
 @injectable
-class CachingAMIResolver:
+class CachingAMIResolver(TemplateResolverPort):
     """
-    AMI resolver with runtime caching and graceful fallback.
+    AMI resolver with caching and fallback capabilities.
     
-    Features:
-    - Resolves SSM parameters to actual AMI IDs
-    - Runtime caching to avoid duplicate AWS calls
-    - Graceful fallback when AWS is unavailable
-    - Configurable behavior via AMIResolutionConfig
+    Resolves SSM parameters to actual AMI IDs with runtime caching
+    to avoid duplicate AWS calls. Uses configuration system for
+    cache settings and path resolution.
     """
     
     def __init__(self, aws_client: AWSClient, config: ConfigurationPort, logger: LoggingPort):
         """
-        Initialize caching AMI resolver.
+        Initialize AMI resolver.
         
         Args:
             aws_client: AWS client for SSM operations
@@ -31,24 +33,54 @@ class CachingAMIResolver:
         self._aws_client = aws_client
         self._logger = logger
         
-        # Get AMI resolution configuration
+        # Get AMI resolution configuration from template extension
         try:
             self._ami_config = config.get_typed(AMIResolutionConfig)
         except Exception as e:
             self._logger.warning(f"Failed to get AMI resolution config: {str(e)}")
-            # Use default configuration
             self._ami_config = AMIResolutionConfig(
                 enabled=True,
-                fallback_on_failure=True,
-                cache_enabled=True
+                fallback_on_failure=True
             )
         
-        self._cache = RuntimeAMICache()
+        # Get performance configuration for caching settings
+        try:
+            perf_config = config.get_typed(PerformanceConfig)
+            self._cache_enabled = perf_config.caching.ami_resolution.enabled
+            cache_ttl_seconds = perf_config.caching.ami_resolution.ttl_seconds
+        except Exception as e:
+            self._logger.warning(f"Failed to get performance config: {str(e)}")
+            self._cache_enabled = True
+            cache_ttl_seconds = 3600
         
-        self._logger.debug(f"Initialized CachingAMIResolver with config: "
+        # Initialize cache with configuration-driven settings
+        cache_file = None
+        if self._cache_enabled:
+            cache_file = self._resolve_cache_path(config)
+        
+        self._cache = RuntimeAMICache(
+            persistent_file=cache_file,
+            ttl_minutes=cache_ttl_seconds // 60
+        )
+        
+        self._logger.debug(f"AMI resolver initialized: "
                           f"enabled={self._ami_config.enabled}, "
-                          f"fallback_on_failure={self._ami_config.fallback_on_failure}, "
-                          f"cache_enabled={self._ami_config.cache_enabled}")
+                          f"cache_enabled={self._cache_enabled}, "
+                          f"cache_file={cache_file}")
+    
+    def _resolve_cache_path(self, config: ConfigurationPort) -> str:
+        """Resolve cache file path using configuration system."""
+        try:
+            work_dir = config.get_work_dir()
+            cache_dir = os.path.join(work_dir, "cache")
+            os.makedirs(cache_dir, exist_ok=True)
+            return os.path.join(cache_dir, "ami_cache.json")
+        except Exception:
+            # Fallback to environment variable or current directory
+            workdir = os.environ.get('HF_PROVIDER_WORKDIR', os.getcwd())
+            cache_dir = os.path.join(workdir, "cache")
+            os.makedirs(cache_dir, exist_ok=True)
+            return os.path.join(cache_dir, "ami_cache.json")
     
     def resolve_with_fallback(self, ami_id_or_parameter: str) -> str:
         """
@@ -79,7 +111,7 @@ class CachingAMIResolver:
             return ami_id_or_parameter
         
         # Check cache first if enabled
-        if self._ami_config.cache_enabled:
+        if self._cache_enabled:
             # Return cached result if available
             cached_ami = self._cache.get(ami_id_or_parameter)
             if cached_ami:
@@ -91,22 +123,22 @@ class CachingAMIResolver:
                 return ami_id_or_parameter
         
         # Attempt resolution
-        self._logger.info(f"Resolving SSM parameter: {ami_id_or_parameter}")
+        self._logger.debug(f"Resolving SSM parameter: {ami_id_or_parameter}")
         try:
             ami_id = self._resolve_ssm_parameter(ami_id_or_parameter)
             
             # Cache successful resolution
-            if self._ami_config.cache_enabled:
+            if self._cache_enabled:
                 self._cache.set(ami_id_or_parameter, ami_id)
             
-            self._logger.info(f"Successfully resolved {ami_id_or_parameter} to {ami_id}")
+            self._logger.info(f"Resolved SSM parameter {ami_id_or_parameter} to AMI {ami_id}")
             return ami_id
             
         except Exception as e:
             self._logger.warning(f"Failed to resolve SSM parameter {ami_id_or_parameter}: {str(e)}")
             
             # Mark as failed in cache
-            if self._ami_config.cache_enabled:
+            if self._cache_enabled:
                 self._cache.mark_failed(ami_id_or_parameter)
             
             # Handle fallback
@@ -162,3 +194,45 @@ class CachingAMIResolver:
         """Clear the cache."""
         self._cache.clear()
         self._logger.info("AMI resolution cache cleared")
+    
+    # TemplateResolverPort interface methods
+    
+    def resolve_parameter(self, parameter: str) -> Optional[str]:
+        """
+        Resolve a template parameter.
+        
+        Args:
+            parameter: Parameter to resolve
+            
+        Returns:
+            Resolved value or None if resolution fails
+        """
+        try:
+            resolved = self.resolve_with_fallback(parameter)
+            # Return None if resolution failed (fallback returned original)
+            return resolved if resolved != parameter else None
+        except Exception:
+            return None
+    
+    def is_resolvable(self, parameter: str) -> bool:
+        """
+        Check if a parameter can be resolved by this resolver.
+        
+        Args:
+            parameter: Parameter to check
+            
+        Returns:
+            True if parameter can be resolved
+        """
+        return (self._ami_config.enabled and 
+                parameter.startswith('/aws/service/') and 
+                not parameter.startswith('ami-'))
+    
+    def get_resolver_type(self) -> str:
+        """
+        Get the type of resolver.
+        
+        Returns:
+            String identifying the resolver type
+        """
+        return "ami"

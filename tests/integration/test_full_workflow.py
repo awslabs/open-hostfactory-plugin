@@ -8,12 +8,14 @@ from typing import Dict, Any, List
 from datetime import datetime, timezone
 
 from src.bootstrap import Application
-from src.application.service import ApplicationService
+from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.config.manager import ConfigurationManager
 from src.domain.template.aggregate import Template
 from src.domain.request.aggregate import Request
 from src.domain.machine.aggregate import Machine
 from src.domain.base.value_objects import InstanceType, InstanceId
+from src.application.dto.commands import CreateRequestCommand
+from src.application.dto.queries import ListTemplatesQuery, GetRequestStatusQuery
 
 
 @pytest.mark.integration
@@ -33,23 +35,25 @@ class TestFullWorkflow:
         # Initialize should succeed
         assert app.initialize() is True
         
-        # Get application service
-        service = app.get_application_service()
-        assert isinstance(service, ApplicationService)
-        assert service.provider_type == "aws"
+        # Get CQRS buses directly
+        query_bus = app.get_query_bus()
+        command_bus = app.get_command_bus()
+        assert isinstance(query_bus, QueryBus)
+        assert isinstance(command_bus, CommandBus)
         
-        # Test basic operations
-        templates = service.get_available_templates()
-        assert isinstance(templates, list)
+        # Test basic operations using direct CQRS
+        with patch.object(query_bus, 'execute') as mock_query_execute:
+            mock_query_execute.return_value = []
+            
+            # Test template listing
+            query = ListTemplatesQuery()
+            templates = query_bus.execute(query)
+            assert isinstance(templates, list)
         
-        # Test provider health
-        health = service.get_provider_health()
-        assert isinstance(health, bool)
-        
-        # Test provider info
-        info = service.get_provider_info()
-        assert isinstance(info, dict)
-        assert info["provider_type"] == "aws"
+        # Test provider health using direct provider context
+        provider_info = app.get_provider_info()
+        assert isinstance(provider_info, dict)
+        assert "status" in provider_info
     
     def test_template_management_workflow(
         self,

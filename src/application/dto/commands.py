@@ -12,7 +12,7 @@ class CreateRequestCommand(BaseCommand):
     """Command to create a new request."""
     
     template_id: str
-    machine_count: int
+    requested_count: int
     timeout: Optional[int] = 3600
     tags: Optional[Dict[str, Any]] = None
 

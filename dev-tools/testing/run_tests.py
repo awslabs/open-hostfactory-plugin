@@ -16,13 +16,13 @@ def run_command(cmd: List[str], description: str) -> bool:
     
     try:
         result = subprocess.run(cmd, check=True, capture_output=False)
-        print(f"✅ {description} - PASSED")
+        print(f"PASS {description}")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ {description} - FAILED (exit code: {e.returncode})")
+        print(f"FAIL {description} (exit code: {e.returncode})")
         return False
     except FileNotFoundError:
-        print(f"❌ {description} - FAILED (command not found)")
+        print(f"FAIL {description} (command not found)")
         return False
 
 
@@ -134,11 +134,11 @@ def main():
     success = run_command(pytest_cmd, "Running Tests")
     
     if success:
-        print(f"\n🎉 All tests passed!")
+        print(f"\nAll tests passed!")
         if args.html_coverage:
-            print(f"📊 Coverage report generated in htmlcov/index.html")
+            print(f"Coverage report generated in htmlcov/index.html")
     else:
-        print(f"\n💥 Some tests failed!")
+        print(f"\nSome tests failed!")
         sys.exit(1)
 
 

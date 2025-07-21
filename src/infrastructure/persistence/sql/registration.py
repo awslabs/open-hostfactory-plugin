@@ -6,7 +6,7 @@ enabling the storage registry pattern for SQL persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Callable
 from src.infrastructure.registry.storage_registry import get_storage_registry
 from src.infrastructure.logging.logger import get_logger
 
@@ -83,28 +83,43 @@ def _build_connection_string(sql_config: Any) -> str:
 
 def create_sql_unit_of_work(config: Any) -> Any:
     """
-    Create SQL unit of work.
+    Create SQL unit of work with proper configuration extraction.
     
     Args:
-        config: Configuration object
+        config: Configuration object (ConfigurationManager or dict)
         
     Returns:
-        SQLUnitOfWork instance
+        SQLUnitOfWork instance with properly configured engine
     """
     from src.infrastructure.persistence.sql.unit_of_work import SQLUnitOfWork
     from src.config.manager import ConfigurationManager
+    from src.config.schemas.storage_schema import StorageConfig
+    from sqlalchemy import create_engine
     from src.infrastructure.logging.logger import get_logger
     
     # Handle different config types
     if isinstance(config, ConfigurationManager):
-        config_manager = config
-        logger = get_logger(__name__)
+        # Extract SQL-specific configuration through StorageConfig
+        storage_config = config.get_typed(StorageConfig)
+        sql_config = storage_config.sql_strategy
+        
+        # Build connection string and create engine
+        connection_string = _build_connection_string(sql_config)
+        engine = create_engine(
+            connection_string,
+            pool_size=sql_config.pool_size,
+            max_overflow=sql_config.max_overflow,
+            pool_timeout=sql_config.pool_timeout,
+            pool_recycle=sql_config.pool_recycle,
+            echo=sql_config.echo
+        )
+        
+        return SQLUnitOfWork(engine)
     else:
-        # For testing or other scenarios
-        config_manager = config
-        logger = get_logger(__name__)
-    
-    return SQLUnitOfWork(config_manager, logger)
+        # For testing or other scenarios - assume it's a dict with connection info
+        connection_string = config.get('connection_string', 'sqlite:///data/test.db')
+        engine = create_engine(connection_string)
+        return SQLUnitOfWork(engine)
 
 
 def register_sql_storage() -> None:

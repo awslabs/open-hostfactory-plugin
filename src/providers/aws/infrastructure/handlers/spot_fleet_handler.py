@@ -31,8 +31,7 @@ import json
 from botocore.exceptions import ClientError
 
 from src.domain.request.aggregate import Request
-from src.domain.template.aggregate import Template
-from src.providers.aws.domain.template.value_objects import ProviderHandlerType, AWSFleetType
+from src.providers.aws.domain.template.value_objects import ProviderApi, AWSFleetType
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSValidationError, AWSEntityNotFoundError, AWSInfrastructureError,
@@ -40,17 +39,19 @@ from src.providers.aws.exceptions.aws_exceptions import (
 )
 from src.providers.aws.utilities.aws_operations import AWSOperations
 from src.domain.base.ports import LoggingPort
-from src.infrastructure.template.sync_configuration_store import SyncTemplateConfigurationStore
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
 from src.domain.base.dependency_injection import injectable
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
+from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
+from src.providers.aws.domain.template.aggregate import AWSTemplate
 
 @injectable
 class SpotFleetHandler(AWSHandler):
     """Handler for Spot Fleet operations."""
     
     def __init__(self, aws_client, logger: LoggingPort, aws_ops: AWSOperations, 
-                 template_config_store: SyncTemplateConfigurationStore, request_adapter: RequestAdapterPort = None):
+                 launch_template_manager: AWSLaunchTemplateManager,
+                 request_adapter: RequestAdapterPort = None):
         """
         Initialize the Spot Fleet handler.
         
@@ -58,59 +59,77 @@ class SpotFleetHandler(AWSHandler):
             aws_client: AWS client instance
             logger: Logger for logging messages
             aws_ops: AWS operations utility
-            template_config_store: Template configuration store for retrieving templates
+            launch_template_manager: Launch template manager for AWS-specific operations
             request_adapter: Optional request adapter for terminating instances
         """
         # Use enhanced base class initialization - eliminates duplication
-        super().__init__(aws_client, logger, aws_ops, template_config_store, request_adapter)
+        super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
 
     @handle_infrastructure_exceptions(context="spot_fleet_creation")
-    def acquire_hosts(self, request: Request, template: Template) -> str:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
         """
         Create a Spot Fleet to acquire hosts.
-        Returns the Spot Fleet Request ID.
+        Returns structured result with resource IDs and instance data.
         """
-        return self.aws_ops.execute_with_standard_error_handling(
-            operation=lambda: self._create_spot_fleet_internal(request, template),
-            operation_name="create Spot Fleet",
-            context="SpotFleet"
-        )
+        try:
+            fleet_id = self.aws_ops.execute_with_standard_error_handling(
+                operation=lambda: self._create_spot_fleet_internal(request, aws_template),
+                operation_name="create Spot Fleet",
+                context="SpotFleet"
+            )
+            
+            return {
+                'success': True,
+                'resource_ids': [fleet_id],
+                'instances': [],  # Spot Fleet instances come later
+                'provider_data': {
+                    'resource_type': 'spot_fleet', 
+                    'fleet_type': aws_template.fleet_type
+                }
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'resource_ids': [],
+                'instances': [],
+                'error_message': str(e)
+            }
 
-    def _create_spot_fleet_internal(self, request: Request, template: Template) -> str:
+    def _create_spot_fleet_internal(self, request: Request, aws_template: AWSTemplate) -> str:
         """Internal method for Spot Fleet creation with pure business logic."""
         # Validate Spot Fleet specific prerequisites
-        self._validate_spot_prerequisites(template)
+        self._validate_spot_prerequisites(aws_template)
         
         # Validate fleet type
-        if not template.fleet_type:
+        if not aws_template.fleet_type:
             raise AWSValidationError("Fleet type is required for SpotFleet")
             
-        # Validate fleet type using configuration-driven logic  
-        temp_fleet = AWSFleetType.REQUEST  # Temporary instance for validation
-        valid_types = temp_fleet.get_valid_types_for_handler(ProviderHandlerType.SPOT_FLEET)
+        # Validate fleet type - SpotFleet supports REQUEST and MAINTAIN types
+        valid_types = ["request", "maintain"]
         try:
-            fleet_type = AWSFleetType(template.fleet_type.lower())
-            if fleet_type.value not in valid_types:
+            fleet_type_value = aws_template.fleet_type.value if hasattr(aws_template.fleet_type, 'value') else str(aws_template.fleet_type)
+            if fleet_type_value.lower() not in valid_types:
                 raise ValueError  # Will be caught by the except block below
-        except ValueError:
-            raise AWSValidationError(f"Invalid Spot fleet type: {template.fleet_type}. "
+        except (ValueError, AttributeError):
+            raise AWSValidationError(f"Invalid Spot fleet type: {aws_template.fleet_type}. "
                                f"Must be one of: {', '.join(valid_types)}")
 
-        # Create launch template directly without additional retry wrapper
-        launch_template = self.create_launch_template(template, request)
+        # Create launch template using the new manager
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
         
-        # Store launch template info in request
-        request.set_launch_template_info(
-            launch_template['LaunchTemplateId'],
-            launch_template['Version']
-        )
+        # Store launch template info in request (if request has this method)
+        if hasattr(request, 'set_launch_template_info'):
+            request.set_launch_template_info(
+                launch_template_result.template_id,
+                launch_template_result.version
+            )
 
         # Create spot fleet configuration
         fleet_config = self._create_spot_fleet_config(
-            template=template,
+            template=aws_template,
             request=request,
-            launch_template_id=launch_template['LaunchTemplateId'],
-            launch_template_version=launch_template['Version']
+            launch_template_id=launch_template_result.template_id,
+            launch_template_version=launch_template_result.version
         )
 
         # Request spot fleet with circuit breaker for critical operation
@@ -125,31 +144,31 @@ class SpotFleetHandler(AWSHandler):
 
         return fleet_id
 
-    def _validate_spot_prerequisites(self, template: Template) -> None:
+    def _validate_spot_prerequisites(self, aws_template: AWSTemplate) -> None:
         """Validate Spot Fleet specific prerequisites."""
         errors = []
 
         # Log the validation start
-        self._logger.debug(f"Starting Spot Fleet prerequisites validation for template: {template.template_id}")
+        self._logger.debug(f"Starting Spot Fleet prerequisites validation for template: {aws_template.template_id}")
 
         # First validate common prerequisites
         try:
-            self._validate_prerequisites(template)
+            self._validate_prerequisites(aws_template)
         except AWSValidationError as e:
             errors.extend(str(e).split('\n'))
 
         # Validate Spot Fleet specific requirements
-        if not template.fleet_role:
+        if not hasattr(aws_template, 'fleet_role') or not aws_template.fleet_role:
             errors.append("Fleet role ARN is required for Spot Fleet")
         else:
             # For service-linked roles, we only validate the format
-            if 'AWSServiceRoleForEC2SpotFleet' in template.fleet_role:
-                if template.fleet_role != 'AWSServiceRoleForEC2SpotFleet':
-                    errors.append(f"Invalid Spot Fleet service-linked role format: {template.fleet_role}")
+            if 'AWSServiceRoleForEC2SpotFleet' in aws_template.fleet_role:
+                if aws_template.fleet_role != 'AWSServiceRoleForEC2SpotFleet':
+                    errors.append(f"Invalid Spot Fleet service-linked role format: {aws_template.fleet_role}")
             else:
                 # For custom roles, validate with IAM
                 try:
-                    role_name = template.fleet_role.split('/')[-1]
+                    role_name = aws_template.fleet_role.split('/')[-1]
                     # Create IAM client directly from session
                     iam_client = self.aws_client.session.client('iam', config=self.aws_client.boto_config)
                     self._retry_with_backoff(
@@ -160,31 +179,33 @@ class SpotFleetHandler(AWSHandler):
                     errors.append(f"Invalid custom fleet role: {str(e)}")
 
         # Validate price type if specified
-        if template.price_type:
+        if hasattr(aws_template, 'price_type') and aws_template.price_type:
             valid_options = ["spot", "ondemand", "heterogeneous"]
-            if template.price_type not in valid_options:
-                errors.append(f"Invalid price type: {template.price_type}. "
+            if aws_template.price_type not in valid_options:
+                errors.append(f"Invalid price type: {aws_template.price_type}. "
                              f"Must be one of: {', '.join(valid_options)}")
         
         # For heterogeneous price type, validate percent_on_demand
-        if template.price_type == "heterogeneous" and template.percent_on_demand is None:
+        if (hasattr(aws_template, 'price_type') and aws_template.price_type == "heterogeneous" and 
+            (not hasattr(aws_template, 'percent_on_demand') or aws_template.percent_on_demand is None)):
             errors.append("percent_on_demand is required for heterogeneous price type")
             
         # For heterogeneous price type with vm_types_on_demand, validate the configuration
-        if template.price_type == "heterogeneous" and template.vm_types_on_demand:
-            # Validate that vm_types is also specified
-            if not template.vm_types:
-                errors.append("vm_types must be specified when using vm_types_on_demand")
+        if (hasattr(aws_template, 'price_type') and aws_template.price_type == "heterogeneous" and 
+            hasattr(aws_template, 'vm_types_on_demand') and aws_template.vm_types_on_demand):
+            # Validate that instance_types is also specified
+            if not hasattr(aws_template, 'instance_types') or not aws_template.instance_types:
+                errors.append("instance_types must be specified when using instance_types_ondemand")
                 
-            # Validate that vm_types_on_demand has valid instance types
-            for instance_type, weight in template.vm_types_on_demand.items():
+            # Validate that instance_types_ondemand has valid instance types
+            for instance_type, weight in aws_template.instance_types_ondemand.items():
                 if not isinstance(weight, int) or weight <= 0:
                     errors.append(f"Weight for on-demand instance type {instance_type} must be a positive integer")
 
         # Validate spot price if specified
-        if template.max_spot_price is not None:
+        if (hasattr(aws_template, 'max_price') and aws_template.max_price is not None):
             try:
-                price = float(template.max_spot_price)
+                price = float(aws_template.max_price)
                 if price <= 0:
                     errors.append("Spot price must be greater than zero")
             except ValueError:
@@ -256,7 +277,7 @@ class SpotFleetHandler(AWSHandler):
             raise IAMError(f"Failed to validate IAM permissions: {str(e)}")
 
     def _create_spot_fleet_config(self,
-                                template: Template,
+                                template: AWSTemplate,
                                 request: Request,
                                 launch_template_id: str,
                                 launch_template_version: str) -> Dict[str, Any]:
@@ -286,7 +307,7 @@ class SpotFleetHandler(AWSHandler):
                     'Version': launch_template_version
                 }
             }],
-            'TargetCapacity': request.machine_count,
+            'TargetCapacity': request.requested_count,
             'IamFleetRole': fleet_role,
             'AllocationStrategy': self._get_allocation_strategy(template.allocation_strategy),
             'Type': template.fleet_type,
@@ -301,15 +322,15 @@ class SpotFleetHandler(AWSHandler):
         
         if price_type == "ondemand":
             # For ondemand, set all capacity as on-demand
-            fleet_config['OnDemandTargetCapacity'] = request.machine_count
+            fleet_config['OnDemandTargetCapacity'] = request.requested_count
             fleet_config['SpotTargetCapacity'] = 0
             fleet_config['DefaultTargetCapacity'] = "onDemand"
             
         elif price_type == "heterogeneous":
             # For heterogeneous, split capacity based on percent_on_demand
             percent_on_demand = template.percent_on_demand or 0
-            on_demand_count = int(request.machine_count * percent_on_demand / 100)
-            spot_count = request.machine_count - on_demand_count
+            on_demand_count = int(request.requested_count * percent_on_demand / 100)
+            spot_count = request.requested_count - on_demand_count
             
             fleet_config['OnDemandTargetCapacity'] = on_demand_count
             fleet_config['SpotTargetCapacity'] = spot_count
@@ -318,7 +339,7 @@ class SpotFleetHandler(AWSHandler):
         else:  # "spot" (default)
             # For spot, set all capacity as spot
             fleet_config['OnDemandTargetCapacity'] = 0
-            fleet_config['SpotTargetCapacity'] = request.machine_count
+            fleet_config['SpotTargetCapacity'] = request.requested_count
             fleet_config['DefaultTargetCapacity'] = "spot"
 
         # Add template tags if any
@@ -332,22 +353,22 @@ class SpotFleetHandler(AWSHandler):
             fleet_config['TerminateInstancesWithExpiration'] = True
 
         # Add spot price if specified
-        if template.max_spot_price:
-            fleet_config['SpotPrice'] = str(template.max_spot_price)
+        if template.max_price:
+            fleet_config['SpotPrice'] = str(template.max_price)
 
         # Add instance type overrides if specified
-        if template.vm_types:
+        if template.instance_types:
             # For heterogeneous price type with on-demand instances
-            if template.price_type == "heterogeneous" and template.vm_types_on_demand:
+            if template.price_type == "heterogeneous" and template.instance_types_ondemand:
                 # Create spot instance overrides
                 spot_overrides = [
                     {
                         'InstanceType': instance_type,
                         'WeightedCapacity': weight,
                         'Priority': idx + 1,
-                        'SpotPrice': str(template.max_spot_price) if template.max_spot_price else None
+                        'SpotPrice': str(template.max_price) if template.max_price else None
                     }
-                    for idx, (instance_type, weight) in enumerate(template.vm_types.items())
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items())
                 ]
                 
                 # Create on-demand instance overrides
@@ -355,10 +376,10 @@ class SpotFleetHandler(AWSHandler):
                     {
                         'InstanceType': instance_type,
                         'WeightedCapacity': weight,
-                        'Priority': idx + len(template.vm_types) + 1,
+                        'Priority': idx + len(template.instance_types) + 1,
                         # Force this to be on-demand by not specifying SpotPrice
                     }
-                    for idx, (instance_type, weight) in enumerate(template.vm_types_on_demand.items())
+                    for idx, (instance_type, weight) in enumerate(template.instance_types_ondemand.items())
                 ]
                 
                 # Combine both types of overrides
@@ -375,9 +396,9 @@ class SpotFleetHandler(AWSHandler):
                         'InstanceType': instance_type,
                         'WeightedCapacity': weight,
                         'Priority': idx + 1,
-                        'SpotPrice': str(template.max_spot_price) if template.max_spot_price else None
+                        'SpotPrice': str(template.max_price) if template.max_price else None
                     }
-                    for idx, (instance_type, weight) in enumerate(template.vm_types.items())
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items())
                 ]
 
         # Add subnet configuration
@@ -386,29 +407,29 @@ class SpotFleetHandler(AWSHandler):
                 fleet_config['LaunchTemplateConfigs'][0]['Overrides'] = []
             
             # For heterogeneous price type with on-demand instances
-            if template.price_type == "heterogeneous" and template.vm_types_on_demand and template.vm_types:
+            if template.price_type == "heterogeneous" and template.instance_types_ondemand and template.instance_types:
                 # Create spot instance overrides with subnets
                 spot_overrides = []
                 for subnet_id in template.subnet_ids:
-                    for idx, (instance_type, weight) in enumerate(template.vm_types.items()):
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items()):
                         override = {
                             'SubnetId': subnet_id,
                             'InstanceType': instance_type,
                             'WeightedCapacity': weight,
                             'Priority': idx + 1,
-                            'SpotPrice': str(template.max_spot_price) if template.max_spot_price else None
+                            'SpotPrice': str(template.max_price) if template.max_price else None
                         }
                         spot_overrides.append(override)
                 
                 # Create on-demand instance overrides with subnets
                 ondemand_overrides = []
                 for subnet_id in template.subnet_ids:
-                    for idx, (instance_type, weight) in enumerate(template.vm_types_on_demand.items()):
+                    for idx, (instance_type, weight) in enumerate(template.instance_types_ondemand.items()):
                         override = {
                             'SubnetId': subnet_id,
                             'InstanceType': instance_type,
                             'WeightedCapacity': weight,
-                            'Priority': idx + len(template.vm_types) + 1
+                            'Priority': idx + len(template.instance_types) + 1
                             # No SpotPrice for on-demand instances
                         }
                         ondemand_overrides.append(override)
@@ -421,18 +442,18 @@ class SpotFleetHandler(AWSHandler):
                             f"{len(spot_overrides)} spot instance overrides, "
                             f"{len(ondemand_overrides)} on-demand instance overrides")
             # If we have both instance types and subnets, create all combinations
-            elif template.vm_types:
+            elif template.instance_types:
                 overrides = []
                 for subnet_id in template.subnet_ids:
-                    for idx, (instance_type, weight) in enumerate(template.vm_types.items()):
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items()):
                         override = {
                             'SubnetId': subnet_id,
                             'InstanceType': instance_type,
                             'WeightedCapacity': weight,
                             'Priority': idx + 1
                         }
-                        if template.max_spot_price:
-                            override['SpotPrice'] = str(template.max_spot_price)
+                        if template.max_price:
+                            override['SpotPrice'] = str(template.max_price)
                         overrides.append(override)
                 fleet_config['LaunchTemplateConfigs'][0]['Overrides'] = overrides
             else:
@@ -460,15 +481,27 @@ class SpotFleetHandler(AWSHandler):
         
         return strategy_map.get(strategy, "lowestPrice")
         
-    def _monitor_spot_prices(self, template: Template) -> Dict[str, float]:
+    def _monitor_spot_prices(self, aws_template: AWSTemplate) -> Dict[str, float]:
         """Monitor current spot prices in specified regions/AZs."""
         try:
             prices = {}
+            instance_types = []
+            
+            # Get instance types from template
+            if hasattr(aws_template, 'instance_types') and aws_template.instance_types:
+                instance_types = list(aws_template.instance_types.keys())
+            elif hasattr(aws_template, 'instance_type') and aws_template.instance_type:
+                instance_types = [aws_template.instance_type]
+            
+            if not instance_types:
+                self._logger.warning("No instance types found for spot price monitoring")
+                return {}
+            
             price_history = self._retry_with_backoff(
                 lambda: self._paginate(
                     self.aws_client.ec2_client.describe_spot_price_history,
                     'SpotPriceHistory',
-                    InstanceTypes=list(template.vm_types.keys()) if template.vm_types else [template.vm_type],
+                    InstanceTypes=instance_types,
                     ProductDescriptions=['Linux/UNIX']
                 )
             )

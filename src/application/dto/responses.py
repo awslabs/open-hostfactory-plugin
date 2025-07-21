@@ -27,19 +27,38 @@ from src.application.request.dto import (
     CleanupResourcesResponse,
     RequestSummaryDTO
 )
-from src.application.template.dto import TemplateDTO, TemplateListResponse
+# Templates use domain objects directly with scheduler strategy for formatting
+from src.domain.template.aggregate import Template
+from src.application.dto.system import (
+    ProviderConfigDTO,
+    ValidationResultDTO,
+    SystemStatusDTO,
+    ProviderMetricsDTO,
+    ProviderHealthDTO,
+    ProviderCapabilitiesDTO,
+    ProviderStrategyConfigDTO,
+    ValidationDTO
+)
 
 __all__ = [
     'BaseDTO',
     'MachineDTO',
     'RequestDTO',
-    'TemplateDTO',
-    'TemplateListResponse',
+    'Template',  # Domain object used directly
     'RequestSummaryDTO',
     'MachineHealthDTO',
     'RequestStatusResponse',
     'ReturnRequestResponse',
     'RequestMachinesResponse',
     'RequestReturnMachinesResponse',
-    'CleanupResourcesResponse'
+    'CleanupResourcesResponse',
+    # System DTOs
+    'ProviderConfigDTO',
+    'ValidationResultDTO',
+    'SystemStatusDTO',
+    'ProviderMetricsDTO',
+    'ProviderHealthDTO',
+    'ProviderCapabilitiesDTO',
+    'ProviderStrategyConfigDTO',
+    'ValidationDTO'
 ]

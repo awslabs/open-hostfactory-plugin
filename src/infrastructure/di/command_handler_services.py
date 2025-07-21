@@ -1,19 +1,10 @@
-"""Command handler service registrations for dependency injection."""
-from typing import Optional, Dict, Any, TYPE_CHECKING
+"""Command handler service registrations for dependency injection.
+
+All command handlers are now automatically discovered and registered via
+@command_handler decorators through the Handler Discovery System.
+"""
 
 from src.infrastructure.di.container import DIContainer
-from src.domain.base.ports import LoggingPort
-from src.providers.base.strategy import ProviderContext
-from src.infrastructure.di.buses import CommandBus
-
-# Import command handlers
-from src.application.machine.handlers import (
-    ConvertMachineStatusCommandHandler,
-    ConvertBatchMachineStatusCommandHandler,
-    ValidateProviderStateCommandHandler,
-    UpdateMachineStatusCommandHandler,
-    CleanupMachineResourcesCommandHandler
-)
 
 
 def register_command_handler_services(container: DIContainer) -> None:
@@ -31,6 +22,12 @@ def register_command_handler_services(container: DIContainer) -> None:
     # Register system command handlers
     _register_system_command_handlers(container)
     
+    # Register provider command handlers
+    _register_provider_command_handlers(container)
+    
+    # Register cleanup command handlers
+    _register_cleanup_command_handlers(container)
+    
     # Register CLI command handlers
     _register_cli_command_handlers(container)
 
@@ -38,80 +35,49 @@ def register_command_handler_services(container: DIContainer) -> None:
 def _register_machine_command_handlers(container: DIContainer) -> None:
     """Register machine-related command handlers."""
     
-    container.register_singleton(ConvertMachineStatusCommandHandler)
-    
-    container.register_singleton(ConvertBatchMachineStatusCommandHandler)
-    
-    container.register_singleton(ValidateProviderStateCommandHandler)
-    
-    container.register_singleton(UpdateMachineStatusCommandHandler)
-    
-    container.register_singleton(CleanupMachineResourcesCommandHandler)
+    # All machine command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
 
 
 def _register_request_command_handlers(container: DIContainer) -> None:
     """Register request-related command handlers."""
     
-    # Import request command handlers
-    from src.application.commands.request_handlers import (
-        CreateMachineRequestHandler,
-        CreateReturnRequestHandler,
-        UpdateRequestStatusHandler,
-        CancelRequestHandler,
-        CompleteRequestHandler
-    )
-    
-    try:
-        # Use direct registration with @injectable decorator
-        container.register_singleton(CreateMachineRequestHandler)
-        container.register_singleton(CreateReturnRequestHandler)
-        container.register_singleton(UpdateRequestStatusHandler)
-        container.register_singleton(CancelRequestHandler)
-        container.register_singleton(CompleteRequestHandler)
-    except Exception as e:
-        logger = container.get(LoggingPort)
-        logger.warning(f"Failed to register some request command handlers: {e}")
+    # All request command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
 
 
 def _register_template_command_handlers(container: DIContainer) -> None:
     """Register template-related command handlers."""
     
-    # Import template command handlers
-    try:
-        from src.application.commands.template_handlers import (
-            CreateTemplateHandler,
-            UpdateTemplateHandler,
-            DeleteTemplateHandler,
-            ValidateTemplateHandler
-        )
-        
-        # Use direct registration with @injectable decorator
-        container.register_singleton(CreateTemplateHandler)
-        container.register_singleton(UpdateTemplateHandler)
-        container.register_singleton(DeleteTemplateHandler)
-        container.register_singleton(ValidateTemplateHandler)
-    except ImportError as e:
-        logger = container.get(LoggingPort)
-        logger.debug(f"Template command handlers not available: {e}")
+    # All template command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
 
 
 def _register_system_command_handlers(container: DIContainer) -> None:
     """Register system-related command handlers."""
     
-    # Import system command handlers
-    try:
-        from src.application.commands.system_handlers import (
-            MigrateRepositoryHandler,
-            HealthCheckHandler,
-            CleanupResourcesHandler
-        )
-        
-        container.register_singleton(MigrateRepositoryHandler)
-        container.register_singleton(HealthCheckHandler)
-        container.register_singleton(CleanupResourcesHandler)
-    except ImportError as e:
-        logger = container.get(LoggingPort)
-        logger.debug(f"System command handlers not available: {e}")
+    # All system command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
+
+
+def _register_provider_command_handlers(container: DIContainer) -> None:
+    """Register provider-related command handlers."""
+    
+    # All provider command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
+
+
+def _register_cleanup_command_handlers(container: DIContainer) -> None:
+    """Register cleanup-related command handlers."""
+    
+    # All cleanup command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
 
 
 def register_command_handlers_with_bus(container: DIContainer) -> None:
@@ -216,21 +182,10 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
 
 
 def _register_cli_command_handlers(container: DIContainer) -> None:
-    """Register CLI command handlers with proper dependency injection."""
+    """Register CLI-related command handlers."""
     
-    # Import CLI handlers
-    from src.interface.template_command_handlers import GetAvailableTemplatesCLIHandler
-    from src.infrastructure.di.buses import QueryBus, CommandBus
-    from src.application.template.format_service import TemplateFormatService
-    from src.domain.base.ports import LoggingPort
-    
-    # Register GetAvailableTemplatesCLIHandler with constructor injection
-    container.register_singleton(
-        GetAvailableTemplatesCLIHandler,
-        lambda c: GetAvailableTemplatesCLIHandler(
-            query_bus=c.get(QueryBus),
-            command_bus=c.get(CommandBus),
-            format_service=c.get(TemplateFormatService),
-            logger=c.get(LoggingPort)
-        )
-    )
+    # All CLI command handlers are now automatically discovered and registered
+    # via @command_handler decorators through the Handler Discovery System
+    pass
+
+

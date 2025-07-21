@@ -380,103 +380,30 @@ class TestApplicationDTOsComprehensive:
 
 @pytest.mark.unit
 @pytest.mark.application
-class TestApplicationServiceComprehensive:
-    """Comprehensive tests for application service."""
+class TestCQRSMigrationValidation:
+    """Test that CQRS migration is complete and working."""
 
-    def test_application_service_exists(self):
-        """Test that application service exists."""
-        try:
-            from src.application.service import ApplicationService
-            assert ApplicationService is not None
-        except ImportError:
-            pytest.skip("ApplicationService not available")
+    def test_cqrs_buses_exist(self):
+        """Test that CQRS buses exist and replace ApplicationService."""
+        from src.infrastructure.di.buses import CommandBus, QueryBus
+        assert CommandBus is not None
+        assert QueryBus is not None
 
-    def test_application_service_initialization(self):
-        """Test application service initialization."""
-        try:
-            from src.application.service import ApplicationService
-            
-            # Try to create instance with mocked dependencies
-            mock_deps = [Mock() for _ in range(20)]  # Create many mocks
-            
-            service = None
-            for i in range(len(mock_deps) + 1):
-                try:
-                    if i == 0:
-                        service = ApplicationService()
-                    else:
-                        service = ApplicationService(*mock_deps[:i])
-                    break
-                except TypeError:
-                    continue
-            
-            if service:
-                assert service is not None
-                # Test basic attributes
-                assert hasattr(service, '__class__')
-                
-        except ImportError:
-            pytest.skip("ApplicationService not available")
+    def test_command_handlers_exist(self):
+        """Test that command handlers exist."""
+        from src.application.commands.request_handlers import CreateMachineRequestHandler
+        assert CreateMachineRequestHandler is not None
 
-    @pytest.mark.asyncio
-    async def test_application_service_methods(self):
-        """Test application service methods."""
+    def test_query_handlers_exist(self):
+        """Test that query handlers exist."""
+        # Check if query handlers exist
         try:
-            from src.application.service import ApplicationService
-            
-            # Create service with mocked dependencies
-            mock_deps = [Mock() for _ in range(20)]
-            service = None
-            
-            for i in range(len(mock_deps) + 1):
-                try:
-                    if i == 0:
-                        service = ApplicationService()
-                    else:
-                        service = ApplicationService(*mock_deps[:i])
-                    break
-                except TypeError:
-                    continue
-            
-            if service:
-                # Find public methods
-                methods = [name for name, method in inspect.getmembers(service)
-                          if callable(method) and not name.startswith('_')]
-                
-                assert len(methods) > 0, "ApplicationService should have public methods"
-                
-                # Test some common methods if they exist
-                common_methods = [
-                    'get_templates', 'create_request', 'get_request_status',
-                    'cancel_request', 'return_machines', 'list_machines'
-                ]
-                
-                for method_name in common_methods:
-                    if hasattr(service, method_name):
-                        method = getattr(service, method_name)
-                        if inspect.iscoroutinefunction(method):
-                            try:
-                                # Mock any dependencies
-                                for attr_name in dir(service):
-                                    attr = getattr(service, attr_name)
-                                    if hasattr(attr, 'send'):
-                                        attr.send = AsyncMock(return_value={})
-                                    if hasattr(attr, 'find_all'):
-                                        attr.find_all = AsyncMock(return_value=[])
-                                
-                                # Try calling method
-                                if method_name in ['get_templates', 'list_machines']:
-                                    await method()
-                                else:
-                                    # Methods that need parameters
-                                    await method('test-id')
-                                
-                            except Exception:
-                                # Method might require specific parameters
-                                pass
-                
+            from src.application.queries.handlers import GetTemplateHandler
+            assert GetTemplateHandler is not None
         except ImportError:
-            pytest.skip("ApplicationService not available")
+            # Query handlers might be in different location
+            from src.application.template.query_handlers import GetTemplateHandler
+            assert GetTemplateHandler is not None
 
 
 @pytest.mark.unit

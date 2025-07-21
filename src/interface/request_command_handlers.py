@@ -1,220 +1,221 @@
 """Request-related command handlers for the interface layer."""
-from typing import Dict, Any, Optional
+from typing import Dict, Any, TYPE_CHECKING
+from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.infrastructure.di.container import get_container
+from src.infrastructure.di.buses import QueryBus, CommandBus
+from src.domain.base.ports.scheduler_port import SchedulerPort
 
-from src.application.base.command_handler import CLICommandHandler
-from src.application.request.dto import RequestStatusResponse
+if TYPE_CHECKING:
+    import argparse
 
 
-class GetRequestStatusCLIHandler(CLICommandHandler):
-    """Handler for getRequestStatus command."""
+@handle_interface_exceptions(context="get_request_status", interface_type="cli")
+async def handle_get_request_status(args: 'argparse.Namespace') -> Dict[str, Any]:
+    """
+    Handle get request status operations.
     
-    def handle(self, command) -> Dict[str, Any]:
-        """
-        Handle getRequestStatus command.
+    Args:
+        args: Modern argument namespace with resource/action structure
         
-        Args:
-            command: Command object or arguments
-            
-        Returns:
-            Request status information
-            
-        Raises:
-            ValueError: If request ID is not provided
-        """
-        input_data = self.process_input(command)
+    Returns:
+        Request status information
+    """
+    container = get_container()
+    query_bus = container.get(QueryBus)
+    scheduler_strategy = container.get(SchedulerPort)
+    
+    # Extract request ID from args or input_data (HostFactory compatibility)
+    request_id = None
+    
+    # Check for input data from -f/--data flags first (HostFactory style)
+    if hasattr(args, 'input_data') and args.input_data:
+        input_data = args.input_data
+        request_id = input_data.get('request_id') or input_data.get('requestId')
+    else:
+        # Use command line arguments (modern CLI style)
+        if hasattr(args, 'request_ids') and args.request_ids:
+            # Take the first request ID from the list
+            request_id = args.request_ids[0]
+        elif hasattr(args, 'request_id') and args.request_id:
+            request_id = args.request_id
+    
+    if not request_id:
+        return {
+            "error": "No request ID provided",
+            "message": "Request ID is required"
+        }
+    
+    from src.application.dto.queries import GetRequestQuery
+    query = GetRequestQuery(request_id=request_id)
+    request_dto = await query_bus.execute(query)
+    
+    # Pass domain DTO to scheduler strategy - NO formatting logic here
+    return scheduler_strategy.convert_domain_to_hostfactory_output(
+        "getRequestStatus", 
+        request_dto
+    )
+
+
+@handle_interface_exceptions(context="request_machines", interface_type="cli")
+async def handle_request_machines(args: 'argparse.Namespace') -> Dict[str, Any]:
+    """
+    Handle request machines operations.
+    
+    Args:
+        args: Modern argument namespace with resource/action structure
         
-        # Determine request_id from either input data or command line
-        request_id = None
-        if input_data and 'requests' in input_data:
-            requests = input_data['requests']
-            if isinstance(requests, list) and requests:
-                request_id = requests[0].get('requestId')
-            elif isinstance(requests, dict):
-                request_id = requests.get('requestId')  # nosec B113 - This is a dictionary access, not an HTTP request
-        elif hasattr(command, 'request_id') and command.request_id:
-            request_id = command.request_id
-            
-        if not request_id:
-            self.logger.error("Request ID is required")
-            raise ValueError("Request ID is required")
-            
-        # Execute via CQRS QueryBus
-        self.logger.debug(f"Getting request status for {request_id}")
-        
-        # Get request with machine information based on long flag using CQRS
-        from src.application.request.queries import GetRequestStatusQuery
-        query = GetRequestStatusQuery(
-            request_id=request_id,
-            include_machines=command.long if hasattr(command, 'long') else False
-        )
-        request_dto = self._query_bus.dispatch(query)
-        
-        # Convert DTO to response format
-        if request_dto:
-            request_dict = request_dto.model_dump() if hasattr(request_dto, 'model_dump') else request_dto
+    Returns:
+        Machine request results in HostFactory format
+    """
+    container = get_container()
+    command_bus = container.get(CommandBus)
+    scheduler_strategy = container.get(SchedulerPort)
+    
+    from src.application.dto.commands import CreateRequestCommand
+    from src.infrastructure.mocking.dry_run_context import is_dry_run_active
+    
+    # Extract parameters from args or input_data (HostFactory compatibility)
+    template_id = None
+    machine_count = None
+    
+    # Check for input data from -f/--data flags first (HostFactory style)
+    if hasattr(args, 'input_data') and args.input_data:
+        input_data = args.input_data
+        # Support both HostFactory format and direct format
+        if 'template' in input_data:
+            # HostFactory nested format: {"template": {"templateId": "...", "machineCount": ...}}
+            template_data = input_data['template']
+            template_id = template_data.get('templateId') or template_data.get('template_id')
+            machine_count = template_data.get('machineCount') or template_data.get('machine_count')
         else:
-            # If it's already a DTO, convert to dict
-            request_dict = request_dto.to_dict() if hasattr(request_dto, 'to_dict') else {}
-            
-        # Create response using RequestStatusResponse
-        response = RequestStatusResponse(
-            requests=[request_dict],
-            status="complete",
-            message="Status retrieved successfully."
-        )
-        
-        result = response.to_dict()
-        self.logger.debug(f"Request status result: {result}")
-        return result
-
-
-class RequestMachinesCLIHandler(CLICommandHandler):
-    """Handler for requestMachines command."""
+            # Direct format: {"template_id": "...", "machine_count": ...}
+            template_id = input_data.get('template_id') or input_data.get('templateId')
+            machine_count = input_data.get('machine_count') or input_data.get('machineCount')
+    else:
+        # Use command line arguments (modern CLI style)
+        template_id = getattr(args, 'template_id', None)
+        machine_count = getattr(args, 'machine_count', None)
     
-    def handle(self, command) -> Dict[str, Any]:
-        """
-        Handle requestMachines command.
+    if not template_id:
+        return {
+            "error": "Template ID is required",
+            "message": "Template ID must be provided"
+        }
+    
+    if not machine_count:
+        return {
+            "error": "Machine count is required", 
+            "message": "Machine count must be provided"
+        }
+    
+    # Check if dry-run is active and add to metadata
+    metadata = getattr(args, 'metadata', {})
+    metadata['dry_run'] = is_dry_run_active()
+    
+    command = CreateRequestCommand(
+        template_id=template_id,
+        requested_count=int(machine_count),
+        metadata=metadata
+    )
+    
+    # Execute command and get request ID - let exceptions bubble up
+    request_id = await command_bus.execute(command)
+    
+    # Get the request details to include resource ID information
+    try:
+        from src.application.dto.queries import GetRequestQuery
+        query_bus = container.get(QueryBus)
+        query = GetRequestQuery(request_id=request_id)
+        request_dto = await query_bus.execute(query)
         
-        Args:
-            command: Command object or arguments
-            
-        Returns:
-            Request creation result
-        """
-        input_data = self.process_input(command)
+        # Extract resource IDs for the message
+        resource_ids = getattr(request_dto, 'resource_ids', []) if request_dto else []
         
-        if not input_data:
-            self.logger.error("Input data is required for requestMachines")
-            raise ValueError("Input data is required for requestMachines")
-            
-        # Extract template_id and machine_count from input
-        template_id = input_data.get('templateId')
-        machine_count = input_data.get('machineCount', 1)
-        
-        if not template_id:
-            self.logger.error("Template ID is required")
-            raise ValueError("Template ID is required")
-            
-        # Execute via CQRS CommandBus
-        self.logger.debug(f"Requesting {machine_count} machines with template {template_id}")
-        
-        # Import dry-run context checker
-        from src.infrastructure.mocking.dry_run_context import is_dry_run_active
-        
-        from src.application.dto.commands import CreateRequestCommand
-        cmd = CreateRequestCommand(
-            template_id=template_id,
-            machine_count=machine_count,
-            timeout=input_data.get('timeout', 3600),
-            tags=input_data.get('tags', {}),
-            metadata=input_data.get('metadata', {}),
-            dry_run=is_dry_run_active()  # Propagate global dry-run context
-        )
-        request_id = self._command_bus.dispatch(cmd)
-        
-        result = {
-            "requestId": request_id,
-            "message": "Request created successfully",
-            "templateId": template_id,
-            "machineCount": machine_count
+        # Create enhanced data with resource ID information
+        request_data = {
+            'request_id': request_id,
+            'resource_ids': resource_ids,
+            'template_id': template_id
         }
         
-        self.logger.debug(f"Request machines result: {result}")
-        return result
+        # Return success response in HostFactory format with resource ID info
+        if scheduler_strategy:
+            return scheduler_strategy.convert_domain_to_hostfactory_output(
+                "requestMachines", 
+                request_data
+            )
+        else:
+            # Fallback to HostFactory format if no scheduler strategy
+            resource_id_msg = f" Resource ID: {resource_ids[0]}" if resource_ids else ""
+            return {
+                "requestId": str(request_id),
+                "message": f"Request VM success from AWS.{resource_id_msg}"
+            }
+    except Exception as e:
+        # Fallback if we can't get request details
+        from src.domain.base.ports import LoggingPort
+        container.get(LoggingPort).warning(f"Could not get request details for resource ID: {e}")
+        if scheduler_strategy:
+            return scheduler_strategy.convert_domain_to_hostfactory_output(
+                "requestMachines", 
+                request_id
+            )
+        else:
+            return {
+                "requestId": str(request_id),
+                "message": "Request VM success from AWS."
+            }
 
 
-class GetReturnRequestsCLIHandler(CLICommandHandler):
-    """Handler for getReturnRequests command."""
+@handle_interface_exceptions(context="get_return_requests", interface_type="cli")
+async def handle_get_return_requests(args: 'argparse.Namespace') -> Dict[str, Any]:
+    """
+    Handle get return requests operations.
     
-    def handle(self, command) -> Dict[str, Any]:
-        """
-        Handle getReturnRequests command.
+    Args:
+        args: Modern argument namespace with resource/action structure
         
-        Args:
-            command: Command object or arguments
-            
-        Returns:
-            Return requests information
-        """
-        # Execute via CQRS QueryBus
-        self.logger.debug("Getting return requests")
-        
-        from src.application.request.queries import ListRequestsQuery
-        query = ListRequestsQuery(
-            status="return_requested",
-            limit=100
-        )
-        return_requests = self._query_bus.dispatch(query)
-        
-        # Convert to response format
-        requests_list = []
-        if return_requests:
-            for req in return_requests:
-                if hasattr(req, 'to_dict'):
-                    requests_list.append(req.to_dict())
-                elif hasattr(req, 'model_dump'):
-                    requests_list.append(req.model_dump())
-                else:
-                    requests_list.append(req)
-        
-        result = {
-            "returnRequests": requests_list,
-            "count": len(requests_list),
-            "message": "Return requests retrieved successfully"
-        }
-        
-        self.logger.debug(f"Return requests result: {result}")
-        return result
-
-
-class RequestReturnMachinesCLIHandler(CLICommandHandler):
-    """Handler for requestReturnMachines command."""
+    Returns:
+        Return requests list
+    """
+    container = get_container()
+    query_bus = container.get(QueryBus)
+    scheduler_strategy = container.get(SchedulerPort)
     
-    def handle(self, command) -> Dict[str, Any]:
-        """
-        Handle requestReturnMachines command.
+    from src.application.dto.queries import ListReturnRequestsQuery
+    query = ListReturnRequestsQuery()
+    requests = await query_bus.execute(query)
+    
+    return {
+        "requests": requests,
+        "count": len(requests),
+        "message": "Return requests retrieved successfully"
+    }
+
+
+@handle_interface_exceptions(context="request_return_machines", interface_type="cli")
+async def handle_request_return_machines(args: 'argparse.Namespace') -> Dict[str, Any]:
+    """
+    Handle request return machines operations.
+    
+    Args:
+        args: Modern argument namespace with resource/action structure
         
-        Args:
-            command: Command object or arguments
-            
-        Returns:
-            Return request creation result
-        """
-        input_data = self.process_input(command)
-        
-        # Handle different input formats
-        machine_ids = []
-        if input_data:
-            if 'machines' in input_data:
-                machines = input_data['machines']
-                if isinstance(machines, list):
-                    machine_ids = [m.get('machineId') if isinstance(m, dict) else str(m) for m in machines]
-                elif isinstance(machines, dict):
-                    machine_ids = [machines.get('machineId')]
-            elif 'machineIds' in input_data:
-                machine_ids = input_data['machineIds']
-        
-        # Execute via CQRS CommandBus
-        self.logger.debug(f"Requesting return of machines: {machine_ids}")
-        
-        # Import dry-run context checker
-        from src.infrastructure.mocking.dry_run_context import is_dry_run_active
-        
-        from src.application.dto.commands import CreateReturnRequestCommand
-        cmd = CreateReturnRequestCommand(
-            machine_ids=machine_ids,
-            timeout=input_data.get('timeout', 3600) if input_data else 3600,
-            force_return=input_data.get('forceReturn', False) if input_data else False,
-            metadata=input_data.get('metadata', {}) if input_data else {},
-            dry_run=is_dry_run_active()  # Propagate global dry-run context
-        )
-        request_id = self._command_bus.dispatch(cmd)
-        
-        result = {
-            "requestId": request_id,
-            "message": "Return request created successfully",
-            "machineCount": len(machine_ids)
-        }
-        
-        self.logger.debug(f"Request return machines result: {result}")
-        return result
+    Returns:
+        Return request results
+    """
+    container = get_container()
+    command_bus = container.get(CommandBus)
+    scheduler_strategy = container.get(SchedulerPort)
+    
+    from src.application.dto.commands import CreateReturnRequestCommand
+    command = CreateReturnRequestCommand(
+        request_id=getattr(args, 'request_id', None),
+        machine_ids=getattr(args, 'machine_ids', [])
+    )
+    result = await command_bus.execute(command)
+    
+    return {
+        "result": result,
+        "message": "Return request created successfully"
+    }

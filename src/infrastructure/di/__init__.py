@@ -1,11 +1,11 @@
 """Dependency Injection package."""
-from src.infrastructure.di.container import (
+from .container import (
     DIContainer,
     get_container,
     reset_container
 )
-from src.infrastructure.di.services import (
-    register_services,
+from .services import (
+    register_all_services,
     create_handler
 )
 
@@ -13,6 +13,6 @@ __all__ = [
     'DIContainer', 
     'get_container', 
     'reset_container',
-    'register_services',
+    'register_all_services',
     'create_handler'
 ]

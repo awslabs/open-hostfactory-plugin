@@ -19,6 +19,10 @@ else
     exit 1
 fi
 
+# Disable Console Logging for HF Scripts
+HF_LOGGING_CONSOLE_ENABLED=${HF_LOGGING_CONSOLE_ENABLED:-false}
+export HF_LOGGING_CONSOLE_ENABLED
+
 # Determine execution mode
 if [ "$USE_LOCAL_DEV" = "true" ] || [ "$USE_LOCAL_DEV" = "1" ]; then
     # Local development mode - use src/run.py from project root
@@ -34,8 +38,44 @@ if [ "$USE_LOCAL_DEV" = "true" ] || [ "$USE_LOCAL_DEV" = "1" ]; then
         exit 1
     fi
     
-    # Execute the Python script with all arguments
-    exec $PYTHON_CMD "${PROJECT_ROOT}/src/run.py" "$@"
+    # Parse arguments to separate global flags from command
+    global_args=()
+    command_args=()
+    
+    # First, collect all arguments
+    all_args=("$@")
+    
+    # Separate global flags from command arguments
+    i=0
+    while [ $i -lt ${#all_args[@]} ]; do
+        arg="${all_args[$i]}"
+        case "$arg" in
+            -f|--file|-d|--data|--config|--log-level|--format|--output|--scheduler)
+                # These flags need a value
+                global_args+=("$arg")
+                i=$((i + 1))
+                if [ $i -lt ${#all_args[@]} ]; then
+                    global_args+=("${all_args[$i]}")
+                fi
+                ;;
+            --quiet|--verbose|--dry-run)
+                # These are boolean flags
+                global_args+=("$arg")
+                ;;
+            -*)
+                # Other flags
+                global_args+=("$arg")
+                ;;
+            *)
+                # Non-flag arguments go to command
+                command_args+=("$arg")
+                ;;
+        esac
+        i=$((i + 1))
+    done
+    
+    # Execute the Python script with global args first, then command args
+    exec $PYTHON_CMD "${PROJECT_ROOT}/src/run.py" "${global_args[@]}" "${command_args[@]}"
     
 else
     # Package mode - use installed command

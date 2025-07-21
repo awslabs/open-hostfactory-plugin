@@ -4,7 +4,7 @@
 from .schemas import (
     AppConfig, validate_config,
     ProviderConfig,
-    TemplateConfig, AMIResolutionConfig,
+    TemplateConfig,
     StorageConfig, LoggingConfig, PerformanceConfig,
     NamingConfig, RequestConfig, DatabaseConfig, EventsConfig,
     StatusValuesConfig, BackoffConfig, LimitsConfig, CircuitBreakerConfig,
@@ -28,7 +28,6 @@ __all__ = [
     
     # Specific configurations
     'TemplateConfig',
-    'AMIResolutionConfig', 
     'StorageConfig',
     'LoggingConfig',
     'PerformanceConfig',

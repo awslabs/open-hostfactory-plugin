@@ -318,9 +318,46 @@ python src/run.py templates list --legacy --format json
 
 ## Extension Points
 
+### Intelligent Attribute Generation
+
+The plugin automatically generates HostFactory attributes with intelligent CPU and RAM specifications based on AWS instance types:
+
+```json
+{
+  "templateId": "custom-template",
+  "attributes": {
+    "type": ["String", "X86_64"],
+    "ncpus": ["Numeric", "4"],
+    "nram": ["Numeric", "16384"]
+  }
+}
+```
+
+**Instance Type Mapping**:
+The plugin includes built-in CPU and RAM mappings for common AWS instance types:
+
+| Instance Type | vCPUs | RAM (MB) | Generated Attributes |
+|---------------|-------|----------|---------------------|
+| `t2.micro` | 1 | 1024 | `ncpus: ["Numeric", "1"], nram: ["Numeric", "1024"]` |
+| `t2.small` | 1 | 2048 | `ncpus: ["Numeric", "1"], nram: ["Numeric", "2048"]` |
+| `t2.medium` | 2 | 4096 | `ncpus: ["Numeric", "2"], nram: ["Numeric", "4096"]` |
+| `t3.medium` | 2 | 4096 | `ncpus: ["Numeric", "2"], nram: ["Numeric", "4096"]` |
+| `m5.large` | 2 | 8192 | `ncpus: ["Numeric", "2"], nram: ["Numeric", "8192"]` |
+| `m5.xlarge` | 4 | 16384 | `ncpus: ["Numeric", "4"], nram: ["Numeric", "16384"]` |
+| `c5.large` | 2 | 4096 | `ncpus: ["Numeric", "2"], nram: ["Numeric", "4096"]` |
+| `c5.xlarge` | 4 | 8192 | `ncpus: ["Numeric", "4"], nram: ["Numeric", "8192"]` |
+| `r5.large` | 2 | 16384 | `ncpus: ["Numeric", "2"], nram: ["Numeric", "16384"]` |
+| `r5.xlarge` | 4 | 32768 | `ncpus: ["Numeric", "4"], nram: ["Numeric", "32768"]` |
+
+**Automatic Detection**:
+- Attributes are automatically generated based on the `instance_type` or `instanceType` field in templates
+- Supports both snake_case (`instance_type`) and camelCase (`instanceType`) field names
+- Falls back to `t2.micro` specifications (1 vCPU, 1024 MB RAM) for unknown instance types
+- Always includes the standard `type: ["String", "X86_64"]` attribute
+
 ### Custom Attributes
 
-The plugin supports HostFactory custom attributes:
+The plugin also supports additional HostFactory custom attributes:
 
 ```json
 {

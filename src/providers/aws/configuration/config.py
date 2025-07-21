@@ -20,6 +20,17 @@ class HandlerDefaultsConfig(BaseModel):
     default_handler: str = Field("ec2_fleet", description="Default handler to use")
 
 
+class LaunchTemplateConfiguration(BaseModel):
+    """Launch template configuration."""
+    
+    create_per_request: bool = Field(True, description="Create launch template per request")
+    naming_strategy: str = Field("request_based", description="Launch template naming strategy")
+    version_strategy: str = Field("incremental", description="Launch template version strategy")
+    reuse_existing: bool = Field(True, description="Reuse existing launch templates")
+    cleanup_old_versions: bool = Field(False, description="Cleanup old launch template versions")
+    max_versions_per_template: int = Field(10, description="Maximum versions per launch template")
+
+
 class HandlersConfig(BaseModel):
     """Handlers configuration."""
     
@@ -87,6 +98,9 @@ class AWSProviderConfig(BaseProviderConfig):
     # Handler configuration
     handlers: HandlersConfig = Field(default_factory=lambda: HandlersConfig())
     
+    # Launch template configuration
+    launch_template: LaunchTemplateConfiguration = Field(default_factory=lambda: LaunchTemplateConfiguration())
+    
     # Symphony/Legacy configuration fields
     credential_file: Optional[str] = Field(None, description="Path to AWS credentials file")
     key_file: Optional[str] = Field(None, description="Path to directory containing key pair files")
@@ -137,10 +151,3 @@ class AWSProviderConfig(BaseProviderConfig):
         if self.proxy_host and self.proxy_port is None:
             raise ValueError("proxy_port is required when proxy_host is specified")
         return self
-        has_credential_file = bool(self.credential_file)
-        
-        if not (has_profile or has_role or has_keys or has_credential_file):
-            raise ValueError(
-                "At least one authentication method must be provided: "
-                "profile, role_arn, credential_file, or access_key_id + secret_access_key"
-            )

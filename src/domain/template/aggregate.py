@@ -6,8 +6,12 @@ from datetime import datetime
 
 
 class Template(BaseModel):
-    """Template configuration value object - represents VM template configuration."""
-    model_config = ConfigDict(frozen=False, validate_assignment=True)
+    """Template configuration value object with both snake_case and camelCase support via aliases."""
+    model_config = ConfigDict(
+        frozen=False, 
+        validate_assignment=True,
+        populate_by_name=True  # Allow both field names and aliases
+    )
     
     # Core template fields (provider-agnostic)
     template_id: str
@@ -28,11 +32,37 @@ class Template(BaseModel):
     allocation_strategy: str = "lowest_price"
     max_price: Optional[float] = None
     
+    # Instance types configuration (extensible for all providers)
+    instance_types: Dict[str, int] = Field(default_factory=dict)  # type -> weight
+    primary_instance_type: Optional[str] = None                   # for simple cases
+    
+    # Network configuration (generic concepts)
+    network_zones: List[str] = Field(default_factory=list)       # subnets, zones, regions
+    public_ip_assignment: Optional[bool] = None                  # generic concept
+    
+    # Storage configuration (generic concepts)
+    root_volume_size: Optional[int] = None                       # root disk size
+    root_volume_type: Optional[str] = None                       # disk type
+    root_volume_iops: Optional[int] = None                       # performance
+    root_volume_throughput: Optional[int] = None                 # throughput
+    storage_encryption: Optional[bool] = None                    # encryption
+    encryption_key: Optional[str] = None                         # key reference
+    
+    # Access and security (generic concepts)
+    key_pair_name: Optional[str] = None                          # SSH key, etc.
+    user_data: Optional[str] = None                              # cloud-init, etc.
+    instance_profile: Optional[str] = None                       # IAM role, service principal
+    
+    # Advanced configuration (extensible)
+    monitoring_enabled: Optional[bool] = None
+    
     # Tags and metadata
     tags: Dict[str, Any] = Field(default_factory=dict)
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
-    # Provider API (direct field for simplicity)
+    # Provider configuration (multi-provider support)
+    provider_type: Optional[str] = None
+    provider_name: Optional[str] = None
     provider_api: Optional[str] = None
     
     # Timestamps for tracking
@@ -66,20 +96,41 @@ class Template(BaseModel):
         super().__init__(**data)
     
     @model_validator(mode='after')
-    
     def validate_template(self) -> 'Template':
-        """Validate template configuration."""
+        """Validate template configuration - provider-agnostic validation only."""
+        if not self.template_id:
+            raise ValueError("template_id is required")
+        
         if self.max_instances <= 0:
             raise ValueError("max_instances must be greater than 0")
         
-        if not self.image_id:
-            raise ValueError("image_id is required")
+        return self
+    
+    @model_validator(mode='after')
+    def validate_provider_fields(self) -> 'Template':
+        """Validate provider field consistency following DDD principles."""
+        # If provider_name is specified, extract provider_type if not provided
+        if self.provider_name and not self.provider_type:
+            # Extract provider type from provider name (e.g., "aws-us-east-1" -> "aws")
+            if '-' in self.provider_name:
+                self.provider_type = self.provider_name.split('-')[0]
+            else:
+                # If no separator, assume the whole name is the provider type
+                self.provider_type = self.provider_name
         
-        if not self.subnet_ids:
-            raise ValueError("At least one subnet_id is required")
+        # Validate provider_name format if provided
+        if self.provider_name:
+            # Provider name should contain only alphanumeric, hyphens, and underscores
+            import re
+            if not re.match(r'^[a-zA-Z0-9_-]+$', self.provider_name):
+                raise ValueError("provider_name must contain only alphanumeric characters, hyphens, and underscores")
         
-        if not self.template_id:
-            raise ValueError("template_id is required")
+        # Validate provider_type format if provided
+        if self.provider_type:
+            # Provider type should be lowercase alphanumeric
+            import re
+            if not re.match(r'^[a-z0-9]+$', self.provider_type):
+                raise ValueError("provider_type must be lowercase alphanumeric")
         
         return self
     

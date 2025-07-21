@@ -1,137 +1,150 @@
 """
-Machine Event Handlers - DRY-compliant handlers using new architecture.
+Machine Event Handlers - CQRS-aligned handlers using BaseEventHandler pattern.
 
-These handlers replace the duplicated code in consolidated_event_handlers.py
-with a clean, maintainable architecture following DDD/SOLID/DRY principles.
+These handlers follow the same architectural patterns as BaseCommandHandler and
+BaseQueryHandler, ensuring consistency across all handler types in the CQRS system.
 """
 from typing import Optional
 
-# Import the new base classes and decorator
-from src.application.events.base import LoggingEventHandler
+from src.application.base.event_handlers import BaseLoggingEventHandler
 from src.application.events.decorators import event_handler
-
-# Import types - using string imports to avoid circular dependencies
-try:
-    from src.domain.base.events import DomainEvent
-    from src.domain.base.ports import LoggingPort
-except ImportError:
-    # Fallback for testing or when dependencies aren't available
-    DomainEvent = object
-    LoggingPort = object
+from src.domain.base.events import DomainEvent
+from src.domain.base.ports import LoggingPort, ErrorHandlingPort, EventPublisherPort
 
 
 @event_handler("MachineCreatedEvent")
-class MachineCreatedHandler(LoggingEventHandler):
-    """Handle machine creation events - DRY compliant."""
+class MachineCreatedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle machine creation events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format machine created message."""
-        fields = self.extract_fields(event, {
-            'template_id': 'unknown',
-            'instance_type': 'unknown',
-            'availability_zone': None
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize machine created handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format machine created log message."""
+        template_id = getattr(event, 'template_id', 'unknown')
+        instance_type = getattr(event, 'instance_type', 'unknown')
+        availability_zone = getattr(event, 'availability_zone', None)
         
         message = (
-            f"Machine created: {event.aggregate_id} | "
-            f"Template: {fields['template_id']} | "
-            f"Type: {fields['instance_type']}"
+            f"Machine created: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Template: {template_id} | "
+            f"Type: {instance_type}"
         )
         
-        if fields['availability_zone']:
-            message += f" | AZ: {fields['availability_zone']}"
+        if availability_zone:
+            message += f" | AZ: {availability_zone}"
         
         return message
 
 
 @event_handler("MachineStatusUpdatedEvent")
-class MachineStatusUpdatedHandler(LoggingEventHandler):
-    """Handle machine status update events - DRY compliant."""
+class MachineStatusUpdatedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle machine status update events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format machine status update message."""
-        fields = self.extract_fields(event, {
-            'old_status': 'unknown',
-            'new_status': 'unknown',
-            'reason': None
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize machine status updated handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format machine status updated log message."""
+        old_status = getattr(event, 'old_status', 'unknown')
+        new_status = getattr(event, 'new_status', 'unknown')
         
-        message = (
-            f"Machine status updated: {event.aggregate_id} | "
-            f"{fields['old_status']} → {fields['new_status']}"
+        return (
+            f"Machine status updated: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Status: {old_status} -> {new_status}"
         )
-        
-        if fields['reason']:
-            message += f" | Reason: {fields['reason']}"
-        
-        return message
 
 
 @event_handler("MachineTerminatedEvent")
-class MachineTerminatedHandler(LoggingEventHandler):
-    """Handle machine termination events - DRY compliant."""
+class MachineTerminatedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle machine termination events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format machine terminated message."""
-        fields = self.extract_fields(event, {
-            'reason': 'unknown',
-            'final_status': 'terminated'
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize machine terminated handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format machine terminated log message."""
+        reason = getattr(event, 'termination_reason', 'unknown')
         
         return (
-            f"Machine terminated: {event.aggregate_id} | "
-            f"Reason: {fields['reason']} | "
-            f"Final Status: {fields['final_status']}"
+            f"Machine terminated: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Reason: {reason}"
         )
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - warnings for unexpected terminations."""
+        reason = getattr(event, 'termination_reason', 'unknown')
+        if reason in ['user_requested', 'scheduled']:
+            return 'info'
+        else:
+            return 'warning'
 
 
 @event_handler("MachineHealthCheckEvent")
-class MachineHealthCheckHandler(LoggingEventHandler):
-    """Handle machine health check events - DRY compliant."""
+class MachineHealthCheckHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle machine health check events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format machine health check message."""
-        fields = self.extract_fields(event, {
-            'health_status': 'unknown',
-            'check_type': 'periodic',
-            'details': {}
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize machine health check handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format machine health check log message."""
+        health_status = getattr(event, 'health_status', 'unknown')
+        check_type = getattr(event, 'check_type', 'unknown')
         
-        message = (
-            f"Machine health check: {event.aggregate_id} | "
-            f"Status: {fields['health_status']} | "
-            f"Type: {fields['check_type']}"
+        return (
+            f"Machine health check: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Type: {check_type} | Status: {health_status}"
         )
-        
-        # Add details if available
-        if fields['details'] and isinstance(fields['details'], dict):
-            detail_items = []
-            for key, value in fields['details'].items():
-                detail_items.append(f"{key}: {value}")
-            if detail_items:
-                message += f" | Details: {', '.join(detail_items)}"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - warnings for unhealthy status."""
+        health_status = getattr(event, 'health_status', 'unknown')
+        if health_status == 'healthy':
+            return 'debug'  # Reduce noise for healthy checks
+        elif health_status == 'unhealthy':
+            return 'warning'
+        else:
+            return 'info'
 
 
 @event_handler("MachineErrorEvent")
-class MachineErrorHandler(LoggingEventHandler):
-    """Handle machine error events - DRY compliant."""
+class MachineErrorHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle machine error events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format machine error message."""
-        fields = self.extract_fields(event, {
-            'error_message': 'Unknown error',
-            'error_code': None,
-            'recovery_action': None
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize machine error handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format machine error log message."""
+        error_type = getattr(event, 'error_type', 'unknown')
+        error_message = getattr(event, 'error_message', 'No details available')
         
-        message = self.format_error_message(event, fields['error_message'])
-        
-        if fields['error_code']:
-            message += f" | Code: {fields['error_code']}"
-        
-        if fields['recovery_action']:
-            message += f" | Recovery: {fields['recovery_action']}"
-        
-        return message
+        return (
+            f"Machine error: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Type: {error_type} | Message: {error_message}"
+        )
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - errors for machine errors."""
+        return 'error'

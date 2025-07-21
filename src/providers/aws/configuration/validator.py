@@ -118,3 +118,6 @@ _aws_config_manager = AWSConfigManager()
 def get_aws_config_manager() -> AWSConfigManager:
     """Get the global AWS configuration manager."""
     return _aws_config_manager
+
+# Import AWSProviderConfig for compatibility
+from .config import AWSProviderConfig

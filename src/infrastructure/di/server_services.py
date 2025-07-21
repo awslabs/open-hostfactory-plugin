@@ -63,7 +63,7 @@ def _register_api_handlers(container: DIContainer) -> None:
         # Register template handler with constructor injection
         from src.api.handlers.get_available_templates_handler import GetAvailableTemplatesRESTHandler
         from src.infrastructure.di.buses import QueryBus, CommandBus
-        from src.application.template.format_service import TemplateFormatService
+        from src.domain.base.ports import SchedulerPort
         from src.monitoring.metrics import MetricsCollector
         
         if not container.is_registered(GetAvailableTemplatesRESTHandler):
@@ -72,7 +72,7 @@ def _register_api_handlers(container: DIContainer) -> None:
                 lambda c: GetAvailableTemplatesRESTHandler(
                     query_bus=c.get(QueryBus),
                     command_bus=c.get(CommandBus),
-                    format_service=c.get(TemplateFormatService),
+                    scheduler_strategy=c.get(SchedulerPort),
                     metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None
                 )
             )
@@ -84,7 +84,17 @@ def _register_api_handlers(container: DIContainer) -> None:
         # Register request machines handler
         from src.api.handlers.request_machines_handler import RequestMachinesRESTHandler
         if not container.is_registered(RequestMachinesRESTHandler):
-            container.register_singleton(RequestMachinesRESTHandler)
+            container.register_singleton(
+                RequestMachinesRESTHandler,
+                lambda c: RequestMachinesRESTHandler(
+                    query_bus=c.get(QueryBus),
+                    command_bus=c.get(CommandBus),
+                    scheduler_strategy=c.get(SchedulerPort),
+                    logger=c.get(LoggingPort),
+                    error_handler=c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None,
+                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None
+                )
+            )
             
     except ImportError:
         logger.debug("Request machines handler not available for registration")
@@ -92,8 +102,19 @@ def _register_api_handlers(container: DIContainer) -> None:
     try:
         # Register request status handler
         from src.api.handlers.get_request_status_handler import GetRequestStatusRESTHandler
+        from src.domain.base.ports import LoggingPort, ErrorHandlingPort
         if not container.is_registered(GetRequestStatusRESTHandler):
-            container.register_singleton(GetRequestStatusRESTHandler)
+            container.register_singleton(
+                GetRequestStatusRESTHandler,
+                lambda c: GetRequestStatusRESTHandler(
+                    query_bus=c.get(QueryBus),
+                    command_bus=c.get(CommandBus),
+                    scheduler_strategy=c.get(SchedulerPort),
+                    logger=c.get(LoggingPort),
+                    error_handler=c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None,
+                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None
+                )
+            )
             
     except ImportError:
         logger.debug("Request status handler not available for registration")
@@ -102,7 +123,17 @@ def _register_api_handlers(container: DIContainer) -> None:
         # Register return requests handler
         from src.api.handlers.get_return_requests_handler import GetReturnRequestsRESTHandler
         if not container.is_registered(GetReturnRequestsRESTHandler):
-            container.register_singleton(GetReturnRequestsRESTHandler)
+            container.register_singleton(
+                GetReturnRequestsRESTHandler,
+                lambda c: GetReturnRequestsRESTHandler(
+                    query_bus=c.get(QueryBus),
+                    command_bus=c.get(CommandBus),
+                    scheduler_strategy=c.get(SchedulerPort),
+                    logger=c.get(LoggingPort),
+                    error_handler=c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None,
+                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None
+                )
+            )
             
     except ImportError:
         logger.debug("Return requests handler not available for registration")
@@ -111,7 +142,17 @@ def _register_api_handlers(container: DIContainer) -> None:
         # Register return machines handler
         from src.api.handlers.request_return_machines_handler import RequestReturnMachinesRESTHandler
         if not container.is_registered(RequestReturnMachinesRESTHandler):
-            container.register_singleton(RequestReturnMachinesRESTHandler)
+            container.register_singleton(
+                RequestReturnMachinesRESTHandler,
+                lambda c: RequestReturnMachinesRESTHandler(
+                    query_bus=c.get(QueryBus),
+                    command_bus=c.get(CommandBus),
+                    scheduler_strategy=c.get(SchedulerPort),
+                    logger=c.get(LoggingPort),
+                    error_handler=c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None,
+                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None
+                )
+            )
             
     except ImportError:
         logger.debug("Return machines handler not available for registration")

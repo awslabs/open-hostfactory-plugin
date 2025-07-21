@@ -57,62 +57,8 @@ def format_list_output(data: Any) -> str:
         return json.dumps(data, indent=2, default=str)
 
 
-def get_field_value(data_dict: Dict[str, Any], field_mapping: Dict[str, List[str]], field_key: str, default: str = 'N/A') -> str:
-    """
-    Get field value from data dictionary using field mapping.
-    
-    Args:
-        data_dict: Dictionary containing the data
-        field_mapping: Mapping of logical field names to possible actual field names
-        field_key: Logical field name to look up
-        default: Default value if field not found
-        
-    Returns:
-        Field value as string, or default if not found
-    """
-    possible_names = field_mapping.get(field_key, [field_key])
-    
-    for name in possible_names:
-        if name in data_dict:
-            value = data_dict[name]
-            return str(value) if value is not None else default
-    
-    return default
-
-
-def get_template_field_mapping() -> Dict[str, List[str]]:
-    """
-    Get mapping of logical template field names to possible actual field names.
-    Uses Template model as source of truth for field names.
-    
-    Returns:
-        Dictionary mapping logical names to [snake_case, camelCase] variants
-    """
-    return {
-        'id': ['template_id', 'templateId'],
-        'name': ['name'],
-        'description': ['description'],
-        'provider_api': ['provider_api', 'providerApi'],
-        'instance_type': ['instance_type', 'vmType'],
-        'image_id': ['image_id', 'imageId'],
-        'max_instances': ['max_instances', 'maxNumber'],
-        'subnet_ids': ['subnet_ids', 'subnetIds'],
-        'security_group_ids': ['security_group_ids', 'securityGroupIds'],
-        'key_name': ['key_name', 'keyName'],
-        'user_data': ['user_data', 'userData'],
-        'instance_tags': ['instance_tags', 'instanceTags'],
-        'price_type': ['price_type', 'priceType'],
-        'max_spot_price': ['max_spot_price', 'maxSpotPrice'],
-        'allocation_strategy': ['allocation_strategy', 'allocationStrategy'],
-        'fleet_type': ['fleet_type', 'fleetType'],
-        'fleet_role': ['fleet_role', 'fleetRole'],
-        'created_at': ['created_at', 'createdAt'],
-        'updated_at': ['updated_at', 'updatedAt']
-    }
-
-
 def format_templates_table(templates: List[Dict]) -> str:
-    """Format templates as a proper table using Rich library."""
+    """Format templates as a proper table using Rich library with Pydantic data."""
     if not templates:
         return "No templates found."
     
@@ -129,14 +75,13 @@ def format_templates_table(templates: List[Dict]) -> str:
         table.add_column("RAM (MB)", style="yellow", justify="right", width=10)
         table.add_column("Max Inst", style="red", justify="right", width=8)
         
-        field_mapping = get_template_field_mapping()
-        
-        # Add rows
+        # Add rows - use direct field access since Pydantic provides consistent field names
         for template in templates:
-            template_id = get_field_value(template, field_mapping, 'id')
-            name = get_field_value(template, field_mapping, 'name')
-            provider_api = get_field_value(template, field_mapping, 'provider_api')
-            max_instances = get_field_value(template, field_mapping, 'max_instances')
+            # Handle both snake_case and camelCase field names (from Pydantic aliases)
+            template_id = template.get('template_id') or template.get('templateId', 'N/A')
+            name = template.get('name', 'N/A')
+            provider_api = template.get('provider_api') or template.get('providerApi', 'N/A')
+            max_instances = template.get('max_instances') or template.get('maxNumber', 'N/A')
             
             # Handle different formats
             attributes = template.get('attributes')
@@ -146,17 +91,17 @@ def format_templates_table(templates: List[Dict]) -> str:
                 ram = attributes.get('nram', ['Numeric', 'N/A'])[1] if attributes.get('nram') else 'N/A'
             else:
                 # Standard format - derive from instance_type
-                instance_type = get_field_value(template, field_mapping, 'instance_type')
+                instance_type = template.get('instance_type') or template.get('instanceType', 'N/A')
                 cpus, ram = _derive_cpu_ram_from_instance_type(instance_type)
             
             # Truncate long values for table display
             table.add_row(
-                template_id[:15],
-                name[:15] if name != 'N/A' else name,
-                provider_api[:10] if provider_api != 'N/A' else provider_api,
-                cpus,
-                ram,
-                max_instances
+                str(template_id)[:15],
+                str(name)[:15] if name != 'N/A' else str(name),
+                str(provider_api)[:10] if provider_api != 'N/A' else str(provider_api),
+                str(cpus),
+                str(ram),
+                str(max_instances)
             )
         
         # Capture Rich output as string
@@ -173,18 +118,17 @@ def format_templates_table(templates: List[Dict]) -> str:
 
 def _format_ascii_table(templates: List[Dict]) -> str:
     """Fallback ASCII table formatter when Rich is not available."""
-    field_mapping = get_template_field_mapping()
     
     # Define table headers
     headers = ['ID', 'Name', 'Provider', 'CPUs', 'RAM (MB)', 'Max Inst']
     
-    # Extract data for each template
+    # Extract data for each template using direct field access
     rows = []
     for template in templates:
-        template_id = get_field_value(template, field_mapping, 'id')
-        name = get_field_value(template, field_mapping, 'name')
-        provider_api = get_field_value(template, field_mapping, 'provider_api')
-        max_instances = get_field_value(template, field_mapping, 'max_instances')
+        template_id = template.get('template_id') or template.get('templateId', 'N/A')
+        name = template.get('name', 'N/A')
+        provider_api = template.get('provider_api') or template.get('providerApi', 'N/A')
+        max_instances = template.get('max_instances') or template.get('maxNumber', 'N/A')
         
         # Handle different formats
         attributes = template.get('attributes')
@@ -194,7 +138,7 @@ def _format_ascii_table(templates: List[Dict]) -> str:
             ram = attributes.get('nram', ['Numeric', 'N/A'])[1] if attributes.get('nram') else 'N/A'
         else:
             # Standard format - derive from instance_type
-            instance_type = get_field_value(template, field_mapping, 'instance_type')
+            instance_type = template.get('instance_type') or template.get('instanceType', 'N/A')
             cpus, ram = _derive_cpu_ram_from_instance_type(instance_type)
         
         # Truncate long values for table display
@@ -241,22 +185,22 @@ def _derive_cpu_ram_from_instance_type(instance_type: str) -> tuple[str, str]:
 
 
 def format_templates_list(templates: List[Dict]) -> str:
-    """Format templates as a detailed list."""
+    """Format templates as a detailed list using Pydantic data."""
     if not templates:
         return "No templates found."
     
-    field_mapping = get_template_field_mapping()
     lines = []
     
     for i, template in enumerate(templates):
         if i > 0:
             lines.append("")  # Blank line between templates
         
-        template_id = get_field_value(template, field_mapping, 'id')
-        name = get_field_value(template, field_mapping, 'name')
-        provider_api = get_field_value(template, field_mapping, 'provider_api')
-        instance_type = get_field_value(template, field_mapping, 'instance_type')
-        max_instances = get_field_value(template, field_mapping, 'max_instances')
+        # Use direct field access since Pydantic provides consistent field names
+        template_id = template.get('template_id') or template.get('templateId', 'N/A')
+        name = template.get('name', 'N/A')
+        provider_api = template.get('provider_api') or template.get('providerApi', 'N/A')
+        instance_type = template.get('instance_type') or template.get('instanceType', 'N/A')
+        max_instances = template.get('max_instances') or template.get('maxNumber', 'N/A')
         
         lines.append(f"Template: {template_id}")
         lines.append(f"  Name: {name}")
@@ -274,51 +218,38 @@ def format_templates_list(templates: List[Dict]) -> str:
             lines.append(f"  RAM (MB): {ram}")
         
         # Add other fields if available
-        description = get_field_value(template, field_mapping, 'description')
+        description = template.get('description', 'N/A')
         if description != 'N/A':
             lines.append(f"  Description: {description}")
         
-        image_id = get_field_value(template, field_mapping, 'image_id')
+        image_id = template.get('image_id') or template.get('imageId', 'N/A')
         if image_id != 'N/A':
             lines.append(f"  Image ID: {image_id}")
         
-        subnet_ids = get_field_value(template, field_mapping, 'subnet_ids')
+        subnet_ids = template.get('subnet_ids') or template.get('subnetIds', 'N/A')
         if subnet_ids != 'N/A':
             lines.append(f"  Subnet IDs: {subnet_ids}")
     
     return "\n".join(lines)
 
 
-def get_request_field_mapping() -> Dict[str, List[str]]:
-    """Get mapping of logical request field names to possible actual field names."""
-    return {
-        'id': ['request_id', 'requestId'],
-        'status': ['status'],
-        'template_id': ['template_id', 'templateId'],
-        'num_requested': ['num_requested', 'numRequested'],
-        'num_allocated': ['num_allocated', 'numAllocated'],
-        'created_at': ['created_at', 'createdAt'],
-        'updated_at': ['updated_at', 'updatedAt']
-    }
-
-
 def format_requests_list(requests: List[Dict]) -> str:
-    """Format requests as a detailed list."""
+    """Format requests as a detailed list using Pydantic data."""
     if not requests:
         return "No requests found."
     
-    field_mapping = get_request_field_mapping()
     lines = []
     
     for i, request in enumerate(requests):
         if i > 0:
             lines.append("")  # Blank line between requests
         
-        request_id = get_field_value(request, field_mapping, 'id')
-        status = get_field_value(request, field_mapping, 'status')
-        template_id = get_field_value(request, field_mapping, 'template_id')
-        num_requested = get_field_value(request, field_mapping, 'num_requested')
-        created_at = get_field_value(request, field_mapping, 'created_at')
+        # Use direct field access with both snake_case and camelCase support
+        request_id = request.get('request_id') or request.get('requestId', 'N/A')
+        status = request.get('status', 'N/A')
+        template_id = request.get('template_id') or request.get('templateId', 'N/A')
+        num_requested = request.get('requested_count') or request.get('numRequested', 'N/A')
+        created_at = request.get('created_at') or request.get('createdAt', 'N/A')
         
         lines.append(f"Request: {request_id}")
         lines.append(f"  Status: {status}")
@@ -330,22 +261,22 @@ def format_requests_list(requests: List[Dict]) -> str:
 
 
 def format_machines_list(machines: List[Dict]) -> str:
-    """Format machines as a detailed list."""
+    """Format machines as a detailed list using Pydantic data."""
     if not machines:
         return "No machines found."
     
-    field_mapping = get_machine_field_mapping()
     lines = []
     
     for i, machine in enumerate(machines):
         if i > 0:
             lines.append("")  # Blank line between machines
         
-        machine_id = get_field_value(machine, field_mapping, 'id')
-        name = get_field_value(machine, field_mapping, 'name')
-        status = get_field_value(machine, field_mapping, 'status')
-        instance_type = get_field_value(machine, field_mapping, 'instance_type')
-        private_ip = get_field_value(machine, field_mapping, 'private_ip')
+        # Use direct field access with both snake_case and camelCase support
+        machine_id = machine.get('instance_id') or machine.get('instanceId') or machine.get('machine_id') or machine.get('machineId', 'N/A')
+        name = machine.get('name') or machine.get('machine_name') or machine.get('machineName', 'N/A')
+        status = machine.get('status') or machine.get('state', 'N/A')
+        instance_type = machine.get('instance_type') or machine.get('instanceType') or machine.get('vm_type') or machine.get('vmType', 'N/A')
+        private_ip = machine.get('private_ip') or machine.get('privateIp') or machine.get('private_ip_address', 'N/A')
         
         lines.append(f"Machine: {machine_id}")
         lines.append(f"  Name: {name}")
@@ -356,46 +287,31 @@ def format_machines_list(machines: List[Dict]) -> str:
     return "\n".join(lines)
 
 
-def get_machine_field_mapping() -> Dict[str, List[str]]:
-    """Get mapping of logical machine field names to possible actual field names."""
-    return {
-        'id': ['machine_id', 'machineId', 'instance_id', 'instanceId'],
-        'name': ['name', 'machine_name', 'machineName'],
-        'status': ['status', 'state'],
-        'instance_type': ['instance_type', 'instanceType', 'vm_type', 'vmType'],
-        'private_ip': ['private_ip', 'privateIp', 'private_ip_address'],
-        'public_ip': ['public_ip', 'publicIp', 'public_ip_address'],
-        'created_at': ['created_at', 'createdAt', 'launch_time'],
-        'template_id': ['template_id', 'templateId']
-    }
-
-
 def format_machines_table(machines: List[Dict]) -> str:
-    """Format machines as a table."""
+    """Format machines as a table using Pydantic data."""
     if not machines:
         return "No machines found."
-    
-    field_mapping = get_machine_field_mapping()
     
     # Define table headers
     headers = ['ID', 'Name', 'Status', 'Type', 'Private IP']
     
-    # Extract data for each machine
+    # Extract data for each machine using direct field access
     rows = []
     for machine in machines:
-        machine_id = get_field_value(machine, field_mapping, 'id')
-        name = get_field_value(machine, field_mapping, 'name')
-        status = get_field_value(machine, field_mapping, 'status')
-        instance_type = get_field_value(machine, field_mapping, 'instance_type')
-        private_ip = get_field_value(machine, field_mapping, 'private_ip')
+        # Support both snake_case and camelCase field names
+        machine_id = machine.get('instance_id') or machine.get('instanceId') or machine.get('machine_id') or machine.get('machineId', 'N/A')
+        name = machine.get('name') or machine.get('machine_name') or machine.get('machineName', 'N/A')
+        status = machine.get('status') or machine.get('state', 'N/A')
+        instance_type = machine.get('instance_type') or machine.get('instanceType') or machine.get('vm_type') or machine.get('vmType', 'N/A')
+        private_ip = machine.get('private_ip') or machine.get('privateIp') or machine.get('private_ip_address', 'N/A')
         
         # Truncate long values for table display
         row = [
-            machine_id[:15],
-            name[:15] if name != 'N/A' else name,
-            status[:10],
-            instance_type[:10],
-            private_ip
+            str(machine_id)[:15],
+            str(name)[:15] if name != 'N/A' else str(name),
+            str(status)[:10],
+            str(instance_type)[:10],
+            str(private_ip)
         ]
         rows.append(row)
     
@@ -403,31 +319,30 @@ def format_machines_table(machines: List[Dict]) -> str:
 
 
 def format_requests_table(requests: List[Dict]) -> str:
-    """Format requests as a table."""
+    """Format requests as a table using Pydantic data."""
     if not requests:
         return "No requests found."
-    
-    field_mapping = get_request_field_mapping()
     
     # Define table headers
     headers = ['ID', 'Status', 'Template', 'Requested', 'Created']
     
-    # Extract data for each request
+    # Extract data for each request using direct field access
     rows = []
     for request in requests:
-        request_id = get_field_value(request, field_mapping, 'id')
-        status = get_field_value(request, field_mapping, 'status')
-        template_id = get_field_value(request, field_mapping, 'template_id')
-        num_requested = get_field_value(request, field_mapping, 'num_requested')
-        created_at = get_field_value(request, field_mapping, 'created_at')
+        # Support both snake_case and camelCase field names
+        request_id = request.get('request_id') or request.get('requestId', 'N/A')
+        status = request.get('status', 'N/A')
+        template_id = request.get('template_id') or request.get('templateId', 'N/A')
+        num_requested = request.get('requested_count') or request.get('numRequested', 'N/A')
+        created_at = request.get('created_at') or request.get('createdAt', 'N/A')
         
         # Truncate long values for table display
         row = [
-            request_id[:15],
-            status[:10],
-            template_id[:15],
-            num_requested,
-            created_at[:19] if created_at != 'N/A' else created_at  # Show date/time only
+            str(request_id)[:15],
+            str(status)[:10],
+            str(template_id)[:15],
+            str(num_requested),
+            str(created_at)[:19] if created_at != 'N/A' else str(created_at)  # Show date/time only
         ]
         rows.append(row)
     

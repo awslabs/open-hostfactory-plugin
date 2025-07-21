@@ -18,6 +18,12 @@ The plugin uses a comprehensive testing approach with multiple test levels:
 - **Coverage**: Component interactions and workflows
 - **Environment**: Test containers and mock services
 
+### Performance Tests
+- **Location**: `tests/performance/`
+- **Framework**: pytest + psutil
+- **Coverage**: Startup time, memory usage, component loading performance
+- **Benchmarks**: Automated performance regression testing
+
 ### End-to-End Tests
 - **Location**: `tests/e2e/`
 - **Framework**: pytest + requests
@@ -39,6 +45,18 @@ pytest tests/unit/
 ### Integration Tests
 ```bash
 pytest tests/integration/
+```
+
+### Performance Tests
+```bash
+# Run performance benchmarks
+pytest tests/performance/ -v
+
+# Run specific performance tests
+PYTHONPATH=. python tests/performance/test_lazy_loading_performance.py
+
+# Run lazy loading integration tests
+PYTHONPATH=. python tests/integration/test_lazy_loading_integration.py
 ```
 
 ### With Coverage

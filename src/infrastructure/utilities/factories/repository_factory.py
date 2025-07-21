@@ -98,7 +98,7 @@ class RepositoryFactory:
         
         try:
             # Use storage registry to create unit of work
-            return self.storage_registry.create_unit_of_work(storage_type, self.config_manager)
+            return self.storage_registry.create_unit_of_work(storage_type)
                 
         except Exception as e:
             self.logger.error(f"Failed to create unit of work: {e}")

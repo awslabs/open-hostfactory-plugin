@@ -1,188 +1,154 @@
-# Source Code Overview
+# Source Code Architecture
 
-This directory contains the main source code for the Open Host Factory Plugin, implementing a clean Domain-Driven Design (DDD) architecture with perfect separation of concerns.
-
-The codebase consists of 250+ Python files organized across multiple architectural layers, demonstrating enterprise-grade software design principles.
+This directory contains the complete source code for the Open Host Factory Plugin, implementing Clean Architecture principles with Domain-Driven Design (DDD) and Command Query Responsibility Segregation (CQRS) patterns.
 
 ## Architecture Overview
 
-The codebase follows Clean Architecture principles with clear dependency direction:
+The codebase follows Clean Architecture with four distinct layers:
+
 ```
-Domain ← Application ← Infrastructure ← Providers
+src/
+├── domain/          # Domain Layer - Core business logic
+├── application/     # Application Layer - Use cases and CQRS handlers  
+├── infrastructure/  # Infrastructure Layer - External integrations
+└── interface/       # Interface Layer - CLI and external interfaces
 ```
 
-## Package Structure
+## Layer Responsibilities
 
-### 📁 `domain/` - Domain Layer (Pure Business Logic)
-The heart of the application containing pure business logic with zero external dependencies.
+### Domain Layer (`domain/`)
+- **Purpose**: Core business logic and domain models
+- **Dependencies**: None (dependency-free)
+- **Contains**: Aggregates, Value Objects, Domain Events, Ports (interfaces)
+- **Key Principles**: 
+  - No dependencies on other layers
+  - Pure business logic
+  - Domain-driven design patterns
 
-**File Count**: 33 files organized across bounded contexts
+### Application Layer (`application/`)
+- **Purpose**: Use cases, CQRS handlers, and application services
+- **Dependencies**: Domain layer only
+- **Contains**: Command/Query handlers, DTOs, Application services
+- **Key Patterns**:
+  - CQRS (Command Query Responsibility Segregation)
+  - Handler pattern with automatic discovery
+  - Event-driven architecture
 
-**Key Components:**
-- **Bounded Contexts**: Template, Machine, Request
-- **Aggregates**: Core business entities with behavior
-- **Value Objects**: Immutable domain concepts
-- **Domain Events**: Business event notifications
-- **Repository Interfaces**: Data access contracts
+### Infrastructure Layer (`infrastructure/`)
+- **Purpose**: External integrations and technical implementations
+- **Dependencies**: Domain and Application layers
+- **Contains**: Repositories, External APIs, Persistence, Configuration
+- **Key Patterns**:
+  - Port/Adapter pattern
+  - Dependency injection
+  - Strategy pattern for providers
 
-**Architecture Principles:**
-- Zero infrastructure dependencies
-- Rich domain models with encapsulated business logic
-- Provider-agnostic design
-- Event-driven architecture
+### Interface Layer (`interface/`)
+- **Purpose**: External interfaces (CLI, REST API)
+- **Dependencies**: All layers (orchestration layer)
+- **Contains**: CLI handlers, API controllers, External interfaces
+- **Key Patterns**:
+  - Command pattern for CLI
+  - Adapter pattern for external systems
 
-### 📁 `application/` - Application Layer (Use Cases)
-Orchestrates domain objects and coordinates business workflows.
+## Key Design Patterns
 
-**File Count**: 41 files implementing comprehensive use cases
+### CQRS Implementation
+- **Commands**: Modify state, handled by CommandHandlers
+- **Queries**: Read data, handled by QueryHandlers  
+- **Events**: Domain events for side effects
+- **Automatic Discovery**: Handlers registered via decorators
 
-**Key Components:**
-- **CQRS Implementation**: Commands for writes, Queries for reads
-- **Command/Query Handlers**: Business use case implementations
-- **Application Services**: Workflow orchestration
-- **DTOs**: Data transfer objects for layer boundaries
-- **Event Handlers**: Cross-cutting concern handlers
+### Dependency Injection
+- **Container**: Comprehensive DI container with automatic registration
+- **Ports**: Abstract interfaces for external dependencies
+- **Adapters**: Concrete implementations of ports
+- **Registration**: Automatic service discovery and registration
 
-**Patterns Used:**
-- **CQRS**: For complex business operations
-- **Service Pattern**: For simple CRUD operations
-- **Event-Driven**: For decoupled communication
-
-### 📁 `infrastructure/` - Infrastructure Layer (Technical Concerns)
-Provides technical implementations of domain interfaces.
-
-**File Count**: 102 files providing comprehensive infrastructure support
-
-**Key Components:**
-- **Persistence**: Repository implementations with multiple storage strategies
-- **Events**: Event sourcing and publishing infrastructure
-- **Dependency Injection**: IoC container and service registration
-- **Resilience**: Retry mechanisms and error handling
-- **Utilities**: Common technical utilities
-
-**Features:**
-- Multiple storage strategies (JSON, SQL, DynamoDB)
-- Comprehensive event system with 50+ handlers
-- Production-ready error handling and logging
-
-### 📁 `providers/` - Provider Layer (Cloud Extensions)
-Cloud-specific implementations extending the core system.
-
-**File Count**: 48 files with complete AWS implementation
-
-**Current Providers:**
-- **AWS**: Complete implementation with EC2, Spot Fleet, ASG support
-
-**Provider-Agnostic Design:**
-- Domain layer uses generic `provider_config`
-- Clean extension points for new providers
-- Ready for multi-cloud expansion (Provider1, Provider2, etc.)
-
-### 📁 `api/` - API Layer (External Interface)
-Host Factory compatible API implementation.
-
-**Key Components:**
-- **Handlers**: API endpoint implementations
-- **Models**: Request/response data models
-- **Validation**: Input validation and sanitization
-
-**Supported Operations:**
-- `getAvailableTemplates`: Get VM templates
-- `requestMachines`: Request new machines
-- `getRequestStatus`: Check request status
-- `requestReturnMachines`: Return machines
-- `getReturnRequests`: Get return requests
-
-### 📁 `config/` - Configuration Management
-Unified configuration system with validation and type safety.
-
-**Features:**
-- Type-safe configuration with dataclasses
-- Multiple configuration sources (files, environment variables)
-- Legacy configuration support
-- Configuration validation and schema enforcement
-
-### 📁 `monitoring/` - Monitoring and Observability
-Health checks, metrics, and monitoring capabilities.
-
-**Components:**
-- Health check system
-- Metrics collection
-- Performance monitoring
-
-## Key Architectural Achievements
-
-### ✅ Perfect DDD Implementation
-- **Bounded Contexts**: Clean separation between Template, Machine, Request
-- **Shared Kernel**: Common domain primitives in `base/`
-- **Rich Domain Models**: Business logic encapsulated in aggregates
-- **Ubiquitous Language**: Consistent terminology throughout
-
-### ✅ SOLID Principles Compliance
-- **Single Responsibility**: Each class has one reason to change
-- **Open/Closed**: Open for extension, closed for modification
-- **Liskov Substitution**: Subtypes are substitutable for base types
-- **Interface Segregation**: Clients depend only on interfaces they use
-- **Dependency Inversion**: High-level modules don't depend on low-level modules
-
-### ✅ Event-Driven Architecture
-- **Domain Events**: Generated by aggregates for business state changes
-- **Event Sourcing**: Complete audit trail of all changes
-- **Event Handlers**: 50+ handlers for cross-cutting concerns
-- **Decoupled Communication**: Components communicate through events
-
-### ✅ Provider-Agnostic Design
-- **Zero Cloud Dependencies**: Domain layer is completely cloud-agnostic
-- **Clean Extension Points**: Easy to add new cloud providers
-- **Standardized Interfaces**: Consistent provider abstraction
-
-## Development Guidelines
-
-### Adding New Features
-1. **Start with Domain**: Define business concepts in domain layer
-2. **Add Use Cases**: Implement in application layer
-3. **Provide Infrastructure**: Add technical implementations
-4. **Extend Providers**: Add cloud-specific features if needed
-
-### Testing Strategy
-- **Unit Tests**: Test domain logic in isolation
-- **Integration Tests**: Test layer interactions
-- **End-to-End Tests**: Test complete workflows
-
-### Code Quality
-- **Type Safety**: Full type hints throughout
-- **Documentation**: Comprehensive docstrings
-- **Error Handling**: Proper exception handling at all layers
-- **Logging**: Structured logging for observability
-
-## Dependencies
-
-### Core Dependencies
-- **Pydantic**: Data validation and serialization
-- **Boto3**: AWS SDK (provider-specific)
-- **Typing**: Type safety and hints
-
-### Development Dependencies
-- **Pytest**: Testing framework
-- **MyPy**: Static type checking
-- **Black**: Code formatting
-- **Pylint**: Code quality analysis
+### Clean Architecture Benefits
+- **Testability**: Easy to unit test with clear boundaries
+- **Maintainability**: Clear separation of concerns
+- **Flexibility**: Easy to swap implementations
+- **Scalability**: Well-organized for team development
 
 ## Getting Started
 
-1. **Understand the Domain**: Start with `domain/` to understand business concepts
-2. **Explore Use Cases**: Check `application/` for business workflows
-3. **Review Infrastructure**: Examine `infrastructure/` for technical implementations
-4. **Study Providers**: Look at `providers/aws/` for cloud integration examples
+### Development Setup
+1. **Install Dependencies**: `pip install -r requirements-dev.txt`
+2. **Run Tests**: `pytest tests/`
+3. **Code Quality**: `make lint` and `make type-check`
+4. **Documentation**: See individual layer READMEs
 
-## Architecture Diagrams
+### Key Entry Points
+- **CLI**: `src/cli/main.py` - Command-line interface
+- **Bootstrap**: `src/bootstrap.py` - Application initialization
+- **Configuration**: `src/config/` - Configuration management
 
-See the `/diagrams` directory for visual representations of:
-- System architecture
-- Request flows
-- Component interactions
-- AWS handler inheritance
+## Code Standards
 
----
+### Import Conventions
+```python
+# Layer imports (allowed)
+from src.domain.* import *           # Domain can import domain
+from src.application.* import *      # Application can import domain
+from src.infrastructure.* import *   # Infrastructure can import domain/application
+from src.interface.* import *        # Interface can import all layers
 
-This source code represents a production-ready, enterprise-grade implementation of Domain-Driven Design principles with excellent separation of concerns and extensibility.
+# Anti-patterns (forbidden)
+from src.infrastructure.* import *   # Domain cannot import infrastructure
+from src.interface.* import *        # Domain/Application cannot import interface
+```
+
+### CQRS Handler Patterns
+```python
+# Command Handler
+@command_handler(MyCommand)
+class MyCommandHandler(BaseCommandHandler[MyCommand, MyResponse]):
+    async def execute_command(self, command: MyCommand) -> MyResponse:
+        # Implementation
+
+# Query Handler  
+@query_handler(MyQuery)
+class MyQueryHandler(BaseQueryHandler[MyQuery, MyResult]):
+    async def execute_query(self, query: MyQuery) -> MyResult:
+        # Implementation
+```
+
+### Dependency Injection
+```python
+# Service with DI
+@injectable
+class MyService:
+    def __init__(self, repository: MyRepositoryPort):
+        self.repository = repository
+
+# Port definition
+class MyRepositoryPort(ABC):
+    @abstractmethod
+    async def save(self, entity: MyEntity) -> None:
+        pass
+```
+
+## Testing Strategy
+
+- **Unit Tests**: Test individual components in isolation
+- **Integration Tests**: Test layer interactions
+- **End-to-End Tests**: Test complete workflows
+- **Architecture Tests**: Verify architectural constraints
+
+## Documentation
+
+Each layer contains its own README with specific details:
+- [Domain Layer README](domain/README.md)
+- [Application Layer README](application/README.md)  
+- [Infrastructure Layer README](infrastructure/README.md)
+
+## Contributing
+
+1. Follow Clean Architecture principles
+2. Maintain layer boundaries
+3. Use CQRS patterns for handlers
+4. Write comprehensive tests
+5. Document public APIs
+
+For detailed contribution guidelines, see the main project README.

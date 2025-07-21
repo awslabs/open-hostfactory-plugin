@@ -6,8 +6,8 @@ from src.application.dto.base import BaseQuery, BaseResponse
 class QueryBus(Protocol):
     """Protocol for query bus."""
     
-    async def send(self, query: BaseQuery) -> BaseResponse:
-        """Send a query for processing."""
+    async def execute(self, query: BaseQuery) -> BaseResponse:
+        """Execute a query asynchronously for processing."""
         ...
     
     def register_handler(self, query_type: type, handler) -> None:

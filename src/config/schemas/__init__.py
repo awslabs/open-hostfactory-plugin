@@ -1,7 +1,7 @@
 """Configuration schemas package."""
 
 from .app_schema import AppConfig, validate_config
-from .template_schema import TemplateConfig, AMIResolutionConfig
+from .template_schema import TemplateConfig
 from .storage_schema import (
     StorageConfig, JsonStrategyConfig, SqlStrategyConfig, DynamodbStrategyConfig,
     BackoffConfig, RetryConfig
@@ -38,7 +38,6 @@ __all__ = [
     
     # Template configuration
     'TemplateConfig',
-    'AMIResolutionConfig',
     
     # Storage configurations
     'StorageConfig',

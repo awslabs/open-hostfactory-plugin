@@ -9,8 +9,8 @@ from typing import Dict, Any, List, Optional
 from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
-from src.infrastructure.template.sync_configuration_store import SyncTemplateConfigurationStore
-from src.providers.aws.domain.template.value_objects import ProviderHandlerType
+from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
+from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
@@ -22,6 +22,7 @@ from src.providers.aws.exceptions.aws_exceptions import (
 )
 from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.exceptions import EntityNotFoundError
 
 @injectable
 class AWSProvisioningAdapter(ResourceProvisioningPort):
@@ -35,7 +36,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                  aws_client: AWSClient,
                  logger: LoggingPort,
                  aws_handler_factory: AWSHandlerFactory,
-                 template_config_store: Optional[SyncTemplateConfigurationStore] = None,
+                 template_config_manager: Optional[TemplateConfigurationManager] = None,
                  provider_strategy: Optional['AWSProviderStrategy'] = None):
         """
         Initialize the adapter.
@@ -44,13 +45,13 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             aws_client: AWS client instance
             logger: Logger for logging messages
             aws_handler_factory: AWS handler factory instance
-            template_config_store: Optional template configuration store instance
+            template_config_manager: Optional template configuration manager instance
             provider_strategy: Optional AWS provider strategy for dry-run support
         """
         self._aws_client = aws_client
         self._logger = logger
         self._aws_handler_factory = aws_handler_factory
-        self._template_config_store = template_config_store
+        self._template_config_manager = template_config_manager
         self._provider_strategy = provider_strategy
         self._handlers = {}  # Cache for handlers
         
@@ -152,12 +153,6 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
         except Exception as e:
             self._logger.error(f"Error during resource provisioning: {str(e)}")
             raise InfrastructureError(f"Failed to provision resources: {str(e)}")
-        except QuotaExceededError as e:
-            self._logger.error(f"Quota exceeded during resource provisioning: {str(e)}")
-            raise
-        except Exception as e:
-            self._logger.error(f"Error during resource provisioning: {str(e)}")
-            raise InfrastructureError(f"Failed to provision resources: {str(e)}")
     
     def check_resources_status(self, request: Request) -> List[Dict[str, Any]]:
         """
@@ -180,26 +175,20 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             raise AWSEntityNotFoundError(f"No resource ID found in request {request.request_id}")
         
         # Get the template to determine the handler type
-        if not self._template_config_store:
-            self._logger.warning("TemplateConfigurationStore not injected, getting from container")
+        if not self._template_config_manager:
+            self._logger.warning("TemplateConfigurationManager not injected, getting from container")
             from src.infrastructure.di.container import get_container
             container = get_container()
-            from src.infrastructure.template.configuration_store import TemplateConfigurationStore
-            from src.infrastructure.template.sync_configuration_store import SyncTemplateConfigurationStore
-            async_store = container.get(TemplateConfigurationStore)
-            self._template_config_store = SyncTemplateConfigurationStore(async_store)
+            self._template_config_manager = container.get(TemplateConfigurationManager)
             
         # Ensure template_id is not None
         if not request.template_id:
             raise AWSValidationError("Template ID is required")
         
-        # Get template DTO and convert to domain object
-        template_dto = self._template_config_store.get_template_by_id(str(request.template_id))
-        if not template_dto:
+        # Get template using the configuration manager
+        template = self._template_config_manager.get_template(str(request.template_id))
+        if not template:
             raise EntityNotFoundError("Template", str(request.template_id))
-        
-        from src.infrastructure.template.mappers import TemplateMapper
-        template = TemplateMapper.from_dto(template_dto)
         
         # Get the appropriate handler for the template
         handler = self._get_handler_for_template(template)
@@ -234,26 +223,20 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             raise AWSEntityNotFoundError(f"No resource ID found in request {request.request_id}")
         
         # Get the template to determine the handler type
-        if not self._template_config_store:
-            self._logger.warning("TemplateConfigurationStore not injected, getting from container")
+        if not self._template_config_manager:
+            self._logger.warning("TemplateConfigurationManager not injected, getting from container")
             from src.infrastructure.di.container import get_container
             container = get_container()
-            from src.infrastructure.template.configuration_store import TemplateConfigurationStore
-            from src.infrastructure.template.sync_configuration_store import SyncTemplateConfigurationStore
-            async_store = container.get(TemplateConfigurationStore)
-            self._template_config_store = SyncTemplateConfigurationStore(async_store)
+            self._template_config_manager = container.get(TemplateConfigurationManager)
             
         # Ensure template_id is not None
         if not request.template_id:
             raise AWSValidationError("Template ID is required")
         
-        # Get template DTO and convert to domain object
-        template_dto = self._template_config_store.get_template_by_id(str(request.template_id))
-        if not template_dto:
+        # Get template using the configuration manager
+        template = self._template_config_manager.get_template(str(request.template_id))
+        if not template:
             raise EntityNotFoundError("Template", str(request.template_id))
-        
-        from src.infrastructure.template.mappers import TemplateMapper
-        template = TemplateMapper.from_dto(template_dto)
         
         # Get the appropriate handler for the template
         handler = self._get_handler_for_template(template)

@@ -8,9 +8,6 @@ from .commands import (
 from src.application.dto.queries import (
     GetTemplateQuery, ListTemplatesQuery, ValidateTemplateQuery
 )
-from .dto import (
-    TemplateListResponse, TemplateValidationResponse
-)
 
 __all__ = [
     # Commands
@@ -18,6 +15,5 @@ __all__ = [
     'ValidateTemplateCommand', 'TemplateCommandResponse',
     
     # Queries
-    'GetTemplateQuery', 'ListTemplatesQuery', 'ValidateTemplateQuery', 
-    'TemplateListResponse', 'TemplateValidationResponse'
+    'GetTemplateQuery', 'ListTemplatesQuery', 'ValidateTemplateQuery'
 ]

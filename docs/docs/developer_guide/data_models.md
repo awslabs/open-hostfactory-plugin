@@ -336,45 +336,116 @@ class RequestDTO(BaseValidatedModel):
         )
 
 class TemplateDTO(BaseValidatedModel):
-    """Template data transfer object."""
+    """Infrastructure DTO for template data transfer and persistence."""
+    model_config = ConfigDict(
+        frozen=False,
+        validate_assignment=True,
+        populate_by_name=True
+    )
     
-    template_id: str
-    name: str = Field(..., min_length=1, max_length=255)
-    provider_api: str = Field(..., regex=r'^(ec2|asg|spot_fleet|ec2_fleet)$')
-    vm_type: str = Field(..., regex=r'^[a-z][0-9][a-z]?\.[a-z0-9]+$')
-    max_number: int = Field(..., ge=1, le=1000)
-    image_id: Optional[str] = Field(None, regex=r'^ami-[a-f0-9]{8,17}$')
-    subnet_ids: Optional[List[str]] = Field(None, min_items=1)
-    security_group_ids: Optional[List[str]] = Field(None, min_items=1)
-    attributes: Optional[Dict[str, List[str]]] = None
+    # Core template identification
+    template_id: str = Field(description="Unique template identifier")
+    name: Optional[str] = Field(default=None, description="Human-readable template name")
+    description: Optional[str] = Field(default=None, description="Template description")
     
-    @field_validator('subnet_ids')
+    # Provider configuration
+    provider_api: str = Field(description="Provider API type (aws, azure, etc.)")
+    provider_type: Optional[str] = Field(default=None, description="Provider type")
+    provider_name: Optional[str] = Field(default=None, description="Provider instance name")
+    
+    # Template configuration data
+    configuration: Dict[str, Any] = Field(default_factory=dict, description="Template configuration")
+    
+    # Metadata and status
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Template metadata")
+    tags: Dict[str, str] = Field(default_factory=dict, description="Template tags")
+    is_active: bool = Field(default=True, description="Whether template is active")
+    
+    # Timestamps
+    created_at: Optional[datetime] = Field(default=None, description="Creation timestamp")
+    updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp")
+    
+    # File metadata
+    source_file: Optional[str] = Field(default=None, description="Source file path")
+    file_priority: Optional[int] = Field(default=None, description="File priority in hierarchy")
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert DTO to dictionary for serialization."""
+        return self.model_dump(exclude_none=True)
+    
     @classmethod
-    def validate_subnet_ids(cls, v: Optional[List[str]]) -> Optional[List[str]]:
-        """Validate subnet ID format."""
-        if not v:
-            return v
-        
-        subnet_pattern = r'^subnet-[a-f0-9]{8,17}$'
-        for subnet_id in v:
-            if not re.match(subnet_pattern, subnet_id):
-                raise ValueError(f"Invalid subnet ID format: {subnet_id}")
-        
-        return v
+    def from_dict(cls, data: Dict[str, Any]) -> 'TemplateDTO':
+        """Create DTO from dictionary data."""
+        return cls(**data)
     
-    @field_validator('security_group_ids')
+    def to_domain(self) -> 'Template':
+        """Convert infrastructure DTO to domain Template aggregate."""
+        from src.domain.template.aggregate import Template
+        
+        return Template(
+            template_id=self.template_id,
+            name=self.name,
+            description=self.description,
+            provider_api=self.provider_api,
+            provider_type=self.provider_type,
+            provider_name=self.provider_name,
+            configuration=self.configuration,
+            metadata=self.metadata,
+            tags=self.tags,
+            is_active=self.is_active,
+            created_at=self.created_at,
+            updated_at=self.updated_at
+        )
+    
     @classmethod
-    def validate_security_group_ids(cls, v: Optional[List[str]]) -> Optional[List[str]]:
-        """Validate security group ID format."""
-        if not v:
-            return v
-        
-        sg_pattern = r'^sg-[a-f0-9]{8,17}$'
-        for sg_id in v:
-            if not re.match(sg_pattern, sg_id):
-                raise ValueError(f"Invalid security group ID format: {sg_id}")
-        
-        return v
+    def from_domain(cls, template: 'Template') -> 'TemplateDTO':
+        """Create infrastructure DTO from domain Template aggregate."""
+        return cls(
+            template_id=template.template_id,
+            name=template.name,
+            description=template.description,
+            provider_api=template.provider_api or 'aws',
+            provider_type=template.provider_type,
+            provider_name=template.provider_name,
+            configuration=template.configuration if hasattr(template, 'configuration') else {},
+            metadata=template.metadata if hasattr(template, 'metadata') else {},
+            tags=template.tags if hasattr(template, 'tags') else {},
+            is_active=template.is_active if hasattr(template, 'is_active') else True,
+            created_at=template.created_at if hasattr(template, 'created_at') else None,
+            updated_at=template.updated_at if hasattr(template, 'updated_at') else None
+        )
+
+class TemplateCacheEntryDTO(BaseValidatedModel):
+    """DTO for template cache entries with metadata."""
+    model_config = ConfigDict(frozen=True)
+    
+    template: TemplateDTO = Field(description="Cached template data")
+    cached_at: datetime = Field(description="Cache timestamp")
+    ttl_seconds: int = Field(description="Time to live in seconds")
+    hit_count: int = Field(default=0, description="Number of cache hits")
+    
+    @property
+    def is_expired(self) -> bool:
+        """Check if cache entry is expired."""
+        age_seconds = (datetime.now() - self.cached_at).total_seconds()
+        return age_seconds > self.ttl_seconds
+    
+    @property
+    def age_seconds(self) -> float:
+        """Get age of cache entry in seconds."""
+        return (datetime.now() - self.cached_at).total_seconds()
+
+class TemplateValidationResultDTO(BaseValidatedModel):
+    """DTO for template validation results."""
+    model_config = ConfigDict(frozen=True)
+    
+    template_id: str = Field(description="Template identifier")
+    is_valid: bool = Field(description="Whether template is valid")
+    errors: List[str] = Field(default_factory=list, description="Validation errors")
+    warnings: List[str] = Field(default_factory=list, description="Validation warnings")
+    supported_features: List[str] = Field(default_factory=list, description="Supported features")
+    validation_time: datetime = Field(default_factory=datetime.now, description="Validation timestamp")
+    provider_instance: Optional[str] = Field(default=None, description="Provider instance validated against")
 ```
 
 ### Command and Query Models

@@ -26,7 +26,7 @@ def test_configuration_loading():
     
     config_manager = ConfigurationManager()
     # Use the correct method name
-    config = config_manager.config
+    config = config_manager.app_config
     
     assert config is not None
     assert hasattr(config, 'provider')
@@ -35,14 +35,17 @@ def test_configuration_loading():
 @patch('boto3.client')
 def test_aws_provider_adapter(mock_boto_client):
     """Test that AWS provider adapter can be instantiated."""
-    from src.providers.aws.domain.aws_provider_adapter import AWSProviderAdapter
+    from src.providers.aws.strategy.aws_provider_adapter import AWSProviderAdapter
     
     # Mock AWS client
     mock_client = MagicMock()
     mock_boto_client.return_value = mock_client
     
-    # Create adapter without arguments (it uses default config)
-    adapter = AWSProviderAdapter()
+    # Create mock logger for required parameter
+    mock_logger = MagicMock()
+    
+    # Create adapter with required logger parameter
+    adapter = AWSProviderAdapter(logger=mock_logger)
     
     assert adapter is not None
 

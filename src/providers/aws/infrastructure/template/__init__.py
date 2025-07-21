@@ -1,8 +1,7 @@
 """AWS provider template infrastructure components."""
 
-from .ssm_template_store import AWSSSMTemplateStore, create_aws_ssm_template_store
+# Template infrastructure components have been consolidated into the unified
+# TemplateConfigurationManager. Provider-specific template logic is now
+# handled by the scheduler strategy pattern.
 
-__all__ = [
-    'AWSSSMTemplateStore',
-    'create_aws_ssm_template_store',
-]
+__all__ = []

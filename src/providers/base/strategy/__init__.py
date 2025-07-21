@@ -169,20 +169,7 @@ def create_provider_context(logger=None) -> ProviderContext:
         from src.infrastructure.registry.provider_registry import get_provider_registry
         registry = get_provider_registry()
         
-        # Get all registered providers and create strategies for them
-        registered_providers = registry.get_registered_providers()
-        for provider_type in registered_providers:
-            try:
-                strategy = registry.get_provider_strategy(provider_type)
-                if strategy:
-                    context.register_strategy(strategy)
-                    if logger:
-                        logger.info(f"Loaded strategy for provider: {provider_type}")
-            except Exception as e:
-                if logger:
-                    logger.warning(f"Failed to load strategy for provider {provider_type}: {e}")
-        
-        # Also check for registered provider instances
+        # Load strategies from registered provider instances (not generic types)
         registered_instances = registry.get_registered_provider_instances()
         for instance_name in registered_instances:
             try:
@@ -205,9 +192,10 @@ def create_provider_context(logger=None) -> ProviderContext:
                         # Create strategy using the actual instance config
                         strategy = registry.create_strategy_from_instance(instance_name, provider_instance_config)
                         if strategy:
-                            context.register_strategy(strategy)
+                            # Register strategy with instance name to ensure uniqueness
+                            context.register_strategy(strategy, instance_name)
                         if logger:
-                            logger.info(f"Loaded strategy for provider instance: {registration.provider_type}:{instance_name}")
+                            logger.debug(f"Loaded strategy for provider instance: {registration.type_name}:{instance_name}")
             except Exception as e:
                 if logger:
                     logger.warning(f"Failed to load strategy for provider instance {instance_name}: {e}")

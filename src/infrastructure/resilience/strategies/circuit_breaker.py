@@ -33,6 +33,10 @@ class CircuitBreakerStrategy(RetryStrategy):
                  failure_threshold: int = 5,
                  reset_timeout: int = 60,
                  half_open_timeout: int = 30,
+                 max_attempts: int = 3,
+                 base_delay: float = 1.0,
+                 max_delay: float = 30.0,
+                 jitter: bool = True,
                  **kwargs):
         """
         Initialize circuit breaker strategy.
@@ -42,9 +46,17 @@ class CircuitBreakerStrategy(RetryStrategy):
             failure_threshold: Number of failures before opening circuit
             reset_timeout: Seconds to wait before transitioning to half-open
             half_open_timeout: Seconds to wait in half-open before closing
+            max_attempts: Maximum retry attempts
+            base_delay: Base delay in seconds
+            max_delay: Maximum delay in seconds
+            jitter: Whether to add jitter to delays
             **kwargs: Additional retry strategy parameters
         """
-        super().__init__(**kwargs)
+        # Initialize base attributes since we don't have a concrete base class
+        self.max_attempts = max_attempts
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self.jitter = jitter
         
         self.service_name = service_name
         self.failure_threshold = failure_threshold

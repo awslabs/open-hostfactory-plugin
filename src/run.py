@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Modern CLI entry point with resource-action structure."""
+import asyncio
 import os
 import sys
 
@@ -21,5 +22,10 @@ except ImportError:
     __version__ = "0.1.0"
 
 
+def cli_main():
+    """Entry point function for console scripts."""
+    return asyncio.run(main())
+
+
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

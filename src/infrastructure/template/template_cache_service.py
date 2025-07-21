@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 import threading
 from src.domain.base.ports import LoggingPort
 from .dtos import TemplateDTO, TemplateCacheEntryDTO
-from .mappers import TemplateMapper
 
 
 class TemplateCacheService(ABC):
@@ -35,6 +34,7 @@ class TemplateCacheService(ABC):
     @abstractmethod
     def is_cached(self) -> bool:
         """Check if templates are currently cached."""
+    
 
 
 class NoOpTemplateCacheService(TemplateCacheService):
@@ -73,6 +73,7 @@ class NoOpTemplateCacheService(TemplateCacheService):
     def is_cached(self) -> bool:
         """Always returns False as nothing is cached."""
         return False
+    
 
 
 class TTLTemplateCacheService(TemplateCacheService):
@@ -170,6 +171,7 @@ class TTLTemplateCacheService(TemplateCacheService):
         """
         with self._lock:
             return len(self._cached_templates) if self._cached_templates else 0
+    
 
 
 class AutoRefreshTemplateCacheService(TTLTemplateCacheService):

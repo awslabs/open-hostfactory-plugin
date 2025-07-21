@@ -34,12 +34,12 @@ def test_decorator_functionality():
 
 def test_core_imports():
     """Test that core application components can be imported."""
-    from src.application.service import ApplicationService
-    from src.providers.aws.domain.aws_provider_adapter import AWSProviderAdapter
+    from src.application.services.provider_capability_service import ProviderCapabilityService
+    from src.providers.aws.strategy.aws_provider_adapter import AWSProviderAdapter
     from src.config.manager import ConfigurationManager
     
     # Test that classes are importable
-    assert ApplicationService is not None
+    assert ProviderCapabilityService is not None
     assert AWSProviderAdapter is not None
     assert ConfigurationManager is not None
 

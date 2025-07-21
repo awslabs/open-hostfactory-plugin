@@ -122,7 +122,70 @@ class ApplicationService:
 
 ## Service Registration
 
-Services are registered in dedicated modules within `src/infrastructure/di/`:
+Services are registered in dedicated modules within `src/infrastructure/di/` following a specific dependency order to ensure proper initialization.
+
+### Service Registration Orchestration
+
+The service registration process is orchestrated by `src/infrastructure/di/services.py` with the following dependency-aware order:
+
+```python
+def register_all_services(container: Optional[DIContainer] = None) -> DIContainer:
+    """Register all services in dependency order."""
+    
+    # 1. Register scheduler strategies first (needed by port adapters)
+    from src.infrastructure.scheduler.registration import register_all_scheduler_types
+    register_all_scheduler_types()
+    
+    # 2. Register core services (includes SchedulerPort registration)
+    register_core_services(container)
+    
+    # 3. Register port adapters (uses SchedulerPort from core services)
+    from src.infrastructure.di.port_registrations import register_port_adapters
+    register_port_adapters(container)
+    
+    # 4. Setup CQRS infrastructure (handlers and buses)
+    from src.infrastructure.di.container import _setup_cqrs_infrastructure
+    _setup_cqrs_infrastructure(container)
+    
+    # 5. Register provider services (needed by infrastructure services)
+    register_provider_services(container)
+    
+    # 6. Register infrastructure services
+    register_infrastructure_services(container)
+    
+    # 7. Register server services (conditionally based on config)
+    register_server_services(container)
+    
+    return container
+```
+
+This registration order ensures that:
+- **Scheduler strategies** are available before port adapters need them
+- **Core services** (including SchedulerPort) are registered before dependent services
+- **Port adapters** can properly resolve their dependencies from core services
+- **CQRS infrastructure** is set up with all necessary dependencies available
+- **Provider and infrastructure services** have access to all foundational components
+- **Server services** are registered last as they depend on all other layers
+
+### Registration Dependencies
+
+The dependency graph for service registration follows this pattern:
+
+```
+Scheduler Strategies (Registry)
+    ↓
+Core Services (SchedulerPort, LoggingPort, ConfigurationPort)
+    ↓
+Port Adapters (Uses SchedulerPort from core services)
+    ↓
+CQRS Infrastructure (CommandBus, QueryBus, Handler Discovery)
+    ↓
+Provider Services (AWS, Strategy Factories)
+    ↓
+Infrastructure Services (Repositories, Templates)
+    ↓
+Server Services (FastAPI, REST API Handlers)
+```
 
 ### Core Services Registration
 
@@ -487,6 +550,60 @@ def register_storage_services(container: DIContainer) -> None:
     else:
         raise ConfigurationError(f"Unsupported storage type: {storage_type}")
 ```
+
+## Registry Pattern Integration
+
+The DI system integrates with the registry pattern for strategy-based component selection:
+
+### Scheduler Port Registration
+
+The scheduler port uses the registry pattern for configuration-driven strategy selection:
+
+```python
+# src/infrastructure/di/port_registrations.py
+def register_port_adapters(container):
+    """Register all port adapters in the DI container."""
+    
+    # Register scheduler port adapter using registry pattern
+    def create_scheduler_port(c):
+        from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
+        from src.config.manager import get_config_manager
+        
+        config_manager = get_config_manager()
+        scheduler_config = config_manager.get_scheduler_config()
+        scheduler_type = scheduler_config.get('strategy', 'hostfactory')
+        
+        registry = get_scheduler_registry()
+        return registry.get_active_strategy(scheduler_type, scheduler_config)
+    
+    container.register_singleton(
+        SchedulerPort,
+        create_scheduler_port
+    )
+```
+
+This pattern provides several benefits:
+
+- **Configuration-Driven**: Scheduler strategy selected based on configuration
+- **Registry Integration**: Leverages the scheduler registry for strategy management
+- **Lazy Loading**: Strategy created only when needed
+- **Type Safety**: Maintains proper port/adapter abstraction
+- **Testability**: Easy to mock or substitute strategies for testing
+
+### Registry Factory Pattern
+
+The registry pattern enables dynamic strategy creation:
+
+```python
+# Registry resolves strategy based on configuration
+registry = get_scheduler_registry()
+strategy = registry.get_active_strategy(scheduler_type, config)
+
+# Strategy implements the port interface
+assert isinstance(strategy, SchedulerPort)
+```
+
+This approach separates strategy selection logic from dependency injection, maintaining clean separation of concerns while enabling flexible configuration-driven behavior.
 
 ## Error Handling
 

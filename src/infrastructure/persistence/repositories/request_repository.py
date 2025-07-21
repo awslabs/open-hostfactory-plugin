@@ -24,51 +24,108 @@ class RequestSerializer:
         self.logger = get_logger(__name__)
     
     def to_dict(self, request: Request) -> Dict[str, Any]:
-        """Convert Request aggregate to dictionary."""
+        """Convert Request aggregate to dictionary with enhanced fields."""
         try:
             return {
+                # Core request fields
                 'request_id': str(request.request_id.value),
                 'template_id': request.template_id,
-                'machine_count': request.requested_count,  # Fix: use requested_count from aggregate
+                'machine_count': request.requested_count,
                 'request_type': request.request_type.value,
                 'status': request.status.value,
-                'machine_ids': [str(instance_id.value) for instance_id in request.instance_ids],  # Fix: use instance_ids
-                'timeout': request.metadata.get('timeout'),  # Fix: get from metadata
-                'tags': request.metadata.get('tags', {}),    # Fix: get from metadata
+                'status_message': request.status_message,
+                
+                # Enhanced provider tracking fields
+                'provider_name': request.provider_name,
+                'provider_api': request.provider_api,
+                'provider_type': request.provider_type,
+                
+                # Enhanced resource tracking fields
+                'resource_ids': request.resource_ids,
+                
+                # HF output fields
+                'message': request.message,
+                
+                # Results and instances
+                'machine_ids': [str(instance_id.value) for instance_id in request.instance_ids],
+                'successful_count': request.successful_count,
+                'failed_count': request.failed_count,
+                
+                # Metadata and error details
                 'metadata': request.metadata or {},
-                'error_message': request.status_message,     # Fix: use status_message
+                'error_details': request.error_details or {},
+                'provider_data': request.provider_data or {},
+                
+                # Timestamps
                 'created_at': request.created_at.isoformat(),
-                'started_at': request.started_at.isoformat() if request.started_at else None,  # Fix: use started_at
-                'completed_at': request.completed_at.isoformat() if request.completed_at else None
+                'started_at': request.started_at.isoformat() if request.started_at else None,
+                'completed_at': request.completed_at.isoformat() if request.completed_at else None,
+                
+                # Versioning
+                'version': request.version,
+                
+                # Legacy fields for backward compatibility
+                'timeout': request.metadata.get('timeout'),
+                'tags': request.metadata.get('tags', {}),
+                'error_message': request.status_message,  # Legacy field name
+                
+                # Schema version for migration support
+                'schema_version': '2.0.0'
             }
         except Exception as e:
             self.logger.error(f"Failed to serialize request {request.request_id}: {e}")
             raise
     
     def from_dict(self, data: Dict[str, Any]) -> Request:
-        """Convert dictionary to Request aggregate."""
+        """Convert dictionary to Request aggregate with enhanced field support."""
         try:
             # Parse datetime fields
             created_at = datetime.fromisoformat(data['created_at'])
-            started_at = datetime.fromisoformat(data['started_at']) if data.get('started_at') else None  # Fix: use started_at
+            started_at = datetime.fromisoformat(data['started_at']) if data.get('started_at') else None
             completed_at = datetime.fromisoformat(data['completed_at']) if data.get('completed_at') else None
             
-            # Create request using factory method
-            # Create Request directly using constructor
-            request = Request(
-                request_id=RequestId(value=data['request_id']),
-                template_id=data['template_id'],
-                requested_count=data['machine_count'],  # Fix: map machine_count to requested_count
-                request_type=RequestType(data['request_type']),
-                status=RequestStatus(data['status']),
-                provider_type=data.get('provider_type', 'aws'),
-                instance_ids=[InstanceId(value=machine_id) for machine_id in data.get('machine_ids', [])],  # Fix: map to instance_ids
-                metadata=data.get('metadata', {}),  # Store timeout and tags in metadata
-                status_message=data.get('error_message'),  # Fix: map to status_message
-                created_at=created_at,
-                started_at=started_at,  # Fix: use started_at
-                completed_at=completed_at
-            )
+            # Build request data with enhanced fields
+            request_data = {
+                # Core request fields
+                'request_id': RequestId(value=data['request_id']),
+                'template_id': data['template_id'],
+                'requested_count': data.get('machine_count', data.get('requested_count', 1)),
+                'request_type': RequestType(data['request_type']),
+                'status': RequestStatus(data['status']),
+                'status_message': data.get('status_message', data.get('error_message')),
+                
+                # Enhanced provider tracking fields
+                'provider_name': data.get('provider_name'),
+                'provider_api': data.get('provider_api'),
+                'provider_type': data.get('provider_type', 'aws'),
+                
+                # Enhanced resource tracking fields
+                'resource_ids': data.get('resource_ids', []),
+                
+                # HF output fields
+                'message': data.get('message'),
+                
+                # Results and instances
+                'instance_ids': [InstanceId(value=machine_id) for machine_id in data.get('machine_ids', [])],
+                'successful_count': data.get('successful_count', 0),
+                'failed_count': data.get('failed_count', 0),
+                
+                # Metadata and error details
+                'metadata': data.get('metadata', {}),
+                'error_details': data.get('error_details', {}),
+                'provider_data': data.get('provider_data', {}),
+                
+                # Timestamps
+                'created_at': created_at,
+                'started_at': started_at,
+                'completed_at': completed_at,
+                
+                # Versioning
+                'version': data.get('version', 0)
+            }
+            
+            # Create request using model_validate to handle all fields properly
+            request = Request.model_validate(request_data)
             
             return request
             

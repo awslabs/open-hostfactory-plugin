@@ -11,21 +11,36 @@ from src.domain.request.request_types import RequestStatus
 
 
 class Request(AggregateRoot):
-    """Request aggregate root - manages request lifecycle and business rules."""
-    model_config = ConfigDict(frozen=False, validate_assignment=True)
+    """Request aggregate root with both snake_case and camelCase support via aliases."""
+    model_config = ConfigDict(
+        frozen=False, 
+        validate_assignment=True,
+        populate_by_name=True  # Allow both field names and aliases
+    )
     
     # Core request identification
     request_id: RequestId
     request_type: RequestType
     provider_type: str
-    
+    provider_instance: Optional[str] = None
+
     # Request configuration
     template_id: str
-    requested_count: int
+    requested_count: int = 1
+    
+    # Provider tracking (which provider was used)
+    provider_name: Optional[str] = None          # Specific provider instance name
+    provider_api: Optional[str] = None           # Provider API/service used
+    
+    # Resource tracking (what was created)
+    resource_ids: List[str] = Field(default_factory=list)  # Provider resource identifiers
     
     # Request state
-    status: RequestStatus = RequestStatus.PENDING
+    status: RequestStatus = Field(default=RequestStatus.PENDING)
     status_message: Optional[str] = None
+    
+    # HF output fields
+    message: Optional[str] = None
     
     # Results
     instance_ids: List[InstanceId] = Field(default_factory=list)
@@ -45,7 +60,7 @@ class Request(AggregateRoot):
     provider_data: Dict[str, Any] = Field(default_factory=dict)
     
     # Versioning
-    version: int = 0
+    version: int = Field(default=0)
     
     def __init__(self, **data):
         # Set default ID if not provided
@@ -197,6 +212,24 @@ class Request(AggregateRoot):
         """Get provider-specific data value."""
         return self.provider_data.get(key, default)
     
+    def add_resource_id(self, resource_id: str) -> 'Request':
+        """Add a provider resource ID"""
+        if resource_id not in self.resource_ids:
+            data = self.model_dump()
+            data['resource_ids'] = self.resource_ids + [resource_id]
+            data['version'] = self.version + 1
+            return Request.model_validate(data)
+        return self
+
+    def remove_resource_id(self, resource_id: str) -> 'Request':
+        """Remove a resource ID"""
+        if resource_id in self.resource_ids:
+            data = self.model_dump()
+            data['resource_ids'] = [rid for rid in self.resource_ids if rid != resource_id]
+            data['version'] = self.version + 1
+            return Request.model_validate(data)
+        return self
+    
     @property
     def is_complete(self) -> bool:
         """Check if request is complete."""
@@ -257,6 +290,7 @@ class Request(AggregateRoot):
                           template_id: str,
                           machine_count: int,
                           provider_type: str,  # Provider type must be explicitly specified
+                          provider_instance: Optional[str] = None,  # Specific provider instance
                           metadata: Optional[Dict[str, Any]] = None) -> 'Request':
         """
         Factory method to create a new request with proper domain event generation.
@@ -266,6 +300,7 @@ class Request(AggregateRoot):
             template_id: Template identifier
             machine_count: Number of machines requested
             provider_type: Cloud provider type
+            provider_instance: Specific provider instance name (optional)
             metadata: Optional metadata
             
         Returns:
@@ -281,6 +316,7 @@ class Request(AggregateRoot):
             template_id=template_id,
             requested_count=machine_count,
             provider_type=provider_type,
+            provider_instance=provider_instance,
             status=RequestStatus.PENDING,
             metadata=metadata or {},
             created_at=datetime.utcnow(),
@@ -386,10 +422,10 @@ class Request(AggregateRoot):
     
     def update_with_provisioning_result(self, provisioning_result: Dict[str, Any]) -> 'Request':
         """
-        Update request with AWS provisioning results.
+        Update request with provider provisioning results.
         
         Args:
-            provisioning_result: Results from AWS provisioning operation
+            provisioning_result: Results from provider provisioning operation
             
         Returns:
             Updated Request instance

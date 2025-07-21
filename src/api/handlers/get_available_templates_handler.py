@@ -1,23 +1,29 @@
 """Enhanced API handler for retrieving available templates."""
+import time
 from typing import Dict, Any, Optional
 
-from src.infrastructure.handlers.base.api_handler import BaseAPIHandler
-from src.application.dto.responses import TemplateListResponse
+from src.application.base.infrastructure_handlers import BaseAPIHandler
 from src.application.dto.queries import ListTemplatesQuery
 from src.monitoring.metrics import MetricsCollector
 from src.infrastructure.di.buses import QueryBus, CommandBus
-from src.application.template.format_service import TemplateFormatService
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.domain.base.ports import LoggingPort, ErrorHandlingPort
+from src.domain.base.dependency_injection import injectable
 
 # Exception handling infrastructure
 from src.infrastructure.error.decorators import handle_interface_exceptions
 
-class GetAvailableTemplatesRESTHandler(BaseAPIHandler):
-    """Enhanced API handler for retrieving available templates - Pure CQRS Implementation."""
+
+@injectable
+class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, Any]]):
+    """Enhanced API handler for retrieving available templates - CQRS-aligned implementation."""
 
     def __init__(self, 
                  query_bus: QueryBus,
                  command_bus: CommandBus,
-                 format_service: TemplateFormatService,
+                 scheduler_strategy: SchedulerPort,
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
                  metrics: Optional[MetricsCollector] = None):
         """
         Initialize handler with injected CQRS dependencies.
@@ -25,104 +31,98 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler):
         Args:
             query_bus: Query bus for CQRS queries (injected)
             command_bus: Command bus for CQRS commands (injected)
-            format_service: Template format conversion service (injected)
+            scheduler_strategy: Scheduler strategy for field mapping (injected)
+            logger: Logging port for operation logging
+            error_handler: Error handling port for exception management
             metrics: Optional metrics collector
             
         Note:
-            Now uses constructor injection instead of service locator pattern.
+            Now uses scheduler strategy instead of format service.
             All dependencies are explicitly provided via constructor.
+            Follows BaseAPIHandler pattern for architectural consistency.
         """
-        super().__init__(None, metrics)
+        super().__init__(logger, error_handler)
         self._query_bus = query_bus
         self._command_bus = command_bus
-        self._format_service = format_service
+        self._scheduler_strategy = scheduler_strategy
+        self._metrics = metrics
         
-    def handle(self,
-                input_data: Optional[Dict[str, Any]] = None,
-                all_flag: bool = False,
-                long: bool = False,
-                clean: bool = False,
-                context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def validate_api_request(self, request: Dict[str, Any], context) -> None:
         """
-        Get all available templates with enhanced functionality.
-
-        Args:
-            input_data: Optional input data
-            all_flag: Whether to return all templates
-            long: Whether to return detailed information
-            clean: Whether to return clean output
-            context: Request context information
-
-        Returns:
-            Dict containing templates and status information
-        """
-        # Apply middleware in standardized order
-        return self.apply_middleware(self._handle, service_name="template_service")(
-            input_data=input_data,
-            all_flag=all_flag,
-            long=long,
-            clean=clean,
-            context=context
-        )
-        
-    @handle_interface_exceptions(context="get_available_templates_api", interface_type="api")
-    def _handle(self,
-                input_data: Optional[Dict[str, Any]] = None,
-                all_flag: bool = False,
-                long: bool = False,
-                clean: bool = False,
-                context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Internal implementation of handle method - Pure CQRS.
+        Validate API request for getting available templates.
         
         Args:
-            input_data: Optional input data
-            all_flag: Whether to return all templates
-            long: Whether to return detailed information
-            clean: Whether to return clean output
-            context: Request context information
+            request: API request data
+            context: Request context
+        """
+        # Basic validation - templates endpoint doesn't require specific parameters
+        # but we can validate optional query parameters if present
+        if 'format' in request and request['format'] not in ['json', 'yaml', 'table']:
+            raise ValueError(f"Invalid format: {request['format']}")
+    
+    @handle_interface_exceptions
+    async def execute_api_request(self, request: Dict[str, Any], context) -> Dict[str, Any]:
+        """
+        Execute the core API logic for retrieving available templates.
+        
+        Args:
+            request: Validated API request
+            context: Request context
             
         Returns:
-            Dict containing templates and status information
+            Dictionary with templates and metadata
         """
-        correlation_id = context.get('correlation_id') if context else None
-        start_time = self.metrics.start_timer() if self.metrics else None
-
-        # Get templates using CQRS query
-        query = ListTemplatesQuery(
-            active_only=not all_flag,
-            include_configuration=long
-        )
+        if self.logger:
+            self.logger.info(f"Processing get available templates request - Correlation ID: {context.correlation_id}")
         
-        # Use injected query bus
-        domain_templates = self._query_bus.execute(query)  # List[Template]
+        try:
+            # Create CQRS query
+            query = ListTemplatesQuery()
+            
+            # Execute query through CQRS query bus
+            templates = await self._query_bus.execute(query)
+            
+            # Use scheduler strategy for format conversion - SINGLE MAPPING POINT
+            formatted_response = self._scheduler_strategy.format_templates_response(templates)
+            
+            # Add correlation ID and other metadata
+            if isinstance(formatted_response, dict):
+                formatted_response["correlation_id"] = context.correlation_id
+                formatted_response["count"] = len(templates)
+            
+            if self.logger:
+                self.logger.info(f"Successfully retrieved {len(templates)} templates - Correlation ID: {context.correlation_id}")
+            
+            # Record metrics if available
+            if self._metrics:
+                self._metrics.record_api_success('get_available_templates', len(templates))
+            
+            return formatted_response
+            
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"Failed to retrieve templates: {str(e)} - Correlation ID: {context.correlation_id}")
+            
+            # Record metrics if available
+            if self._metrics:
+                self._metrics.record_api_failure('get_available_templates', str(e))
+            
+            raise
+    
+    async def post_process_response(self, response: Dict[str, Any], context) -> Dict[str, Any]:
+        """
+        Post-process the template list response.
         
-        # Convert to DTOs
-        from src.application.template.dto import TemplateDTO
-        template_dtos = [TemplateDTO.from_domain(template) for template in domain_templates]
+        Args:
+            response: Original response
+            context: Request context
+            
+        Returns:
+            Post-processed response
+        """
+        # Add any additional metadata or formatting
+        if isinstance(response, dict):
+            response["processed_at"] = context.start_time
+            response["processing_duration"] = time.time() - context.start_time
         
-        # Create response object
-        response = TemplateListResponse(templates=template_dtos)
-        
-        # Convert to API format with camelCase keys using format service
-        result = response.to_dict(format_service=self._format_service)
-
-        # Add request metadata
-        result['metadata'] = {
-            'correlation_id': correlation_id,
-            'timestamp': context.get('timestamp') if context else None,
-            'request_id': context.get('request_id') if context else None
-        }
-
-        # Record metrics
-        if self.metrics:
-            self.metrics.record_success(
-                'get_available_templates',
-                start_time,
-                {
-                    'template_count': len(result.get('templates', [])),
-                    'correlation_id': correlation_id
-                }
-            )
-
-        return result
+        return response

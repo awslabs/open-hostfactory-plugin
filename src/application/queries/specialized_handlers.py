@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
-from src.application.interfaces.command_query import QueryHandler
+from src.application.base.handlers import BaseQueryHandler
+from src.application.decorators import query_handler
 from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
-from src.domain.base.dependency_injection import injectable
 from src.application.dto.queries import (
     GetActiveMachineCountQuery,
     GetRequestSummaryQuery,
@@ -19,220 +19,198 @@ from src.application.dto.responses import (
 # Exception handling infrastructure
 from src.domain.machine.value_objects import MachineStatus
 from src.domain.base.exceptions import EntityNotFoundError
-from src.domain.base.ports import LoggingPort, ContainerPort
+from src.domain.base.ports import LoggingPort, ContainerPort, ErrorHandlingPort
 from src.infrastructure.utilities.factories.repository_factory import UnitOfWork
 from src.domain.base import UnitOfWorkFactory
 
-@injectable
-class GetActiveMachineCountHandler(QueryHandler[GetActiveMachineCountQuery, int]):
+@query_handler(GetActiveMachineCountQuery)
+class GetActiveMachineCountHandler(BaseQueryHandler[GetActiveMachineCountQuery, int]):
     """Handler for getting count of active machines."""
 
     def __init__(self, 
+                 uow_factory: UnitOfWorkFactory,
                  logger: LoggingPort,
-                 container: ContainerPort,
-                 uow: Optional[UnitOfWork] = None) -> None:
-        self.uow = uow
-        self.logger = logger
-        self._container = container
-        self.uow_factory = self._container.get(UnitOfWorkFactory) if uow is None else None
-
-    
-    def handle(self, query: GetActiveMachineCountQuery) -> int:
-        """Handle get active machine count query."""
-        # Get unit of work if not provided in constructor
-        uow = self.uow or self.uow_factory.create_unit_of_work()
-        
-        with uow:
-            active_machines = uow.machines.find_active_machines()
-            count = len(active_machines)
-            
-            self.logger.debug(
-                f"Found {count} active machines",
-                extra={'active_machine_count': count}
-            )
-            
-            return count
-
-@injectable
-class GetRequestSummaryHandler(QueryHandler[GetRequestSummaryQuery, RequestSummaryDTO]):
-    """Handler for getting request summary."""
-
-    def __init__(self, 
-                 logger: LoggingPort,
-                 container: ContainerPort,
-                 uow: Optional[UnitOfWork] = None, 
-                 instance_manager=None) -> None:
-        self.uow = uow
-        self.instance_manager = instance_manager
-        self.logger = logger
-        self._container = container
-        self.uow_factory = self._container.get(UnitOfWorkFactory) if uow is None else None
-
-    
-    def handle(self, query: GetRequestSummaryQuery) -> RequestSummaryDTO:
-        """Handle get request summary query."""
-        # Validate request_id is not None
-        if query.request_id is None:
-            raise ValueError("Request ID cannot be None. This typically happens when a request fails to be created properly.")
-            
-        # Get unit of work if not provided in constructor
-        uow = self.uow or self.uow_factory.create_unit_of_work()
-        
-        with uow:
-            # Get request
-            request = uow.requests.find_by_id(query.request_id)
-            if not request:
-                raise EntityNotFoundError("Request", query.request_id)
-            
-            # Get machines for this request
-            machines = uow.machines.find_by_request(request.request_id)
-            
-            # Synchronize machine statuses with provider (generates events if status changed)
-            updated_machines = self._synchronize_machine_statuses(machines, uow)
-            
-            # Count machines by status (use updated machines)
-            machine_statuses: Dict[str, int] = {}
-            for machine in updated_machines:
-                status = machine.status.value
-                if status in machine_statuses:
-                    machine_statuses[status] += 1
-                else:
-                    machine_statuses[status] = 1
-            
-            # Calculate duration if request is complete
-            duration = None
-            if request.status.is_terminal and request.updated_at:
-                duration = (request.updated_at - request.created_at).total_seconds()
-            
-            return RequestSummaryDTO(
-                request_id=str(request.request_id),
-                status=request.status.value,
-                total_machines=len(updated_machines),
-                machine_statuses=machine_statuses,
-                created_at=request.created_at,
-                updated_at=request.updated_at,
-                duration=duration
-            )
-    
-    def _synchronize_machine_statuses(self, machines: List[Any], uow: UnitOfWork) -> List[Any]:
+                 error_handler: ErrorHandlingPort):
         """
-        Synchronize machine statuses with provider and generate events for changes.
-        This is where machine business events are generated during status checking.
-        """
-        if not self.instance_manager:
-            return machines
-            
-        updated_machines = []
-        machines_to_save = []
-        
-        try:
-            instance_ids = [str(machine.instance_id) for machine in machines]
-            status_response = self.instance_manager.get_instance_status(instance_ids)
-            
-            for machine in machines:
-                provider_instance = next((inst for inst in status_response.instances 
-                                   if inst.instance_id == str(machine.instance_id)), None)
-                if provider_instance:
-                    domain_status = self._map_instance_state_to_machine_status(provider_instance.state)
-                    if machine.status != domain_status:
-                        updated_machine = machine.update_status(domain_status, f"Provider sync: {provider_instance.state}")
-                        machines_to_save.append(updated_machine)
-                        updated_machines.append(updated_machine)
-                    else:
-                        updated_machines.append(machine)
-                else:
-                    updated_machines.append(machine)
-            
-            if machines_to_save:
-                uow.machines.save_batch(machines_to_save)
-                
-        except Exception as e:
-            self.logger.warning(f"Failed to sync machine statuses: {e}")
-            updated_machines = machines
-        
-        return updated_machines
-    
-    def _map_instance_state_to_machine_status(self, instance_state: str) -> 'MachineStatus':
-        """Map provider instance state string to MachineStatus enum.
+        Initialize get active machine count handler.
         
         Args:
-            instance_state: Provider instance state as string (e.g., 'running', 'stopped')
-            
-        Returns:
-            MachineStatus enum value
+            uow_factory: Unit of work factory for data access
+            logger: Logging port for operation logging
+            error_handler: Error handling port for exception management
         """
-        from src.domain.machine.value_objects import MachineStatus
+        super().__init__(logger, error_handler)
+        self.uow_factory = uow_factory
+
+    async def execute_query(self, query: GetActiveMachineCountQuery) -> int:
+        """Execute active machine count query."""
+        self.logger.info("Getting active machine count")
         
         try:
-            # Direct string-to-enum conversion (MachineStatus values match provider states)
-            return MachineStatus(instance_state.lower())
-        except ValueError:
-            # Handle unknown states gracefully
-            return MachineStatus.UNKNOWN
+            with self.uow_factory.create_unit_of_work() as uow:
+                # Get active machines from repository
+                active_statuses = [
+                    MachineStatus.RUNNING,
+                    MachineStatus.PENDING,
+                    MachineStatus.STARTING
+                ]
+                
+                active_machines = uow.machines.find_by_statuses(active_statuses)
+                count = len(active_machines)
+                
+                self.logger.info(f"Found {count} active machines")
+                return count
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get active machine count: {e}")
+            raise
 
-@injectable
-class GetMachineHealthHandler(QueryHandler[GetMachineHealthQuery, MachineHealthDTO]):
-    """Handler for getting machine health status."""
+
+@query_handler(GetRequestSummaryQuery)
+class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestSummaryDTO]):
+    """Handler for getting request summary information."""
 
     def __init__(self, 
+                 uow_factory: UnitOfWorkFactory,
                  logger: LoggingPort,
-                 container: ContainerPort,
-                 uow: Optional[UnitOfWork] = None,
-                 resource_provisioning_port: Optional[ResourceProvisioningPort] = None) -> None:
-        self.uow = uow
-        self._resource_provisioning_port = resource_provisioning_port
-        self.logger = logger
-        self._container = container
-        self.uow_factory = self._container.get(UnitOfWorkFactory) if uow is None else None
-        
-    @property
-    def resource_provisioning_port(self) -> ResourceProvisioningPort:
+                 error_handler: ErrorHandlingPort):
         """
-        Lazy initialization for resource provisioning port.
+        Initialize get request summary handler.
         
-        Returns:
-            ResourceProvisioningPort instance
+        Args:
+            uow_factory: Unit of work factory for data access
+            logger: Logging port for operation logging
+            error_handler: Error handling port for exception management
         """
-        if self._resource_provisioning_port is None:
-            self._resource_provisioning_port = self._container.get(ResourceProvisioningPort)
-        return self._resource_provisioning_port
+        super().__init__(logger, error_handler)
+        self.uow_factory = uow_factory
 
-    
-    def handle(self, query: GetMachineHealthQuery) -> MachineHealthDTO:
-        """Handle get machine health query."""
-        # Get unit of work if not provided in constructor
-        uow = self.uow or self.uow_factory.create_unit_of_work()
+    async def execute_query(self, query: GetRequestSummaryQuery) -> RequestSummaryDTO:
+        """Execute request summary query."""
+        self.logger.info(f"Getting request summary for request: {query.request_id}")
         
-        with uow:
-            # Get machine
-            machine = uow.machines.find_by_id(query.machine_id)
-            if not machine:
-                raise EntityNotFoundError("Machine", query.machine_id)
-            
-            # Get health status using the resource provisioning port
-            instance_id = machine.resource_id
-            health_data = self.resource_provisioning_port.get_resource_health(instance_id)
-            
-            # Extract metrics
-            metrics = []
-            if 'metrics' in health_data:
-                metrics = health_data['metrics']
-            
-            # Determine overall status
-            overall_status = "unknown"
-            if 'status' in health_data:
-                if health_data['status'] == 'ok' or health_data['status'] == 'active':
-                    overall_status = "healthy"
-                elif health_data['status'] == 'impaired':
-                    overall_status = "impaired"
-                elif health_data['status'] == 'failed' or health_data['status'] == 'inactive':
-                    overall_status = "unhealthy"
-            
-            return MachineHealthDTO(
-                machine_id=str(machine.machine_id),
-                overall_status=overall_status,
-                system_status=health_data.get('system_status', 'unknown'),
-                instance_status=health_data.get('status', 'unknown'),
-                metrics=metrics,
-                last_check=datetime.utcnow()
-            )
+        try:
+            with self.uow_factory.create_unit_of_work() as uow:
+                # Get request from repository
+                request = uow.requests.get_by_id(query.request_id)
+                if not request:
+                    raise EntityNotFoundError("Request", query.request_id)
+                
+                # Get associated machines
+                machines = uow.machines.find_by_request_id(query.request_id)
+                
+                # Calculate summary statistics
+                total_machines = len(machines)
+                running_machines = len([m for m in machines if m.status == MachineStatus.RUNNING])
+                failed_machines = len([m for m in machines if m.status == MachineStatus.FAILED])
+                
+                # Create summary DTO
+                summary = RequestSummaryDTO(
+                    request_id=str(request.request_id),
+                    status=request.status.value,
+                    template_id=request.template_id,
+                    requested_count=request.machine_count,
+                    total_machines=total_machines,
+                    running_machines=running_machines,
+                    failed_machines=failed_machines,
+                    created_at=request.created_at,
+                    updated_at=request.updated_at,
+                    metadata=request.metadata or {}
+                )
+                
+                self.logger.info(f"Generated summary for request {query.request_id}: {total_machines} machines")
+                return summary
+                
+        except EntityNotFoundError as e:
+            self.logger.error(f"Request not found: {query.request_id}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Failed to get request summary: {e}")
+            raise
+
+
+@query_handler(GetMachineHealthQuery)
+class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHealthDTO]):
+    """Handler for getting machine health information."""
+
+    def __init__(self, 
+                 uow_factory: UnitOfWorkFactory,
+                 provisioning_port: ResourceProvisioningPort,
+                 logger: LoggingPort,
+                 error_handler: ErrorHandlingPort):
+        """
+        Initialize get machine health handler.
+        
+        Args:
+            uow_factory: Unit of work factory for data access
+            provisioning_port: Resource provisioning port for health checks
+            logger: Logging port for operation logging
+            error_handler: Error handling port for exception management
+        """
+        super().__init__(logger, error_handler)
+        self.uow_factory = uow_factory
+        self.provisioning_port = provisioning_port
+
+    async def execute_query(self, query: GetMachineHealthQuery) -> MachineHealthDTO:
+        """Execute machine health query."""
+        self.logger.info(f"Getting health information for machine: {query.machine_id}")
+        
+        try:
+            with self.uow_factory.create_unit_of_work() as uow:
+                # Get machine from repository
+                machine = uow.machines.get_by_id(query.machine_id)
+                if not machine:
+                    raise EntityNotFoundError("Machine", query.machine_id)
+                
+                # Get health information
+                health_status = "unknown"
+                health_details = {}
+                last_health_check = None
+                
+                try:
+                    # Try to get health from provisioning service
+                    if hasattr(self.provisioning_port, 'get_machine_health'):
+                        health_info = self.provisioning_port.get_machine_health(machine.provider_id)
+                        health_status = health_info.get('status', 'unknown')
+                        health_details = health_info.get('details', {})
+                        last_health_check = health_info.get('timestamp')
+                    else:
+                        # Fallback: derive health from machine status
+                        if machine.status == MachineStatus.RUNNING:
+                            health_status = "healthy"
+                        elif machine.status in [MachineStatus.FAILED, MachineStatus.TERMINATED]:
+                            health_status = "unhealthy"
+                        else:
+                            health_status = "unknown"
+                        
+                        health_details = {
+                            "machine_status": machine.status.value,
+                            "provider_id": machine.provider_id
+                        }
+                        
+                except Exception as health_error:
+                    self.logger.warning(f"Could not get detailed health for machine {query.machine_id}: {health_error}")
+                    health_status = "unknown"
+                    health_details = {"error": str(health_error)}
+                
+                # Create health DTO
+                health_dto = MachineHealthDTO(
+                    machine_id=str(machine.machine_id),
+                    provider_id=machine.provider_id,
+                    status=machine.status.value,
+                    health_status=health_status,
+                    health_details=health_details,
+                    last_health_check=last_health_check,
+                    created_at=machine.created_at,
+                    updated_at=machine.updated_at
+                )
+                
+                self.logger.info(f"Retrieved health for machine {query.machine_id}: {health_status}")
+                return health_dto
+                
+        except EntityNotFoundError as e:
+            self.logger.error(f"Machine not found: {query.machine_id}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Failed to get machine health: {e}")
+            raise

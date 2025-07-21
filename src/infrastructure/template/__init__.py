@@ -1,65 +1,18 @@
 """Template infrastructure components."""
 
-from .loader import TemplateLoader
+from .configuration_manager import TemplateConfigurationManager
 from .template_cache_service import TemplateCacheService, NoOpTemplateCacheService, create_template_cache_service
-from .configuration_store import TemplateConfigurationStore, TemplateFileStore, create_template_configuration_store
-from .sync_configuration_store import SyncTemplateConfigurationStore, create_sync_template_configuration_store
-from .provider_stores import (
-    ProviderTemplateStore, 
-    NoOpProviderTemplateStore,
-    ProviderTemplateStoreRegistry,
-    get_provider_store_registry,
-    register_provider_template_store,
-    register_provider_template_store_factory,
-    CompositeProviderTemplateStore,
-    create_composite_provider_store
-)
-from .extensions import (
-    TemplateExtension,
-    BaseTemplateExtension,
-    NoOpTemplateExtension,
-    TemplateExtensionRegistry,
-    get_template_extension_registry,
-    register_template_extension,
-    register_template_extension_factory,
-    get_template_extension,
-    CompositeTemplateExtension
-)
-from .format_converter import TemplateFormatConverter
+from .template_repository_impl import TemplateRepositoryImpl
 
 __all__ = [
-    # Unified configuration store
-    'TemplateConfigurationStore',
-    'TemplateFileStore',
-    'create_template_configuration_store',
-    'SyncTemplateConfigurationStore',
-    'create_sync_template_configuration_store',
+    # Core template system
+    'TemplateConfigurationManager',
     
-    # Provider extensibility
-    'ProviderTemplateStore',
-    'NoOpProviderTemplateStore',
-    'ProviderTemplateStoreRegistry',
-    'get_provider_store_registry',
-    'register_provider_template_store',
-    'register_provider_template_store_factory',
-    'CompositeProviderTemplateStore',
-    'create_composite_provider_store',
+    # Repository implementation
+    'TemplateRepositoryImpl',
     
-    # Template extensions
-    'TemplateExtension',
-    'BaseTemplateExtension',
-    'NoOpTemplateExtension',
-    'TemplateExtensionRegistry',
-    'get_template_extension_registry',
-    'register_template_extension',
-    'register_template_extension_factory',
-    'get_template_extension',
-    'CompositeTemplateExtension',
-    
-    # Core components
-    'TemplateLoader',
+    # Caching components
     'TemplateCacheService',
     'NoOpTemplateCacheService', 
     'create_template_cache_service',
-    'TemplateFormatConverter',
 ]

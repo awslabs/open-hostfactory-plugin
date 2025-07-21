@@ -19,7 +19,7 @@ try:
     from src.infrastructure.persistence.repositories.request_repository import RequestRepository
     from src.infrastructure.persistence.repositories.template_repository import TemplateRepository
     from src.infrastructure.persistence.repositories.machine_repository import MachineRepository
-    from src.providers.aws.infrastructure.aws_provider import AWSProvider
+    from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy as AWSProvider
     IMPORTS_AVAILABLE = True
 except ImportError as e:
     IMPORTS_AVAILABLE = False

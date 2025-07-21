@@ -9,7 +9,10 @@ from src.domain.base.exceptions import ConfigurationError
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.persistence.base import StrategyBasedRepository
 from src.infrastructure.persistence.json.strategy import JSONStorageStrategy
+from src.infrastructure.persistence.json.provider_template_strategy import ProviderTemplateStrategy
 from src.infrastructure.patterns.singleton_registry import SingletonRegistry
+from src.config.managers.configuration_manager import ConfigurationManager
+
 
 class TemplateJSONStorageStrategy(JSONStorageStrategy):
     """JSON storage strategy for templates with legacy format support."""
@@ -49,552 +52,313 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
         Returns:
             Entity data if found, None otherwise
         """
-        # First, try to find in the main file
-        entity_data = super().find_by_id(entity_id)
-        if entity_data:
-            return entity_data
-            
-        # If not found in main file and legacy file exists, check there
+        # First check main file
+        result = super().find_by_id(entity_id)
+        if result:
+            return result
+        
+        # Then check legacy file if it exists
         if self.legacy_file_path and os.path.exists(self.legacy_file_path):
             try:
-                with open(self.legacy_file_path, 'r') as f:
+                with open(self.legacy_file_path, 'r', encoding='utf-8') as f:
                     legacy_data = json.load(f)
-                    if isinstance(legacy_data, dict) and 'templates' in legacy_data:
-                        for template in legacy_data['templates']:
-                            # Check both camelCase and snake_case template IDs
-                            template_id = template.get('template_id') or template.get('templateId')
-                            if template_id == entity_id:
-                                # Convert to snake_case format
-                                self.logger.debug(f"Found template {entity_id} in legacy file {self.legacy_file_path}")
-                                return self._convert_legacy_template(template)
-            except Exception as e:
-                self.logger.error(f"Error loading legacy template {entity_id}: {str(e)}")
                 
-        # Not found in either file
+                if isinstance(legacy_data, list):
+                    for item in legacy_data:
+                        if isinstance(item, dict) and item.get('template_id') == entity_id:
+                            return item
+                elif isinstance(legacy_data, dict) and entity_id in legacy_data:
+                    return legacy_data[entity_id]
+                    
+            except Exception as e:
+                self.logger.error(f"Error reading legacy templates file {self.legacy_file_path}: {e}")
+        
         return None
     
-    def find_all(self) -> Dict[str, Dict[str, Any]]:
+    def find_all(self) -> List[Dict[str, Any]]:
         """
-        Load templates from both files and merge them.
+        Find all entities from both main and legacy files.
         
         Returns:
-            Dictionary of template ID to template data
+            List of all entity data
         """
-        # Load templates from main file
-        templates_data = {}
+        all_entities = {}
         
-        # Load from main file if it exists
-        if os.path.exists(self.file_path):
-            try:
-                with open(self.file_path, 'r') as f:
-                    data = json.load(f)
-                    if isinstance(data, dict):
-                        if 'templates' in data and isinstance(data['templates'], list):
-                            # Convert list to dictionary by template_id
-                            for template in data['templates']:
-                                # Convert to snake_case if needed
-                                template_data = self._ensure_snake_case(template)
-                                template_id = template_data.get('template_id')
-                                if template_id:
-                                    templates_data[template_id] = template_data
-                        else:
-                            # Assume it's already a dictionary of template_id to template_data
-                            templates_data = data
-            except Exception as e:
-                self.logger.error(f"Error loading templates from {self.file_path}: {str(e)}")
-        
-        # Load from legacy file if it exists
+        # Load from legacy file first (lower priority)
         if self.legacy_file_path and os.path.exists(self.legacy_file_path):
             try:
-                with open(self.legacy_file_path, 'r') as f:
-                    legacy_data = json.load(f)
-                    if isinstance(legacy_data, dict) and 'templates' in legacy_data:
-                        for template in legacy_data['templates']:
-                            # Convert to snake_case format
-                            template_data = self._convert_legacy_template(template)
-                            
-                            # Get template ID
-                            template_id = template_data.get('template_id')
-                            
-                            # Add to templates if not already present
-                            if template_id and template_id not in templates_data:
-                                templates_data[template_id] = template_data
-            except Exception as e:
-                self.logger.error(f"Error loading legacy templates: {str(e)}")
-        
-        return templates_data
-    
-    def save(self, entity_id: str, data: Dict[str, Any]) -> None:
-        """
-        Save entity data.
-        
-        For templates, we save to the main file and update the legacy file if needed.
-        
-        Args:
-            entity_id: Entity ID
-            data: Entity data
-        """
-        # First, save to the main file
-        super().save(entity_id, data)
-        
-        # If the template exists in the legacy file, update it there too
-        if self.legacy_file_path and os.path.exists(self.legacy_file_path):
-            try:
-                # Load legacy templates
-                with open(self.legacy_file_path, 'r') as f:
+                with open(self.legacy_file_path, 'r', encoding='utf-8') as f:
                     legacy_data = json.load(f)
                 
-                # Check if this template exists in the legacy file
-                if isinstance(legacy_data, dict) and 'templates' in legacy_data:
-                    updated = False
-                    for i, template in enumerate(legacy_data['templates']):
-                        template_id_key = 'template_id' if 'template_id' in template else 'templateId'
-                        if template.get(template_id_key) == entity_id:
-                            # Convert back to camelCase for legacy file
-                            legacy_data['templates'][i] = self._convert_to_legacy_format(data)
-                            updated = True
-                            break
-                    
-                    # If the template was updated in the legacy file, save it
-                    if updated:
-                        with open(self.legacy_file_path, 'w') as f:
-                            json.dump(legacy_data, f, indent=2)
-                            self.logger.debug(f"Updated template {entity_id} in legacy file {self.legacy_file_path}")
+                if isinstance(legacy_data, list):
+                    for item in legacy_data:
+                        if isinstance(item, dict) and 'template_id' in item:
+                            all_entities[item['template_id']] = item
+                elif isinstance(legacy_data, dict):
+                    for key, value in legacy_data.items():
+                        if isinstance(value, dict):
+                            value['template_id'] = key
+                            all_entities[key] = value
+                            
             except Exception as e:
-                self.logger.error(f"Error updating legacy template file: {str(e)}")
-    
-    def delete(self, entity_id: str) -> None:
-        """
-        Delete entity.
+                self.logger.error(f"Error reading legacy templates file {self.legacy_file_path}: {e}")
         
-        For templates, we delete from both the main file and the legacy file.
+        # Load from main file (higher priority, will override legacy)
+        main_entities = super().find_all()
+        for entity in main_entities:
+            if isinstance(entity, dict) and 'template_id' in entity:
+                all_entities[entity['template_id']] = entity
         
-        Args:
-            entity_id: Entity ID
-        """
-        # First, delete from the main file
-        super().delete(entity_id)
-        
-        # If the template exists in the legacy file, delete it there too
-        if self.legacy_file_path and os.path.exists(self.legacy_file_path):
-            try:
-                # Load legacy templates
-                with open(self.legacy_file_path, 'r') as f:
-                    legacy_data = json.load(f)
-                
-                # Check if this template exists in the legacy file
-                if isinstance(legacy_data, dict) and 'templates' in legacy_data:
-                    original_length = len(legacy_data['templates'])
-                    legacy_data['templates'] = [
-                        t for t in legacy_data['templates'] 
-                        if not (t.get('template_id') == entity_id or t.get('templateId') == entity_id)
-                    ]
-                    
-                    # If the template was deleted from the legacy file, save it
-                    if len(legacy_data['templates']) < original_length:
-                        with open(self.legacy_file_path, 'w') as f:
-                            json.dump(legacy_data, f, indent=2)
-                            self.logger.debug(f"Deleted template {entity_id} from legacy file {self.legacy_file_path}")
-            except Exception as e:
-                self.logger.error(f"Error deleting from legacy template file: {str(e)}")
-    
-    def _ensure_snake_case(self, template_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Ensure template data uses snake_case keys.
-        
-        Args:
-            template_data: Template data
-            
-        Returns:
-            Template data with snake_case keys
-        """
-        # Check if already in snake_case format
-        if 'template_id' in template_data:
-            return template_data
-        
-        # Convert from camelCase to snake_case
-        return self._convert_legacy_template(template_data)
-    
-    def _convert_legacy_template(self, template_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Convert legacy camelCase template format to snake_case format.
-        
-        Args:
-            template_data: Template data in legacy format
-            
-        Returns:
-            Template data in snake_case format
-        """
-        result = {}
-        
-        # Mapping of camelCase to snake_case for template fields
-        field_mapping = {
-            "templateId": "template_id",
-            "providerApi": "provider_api",
-            "maxNumber": "max_number",
-            "imageId": "image_id",
-            "subnetId": "subnet_id",
-            "subnetIds": "subnet_ids",
-            "vmType": "vm_type",
-            "vmTypes": "vm_types",
-            "keyName": "key_name",
-            "securityGroupIds": "security_group_ids",
-            "instanceTags": "instance_tags",
-            "fleetRole": "fleet_role",
-            "maxSpotPrice": "max_spot_price",
-            "allocationStrategy": "allocation_strategy",
-            "userData": "user_data",
-            "fleetType": "fleet_type",
-            
-            # Symphony-specific fields
-            "priceType": "price_type",
-            "rootDeviceVolumeSize": "root_device_volume_size",
-            "volumeType": "volume_type",
-            "iops": "iops",
-            "userDataScript": "user_data_script",
-            "instanceProfile": "instance_profile",
-            "spotFleetRequestExpiry": "spot_fleet_request_expiry",
-            "allocationStrategyOnDemand": "allocation_strategy_on_demand",
-            "percentOnDemand": "percent_on_demand",
-            "poolsCount": "pools_count",
-            "vmTypesOnDemand": "vm_types_on_demand",
-            "vmTypesPriority": "vm_types_priority",
-            "launchTemplateId": "launch_template_id"
-        }
-        
-        # Convert keys using the mapping
-        for key, value in template_data.items():
-            new_key = field_mapping.get(key, key)
-            result[new_key] = value
-        
-        # Handle attributes specially
-        if 'attributes' in template_data:
-            result['attributes'] = template_data['attributes']
-        
-        return result
-    
-    def _convert_to_legacy_format(self, template_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Convert snake_case template format to legacy camelCase format.
-        
-        Args:
-            template_data: Template data in snake_case format
-            
-        Returns:
-            Template data in legacy camelCase format
-        """
-        result = {}
-        
-        # Mapping of snake_case to camelCase for template fields
-        field_mapping = {
-            "template_id": "templateId",
-            "provider_api": "providerApi",
-            "max_number": "maxNumber",
-            "image_id": "imageId",
-            "subnet_id": "subnetId",
-            "subnet_ids": "subnetIds",
-            "vm_type": "vmType",
-            "vm_types": "vmTypes",
-            "key_name": "keyName",
-            "security_group_ids": "securityGroupIds",
-            "instance_tags": "instanceTags",
-            "fleet_role": "fleetRole",
-            "max_spot_price": "maxSpotPrice",
-            "allocation_strategy": "allocationStrategy",
-            "user_data": "userData",
-            "fleet_type": "fleetType",
-            
-            # Symphony-specific fields
-            "price_type": "priceType",
-            "root_device_volume_size": "rootDeviceVolumeSize",
-            "volume_type": "volumeType",
-            "iops": "iops",
-            "user_data_script": "userDataScript",
-            "instance_profile": "instanceProfile",
-            "spot_fleet_request_expiry": "spotFleetRequestExpiry",
-            "allocation_strategy_on_demand": "allocationStrategyOnDemand",
-            "percent_on_demand": "percentOnDemand",
-            "pools_count": "poolsCount",
-            "vm_types_on_demand": "vmTypesOnDemand",
-            "vm_types_priority": "vmTypesPriority",
-            "launch_template_id": "launchTemplateId"
-        }
-        
-        # Convert keys using the mapping
-        for key, value in template_data.items():
-            new_key = field_mapping.get(key, key)
-            result[new_key] = value
-        
-        # Handle attributes specially
-        if 'attributes' in template_data:
-            result['attributes'] = template_data['attributes']
-        
-        return result
+        return list(all_entities.values())
 
-class JSONTemplateRepositoryImpl(TemplateRepository):
-    """
-    JSON repository implementation for templates.
+
+class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
+    """JSON-based template repository with provider-specific file support."""
     
-    This implementation uses composition with StrategyBasedRepository and
-    TemplateJSONStorageStrategy to handle template storage. It also implements
-    caching to avoid repeated file I/O operations.
-    
-    This class should be accessed through the get_template_repository_singleton()
-    function to ensure only one instance exists.
-    """
-    
-    def __init__(self, templates_path: str, legacy_templates_path: Optional[str] = None):
+    def __init__(self, config_manager: ConfigurationManager, use_provider_strategy: bool = True):
         """
-        Initialize the repository with template file paths.
+        Initialize template repository.
         
         Args:
-            templates_path: Path to the main templates.json file
-            legacy_templates_path: Optional path to the legacy templates file
+            config_manager: Configuration manager
+            use_provider_strategy: Whether to use provider-specific template loading
         """
-        # Create logger
+        self.config_manager = config_manager
         self.logger = get_logger(__name__)
         
-        # Create the storage strategy
-        self.storage_strategy = TemplateJSONStorageStrategy(
-            templates_path, 
-            legacy_templates_path
-        )
+        # Get template file paths from configuration
+        app_config = config_manager.get_app_config()
+        templates_file_path = app_config.templates_file_path
+        legacy_templates_file_path = getattr(app_config, 'legacy_templates_file_path', None)
         
-        # Create the base repository using composition
-        self._repository = StrategyBasedRepository(Template, self.storage_strategy)
+        # Choose strategy based on configuration
+        if use_provider_strategy:
+            strategy = ProviderTemplateStrategy(
+                base_file_path=templates_file_path,
+                config_manager=config_manager,
+                create_dirs=True
+            )
+            self.logger.info("Using provider-specific template loading strategy")
+        else:
+            strategy = TemplateJSONStorageStrategy(
+                file_path=templates_file_path,
+                legacy_file_path=legacy_templates_file_path,
+                create_dirs=True
+            )
+            self.logger.info("Using legacy template loading strategy")
         
-        # Store paths for reference
-        self.templates_path = templates_path
-        self.legacy_templates_path = legacy_templates_path
-        
-        # Log initialization (file logging is already done in the storage strategy)
-        self.logger.debug("Initialized JSONTemplateRepositoryImpl")
-        
+        super().__init__(strategy)
+    
     def find_by_id(self, template_id: str) -> Optional[Template]:
         """
-        Find a template by its ID.
+        Find template by ID.
         
         Args:
-            template_id: The ID of the template to find
+            template_id: Template ID
             
         Returns:
-            Template if found, None otherwise
+            Template aggregate if found, None otherwise
         """
-        template = self._repository.find_by_id(template_id)
-        if template and template.image_id.startswith('/aws/service/'):
-            # Resolve SSM parameter at the repository boundary
-            template = self._resolve_ami_id_in_template(template)
-        return template
-        
+        template_data = self.strategy.find_by_id(template_id)
+        if template_data:
+            try:
+                return self._data_to_aggregate(template_data)
+            except Exception as e:
+                self.logger.error(f"Error converting template data to aggregate for '{template_id}': {e}")
+                return None
+        return None
+    
     def find_all(self) -> List[Template]:
         """
         Find all templates.
         
         Returns:
-            List of templates
+            List of all template aggregates
         """
-        self.logger.debug("JSONTemplateRepositoryImpl.find_all() called")
-        templates = self._repository.find_all()
+        templates = []
+        template_data_list = self.strategy.find_all()
         
-        # Resolve SSM parameters for all templates at the repository boundary
-        resolved_templates = []
-        for template in templates:
-            if template.image_id.startswith('/aws/service/'):
-                template = self._resolve_ami_id_in_template(template)
-            resolved_templates.append(template)
+        for template_data in template_data_list:
+            try:
+                template = self._data_to_aggregate(template_data)
+                templates.append(template)
+            except Exception as e:
+                template_id = template_data.get('template_id', 'unknown')
+                self.logger.error(f"Error converting template data to aggregate for '{template_id}': {e}")
+                continue
         
-        return resolved_templates
-        
+        return templates
+    
     def save(self, template: Template) -> None:
         """
-        Save or update a template.
+        Save template.
         
         Args:
-            template: The template to save
-            
-        Raises:
-            ConfigurationError: If there's an error saving the template
+            template: Template aggregate to save
         """
-        try:
-            self._repository.save(template)
-        except Exception as e:
-            raise ConfigurationError("Template", f"Failed to save template: {str(e)}")
-        
-    def delete(self, template_id: str) -> None:
-        """
-        Delete a template.
-        
-        Args:
-            template_id: The ID of the template to delete
-        """
-        self._repository.delete(template_id)
-        
-    def exists(self, template_id: str) -> bool:
-        """
-        Check if a template exists.
-        
-        Args:
-            template_id: The ID of the template to check
-            
-        Returns:
-            True if the template exists, False otherwise
-        """
-        return self._repository.exists(template_id)
-        
-    def find_by_criteria(self, criteria: Dict[str, Any]) -> List[Template]:
-        """
-        Find templates by criteria.
-        
-        Args:
-            criteria: Dictionary of field-value pairs to match
-            
-        Returns:
-            List of matching templates
-        """
-        templates = self._repository.find_by_criteria(criteria)
-        
-        # Resolve SSM parameters for all templates at the repository boundary
-        resolved_templates = []
-        for template in templates:
-            if template.image_id.startswith('/aws/service/'):
-                template = self._resolve_ami_id_in_template(template)
-            resolved_templates.append(template)
-        
-        return resolved_templates
-        
-    def _resolve_ami_id_in_template(self, template: Template) -> Template:
-        """
-        Resolve SSM parameter in template's image_id.
-        
-        Args:
-            template: Template with SSM parameter path in image_id
-            
-        Returns:
-            Template with resolved AMI ID
-        """
-        if not template.image_id.startswith('/aws/service/'):
-            return template
-            
-        try:
-            # Get AWS client from DI container directly
-            from src.infrastructure.di.container import get_container
-            from src.providers.aws.infrastructure.aws_client import AWSClient
-            container = get_container()
-            aws_client = container.get(AWSClient)
-            
-            # Get SSM client
-            ssm_client = aws_client.ssm_client
-            
-            # Log at debug level since this is an implementation detail
-            self.logger.debug(f"Resolving SSM parameter {template.image_id} for template {template.template_id}")
-            
-            # Get parameter value
-            response = ssm_client.get_parameter(Name=template.image_id)
-            if 'Parameter' not in response or 'Value' not in response['Parameter']:
-                raise ValueError(f"Invalid SSM parameter response for {template.image_id}")
-                
-            ami_id = response['Parameter']['Value']
-            
-            # Log at debug level
-            self.logger.debug(f"Resolved SSM parameter {template.image_id} to AMI ID: {ami_id}")
-            
-            # Create a new template with the resolved AMI ID
-            return template.update_image_id(ami_id)
-        except Exception as e:
-            # Log the error but don't fail - return the original template
-            self.logger.error(f"Failed to resolve SSM parameter {template.image_id} for template {template.template_id}: {str(e)}")
-            return template
-        
-    # Domain-specific methods
+        template_data = self._aggregate_to_data(template)
+        self.strategy.save(template_data)
     
-    def find_by_handler_type(self, handler_type: str) -> List[Template]:
+    def delete(self, template_id: str) -> bool:
         """
-        Find templates by AWS handler type.
+        Delete template by ID.
         
         Args:
-            handler_type: AWS handler type
+            template_id: Template ID to delete
             
         Returns:
-            List of templates with the specified handler type
+            True if template was deleted, False if not found
         """
-        return self.find_by_criteria({'provider_api': handler_type})
-        
-    def find_available_templates(self) -> List[Template]:
+        return self.strategy.delete(template_id)
+    
+    def find_by_provider_type(self, provider_type: str) -> List[Template]:
         """
-        Find all available templates.
-        
-        In this implementation, all templates in the file are considered available.
-        
-        Returns:
-            List of available templates
-        """
-        return self.find_all()
-        
-    def find_by_capacity(self, min_capacity: int) -> List[Template]:
-        """
-        Find templates with specified minimum capacity.
+        Find templates by provider type.
         
         Args:
-            min_capacity: Minimum capacity
+            provider_type: Provider type to filter by
             
         Returns:
-            List of templates with at least the specified capacity
+            List of templates for the specified provider type
         """
-        templates = self.find_all()
-        return [template for template in templates if template.max_number >= min_capacity]
-        
-    def find_by_machine_type(self, machine_type: str) -> List[Template]:
+        all_templates = self.find_all()
+        return [
+            template for template in all_templates 
+            if template.provider_type == provider_type
+        ]
+    
+    def find_by_provider_name(self, provider_name: str) -> List[Template]:
         """
-        Find templates for specific machine type.
+        Find templates by provider name/instance.
         
         Args:
-            machine_type: Machine type
+            provider_name: Provider name/instance to filter by
             
         Returns:
-            List of templates for the specified machine type
+            List of templates for the specified provider name
         """
-        return self.find_by_criteria({'vm_type': machine_type})
+        all_templates = self.find_all()
+        return [
+            template for template in all_templates 
+            if template.provider_name == provider_name
+        ]
+    
+    def get_template_source_info(self, template_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get information about which file a template was loaded from.
+        
+        Args:
+            template_id: Template ID
+            
+        Returns:
+            Dictionary with source information or None if not found
+        """
+        if hasattr(self.strategy, 'get_template_source_info'):
+            return self.strategy.get_template_source_info(template_id)
+        return None
+    
+    def refresh_templates(self) -> None:
+        """Refresh template cache and file discovery."""
+        if hasattr(self.strategy, 'refresh_cache'):
+            self.strategy.refresh_cache()
+            self.logger.info("Refreshed template cache")
+    
+    def _data_to_aggregate(self, data: Dict[str, Any]) -> Template:
+        """
+        Convert template data to Template aggregate.
+        
+        Args:
+            data: Template data dictionary
+            
+        Returns:
+            Template aggregate
+        """
+        # Extract required fields
+        template_id = data.get('template_id')
+        if not template_id:
+            raise ValueError("Template data must include 'template_id'")
+        
+        image_id = data.get('image_id')
+        if not image_id:
+            raise ValueError(f"Template '{template_id}' must include 'image_id'")
+        
+        subnet_ids = data.get('subnet_ids', [])
+        if not subnet_ids:
+            raise ValueError(f"Template '{template_id}' must include 'subnet_ids'")
+        
+        max_instances = data.get('max_instances', 1)
+        if max_instances <= 0:
+            raise ValueError(f"Template '{template_id}' max_instances must be greater than 0")
+        
+        # Create Template aggregate with all fields
+        return Template(
+            template_id=template_id,
+            provider_type=data.get('provider_type'),
+            provider_name=data.get('provider_name'),
+            provider_api=data.get('provider_api'),
+            image_id=image_id,
+            subnet_ids=subnet_ids,
+            max_instances=max_instances,
+            instance_type=data.get('instance_type'),
+            key_name=data.get('key_name'),
+            security_group_ids=data.get('security_group_ids', []),
+            user_data=data.get('user_data'),
+            price_type=data.get('price_type', 'ondemand'),
+            metadata=data.get('metadata', {}),
+            is_active=data.get('is_active', True)
+        )
+    
+    def _aggregate_to_data(self, template: Template) -> Dict[str, Any]:
+        """
+        Convert Template aggregate to data dictionary.
+        
+        Args:
+            template: Template aggregate
+            
+        Returns:
+            Template data dictionary
+        """
+        return {
+            'template_id': template.template_id,
+            'provider_type': template.provider_type,
+            'provider_name': template.provider_name,
+            'provider_api': template.provider_api,
+            'image_id': template.image_id,
+            'subnet_ids': template.subnet_ids,
+            'max_instances': template.max_instances,
+            'instance_type': template.instance_type,
+            'key_name': template.key_name,
+            'security_group_ids': template.security_group_ids,
+            'user_data': template.user_data,
+            'price_type': template.price_type,
+            'metadata': template.metadata,
+            'is_active': template.is_active
+        }
 
-def get_template_repository_singleton(
-    templates_path: Optional[str] = None,
-    legacy_templates_path: Optional[str] = None
-) -> JSONTemplateRepositoryImpl:
+
+# Register the repository in the singleton registry
+def get_template_repository(config_manager: ConfigurationManager = None) -> TemplateJSONRepository:
     """
-    Get or create a singleton instance of JSONTemplateRepositoryImpl.
-    
-    This function ensures that only one instance of JSONTemplateRepositoryImpl
-    is created and reused throughout the application.
+    Get template repository instance.
     
     Args:
-        templates_path: Optional path to templates.json file (will use centralized resolution if not provided)
-        legacy_templates_path: Optional path to legacy templates file (will use centralized resolution if not provided)
+        config_manager: Configuration manager (required for first call)
         
     Returns:
-        Singleton instance of JSONTemplateRepositoryImpl
+        Template repository instance
     """
-    # Get singleton registry
-    registry = SingletonRegistry.get_instance()
+    registry = SingletonRegistry()
     
-    # Check if repository is already registered
-    if JSONTemplateRepositoryImpl in registry.get_all():
-        return registry.get(JSONTemplateRepositoryImpl)
-    
-    # If paths are not provided, use centralized resolution instead of configuration
-    if templates_path is None or legacy_templates_path is None:
-        from src.config.manager import get_config_manager
+    if not registry.has('template_repository'):
+        if not config_manager:
+            raise ConfigurationError("ConfigurationManager required for first template repository creation")
         
-        config_manager = get_config_manager()
-        
-        # Use centralized file resolution for consistent HF_PROVIDER_CONFDIR support
-        templates_path = templates_path or config_manager.resolve_file('template', 'templates.json')
-        legacy_templates_path = legacy_templates_path or config_manager.resolve_file('template', 'awsprov_templates.json')
-        
-        logger.info(f"Using centralized resolution for template files:")
-        logger.info(f"  templates.json: {templates_path}")
-        logger.info(f"  awsprov_templates.json: {legacy_templates_path}")
+        repository = TemplateJSONRepository(config_manager)
+        registry.register('template_repository', repository)
+        return repository
     
-    # Create and register repository
-    repository = JSONTemplateRepositoryImpl(templates_path, legacy_templates_path)
-    registry.register(JSONTemplateRepositoryImpl, repository)
-    
-    return repository
+    return registry.get('template_repository')
+
+
+# Legacy compatibility - keep the old class name
+JSONTemplateRepositoryImpl = TemplateJSONRepository

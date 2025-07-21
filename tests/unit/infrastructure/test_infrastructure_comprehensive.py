@@ -474,8 +474,7 @@ class TestAdaptersComprehensive:
             'container_adapter',
             'error_handling_adapter',
             'logging_adapter',
-            'template_configuration_adapter',
-            'template_format_adapter'
+            'template_configuration_adapter'
         ]
         
         for adapter_file in adapter_files:

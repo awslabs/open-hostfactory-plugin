@@ -8,6 +8,48 @@ Layer Responsibilities:
 - Application: CQRS patterns, handler registration abstractions
 - Domain: Business logic, dependency injection abstractions  
 - Infrastructure: Concrete implementations, discovery mechanisms
+
+DECORATOR USAGE PATTERNS:
+========================
+
+CQRS HANDLERS (Commands, Queries, Events):
+   Use ONLY the specific CQRS decorator - Handler Discovery System automatically
+   handles DI registration. Do NOT use @injectable with CQRS handlers.
+
+   CORRECT:
+   @command_handler(MyCommand)
+   class MyCommandHandler(BaseCommandHandler[MyCommand, MyResponse]):
+       pass
+
+   @query_handler(MyQuery) 
+   class MyQueryHandler(BaseQueryHandler[MyQuery, MyResponse]):
+       pass
+
+   @event_handler("MyEvent")
+   class MyEventHandler(BaseEventHandler[MyEvent]):
+       pass
+
+NON-CQRS SERVICES (Application Services, Utilities, etc.):
+   Use @injectable for regular services that need DI but are not CQRS handlers.
+
+   CORRECT:
+   @injectable
+   class ApplicationService:
+       pass
+
+   @injectable
+   class UtilityService:
+       pass
+
+INCORRECT PATTERNS:
+   @command_handler(MyCommand)
+   @injectable  # WRONG - Don't use both!
+   class MyHandler:
+       pass
+
+The Handler Discovery System automatically registers CQRS handlers in the DI container
+when it finds the appropriate CQRS decorators. Using @injectable on CQRS handlers
+creates duplicate registrations and architectural confusion.
 """
 from __future__ import annotations
 from typing import Type, TypeVar, Dict, Set
@@ -31,10 +73,18 @@ def query_handler(query_type: Type[TQuery]):
     This decorator belongs in the application layer because it represents
     a CQRS application pattern, not an infrastructure implementation detail.
     
+    CQRS handlers use ONLY this decorator - Handler Discovery System automatically
+    registers them in the DI container. Do NOT use @injectable with CQRS handlers.
+    
     Usage:
-        @query_handler(ListTemplatesQuery)
-        @injectable  # Domain-layer DI decorator
-        class ListTemplatesHandler(QueryHandler[ListTemplatesQuery, List[TemplateDTO]]):
+        @query_handler(ListTemplatesQuery)  # ONLY decorator needed
+        class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[TemplateDTO]]):
+            # Handler Discovery System automatically registers this in DI
+            ...
+    
+    For non-CQRS services, use @injectable:
+        @injectable  # For regular services, NOT handlers
+        class MyService:
             ...
     
     Args:
@@ -63,10 +113,18 @@ def command_handler(command_type: Type[TCommand]):
     This decorator belongs in the application layer because it represents
     a CQRS application pattern, not an infrastructure implementation detail.
     
+    CQRS handlers use ONLY this decorator - Handler Discovery System automatically
+    registers them in the DI container. Do NOT use @injectable with CQRS handlers.
+    
     Usage:
-        @command_handler(CreateMachineCommand)
-        @injectable  # Domain-layer DI decorator
-        class CreateMachineHandler(CommandHandler[CreateMachineCommand]):
+        @command_handler(CreateMachineCommand)  # ONLY decorator needed
+        class CreateMachineHandler(BaseCommandHandler[CreateMachineCommand, None]):
+            # Handler Discovery System automatically registers this in DI
+            ...
+    
+    For non-CQRS services, use @injectable:
+        @injectable  # For regular services, NOT handlers
+        class MyService:
             ...
     
     Args:

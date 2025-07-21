@@ -239,6 +239,41 @@ if container.is_registered(ApplicationService):
 all_handlers = container.get_all(CommandHandler)
 ```
 
+## Registry Pattern Integration
+
+The DI system integrates with registry patterns for strategy-based component selection:
+
+### Scheduler Port with Registry
+
+The scheduler port demonstrates registry integration for configuration-driven strategy selection:
+
+```python
+# Automatic registration using registry pattern
+def create_scheduler_port(container):
+    from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
+    from src.config.manager import get_config_manager
+    
+    config_manager = get_config_manager()
+    scheduler_config = config_manager.get_scheduler_config()
+    scheduler_type = scheduler_config.get('strategy', 'hostfactory')
+    
+    registry = get_scheduler_registry()
+    return registry.get_active_strategy(scheduler_type, scheduler_config)
+
+# Usage - transparent to consumers
+from src.domain.base.ports import SchedulerPort
+
+scheduler = container.get(SchedulerPort)  # Automatically resolves via registry
+```
+
+### Benefits of Registry Integration
+
+- **Configuration-Driven**: Strategy selection based on configuration
+- **Lazy Loading**: Strategies created only when needed
+- **Type Safety**: Maintains proper port/adapter abstraction
+- **Testability**: Easy to mock or substitute strategies
+- **Separation of Concerns**: Registry handles strategy selection, DI handles dependency resolution
+
 ## Current Injectable Classes
 
 Based on actual codebase analysis:
@@ -263,6 +298,30 @@ Based on actual codebase analysis:
 
 ### Infrastructure Layer
 - Various infrastructure services and adapters
+- `TemplateConfigurationManager` - **Manually registered** (not using @injectable decorator)
+
+### Manual Registration Pattern
+
+Some services are registered manually in the DI container instead of using the `@injectable` decorator:
+
+```python
+# Example: TemplateConfigurationManager registration
+# Location: src/infrastructure/di/port_registrations.py
+def _register_template_configuration_services(container: DIContainer) -> None:
+    """Register template configuration services."""
+    
+    # Factory-based singleton registration with complex initialization
+    container.register_singleton(
+        TemplateConfigurationManager,
+        create_template_configuration_manager
+    )
+```
+
+**When to use manual registration:**
+- Configuration-driven services that need complex initialization
+- Services that require specific factory patterns
+- Legacy services being migrated from @injectable pattern
+- Services with conditional registration based on configuration
 
 ## Migration Guide
 

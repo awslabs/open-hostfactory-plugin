@@ -10,9 +10,9 @@ try:
     from src.domain.base.events.domain_events import DomainEvent
     from src.domain.base.events.base_events import BaseEvent
     from src.domain.request.aggregate import Request
-    from src.domain.request.events import (
-        RequestCreatedEvent, RequestStatusChangedEvent, RequestCompletedEvent
-    )
+    # from src.domain.request.events import (  # TODO: Verify if this exists
+    #     RequestCreatedEvent, RequestStatusChangedEvent, RequestCompletedEvent
+    # )
     from src.domain.template.aggregate import Template
     from src.domain.machine.aggregate import Machine
     from src.domain.request.value_objects import RequestStatus, RequestType

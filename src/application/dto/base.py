@@ -1,24 +1,55 @@
-"""Base DTO class with automatic camelCase conversion."""
+"""Base DTO class with stable API and clean snake_case format."""
 from typing import Dict, Any, Optional, Union
 from enum import Enum
 from pydantic import BaseModel, ConfigDict
 
-def to_camel(snake_str: str) -> str:
-    """Convert snake_case to camelCase."""
-    components = snake_str.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
 
 class BaseDTO(BaseModel):
-    """Base class for all DTOs with automatic camelCase conversion."""
+    """
+    Base class for all DTOs with stable API and clean snake_case format.
+    
+    This class provides a future-proof abstraction layer that:
+    - Uses pure snake_case internally (Pythonic)
+    - Provides stable to_dict()/from_dict() API
+    - Abstracts away Pydantic implementation details
+    - Allows easy framework switching if needed
+    
+    External format conversion (camelCase) is handled at scheduler strategy level.
+    """
     model_config = ConfigDict(
-        frozen=True,
-        alias_generator=to_camel,
-        populate_by_name=True,  # Allow populating by field name (snake_case)
+        frozen=True
+        # Removed: alias_generator=to_camel (camelCase pollution)
+        # Removed: populate_by_name=True (not needed without aliases)
     )
     
-    def model_dump_camel(self, exclude_none: bool = True) -> Dict[str, Any]:
-        """Convert to dictionary with camelCase keys using Pydantic's built-in alias system."""
-        return self.model_dump(by_alias=True, exclude_none=exclude_none)
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Stable public API - returns clean snake_case dictionary.
+        
+        This method provides a stable interface that abstracts away the underlying
+        serialization framework. External format conversion (camelCase) should be
+        handled at the scheduler strategy level, not here.
+        
+        Returns:
+            Dict with snake_case keys (Pythonic format)
+        """
+        return self.model_dump()
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'BaseDTO':
+        """
+        Stable public API - creates instance from snake_case dictionary.
+        
+        This method provides a stable interface that abstracts away the underlying
+        serialization framework.
+        
+        Args:
+            data: Dictionary with snake_case keys
+            
+        Returns:
+            New instance of the DTO
+        """
+        return cls.model_validate(data)
     
     @staticmethod
     def serialize_enum(value: Union[Enum, str, None]) -> Optional[str]:
@@ -36,35 +67,6 @@ class BaseDTO(BaseModel):
         if isinstance(value, Enum):
             return value.value
         return str(value)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Legacy method for compatibility."""
-        return self.model_dump_camel()
-    
-    # Keep the old methods for compatibility with code that might use them directly
-    def _to_camel_case(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Convert dictionary keys from snake_case to camelCase."""
-        result = {}
-        for key, value in data.items():
-            # Convert key to camelCase
-            camel_key = self._snake_to_camel(key)
-            
-            # Handle nested dictionaries
-            if isinstance(value, dict):
-                result[camel_key] = self._to_camel_case(value)
-            # Handle lists of dictionaries
-            elif isinstance(value, list) and value and isinstance(value[0], dict):
-                result[camel_key] = [self._to_camel_case(item) if isinstance(item, dict) else item for item in value]
-            else:
-                result[camel_key] = value
-                
-        return result
-    
-    @staticmethod
-    def _snake_to_camel(snake_str: str) -> str:
-        """Convert snake_case string to camelCase."""
-        components = snake_str.split('_')
-        return components[0] + ''.join(x.title() for x in components[1:])
 
 
 # CQRS Base Classes

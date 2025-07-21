@@ -63,7 +63,7 @@ def aws_dry_run_context() -> Generator[None, None, None]:
         return
     
     if is_dry_run_active():
-        logger.debug("🧪 AWS dry-run mode: Using moto for boto3 mocking")
+        logger.debug("DRY-RUN: AWS dry-run mode: Using moto for boto3 mocking")
         with mock_aws():
             yield
     else:

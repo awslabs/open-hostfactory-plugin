@@ -1,4 +1,4 @@
-"""Single template repository implementation using storage strategy composition."""
+"""Template repository implementation using storage strategy composition."""
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -13,29 +13,85 @@ from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 class TemplateSerializer:
     """Handles Template aggregate serialization/deserialization."""
     
-    def __init__(self):
+    def __init__(self, defaults_service=None):
         self.logger = get_logger(__name__)
+        self.defaults_service = defaults_service
+        
+        # Get defaults service from DI container if not provided
+        if not self.defaults_service:
+            try:
+                from src.infrastructure.di.container import get_container
+                from src.domain.template.ports.template_defaults_port import TemplateDefaultsPort
+                container = get_container()
+                self.defaults_service = container.get(TemplateDefaultsPort)
+            except Exception as e:
+                self.logger.debug(f"Could not get defaults service from container: {e}")
     
     @handle_infrastructure_exceptions(context="template_serialization")
     def to_dict(self, template: Template) -> Dict[str, Any]:
-        """Convert Template aggregate to dictionary."""
+        """Convert Template aggregate to dictionary with complete field support."""
         try:
             return {
-                'template_id': str(template.template_id.value),
+                # Core template fields
+                'template_id': template.template_id,
                 'name': template.name,
                 'description': template.description,
                 'image_id': template.image_id,
-                'instance_type': template.instance_type.value if template.instance_type else None,
-                'key_name': template.key_name,
-                'security_group_ids': template.security_group_ids,
+                'instance_type': template.instance_type,
+                'max_instances': template.max_instances,
+                
+                # Instance configuration
+                'instance_types': template.instance_types,
+                'primary_instance_type': template.primary_instance_type,
+                
+                # Network configuration
                 'subnet_ids': template.subnet_ids,
+                'security_group_ids': template.security_group_ids,
+                'network_zones': template.network_zones,
+                'public_ip_assignment': template.public_ip_assignment,
+                
+                # Storage configuration
+                'root_volume_size': template.root_volume_size,
+                'root_volume_type': template.root_volume_type,
+                'root_volume_iops': template.root_volume_iops,
+                'root_volume_throughput': template.root_volume_throughput,
+                'storage_encryption': template.storage_encryption,
+                'encryption_key': template.encryption_key,
+                
+                # Access and security
+                'key_pair_name': template.key_pair_name,
                 'user_data': template.user_data,
-                'tags': dict(template.tags.value) if template.tags else {},
-                'metadata': template.metadata or {},
+                'instance_profile': template.instance_profile,
+                
+                # Additional configuration
+                'monitoring_enabled': template.monitoring_enabled,
+                
+                # Pricing and allocation
+                'price_type': template.price_type,
+                'allocation_strategy': template.allocation_strategy,
+                'max_price': template.max_price,
+                
+                # Tags and metadata
+                'tags': template.tags,
+                'metadata': template.metadata,
+                
+                # Provider configuration
+                'provider_type': template.provider_type,
+                'provider_name': template.provider_name,
                 'provider_api': template.provider_api,
+                
+                # Legacy HF fields (for backward compatibility)
+                'vm_type': template.vm_type,
+                'vm_types': template.vm_types,
+                'key_name': template.key_name,
+                
+                # Status and timestamps
                 'is_active': template.is_active,
-                'created_at': template.created_at.isoformat(),
-                'updated_at': template.updated_at.isoformat()
+                'created_at': template.created_at.isoformat() if template.created_at else None,
+                'updated_at': template.updated_at.isoformat() if template.updated_at else None,
+                
+                # Schema version for migration support
+                'schema_version': '2.0.0'
             }
         except Exception as e:
             self.logger.error(f"Failed to serialize template {template.template_id}: {e}")
@@ -43,65 +99,97 @@ class TemplateSerializer:
     
     @handle_infrastructure_exceptions(context="template_deserialization")
     def from_dict(self, data: Dict[str, Any]) -> Template:
-        """Convert dictionary to Template aggregate."""
+        """Convert dictionary to Template aggregate with complete field support."""
         try:
             self.logger.debug(f"Converting template data: {data}")
             
+            # Apply configuration defaults BEFORE creating Template
+            processed_data = data
+            if self.defaults_service:
+                try:
+                    processed_data = self.defaults_service.resolve_template_defaults(
+                        data, provider_instance_name='aws-default'
+                    )
+                    self.logger.debug(f"Applied configuration defaults to template data")
+                except Exception as e:
+                    self.logger.warning(f"Failed to apply defaults, using original data: {e}")
+                    processed_data = data
+            
             # Parse datetime fields with defaults for legacy data
             now = datetime.now()
-            created_at = datetime.fromisoformat(data['created_at']) if 'created_at' in data else now
-            updated_at = datetime.fromisoformat(data['updated_at']) if 'updated_at' in data else now
+            created_at = datetime.fromisoformat(processed_data['created_at']) if processed_data.get('created_at') else now
+            updated_at = datetime.fromisoformat(processed_data['updated_at']) if processed_data.get('updated_at') else now
             
             # Convert legacy format to new format
-            template_id = data.get('templateId', data.get('template_id'))
+            template_id = processed_data.get('templateId', processed_data.get('template_id'))
             if not template_id:
-                raise ValueError(f"No template_id found in data: {list(data.keys())}")
-                
+                raise ValueError(f"No template_id found in data: {list(processed_data.keys())}")
+            
+            # Build template data with complete field support
             template_data = {
+                # Core template fields
                 'template_id': template_id,
-                'name': data.get('name', template_id),
-                'description': data.get('description'),
-                'image_id': data.get('imageId', data.get('image_id')),
-                'instance_type': data.get('vmType', data.get('instance_type')),
-                'key_name': data.get('keyName', data.get('key_name')),
-                'security_group_ids': data.get('securityGroupIds', data.get('security_group_ids', [])),
-                'subnet_ids': [data.get('subnetId')] if data.get('subnetId') else data.get('subnet_ids', []),
+                'name': processed_data.get('name', template_id),
+                'description': processed_data.get('description'),
+                'image_id': processed_data.get('imageId', processed_data.get('image_id')),
+                'instance_type': processed_data.get('vmType', processed_data.get('instance_type')),
+                'max_instances': processed_data.get('maxNumber', processed_data.get('max_instances', 1)),
+                
+                # Instance configuration
+                'instance_types': processed_data.get('instance_types', {}),
+                'primary_instance_type': processed_data.get('primary_instance_type'),
+                
+                # Network configuration
+                'subnet_ids': [processed_data.get('subnetId')] if processed_data.get('subnetId') else processed_data.get('subnet_ids', []),
+                'security_group_ids': processed_data.get('securityGroupIds', processed_data.get('security_group_ids', [])),
+                'network_zones': processed_data.get('network_zones', []),
+                'public_ip_assignment': processed_data.get('public_ip_assignment'),
+                
+                # Storage configuration
+                'root_volume_size': data.get('root_volume_size'),
+                'root_volume_type': data.get('root_volume_type'),
+                'root_volume_iops': data.get('root_volume_iops'),
+                'root_volume_throughput': data.get('root_volume_throughput'),
+                'storage_encryption': data.get('storage_encryption'),
+                'encryption_key': data.get('encryption_key'),
+                
+                # Access and security
+                'key_pair_name': data.get('keyName', data.get('key_pair_name')),
                 'user_data': data.get('user_data'),
+                'instance_profile': data.get('instance_profile'),
+                
+                # Additional configuration
+                'monitoring_enabled': data.get('monitoring_enabled'),
+                
+                # Pricing and allocation
+                'price_type': data.get('price_type', 'ondemand'),
+                'allocation_strategy': data.get('allocation_strategy', 'lowest_price'),
+                'max_price': data.get('max_price'),
+                
+                # Tags and metadata
                 'tags': data.get('tags', {}),
                 'metadata': data.get('metadata', {}),
+                
+                # Provider configuration
+                'provider_type': data.get('provider_type'),
+                'provider_name': data.get('provider_name'),
                 'provider_api': data.get('providerApi', data.get('provider_api')),
+                
+                # Legacy HF fields (for backward compatibility)
+                'vm_type': data.get('vmType', data.get('vm_type')),
+                'vm_types': data.get('vm_types', {}),
+                'key_name': data.get('keyName', data.get('key_name')),
+                
+                # Status and timestamps
                 'is_active': data.get('is_active', True),
                 'created_at': created_at,
-                'updated_at': updated_at,
-                'max_instances': data.get('maxNumber', data.get('max_instances', 1)),
-                'attributes': data.get('attributes', {}),
-                'fleet_type': data.get('fleetType', data.get('fleet_type'))
+                'updated_at': updated_at
             }
             
-            self.logger.debug(f"Converted template_data: {template_data}")
+            self.logger.debug(f"Converted template_data keys: {list(template_data.keys())}")
             
-            # Create template using standard constructor
-            template = Template(
-                template_id=template_data['template_id'],
-                name=template_data['name'],
-                description=template_data['description'],
-                image_id=template_data['image_id'],
-                instance_type=template_data['instance_type'],
-                max_instances=template_data['max_instances'],
-                subnet_ids=template_data['subnet_ids'],
-                security_group_ids=template_data['security_group_ids'],
-                tags=template_data['tags'],
-                metadata=template_data['metadata'],
-                provider_config={
-                    'provider_api': template_data['provider_api'],
-                    'key_name': template_data['key_name'],
-                    'user_data': template_data['user_data'],
-                    'attributes': template_data['attributes'],
-                    'fleet_type': template_data['fleet_type']
-                },
-                created_at=template_data['created_at'],
-                updated_at=template_data['updated_at']
-            )
+            # Create template using model_validate to handle all fields properly
+            template = Template.model_validate(template_data)
             
             return template
             
@@ -111,7 +199,7 @@ class TemplateSerializer:
 
 
 class TemplateRepositoryImpl(TemplateRepositoryInterface):
-    """Single template repository implementation using storage strategy composition."""
+    """Template repository implementation using storage strategy composition."""
     
     def __init__(self, storage_strategy: BaseStorageStrategy):
         """Initialize repository with storage strategy."""
@@ -159,7 +247,7 @@ class TemplateRepositoryImpl(TemplateRepositoryInterface):
     def find_by_template_id(self, template_id: str) -> Optional[Template]:
         """Find template by template ID string."""
         try:
-            return self.get_by_id(TemplateId(value=template_id))  # Fix: use value parameter
+            return self.get_by_id(TemplateId(value=template_id))
         except Exception as e:
             self.logger.error(f"Failed to find template by template_id {template_id}: {e}")
             raise
@@ -208,6 +296,10 @@ class TemplateRepositoryImpl(TemplateRepositoryInterface):
         except Exception as e:
             self.logger.error(f"Failed to find all templates: {e}")
             raise
+    
+    def get_all(self) -> List[Template]:
+        """Get all templates - alias for find_all for backward compatibility."""
+        return self.find_all()
     
     @handle_infrastructure_exceptions(context="template_search")
     def search_templates(self, criteria: Dict[str, Any]) -> List[Template]:

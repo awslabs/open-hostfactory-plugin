@@ -11,17 +11,16 @@ class DomainEvent(BaseModel):
     
     event_id: str = Field(default_factory=lambda: str(uuid4()))
     occurred_at: datetime = Field(default_factory=datetime.utcnow)
-    event_type: str
+    event_type: str = Field(default="")
     aggregate_id: str
     aggregate_type: str
     version: int = 1
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
-    def __init__(self, **data):
-        # Set event_type based on class name if not provided
-        if 'event_type' not in data or not data['event_type']:
-            data['event_type'] = self.__class__.__name__
-        super().__init__(**data)
+    def model_post_init(self, __context) -> None:
+        """Set event_type based on class name if not provided."""
+        if not self.event_type:
+            object.__setattr__(self, 'event_type', self.__class__.__name__)
 
 
 class InfrastructureEvent(DomainEvent):
@@ -29,10 +28,6 @@ class InfrastructureEvent(DomainEvent):
     resource_type: str = ""
     resource_id: str = ""
 
-
-# =============================================================================
-# BASE EVENT CLASSES FOR COMMON PATTERNS (DRY IMPROVEMENTS)
-# =============================================================================
 
 class TimedEvent(DomainEvent):
     """Base class for events that track duration and timing."""
@@ -65,10 +60,6 @@ class StatusChangeEvent(DomainEvent):
     new_status: str
     reason: Optional[str] = None
 
-
-# =============================================================================
-# PROTOCOLS
-# =============================================================================
 
 class EventPublisher(Protocol):
     """Protocol for event publishing."""

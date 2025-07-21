@@ -143,11 +143,9 @@ class Tags(ValueObject):
             return "{}"
         return str(self.tags)
     
-    
     def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """Get tag value by key."""
         return self.tags.get(key, default)
-    
     
     def add(self, key: str, value: str) -> 'Tags':
         """Add a tag (returns new Tags instance)."""
@@ -155,12 +153,26 @@ class Tags(ValueObject):
         new_tags[key] = value
         return Tags(tags=new_tags)
     
-    
     def remove(self, key: str) -> 'Tags':
         """Remove a tag (returns new Tags instance)."""
         new_tags = self.tags.copy()
         new_tags.pop(key, None)
         return Tags(tags=new_tags)
+    
+    def to_dict(self) -> dict[str, str]:
+        """Convert tags to dictionary."""
+        return dict(self.tags)
+    
+    @classmethod
+    def from_dict(cls, tags_dict: dict[str, str]) -> 'Tags':
+        """Create Tags from dictionary."""
+        return cls(tags=tags_dict)
+    
+    def merge(self, other: 'Tags') -> 'Tags':
+        """Merge with another Tags instance (returns new Tags instance)."""
+        merged_tags = self.tags.copy()
+        merged_tags.update(other.tags)
+        return Tags(tags=merged_tags)
 
 
 class ARN(ValueObject):

@@ -15,18 +15,13 @@ from src.infrastructure.di.container import DIContainer, get_container
 from src.infrastructure.di.core_services import register_core_services
 from src.infrastructure.di.provider_services import register_provider_services
 from src.infrastructure.di.infrastructure_services import register_infrastructure_services
-from src.infrastructure.di.command_handler_services import (
-    register_command_handler_services
-)
-from src.infrastructure.di.query_handler_services import (
-    register_query_handler_services
-)
 from src.infrastructure.di.server_services import register_server_services
 
 
 def register_all_services(container: Optional[DIContainer] = None) -> DIContainer:
     """
     Register all services in the dependency injection container.
+    Enhanced with lazy loading support for improved startup performance.
     
     Args:
         container: Optional container instance
@@ -37,32 +32,144 @@ def register_all_services(container: Optional[DIContainer] = None) -> DIContaine
     if container is None:
         container = get_container()
     
-    # Register services in dependency order
-    # 1. Register port adapters first (foundational dependencies)
+    # Check if lazy loading is enabled
+    if container.is_lazy_loading_enabled():
+        return _register_services_lazy(container)
+    else:
+        return _register_services_eager(container)
+
+
+def _register_services_lazy(container: DIContainer) -> DIContainer:
+    """Register services using lazy loading approach."""
+    from src.infrastructure.logging.logger import get_logger
+    logger = get_logger(__name__)
+    
+    logger.info("Registering services with lazy loading enabled")
+    
+    # 1. Register only essential services immediately (Phase 3 optimization)
     from src.infrastructure.di.port_registrations import register_port_adapters
     register_port_adapters(container)
     
-    # 2. Setup CQRS infrastructure (handlers and buses)
+    register_core_services(container)
+    
+    # 2. Register minimal storage types (only JSON by default)
+    from src.infrastructure.persistence.registration import register_minimal_storage_types
+    register_minimal_storage_types()
+    
+    # 3. Register active scheduler only (Phase 3 optimization)
+    from src.infrastructure.scheduler.registration import register_active_scheduler_only
+    try:
+        from src.config.manager import get_config_manager
+        config_manager = get_config_manager()
+        scheduler_config = config_manager.get("scheduler", {"type": "default"})
+        scheduler_type = scheduler_config.get("type", "default") if isinstance(scheduler_config, dict) else str(scheduler_config)
+        register_active_scheduler_only(scheduler_type)
+    except Exception:
+        # Fallback to default scheduler
+        register_active_scheduler_only("default")
+    
+    # 4. Register provider services immediately (Phase 3 fix for provider context errors)
+    register_provider_services(container)
+    
+    # 5. Register lazy factories for non-essential services
+    _register_lazy_service_factories(container)
+    
+    logger.info("Lazy service registration complete")
+    return container
+
+
+def _register_services_eager(container: DIContainer) -> DIContainer:
+    """Register services using traditional eager loading approach."""
+    from src.infrastructure.logging.logger import get_logger
+    logger = get_logger(__name__)
+    
+    logger.info("Registering services with eager loading (fallback mode)")
+    
+    # Register services in dependency order (original behavior)
+    # 1. Register scheduler strategies first (needed by port adapters)
+    from src.infrastructure.scheduler.registration import register_all_scheduler_types
+    register_all_scheduler_types()
+    
+    # 2. Register port adapters FIRST (provides LoggingPort, ConfigurationPort, etc.)
+    from src.infrastructure.di.port_registrations import register_port_adapters
+    register_port_adapters(container)
+    
+    # 3. Register core services (uses LoggingPort from port adapters)
+    register_core_services(container)
+    
+    # 4. Setup CQRS infrastructure (handlers and buses)
     from src.infrastructure.di.container import _setup_cqrs_infrastructure
     _setup_cqrs_infrastructure(container)
     
-    # 3. Register provider services (needed by infrastructure services)
+    # 5. Register provider services (needed by infrastructure services)
     register_provider_services(container)
     
-    # 4. Register infrastructure services
+    # 6. Register infrastructure services
     register_infrastructure_services(container)
     
-    # 5. Register core services (depend on everything else)
-    register_core_services(container)
+    # CQRS handlers are automatically discovered and registered by _setup_cqrs_infrastructure
+    # No manual registration needed - Handler Discovery System handles everything
     
-    # Register CQRS handlers in container
-    register_command_handler_services(container)
-    register_query_handler_services(container)
-    
-    # 6. Register server services (conditionally based on config)
+    # 7. Register server services (conditionally based on config)
     register_server_services(container)
     
     return container
+
+
+def _register_lazy_service_factories(container: DIContainer) -> None:
+    """Register lazy factories for services that can be loaded on-demand."""
+    from src.infrastructure.logging.logger import get_logger
+    logger = get_logger(__name__)
+    
+    # Register CQRS infrastructure as lazy - triggered by QueryBus or CommandBus access
+    def setup_cqrs_lazy(c):
+        from src.infrastructure.di.container import _setup_cqrs_infrastructure
+        _setup_cqrs_infrastructure(c)
+    
+    from src.infrastructure.di.buses import QueryBus, CommandBus
+    container.register_on_demand(QueryBus, setup_cqrs_lazy)
+    container.register_on_demand(CommandBus, setup_cqrs_lazy)
+    
+    # Provider services are now registered immediately in lazy mode
+    # No need for lazy provider registration
+    
+    # Register infrastructure services as lazy - triggered by first infrastructure service access
+    def register_infrastructure_lazy(c):
+        register_infrastructure_services(c)
+        # Also setup CQRS if not already done (infrastructure services may need buses)
+        if not c.has(QueryBus):
+            setup_cqrs_lazy(c)
+    
+    # Register infrastructure services on-demand when needed
+    # Use a placeholder type for infrastructure services
+    container.register_on_demand(type('InfrastructureServices', (), {}), register_infrastructure_lazy)
+    
+    # Register scheduler services as lazy (Phase 3 optimization)
+    def register_scheduler_lazy(c):
+        from src.infrastructure.scheduler.registration import register_active_scheduler_only
+        # Get scheduler type from config if available
+        try:
+            from src.config.manager import get_config_manager
+            config_manager = get_config_manager()
+            scheduler_config = config_manager.get("scheduler", {"type": "default"})
+            scheduler_type = scheduler_config.get("type", "default") if isinstance(scheduler_config, dict) else str(scheduler_config)
+            register_active_scheduler_only(scheduler_type)
+        except Exception:
+            # Fallback to default scheduler
+            register_active_scheduler_only("default")
+    
+    # Register scheduler on-demand when SchedulerPort is accessed
+    from src.domain.base.ports.scheduler_port import SchedulerPort
+    container.register_on_demand(SchedulerPort, register_scheduler_lazy)
+    
+    # Register server services as lazy
+    def register_server_lazy(c):
+        register_server_services(c)
+    
+    # Use a placeholder type for server services
+    container.register_on_demand(type('ServerServices', (), {}), register_server_lazy)
+    
+    logger.debug("Lazy service factories registered")
 
 
 def create_handler(handler_class, config: Optional[Dict[str, Any]] = None) -> Any:
@@ -77,7 +184,7 @@ def create_handler(handler_class, config: Optional[Dict[str, Any]] = None) -> An
         Created handler instance
     """
     # Ensure services are registered
-    container = register_services()
+    container = register_all_services()
     
     # Register handler class if not already registered
     if handler_class not in container._factories:
@@ -96,50 +203,39 @@ def create_handler(handler_class, config: Optional[Dict[str, Any]] = None) -> An
                 logger.info(f"Registering legacy handler class {handler_class.__name__}")
                 
                 def handler_factory(c):
-                    # Get application service from container
-                    from src.application.service import ApplicationService
+                    # Get CQRS buses directly from container
+                    from src.infrastructure.di.buses import QueryBus, CommandBus
                     from src.monitoring.metrics import MetricsCollector
 
-                    app_service = c.get(ApplicationService)
+                    query_bus = c.get(QueryBus)
+                    command_bus = c.get(CommandBus)
                     
                     # Get metrics collector from container if available
                     metrics = c.get_optional(MetricsCollector)
                         
-                    # Create handler with dependencies
-                    return handler_class(app_service, metrics)
+                    # Create handler with CQRS dependencies
+                    return handler_class(query_bus, command_bus, metrics)
                     
                 container.register_factory(handler_class, handler_factory)
         except ImportError:
-            # Fallback to legacy registration if decorator module not available
-            logger.info(f"Fallback registration for handler class {handler_class.__name__}")
+            # Fallback to CQRS registration if decorator module not available
+            logger.info(f"Fallback CQRS registration for handler class {handler_class.__name__}")
             
             def handler_factory(c):
-                # Get application service from container
-                from src.application.service import ApplicationService
+                # Get CQRS buses directly from container
+                from src.infrastructure.di.buses import QueryBus, CommandBus
                 from src.monitoring.metrics import MetricsCollector
 
-                app_service = c.get(ApplicationService)
+                query_bus = c.get(QueryBus)
+                command_bus = c.get(CommandBus)
                 
                 # Get metrics collector from container if available
                 metrics = c.get_optional(MetricsCollector)
                     
-                # Create handler with dependencies
-                return handler_class(app_service, metrics)
+                # Create handler with CQRS dependencies
+                return handler_class(query_bus, command_bus, metrics)
                 
             container.register_factory(handler_class, handler_factory)
     
     # Get handler from container
     return container.get(handler_class)
-
-
-def register_services(container: Optional[DIContainer] = None) -> DIContainer:
-    """
-    Main service registration function.
-    
-    Args:
-        container: Optional container instance
-        
-    Returns:
-        Configured container
-    """
-    return register_all_services(container)

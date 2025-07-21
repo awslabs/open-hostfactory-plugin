@@ -1,8 +1,23 @@
 {
   "version": "2.0.0",
+  "scheduler": {
+    "type": "hostfactory",
+    "config_root": "$HF_PROVIDER_CONFDIR"
+  },
   "provider": {
-    "active_provider": "aws-default",
+    "providers": [
+      {
+        "name": "aws-default",
+        "type": "aws",
+        "enabled": true,
+        "config": {
+          "region": "us-east-1",
+          "profile": "default"
+        }
+      }
+    ],
     "selection_policy": "FIRST_AVAILABLE",
+    "default_provider_type": "aws",
     "health_check_interval": 60,
     "circuit_breaker": {
       "enabled": true,
@@ -10,69 +25,66 @@
       "recovery_timeout": 60,
       "half_open_max_calls": 3
     },
-    "providers": [
-      {
-        "name": "aws-default",
-        "type": "aws",
-        "enabled": true,
-        "priority": 1,
-        "weight": 100,
-        "capabilities": [
-          "compute",
-          "storage",
-          "networking",
-          "monitoring"
-        ],
-        "config": {
-          "region": "us-east-1",
-          "profile": "default",
-          "max_retries": 3,
-          "timeout": 30,
-          "service_role_spot_fleet": "AWSServiceRoleForEC2SpotFleet",
-          "ssm_parameter_prefix": "/hostfactory/templates/",
-          "connection_timeout_ms": 10000,
-          "request_retry_attempts": 0,
-          "instance_pending_timeout_sec": 180,
-          "describe_request_retry_attempts": 0,
-          "describe_request_interval": 0,
-          "handlers": {
-            "types": {
-              "ec2_fleet": "EC2Fleet",
-              "spot_fleet": "SpotFleet",
-              "asg": "ASG",
-              "run_instances": "RunInstances"
-            },
-            "capabilities": {
-              "EC2Fleet": {
-                "supported_fleet_types": [
-                  "instant",
-                  "request",
-                  "maintain"
-                ],
-                "default_fleet_type": "instant"
-              },
-              "SpotFleet": {
-                "supported_fleet_types": [
-                  "request",
-                  "maintain"
-                ],
-                "default_fleet_type": "request"
-              },
-              "ASG": {
-                "capabilities": {}
-              },
-              "RunInstances": {
-                "capabilities": {}
-              }
-            },
-            "defaults": {
-              "ec2_fleet_type": "instant",
-              "spot_fleet_type": "request"
-            }
+    "provider_defaults": {
+      "aws": {
+        "handlers": {
+          "EC2Fleet": {
+            "handler_class": "EC2FleetHandler",
+            "supported_fleet_types": ["instant", "request", "maintain"],
+            "default_fleet_type": "instant",
+            "supports_spot": true,
+            "supports_ondemand": true
+          },
+          "SpotFleet": {
+            "handler_class": "SpotFleetHandler",
+            "supported_fleet_types": ["request", "maintain"],
+            "default_fleet_type": "request",
+            "supports_spot": true,
+            "supports_ondemand": false
+          },
+          "ASG": {
+            "handler_class": "ASGHandler",
+            "supports_spot": true,
+            "supports_ondemand": true
+          },
+          "RunInstances": {
+            "handler_class": "RunInstancesHandler",
+            "supports_spot": false,
+            "supports_ondemand": true
           }
+        },
+        "template_defaults": {
+          "image_id": "ami-12345678",
+          "instance_type": "t2.micro",
+          "security_group_ids": ["sg-12345678"],
+          "subnet_ids": ["subnet-12345678"],
+          "key_name": "",
+          "provider_api": "EC2Fleet",
+          "price_type": "ondemand"
+        },
+        "launch_template": {
+          "create_per_request": true,
+          "naming_strategy": "request_based",
+          "version_strategy": "incremental",
+          "reuse_existing": true,
+          "cleanup_old_versions": false,
+          "max_versions_per_template": 10
+        },
+        "extensions": {
+          "ami_resolution": {
+            "enabled": true,
+            "fallback_on_failure": true,
+            "ssm_parameter_prefix": "/hostfactory/templates/"
+          },
+          "allocation_strategy": "capacityOptimized",
+          "allocation_strategy_on_demand": "lowestPrice",
+          "volume_type": "gp3",
+          "spot_fleet_request_expiry": 30,
+          "percent_on_demand": 0,
+          "root_device_volume_size": 20
         }
       }
-    ]
+    }
   },
   "naming": {
     "collections": {
@@ -86,12 +98,6 @@
       "event_logs": "event_logs",
       "audit_logs": "audit_logs",
       "metrics_logs": "metrics_logs"
-    },
-    "handler_types": {
-      "ec2_fleet": "EC2Fleet",
-      "spot_fleet": "SpotFleet",
-      "asg": "ASG",
-      "run_instances": "RunInstances"
     },
     "fleet_types": {
       "instant": "instant",
@@ -164,53 +170,11 @@
     "accept_propagated_setting": false
   },
   "template": {
-    "default_image_id": "ami-12345678",
-    "default_instance_type": "t2.micro",
-    "subnet_ids": [
-      "subnet-12345678"
-    ],
-    "security_group_ids": [
-      "sg-12345678"
-    ],
-    "default_key_name": "",
-    "default_max_number": 10,
-    "default_attributes": {
-      "type": [
-        "String",
-        "X86_64"
-      ],
-      "ncpus": [
-        "Numeric",
-        "1"
-      ],
-      "nram": [
-        "Numeric",
-        "1024"
-      ],
-      "ncores": [
-        "Numeric",
-        "1"
-      ]
-    },
-    "default_instance_tags": {
-      "company": "abc",
-      "project": "awscloud",
-      "team": "xyz"
-    },
+    "max_number": 10,
     "templates_file_path": "config/templates.json",
     "legacy_templates_file_path": "config/awsprov_templates.json",
     "default_price_type": "ondemand",
-    "default_allocation_strategy": "capacityOptimized",
-    "default_allocation_strategy_on_demand": "lowestPrice",
-    "default_volume_type": "gp3",
-    "default_spot_fleet_request_expiry": 30,
-    "default_percent_on_demand": 0,
-    "default_root_device_volume_size": 20,
-    "ami_resolution": {
-      "enabled": true,
-      "fallback_on_failure": true,
-      "cache_enabled": true
-    }
+    "default_provider_api": "EC2Fleet"
   },
   "events": {
     "store_type": "memory",
@@ -246,6 +210,13 @@
   "request_timeout": 300,
   "max_machines_per_request": 100,
   "performance": {
+    "lazy_loading": {
+      "enabled": true,
+      "cache_instances": true,
+      "discovery_mode": "lazy",
+      "connection_mode": "lazy",
+      "preload_critical": []
+    },
     "enable_batching": true,
     "batch_sizes": {
       "terminate_instances": 25,
@@ -275,6 +246,21 @@
       "success_threshold": 3,
       "failure_threshold": 1,
       "history_size": 10
+    },
+    "caching": {
+      "ami_resolution": {
+        "enabled": true,
+        "ttl_seconds": 3600,
+        "file": "ami_cache.json"
+      },
+      "handler_discovery": {
+        "enabled": true,
+        "file": "handler_discovery.json"
+      },
+      "request_status": {
+        "enabled": true,
+        "ttl_seconds": 300
+      }
     }
   },
   "retry": {

@@ -23,7 +23,7 @@ test:docs:
   script:
     - cd docs
     - mkdocs build  # Build without --strict to allow warnings
-    - echo "✅ Documentation builds successfully (warnings allowed)"
+    - echo "Documentation builds successfully (warnings allowed)"
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -39,7 +39,7 @@ build:docs:production:
     - cd docs
     - mkdocs build
     - mv site ../public  # GitLab Pages expects 'public' directory
-    - echo "📚 Production documentation built and moved to public/"
+    - echo "Production documentation built and moved to public/"
     - ls -la ../public/
   artifacts:
     paths:
@@ -59,7 +59,7 @@ build:docs:staging:
     - mkdocs build
     - mkdir -p ../public/develop
     - cp -r site/* ../public/develop/
-    - echo "📚 Staging documentation built and moved to public/develop/"
+    - echo "Staging documentation built and moved to public/develop/"
     - ls -la ../public/develop/
   artifacts:
     paths:
@@ -74,11 +74,11 @@ pages:
   script:
     - |
       if [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        echo "🚀 Deploying production to GitLab Pages..."
-        echo "📍 Production site: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
+        echo "Deploying production to GitLab Pages..."
+        echo "Production site: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin"
       elif [ "$CI_COMMIT_BRANCH" = "develop" ]; then
-        echo "🚀 Deploying staging to GitLab Pages..."
-        echo "📍 Staging site: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
+        echo "Deploying staging to GitLab Pages..."
+        echo "Staging site: https://aws-gfs-acceleration.gitlab.aws.dev/open-hostfactory-plugin/develop"
       fi
     - ls -la public/
   artifacts:

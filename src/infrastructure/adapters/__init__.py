@@ -5,7 +5,6 @@ from .container_adapter import ContainerAdapter
 from .factories.container_adapter_factory import ContainerAdapterFactory
 from .error_handling_adapter import ErrorHandlingAdapter
 from .template_configuration_adapter import TemplateConfigurationAdapter
-from .template_format_adapter import TemplateFormatAdapter
 
 __all__ = [
     'LoggingAdapter',
@@ -13,5 +12,4 @@ __all__ = [
     'ContainerAdapterFactory',
     'ErrorHandlingAdapter',
     'TemplateConfigurationAdapter',
-    'TemplateFormatAdapter',
 ]

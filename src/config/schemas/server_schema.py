@@ -1,10 +1,11 @@
 """Server configuration schema for REST API server."""
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class AuthConfig(BaseModel):
     """Authentication configuration."""
+    model_config = ConfigDict(extra="allow")  # Allow provider-specific auth configs
     
     enabled: bool = Field(False, description="Enable authentication")
     strategy: str = Field("none", description="Authentication strategy (none, bearer_token, iam, cognito, oauth)")
@@ -23,9 +24,6 @@ class AuthConfig(BaseModel):
     
     # Provider-specific auth configurations
     provider_auth: Optional[Dict[str, Any]] = Field(None, description="Provider-specific auth configuration")
-    
-    class Config:
-        extra = "allow"  # Allow provider-specific auth configs
 
 
 class CORSConfig(BaseModel):
@@ -40,6 +38,7 @@ class CORSConfig(BaseModel):
 
 class ServerConfig(BaseModel):
     """REST API server configuration."""
+    model_config = ConfigDict(extra="forbid")
     
     enabled: bool = Field(False, description="Enable REST API server")
     host: str = Field("0.0.0.0", description="Server host")
@@ -63,30 +62,9 @@ class ServerConfig(BaseModel):
     require_https: bool = Field(False, description="Require HTTPS for all requests")
     trusted_hosts: List[str] = Field(["*"], description="Trusted host headers")
     
-    # Rate limiting (for future implementation)
-    rate_limiting: Optional[Dict[str, Any]] = Field(None, description="Rate limiting configuration")
-    host: str = Field("0.0.0.0", description="Server host")
-    port: int = Field(8000, description="Server port")
-    workers: int = Field(1, description="Number of worker processes")
-    reload: bool = Field(False, description="Enable auto-reload for development")
-    
-    # Documentation
-    docs_enabled: bool = Field(True, description="Enable OpenAPI documentation")
-    docs_url: str = Field("/docs", description="OpenAPI documentation URL")
-    redoc_url: str = Field("/redoc", description="ReDoc documentation URL")
-    openapi_url: str = Field("/openapi.json", description="OpenAPI schema URL")
-    
-    # Security
-    auth: AuthConfig = Field(default_factory=AuthConfig, description="Authentication configuration")
-    cors: CORSConfig = Field(default_factory=CORSConfig, description="CORS configuration")
-    
     # Performance
     request_timeout: int = Field(30, description="Request timeout in seconds")
     max_request_size: int = Field(16 * 1024 * 1024, description="Maximum request size in bytes")
     
-    # Logging
-    access_log: bool = Field(True, description="Enable access logging")
-    log_level: str = Field("info", description="Server log level")
-    
-    class Config:
-        extra = "forbid"
+    # Rate limiting (for future implementation)
+    rate_limiting: Optional[Dict[str, Any]] = Field(None, description="Rate limiting configuration")

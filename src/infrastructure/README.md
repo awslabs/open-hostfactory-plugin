@@ -1,504 +1,776 @@
-# Infrastructure Layer - Technical Implementations
+# Infrastructure Layer
 
-The infrastructure layer provides technical implementations of domain interfaces and handles all external system interactions. This layer contains the technical concerns that support the business logic without polluting the domain layer.
+The Infrastructure Layer provides concrete implementations of domain ports and handles all external integrations. This layer implements the technical details while keeping the domain and application layers clean and focused on business logic.
 
-## Architecture Overview
+## Architecture
 
-### Clean Architecture Compliance
 ```
-Infrastructure Layer → Application Layer → Domain Layer
+infrastructure/
+├── di/                # Dependency Injection container and registrations
+├── persistence/       # Data persistence implementations
+├── providers/         # Cloud provider integrations
+├── scheduler/         # Job scheduling and workflow management
+├── template/          # Template infrastructure components
+├── utilities/         # Infrastructure utilities and factories
+├── error/            # Error handling and exception management
+└── mocking/          # Test doubles and mocking utilities
 ```
 
-**Key Principles:**
-- Implements domain interfaces
-- Handles external system integration
-- Provides technical utilities and cross-cutting concerns
-- Zero business logic (pure technical implementation)
+## Port/Adapter Pattern
 
-### Dependency Inversion
-- High-level modules (domain) define interfaces
-- Low-level modules (infrastructure) implement interfaces
-- Dependencies point inward toward the domain
+The infrastructure layer implements the Port/Adapter pattern, where:
+- **Ports**: Interfaces defined in the domain layer
+- **Adapters**: Concrete implementations in the infrastructure layer
 
-## Package Structure
+### Repository Adapters
+Implement domain repository ports:
 
-### 📁 `persistence/` - Data Persistence
-Comprehensive data persistence layer with multiple storage strategies.
-
-**Key Features:**
-- **Multiple Storage Strategies**: JSON, SQL, DynamoDB
-- **Repository Pattern**: Domain repository implementations
-- **Event Sourcing**: Complete audit trail of changes
-- **Automatic Strategy Selection**: Based on configuration and load
-- **Data Migration**: Between storage strategies
-- **Concurrency Control**: Optimistic locking and conflict resolution
-
-**Components:**
-- **`repositories/`**: Repository implementations for each aggregate
-- **`components/`**: Reusable storage components
-- **`json/`**: JSON file-based storage implementation
-- **`sql/`**: SQL database storage implementation
-- **`dynamodb/`**: AWS DynamoDB storage implementation
-- **`base/`**: Base classes and interfaces
-- **`factories/`**: Repository factory implementations
-
-### 📁 `events/` - Event Infrastructure
-Event sourcing and publishing infrastructure.
-
-**Key Features:**
-- **Event Store**: Persistent event storage
-- **Event Publisher**: Reliable event publishing
-- **Event Registry**: Event type registration and discovery
-- **Event Handlers**: Infrastructure event processing
-- **Deduplication**: Prevents duplicate event processing
-
-**Components:**
-- **`publisher.py`**: Event publishing infrastructure
-- **Event Store**: Persistent event storage implementations
-- **Event Handlers**: Infrastructure-level event processing
-
-### 📁 `di/` - Dependency Injection
-Inversion of Control (IoC) container and service registration.
-
-**Key Features:**
-- **Service Registration**: Automatic service discovery
-- **Lifecycle Management**: Singleton, transient, and scoped services
-- **Configuration Integration**: Services configured from settings
-- **Provider Integration**: Cloud provider service registration
-
-**Components:**
-- **`container.py`**: Main IoC container implementation
-- **`services.py`**: Service registration and configuration
-- **`exceptions.py`**: DI-specific exceptions
-
-### 📁 `resilience/` - Resilience Patterns
-Retry mechanisms, circuit breakers, and error handling.
-
-**Key Features:**
-- **Retry Strategies**: Exponential backoff, fixed delay, custom strategies
-- **Circuit Breaker**: Fail-fast for unreliable services
-- **Timeout Handling**: Configurable operation timeouts
-- **Error Classification**: Transient vs permanent error handling
-
-**Components:**
-- **`strategies/`**: Different resilience strategy implementations
-- **`retry_decorator.py`**: Decorator-based retry implementation
-- **`config.py`**: Resilience configuration
-- **`exceptions.py`**: Resilience-specific exceptions
-
-### 📁 `logging/` - Logging Infrastructure
-Structured logging with multiple outputs and formats.
-
-**Key Features:**
-- **Structured Logging**: JSON and text formats
-- **Multiple Outputs**: Console, file, remote logging
-- **Log Rotation**: Automatic log file rotation
-- **Performance Logging**: Request timing and performance metrics
-- **Correlation IDs**: Request tracing across components
-
-**Components:**
-- **`logger.py`**: Main logging implementation
-- **`logger_singleton.py`**: Singleton logger access
-
-### 📁 `interfaces/` - Technical Interfaces
-Technical interfaces that were moved from domain layer.
-
-**Key Components:**
-- **`provider.py`**: Cloud provider interface contracts
-- **`resource_manager.py`**: Resource management interfaces
-- **`instance_manager.py`**: Instance management interfaces
-
-**Design Note:**
-These interfaces were moved from domain to infrastructure as they represent technical contracts rather than business concepts.
-
-### 📁 `ports/` - External System Ports
-Adapters for external system integration.
-
-**Key Components:**
-- **`cloud_resource_manager_port.py`**: Cloud resource management port
-- **`resource_provisioning_port.py`**: Resource provisioning port
-- **`request_adapter_port.py`**: Request adaptation port
-- **`logger_port.py`**: Logging port
-
-### 📁 `adapters/` - External System Adapters
-Concrete implementations of external system ports.
-
-**Key Components:**
-- **`configuration_adapter.py`**: Configuration system adapter
-
-### 📁 `utilities/` - Infrastructure Utilities
-Common technical utilities and helper functions.
-
-**Key Features:**
-- **Common Utilities**: Shared technical functions
-- **Factory Patterns**: Object creation utilities
-- **Serialization**: JSON and other format handling
-- **Validation**: Technical validation utilities
-
-**Components:**
-- **`common/`**: Common utility functions
-- **`factories/`**: Factory pattern implementations
-
-### 📁 `error/` - Error Handling Infrastructure
-Centralized error handling and middleware.
-
-**Key Features:**
-- **Error Middleware**: Request/response error handling
-- **Error Classification**: Technical vs business error separation
-- **Error Reporting**: Structured error reporting
-- **Error Recovery**: Automatic error recovery strategies
-
-**Components:**
-- **`error_handler.py`**: Main error handling logic
-- **`error_middleware.py`**: Middleware for error processing
-
-### 📁 `handlers/` - Infrastructure Handlers
-Technical handlers for infrastructure concerns.
-
-**Components:**
-- **`base/`**: Base handler implementations
-
-### 📁 `patterns/` - Infrastructure Patterns
-Common infrastructure design patterns.
-
-**Key Components:**
-- **`singleton_registry.py`**: Singleton pattern implementation
-- **`singleton_access.py`**: Singleton access utilities
-- **`lazy_import.py`**: Lazy loading pattern
-
-### 📁 `serialization/` - Serialization Infrastructure
-Data serialization and deserialization utilities.
-
-**Key Components:**
-- **`encoders.py`**: Custom JSON encoders for domain objects
-
-## Key Infrastructure Features
-
-### 1. Multi-Strategy Persistence
-
-**Automatic Strategy Selection:**
 ```python
-class RepositoryFactory:
-    """Factory for creating repositories with appropriate storage strategy."""
+class SQLMachineRepository(MachineRepositoryPort):
+    def __init__(self, connection: DatabaseConnection):
+        self.connection = connection
     
-    def create_request_repository(self) -> RequestRepository:
-        """Create request repository with optimal storage strategy."""
-        config = self._get_repository_config()
-        
-        if config.type == "json":
-            return JSONRequestRepository(config.json)
-        elif config.type == "sql":
-            return SQLRequestRepository(config.sql)
-        elif config.type == "dynamodb":
-            return DynamoDBRequestRepository(config.dynamodb)
-        else:
-            raise UnsupportedStorageTypeError(config.type)
-```
-
-**Storage Strategy Components:**
-- **Single File**: All data in one JSON file
-- **Multi File**: Separate files per aggregate type
-- **SQL Database**: Relational database storage
-- **DynamoDB**: NoSQL cloud storage
-
-### 2. Event Sourcing Infrastructure
-
-**Event Store Implementation:**
-```python
-class EventStore:
-    """Persistent event storage with deduplication."""
+    async def save(self, machine: Machine) -> None:
+        """Save machine to SQL database."""
+        query = """
+            INSERT INTO machines (id, template_id, status, created_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                status = excluded.status,
+                updated_at = CURRENT_TIMESTAMP
+        """
+        await self.connection.execute(query, [
+            machine.id.value,
+            machine.template_id.value,
+            machine.status.value,
+            machine.created_at
+        ])
     
-    async def append_events(self, 
-                          aggregate_id: str, 
-                          events: List[DomainEvent],
-                          expected_version: int) -> None:
-        """Append events to store with optimistic concurrency control."""
-        # Check for concurrent modifications
-        current_version = await self._get_aggregate_version(aggregate_id)
-        if current_version != expected_version:
-            raise ConcurrencyConflictError(
-                f"Expected version {expected_version}, got {current_version}"
-            )
+    async def find_by_id(self, machine_id: MachineId) -> Optional[Machine]:
+        """Find machine by ID from SQL database."""
+        query = "SELECT * FROM machines WHERE id = ?"
+        row = await self.connection.fetch_one(query, [machine_id.value])
         
-        # Store events with deduplication
-        for event in events:
-            if not await self._event_exists(event.event_id):
-                await self._store_event(aggregate_id, event)
+        if not row:
+            return None
+        
+        return Machine.from_persistence(
+            machine_id=MachineId(row['id']),
+            template_id=TemplateId(row['template_id']),
+            status=MachineStatus(row['status']),
+            created_at=row['created_at']
+        )
 ```
 
-### 3. Resilience Infrastructure
+### External Service Adapters
+Implement external service ports:
 
-**Retry Decorator:**
 ```python
-@retry_with_backoff(
-    max_attempts=3,
-    backoff_strategy=ExponentialBackoffStrategy(
-        initial_delay=1.0,
-        max_delay=30.0,
-        multiplier=2.0
-    ),
-    retry_on=[ConnectionError, TimeoutError],
-    stop_on=[AuthenticationError, ValidationError]
-)
-async def provision_resources(self, request: ProvisionRequest) -> List[str]:
-    """Provision resources with automatic retry on transient failures."""
-    return await self._cloud_provider.provision_instances(request)
-```
-
-**Circuit Breaker:**
-```python
-class CircuitBreaker:
-    """Circuit breaker for external service calls."""
+class AWSProviderAdapter(CloudProviderPort):
+    def __init__(self, ec2_client: EC2Client, logger: LoggingPort):
+        self.ec2_client = ec2_client
+        self.logger = logger
     
-    async def call(self, func: Callable, *args, **kwargs) -> Any:
-        """Execute function with circuit breaker protection."""
-        if self._state == CircuitState.OPEN:
-            if not self._should_attempt_reset():
-                raise CircuitBreakerOpenError("Circuit breaker is open")
-            self._state = CircuitState.HALF_OPEN
-        
+    async def provision_instance(self, config: InstanceConfiguration) -> ProvisionResult:
+        """Provision EC2 instance."""
         try:
-            result = await func(*args, **kwargs)
-            self._on_success()
-            return result
+            response = await self.ec2_client.run_instances(
+                ImageId=config.ami_id,
+                InstanceType=config.instance_type,
+                MinCount=1,
+                MaxCount=1,
+                SecurityGroupIds=config.security_groups,
+                SubnetId=config.subnet_id
+            )
+            
+            instance_id = response['Instances'][0]['InstanceId']
+            self.logger.info(f"Provisioned EC2 instance: {instance_id}")
+            
+            return ProvisionResult(
+                instance_id=instance_id,
+                status="pending",
+                provider_data=response['Instances'][0]
+            )
+            
         except Exception as e:
-            self._on_failure()
-            raise
+            self.logger.error(f"Failed to provision instance: {e}")
+            raise InfrastructureError(f"Provisioning failed: {e}")
 ```
 
-### 4. Dependency Injection Container
+## Dependency Injection
 
-**Service Registration:**
+### Container Configuration
+Comprehensive DI container with automatic service registration:
+
 ```python
 class DIContainer:
-    """Dependency injection container."""
+    def __init__(self):
+        self._services: Dict[Type, Any] = {}
+        self._singletons: Dict[Type, Any] = {}
+        self._factories: Dict[Type, Callable] = {}
     
-    def register_singleton(self, 
-                          interface: Type[T], 
-                          implementation: Type[T]) -> None:
+    def register_singleton(self, interface: Type[T], implementation: Type[T]) -> None:
         """Register singleton service."""
-        self._services[interface] = ServiceDescriptor(
-            interface=interface,
-            implementation=implementation,
-            lifetime=ServiceLifetime.SINGLETON
-        )
+        self._services[interface] = implementation
+        self._singletons[interface] = None
     
-    def resolve(self, service_type: Type[T]) -> T:
-        """Resolve service instance."""
-        descriptor = self._services.get(service_type)
-        if not descriptor:
-            raise ServiceNotRegisteredError(service_type)
+    def register_transient(self, interface: Type[T], implementation: Type[T]) -> None:
+        """Register transient service."""
+        self._services[interface] = implementation
+    
+    def get(self, service_type: Type[T]) -> T:
+        """Resolve service from container."""
+        if service_type in self._singletons:
+            if self._singletons[service_type] is None:
+                self._singletons[service_type] = self._create_instance(service_type)
+            return self._singletons[service_type]
         
-        if descriptor.lifetime == ServiceLifetime.SINGLETON:
-            return self._get_or_create_singleton(descriptor)
+        return self._create_instance(service_type)
+```
+
+### Service Registration
+Automatic registration of infrastructure services:
+
+```python
+def register_infrastructure_services(container: DIContainer) -> None:
+    """Register all infrastructure services."""
+    
+    # Repository implementations
+    container.register_singleton(MachineRepositoryPort, SQLMachineRepository)
+    container.register_singleton(TemplateRepositoryPort, SQLTemplateRepository)
+    container.register_singleton(RequestRepositoryPort, SQLRequestRepository)
+    
+    # External service adapters
+    container.register_singleton(CloudProviderPort, AWSProviderAdapter)
+    container.register_singleton(NotificationPort, EmailNotificationAdapter)
+    container.register_singleton(LoggingPort, StructuredLoggingAdapter)
+    
+    # Infrastructure services
+    container.register_singleton(DatabaseConnection, SQLiteConnection)
+    container.register_singleton(ConfigurationManager, YAMLConfigurationManager)
+    container.register_transient(EventPublisher, AsyncEventPublisher)
+```
+
+## Persistence Layer
+
+### Storage Strategies
+Multiple storage implementations with strategy pattern:
+
+```python
+class StorageStrategy(ABC):
+    @abstractmethod
+    async def save(self, key: str, data: Dict[str, Any]) -> None:
+        pass
+    
+    @abstractmethod
+    async def load(self, key: str) -> Optional[Dict[str, Any]]:
+        pass
+
+class JSONStorageStrategy(StorageStrategy):
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+    
+    async def save(self, key: str, data: Dict[str, Any]) -> None:
+        """Save data to JSON file."""
+        # Implementation
+
+class DynamoDBStorageStrategy(StorageStrategy):
+    def __init__(self, table_name: str, dynamodb_client: DynamoDBClient):
+        self.table_name = table_name
+        self.dynamodb_client = dynamodb_client
+    
+    async def save(self, key: str, data: Dict[str, Any]) -> None:
+        """Save data to DynamoDB."""
+        # Implementation
+```
+
+### Repository Base Classes
+Common repository functionality:
+
+```python
+class BaseRepository(Generic[T]):
+    def __init__(self, storage: StorageStrategy, serializer: SerializationStrategy):
+        self.storage = storage
+        self.serializer = serializer
+    
+    async def save(self, entity: T) -> None:
+        """Save entity using storage strategy."""
+        data = self.serializer.serialize(entity)
+        await self.storage.save(entity.id, data)
+    
+    async def find_by_id(self, entity_id: str) -> Optional[T]:
+        """Find entity by ID using storage strategy."""
+        data = await self.storage.load(entity_id)
+        if not data:
+            return None
+        
+        return self.serializer.deserialize(data)
+```
+
+## Provider Integration
+
+### AWS Provider Strategy
+Comprehensive AWS integration:
+
+```python
+class AWSProviderStrategy(ProviderStrategyPort):
+    def __init__(self, 
+                 ec2_client: EC2Client,
+                 ssm_client: SSMClient,
+                 config: AWSConfiguration):
+        self.ec2_client = ec2_client
+        self.ssm_client = ssm_client
+        self.config = config
+    
+    async def provision_machines(self, request: ProvisionRequest) -> ProvisionResult:
+        """Provision machines using AWS EC2."""
+        template = await self._resolve_template(request.template_id)
+        
+        # Resolve AMI
+        ami_id = await self._resolve_ami(template.ami_specification)
+        
+        # Create launch configuration
+        launch_config = self._create_launch_configuration(template, ami_id)
+        
+        # Provision instances
+        instances = await self._provision_instances(launch_config, request.count)
+        
+        return ProvisionResult(
+            request_id=request.id,
+            instances=instances,
+            provider="aws"
+        )
+    
+    async def _resolve_ami(self, ami_spec: AMISpecification) -> str:
+        """Resolve AMI ID from specification."""
+        if ami_spec.ami_id:
+            return ami_spec.ami_id
+        
+        # Query AWS for latest AMI matching criteria
+        response = await self.ec2_client.describe_images(
+            Filters=[
+                {'Name': 'name', 'Values': [ami_spec.name_pattern]},
+                {'Name': 'state', 'Values': ['available']},
+                {'Name': 'architecture', 'Values': [ami_spec.architecture]}
+            ],
+            Owners=[ami_spec.owner_id]
+        )
+        
+        if not response['Images']:
+            raise InfrastructureError(f"No AMI found matching: {ami_spec}")
+        
+        # Return most recent AMI
+        latest_ami = max(response['Images'], key=lambda x: x['CreationDate'])
+        return latest_ami['ImageId']
+```
+
+### Multi-Provider Support
+Strategy pattern for multiple cloud providers:
+
+```python
+class ProviderFactory:
+    def __init__(self, container: DIContainer):
+        self.container = container
+        self._strategies: Dict[str, Type[ProviderStrategyPort]] = {
+            'aws': AWSProviderStrategy,
+            'azure': AzureProviderStrategy,
+            'gcp': GCPProviderStrategy
+        }
+    
+    def create_provider(self, provider_type: str) -> ProviderStrategyPort:
+        """Create provider strategy instance."""
+        if provider_type not in self._strategies:
+            raise ValueError(f"Unsupported provider: {provider_type}")
+        
+        strategy_class = self._strategies[provider_type]
+        return self.container.get(strategy_class)
+```
+
+## Error Handling
+
+### Infrastructure Exceptions
+Standardized error handling for infrastructure concerns:
+
+```python
+class InfrastructureError(Exception):
+    """Base infrastructure error."""
+    pass
+
+class PersistenceError(InfrastructureError):
+    """Database/storage related errors."""
+    pass
+
+class ExternalServiceError(InfrastructureError):
+    """External service integration errors."""
+    pass
+
+class ConfigurationError(InfrastructureError):
+    """Configuration related errors."""
+    pass
+```
+
+### Error Response Handling
+```python
+class InfrastructureErrorResponse:
+    @staticmethod
+    def from_exception(error: Exception, context: str) -> Dict[str, Any]:
+        """Create standardized error response."""
+        return {
+            'error': True,
+            'error_type': error.__class__.__name__,
+            'message': str(error),
+            'context': context,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+```
+
+## Configuration Management
+
+### Configuration Strategy
+Flexible configuration management:
+
+```python
+class ConfigurationManager:
+    def __init__(self, config_sources: List[ConfigurationSource]):
+        self.config_sources = config_sources
+        self._cache: Dict[str, Any] = {}
+    
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get configuration value with fallback chain."""
+        if key in self._cache:
+            return self._cache[key]
+        
+        for source in self.config_sources:
+            value = source.get(key)
+            if value is not None:
+                self._cache[key] = value
+                return value
+        
+        return default
+    
+    def get_provider_config(self) -> ProviderConfiguration:
+        """Get provider-specific configuration."""
+        return ProviderConfiguration(
+            provider_type=self.get('PROVIDER_TYPE', 'aws'),
+            region=self.get('AWS_REGION', 'us-east-1'),
+            profile=self.get('AWS_PROFILE', 'default'),
+            dry_run=self.get('DRY_RUN', False)
+        )
+```
+
+## Template Infrastructure
+
+### Template Infrastructure Components
+The template system provides comprehensive infrastructure support with three core components:
+
+#### Template DTOs (Data Transfer Objects)
+Infrastructure layer DTOs for template data transfer and persistence:
+
+```python
+class TemplateDTO(BaseModel):
+    """Infrastructure DTO for template data transfer and persistence."""
+    model_config = ConfigDict(
+        frozen=False,
+        validate_assignment=True,
+        populate_by_name=True
+    )
+    
+    # Core template identification
+    template_id: str = Field(description="Unique template identifier")
+    name: Optional[str] = Field(default=None, description="Human-readable template name")
+    description: Optional[str] = Field(default=None, description="Template description")
+    
+    # Provider configuration
+    provider_api: str = Field(description="Provider API type (aws, azure, etc.)")
+    provider_type: Optional[str] = Field(default=None, description="Provider type")
+    provider_name: Optional[str] = Field(default=None, description="Provider instance name")
+    
+    # Template configuration data
+    configuration: Dict[str, Any] = Field(default_factory=dict, description="Template configuration")
+    
+    # Metadata and status
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Template metadata")
+    tags: Dict[str, str] = Field(default_factory=dict, description="Template tags")
+    is_active: bool = Field(default=True, description="Whether template is active")
+    
+    # Timestamps
+    created_at: Optional[datetime] = Field(default=None, description="Creation timestamp")
+    updated_at: Optional[datetime] = Field(default=None, description="Last update timestamp")
+    
+    # File metadata
+    source_file: Optional[str] = Field(default=None, description="Source file path")
+    file_priority: Optional[int] = Field(default=None, description="File priority in hierarchy")
+    
+    def to_domain(self) -> 'Template':
+        """Convert infrastructure DTO to domain Template aggregate."""
+        from src.domain.template.aggregate import Template
+        
+        return Template(
+            template_id=self.template_id,
+            name=self.name,
+            description=self.description,
+            provider_api=self.provider_api,
+            provider_type=self.provider_type,
+            provider_name=self.provider_name,
+            configuration=self.configuration,
+            metadata=self.metadata,
+            tags=self.tags,
+            is_active=self.is_active,
+            created_at=self.created_at,
+            updated_at=self.updated_at
+        )
+    
+    @classmethod
+    def from_domain(cls, template: 'Template') -> 'TemplateDTO':
+        """Create infrastructure DTO from domain Template aggregate."""
+        return cls(
+            template_id=template.template_id,
+            name=template.name,
+            description=template.description,
+            provider_api=template.provider_api or 'aws',
+            provider_type=template.provider_type,
+            provider_name=template.provider_name,
+            configuration=template.configuration if hasattr(template, 'configuration') else {},
+            metadata=template.metadata if hasattr(template, 'metadata') else {},
+            tags=template.tags if hasattr(template, 'tags') else {},
+            is_active=template.is_active if hasattr(template, 'is_active') else True,
+            created_at=template.created_at if hasattr(template, 'created_at') else None,
+            updated_at=template.updated_at if hasattr(template, 'updated_at') else None
+        )
+```
+
+#### Template Cache Entry DTO
+DTO for template cache entries with metadata and expiration tracking:
+
+```python
+class TemplateCacheEntryDTO(BaseModel):
+    """DTO for template cache entries with metadata."""
+    model_config = ConfigDict(frozen=True)
+    
+    template: TemplateDTO = Field(description="Cached template data")
+    cached_at: datetime = Field(description="Cache timestamp")
+    ttl_seconds: int = Field(description="Time to live in seconds")
+    hit_count: int = Field(default=0, description="Number of cache hits")
+    
+    @property
+    def is_expired(self) -> bool:
+        """Check if cache entry is expired."""
+        age_seconds = (datetime.now() - self.cached_at).total_seconds()
+        return age_seconds > self.ttl_seconds
+    
+    @property
+    def age_seconds(self) -> float:
+        """Get age of cache entry in seconds."""
+        return (datetime.now() - self.cached_at).total_seconds()
+```
+
+#### Template Validation Result DTO
+DTO for template validation results with comprehensive error and warning tracking:
+
+```python
+class TemplateValidationResultDTO(BaseModel):
+    """DTO for template validation results."""
+    model_config = ConfigDict(frozen=True)
+    
+    template_id: str = Field(description="Template identifier")
+    is_valid: bool = Field(description="Whether template is valid")
+    errors: List[str] = Field(default_factory=list, description="Validation errors")
+    warnings: List[str] = Field(default_factory=list, description="Validation warnings")
+    supported_features: List[str] = Field(default_factory=list, description="Supported features")
+    validation_time: datetime = Field(default_factory=datetime.now, description="Validation timestamp")
+    provider_instance: Optional[str] = Field(default=None, description="Provider instance validated against")
+```
+
+#### Template Configuration Manager
+The template system has been streamlined to focus on core components with a single source of truth. The manager now uses infrastructure DTOs to avoid direct domain dependencies, following Clean Architecture principles:
+
+```python
+class TemplateConfigurationManager:
+    """
+    Template Configuration Manager - Single Source of Truth.
+    
+    Consolidates template operations into a coherent architecture that
+    treats templates as configuration data rather than transactional entities.
+    
+    Registration: Manually registered in DI container (port_registrations.py)
+    using factory pattern for complex initialization with dependencies.
+    
+    Architecture Improvements:
+    - Uses TemplateDTO instead of direct domain Template imports
+    - Follows Dependency Inversion Principle (DIP)
+    - Maintains clean separation between infrastructure and domain layers
+    - Provides configuration-driven template discovery and management
+    """
+    
+    def __init__(self, 
+                 config_manager: ConfigurationManager,
+                 scheduler_strategy: SchedulerPort,
+                 logger: LoggingPort):
+        self.config_manager = config_manager
+        self.scheduler_strategy = scheduler_strategy
+        self.logger = logger
+    
+    async def discover_template_files(self, force_refresh: bool = False) -> TemplateDiscoveryResult:
+        """
+        Discover template files using provider-specific hierarchy.
+        
+        Provider-specific file hierarchy (priority order):
+        1. Instance files: {provider}inst_templates.{ext}
+        2. Type files: {provider}type_templates.{ext}  
+        3. Main templates: {provider}prov_templates.{ext}
+        4. Legacy files: templates.{ext}
+        """
+        # Implementation
+    
+    async def load_templates(self, force_refresh: bool = False) -> List[TemplateDTO]:
+        """Load all templates from discovered files with caching."""
+        # Implementation
+    
+    async def save_template(self, template: TemplateDTO) -> None:
+        """Save template to configuration files."""
+        # Implementation
+```
+
+### Template Repository Implementation
+Repository pattern implementation for template persistence with full AggregateRepository compliance:
+
+```python
+class TemplateRepositoryImpl(TemplateRepository):
+    """Template repository implementation for configuration-based template management."""
+    
+    def __init__(self, 
+                 template_manager: TemplateConfigurationManager,
+                 logger: LoggingPort):
+        """Initialize repository with template configuration manager."""
+        self._template_manager = template_manager
+        self._logger = logger
+    
+    # Abstract methods from AggregateRepository
+    def save(self, aggregate: Template) -> None:
+        """Save a template aggregate."""
+        self._logger.debug(f"Saving template: {aggregate.template_id}")
+        self._template_manager.save_template(aggregate)
+    
+    def find_by_id(self, aggregate_id: str) -> Optional[Template]:
+        """Find template by aggregate ID (required by AggregateRepository)."""
+        self._logger.debug(f"Finding template by ID: {aggregate_id}")
+        return self._template_manager.get_template(aggregate_id)
+    
+    def delete(self, aggregate_id: str) -> None:
+        """Delete template by aggregate ID."""
+        self._logger.debug(f"Deleting template: {aggregate_id}")
+        self._template_manager.delete_template(aggregate_id)
+    
+    # Abstract methods from TemplateRepository
+    def find_by_template_id(self, template_id: str) -> Optional[Template]:
+        """Find template by template ID (required by TemplateRepository)."""
+        # Delegate to the main find_by_id method to avoid duplication
+        return self.find_by_id(template_id)
+    
+    def find_by_provider_api(self, provider_api: str) -> List[Template]:
+        """Find templates by provider API type."""
+        self._logger.debug(f"Finding templates by provider API: {provider_api}")
+        return self._template_manager.get_templates_by_provider(provider_api)
+    
+    def find_active_templates(self) -> List[Template]:
+        """Find all active templates."""
+        self._logger.debug("Finding all active templates")
+        return self._template_manager.get_all_templates()
+    
+    def search_templates(self, criteria: Dict[str, Any]) -> List[Template]:
+        """Search templates by criteria."""
+        self._logger.debug(f"Searching templates with criteria: {criteria}")
+        
+        all_templates = self._template_manager.get_all_templates()
+        
+        filtered_templates = []
+        for template in all_templates:
+            matches = True
+            
+            for key, value in criteria.items():
+                template_value = getattr(template, key, None)
+                if template_value != value:
+                    matches = False
+                    break
+            
+            if matches:
+                filtered_templates.append(template)
+        
+        return filtered_templates
+    
+    # Convenience methods
+    def get_by_id(self, template_id: str) -> Optional[Template]:
+        """Get template by ID (convenience method, delegates to find_by_id)."""
+        return self.find_by_id(template_id)
+    
+    def get_all(self) -> List[Template]:
+        """Get all templates."""
+        return self.find_active_templates()
+    
+    def exists(self, template_id: str) -> bool:
+        """Check if template exists."""
+        return self._template_manager.get_template(template_id) is not None
+    
+    def validate_template(self, template: Template) -> List[str]:
+        """Validate template configuration."""
+        validation_result = self._template_manager.validate_template(template)
+        return validation_result.errors if not validation_result.is_valid else []
+```
+
+#### Key Architecture Improvements
+
+1. **Full AggregateRepository Compliance**: Implements all required abstract methods from both `AggregateRepository` and `TemplateRepository` interfaces
+2. **Clean Dependency Injection**: Removed `@injectable` decorator as this class is manually registered in the DI container using factory pattern
+3. **Method Delegation**: `find_by_template_id` delegates to `find_by_id` to avoid code duplication and maintain single source of truth
+4. **Comprehensive Interface**: Provides both required abstract methods and convenience methods for ease of use
+5. **Proper Logging**: Structured logging with context for all operations
+6. **Template Validation**: Built-in template validation support through configuration manager
+
+### Template Caching Service
+Performance optimization through intelligent caching:
+
+```python
+@injectable
+class TemplateCacheService:
+    """Template caching service for performance optimization."""
+    
+    def __init__(self, cache_ttl_seconds: int = 300):
+        self._cache: Dict[str, Any] = {}
+        self._cache_timestamps: Dict[str, datetime] = {}
+        self._cache_ttl_seconds = cache_ttl_seconds
+    
+    async def get(self, key: str) -> Optional[Any]:
+        """Get cached value if not expired."""
+        if key not in self._cache:
+            return None
+        
+        timestamp = self._cache_timestamps.get(key)
+        if timestamp and (datetime.now() - timestamp).total_seconds() > self._cache_ttl_seconds:
+            # Cache expired
+            del self._cache[key]
+            del self._cache_timestamps[key]
+            return None
+        
+        return self._cache[key]
+    
+    async def set(self, key: str, value: Any) -> None:
+        """Set cached value with timestamp."""
+        self._cache[key] = value
+        self._cache_timestamps[key] = datetime.now()
+```
+
+### Key Features
+- **Configuration-driven discovery**: Provider-specific file hierarchy with priority ordering
+- **Direct file operations**: Simplified approach for better performance
+- **Hierarchical priority system**: Template resolution based on file type priority
+- **Clean dependency injection**: No circular dependencies
+- **Professional codebase**: Optimized for customer delivery
+
+## Utilities and Factories
+
+### Factory Pattern Implementation
+```python
+class RepositoryFactory:
+    def __init__(self, container: DIContainer):
+        self.container = container
+    
+    def create_machine_repository(self) -> MachineRepositoryPort:
+        """Create machine repository based on configuration."""
+        storage_type = self.container.get(ConfigurationManager).get('STORAGE_TYPE')
+        
+        if storage_type == 'sql':
+            return self.container.get(SQLMachineRepository)
+        elif storage_type == 'json':
+            return self.container.get(JSONMachineRepository)
         else:
-            return self._create_instance(descriptor)
+            raise ConfigurationError(f"Unsupported storage type: {storage_type}")
 ```
 
-### 5. Structured Logging
+## Testing Support
 
-**Logger Configuration:**
+### Test Doubles
+Infrastructure provides test doubles for external dependencies:
+
 ```python
-def setup_logging(config: LoggingConfig) -> None:
-    """Set up structured logging with multiple outputs."""
-    logger = logging.getLogger()
-    logger.setLevel(getattr(logging, config.level.upper()))
+class MockCloudProvider(CloudProviderPort):
+    def __init__(self):
+        self.provisioned_instances: List[str] = []
+        self.terminated_instances: List[str] = []
     
-    # Console handler
-    if config.console_enabled:
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(
-            StructuredFormatter(config.format)
+    async def provision_instance(self, config: InstanceConfiguration) -> ProvisionResult:
+        """Mock instance provisioning."""
+        instance_id = f"mock-{uuid.uuid4().hex[:8]}"
+        self.provisioned_instances.append(instance_id)
+        
+        return ProvisionResult(
+            instance_id=instance_id,
+            status="running",
+            provider_data={"mock": True}
         )
-        logger.addHandler(console_handler)
-    
-    # File handler with rotation
-    if config.file_path:
-        file_handler = RotatingFileHandler(
-            config.file_path,
-            maxBytes=config.max_size,
-            backupCount=config.backup_count
-        )
-        file_handler.setFormatter(
-            StructuredFormatter(config.format)
-        )
-        logger.addHandler(file_handler)
 ```
 
-## Repository Implementations
-
-### Base Repository Pattern
+### Integration Test Support
 ```python
-class BaseRepository(ABC):
-    """Base repository with common infrastructure concerns."""
-    
-    def __init__(self, storage_strategy: BaseStorageStrategy):
-        self._storage = storage_strategy
-        self._event_publisher = get_event_publisher()
-        self._logger = get_logger(__name__)
-    
-    async def save(self, aggregate: AggregateRoot) -> None:
-        """Save aggregate and publish events."""
-        try:
-            # Save aggregate data
-            await self._storage.save(aggregate)
-            
-            # Extract and publish domain events
-            events = aggregate.get_domain_events()
-            if events:
-                await self._event_publisher.publish_events(events)
-                aggregate.clear_domain_events()
-            
-            self._logger.info(f"Saved {type(aggregate).__name__} with {len(events)} events")
-            
-        except Exception as e:
-            self._logger.error(f"Failed to save {type(aggregate).__name__}: {str(e)}")
-            raise
+class TestInfrastructureContainer:
+    @staticmethod
+    def create() -> DIContainer:
+        """Create container configured for testing."""
+        container = DIContainer()
+        
+        # Use in-memory implementations for testing
+        container.register_singleton(MachineRepositoryPort, InMemoryMachineRepository)
+        container.register_singleton(CloudProviderPort, MockCloudProvider)
+        container.register_singleton(LoggingPort, TestLoggingAdapter)
+        
+        return container
 ```
 
-### Specific Repository Implementation
+## Performance Considerations
+
+### Connection Pooling
 ```python
-class RequestRepository(BaseRepository):
-    """Request repository with request-specific operations."""
+class DatabaseConnectionPool:
+    def __init__(self, connection_string: str, pool_size: int = 10):
+        self.connection_string = connection_string
+        self.pool_size = pool_size
+        self._pool: Queue = Queue(maxsize=pool_size)
+        self._initialize_pool()
     
-    async def find_by_status(self, status: RequestStatus) -> List[Request]:
-        """Find requests by status with caching."""
-        cache_key = f"requests_by_status_{status.value}"
+    async def get_connection(self) -> DatabaseConnection:
+        """Get connection from pool."""
+        return await self._pool.get()
+    
+    async def return_connection(self, connection: DatabaseConnection) -> None:
+        """Return connection to pool."""
+        await self._pool.put(connection)
+```
+
+### Caching Strategies
+```python
+class CachingRepository(Generic[T]):
+    def __init__(self, 
+                 base_repository: Repository[T],
+                 cache: CacheStrategy,
+                 ttl_seconds: int = 300):
+        self.base_repository = base_repository
+        self.cache = cache
+        self.ttl_seconds = ttl_seconds
+    
+    async def find_by_id(self, entity_id: str) -> Optional[T]:
+        """Find with caching."""
+        cache_key = f"{self.__class__.__name__}:{entity_id}"
         
         # Try cache first
-        cached_result = await self._cache.get(cache_key)
-        if cached_result:
-            return [Request.from_dict(data) for data in cached_result]
+        cached = await self.cache.get(cache_key)
+        if cached:
+            return cached
         
-        # Query storage
-        request_data = await self._storage.find_by_field("status", status.value)
-        requests = [Request.from_dict(data) for data in request_data]
+        # Fallback to repository
+        entity = await self.base_repository.find_by_id(entity_id)
+        if entity:
+            await self.cache.set(cache_key, entity, ttl=self.ttl_seconds)
         
-        # Cache result
-        await self._cache.set(cache_key, 
-                            [req.to_dict() for req in requests], 
-                            ttl=300)
-        
-        return requests
+        return entity
 ```
 
-## Configuration Integration
-
-### Configuration Adapter
-```python
-class ConfigurationAdapter:
-    """Adapter for configuration system integration."""
-    
-    def __init__(self, config_manager: ConfigurationManager):
-        self._config_manager = config_manager
-    
-    def get_database_config(self) -> DatabaseConfig:
-        """Get database configuration."""
-        return self._config_manager.get_database_config()
-    
-    def get_aws_config(self) -> AWSConfig:
-        """Get AWS configuration."""
-        return self._config_manager.get_aws_config()
-    
-    def get_logging_config(self) -> LoggingConfig:
-        """Get logging configuration."""
-        return self._config_manager.get_logging_config()
-```
-
-## Performance Monitoring
-
-### Performance Metrics
-```python
-class PerformanceMonitor:
-    """Monitor infrastructure performance."""
-    
-    async def monitor_operation(self, 
-                              operation_name: str,
-                              operation: Callable) -> Any:
-        """Monitor operation performance."""
-        start_time = time.time()
-        
-        try:
-            result = await operation()
-            
-            duration = time.time() - start_time
-            self._record_success_metric(operation_name, duration)
-            
-            if duration > self._slow_operation_threshold:
-                await self._handle_slow_operation(operation_name, duration)
-            
-            return result
-            
-        except Exception as e:
-            duration = time.time() - start_time
-            self._record_error_metric(operation_name, duration, type(e).__name__)
-            raise
-```
-
-## Testing Infrastructure
-
-### Test Utilities
-```python
-class InMemoryRepository(BaseRepository):
-    """In-memory repository for testing."""
-    
-    def __init__(self):
-        self._data: Dict[str, Any] = {}
-        self._events: List[DomainEvent] = []
-    
-    async def save(self, aggregate: AggregateRoot) -> None:
-        """Save aggregate in memory."""
-        self._data[str(aggregate.id)] = aggregate.to_dict()
-        
-        # Collect events for testing
-        events = aggregate.get_domain_events()
-        self._events.extend(events)
-        aggregate.clear_domain_events()
-    
-    def get_published_events(self) -> List[DomainEvent]:
-        """Get events for testing verification."""
-        return self._events.copy()
-```
-
-## Error Handling Patterns
-
-### Infrastructure Error Handling
-```python
-class InfrastructureErrorHandler:
-    """Handle infrastructure-level errors."""
-    
-    async def handle_error(self, error: Exception, context: Dict[str, Any]) -> None:
-        """Handle infrastructure error with appropriate response."""
-        if isinstance(error, ConnectionError):
-            await self._handle_connection_error(error, context)
-        elif isinstance(error, TimeoutError):
-            await self._handle_timeout_error(error, context)
-        elif isinstance(error, ConfigurationError):
-            await self._handle_configuration_error(error, context)
-        else:
-            await self._handle_unexpected_error(error, context)
-```
-
-## Future Extensions
-
-### Adding New Storage Strategies
-1. Implement `BaseStorageStrategy` interface
-2. Add configuration support
-3. Register with repository factory
-4. Add migration support
-
-### Adding New Cloud Providers
-1. Implement provider interfaces in `interfaces/`
-2. Add provider-specific adapters
-3. Register with DI container
-4. Add configuration support
-
-### Adding New Resilience Patterns
-1. Implement new strategy in `resilience/strategies/`
-2. Add configuration options
-3. Integrate with existing decorators
-4. Add monitoring and metrics
-
----
-
-This infrastructure layer provides a robust, scalable, and maintainable foundation for the application while maintaining clean separation from business logic.
+This Infrastructure Layer provides robust, scalable implementations of all external integrations while maintaining clean architectural boundaries and supporting comprehensive testing strategies.

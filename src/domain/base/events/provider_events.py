@@ -123,10 +123,6 @@ class ProviderHealthCheckEvent(DomainEvent):
             raise ValueError("Health status cannot be empty")
 
 
-# ============================================================================
-# Provider Strategy Events - Added for CQRS Provider Strategy Integration
-# ============================================================================
-
 class ProviderStrategySelectedEvent(DomainEvent):
     """Event raised when a provider strategy is selected for an operation."""
     strategy_name: str
@@ -135,13 +131,13 @@ class ProviderStrategySelectedEvent(DomainEvent):
     selection_reason: Optional[str] = None
     confidence_score: Optional[float] = None
     
-    def __init__(self, **data):
+    def model_post_init(self, __context) -> None:
         # Set aggregate info based on strategy
-        if 'aggregate_id' not in data:
-            data['aggregate_id'] = f"strategy_{data.get('strategy_name', 'unknown')}"
-        if 'aggregate_type' not in data:
-            data['aggregate_type'] = "provider_strategy"
-        super().__init__(**data)
+        if not self.aggregate_id:
+            object.__setattr__(self, 'aggregate_id', f"strategy_{self.strategy_name}")
+        if not self.aggregate_type:
+            object.__setattr__(self, 'aggregate_type', "provider_strategy")
+        super().model_post_init(__context)
 
 
 class ProviderOperationExecutedEvent(DomainEvent):
@@ -153,13 +149,13 @@ class ProviderOperationExecutedEvent(DomainEvent):
     error_message: Optional[str] = None
     error_code: Optional[str] = None
     
-    def __init__(self, **data):
+    def model_post_init(self, __context) -> None:
         # Set aggregate info based on operation
-        if 'aggregate_id' not in data:
-            data['aggregate_id'] = f"operation_{data.get('operation_type', 'unknown')}_{int(data.get('execution_time_ms', 0))}"
-        if 'aggregate_type' not in data:
-            data['aggregate_type'] = "provider_operation"
-        super().__init__(**data)
+        if not self.aggregate_id:
+            object.__setattr__(self, 'aggregate_id', f"operation_{self.operation_type}_{int(self.execution_time_ms)}")
+        if not self.aggregate_type:
+            object.__setattr__(self, 'aggregate_type', "provider_operation")
+        super().model_post_init(__context)
 
 
 class ProviderHealthChangedEvent(DomainEvent):
@@ -169,13 +165,13 @@ class ProviderHealthChangedEvent(DomainEvent):
     new_status: str = ""  # JSON string of new ProviderHealthStatus
     source: str = "system"
     
-    def __init__(self, **data):
+    def model_post_init(self, __context) -> None:
         # Set aggregate info based on provider
-        if 'aggregate_id' not in data:
-            data['aggregate_id'] = f"health_{data.get('provider_name', 'unknown')}"
-        if 'aggregate_type' not in data:
-            data['aggregate_type'] = "provider_health"
-        super().__init__(**data)
+        if not self.aggregate_id:
+            object.__setattr__(self, 'aggregate_id', f"health_{self.provider_name}")
+        if not self.aggregate_type:
+            object.__setattr__(self, 'aggregate_type', "provider_health")
+        super().model_post_init(__context)
 
 
 class ProviderStrategyRegisteredEvent(DomainEvent):
@@ -185,13 +181,13 @@ class ProviderStrategyRegisteredEvent(DomainEvent):
     capabilities: Optional[str] = None  # JSON string of capabilities
     priority: int = 0
     
-    def __init__(self, **data):
+    def model_post_init(self, __context) -> None:
         # Set aggregate info based on registration
-        if 'aggregate_id' not in data:
-            data['aggregate_id'] = f"registration_{data.get('strategy_name', 'unknown')}"
-        if 'aggregate_type' not in data:
-            data['aggregate_type'] = "provider_registration"
-        super().__init__(**data)
+        if not self.aggregate_id:
+            object.__setattr__(self, 'aggregate_id', f"registration_{self.strategy_name}")
+        if not self.aggregate_type:
+            object.__setattr__(self, 'aggregate_type', "provider_registration")
+        super().model_post_init(__context)
 
 
 # Export all provider events

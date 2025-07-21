@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.infrastructure.interfaces.provider import BaseProviderConfig
 
@@ -19,6 +19,7 @@ class ProviderOperationType(str, Enum):
     CREATE_INSTANCES = "create_instances"
     TERMINATE_INSTANCES = "terminate_instances"
     GET_INSTANCE_STATUS = "get_instance_status"
+    DESCRIBE_RESOURCE_INSTANCES = "describe_resource_instances"
     VALIDATE_TEMPLATE = "validate_template"
     GET_AVAILABLE_TEMPLATES = "get_available_templates"
     HEALTH_CHECK = "health_check"
@@ -42,14 +43,13 @@ class ProviderOperation:
 
 class ProviderResult(BaseModel):
     """Value object representing the result of a provider operation."""
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
     success: bool
     data: Any = None
     error_message: Optional[str] = None
     error_code: Optional[str] = None
     metadata: Dict[str, Any] = {}
-    
-    class Config:
-        arbitrary_types_allowed = True
     
     @classmethod
     def success_result(cls, data: Any = None, metadata: Dict[str, Any] = None) -> 'ProviderResult':
@@ -151,7 +151,7 @@ class ProviderStrategy(ABC):
         Get the provider type identifier.
         
         Returns:
-            String identifier for the provider type (e.g., 'aws', 'azure', 'gcp')
+            String identifier for the provider type (e.g., 'aws', 'provider1', 'provider2')
         """
     
     @property

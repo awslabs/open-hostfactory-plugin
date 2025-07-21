@@ -1,10 +1,10 @@
 """AWS-specific template domain extensions."""
 from typing import Dict, Any, Optional
-from pydantic import model_validator
+from pydantic import model_validator, ConfigDict
 
-from src.domain.base.template import Template as CoreTemplate
+from src.domain.template.aggregate import Template as CoreTemplate
 from src.providers.aws.domain.template.value_objects import (
-    ProviderHandlerType,
+    ProviderApi,
     AWSFleetType,
     AWSAllocationStrategy,
     AWSConfiguration,
@@ -17,8 +17,10 @@ from src.providers.aws.domain.template.value_objects import (
 class AWSTemplate(CoreTemplate):
     """AWS-specific template with AWS extensions."""
     
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    
     # AWS-specific fields
-    provider_api: ProviderHandlerType
+    provider_api: ProviderApi
     fleet_type: Optional[AWSFleetType] = None
     fleet_role: Optional[str] = None
     key_name: Optional[str] = None
@@ -38,11 +40,14 @@ class AWSTemplate(CoreTemplate):
     
     # AWS launch template
     launch_template_id: Optional[str] = None
+    launch_template_version: Optional[str] = None
     
-    # AWS-specific instance types and priorities
-    vm_types: Optional[Dict[str, int]] = None
-    vm_types_on_demand: Optional[Dict[str, int]] = None
-    vm_types_priority: Optional[Dict[str, int]] = None
+    # AWS-specific instance types and priorities (extends CoreTemplate.instance_types)
+    instance_types_ondemand: Optional[Dict[str, int]] = None
+    instance_types_priority: Optional[Dict[str, int]] = None
+    
+    # Note: instance_type and instance_types are inherited from CoreTemplate
+    # No need to redefine them here - this was causing the field access issues
     
     def __init__(self, **data):
         # Set provider_type to AWS
@@ -52,22 +57,35 @@ class AWSTemplate(CoreTemplate):
     @model_validator(mode='after')
     def validate_aws_template(self) -> 'AWSTemplate':
         """AWS-specific template validation."""
-        # Validate AWS handler type
-        if self.provider_api:
-            ProviderHandlerType.validate(self.provider_api.value)
+        # AWS-specific required fields
+        if not self.image_id:
+            raise ValueError("image_id is required for AWS templates")
         
-        # Validate fleet type for handler
-        if self.fleet_type and self.provider_api:
-            valid_fleet_types = AWSFleetType.get_valid_types_for_handler(self.provider_api)
-            if self.fleet_type.value not in valid_fleet_types:
-                raise ValueError(
-                    f"Fleet type {self.fleet_type.value} not supported by handler {self.provider_api.value}"
-                )
+        if not self.subnet_ids:
+            raise ValueError("At least one subnet_id is required for AWS templates")
+        
+        # Auto-assign default fleet_type if not provided
+        if not self.fleet_type and self.provider_api:
+            if self.provider_api in [ProviderApi.EC2_FLEET, ProviderApi.SPOT_FLEET]:
+                # Use simple default without configuration dependency
+                object.__setattr__(self, 'fleet_type', AWSFleetType.REQUEST)
         
         # Validate spot configuration
         if self.percent_on_demand is not None:
             if not (0 <= self.percent_on_demand <= 100):
                 raise ValueError("percent_on_demand must be between 0 and 100")
+        
+        # Validate launch template version format
+        if self.launch_template_version is not None:
+            version = str(self.launch_template_version)
+            if version not in ['$Latest', '$Default']:
+                # Must be a positive integer
+                try:
+                    version_int = int(version)
+                    if version_int < 1:
+                        raise ValueError("launch_template_version must be a positive integer, '$Latest', or '$Default'")
+                except ValueError:
+                    raise ValueError("launch_template_version must be a positive integer, '$Latest', or '$Default'")
         
         return self
     
@@ -115,9 +133,9 @@ class AWSTemplate(CoreTemplate):
             'percent_on_demand': self.percent_on_demand,
             'pools_count': self.pools_count,
             'launch_template_id': self.launch_template_id,
-            'vm_types': self.vm_types,
-            'vm_types_on_demand': self.vm_types_on_demand,
-            'vm_types_priority': self.vm_types_priority
+            'launch_template_version': self.launch_template_version,
+            'instance_types_ondemand': self.instance_types_ondemand,
+            'instance_types_priority': self.instance_types_priority
         }
         
         # Add AWS-specific allocation strategies
@@ -144,7 +162,7 @@ class AWSTemplate(CoreTemplate):
         # Add AWS-specific fields
         aws_data = {
             **core_data,
-            'provider_api': ProviderHandlerType(data.get('provider_api')),
+            'provider_api': ProviderApi(data.get('provider_api')),
             'fleet_type': AWSFleetType(data.get('fleet_type')) if data.get('fleet_type') else None,
             'fleet_role': data.get('fleet_role'),
             'key_name': data.get('key_name'),
@@ -157,9 +175,9 @@ class AWSTemplate(CoreTemplate):
             'percent_on_demand': data.get('percent_on_demand'),
             'pools_count': data.get('pools_count'),
             'launch_template_id': data.get('launch_template_id'),
-            'vm_types': data.get('vm_types'),
-            'vm_types_on_demand': data.get('vm_types_on_demand'),
-            'vm_types_priority': data.get('vm_types_priority')
+            'launch_template_version': data.get('launch_template_version'),
+            'instance_types_ondemand': data.get('instance_types_ondemand'),
+            'instance_types_priority': data.get('instance_types_priority')
         }
         
         # Handle optional AWS-specific fields

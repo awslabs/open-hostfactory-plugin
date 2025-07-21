@@ -1,10 +1,10 @@
 """Open Host Factory Plugin - Root Package.
 
-This package provides integration between IBM Spectrum Symphony Host Factory 
+This package provides integration between IBM Spectrum Symphony Host Factory
 and cloud providers, enabling dynamic provisioning of compute resources.
 
 The plugin implements a Domain-Driven Design (DDD) architecture with CQRS patterns
-and event-driven processing, supporting multiple cloud providers through a 
+and event-driven processing, supporting multiple cloud providers through a
 provider-agnostic interface.
 
 Key Components:

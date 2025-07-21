@@ -11,6 +11,7 @@ modules to ensure consistent usage across the application. This allows us to:
 2. Add cross-cutting concerns like validation or serialization in one place
 3. Maintain backward compatibility when refactoring
 """
+
 from __future__ import annotations
 
 # Import base DTO class
@@ -19,14 +20,15 @@ from src.application.dto.base import BaseDTO
 # Import domain-specific DTOs
 from src.application.machine.dto import MachineDTO, MachineHealthDTO
 from src.application.request.dto import (
-    RequestDTO, 
-    RequestStatusResponse, 
+    RequestDTO,
+    RequestStatusResponse,
     ReturnRequestResponse,
     RequestMachinesResponse,
     RequestReturnMachinesResponse,
     CleanupResourcesResponse,
-    RequestSummaryDTO
+    RequestSummaryDTO,
 )
+
 # Templates use domain objects directly with scheduler strategy for formatting
 from src.domain.template.aggregate import Template
 from src.application.dto.system import (
@@ -37,28 +39,28 @@ from src.application.dto.system import (
     ProviderHealthDTO,
     ProviderCapabilitiesDTO,
     ProviderStrategyConfigDTO,
-    ValidationDTO
+    ValidationDTO,
 )
 
 __all__ = [
-    'BaseDTO',
-    'MachineDTO',
-    'RequestDTO',
-    'Template',  # Domain object used directly
-    'RequestSummaryDTO',
-    'MachineHealthDTO',
-    'RequestStatusResponse',
-    'ReturnRequestResponse',
-    'RequestMachinesResponse',
-    'RequestReturnMachinesResponse',
-    'CleanupResourcesResponse',
+    "BaseDTO",
+    "MachineDTO",
+    "RequestDTO",
+    "Template",  # Domain object used directly
+    "RequestSummaryDTO",
+    "MachineHealthDTO",
+    "RequestStatusResponse",
+    "ReturnRequestResponse",
+    "RequestMachinesResponse",
+    "RequestReturnMachinesResponse",
+    "CleanupResourcesResponse",
     # System DTOs
-    'ProviderConfigDTO',
-    'ValidationResultDTO',
-    'SystemStatusDTO',
-    'ProviderMetricsDTO',
-    'ProviderHealthDTO',
-    'ProviderCapabilitiesDTO',
-    'ProviderStrategyConfigDTO',
-    'ValidationDTO'
+    "ProviderConfigDTO",
+    "ValidationResultDTO",
+    "SystemStatusDTO",
+    "ProviderMetricsDTO",
+    "ProviderHealthDTO",
+    "ProviderCapabilitiesDTO",
+    "ProviderStrategyConfigDTO",
+    "ValidationDTO",
 ]

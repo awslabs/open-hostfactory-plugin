@@ -1,4 +1,5 @@
 """Machine status enumerations."""
+
 from __future__ import annotations
 from enum import Enum
 
@@ -13,6 +14,7 @@ class MachineStatus(str, Enum):
     - shutting-down
     - stopping
     """
+
     # Define with default values
     # External states (HostFactory-facing)
     PENDING = "pending"
@@ -21,22 +23,22 @@ class MachineStatus(str, Enum):
     STOPPED = "stopped"
     SHUTTING_DOWN = "shutting-down"
     TERMINATED = "terminated"
-    
+
     # Internal states (for tracking)
     RETURNED = "returned"  # Used for return requests
-    FAILED = "failed"     # Used for failed provisioning
-    UNKNOWN = "unknown"   # Used for unrecognized states
+    FAILED = "failed"  # Used for failed provisioning
+    UNKNOWN = "unknown"  # Used for unrecognized states
 
     @classmethod
-    def from_str(cls, value: str) -> 'MachineStatus':
+    def from_str(cls, value: str) -> "MachineStatus":
         """Create MachineStatus from string value.
-        
+
         Args:
             value: Status string value
-            
+
         Returns:
             MachineStatus instance
-            
+
         Raises:
             ValueError: If value is not a valid status
         """
@@ -50,16 +52,16 @@ class MachineStatus(str, Enum):
             "terminated": cls.TERMINATED,
             "returned": cls.RETURNED,
             "failed": cls.FAILED,
-            "unknown": cls.UNKNOWN
+            "unknown": cls.UNKNOWN,
         }
-        
-        normalized_value = value.lower().replace('_', '-')
+
+        normalized_value = value.lower().replace("_", "-")
         if normalized_value in status_map:
             return status_map[normalized_value]
-        
+
         raise ValueError(f"Invalid machine status: {value}")
-        
-    def can_transition_to(self, new_status: 'MachineStatus') -> bool:
+
+    def can_transition_to(self, new_status: "MachineStatus") -> bool:
         """Validate state transition."""
         valid_transitions = {
             self.PENDING: {self.RUNNING, self.FAILED},
@@ -69,8 +71,8 @@ class MachineStatus(str, Enum):
             self.SHUTTING_DOWN: {self.TERMINATED},
             self.TERMINATED: {self.RETURNED},
             self.FAILED: set(),  # Terminal state
-            self.RETURNED: set(), # Terminal state
-            self.UNKNOWN: {self.PENDING, self.RUNNING, self.STOPPED, self.TERMINATED}
+            self.RETURNED: set(),  # Terminal state
+            self.UNKNOWN: {self.PENDING, self.RUNNING, self.STOPPED, self.TERMINATED},
         }
         return new_status in valid_transitions.get(self, set())
 

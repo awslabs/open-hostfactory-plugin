@@ -8,67 +8,65 @@ All functions maintain backward compatibility.
 # Import all functions from the new organized structure
 from src.infrastructure.utilities.file import *
 
+
 # Maintain backward compatibility with any legacy imports
 def get_file_utils_logger():
     """Get logger for file utilities - backward compatibility."""
     from src.infrastructure.utilities.file import get_file_utils_logger as _get_logger
+
     return _get_logger()
+
 
 def _get_logger():
     """Legacy logger function."""
     return get_file_utils_logger()
 
+
 # Re-export commonly used functions to maintain existing imports
 __all__ = [
     # YAML operations
-    'read_yaml_file',
-    'write_yaml_file',
-    
+    "read_yaml_file",
+    "write_yaml_file",
     # JSON operations
-    'read_json_file',
-    'write_json_file',
-    
+    "read_json_file",
+    "write_json_file",
     # Text operations
-    'read_text_file',
-    'write_text_file',
-    'append_text_file',
-    
+    "read_text_file",
+    "write_text_file",
+    "append_text_file",
     # Binary operations
-    'read_binary_file',
-    'write_binary_file',
-    'get_file_hash',
-    'is_binary_file',
-    'is_text_file',
-    
+    "read_binary_file",
+    "write_binary_file",
+    "get_file_hash",
+    "is_binary_file",
+    "is_text_file",
     # Directory operations
-    'ensure_directory_exists',
-    'ensure_parent_directory_exists',
-    'directory_exists',
-    'delete_directory',
-    'list_files',
-    'list_directories',
-    'find_files',
-    'create_temp_directory',
-    
+    "ensure_directory_exists",
+    "ensure_parent_directory_exists",
+    "directory_exists",
+    "delete_directory",
+    "list_files",
+    "list_directories",
+    "find_files",
+    "create_temp_directory",
     # File operations
-    'file_exists',
-    'get_file_size',
-    'delete_file',
-    'copy_file',
-    'move_file',
-    'rename_file',
-    'touch_file',
-    'create_temp_file',
-    'with_temp_file',
-    'get_file_extension',
-    'get_file_name',
-    'get_file_name_without_extension',
-    'get_directory_name',
-    'get_absolute_path',
-    'get_relative_path',
-    'join_paths',
-    'normalize_path',
-    
+    "file_exists",
+    "get_file_size",
+    "delete_file",
+    "copy_file",
+    "move_file",
+    "rename_file",
+    "touch_file",
+    "create_temp_file",
+    "with_temp_file",
+    "get_file_extension",
+    "get_file_name",
+    "get_file_name_without_extension",
+    "get_directory_name",
+    "get_absolute_path",
+    "get_relative_path",
+    "join_paths",
+    "normalize_path",
     # Utility functions
-    'get_file_utils_logger'
+    "get_file_utils_logger",
 ]

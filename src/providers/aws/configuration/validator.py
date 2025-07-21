@@ -1,4 +1,5 @@
 """AWS configuration validation and naming patterns."""
+
 from typing import Dict, Optional
 from dataclasses import dataclass, field
 
@@ -6,6 +7,7 @@ from dataclasses import dataclass, field
 @dataclass
 class AWSLimits:
     """AWS service limits and constraints."""
+
     tag_key_length: int = 128
     tag_value_length: int = 256
     max_tags_per_resource: int = 50
@@ -16,24 +18,28 @@ class AWSLimits:
 @dataclass
 class AWSNamingConfig:
     """AWS naming patterns and validation rules."""
-    patterns: Dict[str, str] = field(default_factory=lambda: {
-        "subnet": r"^subnet-[0-9a-f]{8,17}$",
-        "security_group": r"^sg-[0-9a-f]{8,17}$", 
-        "ec2_instance": r"^i-[0-9a-f]{8,17}$",
-        "ami": r"^ami-[0-9a-f]{8,17}$",
-        "ec2_fleet": r"^fleet-[0-9a-f]{8,17}$",
-        "launch_template": r"^lt-[0-9a-f]{8,17}$",
-        "instance_type": r"^[a-z][0-9]+[a-z]*\.[a-z0-9]+$",
-        "tag_key": r"^[a-zA-Z0-9\s\._:/=+\-@]{1,128}$",
-        "arn": r"^arn:aws:[a-zA-Z0-9\-]+:[a-zA-Z0-9\-]*:[0-9]{12}:.+$"
-    })
-    
+
+    patterns: Dict[str, str] = field(
+        default_factory=lambda: {
+            "subnet": r"^subnet-[0-9a-f]{8,17}$",
+            "security_group": r"^sg-[0-9a-f]{8,17}$",
+            "ec2_instance": r"^i-[0-9a-f]{8,17}$",
+            "ami": r"^ami-[0-9a-f]{8,17}$",
+            "ec2_fleet": r"^fleet-[0-9a-f]{8,17}$",
+            "launch_template": r"^lt-[0-9a-f]{8,17}$",
+            "instance_type": r"^[a-z][0-9]+[a-z]*\.[a-z0-9]+$",
+            "tag_key": r"^[a-zA-Z0-9\s\._:/=+\-@]{1,128}$",
+            "arn": r"^arn:aws:[a-zA-Z0-9\-]+:[a-zA-Z0-9\-]*:[0-9]{12}:.+$",
+        }
+    )
+
     limits: AWSLimits = field(default_factory=AWSLimits)
 
 
 @dataclass
 class AWSHandlerCapabilities:
     """AWS handler capabilities and defaults."""
+
     supported_fleet_types: Optional[list] = None
     default_fleet_type: Optional[str] = None
     supports_spot: bool = True
@@ -43,6 +49,7 @@ class AWSHandlerCapabilities:
 @dataclass
 class AWSHandlerDefaults:
     """AWS handler default values."""
+
     ec2_fleet_type: str = "request"
     spot_fleet_type: str = "request"
     allocation_strategy: str = "lowest_price"
@@ -52,40 +59,45 @@ class AWSHandlerDefaults:
 @dataclass
 class AWSHandlerConfig:
     """AWS handler configuration."""
-    types: Dict[str, str] = field(default_factory=lambda: {
-        "ec2_fleet": "EC2Fleet",
-        "spot_fleet": "SpotFleet", 
-        "asg": "ASG",
-        "run_instances": "RunInstances"
-    })
-    
-    capabilities: Dict[str, AWSHandlerCapabilities] = field(default_factory=lambda: {
-        "EC2Fleet": AWSHandlerCapabilities(
-            supported_fleet_types=["instant", "request", "maintain"],
-            default_fleet_type="request",
-            supports_spot=True,
-            supports_on_demand=True
-        ),
-        "SpotFleet": AWSHandlerCapabilities(
-            supported_fleet_types=["request", "maintain"],
-            default_fleet_type="request", 
-            supports_spot=True,
-            supports_on_demand=False
-        ),
-        "ASG": AWSHandlerCapabilities(
-            supported_fleet_types=[],
-            default_fleet_type=None,
-            supports_spot=True,
-            supports_on_demand=True
-        ),
-        "RunInstances": AWSHandlerCapabilities(
-            supported_fleet_types=[],
-            default_fleet_type=None,
-            supports_spot=False,
-            supports_on_demand=True
-        )
-    })
-    
+
+    types: Dict[str, str] = field(
+        default_factory=lambda: {
+            "ec2_fleet": "EC2Fleet",
+            "spot_fleet": "SpotFleet",
+            "asg": "ASG",
+            "run_instances": "RunInstances",
+        }
+    )
+
+    capabilities: Dict[str, AWSHandlerCapabilities] = field(
+        default_factory=lambda: {
+            "EC2Fleet": AWSHandlerCapabilities(
+                supported_fleet_types=["instant", "request", "maintain"],
+                default_fleet_type="request",
+                supports_spot=True,
+                supports_on_demand=True,
+            ),
+            "SpotFleet": AWSHandlerCapabilities(
+                supported_fleet_types=["request", "maintain"],
+                default_fleet_type="request",
+                supports_spot=True,
+                supports_on_demand=False,
+            ),
+            "ASG": AWSHandlerCapabilities(
+                supported_fleet_types=[],
+                default_fleet_type=None,
+                supports_spot=True,
+                supports_on_demand=True,
+            ),
+            "RunInstances": AWSHandlerCapabilities(
+                supported_fleet_types=[],
+                default_fleet_type=None,
+                supports_spot=False,
+                supports_on_demand=True,
+            ),
+        }
+    )
+
     defaults: AWSHandlerDefaults = field(default_factory=AWSHandlerDefaults)
 
 
@@ -95,10 +107,10 @@ _aws_naming_config = AWSNamingConfig()
 
 class AWSConfigManager:
     """Manager for AWS configuration."""
-    
+
     def __init__(self):
         self._naming_config = _aws_naming_config
-    
+
     def get_typed(self, config_type):
         """Get typed configuration."""
         if config_type == AWSNamingConfig:
@@ -106,6 +118,7 @@ class AWSConfigManager:
         else:
             # Import here to avoid circular imports
             from .config import AWSProviderConfig
+
             if config_type == AWSProviderConfig:
                 # Return a default instance - in real usage this would be injected
                 return AWSProviderConfig()
@@ -115,9 +128,11 @@ class AWSConfigManager:
 # Global AWS config manager instance
 _aws_config_manager = AWSConfigManager()
 
+
 def get_aws_config_manager() -> AWSConfigManager:
     """Get the global AWS configuration manager."""
     return _aws_config_manager
+
 
 # Import AWSProviderConfig for compatibility
 from .config import AWSProviderConfig

@@ -2,6 +2,7 @@
 Simple test configuration for basic functionality testing.
 This avoids the complex DI system that has circular import issues.
 """
+
 import pytest
 import os
 import sys
@@ -9,7 +10,8 @@ from unittest.mock import Mock, MagicMock
 from typing import Dict, Any, Optional
 
 # Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+
 
 # Mock AWS services to avoid import issues
 @pytest.fixture
@@ -20,18 +22,15 @@ def mock_aws():
         mock_boto3 = MagicMock()
         mock_ec2 = MagicMock()
         mock_autoscaling = MagicMock()
-        
+
         mock_boto3.client.return_value = mock_ec2
         mock_boto3.Session.return_value.client.return_value = mock_ec2
-        
-        m.setattr('boto3.client', mock_boto3.client)
-        m.setattr('boto3.Session', mock_boto3.Session)
-        
-        yield {
-            'boto3': mock_boto3,
-            'ec2': mock_ec2,
-            'autoscaling': mock_autoscaling
-        }
+
+        m.setattr("boto3.client", mock_boto3.client)
+        m.setattr("boto3.Session", mock_boto3.Session)
+
+        yield {"boto3": mock_boto3, "ec2": mock_ec2, "autoscaling": mock_autoscaling}
+
 
 @pytest.fixture
 def sample_template():
@@ -47,11 +46,9 @@ def sample_template():
         "security_group_ids": ["sg-12345678"],
         "key_name": "test-key",
         "user_data": "",
-        "tags": {
-            "Environment": "test",
-            "Application": "host-factory"
-        }
+        "tags": {"Environment": "test", "Application": "host-factory"},
     }
+
 
 @pytest.fixture
 def sample_request():
@@ -61,8 +58,9 @@ def sample_request():
         "template_id": "test-template",
         "machine_count": 2,
         "status": "pending",
-        "created_at": "2024-01-01T00:00:00Z"
+        "created_at": "2024-01-01T00:00:00Z",
     }
+
 
 @pytest.fixture
 def sample_machine():
@@ -75,25 +73,15 @@ def sample_machine():
         "instance_type": "t2.micro",
         "private_ip": "10.0.1.100",
         "public_ip": "54.123.45.67",
-        "created_at": "2024-01-01T00:00:00Z"
+        "created_at": "2024-01-01T00:00:00Z",
     }
+
 
 @pytest.fixture
 def mock_config():
     """Mock configuration."""
     return {
-        "provider": {
-            "type": "aws",
-            "aws": {
-                "region": "us-east-1",
-                "profile": "default"
-            }
-        },
-        "logging": {
-            "level": "INFO",
-            "console_enabled": True
-        },
-        "storage": {
-            "strategy": "json"
-        }
+        "provider": {"type": "aws", "aws": {"region": "us-east-1", "profile": "default"}},
+        "logging": {"level": "INFO", "console_enabled": True},
+        "storage": {"strategy": "json"},
     }

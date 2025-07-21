@@ -1,4 +1,5 @@
 """Tests for Symphony HostFactory scheduler strategy."""
+
 import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
@@ -9,67 +10,58 @@ from src.domain.template.aggregate import Template
 
 class TestSymphonyHostFactorySchedulerStrategy:
     """Test Symphony HostFactory scheduler strategy - SINGLE FIELD MAPPING POINT."""
-    
+
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_config_manager = Mock()
         self.mock_config_manager.get_app_config.return_value = {
-            "scheduler": {
-                "type": "hostfactory",
-                "config_root": "/test/config"
-            },
-            "provider": {
-                "active_provider": "aws-default"
-            }
+            "scheduler": {"type": "hostfactory", "config_root": "/test/config"},
+            "provider": {"active_provider": "aws-default"},
         }
-        
+
         # Mock provider config to return proper values instead of Mock objects
         mock_provider_config = Mock()
         mock_provider_config.active_provider = "aws-default"
         self.mock_config_manager.get_provider_config.return_value = mock_provider_config
-        
+
         # Mock resolve_file method to return actual paths
         def mock_resolve_file(file_type, filename):
             config_root = "/test/config"
             return f"{config_root}/{filename}"
-        
+
         self.mock_config_manager.resolve_file.side_effect = mock_resolve_file
-        
+
         self.mock_logger = Mock()
         self.strategy = HostFactorySchedulerStrategy(self.mock_config_manager, self.mock_logger)
-    
+
     def test_get_templates_file_path(self):
         """Test templates file path generation."""
         path = self.strategy.get_templates_file_path()
         assert path == "/test/config/awsprov_templates.json"
-    
+
     def test_get_config_file_path(self):
         """Test config file path generation."""
         path = self.strategy.get_config_file_path()
         assert path == "/test/config/awsprov_config.json"
-    
+
     def test_get_paths_with_different_provider(self):
         """Test path generation with different provider."""
         self.mock_config_manager.get_app_config.return_value = {
-            "scheduler": {
-                "config_root": "/test/config"
-            },
-            "provider": {
-                "active_provider": "azure-production"
-            }
+            "scheduler": {"config_root": "/test/config"},
+            "provider": {"active_provider": "azure-production"},
         }
-        
+
         # Update the provider config mock as well
         mock_provider_config = Mock()
         mock_provider_config.active_provider = "azure-production"
         self.mock_config_manager.get_provider_config.return_value = mock_provider_config
-        
+
         templates_path = self.strategy.get_templates_file_path()
         config_path = self.strategy.get_config_file_path()
-        
+
         assert templates_path == "/test/config/azureprov_templates.json"
         assert config_path == "/test/config/azureprov_config.json"
-    
+
     def test_parse_template_config_single_mapping_point(self):
         """Test template parsing - SINGLE FIELD MAPPING POINT."""
         raw_template = {
@@ -91,11 +83,11 @@ class TestSymphonyHostFactorySchedulerStrategy:
             "updatedAt": "2023-01-02T00:00:00Z",
             "isActive": True,
             "keyName": "test-key",
-            "userData": "#!/bin/bash\necho hello"
+            "userData": "#!/bin/bash\necho hello",
         }
-        
+
         template = self.strategy.parse_template_config(raw_template)
-        
+
         # Verify all Symphony → Domain field mappings
         assert template.template_id == "test-template-123"
         assert template.name == "Test Template"
@@ -114,18 +106,18 @@ class TestSymphonyHostFactorySchedulerStrategy:
         assert template.is_active is True
         assert template.key_name == "test-key"
         assert template.user_data == "#!/bin/bash\necho hello"
-    
+
     def test_parse_template_config_with_defaults(self):
         """Test template parsing with default values."""
         raw_template = {
             "templateId": "minimal-template",
             "vmType": "t2.micro",
             "imageId": "ami-12345678",
-            "subnetIds": ["subnet-123"]  # Required field
+            "subnetIds": ["subnet-123"],  # Required field
         }
-        
+
         template = self.strategy.parse_template_config(raw_template)
-        
+
         # Verify defaults are applied
         assert template.template_id == "minimal-template"
         assert template.max_instances == 1  # Default
@@ -136,7 +128,7 @@ class TestSymphonyHostFactorySchedulerStrategy:
         assert template.tags == {}  # Default empty dict
         assert template.metadata == {}  # Default empty dict
         assert template.is_active is True  # Default
-    
+
     def test_format_templates_response_single_mapping_point(self):
         """Test template response formatting - SINGLE FIELD MAPPING POINT."""
         # Create domain template
@@ -157,11 +149,11 @@ class TestSymphonyHostFactorySchedulerStrategy:
             provider_api="aws",
             is_active=True,
             key_name="test-key",
-            user_data="#!/bin/bash\necho test"
+            user_data="#!/bin/bash\necho test",
         )
-        
+
         response = self.strategy.format_templates_response([template])
-        
+
         # Verify all Domain → Symphony field mappings
         symphony_template = response["templates"][0]
         assert symphony_template["templateId"] == "test-template"
@@ -181,38 +173,36 @@ class TestSymphonyHostFactorySchedulerStrategy:
         assert symphony_template["isActive"] is True
         assert symphony_template["keyName"] == "test-key"
         assert symphony_template["userData"] == "#!/bin/bash\necho test"
-    
+
     def test_parse_request_data_single_mapping_point(self):
         """Test request data parsing - SINGLE FIELD MAPPING POINT."""
         raw_request = {
             "templateId": "test-template",
             "maxNumber": 3,
             "requestType": "provision",
-            "metadata": {"user": "test-user"}
+            "metadata": {"user": "test-user"},
         }
-        
+
         parsed_request = self.strategy.parse_request_data(raw_request)
-        
+
         # Verify Symphony → Domain field mappings for requests
         assert parsed_request["template_id"] == "test-template"
         assert parsed_request["requested_count"] == 3
         assert parsed_request["request_type"] == "provision"
         assert parsed_request["metadata"] == {"user": "test-user"}
-    
+
     def test_parse_request_data_with_defaults(self):
         """Test request data parsing with defaults."""
-        raw_request = {
-            "templateId": "test-template"
-        }
-        
+        raw_request = {"templateId": "test-template"}
+
         parsed_request = self.strategy.parse_request_data(raw_request)
-        
+
         # Verify defaults
         assert parsed_request["template_id"] == "test-template"
         assert parsed_request["requested_count"] == 1  # Default
         assert parsed_request["request_type"] == "provision"  # Default
         assert parsed_request["metadata"] == {}  # Default
-    
+
     def test_field_mapping_consistency(self):
         """Test that field mapping is consistent in both directions."""
         # Original Symphony data
@@ -223,16 +213,16 @@ class TestSymphonyHostFactorySchedulerStrategy:
             "maxNumber": 7,
             "subnetIds": ["subnet-abc", "subnet-def"],
             "priceType": "ondemand",
-            "allocationStrategy": "lowest_price"
+            "allocationStrategy": "lowest_price",
         }
-        
+
         # Parse to domain
         domain_template = self.strategy.parse_template_config(original_data)
-        
+
         # Format back to Symphony
         response = self.strategy.format_templates_response([domain_template])
         symphony_template = response["templates"][0]
-        
+
         # Verify round-trip consistency for key fields
         assert symphony_template["templateId"] == original_data["templateId"]
         assert symphony_template["vmType"] == original_data["vmType"]

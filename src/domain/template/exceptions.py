@@ -1,4 +1,5 @@
 """Template domain exceptions."""
+
 from src.domain.base.exceptions import DomainException, ValidationError, EntityNotFoundError
 
 
@@ -8,7 +9,7 @@ class TemplateException(DomainException):
 
 class TemplateNotFoundError(EntityNotFoundError):
     """Raised when a template is not found."""
-    
+
     def __init__(self, template_id: str):
         super().__init__("Template", template_id)
 
@@ -23,7 +24,7 @@ class InvalidTemplateConfigurationError(TemplateException):
 
 class TemplateAlreadyExistsError(TemplateException):
     """Raised when attempting to create a template that already exists."""
-    
+
     def __init__(self, template_id: str):
         message = f"Template with ID '{template_id}' already exists"
         super().__init__(message, "TEMPLATE_ALREADY_EXISTS", {"template_id": template_id})

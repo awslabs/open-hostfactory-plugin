@@ -13,7 +13,7 @@ Key Features:
 
 Usage:
     from ohfpsdk import OHFPSDK
-    
+
     async with OHFPSDK(provider="aws") as sdk:
         templates = await sdk.list_templates(active_only=True)
         request = await sdk.create_request(template_id="basic", machine_count=5)
@@ -28,12 +28,12 @@ from .exceptions import SDKError, ConfigurationError, ProviderError
 OHFPSDK = OpenHFPluginSDK
 
 __all__ = [
-    'OpenHFPluginSDK',
-    'OHFPSDK',
-    'SDKConfig',
-    'SDKError',
-    'ConfigurationError', 
-    'ProviderError'
+    "OpenHFPluginSDK",
+    "OHFPSDK",
+    "SDKConfig",
+    "SDKError",
+    "ConfigurationError",
+    "ProviderError",
 ]
 
 __version__ = "1.0.0"

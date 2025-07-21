@@ -9,13 +9,11 @@ This application layer is organized by bounded contexts:
 
 Each context contains:
 - commands.py: Command DTOs and handlers
-- queries.py: Query DTOs and handlers  
+- queries.py: Query DTOs and handlers
 - dto.py: Data transfer objects
 - service.py: Application service (orchestrates use cases)
 """
 
 from .dto.base import BaseDTO, BaseCommand, BaseQuery, BaseResponse
 
-__all__ = [
-    'BaseDTO', 'BaseCommand', 'BaseQuery', 'BaseResponse'
-]
+__all__ = ["BaseDTO", "BaseCommand", "BaseQuery", "BaseResponse"]

@@ -10,12 +10,13 @@ from src.providers.base.strategy import (
     ProviderOperation,
     ProviderOperationType,
     SelectionCriteria,
-    ProviderHealthStatus
+    ProviderHealthStatus,
 )
 
 
 class SelectProviderStrategyCommand(BaseCommand):
     """Command to select optimal provider strategy for an operation."""
+
     operation_type: ProviderOperationType
     selection_criteria: SelectionCriteria
     context: Optional[Dict[str, Any]] = None
@@ -23,6 +24,7 @@ class SelectProviderStrategyCommand(BaseCommand):
 
 class ExecuteProviderOperationCommand(BaseCommand):
     """Command to execute a provider operation through strategy pattern."""
+
     operation: ProviderOperation
     strategy_override: Optional[str] = None
     retry_count: int = 0
@@ -31,6 +33,7 @@ class ExecuteProviderOperationCommand(BaseCommand):
 
 class RegisterProviderStrategyCommand(BaseCommand):
     """Command to register a new provider strategy."""
+
     strategy_name: str
     provider_type: str
     strategy_config: Dict[str, Any]
@@ -40,6 +43,7 @@ class RegisterProviderStrategyCommand(BaseCommand):
 
 class UpdateProviderHealthCommand(BaseCommand):
     """Command to update provider health status."""
+
     provider_name: str
     health_status: ProviderHealthStatus
     source: str = "system"
@@ -48,6 +52,7 @@ class UpdateProviderHealthCommand(BaseCommand):
 
 class ConfigureProviderStrategyCommand(BaseCommand):
     """Command to configure provider strategy selection policies."""
+
     default_selection_policy: str
     selection_criteria: Dict[str, Any]
     fallback_strategies: Optional[List[str]] = None

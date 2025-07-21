@@ -1,4 +1,5 @@
 """Directory operations utilities."""
+
 import os
 import glob
 from typing import List, Optional
@@ -7,10 +8,10 @@ from typing import List, Optional
 def ensure_directory_exists(directory_path: str) -> None:
     """
     Ensure a directory exists, creating it if necessary.
-    
+
     Args:
         directory_path: Path to directory
-        
+
     Raises:
         OSError: If directory cannot be created
     """
@@ -23,10 +24,10 @@ def ensure_directory_exists(directory_path: str) -> None:
 def ensure_parent_directory_exists(file_path: str) -> None:
     """
     Ensure the parent directory of a file exists.
-    
+
     Args:
         file_path: Path to file
-        
+
     Raises:
         OSError: If parent directory cannot be created
     """
@@ -38,10 +39,10 @@ def ensure_parent_directory_exists(file_path: str) -> None:
 def directory_exists(directory_path: str) -> bool:
     """
     Check if a directory exists.
-    
+
     Args:
         directory_path: Path to directory
-        
+
     Returns:
         True if directory exists, False otherwise
     """
@@ -51,20 +52,20 @@ def directory_exists(directory_path: str) -> bool:
 def delete_directory(directory_path: str, recursive: bool = False) -> None:
     """
     Delete a directory.
-    
+
     Args:
         directory_path: Path to directory
         recursive: Whether to delete recursively (default: False)
-        
+
     Raises:
         FileNotFoundError: If directory doesn't exist
         OSError: If directory cannot be deleted
     """
     import shutil
-    
+
     if not directory_exists(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
-    
+
     try:
         if recursive:
             shutil.rmtree(directory_path)
@@ -74,25 +75,26 @@ def delete_directory(directory_path: str, recursive: bool = False) -> None:
         raise OSError(f"Failed to delete directory {directory_path}: {str(e)}")
 
 
-def list_files(directory_path: str, pattern: Optional[str] = None, 
-               recursive: bool = False) -> List[str]:
+def list_files(
+    directory_path: str, pattern: Optional[str] = None, recursive: bool = False
+) -> List[str]:
     """
     List files in a directory.
-    
+
     Args:
         directory_path: Path to directory
         pattern: File pattern to match (e.g., "*.py")
         recursive: Whether to search recursively (default: False)
-        
+
     Returns:
         List of file paths
-        
+
     Raises:
         FileNotFoundError: If directory doesn't exist
     """
     if not directory_exists(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
-    
+
     if pattern:
         if recursive:
             search_pattern = os.path.join(directory_path, "**", pattern)
@@ -117,20 +119,20 @@ def list_files(directory_path: str, pattern: Optional[str] = None,
 def list_directories(directory_path: str, recursive: bool = False) -> List[str]:
     """
     List directories in a directory.
-    
+
     Args:
         directory_path: Path to directory
         recursive: Whether to search recursively (default: False)
-        
+
     Returns:
         List of directory paths
-        
+
     Raises:
         FileNotFoundError: If directory doesn't exist
     """
     if not directory_exists(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
-    
+
     directories = []
     if recursive:
         for root, dirnames, _ in os.walk(directory_path):
@@ -144,41 +146,46 @@ def list_directories(directory_path: str, recursive: bool = False) -> List[str]:
     return directories
 
 
-def find_files(directory_path: str, name_pattern: Optional[str] = None,
-               content_pattern: Optional[str] = None, recursive: bool = True) -> List[str]:
+def find_files(
+    directory_path: str,
+    name_pattern: Optional[str] = None,
+    content_pattern: Optional[str] = None,
+    recursive: bool = True,
+) -> List[str]:
     """
     Find files matching criteria.
-    
+
     Args:
         directory_path: Path to directory to search
         name_pattern: File name pattern (e.g., "*.py")
         content_pattern: Content pattern to search for
         recursive: Whether to search recursively (default: True)
-        
+
     Returns:
         List of matching file paths
-        
+
     Raises:
         FileNotFoundError: If directory doesn't exist
     """
     if not directory_exists(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
-    
+
     matching_files = []
-    
+
     # Get files matching name pattern
     if name_pattern:
         files = list_files(directory_path, name_pattern, recursive)
     else:
         files = list_files(directory_path, recursive=recursive)
-    
+
     # Filter by content pattern if specified
     if content_pattern:
         import re
+
         pattern = re.compile(content_pattern)
         for file_path in files:
             try:
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                     if pattern.search(f.read()):
                         matching_files.append(file_path)
             except (OSError, UnicodeDecodeError):
@@ -186,14 +193,14 @@ def find_files(directory_path: str, name_pattern: Optional[str] = None,
                 continue
     else:
         matching_files = files
-    
+
     return matching_files
 
 
 def get_current_directory() -> str:
     """
     Get current working directory.
-    
+
     Returns:
         Current directory path
     """
@@ -203,17 +210,17 @@ def get_current_directory() -> str:
 def change_directory(directory_path: str) -> None:
     """
     Change current working directory.
-    
+
     Args:
         directory_path: Path to directory
-        
+
     Raises:
         FileNotFoundError: If directory doesn't exist
         OSError: If directory cannot be changed to
     """
     if not directory_exists(directory_path):
         raise FileNotFoundError(f"Directory not found: {directory_path}")
-    
+
     try:
         os.chdir(directory_path)
     except OSError as e:
@@ -223,7 +230,7 @@ def change_directory(directory_path: str) -> None:
 def get_home_directory() -> str:
     """
     Get user's home directory.
-    
+
     Returns:
         Home directory path
     """
@@ -233,20 +240,20 @@ def get_home_directory() -> str:
 def create_temp_directory(suffix: str = "", prefix: str = "", dir: str = None) -> str:
     """
     Create a temporary directory.
-    
+
     Args:
         suffix: Directory name suffix
-        prefix: Directory name prefix  
+        prefix: Directory name prefix
         dir: Parent directory (default: system temp)
-        
+
     Returns:
         Path to created temporary directory
-        
+
     Raises:
         OSError: If temporary directory cannot be created
     """
     import tempfile
-    
+
     try:
         return tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
     except OSError as e:

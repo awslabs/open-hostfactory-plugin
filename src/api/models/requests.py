@@ -1,21 +1,23 @@
 """Request models for API handlers."""
+
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
 def to_camel(snake_str: str) -> str:
     """Convert snake_case to camelCase for API boundary."""
-    components = snake_str.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    components = snake_str.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])
 
 
 class BaseRequestModel(BaseModel):
     """
     Base class for API request models with camelCase support.
-    
+
     These models handle external API requests that use camelCase format.
     This is appropriate at the API boundary layer.
     """
+
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,  # Allow populating by field name (snake_case)
@@ -24,19 +26,21 @@ class BaseRequestModel(BaseModel):
 
 class MachineReferenceModel(BaseRequestModel):
     """Model for machine reference in requests."""
+
     name: str
     machine_id: Optional[str] = None
 
 
 class RequestMachinesModel(BaseRequestModel):
     """Model for request machines API."""
+
     template: Dict[str, Any]
-    
+
     @property
     def template_id(self) -> str:
         """Get template ID from template dictionary."""
         return self.template.get("templateId", "")
-    
+
     @property
     def machine_count(self) -> int:
         """Get machine count from template dictionary."""
@@ -45,8 +49,9 @@ class RequestMachinesModel(BaseRequestModel):
 
 class RequestStatusModel(BaseRequestModel):
     """Model for request status API."""
+
     requests: List[Dict[str, Any]]
-    
+
     @property
     def request_ids(self) -> List[str]:
         """Get request IDs from requests list."""
@@ -55,13 +60,14 @@ class RequestStatusModel(BaseRequestModel):
 
 class RequestReturnMachinesModel(BaseRequestModel):
     """Model for request return machines API."""
+
     machines: List[Dict[str, Any]]
-    
+
     @property
     def machine_names(self) -> List[str]:
         """Get machine names from machines list."""
         return [m.get("name", "") for m in self.machines if "name" in m]
-    
+
     @property
     def machine_ids(self) -> List[str]:
         """Get machine IDs from machines list."""
@@ -70,8 +76,9 @@ class RequestReturnMachinesModel(BaseRequestModel):
 
 class GetReturnRequestsModel(BaseRequestModel):
     """Model for get return requests API."""
+
     machines: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
-    
+
     @property
     def machine_names(self) -> List[str]:
         """Get machine names from machines list."""

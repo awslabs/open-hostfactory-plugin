@@ -12,9 +12,9 @@ from .machine_adapter import AWSMachineAdapter
 from .template_adapter import AWSTemplateAdapter
 
 __all__ = [
-    'AWSResourceManagerAdapter',
-    'AWSProvisioningAdapter', 
-    'AWSRequestAdapter',
-    'AWSMachineAdapter',
-    'AWSTemplateAdapter'
+    "AWSResourceManagerAdapter",
+    "AWSProvisioningAdapter",
+    "AWSRequestAdapter",
+    "AWSMachineAdapter",
+    "AWSTemplateAdapter",
 ]

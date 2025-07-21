@@ -1,4 +1,5 @@
 """Application metrics collection and monitoring."""
+
 import time
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
@@ -11,9 +12,11 @@ from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 @dataclass
 class Metric:
     """Base class for metrics."""
+
     name: str
     value: float
     timestamp: datetime = field(default_factory=datetime.utcnow)
@@ -22,41 +25,46 @@ class Metric:
     def to_dict(self) -> Dict[str, Any]:
         """Convert metric to dictionary."""
         return {
-            'name': self.name,
-            'value': self.value,
-            'timestamp': self.timestamp.isoformat(),
-            'labels': self.labels
+            "name": self.name,
+            "value": self.value,
+            "timestamp": self.timestamp.isoformat(),
+            "labels": self.labels,
         }
+
 
 @dataclass
 class Counter(Metric):
     """Counter metric that only increases."""
-    
+
     def increment(self, value: float = 1.0) -> None:
         """Increment counter value."""
         self.value += value
         self.timestamp = datetime.utcnow()
 
+
 @dataclass
 class Gauge(Metric):
     """Gauge metric that can go up and down."""
-    
+
     def set(self, value: float) -> None:
         """Set gauge value."""
         self.value = value
         self.timestamp = datetime.utcnow()
 
+
 @dataclass
 class Timer:
     """Timer for measuring durations."""
+
     name: str
     labels: Dict[str, str]
     start_time: float = field(default_factory=time.time)
-    
+
     def stop(self) -> float:
         """Stop timer and return duration."""
         duration = time.time() - self.start_time
         return duration
+
 
 class MetricsCollector:
     """Collects and manages application metrics."""
@@ -67,36 +75,36 @@ class MetricsCollector:
         self.metrics: Dict[str, Metric] = {}
         self.timers: Dict[str, List[float]] = {}
         self._lock = threading.Lock()
-        
+
         # Create metrics directory
-        self.metrics_dir = Path(config.get('METRICS_DIR', './metrics'))
+        self.metrics_dir = Path(config.get("METRICS_DIR", "./metrics"))
         self.metrics_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize default metrics
         self._initialize_metrics()
-        
+
         # Start background metrics writer if enabled
-        if config.get('METRICS_ENABLED', True):
+        if config.get("METRICS_ENABLED", True):
             self._start_metrics_writer()
 
     def _initialize_metrics(self) -> None:
         """Initialize default metrics."""
         # Request metrics
-        self.register_counter('requests_total', labels={'type': 'all'})
-        self.register_counter('requests_failed_total', labels={'type': 'all'})
-        
+        self.register_counter("requests_total", labels={"type": "all"})
+        self.register_counter("requests_failed_total", labels={"type": "all"})
+
         # AWS metrics
-        self.register_counter('aws_api_calls_total', labels={'service': 'all'})
-        self.register_counter('aws_api_errors_total', labels={'service': 'all'})
-        
+        self.register_counter("aws_api_calls_total", labels={"service": "all"})
+        self.register_counter("aws_api_errors_total", labels={"service": "all"})
+
         # Resource metrics
-        self.register_gauge('active_instances', labels={'type': 'all'})
-        self.register_gauge('pending_requests', labels={'type': 'all'})
-        
+        self.register_gauge("active_instances", labels={"type": "all"})
+        self.register_gauge("pending_requests", labels={"type": "all"})
+
         # Performance metrics
-        self.register_gauge('response_time_seconds', labels={'endpoint': 'all'})
-        self.register_gauge('memory_usage_bytes')
-        self.register_gauge('cpu_usage_percent')
+        self.register_gauge("response_time_seconds", labels={"endpoint": "all"})
+        self.register_gauge("memory_usage_bytes")
+        self.register_gauge("cpu_usage_percent")
 
     def register_counter(self, name: str, labels: Optional[Dict[str, str]] = None) -> Counter:
         """Register a new counter metric."""
@@ -128,7 +136,7 @@ class MetricsCollector:
             if isinstance(self.metrics[name], Gauge):
                 self.metrics[name].set(value)
 
-    def start_timer(self, name: str = '', labels: Optional[Dict[str, str]] = None) -> Timer:
+    def start_timer(self, name: str = "", labels: Optional[Dict[str, str]] = None) -> Timer:
         """Start a new timer."""
         return Timer(name, labels or {})
 
@@ -138,74 +146,64 @@ class MetricsCollector:
             if name not in self.timers:
                 self.timers[name] = []
             self.timers[name].append(duration)
-            
+
             # Calculate and update average response time
             avg_time = sum(self.timers[name]) / len(self.timers[name])
             self.set_gauge(f"{name}_seconds", avg_time)
 
-    def record_success(self, operation: str, start_time: float, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def record_success(
+        self, operation: str, start_time: float, metadata: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Record a successful operation."""
         duration = time.time() - start_time
         self.increment_counter(f"{operation}_success_total")
         self.record_time(f"{operation}_duration", duration)
-        
+
         if metadata:
             logger.info(
                 f"{operation} completed successfully",
-                extra={
-                    'duration': duration,
-                    'metadata': metadata
-                }
+                extra={"duration": duration, "metadata": metadata},
             )
 
-    def record_error(self, operation: str, start_time: float, metadata: Optional[Dict[str, Any]] = None) -> None:
+    def record_error(
+        self, operation: str, start_time: float, metadata: Optional[Dict[str, Any]] = None
+    ) -> None:
         """Record a failed operation."""
         duration = time.time() - start_time
         self.increment_counter(f"{operation}_error_total")
         self.record_time(f"{operation}_error_duration", duration)
-        
+
         if metadata:
-            logger.error(
-                f"{operation} failed",
-                extra={
-                    'duration': duration,
-                    'metadata': metadata
-                }
-            )
+            logger.error(f"{operation} failed", extra={"duration": duration, "metadata": metadata})
 
     def get_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Get all current metrics."""
         with self._lock:
-            return {
-                name: metric.to_dict()
-                for name, metric in self.metrics.items()
-            }
+            return {name: metric.to_dict() for name, metric in self.metrics.items()}
 
     def _start_metrics_writer(self) -> None:
         """Start background metrics writer thread."""
+
         def write_metrics() -> None:
             """Write metrics to file periodically in background thread."""
             while True:
                 try:
                     metrics = self.get_metrics()
-                    
+
                     # Write to JSON file
-                    metrics_file = self.metrics_dir / 'metrics.json'
-                    with metrics_file.open('w') as f:
+                    metrics_file = self.metrics_dir / "metrics.json"
+                    with metrics_file.open("w") as f:
                         json.dump(metrics, f, indent=2)
-                    
+
                     # Write to Prometheus format
-                    prom_file = self.metrics_dir / 'metrics.prom'
-                    with prom_file.open('w') as f:
+                    prom_file = self.metrics_dir / "metrics.prom"
+                    with prom_file.open("w") as f:
                         for name, metric in metrics.items():
-                            labels = ','.join(
-                                f'{k}="{v}"'
-                                for k, v in metric['labels'].items()
-                            )
+                            labels = ",".join(f'{k}="{v}"' for k, v in metric["labels"].items())
                             f.write(f'{name}{{{labels}}} {metric["value"]}\n')
-                    
-                    time.sleep(self.config.get('METRICS_INTERVAL', 60))
-                
+
+                    time.sleep(self.config.get("METRICS_INTERVAL", 60))
+
                 except Exception as e:
                     logger.error(f"Error writing metrics: {e}")
                     time.sleep(5)  # Shorter sleep on error
@@ -216,20 +214,22 @@ class MetricsCollector:
     def check_thresholds(self) -> List[Dict[str, Any]]:
         """Check metrics against configured thresholds."""
         alerts = []
-        thresholds = self.config.get('ALERT_THRESHOLDS', {})
-        
+        thresholds = self.config.get("ALERT_THRESHOLDS", {})
+
         with self._lock:
             for name, threshold in thresholds.items():
                 if name in self.metrics:
                     metric = self.metrics[name]
                     if metric.value > threshold:
-                        alerts.append({
-                            'metric': name,
-                            'value': metric.value,
-                            'threshold': threshold,
-                            'timestamp': datetime.utcnow().isoformat()
-                        })
-        
+                        alerts.append(
+                            {
+                                "metric": name,
+                                "value": metric.value,
+                                "threshold": threshold,
+                                "timestamp": datetime.utcnow().isoformat(),
+                            }
+                        )
+
         return alerts
 
     def reset_metrics(self) -> None:
@@ -245,15 +245,15 @@ class MetricsCollector:
     def cleanup_old_metrics(self, max_age: timedelta = timedelta(days=7)) -> None:
         """Clean up old metrics data."""
         cutoff = datetime.utcnow() - max_age
-        
+
         with self._lock:
             # Clean up timers
             for name in list(self.timers.keys()):
                 if not self.timers[name]:
                     del self.timers[name]
-            
+
             # Clean up old metric files
-            for file in self.metrics_dir.glob('*.json'):
+            for file in self.metrics_dir.glob("*.json"):
                 if file.stat().st_mtime < cutoff.timestamp():
                     try:
                         file.unlink()

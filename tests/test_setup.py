@@ -1,4 +1,5 @@
 """Basic setup tests to verify test environment is working."""
+
 import pytest
 import os
 import sys
@@ -22,7 +23,7 @@ def test_python_path_setup():
     # Check that src is in Python path
     project_root = Path(__file__).parent.parent
     src_path = str(project_root / "src")
-    
+
     assert src_path in sys.path
 
 
@@ -33,14 +34,14 @@ def test_imports_work():
         # Test domain imports
         from src.domain.base.entity import Entity
         from src.domain.base.value_objects import InstanceId, InstanceType
-        
+
         # Test application imports - using modern CQRS handlers instead of ApplicationService
         from src.application.commands.request_handlers import CreateMachineRequestHandler
         from src.application.services.provider_capability_service import ProviderCapabilityService
-        
+
         # Test infrastructure imports
         from src.config.manager import ConfigurationManager
-        
+
         # If we get here, imports work
         assert True
     except ImportError as e:
@@ -71,6 +72,7 @@ def test_e2e_marker():
 def test_slow_marker():
     """Test slow marker."""
     import time
+
     time.sleep(0.1)  # Small delay to simulate slow test
     assert True
 

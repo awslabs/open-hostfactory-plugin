@@ -1,11 +1,12 @@
 """Common configuration schemas."""
+
 from typing import Dict
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ResourcePrefixConfig(BaseModel):
     """Resource prefix configuration."""
-    
+
     default: str = Field("", description="Default prefix for all resources")
     request: str = Field("req-", description="Prefix for acquire request IDs")
     return_prefix: str = Field("ret-", description="Prefix for return request IDs")
@@ -18,21 +19,21 @@ class ResourcePrefixConfig(BaseModel):
 
 class ResourceConfig(BaseModel):
     """Resource configuration."""
-    
+
     default_prefix: str = Field("", description="Default prefix for all resources")
     prefixes: ResourcePrefixConfig = Field(default_factory=lambda: ResourcePrefixConfig())
-    
-    @model_validator(mode='after')
-    def set_default_prefix(self) -> 'ResourceConfig':
+
+    @model_validator(mode="after")
+    def set_default_prefix(self) -> "ResourceConfig":
         """Set default prefix if not provided."""
         if not self.default_prefix:
-            object.__setattr__(self, 'default_prefix', self.prefixes.default)
+            object.__setattr__(self, "default_prefix", self.prefixes.default)
         return self
 
 
 class PrefixConfig(BaseModel):
     """Prefix configuration."""
-    
+
     default: str = Field("", description="Default prefix for all resources")
     request: str = Field("req-", description="Prefix for acquire request IDs")
     return_prefix: str = Field("ret-", description="Prefix for return request IDs")
@@ -45,16 +46,16 @@ class PrefixConfig(BaseModel):
 
 class StatusValuesConfig(BaseModel):
     """Status values configuration."""
-    
+
     request: Dict[str, str] = Field(
         default_factory=lambda: {
             "pending": "pending",
             "running": "running",
             "complete": "complete",
             "complete_with_error": "complete_with_error",
-            "failed": "failed"
+            "failed": "failed",
         },
-        description="Request status values"
+        description="Request status values",
     )
     machine: Dict[str, str] = Field(
         default_factory=lambda: {
@@ -64,51 +65,49 @@ class StatusValuesConfig(BaseModel):
             "stopped": "stopped",
             "shutting_down": "shutting-down",
             "terminated": "terminated",
-            "unknown": "unknown"
+            "unknown": "unknown",
         },
-        description="Machine status values"
+        description="Machine status values",
     )
     machine_result: Dict[str, str] = Field(
-        default_factory=lambda: {
-            "executing": "executing",
-            "succeed": "succeed",
-            "fail": "fail"
-        },
-        description="Machine result values"
+        default_factory=lambda: {"executing": "executing", "succeed": "succeed", "fail": "fail"},
+        description="Machine result values",
     )
     circuit_breaker: Dict[str, str] = Field(
-        default_factory=lambda: {
-            "closed": "closed",
-            "open": "open",
-            "half_open": "half_open"
-        },
-        description="Circuit breaker state values"
+        default_factory=lambda: {"closed": "closed", "open": "open", "half_open": "half_open"},
+        description="Circuit breaker state values",
     )
 
 
 class LimitsConfig(BaseModel):
     """Limits configuration."""
-    
+
     tag_key_length: int = Field(128, description="Maximum length of tag keys")
     tag_value_length: int = Field(256, description="Maximum length of tag values")
     max_tags_per_resource: int = Field(50, description="Maximum number of tags per resource")
-    max_instance_types_per_fleet: int = Field(20, description="Maximum number of instance types per fleet")
+    max_instance_types_per_fleet: int = Field(
+        20, description="Maximum number of instance types per fleet"
+    )
     max_subnets_per_fleet: int = Field(16, description="Maximum number of subnets per fleet")
-    max_security_groups_per_instance: int = Field(5, description="Maximum number of security groups per instance")
+    max_security_groups_per_instance: int = Field(
+        5, description="Maximum number of security groups per instance"
+    )
     max_batch_size: int = Field(100, description="Maximum batch size for API calls")
-    max_instances_per_request: int = Field(1000, description="Maximum number of instances per request")
+    max_instances_per_request: int = Field(
+        1000, description="Maximum number of instances per request"
+    )
 
 
 class NamingConfig(BaseModel):
     """Naming configuration."""
-    
+
     collections: Dict[str, str] = Field(
         default_factory=lambda: {
             "requests": "requests",
             "machines": "machines",
-            "templates": "templates"
+            "templates": "templates",
         },
-        description="Collection names for NoSQL databases"
+        description="Collection names for NoSQL databases",
     )
     tables: Dict[str, str] = Field(
         default_factory=lambda: {
@@ -116,34 +115,34 @@ class NamingConfig(BaseModel):
             "machines": "machines",
             "event_logs": "event_logs",
             "audit_logs": "audit_logs",
-            "metrics_logs": "metrics_logs"
+            "metrics_logs": "metrics_logs",
         },
-        description="Table names for SQL databases"
+        description="Table names for SQL databases",
     )
     handler_types: Dict[str, str] = Field(
         default_factory=lambda: {
             "ec2_fleet": "EC2Fleet",
             "spot_fleet": "SpotFleet",
             "asg": "ASG",
-            "run_instances": "RunInstances"
+            "run_instances": "RunInstances",
         },
-        description="Handler types for different AWS resources"
+        description="Handler types for different AWS resources",
     )
     fleet_types: Dict[str, str] = Field(
         default_factory=lambda: {
             "instant": "instant",
             "request": "request",
-            "maintain": "maintain"
+            "maintain": "maintain",
         },
-        description="Fleet types for EC2 Fleet and Spot Fleet"
+        description="Fleet types for EC2 Fleet and Spot Fleet",
     )
     price_types: Dict[str, str] = Field(
         default_factory=lambda: {
             "ondemand": "ondemand",
             "spot": "spot",
-            "heterogeneous": "heterogeneous"
+            "heterogeneous": "heterogeneous",
         },
-        description="Price types for templates"
+        description="Price types for templates",
     )
     statuses: StatusValuesConfig = Field(default_factory=lambda: StatusValuesConfig())
     patterns: Dict[str, str] = Field(
@@ -162,9 +161,9 @@ class NamingConfig(BaseModel):
             "request_id": r"^(req|ret)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
             "tag_key": r"^[\w\s+=.@-]+$",
             "cidr_block": r"^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$",
-            "arn": r"^arn:aws:[a-zA-Z0-9\-]+:[a-z0-9\-]*:[0-9]{12}:.+$"
+            "arn": r"^arn:aws:[a-zA-Z0-9\-]+:[a-z0-9\-]*:[0-9]{12}:.+$",
         },
-        description="Validation patterns for various resources"
+        description="Validation patterns for various resources",
     )
     prefixes: PrefixConfig = Field(default_factory=lambda: PrefixConfig())
     limits: LimitsConfig = Field(default_factory=lambda: LimitsConfig())
@@ -172,10 +171,10 @@ class NamingConfig(BaseModel):
 
 class RequestConfig(BaseModel):
     """Request configuration."""
-    
+
     max_machines_per_request: int = Field(100, description="Maximum number of machines per request")
-    
-    @field_validator('max_machines_per_request')
+
+    @field_validator("max_machines_per_request")
     @classmethod
     def validate_max_machines(cls, v: int) -> int:
         """Validate max machines per request."""
@@ -186,20 +185,20 @@ class RequestConfig(BaseModel):
 
 class DatabaseConfig(BaseModel):
     """Database configuration."""
-    
+
     connection_timeout: int = Field(30, description="Database connection timeout in seconds")
     query_timeout: int = Field(60, description="Database query timeout in seconds")
     max_connections: int = Field(10, description="Maximum number of database connections")
-    
-    @field_validator('connection_timeout', 'query_timeout')
+
+    @field_validator("connection_timeout", "query_timeout")
     @classmethod
     def validate_timeouts(cls, v: int) -> int:
         """Validate timeout values."""
         if v < 1:
             raise ValueError("Timeout must be at least 1 second")
         return v
-    
-    @field_validator('max_connections')
+
+    @field_validator("max_connections")
     @classmethod
     def validate_max_connections(cls, v: int) -> int:
         """Validate max connections."""
@@ -210,20 +209,20 @@ class DatabaseConfig(BaseModel):
 
 class EventsConfig(BaseModel):
     """Events configuration."""
-    
+
     enabled: bool = Field(True, description="Whether events are enabled")
     max_events_per_request: int = Field(1000, description="Maximum number of events per request")
     event_retention_days: int = Field(30, description="Number of days to retain events")
-    
-    @field_validator('max_events_per_request')
+
+    @field_validator("max_events_per_request")
     @classmethod
     def validate_max_events(cls, v: int) -> int:
         """Validate max events per request."""
         if v < 1:
             raise ValueError("Maximum events per request must be at least 1")
         return v
-    
-    @field_validator('event_retention_days')
+
+    @field_validator("event_retention_days")
     @classmethod
     def validate_retention_days(cls, v: int) -> int:
         """Validate event retention days."""

@@ -7,27 +7,29 @@ class RetryError(Exception):
 
 class MaxRetriesExceededError(RetryError):
     """Exception raised when maximum retry attempts are exceeded."""
-    
+
     def __init__(self, attempts: int, last_exception: Exception):
         """
         Initialize MaxRetriesExceededError.
-        
+
         Args:
             attempts: Number of attempts made
             last_exception: The last exception that occurred
         """
         self.attempts = attempts
         self.last_exception = last_exception
-        super().__init__(f"Maximum retry attempts ({attempts}) exceeded. Last error: {last_exception}")
+        super().__init__(
+            f"Maximum retry attempts ({attempts}) exceeded. Last error: {last_exception}"
+        )
 
 
 class InvalidRetryStrategyError(RetryError):
     """Exception raised when an invalid retry strategy is specified."""
-    
+
     def __init__(self, strategy: str):
         """
         Initialize InvalidRetryStrategyError.
-        
+
         Args:
             strategy: The invalid strategy name
         """
@@ -41,11 +43,11 @@ class RetryConfigurationError(RetryError):
 
 class CircuitBreakerOpenError(RetryError):
     """Exception raised when circuit breaker is in OPEN state."""
-    
+
     def __init__(self, service_name: str, failure_count: int, last_failure_time: float):
         """
         Initialize CircuitBreakerOpenError.
-        
+
         Args:
             service_name: Name of the service with open circuit
             failure_count: Number of failures that caused circuit to open

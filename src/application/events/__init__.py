@@ -17,7 +17,7 @@ Usage:
     class MachineCreatedHandler(LoggingEventHandler):
         def format_message(self, event):
             return f"Machine created: {event.aggregate_id}"
-    
+
     # Use the event bus
     event_bus = EventBus(logger)
     event_bus.auto_register_handlers()
@@ -32,42 +32,40 @@ from .base import EventHandler, LoggingEventHandler, ActionEventHandler
 # Import all handlers to ensure they're registered
 from .handlers import (
     machine_handlers,
-    request_handlers, 
+    request_handlers,
     system_handlers,
     infrastructure_handlers,
-    template_handlers
+    template_handlers,
 )
 
 __all__ = [
     # Core components
-    'EventBus',
-    'event_handler',
-    'EventHandlerRegistry',
-    
+    "EventBus",
+    "event_handler",
+    "EventHandlerRegistry",
     # Base classes
-    'EventHandler',
-    'LoggingEventHandler', 
-    'ActionEventHandler',
-    
+    "EventHandler",
+    "LoggingEventHandler",
+    "ActionEventHandler",
     # Handler modules (imported for registration)
-    'machine_handlers',
-    'request_handlers',
-    'system_handlers', 
-    'infrastructure_handlers',
-    'template_handlers'
+    "machine_handlers",
+    "request_handlers",
+    "system_handlers",
+    "infrastructure_handlers",
+    "template_handlers",
 ]
 
 
 def create_event_bus(logger=None):
     """
     Create and configure an EventBus with all handlers registered.
-    
+
     This is a convenience function that creates an EventBus and automatically
     registers all handlers decorated with @event_handler.
-    
+
     Args:
         logger: Logger instance to inject into handlers
-        
+
     Returns:
         Configured EventBus instance
     """
@@ -79,7 +77,7 @@ def create_event_bus(logger=None):
 def get_registered_handlers():
     """
     Get all handlers registered with @event_handler decorator.
-    
+
     Returns:
         Dictionary mapping event types to handler classes
     """
@@ -89,10 +87,10 @@ def get_registered_handlers():
 def get_event_statistics(event_bus: EventBus):
     """
     Get event processing statistics from an EventBus.
-    
+
     Args:
         event_bus: The EventBus instance
-        
+
     Returns:
         Dictionary with processing statistics
     """

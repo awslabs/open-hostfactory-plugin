@@ -1,4 +1,5 @@
 """Infrastructure events - Generic resource and operation tracking."""
+
 from typing import Any, Dict, Optional
 from datetime import datetime
 from pydantic import Field
@@ -9,32 +10,38 @@ from .base_events import InfrastructureEvent
 # INFRASTRUCTURE EVENTS
 # =============================================================================
 
+
 class ResourceEvent(InfrastructureEvent):
     """Base class for resource-related infrastructure events."""
+
     provider: str  # Provider type must be specified
     region: Optional[str] = None
 
 
 class ResourceCreatedEvent(ResourceEvent):
     """Event raised when an infrastructure resource is created."""
+
     resource_id: Optional[str] = None  # Generic resource identifier
     creation_time: datetime = Field(default_factory=datetime.utcnow)
 
 
 class ResourceUpdatedEvent(ResourceEvent):
     """Event raised when an infrastructure resource is updated."""
+
     changes: Dict[str, Any] = Field(default_factory=dict)
     update_time: datetime = Field(default_factory=datetime.utcnow)
 
 
 class ResourceDeletedEvent(ResourceEvent):
     """Event raised when an infrastructure resource is deleted."""
+
     deletion_reason: str
     deletion_time: datetime = Field(default_factory=datetime.utcnow)
 
 
 class ResourcesCleanedEvent(ResourceEvent):
     """Event raised when multiple resources are cleaned up."""
+
     resource_count: int
     cleanup_reason: str
     cleanup_time: datetime = Field(default_factory=datetime.utcnow)
@@ -42,6 +49,7 @@ class ResourcesCleanedEvent(ResourceEvent):
 
 class ResourceErrorEvent(ResourceEvent):
     """Event raised when there's an error with an infrastructure resource."""
+
     error_message: str
     error_code: Optional[str] = None
     error_time: datetime = Field(default_factory=datetime.utcnow)
@@ -49,6 +57,7 @@ class ResourceErrorEvent(ResourceEvent):
 
 class OperationStartedEvent(InfrastructureEvent):
     """Event raised when an infrastructure operation starts."""
+
     operation_type: str
     operation_id: str
     parameters: Dict[str, Any] = Field(default_factory=dict)
@@ -56,6 +65,7 @@ class OperationStartedEvent(InfrastructureEvent):
 
 class OperationCompletedEvent(InfrastructureEvent):
     """Event raised when an infrastructure operation completes."""
+
     operation_type: str
     operation_id: str
     result: Dict[str, Any] = Field(default_factory=dict)
@@ -64,6 +74,7 @@ class OperationCompletedEvent(InfrastructureEvent):
 
 class OperationFailedEvent(InfrastructureEvent):
     """Event raised when an infrastructure operation fails."""
+
     operation_type: str
     operation_id: str
     error_message: str

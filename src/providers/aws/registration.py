@@ -29,7 +29,7 @@ def create_aws_strategy(provider_config: Any) -> Any:
 
     try:
         # Handle both ProviderInstanceConfig object and raw dict
-        if hasattr(provider_config, 'config'):
+        if hasattr(provider_config, "config"):
             # ProviderInstanceConfig object
             config_data = provider_config.config
         else:
@@ -47,7 +47,7 @@ def create_aws_strategy(provider_config: Any) -> Any:
         strategy = AWSProviderStrategy(aws_config, logger)
 
         # Set provider name for identification
-        if hasattr(strategy, 'name'):
+        if hasattr(strategy, "name"):
             strategy.name = provider_config.name
 
         return strategy
@@ -70,6 +70,7 @@ def create_aws_config(data: Dict[str, Any]) -> Any:
     """
     try:
         from src.providers.aws.configuration.config import AWSProviderConfig
+
         return AWSProviderConfig(**data)
     except ImportError as e:
         raise ImportError(f"AWS configuration not available: {str(e)}") from e
@@ -85,7 +86,10 @@ def create_aws_resolver() -> Any:
         AWS template resolver instance
     """
     try:
-        from src.providers.aws.infrastructure.template.caching_ami_resolver import CachingAMIResolver
+        from src.providers.aws.infrastructure.template.caching_ami_resolver import (
+            CachingAMIResolver,
+        )
+
         return CachingAMIResolver()
     except ImportError:
         # AWS resolver not available, return None
@@ -110,7 +114,9 @@ def create_aws_validator() -> Any:
         raise RuntimeError(f"Failed to create AWS validator: {str(e)}") from e
 
 
-def register_aws_provider(registry: 'ProviderRegistry' = None, logger: 'LoggingPort' = None, instance_name: str = None) -> None:
+def register_aws_provider(
+    registry: "ProviderRegistry" = None, logger: "LoggingPort" = None, instance_name: str = None
+) -> None:
     """Register AWS provider with the provider registry.
 
     Args:
@@ -121,6 +127,7 @@ def register_aws_provider(registry: 'ProviderRegistry' = None, logger: 'LoggingP
     if registry is None:
         # Import here to avoid circular dependencies
         from src.infrastructure.registry.provider_registry import get_provider_registry
+
         registry = get_provider_registry()
 
     try:
@@ -132,7 +139,7 @@ def register_aws_provider(registry: 'ProviderRegistry' = None, logger: 'LoggingP
                 strategy_factory=create_aws_strategy,
                 config_factory=create_aws_config,
                 resolver_factory=create_aws_resolver,
-                validator_factory=create_aws_validator
+                validator_factory=create_aws_validator,
             )
         else:
             # Register as provider type (backward compatibility)
@@ -141,7 +148,7 @@ def register_aws_provider(registry: 'ProviderRegistry' = None, logger: 'LoggingP
                 strategy_factory=create_aws_strategy,
                 config_factory=create_aws_config,
                 resolver_factory=create_aws_resolver,
-                validator_factory=create_aws_validator
+                validator_factory=create_aws_validator,
             )
 
         # Register AWS template store
@@ -159,7 +166,7 @@ def register_aws_provider(registry: 'ProviderRegistry' = None, logger: 'LoggingP
         raise
 
 
-def _register_aws_template_store(logger: 'LoggingPort' = None) -> None:
+def _register_aws_template_store(logger: "LoggingPort" = None) -> None:
     """Register AWS template store - DISABLED: Template system consolidated.
 
     Template functionality has been consolidated into the unified TemplateConfigurationManager.
@@ -170,11 +177,14 @@ def _register_aws_template_store(logger: 'LoggingPort' = None) -> None:
     # No-op: Template system has been consolidated
 
 
-def _register_aws_template_adapter(logger: 'LoggingPort' = None) -> None:
+def _register_aws_template_adapter(logger: "LoggingPort" = None) -> None:
     """Register AWS template adapter with the DI container."""
     try:
         from src.infrastructure.di.container import get_container
-        from .infrastructure.adapters.template_adapter import AWSTemplateAdapter, create_aws_template_adapter
+        from .infrastructure.adapters.template_adapter import (
+            AWSTemplateAdapter,
+            create_aws_template_adapter,
+        )
         from src.domain.base.ports.template_adapter_port import TemplateAdapterPort
 
         container = get_container()
@@ -220,6 +230,7 @@ def register_aws_provider_with_di(provider_instance, container) -> bool:
 
         # Register provider strategy with registry
         from src.infrastructure.registry.provider_registry import get_provider_registry
+
         registry = get_provider_registry()
 
         # Create provider strategy factory using DI container
@@ -228,17 +239,19 @@ def register_aws_provider_with_di(provider_instance, container) -> bool:
 
         # Register the specific provider instance (no generic type registration)
         registry.register_provider_instance(
-            provider_type='aws',
+            provider_type="aws",
             instance_name=provider_instance.name,
             strategy_factory=aws_strategy_factory,
-            config_factory=lambda: aws_config
+            config_factory=lambda: aws_config,
         )
 
         logger.debug(f"Successfully registered AWS provider instance: {provider_instance.name}")
         return True
 
     except Exception as e:
-        logger.error(f"Failed to register AWS provider instance '{provider_instance.name}': {str(e)}")
+        logger.error(
+            f"Failed to register AWS provider instance '{provider_instance.name}': {str(e)}"
+        )
         return False
 
 
@@ -250,32 +263,34 @@ def _register_aws_components_with_di(container, aws_config, instance_name: str) 
     # Register AWS client for this instance with instance-specific configuration
     def aws_client_factory(container_instance):
         logger_port = container_instance.get(LoggingPort)
-        
+
         # Create a configuration port that provides the instance-specific AWS config
         class AWSInstanceConfigPort:
             """Configuration port that provides instance-specific AWS configuration."""
+
             def __init__(self, aws_config):
                 self._aws_config = aws_config
-            
+
             def get_typed(self, config_type):
                 """Return the instance-specific AWS config."""
                 from src.providers.aws.configuration.config import AWSProviderConfig
+
                 if config_type == AWSProviderConfig:
                     return self._aws_config
                 return None
-            
+
             def get(self, key, default=None):
                 """Get configuration value."""
                 return getattr(self._aws_config, key, default)
-        
+
         config_port = AWSInstanceConfigPort(aws_config)
-        
+
         # Create AWS client with instance-specific config
         aws_client = AWSClient(config=config_port, logger=logger_port)
-        
+
         # Log the client creation for this specific instance
         logger_port.info(f"AWS client initialized for {instance_name}: region={aws_config.region}")
-        
+
         return aws_client
 
     # Register with instance-specific key
@@ -293,29 +308,27 @@ def _create_aws_strategy_with_di(container, aws_config, instance_name: str):
 
     # Create and return AWS strategy
     from src.providers.aws.strategy import AWSProviderStrategy
-    return AWSProviderStrategy(
-        aws_client=aws_client,
-        config=aws_config,
-        logger=logger
-    )
 
-def register_aws_extensions(logger: Optional['LoggingPort'] = None) -> None:
+    return AWSProviderStrategy(aws_client=aws_client, config=aws_config, logger=logger)
+
+
+def register_aws_extensions(logger: Optional["LoggingPort"] = None) -> None:
     """Register AWS template extensions with the global registry.
-    
+
     This function should be called during application startup to ensure
     AWS extensions are available for template processing.
-    
+
     Args:
         logger: Optional logger for registration messages
     """
     try:
         # Register AWS template extension configuration
-        TemplateExtensionRegistry.register_extension('aws', AWSTemplateExtensionConfig)
-        
+        TemplateExtensionRegistry.register_extension("aws", AWSTemplateExtensionConfig)
+
         if logger:
             logger.debug("AWS template extensions registered successfully")
         # Remove print statement - should use proper logging
-            
+
     except Exception as e:
         error_msg = f"Failed to register AWS template extensions: {e}"
         if logger:
@@ -325,9 +338,11 @@ def register_aws_extensions(logger: Optional['LoggingPort'] = None) -> None:
         raise
 
 
-def register_aws_template_factory(factory: TemplateFactory, logger: Optional['LoggingPort'] = None) -> None:
+def register_aws_template_factory(
+    factory: TemplateFactory, logger: Optional["LoggingPort"] = None
+) -> None:
     """Register AWS template class with the template factory.
-    
+
     Args:
         factory: Template factory to register AWS template with
         logger: Optional logger for registration messages
@@ -336,20 +351,21 @@ def register_aws_template_factory(factory: TemplateFactory, logger: Optional['Lo
         # Try to import and register AWS template class
         try:
             from src.providers.aws.domain.template.aggregate import AWSTemplate
-            factory.register_provider_template_class('aws', AWSTemplate)
-            
+
+            factory.register_provider_template_class("aws", AWSTemplate)
+
             if logger:
                 logger.info("AWS template class registered with factory")
             else:
                 print("AWS template class registered with factory")
-                
+
         except ImportError:
             # AWS template class doesn't exist yet, that's okay
             if logger:
                 logger.debug("AWS template class not available, using core template")
             else:
                 print("AWS template class not available, using core template")
-                
+
     except Exception as e:
         error_msg = f"Failed to register AWS template factory: {e}"
         if logger:
@@ -361,7 +377,7 @@ def register_aws_template_factory(factory: TemplateFactory, logger: Optional['Lo
 
 def get_aws_extension_defaults() -> dict:
     """Get default AWS extension configuration.
-    
+
     Returns:
         Dictionary of default AWS extension values
     """
@@ -369,13 +385,14 @@ def get_aws_extension_defaults() -> dict:
     return default_config.to_template_defaults()
 
 
-def initialize_aws_provider(template_factory: Optional[TemplateFactory] = None, 
-                          logger: Optional['LoggingPort'] = None) -> None:
+def initialize_aws_provider(
+    template_factory: Optional[TemplateFactory] = None, logger: Optional["LoggingPort"] = None
+) -> None:
     """Initialize AWS provider components.
-    
+
     This is the main initialization function that should be called during
     application startup to set up all AWS provider components.
-    
+
     Args:
         template_factory: Optional template factory to register AWS components with
         logger: Optional logger for initialization messages
@@ -383,16 +400,16 @@ def initialize_aws_provider(template_factory: Optional[TemplateFactory] = None,
     try:
         # Register AWS extensions
         register_aws_extensions(logger)
-        
+
         # Register AWS template factory if provided
         if template_factory:
             register_aws_template_factory(template_factory, logger)
-        
+
         if logger:
             logger.info("AWS provider initialization completed successfully")
         else:
             print("AWS provider initialization completed successfully")
-            
+
     except Exception as e:
         error_msg = f"AWS provider initialization failed: {e}"
         if logger:
@@ -404,38 +421,42 @@ def initialize_aws_provider(template_factory: Optional[TemplateFactory] = None,
 
 def is_aws_provider_registered() -> bool:
     """Check if AWS provider is properly registered.
-    
+
     Returns:
         True if AWS extensions are registered
     """
-    return TemplateExtensionRegistry.has_extension('aws')
+    return TemplateExtensionRegistry.has_extension("aws")
 
 
 def register_aws_services_with_di(container) -> None:
     """Register AWS services with DI container."""
     from src.domain.base.ports import LoggingPort
-    
+
     logger = container.get(LoggingPort)
-    
+
     try:
         # Register AWS-specific services that need to be available globally
-        from src.providers.aws.infrastructure.template.caching_ami_resolver import CachingAMIResolver
+        from src.providers.aws.infrastructure.template.caching_ami_resolver import (
+            CachingAMIResolver,
+        )
         from src.domain.base.ports.template_resolver_port import TemplateResolverPort
-        from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
-        
+        from src.providers.aws.infrastructure.launch_template.manager import (
+            AWSLaunchTemplateManager,
+        )
+
         # Register AMI resolver if not already registered
         if not container.is_registered(CachingAMIResolver):
             container.register_singleton(CachingAMIResolver)
             container.register_singleton(TemplateResolverPort, lambda c: c.get(CachingAMIResolver))
             logger.debug("AWS AMI resolver registered with DI container")
-        
+
         # Register AWS Launch Template Manager if not already registered
         if not container.is_registered(AWSLaunchTemplateManager):
             container.register_singleton(AWSLaunchTemplateManager)
             logger.debug("AWS Launch Template Manager registered with DI container")
-        
+
         logger.debug("AWS services registered with DI container")
-        
+
     except Exception as e:
         logger.warning(f"Failed to register AWS services with DI container: {e}")
 

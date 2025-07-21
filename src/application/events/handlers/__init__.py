@@ -17,9 +17,9 @@ from . import infrastructure_handlers
 from . import template_handlers
 
 __all__ = [
-    'machine_handlers',
-    'request_handlers', 
-    'system_handlers',
-    'infrastructure_handlers',
-    'template_handlers'
+    "machine_handlers",
+    "request_handlers",
+    "system_handlers",
+    "infrastructure_handlers",
+    "template_handlers",
 ]

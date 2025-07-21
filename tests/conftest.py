@@ -1,4 +1,5 @@
 """Global test configuration and fixtures."""
+
 import os
 import sys
 import pytest
@@ -21,19 +22,22 @@ from tests.fixtures.environment.mock_env_vars import (
     mock_aws_credentials,
     complete_test_environment,
     create_test_config_dict,
-    create_test_templates_dict
+    create_test_templates_dict,
 )
 
 # Import moto for AWS mocking
 try:
     from moto import mock_aws
+
     MOTO_AVAILABLE = True
 except ImportError:
     # Fallback if moto is not available
     def mock_aws():
         def decorator(func):
             return func
+
         return decorator
+
     MOTO_AVAILABLE = False
 
 import boto3
@@ -50,84 +54,86 @@ try:
     from src.domain.machine.aggregate import Machine
     from src.domain.base.value_objects import InstanceId, InstanceType, ResourceId
     from src.providers.aws.configuration.config import AWSConfig
+
     IMPORTS_AVAILABLE = True
 except ImportError as e:
     # If imports fail, create mock classes to prevent test failures
     print(f"Warning: Could not import application components: {e}")
     IMPORTS_AVAILABLE = False
-    
+
     class ConfigurationManager:
         def __init__(self):
             self._config = {}
-        
+
         def load_from_file(self, path):
             pass
-        
+
         def get(self, key, default=None):
             return default
-    
+
     class AppConfig:
         def __init__(self, **kwargs):
             pass
-    
+
     class TemplateService:
         pass
-    
+
     class CommandBus:
         def __init__(self, **kwargs):
             pass
-        
+
         def execute(self, command):
             return {"success": True}
-    
+
     class QueryBus:
         def __init__(self, **kwargs):
             pass
-        
+
         def execute(self, query):
             return {"success": True}
-    
+
     class DIContainer:
         pass
-    
+
     class Template:
         def __init__(self, **kwargs):
             for k, v in kwargs.items():
                 setattr(self, k, v)
-    
+
     class Request:
         @classmethod
         def create_new_request(cls, **kwargs):
             return cls(**kwargs)
-        
+
         def __init__(self, **kwargs):
             for k, v in kwargs.items():
                 setattr(self, k, v)
-    
+
     class Machine:
         def __init__(self, **kwargs):
             for k, v in kwargs.items():
                 setattr(self, k, v)
-    
+
     class InstanceId:
         def __init__(self, value):
             self.value = value
-    
+
     class InstanceType:
         def __init__(self, value):
             self.value = value
-    
+
     class ResourceId:
         def __init__(self, value):
             self.value = value
-    
+
     class AWSProvider:
         def __init__(self, **kwargs):
             pass
-    
+
     class AWSConfig:
         def __init__(self, **kwargs):
             pass
+
 
 # Test utilities
 from tests.utilities.reset_singletons import reset_all_singletons
@@ -139,25 +145,27 @@ def setup_test_environment():
     # Set up PYTHONPATH first
     project_root = Path(__file__).parent.parent
     src_path = project_root / "src"
-    
+
     # Add src to Python path
     if str(src_path) not in sys.path:
         sys.path.insert(0, str(src_path))
-    
+
     # Set environment variables
-    os.environ.update({
-        "AWS_DEFAULT_REGION": "us-east-1",
-        "AWS_ACCESS_KEY_ID": "testing",
-        "AWS_SECRET_ACCESS_KEY": "testing",
-        "AWS_SECURITY_TOKEN": "testing",
-        "AWS_SESSION_TOKEN": "testing",
-        "ENVIRONMENT": "testing",
-        "LOG_LEVEL": "DEBUG",
-        "TESTING": "true",
-        "PYTHONPATH": f"{src_path}:{os.environ.get('PYTHONPATH', '')}",
-        "PYTHONWARNINGS": "ignore::DeprecationWarning",
-        "MOTO_CALL_RESET_API": "false",
-    })
+    os.environ.update(
+        {
+            "AWS_DEFAULT_REGION": "us-east-1",
+            "AWS_ACCESS_KEY_ID": "testing",
+            "AWS_SECRET_ACCESS_KEY": "testing",
+            "AWS_SECURITY_TOKEN": "testing",
+            "AWS_SESSION_TOKEN": "testing",
+            "ENVIRONMENT": "testing",
+            "LOG_LEVEL": "DEBUG",
+            "TESTING": "true",
+            "PYTHONPATH": f"{src_path}:{os.environ.get('PYTHONPATH', '')}",
+            "PYTHONWARNINGS": "ignore::DeprecationWarning",
+            "MOTO_CALL_RESET_API": "false",
+        }
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -186,35 +194,24 @@ def test_config_dict() -> Dict[str, Any]:
             "region": "us-east-1",
             "profile": "default",
             "access_key_id": "testing",
-            "secret_access_key": "testing"
+            "secret_access_key": "testing",
         },
-        "logging": {
-            "level": "DEBUG",
-            "file_path": "logs/test.log",
-            "console_enabled": True
-        },
-        "database": {
-            "type": "sqlite",
-            "host": "",
-            "port": 0,
-            "name": ":memory:"
-        },
+        "logging": {"level": "DEBUG", "file_path": "logs/test.log", "console_enabled": True},
+        "database": {"type": "sqlite", "host": "", "port": 0, "name": ":memory:"},
         "template": {
             "default_image_id": "ami-12345678",
             "default_instance_type": "t2.micro",
             "subnet_ids": ["subnet-12345678"],
-            "security_group_ids": ["sg-12345678"]
+            "security_group_ids": ["sg-12345678"],
         },
         "REPOSITORY_CONFIG": {
             "type": "json",
             "json": {
                 "storage_type": "single_file",
                 "base_path": "/tmp",
-                "filenames": {
-                    "single_file": "test_database.json"
-                }
-            }
-        }
+                "filenames": {"single_file": "test_database.json"},
+            },
+        },
     }
 
 
@@ -222,7 +219,7 @@ def test_config_dict() -> Dict[str, Any]:
 def test_config_file(temp_dir: Path, test_config_dict: Dict[str, Any]) -> Path:
     """Create a test configuration file."""
     config_file = temp_dir / "test_config.json"
-    with open(config_file, 'w') as f:
+    with open(config_file, "w") as f:
         json.dump(test_config_dict, f, indent=2)
     return config_file
 
@@ -253,7 +250,7 @@ def aws_config() -> AWSConfig:
             region="us-east-1",
             profile="default",
             access_key_id="testing",
-            secret_access_key="testing"
+            secret_access_key="testing",
         )
     else:
         return AWSConfig()
@@ -262,13 +259,16 @@ def aws_config() -> AWSConfig:
 @pytest.fixture
 def mock_aws_credentials():
     """Mock AWS credentials."""
-    with patch.dict(os.environ, {
-        'AWS_ACCESS_KEY_ID': 'testing',
-        'AWS_SECRET_ACCESS_KEY': 'testing',
-        'AWS_SECURITY_TOKEN': 'testing',
-        'AWS_SESSION_TOKEN': 'testing',
-        'AWS_DEFAULT_REGION': 'us-east-1',
-    }):
+    with patch.dict(
+        os.environ,
+        {
+            "AWS_ACCESS_KEY_ID": "testing",
+            "AWS_SECRET_ACCESS_KEY": "testing",
+            "AWS_SECURITY_TOKEN": "testing",
+            "AWS_SESSION_TOKEN": "testing",
+            "AWS_DEFAULT_REGION": "us-east-1",
+        },
+    ):
         yield
 
 
@@ -286,52 +286,48 @@ def aws_mocks():
 @pytest.fixture
 def ec2_client(mock_aws_credentials, aws_mocks):
     """Create a mocked EC2 client."""
-    return boto3.client('ec2', region_name='us-east-1')
+    return boto3.client("ec2", region_name="us-east-1")
 
 
 @pytest.fixture
 def autoscaling_client(mock_aws_credentials, aws_mocks):
     """Create a mocked Auto Scaling client."""
-    return boto3.client('autoscaling', region_name='us-east-1')
+    return boto3.client("autoscaling", region_name="us-east-1")
 
 
 @pytest.fixture
 def ssm_client(mock_aws_credentials, aws_mocks):
     """Create a mocked SSM client."""
-    return boto3.client('ssm', region_name='us-east-1')
+    return boto3.client("ssm", region_name="us-east-1")
 
 
 @pytest.fixture
 def mock_ec2_resources(ec2_client):
     """Create mock EC2 resources for testing."""
     # Create VPC
-    vpc = ec2_client.create_vpc(CidrBlock='10.0.0.0/16')
-    vpc_id = vpc['Vpc']['VpcId']
-    
+    vpc = ec2_client.create_vpc(CidrBlock="10.0.0.0/16")
+    vpc_id = vpc["Vpc"]["VpcId"]
+
     # Create subnet
     subnet = ec2_client.create_subnet(
-        VpcId=vpc_id,
-        CidrBlock='10.0.1.0/24',
-        AvailabilityZone='us-east-1a'
+        VpcId=vpc_id, CidrBlock="10.0.1.0/24", AvailabilityZone="us-east-1a"
     )
-    subnet_id = subnet['Subnet']['SubnetId']
-    
+    subnet_id = subnet["Subnet"]["SubnetId"]
+
     # Create security group
     sg = ec2_client.create_security_group(
-        GroupName='test-sg',
-        Description='Test security group',
-        VpcId=vpc_id
+        GroupName="test-sg", Description="Test security group", VpcId=vpc_id
     )
-    sg_id = sg['GroupId']
-    
+    sg_id = sg["GroupId"]
+
     # Create key pair
-    key_pair = ec2_client.create_key_pair(KeyName='test-key')
-    
+    key_pair = ec2_client.create_key_pair(KeyName="test-key")
+
     return {
-        'vpc_id': vpc_id,
-        'subnet_id': subnet_id,
-        'security_group_id': sg_id,
-        'key_name': key_pair['KeyName']
+        "vpc_id": vpc_id,
+        "subnet_id": subnet_id,
+        "security_group_id": sg_id,
+        "key_name": key_pair["KeyName"],
     }
 
 
@@ -353,14 +349,10 @@ def sample_template() -> Template:
             user_data="#!/bin/bash\necho 'Hello World'",
             tags={"Environment": "test", "Project": "hostfactory"},
             created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            updated_at=datetime.now(timezone.utc),
         )
     else:
-        return Template(
-            id="template-001",
-            name="test-template",
-            provider_api="ec2_fleet"
-        )
+        return Template(id="template-001", name="test-template", provider_api="ec2_fleet")
 
 
 @pytest.fixture
@@ -372,14 +364,10 @@ def sample_request() -> Request:
             machine_count=2,
             requester_id="test-user",
             priority=1,
-            tags={"Environment": "test"}
+            tags={"Environment": "test"},
         )
     else:
-        return Request(
-            template_id="template-001",
-            machine_count=2,
-            requester_id="test-user"
-        )
+        return Request(template_id="template-001", machine_count=2, requester_id="test-user")
 
 
 @pytest.fixture
@@ -398,7 +386,7 @@ def sample_machine() -> Machine:
             public_ip="54.123.45.67",
             tags={"Environment": "test"},
             created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            updated_at=datetime.now(timezone.utc),
         )
     else:
         return Machine(
@@ -406,7 +394,7 @@ def sample_machine() -> Machine:
             instance_id="i-1234567890abcdef0",
             template_id="template-001",
             request_id="request-001",
-            status="running"
+            status="running",
         )
 
 
@@ -453,9 +441,9 @@ def mock_provider() -> Mock:
     provider.get_available_templates.return_value = []
     provider.get_capabilities.return_value = {
         "provider_type": "mock",
-        "region": "mock-region", 
+        "region": "mock-region",
         "version": "1.0.0",
-        "capabilities": ["mock_capability"]
+        "capabilities": ["mock_capability"],
     }
     return provider
 
@@ -465,15 +453,18 @@ def mock_logger() -> Mock:
     """Create a mock logger."""
     return Mock()
 
+
 @pytest.fixture
 def mock_container() -> Mock:
     """Create a mock DI container."""
     return Mock()
 
+
 @pytest.fixture
 def mock_config() -> Mock:
     """Create a mock configuration."""
     return Mock()
+
 
 # ApplicationService fixture removed - using direct CQRS buses instead
 # Use mock_command_bus and mock_query_bus fixtures directly in tests
@@ -491,12 +482,12 @@ def di_container() -> DIContainer:
 def setup_test_environment(complete_test_environment):
     """
     Automatically set up test environment for all tests.
-    
+
     This fixture runs automatically for every test and ensures:
     - HF_PROVIDER environment variables are set to test values
     - AWS credentials are mocked to prevent real AWS calls
     - Test configuration files are available
-    
+
     Args:
         complete_test_environment: Combined HF and AWS environment fixture
     """
@@ -507,12 +498,12 @@ def setup_test_environment(complete_test_environment):
 
 # Re-export fixtures from mock_env_vars for convenience
 __all__ = [
-    'mock_hf_environment',
-    'mock_hf_environment_with_fixtures', 
-    'mock_aws_credentials',
-    'complete_test_environment',
-    'create_test_config_dict',
-    'create_test_templates_dict'
+    "mock_hf_environment",
+    "mock_hf_environment_with_fixtures",
+    "mock_aws_credentials",
+    "complete_test_environment",
+    "create_test_config_dict",
+    "create_test_templates_dict",
 ]
 
 
@@ -590,7 +581,7 @@ def assert_valid_uuid(value: str) -> None:
 
 def assert_valid_instance_id(value: str) -> None:
     """Assert that a string is a valid AWS instance ID."""
-    if not value.startswith('i-') or len(value) != 19:
+    if not value.startswith("i-") or len(value) != 19:
         pytest.fail(f"'{value}' is not a valid AWS instance ID")
 
 
@@ -598,7 +589,7 @@ def assert_valid_timestamp(value: datetime) -> None:
     """Assert that a datetime is valid and recent."""
     if not isinstance(value, datetime):
         pytest.fail(f"'{value}' is not a datetime object")
-    
+
     now = datetime.now(timezone.utc)
     if value > now:
         pytest.fail(f"Timestamp '{value}' is in the future")
@@ -607,13 +598,13 @@ def assert_valid_timestamp(value: datetime) -> None:
 # Test utilities
 class TestDataBuilder:
     """Builder pattern for creating test data."""
-    
+
     @staticmethod
     def template(
         template_id: Optional[str] = None,
         name: Optional[str] = None,
         provider_api: str = "ec2_fleet",
-        **kwargs
+        **kwargs,
     ) -> Template:
         """Build a test template."""
         return Template(
@@ -628,15 +619,15 @@ class TestDataBuilder:
             user_data=kwargs.get("user_data", "#!/bin/bash\necho 'test'"),
             tags=kwargs.get("tags", {"Environment": "test"}),
             created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            updated_at=datetime.now(timezone.utc),
         )
-    
+
     @staticmethod
     def request(
         request_id: Optional[str] = None,
         template_id: Optional[str] = None,
         machine_count: int = 1,
-        **kwargs
+        **kwargs,
     ) -> Request:
         """Build a test request."""
         return Request.create_new_request(
@@ -644,14 +635,12 @@ class TestDataBuilder:
             machine_count=machine_count,
             requester_id=kwargs.get("requester_id", "test-user"),
             priority=kwargs.get("priority", 1),
-            tags=kwargs.get("tags", {"Environment": "test"})
+            tags=kwargs.get("tags", {"Environment": "test"}),
         )
-    
+
     @staticmethod
     def machine(
-        machine_id: Optional[str] = None,
-        instance_id: Optional[str] = None,
-        **kwargs
+        machine_id: Optional[str] = None, instance_id: Optional[str] = None, **kwargs
     ) -> Machine:
         """Build a test machine."""
         return Machine(
@@ -666,7 +655,7 @@ class TestDataBuilder:
             public_ip=kwargs.get("public_ip", "54.123.45.67"),
             tags=kwargs.get("tags", {"Environment": "test"}),
             created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            updated_at=datetime.now(timezone.utc),
         )
 
 

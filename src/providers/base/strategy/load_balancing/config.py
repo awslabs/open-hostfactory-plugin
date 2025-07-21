@@ -1,4 +1,5 @@
 """Load balancing configuration."""
+
 from dataclasses import dataclass
 from .algorithms import LoadBalancingAlgorithm, HealthCheckMode
 
@@ -6,17 +7,18 @@ from .algorithms import LoadBalancingAlgorithm, HealthCheckMode
 @dataclass
 class LoadBalancingConfig:
     """Configuration for load balancing strategy."""
+
     algorithm: LoadBalancingAlgorithm = LoadBalancingAlgorithm.ROUND_ROBIN
     health_check_mode: HealthCheckMode = HealthCheckMode.HYBRID
     health_check_interval_seconds: float = 30.0
     unhealthy_threshold: int = 3  # Consecutive failures before marking unhealthy
-    recovery_threshold: int = 2   # Consecutive successes before marking healthy
+    recovery_threshold: int = 2  # Consecutive successes before marking healthy
     max_connections_per_strategy: int = 100
     response_time_window_size: int = 10  # Number of recent requests to track
     weight_adjustment_factor: float = 0.1  # For adaptive algorithms
     sticky_sessions: bool = False
     session_timeout_seconds: float = 300.0
-    
+
     def __post_init__(self):
         """Validate configuration after initialization."""
         if self.health_check_interval_seconds <= 0:

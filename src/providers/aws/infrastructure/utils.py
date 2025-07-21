@@ -1,10 +1,12 @@
 """AWS utility functions."""
+
 from typing import Callable, Dict, Any, List
 from botocore.exceptions import ClientError
 
 from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
+
 
 def paginate(client_method: Callable, result_key: str, **kwargs) -> List[Dict[str, Any]]:
     """
@@ -28,59 +30,50 @@ def paginate(client_method: Callable, result_key: str, **kwargs) -> List[Dict[st
 
     return results
 
+
 def list_all_instances(ec2_client, filters=None) -> List[Dict[str, Any]]:
     """
     List all EC2 instances with pagination.
-    
+
     Args:
         ec2_client: EC2 client
         filters: Optional filters
-        
+
     Returns:
         List of instances
     """
-    reservations = paginate(
-        ec2_client.describe_instances,
-        'Reservations',
-        Filters=filters or []
-    )
-    
+    reservations = paginate(ec2_client.describe_instances, "Reservations", Filters=filters or [])
+
     instances = []
     for reservation in reservations:
-        instances.extend(reservation.get('Instances', []))
-    
+        instances.extend(reservation.get("Instances", []))
+
     return instances
+
 
 def list_all_subnets(ec2_client, filters=None) -> List[Dict[str, Any]]:
     """
     List all subnets with pagination.
-    
+
     Args:
         ec2_client: EC2 client
         filters: Optional filters
-        
+
     Returns:
         List of subnets
     """
-    return paginate(
-        ec2_client.describe_subnets,
-        'Subnets',
-        Filters=filters or []
-    )
+    return paginate(ec2_client.describe_subnets, "Subnets", Filters=filters or [])
+
 
 def list_all_security_groups(ec2_client, filters=None) -> List[Dict[str, Any]]:
     """
     List all security groups with pagination.
-    
+
     Args:
         ec2_client: EC2 client
         filters: Optional filters
-        
+
     Returns:
         List of security groups
     """
-    return paginate(
-        ec2_client.describe_security_groups,
-        'SecurityGroups',
-        Filters=filters or []
-    )
+    return paginate(ec2_client.describe_security_groups, "SecurityGroups", Filters=filters or [])

@@ -3,9 +3,11 @@ Request Adapter Port
 
 This module defines the interface for request adapters.
 """
+
 from typing import Dict, Any, List
 from abc import ABC, abstractmethod
 from src.domain.request.aggregate import Request
+
 
 class RequestAdapterPort(ABC):
     """Interface for request adapters."""
@@ -14,10 +16,10 @@ class RequestAdapterPort(ABC):
     def get_request_status(self, request: Request) -> Dict[str, Any]:
         """
         Get provider-specific status for request.
-        
+
         Args:
             request: Request domain entity
-            
+
         Returns:
             Dictionary with status information
         """
@@ -26,10 +28,10 @@ class RequestAdapterPort(ABC):
     def cancel_fleet_request(self, request: Request) -> Dict[str, Any]:
         """
         Cancel fleet request.
-        
+
         Args:
             request: Request domain entity
-            
+
         Returns:
             Dictionary with cancellation results
         """
@@ -38,10 +40,10 @@ class RequestAdapterPort(ABC):
     def terminate_instances(self, instance_ids: List[str]) -> Dict[str, Any]:
         """
         Terminate instances.
-        
+
         Args:
             instance_ids: List of instance IDs to terminate
-            
+
         Returns:
             Dictionary with termination results
         """

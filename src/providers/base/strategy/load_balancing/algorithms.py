@@ -1,4 +1,5 @@
 """Load balancing algorithms enumeration."""
+
 from enum import Enum
 from src.domain.base.dependency_injection import injectable
 
@@ -6,6 +7,7 @@ from src.domain.base.dependency_injection import injectable
 @injectable
 class LoadBalancingAlgorithm(str, Enum):
     """Load balancing algorithms."""
+
     ROUND_ROBIN = "round_robin"
     WEIGHTED_ROUND_ROBIN = "weighted_round_robin"
     LEAST_CONNECTIONS = "least_connections"
@@ -19,7 +21,8 @@ class LoadBalancingAlgorithm(str, Enum):
 @injectable
 class HealthCheckMode(str, Enum):
     """Health check modes for load balancing."""
+
     DISABLED = "disabled"
-    PASSIVE = "passive"      # Monitor during regular operations
-    ACTIVE = "active"        # Periodic health checks
-    HYBRID = "hybrid"        # Both passive and active
+    PASSIVE = "passive"  # Monitor during regular operations
+    ACTIVE = "active"  # Periodic health checks
+    HYBRID = "hybrid"  # Both passive and active

@@ -2,10 +2,4 @@
 
 # Import handlers directly from their modules when needed
 
-__all__ = [
-    'AWSHandler',
-    'ASGHandler', 
-    'EC2FleetHandler',
-    'SpotFleetHandler',
-    'RunInstancesHandler'
-]
+__all__ = ["AWSHandler", "ASGHandler", "EC2FleetHandler", "SpotFleetHandler", "RunInstancesHandler"]

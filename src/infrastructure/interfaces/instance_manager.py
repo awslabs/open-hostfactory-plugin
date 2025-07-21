@@ -1,4 +1,5 @@
 """Core instance manager interface - provider-agnostic instance management."""
+
 from typing import Dict, Any, List, Optional, Protocol, runtime_checkable
 from pydantic import BaseModel, ConfigDict
 from enum import Enum
@@ -8,6 +9,7 @@ from src.domain.base.value_objects import InstanceId, InstanceType, Tags
 
 class InstanceState(str, Enum):
     """Instance state enumeration."""
+
     PENDING = "pending"
     RUNNING = "running"
     STOPPING = "stopping"
@@ -18,8 +20,9 @@ class InstanceState(str, Enum):
 
 class InstanceSpec(BaseModel):
     """Specification for creating instances."""
+
     model_config = ConfigDict(extra="allow")  # Allow provider-specific config fields
-    
+
     instance_type: InstanceType
     image_id: str
     count: int = 1
@@ -32,8 +35,9 @@ class InstanceSpec(BaseModel):
 
 class Instance(BaseModel):
     """Instance information."""
+
     model_config = ConfigDict(extra="allow")  # Allow provider-specific fields
-    
+
     instance_id: InstanceId
     instance_type: InstanceType
     state: InstanceState
@@ -44,16 +48,18 @@ class Instance(BaseModel):
 
 class InstanceStatusResponse(BaseModel):
     """Response for instance status queries."""
+
     model_config = ConfigDict(extra="allow")
-    
+
     instances: List[Instance]
     total_count: int
 
 
 class InstanceConfig(BaseModel):
     """Base configuration for cloud instances."""
+
     model_config = ConfigDict(extra="allow")  # Allow provider-specific config fields
-    
+
     instance_type: InstanceType
     image_id: str
     count: int = 1
@@ -63,43 +69,43 @@ class InstanceConfig(BaseModel):
 @runtime_checkable
 class InstanceManagerPort(Protocol):
     """Interface for managing cloud instances."""
-    
+
     def launch_instances(self, config: InstanceConfig) -> List[InstanceId]:
         """Launch cloud instances."""
         ...
-    
+
     def terminate_instances(self, instance_ids: List[InstanceId]) -> bool:
         """Terminate cloud instances."""
         ...
-    
+
     def get_instance_status(self, instance_ids: List[InstanceId]) -> InstanceStatusResponse:
         """Get status of specific instances."""
         ...
-    
+
     def create_instances(self, spec: InstanceSpec) -> List[Instance]:
         """Create instances based on specification."""
         ...
-    
+
     def list_instances(self, filters: Optional[Dict[str, Any]] = None) -> List[Instance]:
         """List instances with optional filters."""
         ...
-    
+
     def stop_instances(self, instance_ids: List[InstanceId]) -> bool:
         """Stop cloud instances (if supported by provider)."""
         ...
-    
+
     def start_instances(self, instance_ids: List[InstanceId]) -> bool:
         """Start stopped cloud instances (if supported by provider)."""
         ...
-    
+
     def get_instance_status(self, instance_ids: List[InstanceId]) -> Dict[InstanceId, str]:
         """Get the status of cloud instances."""
         ...
-    
+
     def get_instance_details(self, instance_ids: List[InstanceId]) -> List[Dict[str, Any]]:
         """Get detailed information about cloud instances."""
         ...
-    
+
     def update_instance_tags(self, instance_ids: List[InstanceId], tags: Tags) -> bool:
         """Update tags on cloud instances."""
         ...

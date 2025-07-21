@@ -1,8 +1,6 @@
 """SQLAlchemy models for persistence."""
-from sqlalchemy import (
-    Column, Integer, String, Boolean, DateTime, Text, ForeignKey,
-    JSON, Enum
-)
+
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, JSON, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -10,6 +8,7 @@ import enum
 import json
 
 Base = declarative_base()
+
 
 class JsonSerializableMixin:
     """Mixin for JSON serializable models."""
@@ -43,9 +42,9 @@ class JsonSerializableMixin:
 
 class MachineModel(Base, JsonSerializableMixin):
     """SQLAlchemy model for machines."""
-    
-    __tablename__ = 'machines'
-    
+
+    __tablename__ = "machines"
+
     machine_id = Column(String(36), primary_key=True)
     name = Column(String(255), nullable=False)
     status = Column(String(50), nullable=False)
@@ -61,28 +60,28 @@ class MachineModel(Base, JsonSerializableMixin):
     cloud_host_id = Column(String(255), nullable=True)
     # Using model_metadata instead of metadata to avoid conflict with SQLAlchemy's reserved keyword
     # The domain model uses metadata, but SQLAlchemy reserves this name in the Declarative API
-    model_metadata = Column('model_metadata', JSON, nullable=True)
+    model_metadata = Column("model_metadata", JSON, nullable=True)
     health_checks = Column(JSON, nullable=True)
-    request_id = Column(String(36), ForeignKey('requests.request_id'), nullable=False)
-    template_id = Column(String(36), ForeignKey('templates.template_id'), nullable=True)
+    request_id = Column(String(36), ForeignKey("requests.request_id"), nullable=False)
+    template_id = Column(String(36), ForeignKey("templates.template_id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     version = Column(Integer, default=0)
-    
+
     # Relationships
-    request = relationship('RequestModel', back_populates='machines')
-    template = relationship('TemplateModel', back_populates='machines')
+    request = relationship("RequestModel", back_populates="machines")
+    template = relationship("TemplateModel", back_populates="machines")
 
 
 class RequestModel(Base, JsonSerializableMixin):
     """SQLAlchemy model for requests."""
-    
-    __tablename__ = 'requests'
-    
+
+    __tablename__ = "requests"
+
     request_id = Column(String(36), primary_key=True)
     status = Column(String(50), nullable=False)
     request_type = Column(String(50), nullable=False)
-    template_id = Column(String(36), ForeignKey('templates.template_id'), nullable=True)
+    template_id = Column(String(36), ForeignKey("templates.template_id"), nullable=True)
     number_of_machines = Column(Integer, nullable=False)
     machine_ids = Column(JSON, nullable=True)  # List of machine IDs
     parameters = Column(JSON, nullable=True)
@@ -90,17 +89,17 @@ class RequestModel(Base, JsonSerializableMixin):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)
     version = Column(Integer, default=0)
-    
+
     # Relationships
-    machines = relationship('MachineModel', back_populates='request')
-    template = relationship('TemplateModel', back_populates='requests')
+    machines = relationship("MachineModel", back_populates="request")
+    template = relationship("TemplateModel", back_populates="requests")
 
 
 class TemplateModel(Base, JsonSerializableMixin):
     """SQLAlchemy model for templates."""
-    
-    __tablename__ = 'templates'
-    
+
+    __tablename__ = "templates"
+
     template_id = Column(String(36), primary_key=True)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
@@ -113,7 +112,7 @@ class TemplateModel(Base, JsonSerializableMixin):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     version = Column(Integer, default=0)
-    
+
     # Relationships
-    machines = relationship('MachineModel', back_populates='template')
-    requests = relationship('RequestModel', back_populates='template')
+    machines = relationship("MachineModel", back_populates="template")
+    requests = relationship("RequestModel", back_populates="template")

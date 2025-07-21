@@ -3,6 +3,7 @@ String utility functions for the AWS Host Factory Plugin.
 
 This module contains utility functions for working with strings.
 """
+
 import re
 import uuid
 import hashlib
@@ -12,10 +13,10 @@ from typing import Optional, List, Dict, Any
 def is_empty(value: Optional[str]) -> bool:
     """
     Check if a string is empty or None.
-    
+
     Args:
         value: String to check
-        
+
     Returns:
         True if string is empty or None, False otherwise
     """
@@ -25,10 +26,10 @@ def is_empty(value: Optional[str]) -> bool:
 def is_not_empty(value: Optional[str]) -> bool:
     """
     Check if a string is not empty and not None.
-    
+
     Args:
         value: String to check
-        
+
     Returns:
         True if string is not empty and not None, False otherwise
     """
@@ -38,34 +39,34 @@ def is_not_empty(value: Optional[str]) -> bool:
 def truncate(value: str, max_length: int, suffix: str = "...") -> str:
     """
     Truncate a string to a maximum length.
-    
+
     Args:
         value: String to truncate
         max_length: Maximum length
         suffix: Suffix to add if truncated
-        
+
     Returns:
         Truncated string
     """
     if len(value) <= max_length:
         return value
-    return value[:max_length - len(suffix)] + suffix
+    return value[: max_length - len(suffix)] + suffix
 
 
 def to_snake_case(value: str) -> str:
     """
     Convert a string to snake_case.
-    
+
     Args:
         value: String to convert
-        
+
     Returns:
         String in snake_case
     """
     # Replace non-alphanumeric characters with underscores
-    s1 = re.sub(r'[^a-zA-Z0-9]', '_', value)
+    s1 = re.sub(r"[^a-zA-Z0-9]", "_", value)
     # Insert underscores between lowercase and uppercase letters
-    s2 = re.sub(r'([a-z])([A-Z])', r'\1_\2', s1)
+    s2 = re.sub(r"([a-z])([A-Z])", r"\1_\2", s1)
     # Convert to lowercase
     return s2.lower()
 
@@ -73,49 +74,49 @@ def to_snake_case(value: str) -> str:
 def to_camel_case(value: str) -> str:
     """
     Convert a string to camelCase.
-    
+
     Args:
         value: String to convert
-        
+
     Returns:
         String in camelCase
     """
     # Split by non-alphanumeric characters
-    words = re.split(r'[^a-zA-Z0-9]', value)
+    words = re.split(r"[^a-zA-Z0-9]", value)
     # Capitalize all words except the first one
-    return words[0].lower() + ''.join(word.capitalize() for word in words[1:])
+    return words[0].lower() + "".join(word.capitalize() for word in words[1:])
 
 
 def to_pascal_case(value: str) -> str:
     """
     Convert a string to PascalCase.
-    
+
     Args:
         value: String to convert
-        
+
     Returns:
         String in PascalCase
     """
     # Split by non-alphanumeric characters
-    words = re.split(r'[^a-zA-Z0-9]', value)
+    words = re.split(r"[^a-zA-Z0-9]", value)
     # Capitalize all words
-    return ''.join(word.capitalize() for word in words)
+    return "".join(word.capitalize() for word in words)
 
 
 def to_kebab_case(value: str) -> str:
     """
     Convert a string to kebab-case.
-    
+
     Args:
         value: String to convert
-        
+
     Returns:
         String in kebab-case
     """
     # Replace non-alphanumeric characters with hyphens
-    s1 = re.sub(r'[^a-zA-Z0-9]', '-', value)
+    s1 = re.sub(r"[^a-zA-Z0-9]", "-", value)
     # Insert hyphens between lowercase and uppercase letters
-    s2 = re.sub(r'([a-z])([A-Z])', r'\1-\2', s1)
+    s2 = re.sub(r"([a-z])([A-Z])", r"\1-\2", s1)
     # Convert to lowercase
     return s2.lower()
 
@@ -123,7 +124,7 @@ def to_kebab_case(value: str) -> str:
 def generate_uuid() -> str:
     """
     Generate a UUID.
-    
+
     Returns:
         UUID as string
     """
@@ -133,11 +134,11 @@ def generate_uuid() -> str:
 def hash_string(value: str, algorithm: str = "sha256") -> str:
     """
     Hash a string using the specified algorithm.
-    
+
     Args:
         value: String to hash
         algorithm: Hash algorithm to use
-        
+
     Returns:
         Hashed string
     """
@@ -158,18 +159,18 @@ def hash_string(value: str, algorithm: str = "sha256") -> str:
 def mask_sensitive_data(value: str, mask_char: str = "*", visible_chars: int = 4) -> str:
     """
     Mask sensitive data in a string.
-    
+
     Args:
         value: String to mask
         mask_char: Character to use for masking
         visible_chars: Number of characters to leave visible at the end
-        
+
     Returns:
         Masked string
     """
     if len(value) <= visible_chars:
         return value
-    
+
     masked_length = len(value) - visible_chars
     return mask_char * masked_length + value[-visible_chars:]
 
@@ -177,25 +178,25 @@ def mask_sensitive_data(value: str, mask_char: str = "*", visible_chars: int = 4
 def split_by_case(value: str) -> List[str]:
     """
     Split a string by case changes.
-    
+
     Args:
         value: String to split
-        
+
     Returns:
         List of words
     """
     # Split by case changes
-    return re.findall(r'[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)', value)
+    return re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)", value)
 
 
 def convert_case(value: str, case_type: str) -> str:
     """
     Convert a string to the specified case type.
-    
+
     Args:
         value: String to convert
         case_type: Case type to convert to (snake, camel, pascal, kebab)
-        
+
     Returns:
         Converted string
     """
@@ -214,17 +215,17 @@ def convert_case(value: str, case_type: str) -> str:
 def convert_dict_keys(data: Dict[str, Any], case_type: str) -> Dict[str, Any]:
     """
     Convert all dictionary keys to the specified case type.
-    
+
     Args:
         data: Dictionary to convert
         case_type: Case type to convert to (snake, camel, pascal, kebab)
-        
+
     Returns:
         Dictionary with converted keys
     """
     if not isinstance(data, dict):
         return data
-    
+
     result = {}
     for key, value in data.items():
         new_key = convert_case(key, case_type)
@@ -237,5 +238,5 @@ def convert_dict_keys(data: Dict[str, Any], case_type: str) -> Dict[str, Any]:
             ]
         else:
             result[new_key] = value
-    
+
     return result

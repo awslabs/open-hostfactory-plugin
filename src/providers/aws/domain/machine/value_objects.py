@@ -6,24 +6,23 @@ from src.providers.aws.domain.template.value_objects import (
     AWSTags,
     AWSImageId,
     AWSSubnetId,
-    AWSSecurityGroupId
+    AWSSecurityGroupId,
 )
 
 # Re-export all base machine value objects with AWS extensions
 __all__ = [
     # Base machine value objects
-    'MachineId',
-    'MachineStatus', 
-    'MachineHealth',
-    'InstanceType',
-    'PrivateIpAddress',
-    'PublicIpAddress',
-    'Tags',
-    
+    "MachineId",
+    "MachineStatus",
+    "MachineHealth",
+    "InstanceType",
+    "PrivateIpAddress",
+    "PublicIpAddress",
+    "Tags",
     # AWS-specific extensions
-    'AWSInstanceType',
-    'AWSTags',
-    'AWSImageId', 
-    'AWSSubnetId',
-    'AWSSecurityGroupId'
+    "AWSInstanceType",
+    "AWSTags",
+    "AWSImageId",
+    "AWSSubnetId",
+    "AWSSecurityGroupId",
 ]

@@ -23,18 +23,18 @@ _dry_run_context = threading.local()
 def dry_run_context(active: bool = True) -> Generator[None, None, None]:
     """
     Global dry-run context manager.
-    
+
     When active, providers should use their respective mocking strategies:
     - AWS Provider: Uses moto for boto3 calls
     - Azure Provider: Uses Azure SDK mocks
     - GCP Provider: Uses GCP SDK mocks
-    
+
     Args:
         active: Whether to activate dry-run mode
-        
+
     Yields:
         None
-        
+
     Example:
         ```python
         with dry_run_context(True):
@@ -43,9 +43,9 @@ def dry_run_context(active: bool = True) -> Generator[None, None, None]:
         ```
     """
     # Store previous state for nested contexts
-    old_value = getattr(_dry_run_context, 'active', False)
+    old_value = getattr(_dry_run_context, "active", False)
     _dry_run_context.active = active
-    
+
     try:
         yield
     finally:
@@ -56,10 +56,10 @@ def dry_run_context(active: bool = True) -> Generator[None, None, None]:
 def is_dry_run_active() -> bool:
     """
     Check if dry-run mode is currently active for the current thread.
-    
+
     Returns:
         bool: True if dry-run is active, False otherwise
-        
+
     Example:
         ```python
         if is_dry_run_active():
@@ -71,18 +71,18 @@ def is_dry_run_active() -> bool:
             return boto3.client('ec2').run_instances(...)
         ```
     """
-    return getattr(_dry_run_context, 'active', False)
+    return getattr(_dry_run_context, "active", False)
 
 
 def get_dry_run_status() -> dict:
     """
     Get detailed dry-run status information for debugging.
-    
+
     Returns:
         dict: Status information including thread ID and active state
     """
     return {
-        'active': is_dry_run_active(),
-        'thread_id': threading.get_ident(),
-        'thread_name': threading.current_thread().name
+        "active": is_dry_run_active(),
+        "thread_id": threading.get_ident(),
+        "thread_name": threading.current_thread().name,
     }

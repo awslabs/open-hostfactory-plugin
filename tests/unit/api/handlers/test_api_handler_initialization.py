@@ -1,4 +1,5 @@
 """Tests for API handler initialization."""
+
 import pytest
 from unittest.mock import MagicMock, patch
 
@@ -32,9 +33,9 @@ class TestAPIHandlerInitialization:
             query_bus=self.query_bus,
             command_bus=self.command_bus,
             scheduler_strategy=self.scheduler_strategy,
-            metrics=self.metrics
+            metrics=self.metrics,
         )
-        
+
         # Assert
         assert handler._query_bus == self.query_bus
         assert handler._command_bus == self.command_bus
@@ -49,9 +50,9 @@ class TestAPIHandlerInitialization:
             command_bus=self.command_bus,
             logger=self.logger,
             error_handler=self.error_handler,
-            metrics=self.metrics
+            metrics=self.metrics,
         )
-        
+
         # Assert
         assert handler._query_bus == self.query_bus
         assert handler._command_bus == self.command_bus
@@ -68,9 +69,9 @@ class TestAPIHandlerInitialization:
             scheduler_strategy=self.scheduler_strategy,
             logger=self.logger,
             error_handler=self.error_handler,
-            metrics=self.metrics
+            metrics=self.metrics,
         )
-        
+
         # Assert
         assert handler._query_bus == self.query_bus
         assert handler._command_bus == self.command_bus
@@ -88,9 +89,9 @@ class TestAPIHandlerInitialization:
             scheduler_strategy=self.scheduler_strategy,
             logger=self.logger,
             error_handler=self.error_handler,
-            metrics=self.metrics
+            metrics=self.metrics,
         )
-        
+
         # Assert
         assert handler._query_bus == self.query_bus
         assert handler._command_bus == self.command_bus
@@ -108,9 +109,9 @@ class TestAPIHandlerInitialization:
             scheduler_strategy=self.scheduler_strategy,
             logger=self.logger,
             error_handler=self.error_handler,
-            metrics=self.metrics
+            metrics=self.metrics,
         )
-        
+
         # Assert
         assert handler._query_bus == self.query_bus
         assert handler._command_bus == self.command_bus
@@ -123,42 +124,42 @@ class TestAPIHandlerInitialization:
 class TestAPIHandlerRegistration:
     """Test API handler registration in server_services.py."""
 
-    @patch('src.infrastructure.di.server_services._register_api_handlers')
+    @patch("src.infrastructure.di.server_services._register_api_handlers")
     def test_register_server_services(self, mock_register_api_handlers):
         """Test that register_server_services calls _register_api_handlers when server is enabled."""
         # Arrange
         from src.infrastructure.di.server_services import register_server_services
         from src.config.schemas.server_schema import ServerConfig
-        
+
         container = MagicMock()
         config_manager = MagicMock()
         server_config = MagicMock(spec=ServerConfig)
         server_config.enabled = True
         config_manager.get_typed.return_value = server_config
         container.get.return_value = config_manager
-        
+
         # Act
         register_server_services(container)
-        
+
         # Assert
         mock_register_api_handlers.assert_called_once_with(container)
 
-    @patch('src.infrastructure.di.server_services._register_api_handlers')
+    @patch("src.infrastructure.di.server_services._register_api_handlers")
     def test_register_server_services_disabled(self, mock_register_api_handlers):
         """Test that register_server_services doesn't call _register_api_handlers when server is disabled."""
         # Arrange
         from src.infrastructure.di.server_services import register_server_services
         from src.config.schemas.server_schema import ServerConfig
-        
+
         container = MagicMock()
         config_manager = MagicMock()
         server_config = MagicMock(spec=ServerConfig)
         server_config.enabled = False
         config_manager.get_typed.return_value = server_config
         container.get.return_value = config_manager
-        
+
         # Act
         register_server_services(container)
-        
+
         # Assert
         mock_register_api_handlers.assert_not_called()

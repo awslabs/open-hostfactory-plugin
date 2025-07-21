@@ -1,4 +1,5 @@
 """Application logging configuration."""
+
 from __future__ import annotations
 import logging
 import logging.handlers
@@ -8,6 +9,7 @@ from typing import Any, Dict, Optional
 from pathlib import Path
 
 from src.config import LoggingConfig
+
 
 class JsonFormatter(logging.Formatter):
     """Format log records as JSON."""
@@ -22,41 +24,44 @@ class JsonFormatter(logging.Formatter):
         file_path = record.pathname
         try:
             # Try to get relative path from src directory
-            src_index = file_path.find('/src/')
+            src_index = file_path.find("/src/")
             if src_index >= 0:
-                file_path = file_path[src_index + 1:]  # +1 to remove leading slash
+                file_path = file_path[src_index + 1 :]  # +1 to remove leading slash
         except Exception as e:
             # Can't use logger here to avoid recursion
             # Just use full path and continue
-            logger.warning(f"Warning: Error formatting log path: {e}")  # Simple console output for logging system errors
-            
+            logger.warning(
+                f"Warning: Error formatting log path: {e}"
+            )  # Simple console output for logging system errors
+
         message = {
-            'timestamp': datetime.utcfromtimestamp(record.created).isoformat(),
-            'level': record.levelname,
-            'logger': record.name,
-            'message': record.getMessage(),
-            'module': record.module,
-            'function': record.funcName,
-            'line': record.lineno,
-            'file': file_path,
-            'location': f"{file_path}:{record.lineno} ({record.funcName})",
-            **self.default_fields
+            "timestamp": datetime.utcfromtimestamp(record.created).isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
+            "file": file_path,
+            "location": f"{file_path}:{record.lineno} ({record.funcName})",
+            **self.default_fields,
         }
 
         if record.exc_info:
-            message['exception'] = self.formatException(record.exc_info)
+            message["exception"] = self.formatException(record.exc_info)
 
-        if hasattr(record, 'request_id'):
-            message['request_id'] = record.request_id
+        if hasattr(record, "request_id"):
+            message["request_id"] = record.request_id
 
-        if hasattr(record, 'correlation_id'):
-            message['correlation_id'] = record.correlation_id
+        if hasattr(record, "correlation_id"):
+            message["correlation_id"] = record.correlation_id
 
         # Include any extra fields provided in the log call
-        if hasattr(record, 'extra'):
+        if hasattr(record, "extra"):
             message.update(record.extra)
 
         return json.dumps(message)
+
 
 class ContextLogger(logging.Logger):
     """Logger that supports context information."""
@@ -74,14 +79,16 @@ class ContextLogger(logging.Logger):
         for key in keys:
             self._context.pop(key, None)
 
-    def _log(self,
-            level: int,
-            msg: str,
-            args: tuple,
-            exc_info: Optional[Exception] = None,
-            extra: Optional[Dict[str, Any]] = None,
-            stack_info: bool = False,
-            stacklevel: int = 1) -> None:
+    def _log(
+        self,
+        level: int,
+        msg: str,
+        args: tuple,
+        exc_info: Optional[Exception] = None,
+        extra: Optional[Dict[str, Any]] = None,
+        stack_info: bool = False,
+        stacklevel: int = 1,
+    ) -> None:
         """Override _log to include context information."""
         if extra is None:
             extra = {}
@@ -89,37 +96,39 @@ class ContextLogger(logging.Logger):
         # Increase stacklevel by 1 to skip our wrapper and report the correct caller
         super()._log(level, msg, args, exc_info, extra, stack_info, stacklevel + 1)
 
+
 # Flag to track if logging has been initialized
 _logging_initialized = False
+
 
 def setup_logging(config: LoggingConfig) -> None:
     """
     Configure application logging.
-    
+
     Args:
         config: Logging configuration
     """
     global _logging_initialized
-    
+
     # Only initialize logging once
     if _logging_initialized:
         return
-    
+
     # Set logging class
     logging.setLoggerClass(ContextLogger)
 
     # Create root logger
     root_logger = logging.getLogger()
-    
+
     # Convert string level to numeric level
     level_name = config.level.upper()
     level = getattr(logging, level_name, logging.INFO)
     root_logger.setLevel(level)
-    
+
     # Log the level being set
     logger = get_logger(__name__)
     logger.info(f"Setting root logger level to: {level_name}")
-    
+
     # Remove any existing handlers to prevent duplicates
     for handler in list(root_logger.handlers):
         root_logger.removeHandler(handler)
@@ -136,14 +145,14 @@ def setup_logging(config: LoggingConfig) -> None:
 
     try:
         config_manager = get_config_manager()
-        console_enabled = config_manager.get('logging.console_enabled', config.console_enabled)
+        console_enabled = config_manager.get("logging.console_enabled", config.console_enabled)
         if isinstance(console_enabled, str):
-            console_enabled = console_enabled.lower() in ('true', '1', 'yes')
+            console_enabled = console_enabled.lower() in ("true", "1", "yes")
     except Exception as e:
         # Fallback to config if ConfigurationManager fails
         logger.debug(f"Could not get console_enabled from ConfigurationManager: {str(e)}")
         console_enabled = config.console_enabled
-        
+
     if console_enabled:
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(text_formatter)
@@ -157,66 +166,67 @@ def setup_logging(config: LoggingConfig) -> None:
 
         # Create rotating file handler
         file_handler = logging.handlers.RotatingFileHandler(
-            filename=str(log_path),
-            maxBytes=config.max_size,
-            backupCount=config.backup_count
+            filename=str(log_path), maxBytes=config.max_size, backupCount=config.backup_count
         )
         file_handler.setFormatter(json_formatter)
         root_logger.addHandler(file_handler)
 
     # Set default logging levels for third-party libraries
-    get_logger('boto3').setLevel(logging.WARNING)
-    get_logger('botocore').setLevel(logging.WARNING)
-    get_logger('urllib3').setLevel(logging.WARNING)
-    
+    get_logger("boto3").setLevel(logging.WARNING)
+    get_logger("botocore").setLevel(logging.WARNING)
+    get_logger("urllib3").setLevel(logging.WARNING)
+
     # Mark logging as initialized
     _logging_initialized = True
-    
+
     # Log initialization
     logging.getLogger(__name__).debug("Logging system initialized")
+
 
 def get_logger(name: str) -> ContextLogger:
     """
     Get a logger instance.
-    
+
     Args:
         name: Logger name
-        
+
     Returns:
         Logger instance
     """
     return logging.getLogger(name)
+
 
 class LoggerAdapter(logging.LoggerAdapter):
     """Adapter that adds context to log records."""
 
     def process(self, msg: str, kwargs: Dict[str, Any]) -> tuple[str, Dict[str, Any]]:
         """Process log record to add context."""
-        if 'extra' not in kwargs:
-            kwargs['extra'] = {}
-        kwargs['extra'].update(self.extra)
+        if "extra" not in kwargs:
+            kwargs["extra"] = {}
+        kwargs["extra"].update(self.extra)
         return msg, kwargs
+
 
 def with_context(**context: Any) -> LoggerAdapter:
     """
     Create a logger adapter with context.
-    
+
     Args:
         **context: Context key-value pairs
-        
+
     Returns:
         Logger adapter with context
     """
     logger = get_logger(__name__)
     return LoggerAdapter(logger, context)
 
+
 class RequestLogger:
     """Logger for request-specific logging."""
 
     def __init__(self, request_id: str, correlation_id: Optional[str] = None) -> None:
         self.logger = with_context(
-            request_id=request_id,
-            correlation_id=correlation_id or request_id
+            request_id=request_id, correlation_id=correlation_id or request_id
         )
 
     def info(self, msg: str, **kwargs: Any) -> None:
@@ -235,22 +245,25 @@ class RequestLogger:
         """Log debug message."""
         self.logger.debug(msg, extra=kwargs)
 
+
 class AuditLogger:
     """Logger for audit events."""
 
     def __init__(self) -> None:
-        self.logger = get_logger('audit')
+        self.logger = get_logger("audit")
 
-    def log_event(self,
-                event_type: str,
-                user: str,
-                action: str,
-                resource: str,
-                status: str,
-                details: Optional[Dict[str, Any]] = None) -> None:
+    def log_event(
+        self,
+        event_type: str,
+        user: str,
+        action: str,
+        resource: str,
+        status: str,
+        details: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """
         Log an audit event.
-        
+
         Args:
             event_type: Type of event
             user: User performing the action
@@ -262,30 +275,29 @@ class AuditLogger:
         self.logger.info(
             f"{event_type}: {action} on {resource} by {user} - {status}",
             extra={
-                'event_type': event_type,
-                'user': user,
-                'action': action,
-                'resource': resource,
-                'status': status,
-                'details': details or {},
-                'timestamp': datetime.utcnow().isoformat()
-            }
+                "event_type": event_type,
+                "user": user,
+                "action": action,
+                "resource": resource,
+                "status": status,
+                "details": details or {},
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
+
 
 class MetricsLogger:
     """Logger for application metrics."""
 
     def __init__(self) -> None:
-        self.logger = get_logger('metrics')
+        self.logger = get_logger("metrics")
 
-    def log_timing(self,
-                operation: str,
-                duration_ms: float,
-                status: str = 'success',
-                **tags: str) -> None:
+    def log_timing(
+        self, operation: str, duration_ms: float, status: str = "success", **tags: str
+    ) -> None:
         """
         Log operation timing.
-        
+
         Args:
             operation: Operation being timed
             duration_ms: Duration in milliseconds
@@ -295,22 +307,19 @@ class MetricsLogger:
         self.logger.info(
             f"{operation} took {duration_ms:.2f}ms",
             extra={
-                'metric_type': 'timing',
-                'operation': operation,
-                'duration_ms': duration_ms,
-                'status': status,
-                'tags': tags,
-                'timestamp': datetime.utcnow().isoformat()
-            }
+                "metric_type": "timing",
+                "operation": operation,
+                "duration_ms": duration_ms,
+                "status": status,
+                "tags": tags,
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_counter(self,
-                metric: str,
-                value: int = 1,
-                **tags: str) -> None:
+    def log_counter(self, metric: str, value: int = 1, **tags: str) -> None:
         """
         Log counter metric.
-        
+
         Args:
             metric: Metric name
             value: Metric value
@@ -319,21 +328,18 @@ class MetricsLogger:
         self.logger.info(
             f"{metric}: {value}",
             extra={
-                'metric_type': 'counter',
-                'metric': metric,
-                'value': value,
-                'tags': tags,
-                'timestamp': datetime.utcnow().isoformat()
-            }
+                "metric_type": "counter",
+                "metric": metric,
+                "value": value,
+                "tags": tags,
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )
 
-    def log_gauge(self,
-                metric: str,
-                value: float,
-                **tags: str) -> None:
+    def log_gauge(self, metric: str, value: float, **tags: str) -> None:
         """
         Log gauge metric.
-        
+
         Args:
             metric: Metric name
             value: Metric value
@@ -342,10 +348,10 @@ class MetricsLogger:
         self.logger.info(
             f"{metric}: {value}",
             extra={
-                'metric_type': 'gauge',
-                'metric': metric,
-                'value': value,
-                'tags': tags,
-                'timestamp': datetime.utcnow().isoformat()
-            }
+                "metric_type": "gauge",
+                "metric": metric,
+                "value": value,
+                "tags": tags,
+                "timestamp": datetime.utcnow().isoformat(),
+            },
         )

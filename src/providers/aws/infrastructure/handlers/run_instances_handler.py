@@ -26,6 +26,7 @@ Note:
     RunInstances is ideal for simple deployments, development environments,
     and workloads that require predictable instance provisioning.
 """
+
 from typing import Dict, Any, List
 from datetime import datetime
 from botocore.exceptions import ClientError
@@ -34,7 +35,9 @@ from src.domain.request.aggregate import Request
 from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSValidationError, AWSEntityNotFoundError, AWSInfrastructureError
+    AWSValidationError,
+    AWSEntityNotFoundError,
+    AWSInfrastructureError,
 )
 from src.providers.aws.utilities.aws_operations import AWSOperations
 from src.domain.base.ports import LoggingPort, ErrorHandlingPort
@@ -43,20 +46,23 @@ from src.domain.base.dependency_injection import injectable
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
 
+
 @injectable
 class RunInstancesHandler(AWSHandler):
     """Handler for direct EC2 instance operations using RunInstances."""
-    
-    def __init__(self, 
-                 aws_client,
-                 logger: LoggingPort,
-                 aws_ops: AWSOperations,
-                 launch_template_manager: AWSLaunchTemplateManager,
-                 request_adapter: RequestAdapterPort = None,
-                 error_handler: ErrorHandlingPort = None):
+
+    def __init__(
+        self,
+        aws_client,
+        logger: LoggingPort,
+        aws_ops: AWSOperations,
+        launch_template_manager: AWSLaunchTemplateManager,
+        request_adapter: RequestAdapterPort = None,
+        error_handler: ErrorHandlingPort = None,
+    ):
         """
         Initialize RunInstances handler with unified dependencies.
-        
+
         Args:
             aws_client: AWS client instance
             logger: Logger for logging messages
@@ -66,7 +72,9 @@ class RunInstancesHandler(AWSHandler):
             error_handler: Optional error handling port for exception management
         """
         # Use unified base class initialization
-        super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter, error_handler)
+        super().__init__(
+            aws_client, logger, aws_ops, launch_template_manager, request_adapter, error_handler
+        )
 
     @handle_infrastructure_exceptions(context="run_instances_creation")
     def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
@@ -78,27 +86,22 @@ class RunInstancesHandler(AWSHandler):
             resource_id = self.aws_ops.execute_with_standard_error_handling(
                 operation=lambda: self._create_instances_internal(request, aws_template),
                 operation_name="run EC2 instances",
-                context="RunInstances"
+                context="RunInstances",
             )
-            
+
             # Get instance details immediately
-            instance_ids = request.metadata.get('instance_ids', [])
+            instance_ids = request.metadata.get("instance_ids", [])
             instance_details = self._get_instance_details(instance_ids)
             instances = self._format_instance_data(instance_details, resource_id)
-            
+
             return {
-                'success': True,
-                'resource_ids': [resource_id],
-                'instances': instances,
-                'provider_data': {'resource_type': 'run_instances'}
+                "success": True,
+                "resource_ids": [resource_id],
+                "instances": instances,
+                "provider_data": {"resource_type": "run_instances"},
             }
         except Exception as e:
-            return {
-                'success': False,
-                'resource_ids': [],
-                'instances': [],
-                'error_message': str(e)
-            }
+            return {"success": False, "resource_ids": [], "instances": [], "error_message": str(e)}
 
     def _create_instances_internal(self, request: Request, aws_template: AWSTemplate) -> str:
         """Internal method for RunInstances creation with pure business logic."""
@@ -106,13 +109,14 @@ class RunInstancesHandler(AWSHandler):
         self._validate_prerequisites(aws_template)
 
         # Create launch template using the new manager
-        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
-        
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
+        )
+
         # Store launch template info in request (if request has this method)
-        if hasattr(request, 'set_launch_template_info'):
+        if hasattr(request, "set_launch_template_info"):
             request.set_launch_template_info(
-                launch_template_result.template_id,
-                launch_template_result.version
+                launch_template_result.template_id, launch_template_result.version
             )
 
         # Create RunInstances parameters
@@ -120,83 +124,90 @@ class RunInstancesHandler(AWSHandler):
             aws_template=aws_template,
             request=request,
             launch_template_id=launch_template_result.template_id,
-            launch_template_version=launch_template_result.version
+            launch_template_version=launch_template_result.version,
         )
 
         # Execute RunInstances API call with circuit breaker for critical operation
         response = self._retry_with_backoff(
-            self.aws_client.ec2_client.run_instances,
-            operation_type="critical",
-            **run_params
+            self.aws_client.ec2_client.run_instances, operation_type="critical", **run_params
         )
 
         # Extract reservation ID and instance IDs from response
-        reservation_id = response.get('ReservationId')
-        instance_ids = [instance['InstanceId'] for instance in response.get('Instances', [])]
-        
+        reservation_id = response.get("ReservationId")
+        instance_ids = [instance["InstanceId"] for instance in response.get("Instances", [])]
+
         if not instance_ids:
             raise AWSInfrastructureError("No instances were created by RunInstances")
-        
+
         if not reservation_id:
             raise AWSInfrastructureError("No reservation ID returned by RunInstances")
 
         # Use the actual AWS reservation ID as the resource ID
         resource_id = reservation_id
-        
-        # Store instance IDs and reservation ID in request metadata for later retrieval
-        if not hasattr(request, 'metadata'):
-            request.metadata = {}
-        request.metadata['instance_ids'] = instance_ids
-        request.metadata['reservation_id'] = reservation_id
-        request.metadata['run_instances_resource_id'] = resource_id
 
-        self._logger.info(f"Successfully created {len(instance_ids)} instances via RunInstances with reservation ID {reservation_id}: {instance_ids}")
+        # Store instance IDs and reservation ID in request metadata for later retrieval
+        if not hasattr(request, "metadata"):
+            request.metadata = {}
+        request.metadata["instance_ids"] = instance_ids
+        request.metadata["reservation_id"] = reservation_id
+        request.metadata["run_instances_resource_id"] = resource_id
+
+        self._logger.info(
+            f"Successfully created {len(instance_ids)} instances via RunInstances with reservation ID {reservation_id}: {instance_ids}"
+        )
 
         return resource_id
 
-    def _format_instance_data(self, instance_details: List[Dict[str, Any]], resource_id: str) -> List[Dict[str, Any]]:
+    def _format_instance_data(
+        self, instance_details: List[Dict[str, Any]], resource_id: str
+    ) -> List[Dict[str, Any]]:
         """Format AWS instance details to standard structure."""
-        return [{
-            'instance_id': inst['InstanceId'],
-            'resource_id': resource_id,
-            'status': inst['State'],
-            'private_ip': inst.get('PrivateIpAddress'),
-            'public_ip': inst.get('PublicIpAddress'),
-            'launch_time': inst.get('LaunchTime')
-        } for inst in instance_details]
+        return [
+            {
+                "instance_id": inst["InstanceId"],
+                "resource_id": resource_id,
+                "status": inst["State"],
+                "private_ip": inst.get("PrivateIpAddress"),
+                "public_ip": inst.get("PublicIpAddress"),
+                "launch_time": inst.get("LaunchTime"),
+            }
+            for inst in instance_details
+        ]
 
-    def _create_run_instances_params(self,
-                                   aws_template: AWSTemplate,
-                                   request: Request,
-                                   launch_template_id: str,
-                                   launch_template_version: str) -> Dict[str, Any]:
+    def _create_run_instances_params(
+        self,
+        aws_template: AWSTemplate,
+        request: Request,
+        launch_template_id: str,
+        launch_template_version: str,
+    ) -> Dict[str, Any]:
         """Create RunInstances parameters with launch template."""
-        
+
         # Base parameters using launch template
         params = {
-            'LaunchTemplate': {
-                'LaunchTemplateId': launch_template_id,
-                'Version': launch_template_version
+            "LaunchTemplate": {
+                "LaunchTemplateId": launch_template_id,
+                "Version": launch_template_version,
             },
-            'MinCount': 1,
-            'MaxCount': request.requested_count,
+            "MinCount": 1,
+            "MaxCount": request.requested_count,
         }
 
         # Add instance type override if specified (overrides launch template)
         if aws_template.instance_type:
-            params['InstanceType'] = aws_template.instance_type
+            params["InstanceType"] = aws_template.instance_type
 
         # Handle networking overrides based on launch template source
         if aws_template.launch_template_id:
             # Using existing launch template - need to check what it contains
             # For now, assume we can override (this should be enhanced to inspect the LT)
             if aws_template.subnet_id:
-                params['SubnetId'] = aws_template.subnet_id
+                params["SubnetId"] = aws_template.subnet_id
             elif aws_template.subnet_ids and len(aws_template.subnet_ids) == 1:
-                params['SubnetId'] = aws_template.subnet_ids[0]
-            
+                params["SubnetId"] = aws_template.subnet_ids[0]
+
             if aws_template.security_group_ids:
-                params['SecurityGroupIds'] = aws_template.security_group_ids
+                params["SecurityGroupIds"] = aws_template.security_group_ids
         else:
             # We created the launch template ourselves with NetworkInterfaces
             # Don't override networking at API level - AWS will reject it
@@ -205,34 +216,34 @@ class RunInstancesHandler(AWSHandler):
 
         # Add spot instance configuration if needed
         if aws_template.price_type == "spot":
-            params['InstanceMarketOptions'] = {
-                'MarketType': 'spot'
-            }
-            
+            params["InstanceMarketOptions"] = {"MarketType": "spot"}
+
             if aws_template.max_spot_price:
-                params['InstanceMarketOptions']['SpotOptions'] = {
-                    'MaxPrice': str(aws_template.max_spot_price)
+                params["InstanceMarketOptions"]["SpotOptions"] = {
+                    "MaxPrice": str(aws_template.max_spot_price)
                 }
 
         # Add additional tags for instances (beyond launch template)
-        tag_specifications = [{
-            'ResourceType': 'instance',
-            'Tags': [
-                {'Key': 'Name', 'Value': f"hf-{request.request_id}"},
-                {'Key': 'RequestId', 'Value': str(request.request_id)},
-                {'Key': 'TemplateId', 'Value': str(aws_template.template_id)},
-                {'Key': 'CreatedBy', 'Value': 'HostFactory'},
-                {'Key': 'CreatedAt', 'Value': datetime.utcnow().isoformat()},
-                {'Key': 'ProviderApi', 'Value': 'RunInstances'}
-            ]
-        }]
+        tag_specifications = [
+            {
+                "ResourceType": "instance",
+                "Tags": [
+                    {"Key": "Name", "Value": f"hf-{request.request_id}"},
+                    {"Key": "RequestId", "Value": str(request.request_id)},
+                    {"Key": "TemplateId", "Value": str(aws_template.template_id)},
+                    {"Key": "CreatedBy", "Value": "HostFactory"},
+                    {"Key": "CreatedAt", "Value": datetime.utcnow().isoformat()},
+                    {"Key": "ProviderApi", "Value": "RunInstances"},
+                ],
+            }
+        ]
 
         # Add template tags if any
         if aws_template.tags:
-            instance_tags = [{'Key': k, 'Value': v} for k, v in aws_template.tags.items()]
-            tag_specifications[0]['Tags'].extend(instance_tags)
+            instance_tags = [{"Key": k, "Value": v} for k, v in aws_template.tags.items()]
+            tag_specifications[0]["Tags"].extend(instance_tags)
 
-        params['TagSpecifications'] = tag_specifications
+        params["TagSpecifications"] = tag_specifications
 
         return params
 
@@ -240,15 +251,19 @@ class RunInstancesHandler(AWSHandler):
         """Check the status of instances created by RunInstances."""
         try:
             # Get instance IDs from request metadata
-            instance_ids = request.metadata.get('instance_ids', [])
-            
+            instance_ids = request.metadata.get("instance_ids", [])
+
             if not instance_ids:
                 # If no instance IDs in metadata, try to find instances using resource IDs (reservation IDs)
-                if hasattr(request, 'resource_ids') and request.resource_ids:
-                    self._logger.info(f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}")
+                if hasattr(request, "resource_ids") and request.resource_ids:
+                    self._logger.info(
+                        f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}"
+                    )
                     return self._find_instances_by_resource_ids(request.resource_ids)
                 else:
-                    self._logger.info(f"No instance IDs or resource IDs found in request {request.request_id}")
+                    self._logger.info(
+                        f"No instance IDs or resource IDs found in request {request.request_id}"
+                    )
                     return []
 
             # Get detailed instance information using instance IDs
@@ -257,103 +272,124 @@ class RunInstancesHandler(AWSHandler):
         except Exception as e:
             self._logger.error(f"Unexpected error checking RunInstances status: {str(e)}")
             raise AWSInfrastructureError(f"Failed to check RunInstances status: {str(e)}")
-    
+
     def _find_instances_by_resource_ids(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Find instances using resource IDs (reservation IDs for RunInstances)."""
         try:
             all_instances = []
-            
+
             for resource_id in resource_ids:
                 # For RunInstances, resource_id is the reservation ID
                 # Try to use describe_instances with Filters to find instances by reservation ID
                 try:
                     response = self.aws_client.ec2_client.describe_instances(
-                        Filters=[
-                            {
-                                'Name': 'reservation-id',
-                                'Values': [resource_id]
-                            }
-                        ]
+                        Filters=[{"Name": "reservation-id", "Values": [resource_id]}]
                     )
-                    
+
                     # Extract instances from reservations
-                    for reservation in response.get('Reservations', []):
-                        for instance in reservation['Instances']:
+                    for reservation in response.get("Reservations", []):
+                        for instance in reservation["Instances"]:
                             instance_data = {
-                                'InstanceId': instance['InstanceId'],
-                                'State': instance['State']['Name'],
-                                'PrivateIpAddress': instance.get('PrivateIpAddress'),
-                                'PublicIpAddress': instance.get('PublicIpAddress'),
-                                'LaunchTime': instance['LaunchTime'].isoformat() if instance.get('LaunchTime') else None,
-                                'Tags': instance.get('Tags', []),
-                                'InstanceType': instance['InstanceType']
+                                "InstanceId": instance["InstanceId"],
+                                "State": instance["State"]["Name"],
+                                "PrivateIpAddress": instance.get("PrivateIpAddress"),
+                                "PublicIpAddress": instance.get("PublicIpAddress"),
+                                "LaunchTime": (
+                                    instance["LaunchTime"].isoformat()
+                                    if instance.get("LaunchTime")
+                                    else None
+                                ),
+                                "Tags": instance.get("Tags", []),
+                                "InstanceType": instance["InstanceType"],
                             }
                             all_instances.append(instance_data)
-                            
+
                 except ClientError as e:
-                    if e.response['Error']['Code'] == 'InvalidReservationID.NotFound':
+                    if e.response["Error"]["Code"] == "InvalidReservationID.NotFound":
                         self._logger.warning(f"Reservation ID {resource_id} not found")
                         continue
-                    elif 'Filter dicts have not been implemented' in str(e):
+                    elif "Filter dicts have not been implemented" in str(e):
                         # Moto doesn't support reservation-id filter, fall back to describe all instances
-                        self._logger.info(f"Reservation-id filter not supported (likely moto), falling back to describe all instances")
+                        self._logger.info(
+                            f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
+                        )
                         return self._find_instances_by_tags_fallback(resource_ids)
                     else:
                         raise
                 except Exception as e:
-                    if 'Filter dicts have not been implemented' in str(e):
+                    if "Filter dicts have not been implemented" in str(e):
                         # Moto doesn't support reservation-id filter, fall back to describe all instances
-                        self._logger.info(f"Reservation-id filter not supported (likely moto), falling back to describe all instances")
+                        self._logger.info(
+                            f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
+                        )
                         return self._find_instances_by_tags_fallback(resource_ids)
                     else:
                         raise
-            
-            self._logger.info(f"Found {len(all_instances)} instances for resource IDs: {resource_ids}")
+
+            self._logger.info(
+                f"Found {len(all_instances)} instances for resource IDs: {resource_ids}"
+            )
             return all_instances
-            
+
         except Exception as e:
             self._logger.error(f"Failed to find instances by resource IDs: {str(e)}")
             raise AWSInfrastructureError(f"Failed to find instances by resource IDs: {str(e)}")
-    
+
     def _find_instances_by_tags_fallback(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Fallback method to find instances by tags when reservation-id filter is not supported."""
         try:
-            self._logger.info(f"FALLBACK: Starting fallback method for resource IDs: {resource_ids}")
-            
+            self._logger.info(
+                f"FALLBACK: Starting fallback method for resource IDs: {resource_ids}"
+            )
+
             # In mock mode (moto), we can't use reservation-id filter
             # Instead, look for instances with our RequestId tag
             # This assumes the instances were tagged during creation
-            
+
             # Get all instances and filter by tags
             response = self.aws_client.ec2_client.describe_instances()
-            self._logger.info(f"FALLBACK: Found {len(response.get('Reservations', []))} total reservations")
-            
+            self._logger.info(
+                f"FALLBACK: Found {len(response.get('Reservations', []))} total reservations"
+            )
+
             matching_instances = []
-            for reservation in response.get('Reservations', []):
-                reservation_id = reservation['ReservationId']
-                self._logger.info(f"FALLBACK: Checking reservation {reservation_id} against targets {resource_ids}")
-                
+            for reservation in response.get("Reservations", []):
+                reservation_id = reservation["ReservationId"]
+                self._logger.info(
+                    f"FALLBACK: Checking reservation {reservation_id} against targets {resource_ids}"
+                )
+
                 # Check if this reservation matches any of our resource IDs
                 if reservation_id in resource_ids:
-                    self._logger.info(f"FALLBACK: MATCH! Reservation {reservation_id} found {len(reservation['Instances'])} instances")
-                    for instance in reservation['Instances']:
+                    self._logger.info(
+                        f"FALLBACK: MATCH! Reservation {reservation_id} found {len(reservation['Instances'])} instances"
+                    )
+                    for instance in reservation["Instances"]:
                         instance_data = {
-                            'InstanceId': instance['InstanceId'],
-                            'State': instance['State']['Name'],
-                            'PrivateIpAddress': instance.get('PrivateIpAddress'),
-                            'PublicIpAddress': instance.get('PublicIpAddress'),
-                            'LaunchTime': instance['LaunchTime'].isoformat() if instance.get('LaunchTime') else None,
-                            'Tags': instance.get('Tags', []),
-                            'InstanceType': instance['InstanceType']
+                            "InstanceId": instance["InstanceId"],
+                            "State": instance["State"]["Name"],
+                            "PrivateIpAddress": instance.get("PrivateIpAddress"),
+                            "PublicIpAddress": instance.get("PublicIpAddress"),
+                            "LaunchTime": (
+                                instance["LaunchTime"].isoformat()
+                                if instance.get("LaunchTime")
+                                else None
+                            ),
+                            "Tags": instance.get("Tags", []),
+                            "InstanceType": instance["InstanceType"],
                         }
                         matching_instances.append(instance_data)
-                        self._logger.info(f"FALLBACK: Added instance {instance_data['InstanceId']} with IP {instance_data['PrivateIpAddress']}")
+                        self._logger.info(
+                            f"FALLBACK: Added instance {instance_data['InstanceId']} with IP {instance_data['PrivateIpAddress']}"
+                        )
                 else:
                     self._logger.info(f"FALLBACK: No match for reservation {reservation_id}")
-            
-            self._logger.info(f"FALLBACK: Returning {len(matching_instances)} instances for resource IDs: {resource_ids}")
+
+            self._logger.info(
+                f"FALLBACK: Returning {len(matching_instances)} instances for resource IDs: {resource_ids}"
+            )
             return matching_instances
-            
+
         except Exception as e:
             self._logger.error(f"FALLBACK: Fallback method failed to find instances: {e}")
             # Return empty list rather than raising exception to allow graceful degradation
@@ -362,18 +398,18 @@ class RunInstancesHandler(AWSHandler):
     def release_hosts(self, request: Request) -> None:
         """
         Release hosts created by RunInstances.
-        
+
         Args:
             request: The request containing the instance information
         """
         try:
             # Get instance IDs from machine references or metadata
             instance_ids = []
-            
+
             if request.machine_references:
                 instance_ids = [m.machine_id for m in request.machine_references]
-            elif hasattr(request, 'metadata') and request.metadata.get('instance_ids'):
-                instance_ids = request.metadata['instance_ids']
+            elif hasattr(request, "metadata") and request.metadata.get("instance_ids"):
+                instance_ids = request.metadata["instance_ids"]
 
             if not instance_ids:
                 self._logger.warning(f"No instance IDs found for request {request.request_id}")
@@ -381,9 +417,7 @@ class RunInstancesHandler(AWSHandler):
 
             # Use consolidated AWS operations utility for instance termination
             self.aws_ops.terminate_instances_with_fallback(
-                instance_ids,
-                self._request_adapter,
-                "RunInstances instances"
+                instance_ids, self._request_adapter, "RunInstances instances"
             )
             self._logger.info(f"Terminated RunInstances instances: {instance_ids}")
 

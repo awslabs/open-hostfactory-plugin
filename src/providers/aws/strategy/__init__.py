@@ -7,9 +7,7 @@ strategy interface while maintaining all AWS-specific capabilities.
 
 from .aws_provider_strategy import AWSProviderStrategy
 
-__all__ = [
-    "AWSProviderStrategy"
-]
+__all__ = ["AWSProviderStrategy"]
 
 __version__ = "1.0.0"
 __author__ = "Symphony Team"

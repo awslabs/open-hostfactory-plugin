@@ -2,6 +2,4 @@
 
 from .provider_strategy_factory import ProviderStrategyFactory
 
-__all__ = [
-    'ProviderStrategyFactory'
-]
+__all__ = ["ProviderStrategyFactory"]

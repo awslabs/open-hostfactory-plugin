@@ -10,6 +10,7 @@ from src.application.dto.base import BaseQuery
 
 class GetProviderHealthQuery(BaseQuery):
     """Query to get provider health status."""
+
     provider_name: Optional[str] = None  # None = all providers
     include_details: bool = True
     include_history: bool = False
@@ -17,6 +18,7 @@ class GetProviderHealthQuery(BaseQuery):
 
 class ListAvailableProvidersQuery(BaseQuery):
     """Query to list all available provider strategies."""
+
     include_health: bool = True
     include_capabilities: bool = True
     include_metrics: bool = False
@@ -26,6 +28,7 @@ class ListAvailableProvidersQuery(BaseQuery):
 
 class GetProviderCapabilitiesQuery(BaseQuery):
     """Query to get provider capabilities and features."""
+
     provider_name: str
     include_performance_metrics: bool = True
     include_limitations: bool = True
@@ -33,6 +36,7 @@ class GetProviderCapabilitiesQuery(BaseQuery):
 
 class GetProviderMetricsQuery(BaseQuery):
     """Query to get provider performance metrics."""
+
     provider_name: Optional[str] = None  # None = all providers
     time_range_hours: int = 24
     include_operation_breakdown: bool = True
@@ -41,6 +45,7 @@ class GetProviderMetricsQuery(BaseQuery):
 
 class GetProviderStrategyConfigQuery(BaseQuery):
     """Query to get current provider strategy configuration."""
+
     include_selection_policies: bool = True
     include_fallback_config: bool = True
     include_health_check_config: bool = True

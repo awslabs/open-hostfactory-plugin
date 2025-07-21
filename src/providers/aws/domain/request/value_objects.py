@@ -8,26 +8,25 @@ from src.providers.aws.domain.template.value_objects import (
     AWSSubnetId,
     AWSSecurityGroupId,
     AWSFleetId,
-    AWSLaunchTemplateId
+    AWSLaunchTemplateId,
 )
 
 # Re-export all base request value objects with AWS extensions
 __all__ = [
     # Base request value objects
-    'RequestId',
-    'RequestStatus',
-    'RequestType',
-    'Priority',
-    'ResourceId',
-    'InstanceId',
-    'Tags',
-    
+    "RequestId",
+    "RequestStatus",
+    "RequestType",
+    "Priority",
+    "ResourceId",
+    "InstanceId",
+    "Tags",
     # AWS-specific extensions
-    'AWSInstanceType',
-    'AWSTags',
-    'AWSImageId',
-    'AWSSubnetId', 
-    'AWSSecurityGroupId',
-    'AWSFleetId',
-    'AWSLaunchTemplateId'
+    "AWSInstanceType",
+    "AWSTags",
+    "AWSImageId",
+    "AWSSubnetId",
+    "AWSSecurityGroupId",
+    "AWSFleetId",
+    "AWSLaunchTemplateId",
 ]

@@ -1,4 +1,5 @@
 """Basic file operations utilities."""
+
 import os
 import shutil
 import tempfile
@@ -8,10 +9,10 @@ from typing import Optional, Callable, Any, ContextManager
 def file_exists(file_path: str) -> bool:
     """
     Check if a file exists.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         True if file exists, False otherwise
     """
@@ -21,13 +22,13 @@ def file_exists(file_path: str) -> bool:
 def get_file_size(file_path: str) -> int:
     """
     Get size of a file in bytes.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         File size in bytes
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If file stats cannot be retrieved
@@ -43,13 +44,13 @@ def get_file_size(file_path: str) -> int:
 def get_file_modification_time(file_path: str) -> float:
     """
     Get file modification time as timestamp.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         Modification time as timestamp
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If file stats cannot be retrieved
@@ -65,13 +66,13 @@ def get_file_modification_time(file_path: str) -> float:
 def get_file_creation_time(file_path: str) -> float:
     """
     Get file creation time as timestamp.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         Creation time as timestamp
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If file stats cannot be retrieved
@@ -87,13 +88,13 @@ def get_file_creation_time(file_path: str) -> float:
 def get_file_access_time(file_path: str) -> float:
     """
     Get file access time as timestamp.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         Access time as timestamp
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If file stats cannot be retrieved
@@ -109,17 +110,17 @@ def get_file_access_time(file_path: str) -> float:
 def delete_file(file_path: str) -> None:
     """
     Delete a file.
-    
+
     Args:
         file_path: Path to file
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If file cannot be deleted
     """
     if not file_exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     try:
         os.remove(file_path)
     except OSError as e:
@@ -129,20 +130,20 @@ def delete_file(file_path: str) -> None:
 def copy_file(source_path: str, destination_path: str) -> None:
     """
     Copy a file from source to destination.
-    
+
     Args:
         source_path: Source file path
         destination_path: Destination file path
-        
+
     Raises:
         FileNotFoundError: If source file doesn't exist
         OSError: If file cannot be copied
     """
     from .directory_utils import ensure_parent_directory_exists
-    
+
     if not file_exists(source_path):
         raise FileNotFoundError(f"Source file not found: {source_path}")
-    
+
     try:
         ensure_parent_directory_exists(destination_path)
         shutil.copy2(source_path, destination_path)
@@ -153,20 +154,20 @@ def copy_file(source_path: str, destination_path: str) -> None:
 def move_file(source_path: str, destination_path: str) -> None:
     """
     Move a file from source to destination.
-    
+
     Args:
         source_path: Source file path
         destination_path: Destination file path
-        
+
     Raises:
         FileNotFoundError: If source file doesn't exist
         OSError: If file cannot be moved
     """
     from .directory_utils import ensure_parent_directory_exists
-    
+
     if not file_exists(source_path):
         raise FileNotFoundError(f"Source file not found: {source_path}")
-    
+
     try:
         ensure_parent_directory_exists(destination_path)
         shutil.move(source_path, destination_path)
@@ -177,24 +178,24 @@ def move_file(source_path: str, destination_path: str) -> None:
 def rename_file(file_path: str, new_name: str) -> str:
     """
     Rename a file.
-    
+
     Args:
         file_path: Current file path
         new_name: New file name (not full path)
-        
+
     Returns:
         New file path
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If file cannot be renamed
     """
     if not file_exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     directory = os.path.dirname(file_path)
     new_path = os.path.join(directory, new_name)
-    
+
     try:
         os.rename(file_path, new_path)
         return new_path
@@ -205,18 +206,18 @@ def rename_file(file_path: str, new_name: str) -> str:
 def touch_file(file_path: str) -> None:
     """
     Create an empty file or update its timestamp.
-    
+
     Args:
         file_path: Path to file
-        
+
     Raises:
         OSError: If file cannot be created or touched
     """
     from .directory_utils import ensure_parent_directory_exists
-    
+
     try:
         ensure_parent_directory_exists(file_path)
-        with open(file_path, 'a'):
+        with open(file_path, "a"):
             os.utime(file_path, None)
     except OSError as e:
         raise OSError(f"Failed to touch file {file_path}: {str(e)}")
@@ -225,34 +226,34 @@ def touch_file(file_path: str) -> None:
 def is_file_empty(file_path: str) -> bool:
     """
     Check if a file is empty.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         True if file is empty, False otherwise
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
     """
     if not file_exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     return get_file_size(file_path) == 0
 
 
 def create_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> str:
     """
     Create a temporary file.
-    
+
     Args:
         suffix: File name suffix
         prefix: File name prefix
         dir: Parent directory (default: system temp)
-        
+
     Returns:
         Path to created temporary file
-        
+
     Raises:
         OSError: If temporary file cannot be created
     """
@@ -267,22 +268,22 @@ def create_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> str
 def with_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> ContextManager[str]:
     """
     Context manager for temporary file.
-    
+
     Args:
         suffix: File name suffix
         prefix: File name prefix
         dir: Parent directory (default: system temp)
-        
+
     Returns:
         Context manager yielding temporary file path
-        
+
     Example:
         with with_temp_file(suffix='.txt') as temp_path:
             write_text_file(temp_path, "Hello World")
             # File is automatically deleted when exiting context
     """
     import contextlib
-    
+
     @contextlib.contextmanager
     def temp_file_context():
         temp_path = create_temp_file(suffix=suffix, prefix=prefix, dir=dir)
@@ -291,17 +292,17 @@ def with_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> Conte
         finally:
             if file_exists(temp_path):
                 delete_file(temp_path)
-    
+
     return temp_file_context()
 
 
 def get_file_extension(file_path: str) -> str:
     """
     Get file extension.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         File extension (including dot)
     """
@@ -311,10 +312,10 @@ def get_file_extension(file_path: str) -> str:
 def get_file_name(file_path: str) -> str:
     """
     Get file name from path.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         File name with extension
     """
@@ -324,10 +325,10 @@ def get_file_name(file_path: str) -> str:
 def get_file_name_without_extension(file_path: str) -> str:
     """
     Get file name without extension.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         File name without extension
     """
@@ -337,10 +338,10 @@ def get_file_name_without_extension(file_path: str) -> str:
 def get_directory_name(file_path: str) -> str:
     """
     Get directory name from file path.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         Directory path
     """
@@ -350,10 +351,10 @@ def get_directory_name(file_path: str) -> str:
 def get_absolute_path(file_path: str) -> str:
     """
     Get absolute path.
-    
+
     Args:
         file_path: File path (relative or absolute)
-        
+
     Returns:
         Absolute file path
     """
@@ -363,11 +364,11 @@ def get_absolute_path(file_path: str) -> str:
 def get_relative_path(file_path: str, start: Optional[str] = None) -> str:
     """
     Get relative path.
-    
+
     Args:
         file_path: File path
         start: Start directory (default: current directory)
-        
+
     Returns:
         Relative file path
     """
@@ -379,10 +380,10 @@ def get_relative_path(file_path: str, start: Optional[str] = None) -> str:
 def join_paths(*paths: str) -> str:
     """
     Join multiple path components.
-    
+
     Args:
         *paths: Path components to join
-        
+
     Returns:
         Joined path
     """
@@ -392,10 +393,10 @@ def join_paths(*paths: str) -> str:
 def normalize_path(file_path: str) -> str:
     """
     Normalize a path.
-    
+
     Args:
         file_path: Path to normalize
-        
+
     Returns:
         Normalized path
     """
@@ -405,13 +406,13 @@ def normalize_path(file_path: str) -> str:
 def get_file_permissions(file_path: str) -> int:
     """
     Get file permissions.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         File permissions as octal integer
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If permissions cannot be retrieved
@@ -427,18 +428,18 @@ def get_file_permissions(file_path: str) -> int:
 def set_file_permissions(file_path: str, permissions: int) -> None:
     """
     Set file permissions.
-    
+
     Args:
         file_path: Path to file
         permissions: Permissions as octal integer (e.g., 0o644)
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If permissions cannot be set
     """
     if not file_exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     try:
         os.chmod(file_path, permissions)
     except OSError as e:
@@ -448,13 +449,13 @@ def set_file_permissions(file_path: str, permissions: int) -> None:
 def get_file_owner(file_path: str) -> int:
     """
     Get file owner UID.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         Owner UID
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If owner cannot be retrieved
@@ -470,13 +471,13 @@ def get_file_owner(file_path: str) -> int:
 def get_file_group(file_path: str) -> int:
     """
     Get file group GID.
-    
+
     Args:
         file_path: Path to file
-        
+
     Returns:
         Group GID
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If group cannot be retrieved
@@ -492,19 +493,19 @@ def get_file_group(file_path: str) -> int:
 def set_file_owner_and_group(file_path: str, owner: int, group: int) -> None:
     """
     Set file owner and group.
-    
+
     Args:
         file_path: Path to file
         owner: Owner UID
         group: Group GID
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         OSError: If owner/group cannot be set
     """
     if not file_exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
-    
+
     try:
         os.chown(file_path, owner, group)
     except OSError as e:

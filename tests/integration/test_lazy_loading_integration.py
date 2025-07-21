@@ -44,10 +44,10 @@ class TestLazyLoadingIntegration:
         """Test that DI container is created lazily."""
         # Container should not exist initially
         assert app._container is None
-        
+
         # Initialize app
         await app.initialize()
-        
+
         # Container should be created during initialization
         assert app._container is not None
         assert app._container.is_lazy_loading_enabled()
@@ -56,10 +56,10 @@ class TestLazyLoadingIntegration:
         """Test that config manager is created lazily."""
         # Config manager should not exist initially
         assert app._config_manager is None
-        
+
         # Initialize app
         await app.initialize()
-        
+
         # Config manager should be created during initialization
         assert app._config_manager is not None
 
@@ -68,7 +68,7 @@ class TestLazyLoadingIntegration:
         # First access
         query_bus1 = initialized_app.get_query_bus()
         assert query_bus1 is not None
-        
+
         # Second access should return same instance (cached)
         query_bus2 = initialized_app.get_query_bus()
         assert query_bus1 is query_bus2
@@ -78,7 +78,7 @@ class TestLazyLoadingIntegration:
         # First access
         command_bus1 = initialized_app.get_command_bus()
         assert command_bus1 is not None
-        
+
         # Second access should return same instance (cached)
         command_bus2 = initialized_app.get_command_bus()
         assert command_bus1 is command_bus2
@@ -87,18 +87,18 @@ class TestLazyLoadingIntegration:
         """Test that provider info can be accessed."""
         provider_info = initialized_app.get_provider_info()
         assert isinstance(provider_info, dict)
-        assert 'mode' in provider_info or 'status' in provider_info
+        assert "mode" in provider_info or "status" in provider_info
 
     async def test_health_check_works(self, initialized_app):
         """Test that health check functionality works."""
         health = initialized_app.health_check()
         assert isinstance(health, dict)
-        assert 'status' in health
+        assert "status" in health
 
     async def test_templates_query_execution(self, initialized_app):
         """Test that templates query can be executed (end-to-end test)."""
         query_bus = initialized_app.get_query_bus()
-        
+
         # This should work without errors
         try:
             result = query_bus.execute(ListTemplatesQuery())
@@ -118,14 +118,14 @@ class TestLazyLoadingIntegration:
         """Test that multiple application instances work correctly."""
         app1 = Application()
         app2 = Application()
-        
+
         await app1.initialize()
         await app2.initialize()
-        
+
         # Both should be initialized successfully
         assert app1._initialized
         assert app2._initialized
-        
+
         # They should have separate containers
         assert app1._container is not app2._container
 
@@ -148,19 +148,19 @@ class TestLazyLoadingErrorHandling:
     def test_uninitialized_app_access(self):
         """Test that accessing uninitialized app raises appropriate errors."""
         app = Application()
-        
+
         with pytest.raises(RuntimeError, match="Application not initialized"):
             app.get_query_bus()
-        
+
         with pytest.raises(RuntimeError, match="Application not initialized"):
             app.get_command_bus()
 
     def test_initialization_failure_handling(self):
         """Test handling of initialization failures."""
         app = Application()
-        
+
         # Mock a failure in initialization
-        with patch.object(app, '_ensure_config_manager', side_effect=Exception("Config error")):
+        with patch.object(app, "_ensure_config_manager", side_effect=Exception("Config error")):
             result = asyncio.run(app.initialize())
             assert result is False, "Initialization should fail gracefully"
 
@@ -168,9 +168,9 @@ class TestLazyLoadingErrorHandling:
         """Test handling of lazy component creation failures."""
         app = Application()
         await app.initialize()
-        
+
         # Mock a failure in lazy component creation
-        with patch.object(app._container, 'get', side_effect=Exception("Component error")):
+        with patch.object(app._container, "get", side_effect=Exception("Component error")):
             with pytest.raises(Exception, match="Component error"):
                 app.get_query_bus()
 
@@ -186,19 +186,26 @@ class TestLazyLoadingCompatibility:
             ["templates", "list"],
             ["requests", "list"],
         ]
-        
+
         import subprocess
         import sys
-        
+
         for cmd in commands_to_test:
             try:
-                result = subprocess.run([
-                    sys.executable, "src/run.py"
-                ] + cmd, capture_output=True, text=True, cwd=".", timeout=30)
-                
+                result = subprocess.run(
+                    [sys.executable, "src/run.py"] + cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=".",
+                    timeout=30,
+                )
+
                 # Command should either succeed or fail gracefully (not crash)
-                assert result.returncode in [0, 1], f"Command {cmd} crashed with return code {result.returncode}"
-                
+                assert result.returncode in [
+                    0,
+                    1,
+                ], f"Command {cmd} crashed with return code {result.returncode}"
+
             except subprocess.TimeoutExpired:
                 pytest.fail(f"Command {cmd} timed out")
 
@@ -207,7 +214,7 @@ class TestLazyLoadingCompatibility:
         # Test with different config paths
         app1 = Application()
         app2 = Application(config_path="config/default_config.json")
-        
+
         # Both should create successfully
         assert app1.config_path is None
         assert app2.config_path == "config/default_config.json"
@@ -216,9 +223,9 @@ class TestLazyLoadingCompatibility:
         """Test that provider strategy system works with lazy loading."""
         app = Application()
         await app.initialize()
-        
+
         provider_info = app.get_provider_info()
-        
+
         # Should have provider information
         assert isinstance(provider_info, dict)
         # Should not crash when accessing provider info
@@ -230,71 +237,75 @@ class TestLazyLoadingPerformanceIntegration:
     def test_startup_performance_integration(self):
         """Test startup performance in integration context."""
         import time
-        
+
         start_time = time.time()
         app = Application()
         creation_time = (time.time() - start_time) * 1000
-        
+
         # Creation should be very fast (lazy loading)
         assert creation_time < 100, f"App creation took {creation_time:.1f}ms, expected <100ms"
 
     async def test_first_access_performance_integration(self):
         """Test first access performance in integration context."""
         import time
-        
+
         app = Application()
         await app.initialize()
-        
+
         start_time = time.time()
         query_bus = app.get_query_bus()
         first_access_time = (time.time() - start_time) * 1000
-        
+
         # First access should be reasonable (triggers lazy loading)
-        assert first_access_time < 1000, f"First access took {first_access_time:.1f}ms, expected <1000ms"
+        assert (
+            first_access_time < 1000
+        ), f"First access took {first_access_time:.1f}ms, expected <1000ms"
 
     async def test_cached_access_performance_integration(self):
         """Test cached access performance in integration context."""
         import time
-        
+
         app = Application()
         await app.initialize()
-        
+
         # First access (triggers lazy loading)
         app.get_query_bus()
-        
+
         # Second access (should be cached)
         start_time = time.time()
         query_bus = app.get_query_bus()
         cached_access_time = (time.time() - start_time) * 1000
-        
+
         # Cached access should be very fast
-        assert cached_access_time < 10, f"Cached access took {cached_access_time:.1f}ms, expected <10ms"
+        assert (
+            cached_access_time < 10
+        ), f"Cached access took {cached_access_time:.1f}ms, expected <10ms"
 
 
 if __name__ == "__main__":
     # Run integration tests directly
     import sys
-    
+
     print("🧪 Running Lazy Loading Integration Tests...")
     print("=" * 50)
-    
+
     # Run a subset of tests that don't require pytest fixtures
     test_suite = TestLazyLoadingIntegration()
-    
+
     try:
         app = Application()
         test_suite.test_application_creation_is_fast(app)
         print("✅ Application creation test passed")
-        
+
         test_suite.test_lazy_loading_configuration()
         print("✅ Lazy loading configuration test passed")
-        
+
         asyncio.run(test_suite.test_application_initialization_works(app))
         print("✅ Application initialization test passed")
-        
+
         print("=" * 50)
         print("🎉 Integration tests completed successfully!")
-        
+
     except Exception as e:
         print(f"❌ Integration test failed: {e}")
         sys.exit(1)

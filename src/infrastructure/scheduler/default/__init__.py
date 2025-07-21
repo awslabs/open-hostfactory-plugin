@@ -2,4 +2,4 @@
 
 from .strategy import DefaultSchedulerStrategy
 
-__all__ = ['DefaultSchedulerStrategy']
+__all__ = ["DefaultSchedulerStrategy"]

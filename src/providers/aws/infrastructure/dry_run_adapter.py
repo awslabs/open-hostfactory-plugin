@@ -20,6 +20,7 @@ from src.infrastructure.mocking.dry_run_context import is_dry_run_active
 # Import moto for AWS mocking
 try:
     from moto import mock_aws
+
     MOTO_AVAILABLE = True
 except ImportError:
     MOTO_AVAILABLE = False
@@ -32,14 +33,14 @@ logger = logging.getLogger(__name__)
 def aws_dry_run_context() -> Generator[None, None, None]:
     """
     AWS-specific dry-run context using moto for boto3 mocking.
-    
+
     When the global dry-run context is active, this context manager
     automatically applies moto mocking to all boto3 calls within its scope.
     This provides realistic AWS responses without creating real resources.
-    
+
     Yields:
         None
-        
+
     Example:
         ```python
         # In AWS manager
@@ -50,7 +51,7 @@ def aws_dry_run_context() -> Generator[None, None, None]:
                 response = ec2_client.run_instances(...)
                 return self._process_response(response)
         ```
-        
+
     Note:
         - Only activates mocking if global dry-run context is active
         - Uses moto's comprehensive AWS service mocking
@@ -61,7 +62,7 @@ def aws_dry_run_context() -> Generator[None, None, None]:
         logger.warning("Moto not available - dry-run mode will use real AWS calls")
         yield
         return
-    
+
     if is_dry_run_active():
         logger.debug("DRY-RUN: AWS dry-run mode: Using moto for boto3 mocking")
         with mock_aws():
@@ -74,10 +75,10 @@ def aws_dry_run_context() -> Generator[None, None, None]:
 def is_aws_dry_run_active() -> bool:
     """
     Check if AWS dry-run mode is currently active.
-    
+
     This is a convenience function that combines the global dry-run check
     with AWS-specific availability checks.
-    
+
     Returns:
         bool: True if AWS dry-run should be used, False otherwise
     """
@@ -87,15 +88,15 @@ def is_aws_dry_run_active() -> bool:
 def get_aws_dry_run_status() -> dict:
     """
     Get AWS-specific dry-run status information.
-    
+
     Returns:
         dict: Status information including moto availability and active state
     """
     return {
-        'dry_run_active': is_dry_run_active(),
-        'moto_available': MOTO_AVAILABLE,
-        'aws_dry_run_active': is_aws_dry_run_active(),
-        'moto_version': _get_moto_version() if MOTO_AVAILABLE else None
+        "dry_run_active": is_dry_run_active(),
+        "moto_available": MOTO_AVAILABLE,
+        "aws_dry_run_active": is_aws_dry_run_active(),
+        "moto_version": _get_moto_version() if MOTO_AVAILABLE else None,
     }
 
 
@@ -103,9 +104,10 @@ def _get_moto_version() -> str:
     """Get moto version for debugging purposes."""
     try:
         import moto
-        return getattr(moto, '__version__', 'unknown')
+
+        return getattr(moto, "__version__", "unknown")
     except (ImportError, AttributeError):
-        return 'unknown'
+        return "unknown"
 
 
 # Context manager alias for backward compatibility

@@ -1,9 +1,10 @@
 """Persistence package."""
+
 # Import only the base classes to avoid circular imports
 from src.infrastructure.persistence.base import (
     StrategyBasedRepository,
     BaseUnitOfWork,
-    StrategyUnitOfWork
+    StrategyUnitOfWork,
 )
 
 # Import factory functions but not classes to avoid circular imports
@@ -11,9 +12,8 @@ from src.infrastructure.persistence.base import (
 
 __all__ = [
     # Base
-    'StrategyBasedRepository',
-    'BaseUnitOfWork',
-    'StrategyUnitOfWork',
-    
+    "StrategyBasedRepository",
+    "BaseUnitOfWork",
+    "StrategyUnitOfWork",
     # Factory functions
 ]

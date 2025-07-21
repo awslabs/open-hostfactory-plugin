@@ -5,10 +5,10 @@ from .request_repository import RequestRepositoryImpl as RequestRepository, Requ
 from .template_repository import TemplateRepositoryImpl as TemplateRepository, TemplateSerializer
 
 __all__ = [
-    'MachineRepository',
-    'MachineSerializer',
-    'RequestRepository', 
-    'RequestSerializer',
-    'TemplateRepository',
-    'TemplateSerializer'
+    "MachineRepository",
+    "MachineSerializer",
+    "RequestRepository",
+    "RequestSerializer",
+    "TemplateRepository",
+    "TemplateSerializer",
 ]

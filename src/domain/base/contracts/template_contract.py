@@ -1,4 +1,5 @@
 """Template contracts for domain layer."""
+
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from dataclasses import dataclass
@@ -8,10 +9,11 @@ from dataclasses import dataclass
 class TemplateContract:
     """
     Domain-level template contract.
-    
+
     This represents the template data structure that the domain layer
     expects, without depending on infrastructure DTOs.
     """
+
     template_id: str
     name: str
     provider_api: str
@@ -20,7 +22,7 @@ class TemplateContract:
     updated_at: Optional[datetime] = None
     version: Optional[str] = None
     tags: Optional[Dict[str, str]] = None
-    
+
     def __post_init__(self):
         """Validate required fields."""
         if not self.template_id:
@@ -34,15 +36,16 @@ class TemplateContract:
 @dataclass
 class TemplateValidationResult:
     """Template validation result contract."""
+
     is_valid: bool
     errors: List[str]
     warnings: List[str]
     template_id: str
-    
+
     def has_errors(self) -> bool:
         """Check if validation has errors."""
         return len(self.errors) > 0
-    
+
     def has_warnings(self) -> bool:
         """Check if validation has warnings."""
         return len(self.warnings) > 0
@@ -51,6 +54,7 @@ class TemplateValidationResult:
 @dataclass
 class TemplateMetadata:
     """Template metadata contract."""
+
     template_id: str
     provider_apis: List[str]
     last_modified: datetime

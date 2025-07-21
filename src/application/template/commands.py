@@ -1,4 +1,5 @@
 """Template commands - template use case commands."""
+
 from typing import Dict, Any, Optional, List
 from pydantic import Field
 
@@ -7,6 +8,7 @@ from src.application.dto.base import BaseCommand, BaseResponse
 
 class CreateTemplateCommand(BaseCommand):
     """Command to create a new template."""
+
     template_id: str
     name: Optional[str] = None
     description: Optional[str] = None
@@ -21,6 +23,7 @@ class CreateTemplateCommand(BaseCommand):
 
 class UpdateTemplateCommand(BaseCommand):
     """Command to update an existing template."""
+
     template_id: str
     name: Optional[str] = None
     description: Optional[str] = None
@@ -29,16 +32,19 @@ class UpdateTemplateCommand(BaseCommand):
 
 class DeleteTemplateCommand(BaseCommand):
     """Command to delete a template."""
+
     template_id: str
 
 
 class ValidateTemplateCommand(BaseCommand):
     """Command to validate a template configuration."""
+
     template_id: str
     configuration: Dict[str, Any]
 
 
 class TemplateCommandResponse(BaseResponse):
     """Response for template commands."""
+
     template_id: Optional[str] = None
     validation_errors: List[str] = Field(default_factory=list)

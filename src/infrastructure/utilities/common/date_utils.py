@@ -3,6 +3,7 @@ Date utility functions for the AWS Host Factory Plugin.
 
 This module contains utility functions for working with dates and times.
 """
+
 import time
 import datetime
 from typing import List
@@ -11,7 +12,7 @@ from typing import List
 def get_current_timestamp() -> float:
     """
     Get current timestamp in seconds since epoch.
-    
+
     Returns:
         Current timestamp in seconds
     """
@@ -21,7 +22,7 @@ def get_current_timestamp() -> float:
 def get_current_timestamp_ms() -> int:
     """
     Get current timestamp in milliseconds since epoch.
-    
+
     Returns:
         Current timestamp in milliseconds
     """
@@ -31,7 +32,7 @@ def get_current_timestamp_ms() -> int:
 def get_current_datetime() -> datetime.datetime:
     """
     Get current datetime in UTC.
-    
+
     Returns:
         Current datetime in UTC
     """
@@ -41,7 +42,7 @@ def get_current_datetime() -> datetime.datetime:
 def get_current_date() -> datetime.date:
     """
     Get current date in UTC.
-    
+
     Returns:
         Current date in UTC
     """
@@ -51,11 +52,11 @@ def get_current_date() -> datetime.date:
 def format_timestamp(timestamp: float, format_str: str = "%Y-%m-%d %H:%M:%S") -> str:
     """
     Format a timestamp as a string.
-    
+
     Args:
         timestamp: Timestamp in seconds since epoch
         format_str: Format string
-        
+
     Returns:
         Formatted timestamp
     """
@@ -66,11 +67,11 @@ def format_timestamp(timestamp: float, format_str: str = "%Y-%m-%d %H:%M:%S") ->
 def format_datetime(dt: datetime.datetime, format_str: str = "%Y-%m-%d %H:%M:%S") -> str:
     """
     Format a datetime as a string.
-    
+
     Args:
         dt: Datetime to format
         format_str: Format string
-        
+
     Returns:
         Formatted datetime
     """
@@ -80,14 +81,14 @@ def format_datetime(dt: datetime.datetime, format_str: str = "%Y-%m-%d %H:%M:%S"
 def parse_datetime(date_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> datetime.datetime:
     """
     Parse a string as a datetime.
-    
+
     Args:
         date_str: String to parse
         format_str: Format string
-        
+
     Returns:
         Parsed datetime
-        
+
     Raises:
         ValueError: If the string cannot be parsed
     """
@@ -97,14 +98,14 @@ def parse_datetime(date_str: str, format_str: str = "%Y-%m-%d %H:%M:%S") -> date
 def parse_date(date_str: str, format_str: str = "%Y-%m-%d") -> datetime.date:
     """
     Parse a string as a date.
-    
+
     Args:
         date_str: String to parse
         format_str: Format string
-        
+
     Returns:
         Parsed date
-        
+
     Raises:
         ValueError: If the string cannot be parsed
     """
@@ -114,10 +115,10 @@ def parse_date(date_str: str, format_str: str = "%Y-%m-%d") -> datetime.date:
 def datetime_to_timestamp(dt: datetime.datetime) -> float:
     """
     Convert a datetime to a timestamp.
-    
+
     Args:
         dt: Datetime to convert
-        
+
     Returns:
         Timestamp in seconds since epoch
     """
@@ -127,10 +128,10 @@ def datetime_to_timestamp(dt: datetime.datetime) -> float:
 def timestamp_to_datetime(timestamp: float) -> datetime.datetime:
     """
     Convert a timestamp to a datetime.
-    
+
     Args:
         timestamp: Timestamp in seconds since epoch
-        
+
     Returns:
         Datetime in UTC
     """
@@ -140,11 +141,11 @@ def timestamp_to_datetime(timestamp: float) -> datetime.datetime:
 def add_days(dt: datetime.datetime, days: int) -> datetime.datetime:
     """
     Add days to a datetime.
-    
+
     Args:
         dt: Datetime to add days to
         days: Number of days to add
-        
+
     Returns:
         New datetime
     """
@@ -154,11 +155,11 @@ def add_days(dt: datetime.datetime, days: int) -> datetime.datetime:
 def add_hours(dt: datetime.datetime, hours: int) -> datetime.datetime:
     """
     Add hours to a datetime.
-    
+
     Args:
         dt: Datetime to add hours to
         hours: Number of hours to add
-        
+
     Returns:
         New datetime
     """
@@ -168,11 +169,11 @@ def add_hours(dt: datetime.datetime, hours: int) -> datetime.datetime:
 def add_minutes(dt: datetime.datetime, minutes: int) -> datetime.datetime:
     """
     Add minutes to a datetime.
-    
+
     Args:
         dt: Datetime to add minutes to
         minutes: Number of minutes to add
-        
+
     Returns:
         New datetime
     """
@@ -182,11 +183,11 @@ def add_minutes(dt: datetime.datetime, minutes: int) -> datetime.datetime:
 def add_seconds(dt: datetime.datetime, seconds: int) -> datetime.datetime:
     """
     Add seconds to a datetime.
-    
+
     Args:
         dt: Datetime to add seconds to
         seconds: Number of seconds to add
-        
+
     Returns:
         New datetime
     """
@@ -196,11 +197,11 @@ def add_seconds(dt: datetime.datetime, seconds: int) -> datetime.datetime:
 def get_time_difference(dt1: datetime.datetime, dt2: datetime.datetime) -> datetime.timedelta:
     """
     Get the time difference between two datetimes.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         Time difference
     """
@@ -210,11 +211,11 @@ def get_time_difference(dt1: datetime.datetime, dt2: datetime.datetime) -> datet
 def get_time_difference_seconds(dt1: datetime.datetime, dt2: datetime.datetime) -> float:
     """
     Get the time difference between two datetimes in seconds.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         Time difference in seconds
     """
@@ -224,11 +225,11 @@ def get_time_difference_seconds(dt1: datetime.datetime, dt2: datetime.datetime) 
 def get_time_difference_minutes(dt1: datetime.datetime, dt2: datetime.datetime) -> float:
     """
     Get the time difference between two datetimes in minutes.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         Time difference in minutes
     """
@@ -238,11 +239,11 @@ def get_time_difference_minutes(dt1: datetime.datetime, dt2: datetime.datetime) 
 def get_time_difference_hours(dt1: datetime.datetime, dt2: datetime.datetime) -> float:
     """
     Get the time difference between two datetimes in hours.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         Time difference in hours
     """
@@ -252,11 +253,11 @@ def get_time_difference_hours(dt1: datetime.datetime, dt2: datetime.datetime) ->
 def get_time_difference_days(dt1: datetime.datetime, dt2: datetime.datetime) -> float:
     """
     Get the time difference between two datetimes in days.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         Time difference in days
     """
@@ -266,11 +267,11 @@ def get_time_difference_days(dt1: datetime.datetime, dt2: datetime.datetime) -> 
 def is_same_day(dt1: datetime.datetime, dt2: datetime.datetime) -> bool:
     """
     Check if two datetimes are on the same day.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         True if the datetimes are on the same day, False otherwise
     """
@@ -280,11 +281,11 @@ def is_same_day(dt1: datetime.datetime, dt2: datetime.datetime) -> bool:
 def is_same_month(dt1: datetime.datetime, dt2: datetime.datetime) -> bool:
     """
     Check if two datetimes are in the same month.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         True if the datetimes are in the same month, False otherwise
     """
@@ -294,11 +295,11 @@ def is_same_month(dt1: datetime.datetime, dt2: datetime.datetime) -> bool:
 def is_same_year(dt1: datetime.datetime, dt2: datetime.datetime) -> bool:
     """
     Check if two datetimes are in the same year.
-    
+
     Args:
         dt1: First datetime
         dt2: Second datetime
-        
+
     Returns:
         True if the datetimes are in the same year, False otherwise
     """
@@ -308,10 +309,10 @@ def is_same_year(dt1: datetime.datetime, dt2: datetime.datetime) -> bool:
 def get_start_of_day(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the start of the day for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the start of the day
     """
@@ -321,10 +322,10 @@ def get_start_of_day(dt: datetime.datetime) -> datetime.datetime:
 def get_end_of_day(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the end of the day for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the end of the day
     """
@@ -334,10 +335,10 @@ def get_end_of_day(dt: datetime.datetime) -> datetime.datetime:
 def get_start_of_month(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the start of the month for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the start of the month
     """
@@ -347,10 +348,10 @@ def get_start_of_month(dt: datetime.datetime) -> datetime.datetime:
 def get_end_of_month(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the end of the month for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the end of the month
     """
@@ -362,10 +363,10 @@ def get_end_of_month(dt: datetime.datetime) -> datetime.datetime:
 def get_start_of_year(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the start of the year for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the start of the year
     """
@@ -375,10 +376,10 @@ def get_start_of_year(dt: datetime.datetime) -> datetime.datetime:
 def get_end_of_year(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the end of the year for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the end of the year
     """
@@ -388,11 +389,11 @@ def get_end_of_year(dt: datetime.datetime) -> datetime.datetime:
 def get_date_range(start_date: datetime.date, end_date: datetime.date) -> List[datetime.date]:
     """
     Get a list of dates in a range.
-    
+
     Args:
         start_date: Start date
         end_date: End date
-        
+
     Returns:
         List of dates
     """
@@ -401,18 +402,16 @@ def get_date_range(start_date: datetime.date, end_date: datetime.date) -> List[d
 
 
 def get_datetime_range(
-    start_dt: datetime.datetime,
-    end_dt: datetime.datetime,
-    delta: datetime.timedelta
+    start_dt: datetime.datetime, end_dt: datetime.datetime, delta: datetime.timedelta
 ) -> List[datetime.datetime]:
     """
     Get a list of datetimes in a range with a specified interval.
-    
+
     Args:
         start_dt: Start datetime
         end_dt: End datetime
         delta: Interval
-        
+
     Returns:
         List of datetimes
     """
@@ -427,10 +426,10 @@ def get_datetime_range(
 def is_leap_year(year: int) -> bool:
     """
     Check if a year is a leap year.
-    
+
     Args:
         year: Year to check
-        
+
     Returns:
         True if the year is a leap year, False otherwise
     """
@@ -440,20 +439,20 @@ def is_leap_year(year: int) -> bool:
 def get_days_in_month(year: int, month: int) -> int:
     """
     Get the number of days in a month.
-    
+
     Args:
         year: Year
         month: Month (1-12)
-        
+
     Returns:
         Number of days in the month
-        
+
     Raises:
         ValueError: If the month is invalid
     """
     if month < 1 or month > 12:
         raise ValueError("Month must be between 1 and 12")
-    
+
     if month == 2:
         return 29 if is_leap_year(year) else 28
     elif month in [4, 6, 9, 11]:
@@ -465,10 +464,10 @@ def get_days_in_month(year: int, month: int) -> int:
 def get_days_in_year(year: int) -> int:
     """
     Get the number of days in a year.
-    
+
     Args:
         year: Year
-        
+
     Returns:
         Number of days in the year
     """
@@ -478,10 +477,10 @@ def get_days_in_year(year: int) -> int:
 def get_quarter(dt: datetime.datetime) -> int:
     """
     Get the quarter of the year for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Quarter (1-4)
     """
@@ -491,10 +490,10 @@ def get_quarter(dt: datetime.datetime) -> int:
 def get_start_of_quarter(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the start of the quarter for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the start of the quarter
     """
@@ -506,10 +505,10 @@ def get_start_of_quarter(dt: datetime.datetime) -> datetime.datetime:
 def get_end_of_quarter(dt: datetime.datetime) -> datetime.datetime:
     """
     Get the end of the quarter for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Datetime at the end of the quarter
     """
@@ -521,10 +520,10 @@ def get_end_of_quarter(dt: datetime.datetime) -> datetime.datetime:
 def get_week_number(dt: datetime.datetime) -> int:
     """
     Get the week number of the year for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Week number (1-53)
     """
@@ -534,10 +533,10 @@ def get_week_number(dt: datetime.datetime) -> int:
 def get_day_of_week(dt: datetime.datetime) -> int:
     """
     Get the day of the week for a datetime.
-    
+
     Args:
         dt: Datetime
-        
+
     Returns:
         Day of the week (1-7, where 1 is Monday)
     """
@@ -547,11 +546,11 @@ def get_day_of_week(dt: datetime.datetime) -> int:
 def get_day_name(dt: datetime.datetime, short: bool = False) -> str:
     """
     Get the name of the day of the week for a datetime.
-    
+
     Args:
         dt: Datetime
         short: Whether to return the short name
-        
+
     Returns:
         Day name
     """
@@ -564,11 +563,11 @@ def get_day_name(dt: datetime.datetime, short: bool = False) -> str:
 def get_month_name(dt: datetime.datetime, short: bool = False) -> str:
     """
     Get the name of the month for a datetime.
-    
+
     Args:
         dt: Datetime
         short: Whether to return the short name
-        
+
     Returns:
         Month name
     """

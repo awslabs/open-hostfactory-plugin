@@ -1,18 +1,19 @@
 """Collection filtering utility functions."""
+
 from typing import List, Iterable, TypeVar, Callable, Optional
 
-T = TypeVar('T')
-K = TypeVar('K')
+T = TypeVar("T")
+K = TypeVar("K")
 
 
 def filter_by(collection: Iterable[T], predicate: Callable[[T], bool]) -> List[T]:
     """
     Filter collection by predicate.
-    
+
     Args:
         collection: Collection to filter
         predicate: Function to test each element
-        
+
     Returns:
         List of elements that match predicate
     """
@@ -22,11 +23,11 @@ def filter_by(collection: Iterable[T], predicate: Callable[[T], bool]) -> List[T
 def find(collection: Iterable[T], predicate: Callable[[T], bool]) -> Optional[T]:
     """
     Find first element matching predicate.
-    
+
     Args:
         collection: Collection to search
         predicate: Function to test each element
-        
+
     Returns:
         First matching element or None
     """
@@ -39,11 +40,11 @@ def find(collection: Iterable[T], predicate: Callable[[T], bool]) -> Optional[T]
 def find_index(collection: List[T], predicate: Callable[[T], bool]) -> int:
     """
     Find index of first element matching predicate.
-    
+
     Args:
         collection: List to search
         predicate: Function to test each element
-        
+
     Returns:
         Index of first matching element, -1 if not found
     """
@@ -56,11 +57,11 @@ def find_index(collection: List[T], predicate: Callable[[T], bool]) -> int:
 def contains(collection: Iterable[T], item: T) -> bool:
     """
     Check if collection contains item.
-    
+
     Args:
         collection: Collection to check
         item: Item to find
-        
+
     Returns:
         True if item is in collection
     """
@@ -70,11 +71,11 @@ def contains(collection: Iterable[T], item: T) -> bool:
 def contains_all(collection: Iterable[T], items: Iterable[T]) -> bool:
     """
     Check if collection contains all items.
-    
+
     Args:
         collection: Collection to check
         items: Items to find
-        
+
     Returns:
         True if all items are in collection
     """
@@ -85,11 +86,11 @@ def contains_all(collection: Iterable[T], items: Iterable[T]) -> bool:
 def contains_any(collection: Iterable[T], items: Iterable[T]) -> bool:
     """
     Check if collection contains any of the items.
-    
+
     Args:
         collection: Collection to check
         items: Items to find
-        
+
     Returns:
         True if any item is in collection
     """
@@ -100,10 +101,10 @@ def contains_any(collection: Iterable[T], items: Iterable[T]) -> bool:
 def distinct(collection: Iterable[T]) -> List[T]:
     """
     Get distinct elements from collection.
-    
+
     Args:
         collection: Collection to process
-        
+
     Returns:
         List of unique elements
     """
@@ -119,11 +120,11 @@ def distinct(collection: Iterable[T]) -> List[T]:
 def distinct_by(collection: Iterable[T], key_func: Callable[[T], K]) -> List[T]:
     """
     Get distinct elements by key function.
-    
+
     Args:
         collection: Collection to process
         key_func: Function to extract key for comparison
-        
+
     Returns:
         List of elements unique by key
     """
@@ -140,10 +141,10 @@ def distinct_by(collection: Iterable[T], key_func: Callable[[T], K]) -> List[T]:
 def remove_duplicates(collection: List[T]) -> List[T]:
     """
     Remove duplicates from list while preserving order.
-    
+
     Args:
         collection: List to process
-        
+
     Returns:
         List without duplicates
     """
@@ -153,10 +154,10 @@ def remove_duplicates(collection: List[T]) -> List[T]:
 def find_duplicates(collection: Iterable[T]) -> List[T]:
     """
     Find duplicate elements in collection.
-    
+
     Args:
         collection: Collection to check
-        
+
     Returns:
         List of duplicate elements
     """
@@ -173,10 +174,10 @@ def find_duplicates(collection: Iterable[T]) -> List[T]:
 def has_duplicates(collection: Iterable[T]) -> bool:
     """
     Check if collection has duplicate elements.
-    
+
     Args:
         collection: Collection to check
-        
+
     Returns:
         True if collection has duplicates
     """

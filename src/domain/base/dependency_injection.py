@@ -12,68 +12,71 @@ Key Principles:
 - Application layer uses domain DI abstractions
 - Preserves @injectable decorator pattern while fixing architectural violations
 """
+
 from abc import ABC, abstractmethod
 from typing import Type, TypeVar, Any, Dict, Optional, Callable, List, Union, Generic
 from functools import wraps
 import inspect
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class DependencyInjectionPort(ABC):
     """
     Domain port for dependency injection operations.
-    
+
     This port defines the contract that infrastructure DI containers
     must implement, following the Port-Adapter pattern.
     """
-    
+
     @abstractmethod
     def get(self, cls: Type[T]) -> T:
         """
         Resolve dependency by type.
-        
+
         Args:
             cls: The class type to resolve
-            
+
         Returns:
             Instance of the requested type
-            
+
         Raises:
             DependencyResolutionError: If dependency cannot be resolved
         """
         pass
-    
+
     @abstractmethod
     def register(self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]) -> None:
         """
         Register dependency in container.
-        
+
         Args:
             cls: The class type to register
             instance_or_factory: Instance or factory function
         """
         pass
-    
+
     @abstractmethod
-    def register_singleton(self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]) -> None:
+    def register_singleton(
+        self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]
+    ) -> None:
         """
         Register dependency as singleton.
-        
+
         Args:
             cls: The class type to register
             instance_or_factory: Instance or factory function
         """
         pass
-    
+
     @abstractmethod
     def is_registered(self, cls: Type[T]) -> bool:
         """
         Check if type is registered in container.
-        
+
         Args:
             cls: The class type to check
-            
+
         Returns:
             True if registered, False otherwise
         """
@@ -82,61 +85,64 @@ class DependencyInjectionPort(ABC):
 
 class DependencyResolutionError(Exception):
     """Raised when dependency cannot be resolved."""
+
     pass
 
 
 # Injectable Metadata Classes
 
+
 class InjectableMetadata:
     """Metadata for injectable classes."""
-    
+
     def __init__(
         self,
         auto_wire: bool = True,
         singleton: bool = False,
         dependencies: Optional[List[Type]] = None,
         factory: Optional[Callable] = None,
-        lazy: bool = False
+        lazy: bool = False,
     ):
         self.auto_wire = auto_wire
         self.singleton = singleton
         self.dependencies = dependencies or []
         self.factory = factory
         self.lazy = lazy
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
         return {
-            'auto_wire': self.auto_wire,
-            'singleton': self.singleton,
-            'dependencies': self.dependencies,
-            'factory': self.factory,
-            'lazy': self.lazy
+            "auto_wire": self.auto_wire,
+            "singleton": self.singleton,
+            "dependencies": self.dependencies,
+            "factory": self.factory,
+            "lazy": self.lazy,
         }
 
 
 # Core DI Decorators
 
+
 def injectable(cls: Type[T]) -> Type[T]:
     """
     Domain decorator for marking classes as injectable.
-    
+
     This decorator marks classes for automatic dependency injection
     without coupling to infrastructure implementation. It preserves
     the existing @injectable pattern while moving it to the domain layer.
-    
+
     Features:
     - Automatic dependency resolution
     - Constructor parameter analysis
     - Type hint support
     - Optional dependency handling
-    
+
     Args:
         cls: The class to make injectable
-        
+
     Returns:
         The decorated class with injectable metadata
-        
+
     Example:
         @injectable
         class UserService:
@@ -145,48 +151,48 @@ def injectable(cls: Type[T]) -> Type[T]:
     """
     # Preserve existing functionality
     cls._injectable = True
-    
+
     # Enhanced metadata
     metadata = InjectableMetadata(
         auto_wire=True,
-        singleton=getattr(cls, '_singleton', False),
-        dependencies=getattr(cls, '_dependencies', []),
-        factory=getattr(cls, '_factory', None),
-        lazy=getattr(cls, '_lazy', False)
+        singleton=getattr(cls, "_singleton", False),
+        dependencies=getattr(cls, "_dependencies", []),
+        factory=getattr(cls, "_factory", None),
+        lazy=getattr(cls, "_lazy", False),
     )
-    
+
     cls._injectable_metadata = metadata
-    
+
     # Store original __init__ for dependency analysis
-    if hasattr(cls, '__init__'):
+    if hasattr(cls, "__init__"):
         cls._original_init = cls.__init__
-        
+
         # Analyze constructor parameters for auto-wiring
         sig = inspect.signature(cls.__init__)
         dependencies = []
-        
+
         for param_name, param in sig.parameters.items():
-            if param_name != 'self' and param.annotation != inspect.Parameter.empty:
+            if param_name != "self" and param.annotation != inspect.Parameter.empty:
                 dependencies.append(param.annotation)
-        
+
         metadata.dependencies = dependencies
-    
+
     return cls
 
 
 def singleton(cls: Type[T]) -> Type[T]:
     """
     Mark class as singleton for DI container.
-    
+
     This decorator marks a class to be registered as a singleton,
     meaning only one instance will be created and reused.
-    
+
     Args:
         cls: The class to mark as singleton
-        
+
     Returns:
         The decorated class with singleton metadata
-        
+
     Example:
         @singleton
         @injectable
@@ -200,63 +206,67 @@ def singleton(cls: Type[T]) -> Type[T]:
 def requires(*dependencies: Type) -> Callable[[Type[T]], Type[T]]:
     """
     Decorator to specify explicit dependencies.
-    
+
     Use this decorator when you need to explicitly specify dependencies
     that cannot be inferred from constructor parameters.
-    
+
     Args:
         *dependencies: The dependency types required
-        
+
     Returns:
         Decorator function
-        
+
     Example:
         @requires(UserRepository, EmailService)
         @injectable
         class UserService:
             pass
     """
+
     def decorator(cls: Type[T]) -> Type[T]:
         cls._dependencies = list(dependencies)
         return cls
+
     return decorator
 
 
 def factory(factory_func: Callable[[], T]) -> Callable[[Type[T]], Type[T]]:
     """
     Specify custom factory function for dependency creation.
-    
+
     Args:
         factory_func: Function that creates instances
-        
+
     Returns:
         Decorator function
-        
+
     Example:
         def create_database_connection():
             return DatabaseConnection(config.db_url)
-        
+
         @factory(create_database_connection)
         @injectable
         class DatabaseService:
             pass
     """
+
     def decorator(cls: Type[T]) -> Type[T]:
         cls._factory = factory_func
         return cls
+
     return decorator
 
 
 def lazy(cls: Type[T]) -> Type[T]:
     """
     Mark dependency for lazy initialization.
-    
+
     Lazy dependencies are only created when first accessed,
     which can help with circular dependencies and performance.
-    
+
     Args:
         cls: The class to mark as lazy
-        
+
     Returns:
         The decorated class with lazy metadata
     """
@@ -266,113 +276,121 @@ def lazy(cls: Type[T]) -> Type[T]:
 
 # CQRS-Specific Decorators
 
+
 def command_handler(command_type: Type) -> Callable[[Type[T]], Type[T]]:
     """
     Mark class as CQRS command handler.
-    
+
     This decorator combines @injectable with command handler metadata,
     making it easy to register command handlers in the DI container.
-    
+
     Args:
         command_type: The command type this handler processes
-        
+
     Returns:
         Decorator function
-        
+
     Example:
         @command_handler(CreateUserCommand)
         class CreateUserHandler:
             def handle(self, command: CreateUserCommand):
                 pass
     """
+
     def decorator(cls: Type[T]) -> Type[T]:
         cls._command_type = command_type
-        cls._handler_type = 'command'
+        cls._handler_type = "command"
         cls._cqrs_handler = True
         return injectable(cls)
+
     return decorator
 
 
 def query_handler(query_type: Type) -> Callable[[Type[T]], Type[T]]:
     """
     Mark class as CQRS query handler.
-    
+
     This decorator combines @injectable with query handler metadata,
     making it easy to register query handlers in the DI container.
-    
+
     Args:
         query_type: The query type this handler processes
-        
+
     Returns:
         Decorator function
-        
+
     Example:
         @query_handler(GetUserQuery)
         class GetUserHandler:
             def handle(self, query: GetUserQuery):
                 pass
     """
+
     def decorator(cls: Type[T]) -> Type[T]:
         cls._query_type = query_type
-        cls._handler_type = 'query'
+        cls._handler_type = "query"
         cls._cqrs_handler = True
         return injectable(cls)
+
     return decorator
 
 
 def event_handler(event_type: Type) -> Callable[[Type[T]], Type[T]]:
     """
     Mark class as domain event handler.
-    
+
     This decorator combines @injectable with event handler metadata,
     making it easy to register event handlers in the DI container.
-    
+
     Args:
         event_type: The event type this handler processes
-        
+
     Returns:
         Decorator function
-        
+
     Example:
         @event_handler(UserCreatedEvent)
         class UserCreatedHandler:
             def handle(self, event: UserCreatedEvent):
                 pass
     """
+
     def decorator(cls: Type[T]) -> Type[T]:
         cls._event_type = event_type
-        cls._handler_type = 'event'
+        cls._handler_type = "event"
         cls._cqrs_handler = True
         return injectable(cls)
+
     return decorator
 
 
 # Utility Functions
 
+
 def is_injectable(cls: Type) -> bool:
     """
     Check if class is marked as injectable.
-    
+
     Args:
         cls: The class to check
-        
+
     Returns:
         True if class is injectable, False otherwise
     """
-    return hasattr(cls, '_injectable') and cls._injectable
+    return hasattr(cls, "_injectable") and cls._injectable
 
 
 def get_injectable_metadata(cls: Type) -> Optional[InjectableMetadata]:
     """
     Get injectable metadata for class.
-    
+
     Args:
         cls: The class to get metadata for
-        
+
     Returns:
         InjectableMetadata if class is injectable, None otherwise
     """
-    if hasattr(cls, '_injectable_metadata'):
+    if hasattr(cls, "_injectable_metadata"):
         return cls._injectable_metadata
     return None
 
@@ -380,40 +398,40 @@ def get_injectable_metadata(cls: Type) -> Optional[InjectableMetadata]:
 def is_singleton(cls: Type) -> bool:
     """
     Check if class is marked as singleton.
-    
+
     Args:
         cls: The class to check
-        
+
     Returns:
         True if class is singleton, False otherwise
     """
-    return hasattr(cls, '_singleton') and cls._singleton
+    return hasattr(cls, "_singleton") and cls._singleton
 
 
 def is_cqrs_handler(cls: Type) -> bool:
     """
     Check if class is a CQRS handler.
-    
+
     Args:
         cls: The class to check
-        
+
     Returns:
         True if class is a CQRS handler, False otherwise
     """
-    return hasattr(cls, '_cqrs_handler') and cls._cqrs_handler
+    return hasattr(cls, "_cqrs_handler") and cls._cqrs_handler
 
 
 def get_handler_type(cls: Type) -> Optional[str]:
     """
     Get CQRS handler type.
-    
+
     Args:
         cls: The class to check
-        
+
     Returns:
         Handler type ('command', 'query', 'event') or None
     """
-    if hasattr(cls, '_handler_type'):
+    if hasattr(cls, "_handler_type"):
         return cls._handler_type
     return None
 
@@ -421,36 +439,37 @@ def get_handler_type(cls: Type) -> Optional[str]:
 def get_dependencies(cls: Type) -> List[Type]:
     """
     Get explicit dependencies for class.
-    
+
     Args:
         cls: The class to get dependencies for
-        
+
     Returns:
         List of dependency types
     """
-    if hasattr(cls, '_dependencies'):
+    if hasattr(cls, "_dependencies"):
         return cls._dependencies
-    
+
     # Try to get from metadata
     metadata = get_injectable_metadata(cls)
     if metadata:
         return metadata.dependencies
-    
+
     return []
 
 
 # Optional Dependency Helper
 
+
 class OptionalDependency(Generic[T]):
     """
     Wrapper for optional dependencies.
-    
+
     Use this to mark dependencies as optional in constructor parameters.
     """
-    
+
     def __init__(self, dependency_type: Type[T]):
         self.dependency_type = dependency_type
-    
+
     def __repr__(self):
         return f"OptionalDependency({self.dependency_type})"
 
@@ -458,21 +477,21 @@ class OptionalDependency(Generic[T]):
 def optional_dependency(dependency_type: Type[T]) -> OptionalDependency[T]:
     """
     Mark dependency as optional.
-    
+
     Optional dependencies will be injected if available,
     but won't cause errors if not registered.
-    
+
     Args:
         dependency_type: The dependency type
-        
+
     Returns:
         OptionalDependency wrapper
-        
+
     Example:
         @injectable
         class UserService:
             def __init__(
-                self, 
+                self,
                 repository: UserRepository,
                 cache: OptionalDependency[CacheService] = optional_dependency(CacheService)
             ):
@@ -484,25 +503,26 @@ def optional_dependency(dependency_type: Type[T]) -> OptionalDependency[T]:
 
 # Backward Compatibility
 
+
 # Preserve existing function names for compatibility
 def get_injectable_info(cls: Type) -> Dict[str, Any]:
     """
     Get injectable information for class (backward compatibility).
-    
+
     Args:
         cls: The class to get info for
-        
+
     Returns:
         Dictionary with injectable information
     """
     metadata = get_injectable_metadata(cls)
     if metadata:
         return metadata.to_dict()
-    
+
     return {
-        'injectable': is_injectable(cls),
-        'singleton': is_singleton(cls),
-        'dependencies': get_dependencies(cls),
-        'cqrs_handler': is_cqrs_handler(cls),
-        'handler_type': get_handler_type(cls)
+        "injectable": is_injectable(cls),
+        "singleton": is_singleton(cls),
+        "dependencies": get_dependencies(cls),
+        "cqrs_handler": is_cqrs_handler(cls),
+        "handler_type": get_handler_type(cls),
     }

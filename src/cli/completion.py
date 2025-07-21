@@ -8,7 +8,7 @@ enabling tab completion for commands, options, and arguments.
 
 def generate_bash_completion() -> str:
     """Generate bash completion script for ohfp command."""
-    return '''#!/bin/bash
+    return """#!/bin/bash
 
 _ohfp_completion() {
     local cur prev words cword
@@ -95,12 +95,12 @@ _ohfp_completion() {
 
 complete -F _ohfp_completion ohfp
 complete -F _ohfp_completion open-hostfactory-plugin
-'''
+"""
 
 
 def generate_zsh_completion() -> str:
     """Generate zsh completion script for ohfp command."""
-    return '''#compdef ohfp open-hostfactory-plugin
+    return """#compdef ohfp open-hostfactory-plugin
 
 _ohfp() {
     local context state line
@@ -239,4 +239,4 @@ _ohfp_options() {
 }
 
 _ohfp "$@"
-'''
+"""

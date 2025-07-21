@@ -7,14 +7,9 @@ This module provides a unified interface to all machine value objects organized 
 """
 
 # Import all value objects from specialized modules
-from .machine_status import (
-    MachineStatus
-)
+from .machine_status import MachineStatus
 
-from .machine_identifiers import (
-    MachineId,
-    MachineType
-)
+from .machine_identifiers import MachineId, MachineType
 
 from .machine_metadata import (
     PriceType,
@@ -24,25 +19,23 @@ from .machine_metadata import (
     IPAddressRange,
     MachineMetadata,
     HealthCheckResult,
-    ResourceTag
+    ResourceTag,
 )
 
 # Export all value objects
 __all__ = [
     # Machine status
-    'MachineStatus',
-    
+    "MachineStatus",
     # Machine identifiers and core types
-    'MachineId',
-    'MachineType',
-    
+    "MachineId",
+    "MachineType",
     # Machine metadata and configuration
-    'PriceType',
-    'MachineConfiguration',
-    'MachineEvent',
-    'HealthCheck',
-    'IPAddressRange',
-    'MachineMetadata',
-    'HealthCheckResult',
-    'ResourceTag'
+    "PriceType",
+    "MachineConfiguration",
+    "MachineEvent",
+    "HealthCheck",
+    "IPAddressRange",
+    "MachineMetadata",
+    "HealthCheckResult",
+    "ResourceTag",
 ]

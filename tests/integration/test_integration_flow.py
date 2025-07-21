@@ -6,67 +6,63 @@ Tests that the AWS provider strategy now uses the proper handler system instead 
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+
 
 def test_aws_provider_strategy_uses_handlers():
     """Test that AWS provider strategy uses proper handler system."""
     print("=== Phase 4: Integration Flow Fix Test ===")
-    
+
     try:
         from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
         from src.providers.aws.configuration.config import AWSProviderConfig
         from src.infrastructure.logging.logger import get_logger
         from src.providers.base.strategy import ProviderOperation, ProviderOperationType
-        
+
         # Create AWS provider strategy
-        config = AWSProviderConfig(
-            region='us-west-2',
-            profile='default'
-        )
+        config = AWSProviderConfig(region="us-west-2", profile="default")
         logger = get_logger(__name__)
         strategy = AWSProviderStrategy(config, logger)
-        
+
         # Initialize the strategy
         initialized = strategy.initialize()
         print(f"PASS: AWS provider strategy initialized: {initialized}")
-        
+
         # Check that handlers are properly initialized
         handlers = strategy.handlers
         print(f"PASS: Handlers initialized: {list(handlers.keys())}")
-        
+
         # Verify expected handlers are present
-        expected_handlers = ['SpotFleet', 'EC2Fleet', 'RunInstances']
+        expected_handlers = ["SpotFleet", "EC2Fleet", "RunInstances"]
         for handler_name in expected_handlers:
             assert handler_name in handlers, f"Handler {handler_name} not found"
             print(f"   - {handler_name}: PASS:")
-        
+
         # Check that launch template manager is available
         lt_manager = strategy.launch_template_manager
         assert lt_manager is not None, "Launch template manager should be initialized"
         print(f"PASS: Launch template manager initialized: {type(lt_manager).__name__}")
-        
+
         # Test that create_instances operation routes to handlers
         template_config = {
-            'template_id': 'test-template',
-            'image_id': 'ami-123456',
-            'instance_type': 't2.micro',
-            'subnet_ids': ['subnet-123'],
-            'security_group_ids': ['sg-123'],
-            'provider_api': 'SpotFleet'  # Should route to SpotFleet handler
+            "template_id": "test-template",
+            "image_id": "ami-123456",
+            "instance_type": "t2.micro",
+            "subnet_ids": ["subnet-123"],
+            "security_group_ids": ["sg-123"],
+            "provider_api": "SpotFleet",  # Should route to SpotFleet handler
         }
-        
+
         operation = ProviderOperation(
             operation_type=ProviderOperationType.CREATE_INSTANCES,
-            parameters={
-                'template_config': template_config,
-                'count': 1
-            },
-            context={'correlation_id': 'test-123', 'dry_run': True}
+            parameters={"template_config": template_config, "count": 1},
+            context={"correlation_id": "test-123", "dry_run": True},
         )
-        
+
         print("PASS: Testing create_instances operation routing...")
         result = strategy.execute_operation(operation)
-        
+
         print(f"PASS: Operation result: success={result.success}")
         if result.success:
             print(f"   - Resource ID: {result.data.get('resource_id')}")
@@ -74,86 +70,93 @@ def test_aws_provider_strategy_uses_handlers():
             print(f"   - Handler used: {result.metadata.get('handler_used')}")
         else:
             print(f"   - Error: {result.error_message}")
-        
+
         # Test fallback to RunInstances when provider_api not specified
         template_config_no_api = {
-            'template_id': 'test-template-2',
-            'image_id': 'ami-123456',
-            'instance_type': 't2.micro',
-            'subnet_ids': ['subnet-123'],
-            'security_group_ids': ['sg-123']
+            "template_id": "test-template-2",
+            "image_id": "ami-123456",
+            "instance_type": "t2.micro",
+            "subnet_ids": ["subnet-123"],
+            "security_group_ids": ["sg-123"],
             # No provider_api - should default to RunInstances
         }
-        
+
         operation2 = ProviderOperation(
             operation_type=ProviderOperationType.CREATE_INSTANCES,
-            parameters={
-                'template_config': template_config_no_api,
-                'count': 1
-            },
-            context={'correlation_id': 'test-456', 'dry_run': True}
+            parameters={"template_config": template_config_no_api, "count": 1},
+            context={"correlation_id": "test-456", "dry_run": True},
         )
-        
+
         print("PASS: Testing fallback to RunInstances...")
         result2 = strategy.execute_operation(operation2)
-        
+
         print(f"PASS: Fallback result: success={result2.success}")
         if result2.success:
             print(f"   - Provider API used: {result2.data.get('provider_api')}")
             print(f"   - Handler used: {result2.metadata.get('handler_used')}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"FAIL: Phase 4 integration flow test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 def test_no_instance_manager_bypass():
     """Test that AWSInstanceManager is no longer used directly."""
     print("\n=== No Instance Manager Bypass Test ===")
-    
+
     try:
         from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
         from src.providers.aws.configuration.config import AWSProviderConfig
         from src.infrastructure.logging.logger import get_logger
-        
+
         # Create AWS provider strategy
-        config = AWSProviderConfig(region='us-west-2', profile='default')
+        config = AWSProviderConfig(region="us-west-2", profile="default")
         logger = get_logger(__name__)
         strategy = AWSProviderStrategy(config, logger)
-        
+
         # Initialize the strategy
         strategy.initialize()
-        
+
         # Check that instance_manager property doesn't exist (should be removed)
-        assert not hasattr(strategy, 'instance_manager'), "instance_manager property should be removed"
+        assert not hasattr(
+            strategy, "instance_manager"
+        ), "instance_manager property should be removed"
         print("PASS: instance_manager property correctly removed")
-        
+
         # Check that _instance_manager attribute doesn't exist
-        assert not hasattr(strategy, '_instance_manager'), "_instance_manager attribute should be removed"
+        assert not hasattr(
+            strategy, "_instance_manager"
+        ), "_instance_manager attribute should be removed"
         print("PASS: _instance_manager attribute correctly removed")
-        
+
         # Check that handlers and launch_template_manager exist instead
-        assert hasattr(strategy, 'handlers'), "handlers property should exist"
-        assert hasattr(strategy, 'launch_template_manager'), "launch_template_manager property should exist"
+        assert hasattr(strategy, "handlers"), "handlers property should exist"
+        assert hasattr(
+            strategy, "launch_template_manager"
+        ), "launch_template_manager property should exist"
         print("PASS: New handler system properties exist")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"FAIL: No instance manager bypass test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
+
 if __name__ == "__main__":
     print("Running Phase 4: Integration Flow Fix Tests...")
-    
+
     test1_passed = test_aws_provider_strategy_uses_handlers()
     test2_passed = test_no_instance_manager_bypass()
-    
+
     if test1_passed and test2_passed:
         print("\n🎉 ALL PHASE 4 INTEGRATION FLOW TESTS PASSED")
         print("PASS: AWS provider strategy now uses proper handler system")

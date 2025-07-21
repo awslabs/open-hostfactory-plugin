@@ -18,9 +18,9 @@ from .stats import StrategyStats
 from .strategy import LoadBalancingProviderStrategy
 
 __all__ = [
-    'LoadBalancingAlgorithm',
-    'HealthCheckMode', 
-    'LoadBalancingConfig',
-    'StrategyStats',
-    'LoadBalancingProviderStrategy'
+    "LoadBalancingAlgorithm",
+    "HealthCheckMode",
+    "LoadBalancingConfig",
+    "StrategyStats",
+    "LoadBalancingProviderStrategy",
 ]

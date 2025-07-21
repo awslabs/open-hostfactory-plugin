@@ -46,7 +46,7 @@ jobs:
 
     - name: Generate Python SBOM with pip-audit
       run: |
-        pip install pip-audit
+        uv pip install --system pip-audit
         pip-audit --format=cyclonedx-json --output=python-sbom.json
         pip-audit --format=spdx-json --output=python-sbom-spdx.json
       continue-on-error: true

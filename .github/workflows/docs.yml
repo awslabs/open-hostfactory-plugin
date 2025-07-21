@@ -56,9 +56,10 @@ jobs:
           uv pip install --system -r requirements-dev.txt
 
       - name: Build documentation
+        working-directory: docs
         run: |
-          cd docs
           mkdocs build --strict
+          ls -la site/  # Verify build output exists
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

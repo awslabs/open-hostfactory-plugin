@@ -63,13 +63,13 @@ jobs:
       continue-on-error: true
     
     - name: Upload Bandit SARIF results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: bandit-report.sarif
     
     - name: Upload Hadolint SARIF results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: hadolint-results.sarif
@@ -91,7 +91,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload Semgrep SARIF results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: semgrep.sarif
@@ -176,7 +176,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         queries: security-extended,security-and-quality
@@ -198,6 +198,6 @@ jobs:
         uv pip install --system -r requirements.txt
     
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"

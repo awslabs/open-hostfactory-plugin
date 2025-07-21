@@ -17,7 +17,7 @@ jsonschema>=4.17.0,<5.0.0
 
 # CLI and UI
 rich>=13.3.0,<14.0.0
-python-dotenv>=1.0.0,<2.0.0
+python-dotenv>=0.13.0,<2.0.0
 
 # Authentication dependencies
 PyJWT>=2.8.0,<3.0.0

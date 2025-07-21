@@ -1,7 +1,7 @@
 """Collection transformation utility functions."""
 
-from typing import Any, Dict, List, Set, Tuple, Iterable, TypeVar, Callable
 import copy
+from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, TypeVar
 
 T = TypeVar("T")
 K = TypeVar("K")

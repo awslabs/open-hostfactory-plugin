@@ -1,24 +1,26 @@
 """Single request repository implementation using storage strategy composition."""
 
-from typing import List, Optional, Dict, Any
-from datetime import datetime
-from uuid import uuid4
 import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+from uuid import uuid4
 
-from src.domain.request.repository import RequestRepository as RequestRepositoryInterface
-from src.domain.request.aggregate import Request
-from src.domain.request.value_objects import RequestId, RequestStatus, RequestType
-from src.domain.base.value_objects import InstanceId  # Add InstanceId import
-from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
-from src.infrastructure.logging.logger import get_logger
-from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.domain.base.events import (
     DomainEvent,
-    RepositoryOperationStartedEvent,
     RepositoryOperationCompletedEvent,
     RepositoryOperationFailedEvent,
+    RepositoryOperationStartedEvent,
     SlowQueryDetectedEvent,
 )
+from src.domain.base.value_objects import InstanceId  # Add InstanceId import
+from src.domain.request.aggregate import Request
+from src.domain.request.repository import (
+    RequestRepository as RequestRepositoryInterface,
+)
+from src.domain.request.value_objects import RequestId, RequestStatus, RequestType
+from src.infrastructure.error.decorators import handle_infrastructure_exceptions
+from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
 
 
 class RequestSerializer:

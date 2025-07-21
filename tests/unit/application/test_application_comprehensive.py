@@ -1,10 +1,11 @@
 """Comprehensive application layer tests."""
 
-import pytest
 import importlib
 import inspect
-from unittest.mock import Mock, patch, AsyncMock
 from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -393,7 +394,9 @@ class TestCQRSMigrationValidation:
 
     def test_command_handlers_exist(self):
         """Test that command handlers exist."""
-        from src.application.commands.request_handlers import CreateMachineRequestHandler
+        from src.application.commands.request_handlers import (
+            CreateMachineRequestHandler,
+        )
 
         assert CreateMachineRequestHandler is not None
 

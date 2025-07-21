@@ -1,8 +1,8 @@
 """Service registration management for DI container."""
 
-from typing import Dict, Type, Any, Callable, TypeVar, Optional, Set
-import threading
 import logging
+import threading
+from typing import Any, Callable, Dict, Optional, Set, Type, TypeVar
 
 from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
 

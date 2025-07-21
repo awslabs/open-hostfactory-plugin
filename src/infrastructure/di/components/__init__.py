@@ -7,8 +7,8 @@ This package provides modular dependency injection components:
 - DependencyResolver: Dependency resolution engine
 """
 
-from .service_registry import ServiceRegistry
 from .cqrs_registry import CQRSHandlerRegistry
 from .dependency_resolver import DependencyResolver
+from .service_registry import ServiceRegistry
 
 __all__ = ["ServiceRegistry", "CQRSHandlerRegistry", "DependencyResolver"]

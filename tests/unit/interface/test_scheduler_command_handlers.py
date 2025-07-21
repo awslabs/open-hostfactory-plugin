@@ -1,9 +1,10 @@
 """Unit tests for scheduler command handlers."""
 
-import pytest
-from unittest.mock import Mock, patch
-from typing import Dict, Any
 from argparse import Namespace
+from typing import Any, Dict
+from unittest.mock import Mock, patch
+
+import pytest
 
 from src.interface.scheduler_command_handlers import (
     handle_list_scheduler_strategies,

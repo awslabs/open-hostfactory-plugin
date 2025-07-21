@@ -1,20 +1,23 @@
 """API handler for returning machines."""
 
-from typing import Dict, Any, Optional, List, TYPE_CHECKING
-import uuid
 import time
+import uuid
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.application.base.infrastructure_handlers import BaseAPIHandler, RequestContext
 from src.application.dto.commands import CreateReturnRequestCommand
-from src.application.dto.responses import RequestReturnMachinesResponse, CleanupResourcesResponse
-from src.domain.machine.exceptions import MachineNotFoundError
-from src.monitoring.metrics import MetricsCollector
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
+from src.application.dto.responses import (
+    CleanupResourcesResponse,
+    RequestReturnMachinesResponse,
+)
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.domain.machine.exceptions import MachineNotFoundError
 
 # Exception handling infrastructure
 from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.monitoring.metrics import MetricsCollector
 
 
 @injectable
@@ -289,4 +292,4 @@ class RequestReturnMachinesRESTHandler(
 
 
 if TYPE_CHECKING:
-    from src.infrastructure.di.buses import QueryBus, CommandBus
+    from src.infrastructure.di.buses import CommandBus, QueryBus

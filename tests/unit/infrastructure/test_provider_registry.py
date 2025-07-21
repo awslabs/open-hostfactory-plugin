@@ -1,14 +1,15 @@
 """Unit tests for Provider Registry."""
 
-import pytest
 from unittest.mock import Mock
 
+import pytest
+
+from src.domain.base.exceptions import ConfigurationError
 from src.infrastructure.registry.provider_registry import (
     ProviderRegistry,
     UnsupportedProviderError,
     get_provider_registry,
 )
-from src.domain.base.exceptions import ConfigurationError
 
 
 @pytest.mark.unit

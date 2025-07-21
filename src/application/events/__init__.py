@@ -24,17 +24,18 @@ Usage:
     await event_bus.publish(machine_created_event)
 """
 
+from .base import ActionEventHandler, EventHandler, LoggingEventHandler
+
 # Import core components
 from .bus import EventBus
-from .decorators import event_handler, EventHandlerRegistry
-from .base import EventHandler, LoggingEventHandler, ActionEventHandler
+from .decorators import EventHandlerRegistry, event_handler
 
 # Import all handlers to ensure they're registered
 from .handlers import (
+    infrastructure_handlers,
     machine_handlers,
     request_handlers,
     system_handlers,
-    infrastructure_handlers,
     template_handlers,
 )
 

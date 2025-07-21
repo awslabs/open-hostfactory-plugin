@@ -1,6 +1,7 @@
 """AWS-specific event handlers."""
 
 import logging
+
 from src.domain.base.events import DomainEvent
 
 

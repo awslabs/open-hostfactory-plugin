@@ -1,18 +1,18 @@
 """Enhanced API handler for retrieving available templates."""
 
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from src.application.base.infrastructure_handlers import BaseAPIHandler
 from src.application.dto.queries import ListTemplatesQuery
-from src.monitoring.metrics import MetricsCollector
-from src.infrastructure.di.buses import QueryBus, CommandBus
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.infrastructure.di.buses import CommandBus, QueryBus
 
 # Exception handling infrastructure
 from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.monitoring.metrics import MetricsCollector
 
 
 @injectable

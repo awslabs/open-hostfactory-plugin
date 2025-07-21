@@ -1,20 +1,20 @@
 """Core service registrations for dependency injection."""
 
-from typing import Optional, Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from src.infrastructure.di.container import DIContainer
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports import (
     ConfigurationPort,
-    LoggingPort,
-    EventPublisherPort,
     ErrorHandlingPort,
+    EventPublisherPort,
+    LoggingPort,
     SchedulerPort,
 )
-from src.monitoring.metrics import MetricsCollector
 from src.infrastructure.di.buses import CommandBus, QueryBus
-from src.providers.base.strategy import ProviderContext
+from src.infrastructure.di.container import DIContainer
 from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
+from src.monitoring.metrics import MetricsCollector
+from src.providers.base.strategy import ProviderContext
 
 
 def register_core_services(container: DIContainer) -> None:

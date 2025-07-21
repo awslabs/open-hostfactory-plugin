@@ -1,18 +1,20 @@
 """JSON template repository and strategy implementation."""
 
-import os
 import json
-from typing import List, Optional, Dict, Any
+import os
+from typing import Any, Dict, List, Optional
 
-from src.domain.template.repository import TemplateRepository
-from src.domain.template.aggregate import Template
-from src.domain.base.exceptions import ConfigurationError
-from src.infrastructure.logging.logger import get_logger
-from src.infrastructure.persistence.base import StrategyBasedRepository
-from src.infrastructure.persistence.json.strategy import JSONStorageStrategy
-from src.infrastructure.persistence.json.provider_template_strategy import ProviderTemplateStrategy
-from src.infrastructure.patterns.singleton_registry import SingletonRegistry
 from src.config.managers.configuration_manager import ConfigurationManager
+from src.domain.base.exceptions import ConfigurationError
+from src.domain.template.aggregate import Template
+from src.domain.template.repository import TemplateRepository
+from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.patterns.singleton_registry import SingletonRegistry
+from src.infrastructure.persistence.base import StrategyBasedRepository
+from src.infrastructure.persistence.json.provider_template_strategy import (
+    ProviderTemplateStrategy,
+)
+from src.infrastructure.persistence.json.strategy import JSONStorageStrategy
 
 
 class TemplateJSONStorageStrategy(JSONStorageStrategy):

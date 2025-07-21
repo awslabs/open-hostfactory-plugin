@@ -1,12 +1,13 @@
 """Authentication middleware for FastAPI."""
 
-from typing import List
-from fastapi import Request, Response, HTTPException, status
-from starlette.middleware.base import BaseHTTPMiddleware
 import logging
+from typing import List
 
-from src.infrastructure.ports.auth import AuthPort, AuthContext, AuthResult, AuthStatus
+from fastapi import HTTPException, Request, Response, status
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.ports.auth import AuthContext, AuthPort, AuthResult, AuthStatus
 
 
 class AuthMiddleware(BaseHTTPMiddleware):

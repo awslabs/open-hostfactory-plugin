@@ -1,6 +1,7 @@
 """Request machines API models."""
 
 from typing import Optional
+
 from pydantic import Field, field_validator
 
 from src.api.models.base import APIRequest, APIResponse

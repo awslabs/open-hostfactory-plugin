@@ -1,6 +1,6 @@
 """API examples for OpenAPI documentation."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def get_api_examples() -> Dict[str, Any]:

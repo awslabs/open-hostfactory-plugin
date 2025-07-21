@@ -4,8 +4,8 @@ This utility provides standardized tag building functionality across all AWS han
 eliminating duplication and ensuring consistent tagging patterns.
 """
 
-from typing import Dict, List, Any
 from datetime import datetime
+from typing import Any, Dict, List
 
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template

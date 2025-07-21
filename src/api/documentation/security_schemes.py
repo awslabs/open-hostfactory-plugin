@@ -1,6 +1,6 @@
 """OpenAPI security schemes for different authentication strategies."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 from src.config.schemas.server_schema import AuthConfig
 

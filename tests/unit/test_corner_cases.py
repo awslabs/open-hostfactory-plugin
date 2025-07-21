@@ -1,26 +1,32 @@
 """Comprehensive corner case and edge scenario tests."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import List, Dict, Any, Optional
+import json
+import os
 import sys
+import tempfile
 import threading
 import time
-from datetime import datetime, timezone, timedelta
-import json
-import tempfile
-import os
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Import components for testing
 try:
-    from src.domain.request.aggregate import Request
-    from src.domain.template.aggregate import Template
-    from src.domain.machine.aggregate import Machine
     from src.application.service import ApplicationService
-    from src.infrastructure.persistence.repositories.request_repository import RequestRepository
-    from src.domain.request.value_objects import RequestStatus, RequestType
     from src.domain.base.value_objects import InstanceId, InstanceType, Tags
-    from src.domain.request.exceptions import RequestValidationError, InvalidRequestStateError
+    from src.domain.machine.aggregate import Machine
+    from src.domain.request.aggregate import Request
+    from src.domain.request.exceptions import (
+        InvalidRequestStateError,
+        RequestValidationError,
+    )
+    from src.domain.request.value_objects import RequestStatus, RequestType
+    from src.domain.template.aggregate import Template
+    from src.infrastructure.persistence.repositories.request_repository import (
+        RequestRepository,
+    )
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

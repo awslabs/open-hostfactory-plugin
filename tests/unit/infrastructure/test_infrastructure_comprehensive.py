@@ -1,10 +1,11 @@
 """Comprehensive infrastructure layer tests."""
 
-import pytest
 import importlib
 import inspect
-from unittest.mock import Mock, patch, AsyncMock
 from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -444,7 +445,9 @@ class TestTemplateInfrastructureComprehensive:
     def test_template_configuration_store_exists(self):
         """Test that template configuration store exists."""
         try:
-            from src.infrastructure.template.configuration_store import TemplateConfigurationStore
+            from src.infrastructure.template.configuration_store import (
+                TemplateConfigurationStore,
+            )
 
             assert TemplateConfigurationStore is not None
         except ImportError:
@@ -453,7 +456,9 @@ class TestTemplateInfrastructureComprehensive:
     def test_template_cache_service_exists(self):
         """Test that template cache service exists."""
         try:
-            from src.infrastructure.template.template_cache_service import TemplateCacheService
+            from src.infrastructure.template.template_cache_service import (
+                TemplateCacheService,
+            )
 
             assert TemplateCacheService is not None
         except ImportError:

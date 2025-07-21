@@ -26,8 +26,8 @@ Usage:
     await server.start_stdio()
 """
 
-from .tools import OpenHFPluginMCPTools
 from .discovery import MCPToolDiscovery
+from .tools import OpenHFPluginMCPTools
 
 # Server will be added in Phase 3
 __all__ = ["OpenHFPluginMCPTools", "MCPToolDiscovery"]

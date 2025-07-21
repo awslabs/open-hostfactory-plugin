@@ -5,25 +5,27 @@ This module provides an adapter for AWS-specific resource provisioning operation
 It implements the ResourceProvisioningPort interface from the domain layer.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
-from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.exceptions import EntityNotFoundError
+from src.domain.base.ports import LoggingPort
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
+from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
 from src.providers.aws.domain.template.value_objects import ProviderApi
-from src.providers.aws.infrastructure.aws_client import AWSClient
-from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
-from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSEntityNotFoundError,
     AWSValidationError,
-    QuotaExceededError,
     InfrastructureError,
+    QuotaExceededError,
 )
-from src.domain.base.ports import LoggingPort
-from src.domain.base.dependency_injection import injectable
-from src.domain.base.exceptions import EntityNotFoundError
+from src.providers.aws.infrastructure.aws_client import AWSClient
+from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
+from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 
 
 @injectable

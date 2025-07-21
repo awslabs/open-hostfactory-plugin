@@ -1,11 +1,14 @@
 """Template repository implementation using configuration management."""
 
-from typing import List, Optional, Dict, Any
-from src.domain.template.repository import TemplateRepository
-from src.domain.template.aggregate import Template
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
-from src.domain.base.ports import LoggingPort
+from typing import Any, Dict, List, Optional
+
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.domain.template.aggregate import Template
+from src.domain.template.repository import TemplateRepository
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
 
 
 class TemplateRepositoryImpl(TemplateRepository):

@@ -1,18 +1,20 @@
 """Error response DTOs and HTTP response formatting."""
 
-from typing import Dict, Any, Optional
 from datetime import datetime
 from http import HTTPStatus
+from typing import Any, Dict, Optional
+
 from pydantic import Field
 
 from src.application.dto.base import BaseDTO
 from src.domain.base.exceptions import (
-    ValidationError,
-    EntityNotFoundError,
     BusinessRuleViolationError,
-    InfrastructureError,
     ConfigurationError,
+    EntityNotFoundError,
+    InfrastructureError,
+    ValidationError,
 )
+
 from .categories import ErrorCategory
 
 

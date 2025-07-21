@@ -2,11 +2,11 @@
 
 # Import AWS-specific value objects from their respective modules
 from .template.value_objects import (
-    AWSImageId,
-    AWSSubnetId,
-    AWSSecurityGroupId,
     AWSFleetId,
+    AWSImageId,
     AWSLaunchTemplateId,
+    AWSSecurityGroupId,
+    AWSSubnetId,
 )
 
 __all__ = [

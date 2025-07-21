@@ -5,13 +5,14 @@ This module provides unified AWS operation patterns to eliminate duplication acr
 Consolidates: instance management, operation execution, describe operations, logging, and status checking.
 """
 
-from typing import Dict, Any, List, Optional, Callable
+from typing import Any, Callable, Dict, List, Optional
+
 from botocore.exceptions import ClientError
 
-from src.infrastructure.resilience import CircuitBreakerOpenError
-from src.providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
+from src.infrastructure.resilience import CircuitBreakerOpenError
+from src.providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
 from src.providers.aws.infrastructure.aws_client import AWSClient
 
 
@@ -396,11 +397,11 @@ class AWSOperations:
 
         # Import here to avoid circular imports
         from src.providers.aws.exceptions.aws_exceptions import (
-            AWSValidationError,
             AWSEntityNotFoundError,
             AWSInfrastructureError,
-            AWSRateLimitError,
             AWSPermissionError,
+            AWSRateLimitError,
+            AWSValidationError,
         )
 
         # Map AWS error codes to domain exceptions

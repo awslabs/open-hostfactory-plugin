@@ -1,25 +1,25 @@
 """API handler for getting return requests."""
 
-from typing import Dict, Any, Optional, List, TYPE_CHECKING
-from datetime import datetime
-import uuid
 import time
+import uuid
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.application.base.infrastructure_handlers import BaseAPIHandler, RequestContext
-from src.application.request.queries import ListRequestsQuery
 from src.application.dto.responses import ReturnRequestResponse
-from src.monitoring.metrics import MetricsCollector
-from src.config.manager import get_config_manager
+from src.application.request.queries import ListRequestsQuery
 from src.config import RequestConfig
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
+from src.config.manager import get_config_manager
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
 
 # Exception handling infrastructure
 from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.monitoring.metrics import MetricsCollector
 
 if TYPE_CHECKING:
-    from src.infrastructure.di.buses import QueryBus, CommandBus
+    from src.infrastructure.di.buses import CommandBus, QueryBus
 
 
 @injectable

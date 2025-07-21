@@ -1,6 +1,7 @@
 """Performance configuration schemas."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .base_config import BaseCircuitBreakerConfig

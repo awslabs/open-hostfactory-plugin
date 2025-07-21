@@ -18,11 +18,11 @@ Test Categories:
 6. Performance Metrics Tests
 """
 
-import sys
-import os
 import inspect
-from typing import Dict, Any, List
-from unittest.mock import Mock, MagicMock
+import os
+import sys
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -107,12 +107,16 @@ def test_constructor_consistency():
     """Test that all handlers have consistent constructor patterns."""
     try:
         # Import all handlers
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
+        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
+            EC2FleetHandler,
+        )
         from src.providers.aws.infrastructure.handlers.run_instances_handler import (
             RunInstancesHandler,
         )
-        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         handlers = [SpotFleetHandler, EC2FleetHandler, RunInstancesHandler, ASGHandler]
 
@@ -164,14 +168,18 @@ def test_method_signatures():
     """Test that all handlers have consistent method signatures."""
     try:
         # Import all handlers
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
+        from src.domain.request.aggregate import Request
+        from src.providers.aws.domain.template.aggregate import AWSTemplate
+        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
+            EC2FleetHandler,
+        )
         from src.providers.aws.infrastructure.handlers.run_instances_handler import (
             RunInstancesHandler,
         )
-        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
-        from src.domain.request.aggregate import Request
-        from src.providers.aws.domain.template.aggregate import AWSTemplate
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         handlers = [SpotFleetHandler, EC2FleetHandler, RunInstancesHandler, ASGHandler]
 
@@ -234,13 +242,17 @@ def test_base_class_inheritance():
     """Test that all handlers inherit from unified AWSHandler base class."""
     try:
         # Import handlers and base class
+        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
         from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
+        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
+            EC2FleetHandler,
+        )
         from src.providers.aws.infrastructure.handlers.run_instances_handler import (
             RunInstancesHandler,
         )
-        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         handlers = [
             (SpotFleetHandler, "SpotFleetHandler"),
@@ -291,12 +303,16 @@ def test_launch_template_integration():
     """Test that all handlers properly integrate with launch template manager."""
     try:
         # Import handlers
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
+        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
+            EC2FleetHandler,
+        )
         from src.providers.aws.infrastructure.handlers.run_instances_handler import (
             RunInstancesHandler,
         )
-        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         handlers = [
             (SpotFleetHandler, "SpotFleetHandler"),
@@ -357,7 +373,9 @@ def test_error_handling_consistency():
     try:
         # Import base handler to check error handling methods
         from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         print("   Checking error handling consistency...")
 
@@ -401,7 +419,9 @@ def test_performance_metrics():
     """Test that handlers support performance metrics."""
     try:
         from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         print("   Checking performance metrics support...")
 

@@ -1,10 +1,17 @@
 """Tests for multi-instance provider support."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
-from src.config.schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
-from src.infrastructure.registry.provider_registry import ProviderRegistry, ProviderRegistration
+import pytest
+
+from src.config.schemas.provider_strategy_schema import (
+    ProviderConfig,
+    ProviderInstanceConfig,
+)
+from src.infrastructure.registry.provider_registry import (
+    ProviderRegistration,
+    ProviderRegistry,
+)
 
 
 class TestMultiInstanceProviderSupport:
@@ -177,7 +184,9 @@ class TestMultiInstanceProviderSupport:
 
     def test_provider_strategy_factory_with_instances(self):
         """Test ProviderStrategyFactory with named instances."""
-        from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
+        from src.infrastructure.factories.provider_strategy_factory import (
+            ProviderStrategyFactory,
+        )
 
         # Mock logger and config
         mock_logger = Mock()
@@ -214,7 +223,9 @@ class TestMultiInstanceProviderSupport:
 
     def test_provider_strategy_factory_fallback_to_type(self):
         """Test ProviderStrategyFactory fallback to provider type."""
-        from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
+        from src.infrastructure.factories.provider_strategy_factory import (
+            ProviderStrategyFactory,
+        )
 
         # Mock logger and config
         mock_logger = Mock()

@@ -1,67 +1,63 @@
 """Base domain layer - shared kernel for all bounded contexts."""
 
-from .entity import Entity, AggregateRoot
-from .value_objects import (
-    ValueObject,
-    ResourceId,
-    InstanceId,
-    IPAddress,
-    InstanceType,
-    Tags,
-    ARN,
-    PriceType,
-    AllocationStrategy,
+from .domain_interfaces import (
+    AggregateRepository,
+    Repository,
+    RepositoryProtocol,
+    UnitOfWork,
+    UnitOfWorkFactory,
 )
-from .events import (
+from .entity import AggregateRoot, Entity
+from .events import (  # Request Events; Machine Events; Template Events; Infrastructure Events
     DomainEvent,
     EventPublisher,
     InfrastructureEvent,
-    # Request Events
-    RequestEvent,
-    RequestCreatedEvent,
-    RequestStatusChangedEvent,
-    RequestCompletedEvent,
-    RequestFailedEvent,
-    RequestTimeoutEvent,
-    # Machine Events
-    MachineEvent,
     MachineCreatedEvent,
-    MachineStatusChangedEvent,
-    MachineProvisionedEvent,
-    MachineTerminatedEvent,
+    MachineEvent,
     MachineHealthCheckEvent,
-    # Template Events
-    TemplateEvent,
-    TemplateCreatedEvent,
-    TemplateValidatedEvent,
-    TemplateUpdatedEvent,
-    TemplateDeletedEvent,
-    # Infrastructure Events
-    ResourceEvent,
-    ResourceCreatedEvent,
-    ResourceUpdatedEvent,
-    ResourceDeletedEvent,
-    ResourceErrorEvent,
-    OperationStartedEvent,
+    MachineProvisionedEvent,
+    MachineStatusChangedEvent,
+    MachineTerminatedEvent,
     OperationCompletedEvent,
     OperationFailedEvent,
+    OperationStartedEvent,
+    RequestCompletedEvent,
+    RequestCreatedEvent,
+    RequestEvent,
+    RequestFailedEvent,
+    RequestStatusChangedEvent,
+    RequestTimeoutEvent,
+    ResourceCreatedEvent,
+    ResourceDeletedEvent,
+    ResourceErrorEvent,
+    ResourceEvent,
+    ResourceUpdatedEvent,
+    TemplateCreatedEvent,
+    TemplateDeletedEvent,
+    TemplateEvent,
+    TemplateUpdatedEvent,
+    TemplateValidatedEvent,
 )
 from .exceptions import (
-    DomainException,
-    ValidationError,
     BusinessRuleViolationError,
-    EntityNotFoundError,
     ConcurrencyError,
-    InvariantViolationError,
-    InfrastructureError,
     ConfigurationError,
+    DomainException,
+    EntityNotFoundError,
+    InfrastructureError,
+    InvariantViolationError,
+    ValidationError,
 )
-from .domain_interfaces import (
-    RepositoryProtocol,
-    Repository,
-    AggregateRepository,
-    UnitOfWork,
-    UnitOfWorkFactory,
+from .value_objects import (
+    ARN,
+    AllocationStrategy,
+    InstanceId,
+    InstanceType,
+    IPAddress,
+    PriceType,
+    ResourceId,
+    Tags,
+    ValueObject,
 )
 
 __all__ = [

@@ -1,27 +1,34 @@
 """Comprehensive tests for repository pattern implementations."""
 
-import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
 import json
-import tempfile
 import os
+import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Import repository components
 try:
-    from src.infrastructure.persistence.repositories.request_repository import RequestRepository
-    from src.infrastructure.persistence.repositories.template_repository import TemplateRepository
-    from src.infrastructure.persistence.repositories.machine_repository import MachineRepository
+    from src.domain.base.events.domain_events import DomainEvent
+    from src.domain.machine.aggregate import Machine
+    from src.domain.request.aggregate import Request
+    from src.domain.request.value_objects import RequestId, RequestStatus
+    from src.domain.template.aggregate import Template
     from src.infrastructure.persistence.base.base_repository import BaseRepository
     from src.infrastructure.persistence.components.json_storage import JSONStorage
     from src.infrastructure.persistence.components.sql_storage import SQLStorage
-    from src.domain.request.aggregate import Request
-    from src.domain.template.aggregate import Template
-    from src.domain.machine.aggregate import Machine
-    from src.domain.base.events.domain_events import DomainEvent
-    from src.domain.request.value_objects import RequestId, RequestStatus
+    from src.infrastructure.persistence.repositories.machine_repository import (
+        MachineRepository,
+    )
+    from src.infrastructure.persistence.repositories.request_repository import (
+        RequestRepository,
+    )
+    from src.infrastructure.persistence.repositories.template_repository import (
+        TemplateRepository,
+    )
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

@@ -1,12 +1,13 @@
 """Data Transfer Objects for request domain."""
 
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import Field
 
+from src.application.dto.base import BaseDTO
 from src.domain.request.aggregate import Request
 from src.domain.request.value_objects import MachineReference
-from src.application.dto.base import BaseDTO
 
 
 class MachineReferenceDTO(BaseDTO):

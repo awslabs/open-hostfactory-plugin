@@ -1,30 +1,31 @@
 """Query handlers for application services."""
 
 from __future__ import annotations
-from typing import List, Dict, Any, TypeVar
+
+from typing import Any, Dict, List, TypeVar
 
 from src.application.base.handlers import BaseQueryHandler
-from src.application.dto.system import ValidationDTO
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort, ContainerPort
-from src.domain.template.aggregate import Template
+from src.application.decorators import query_handler
 from src.application.dto.queries import (
+    GetMachineQuery,
     GetRequestQuery,
     GetRequestStatusQuery,
-    ListActiveRequestsQuery,
-    ListReturnRequestsQuery,
     GetTemplateQuery,
+    ListActiveRequestsQuery,
+    ListMachinesQuery,
+    ListReturnRequestsQuery,
     ListTemplatesQuery,
     ValidateTemplateQuery,
-    GetMachineQuery,
-    ListMachinesQuery,
 )
-from src.application.dto.responses import RequestDTO, MachineDTO
+from src.application.dto.responses import MachineDTO, RequestDTO
+from src.application.dto.system import ValidationDTO
+from src.domain.base import UnitOfWorkFactory
 
 # Exception handling through BaseQueryHandler (Clean Architecture compliant)
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.exceptions import EntityNotFoundError
-from src.domain.base import UnitOfWorkFactory
-from src.application.decorators import query_handler
+from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
+from src.domain.template.aggregate import Template
 
 T = TypeVar("T")
 
@@ -171,7 +172,10 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 return []
 
             # Create operation for resource-to-instance discovery using stored provider API
-            from src.providers.base.strategy import ProviderOperation, ProviderOperationType
+            from src.providers.base.strategy import (
+                ProviderOperation,
+                ProviderOperationType,
+            )
 
             operation = ProviderOperation(
                 operation_type=ProviderOperationType.DESCRIBE_RESOURCE_INSTANCES,
@@ -261,7 +265,10 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             provider_context = self._get_provider_context()
 
             # Create operation to check instance status using instance IDs
-            from src.providers.base.strategy import ProviderOperation, ProviderOperationType
+            from src.providers.base.strategy import (
+                ProviderOperation,
+                ProviderOperationType,
+            )
 
             # Extract instance IDs from machines
             instance_ids = [str(machine.instance_id.value) for machine in machines]
@@ -387,7 +394,9 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
                         return self.container.get(RunInstancesHandler)
                     else:
-                        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+                        from src.providers.aws.infrastructure.handlers.asg_handler import (
+                            ASGHandler,
+                        )
 
                         return self.container.get(ASGHandler)
 
@@ -402,8 +411,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
     def _create_machine_from_aws_data(self, aws_instance: Dict[str, Any], request):
         """Create machine aggregate from AWS instance data."""
-        from src.domain.machine.aggregate import Machine
         from src.domain.base.value_objects import InstanceId
+        from src.domain.machine.aggregate import Machine
         from src.domain.machine.value_objects import MachineStatus
 
         return Machine(
@@ -448,8 +457,10 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
     def _get_cache_service(self):
         """Get cache service for request caching."""
         try:
-            from src.infrastructure.caching.request_cache_service import RequestCacheService
             from src.config.manager import ConfigurationManager
+            from src.infrastructure.caching.request_cache_service import (
+                RequestCacheService,
+            )
 
             config_manager = self._container.get(ConfigurationManager)
             cache_service = RequestCacheService(
@@ -617,8 +628,10 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
 
     async def execute_query(self, query: GetTemplateQuery) -> Template:
         """Execute get template query."""
-        from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
         from src.domain.template.aggregate import Template
+        from src.infrastructure.template.configuration_manager import (
+            TemplateConfigurationManager,
+        )
 
         self.logger.info(f"Getting template: {query.template_id}")
 
@@ -677,8 +690,10 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
 
     async def execute_query(self, query: ListTemplatesQuery) -> List[Template]:
         """Execute list templates query."""
-        from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
         from src.domain.template.aggregate import Template
+        from src.infrastructure.template.configuration_manager import (
+            TemplateConfigurationManager,
+        )
 
         self.logger.info("Listing templates")
 
@@ -755,7 +770,9 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
 
         try:
             # Get template configuration port for validation
-            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            from src.domain.base.ports.template_configuration_port import (
+                TemplateConfigurationPort,
+            )
 
             template_port = self.container.get(TemplateConfigurationPort)
 

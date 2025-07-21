@@ -16,31 +16,31 @@ from __future__ import annotations
 
 # Import base DTO class
 from src.application.dto.base import BaseDTO
+from src.application.dto.system import (
+    ProviderCapabilitiesDTO,
+    ProviderConfigDTO,
+    ProviderHealthDTO,
+    ProviderMetricsDTO,
+    ProviderStrategyConfigDTO,
+    SystemStatusDTO,
+    ValidationDTO,
+    ValidationResultDTO,
+)
 
 # Import domain-specific DTOs
 from src.application.machine.dto import MachineDTO, MachineHealthDTO
 from src.application.request.dto import (
+    CleanupResourcesResponse,
     RequestDTO,
-    RequestStatusResponse,
-    ReturnRequestResponse,
     RequestMachinesResponse,
     RequestReturnMachinesResponse,
-    CleanupResourcesResponse,
+    RequestStatusResponse,
     RequestSummaryDTO,
+    ReturnRequestResponse,
 )
 
 # Templates use domain objects directly with scheduler strategy for formatting
 from src.domain.template.aggregate import Template
-from src.application.dto.system import (
-    ProviderConfigDTO,
-    ValidationResultDTO,
-    SystemStatusDTO,
-    ProviderMetricsDTO,
-    ProviderHealthDTO,
-    ProviderCapabilitiesDTO,
-    ProviderStrategyConfigDTO,
-    ValidationDTO,
-)
 
 __all__ = [
     "BaseDTO",

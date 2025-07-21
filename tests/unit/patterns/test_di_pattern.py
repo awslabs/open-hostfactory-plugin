@@ -8,26 +8,27 @@ This module validates the DI pattern implementation including:
 - Port/Adapter registration
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List, Optional
 import threading
 import time
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, Mock, patch
 
-from src.infrastructure.di.container import DIContainer
+import pytest
+
 from src.domain.base.dependency_injection import (
-    injectable,
-    singleton,
-    is_injectable,
     get_injectable_metadata,
+    injectable,
+    is_injectable,
+    singleton,
 )
+from src.domain.base.di_contracts import DILifecycle, DIScope
+from src.infrastructure.di.container import DIContainer
 from src.infrastructure.di.exceptions import (
-    DependencyResolutionError,
     CircularDependencyError,
-    UnregisteredDependencyError,
+    DependencyResolutionError,
     InstantiationError,
+    UnregisteredDependencyError,
 )
-from src.domain.base.di_contracts import DIScope, DILifecycle
 
 
 @pytest.mark.unit

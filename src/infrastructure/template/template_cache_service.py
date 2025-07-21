@@ -1,11 +1,13 @@
 """Template cache service with focused responsibilities."""
 
-from abc import ABC, abstractmethod
-from typing import List, Callable, Optional
-from datetime import datetime, timedelta
 import threading
+from abc import ABC, abstractmethod
+from datetime import datetime, timedelta
+from typing import Callable, List, Optional
+
 from src.domain.base.ports import LoggingPort
-from .dtos import TemplateDTO, TemplateCacheEntryDTO
+
+from .dtos import TemplateCacheEntryDTO, TemplateDTO
 
 
 class TemplateCacheService(ABC):

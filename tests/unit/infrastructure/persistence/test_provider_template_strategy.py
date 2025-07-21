@@ -1,15 +1,21 @@
 """Tests for ProviderTemplateStrategy."""
 
-import pytest
-import os
 import json
-import tempfile
+import os
 import shutil
-from unittest.mock import Mock, MagicMock
+import tempfile
+from unittest.mock import MagicMock, Mock
 
-from src.infrastructure.persistence.json.provider_template_strategy import ProviderTemplateStrategy
+import pytest
+
 from src.config.managers.configuration_manager import ConfigurationManager
-from src.config.schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+from src.config.schemas.provider_strategy_schema import (
+    ProviderConfig,
+    ProviderInstanceConfig,
+)
+from src.infrastructure.persistence.json.provider_template_strategy import (
+    ProviderTemplateStrategy,
+)
 
 
 class TestProviderTemplateStrategy:

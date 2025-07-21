@@ -6,8 +6,8 @@ This test validates that the dependency injection updates for AWS Launch Templat
 and other services are working correctly.
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -152,7 +152,9 @@ def test_repository_factory_machine_support():
         print("   Testing repository factory machine support...")
 
         # Test that repository factory can be imported
-        from src.infrastructure.utilities.factories.repository_factory import RepositoryFactory
+        from src.infrastructure.utilities.factories.repository_factory import (
+            RepositoryFactory,
+        )
 
         print("   PASS: RepositoryFactory import successful")
 
@@ -199,7 +201,9 @@ def test_di_container_resolution():
         print("   PASS: DIContainer import successful")
 
         # Test that infrastructure services registration exists
-        from src.infrastructure.di.infrastructure_services import register_infrastructure_services
+        from src.infrastructure.di.infrastructure_services import (
+            register_infrastructure_services,
+        )
 
         print("   PASS: register_infrastructure_services function exists")
 
@@ -275,12 +279,16 @@ def test_service_dependencies():
             print("   WARN:  AWSOperations import failed (may be expected)")
 
         # Test that template defaults service exists
-        from src.application.services.template_defaults_service import TemplateDefaultsService
+        from src.application.services.template_defaults_service import (
+            TemplateDefaultsService,
+        )
 
         print("   PASS: TemplateDefaultsService import successful")
 
         # Test that template defaults port exists
-        from src.domain.template.ports.template_defaults_port import TemplateDefaultsPort
+        from src.domain.template.ports.template_defaults_port import (
+            TemplateDefaultsPort,
+        )
 
         print("   PASS: TemplateDefaultsPort import successful")
 

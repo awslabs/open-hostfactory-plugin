@@ -1,7 +1,7 @@
 """Configuration port for domain layer."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class ConfigurationPort(ABC):

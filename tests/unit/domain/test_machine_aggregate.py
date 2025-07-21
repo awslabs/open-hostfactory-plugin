@@ -1,24 +1,25 @@
 """Unit tests for Machine aggregate."""
 
-import pytest
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List
 from unittest.mock import Mock, patch
-from typing import Dict, Any, List
 
+import pytest
+
+from src.domain.base.value_objects import InstanceId, InstanceType, IPAddress, Tags
 from src.domain.machine.aggregate import Machine
+from src.domain.machine.exceptions import (
+    InvalidMachineStateError,
+    MachineNotFoundError,
+    MachineProvisioningError,
+    MachineValidationError,
+)
 from src.domain.machine.value_objects import (
+    MachineConfiguration,
     MachineId,
     MachineStatus,
-    MachineConfiguration,
     MachineType,
 )
-from src.domain.machine.exceptions import (
-    MachineValidationError,
-    MachineNotFoundError,
-    InvalidMachineStateError,
-    MachineProvisioningError,
-)
-from src.domain.base.value_objects import InstanceId, InstanceType, IPAddress, Tags
 
 
 @pytest.mark.unit

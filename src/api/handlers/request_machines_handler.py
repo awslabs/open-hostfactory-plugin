@@ -1,23 +1,23 @@
 """API handler for requesting machines."""
 
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any, Optional, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
+from src.api.models import RequestMachinesModel
+from src.api.validation import RequestValidator, ValidationException
 from src.application.base.infrastructure_handlers import BaseAPIHandler
 from src.application.dto.commands import CreateRequestCommand
 from src.application.dto.queries import ListTemplatesQuery
-from src.monitoring.metrics import MetricsCollector
-from src.api.validation import RequestValidator, ValidationException
-from src.api.models import RequestMachinesModel
 from src.application.request.dto import RequestMachinesResponse
-from src.infrastructure.error.decorators import handle_interface_exceptions
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
+from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.monitoring.metrics import MetricsCollector
 
 if TYPE_CHECKING:
-    from src.infrastructure.di.buses import QueryBus, CommandBus
+    from src.infrastructure.di.buses import CommandBus, QueryBus
 
 
 @injectable

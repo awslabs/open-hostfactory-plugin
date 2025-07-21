@@ -1,12 +1,13 @@
 """Application logging configuration."""
 
 from __future__ import annotations
+
+import json
 import logging
 import logging.handlers
-import json
 from datetime import datetime
-from typing import Any, Dict, Optional
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from src.config import LoggingConfig
 

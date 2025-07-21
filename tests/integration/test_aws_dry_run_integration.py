@@ -1,15 +1,19 @@
 """Integration tests for AWS dry-run functionality."""
 
-import pytest
 import threading
-from unittest.mock import Mock, patch
 from typing import List
+from unittest.mock import Mock, patch
 
-from src.infrastructure.mocking.dry_run_context import dry_run_context, is_dry_run_active
+import pytest
+
+from src.infrastructure.mocking.dry_run_context import (
+    dry_run_context,
+    is_dry_run_active,
+)
 from src.providers.aws.infrastructure.dry_run_adapter import (
     aws_dry_run_context,
-    is_aws_dry_run_active,
     get_aws_dry_run_status,
+    is_aws_dry_run_active,
 )
 from src.providers.aws.managers.aws_instance_manager import AWSInstanceManager
 
@@ -198,8 +202,8 @@ class TestAWSDryRunWithMoto:
 
     def test_aws_dry_run_with_real_moto(self):
         """Test AWS dry-run with actual moto integration."""
-        from moto import mock_aws
         import boto3
+        from moto import mock_aws
 
         # Test that moto actually works
         with mock_aws():

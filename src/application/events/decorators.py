@@ -4,8 +4,8 @@ Event Handler Decorators - CQRS-aligned event handler registration.
 Following the same pattern as CommandHandler and QueryHandler decorators.
 """
 
-from typing import Dict, Type, Callable, Any
 from functools import wraps
+from typing import Any, Callable, Dict, Type
 
 
 class EventHandlerRegistry:

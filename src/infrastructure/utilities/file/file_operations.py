@@ -3,7 +3,7 @@
 import os
 import shutil
 import tempfile
-from typing import Optional, Callable, Any, ContextManager
+from typing import Any, Callable, ContextManager, Optional
 
 
 def file_exists(file_path: str) -> bool:

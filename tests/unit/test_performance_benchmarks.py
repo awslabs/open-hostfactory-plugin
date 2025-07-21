@@ -1,24 +1,27 @@
 """Comprehensive performance and load testing."""
 
-import pytest
-import time
-import threading
-import multiprocessing
-from unittest.mock import Mock, patch
-from typing import List, Dict, Any
-import statistics
 import gc
-import sys
-import psutil
+import multiprocessing
 import os
+import statistics
+import sys
+import threading
+import time
 from datetime import datetime, timezone
+from typing import Any, Dict, List
+from unittest.mock import Mock, patch
+
+import psutil
+import pytest
 
 # Import components for performance testing
 try:
+    from src.application.service import ApplicationService
     from src.domain.request.aggregate import Request
     from src.domain.template.aggregate import Template
-    from src.application.service import ApplicationService
-    from src.infrastructure.persistence.repositories.request_repository import RequestRepository
+    from src.infrastructure.persistence.repositories.request_repository import (
+        RequestRepository,
+    )
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

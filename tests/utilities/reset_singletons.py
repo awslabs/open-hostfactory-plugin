@@ -1,8 +1,8 @@
 """Utilities for resetting singletons during testing."""
 
-from typing import Type, Any, Optional, cast
 import importlib
 import sys
+from typing import Any, Optional, Type, cast
 
 
 # Define a fallback registry class

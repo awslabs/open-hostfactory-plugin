@@ -1,12 +1,16 @@
 """Integration tests for ProviderContext with real provider strategies."""
 
-import pytest
+from typing import Any, Dict
 from unittest.mock import Mock, patch
-from typing import Dict, Any
 
-from src.providers.base.strategy.provider_context import ProviderContext
-from src.providers.base.strategy.provider_strategy import ProviderOperation, ProviderOperationType
+import pytest
+
 from src.domain.base.ports import LoggingPort
+from src.providers.base.strategy.provider_context import ProviderContext
+from src.providers.base.strategy.provider_strategy import (
+    ProviderOperation,
+    ProviderOperationType,
+)
 
 
 class TestProviderContextIntegration:
@@ -34,7 +38,9 @@ class TestProviderContextIntegration:
             mock_aws_strategy.is_initialized.return_value = True
 
             # Mock capabilities
-            from src.providers.base.strategy.provider_strategy import ProviderCapabilities
+            from src.providers.base.strategy.provider_strategy import (
+                ProviderCapabilities,
+            )
 
             mock_capabilities = ProviderCapabilities(
                 supported_operations=[
@@ -238,6 +244,7 @@ class TestProviderContextIntegration:
     def test_provider_context_concurrent_operations(self, provider_context):
         """Test concurrent operations across multiple providers."""
         import threading
+
         from src.providers.base.strategy.provider_strategy import (
             ProviderCapabilities,
             ProviderResult,
@@ -304,8 +311,8 @@ class TestProviderContextIntegration:
         """Test provider failover scenario."""
         from src.providers.base.strategy.provider_strategy import (
             ProviderCapabilities,
-            ProviderResult,
             ProviderHealthStatus,
+            ProviderResult,
         )
 
         # Create primary and backup strategies

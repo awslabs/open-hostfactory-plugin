@@ -1,19 +1,24 @@
 """Template management API routes."""
 
-from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, Depends, Query, HTTPException, Body
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from src.infrastructure.di.container import get_container
-from src.infrastructure.di.buses import CommandBus, QueryBus
-from src.application.dto.queries import GetTemplateQuery, ListTemplatesQuery, ValidateTemplateQuery
+from src.application.dto.queries import (
+    GetTemplateQuery,
+    ListTemplatesQuery,
+    ValidateTemplateQuery,
+)
 from src.application.template.commands import (
     CreateTemplateCommand,
-    UpdateTemplateCommand,
     DeleteTemplateCommand,
+    UpdateTemplateCommand,
     ValidateTemplateCommand,
 )
+from src.infrastructure.di.buses import CommandBus, QueryBus
+from src.infrastructure.di.container import get_container
 from src.infrastructure.error.decorators import handle_rest_exceptions
 
 router = APIRouter(prefix="/templates", tags=["Templates"])

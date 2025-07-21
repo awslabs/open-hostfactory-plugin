@@ -9,12 +9,12 @@ types in the CQRS system.
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, TypeVar, Optional
 from datetime import datetime
+from typing import Any, Dict, Generic, Optional, TypeVar
 
-from src.domain.base.events import DomainEvent
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort, EventPublisherPort
 from src.application.interfaces.event_handler import EventHandler
+from src.domain.base.events import DomainEvent
+from src.domain.base.ports import ErrorHandlingPort, EventPublisherPort, LoggingPort
 
 TEvent = TypeVar("TEvent", bound=DomainEvent)
 

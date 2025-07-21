@@ -1,19 +1,25 @@
 """Template command handlers for CQRS pattern."""
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from src.application.base.handlers import BaseCommandHandler
 from src.application.decorators import command_handler
 from src.application.template.commands import (
     CreateTemplateCommand,
-    UpdateTemplateCommand,
     DeleteTemplateCommand,
-    ValidateTemplateCommand,
     TemplateCommandResponse,
+    UpdateTemplateCommand,
+    ValidateTemplateCommand,
+)
+from src.domain.base import UnitOfWorkFactory
+from src.domain.base.exceptions import BusinessRuleError, EntityNotFoundError
+from src.domain.base.ports import (
+    ContainerPort,
+    ErrorHandlingPort,
+    EventPublisherPort,
+    LoggingPort,
 )
 from src.domain.template.aggregate import Template
-from src.domain.base.exceptions import EntityNotFoundError, BusinessRuleError
-from src.domain.base.ports import LoggingPort, ContainerPort, EventPublisherPort, ErrorHandlingPort
-from src.domain.base import UnitOfWorkFactory
 
 
 @command_handler(CreateTemplateCommand)
@@ -56,7 +62,9 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
 
         try:
             # Get template configuration port for validation
-            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            from src.domain.base.ports.template_configuration_port import (
+                TemplateConfigurationPort,
+            )
 
             template_port = self._container.get(TemplateConfigurationPort)
 
@@ -148,7 +156,9 @@ class UpdateTemplateHandler(BaseCommandHandler[UpdateTemplateCommand, TemplateCo
 
         try:
             # Get template configuration port for validation
-            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            from src.domain.base.ports.template_configuration_port import (
+                TemplateConfigurationPort,
+            )
 
             template_port = self._container.get(TemplateConfigurationPort)
 
@@ -309,7 +319,9 @@ class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, Templa
 
         try:
             # Get template configuration port for validation
-            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            from src.domain.base.ports.template_configuration_port import (
+                TemplateConfigurationPort,
+            )
 
             template_port = self._container.get(TemplateConfigurationPort)
 

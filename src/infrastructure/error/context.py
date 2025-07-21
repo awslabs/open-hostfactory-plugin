@@ -1,8 +1,8 @@
 """Exception context management."""
 
 import threading
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any, Dict
 
 
 class ExceptionContext:

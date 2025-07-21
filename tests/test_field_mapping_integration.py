@@ -4,14 +4,21 @@ This module tests the complete field mapping flow from HostFactory JSON
 through the scheduler strategy to the AWS template creation.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from src.infrastructure.scheduler.hostfactory.field_mappings import HostFactoryFieldMappings
-from src.infrastructure.scheduler.hostfactory.strategy import HostFactorySchedulerStrategy
-from src.infrastructure.scheduler.hostfactory.transformations import HostFactoryTransformations
-from src.providers.aws.domain.template.aggregate import AWSTemplate
+import pytest
+
 from src.config.manager import ConfigurationManager
+from src.infrastructure.scheduler.hostfactory.field_mappings import (
+    HostFactoryFieldMappings,
+)
+from src.infrastructure.scheduler.hostfactory.strategy import (
+    HostFactorySchedulerStrategy,
+)
+from src.infrastructure.scheduler.hostfactory.transformations import (
+    HostFactoryTransformations,
+)
+from src.providers.aws.domain.template.aggregate import AWSTemplate
 
 
 class TestFieldMappingIntegration:

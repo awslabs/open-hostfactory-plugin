@@ -1,28 +1,29 @@
 """Global test configuration and fixtures."""
 
-import os
-import sys
-import pytest
-import tempfile
-import shutil
-from pathlib import Path
-from typing import Dict, Any, Generator, Optional
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timezone
 import json
+import os
+import shutil
+import sys
+import tempfile
 import uuid
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Generator, Optional
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 # Import test environment fixtures
 from tests.fixtures.environment.mock_env_vars import (
-    mock_hf_environment,
-    mock_hf_environment_with_fixtures,
-    mock_aws_credentials,
     complete_test_environment,
     create_test_config_dict,
     create_test_templates_dict,
+    mock_aws_credentials,
+    mock_hf_environment,
+    mock_hf_environment_with_fixtures,
 )
 
 # Import moto for AWS mocking
@@ -46,13 +47,13 @@ import boto3
 try:
     from src.config.manager import ConfigurationManager
     from src.config.schemas.app_schema import AppConfig
-    from src.infrastructure.template.template_service import TemplateService
+    from src.domain.base.value_objects import InstanceId, InstanceType, ResourceId
+    from src.domain.machine.aggregate import Machine
+    from src.domain.request.aggregate import Request
+    from src.domain.template.aggregate import Template
     from src.infrastructure.di.buses import CommandBus, QueryBus
     from src.infrastructure.di.container import DIContainer
-    from src.domain.template.aggregate import Template
-    from src.domain.request.aggregate import Request
-    from src.domain.machine.aggregate import Machine
-    from src.domain.base.value_objects import InstanceId, InstanceType, ResourceId
+    from src.infrastructure.template.template_service import TemplateService
     from src.providers.aws.configuration.config import AWSConfig
 
     IMPORTS_AVAILABLE = True

@@ -1,10 +1,11 @@
 """Tests for Dockerfile and container build process."""
 
-import pytest
-import subprocess
 import json
+import subprocess
 import time
 from pathlib import Path
+
+import pytest
 
 
 class TestDockerfile:

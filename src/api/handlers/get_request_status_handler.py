@@ -1,20 +1,23 @@
 """API handler for checking request status."""
 
-from typing import Dict, Any, Optional, Union, TYPE_CHECKING
-import uuid
 import time
+import uuid
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-from src.application.base.infrastructure_handlers import BaseAPIHandler, RequestContext
-from src.application.request.queries import GetRequestStatusQuery, GetActiveRequestsQuery
-from src.application.request.dto import RequestStatusResponse
-from src.domain.request.exceptions import RequestNotFoundError
-from src.monitoring.metrics import MetricsCollector
-from src.api.validation import RequestValidator, ValidationException
 from src.api.models import RequestStatusModel
-from src.infrastructure.error.decorators import handle_interface_exceptions
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
+from src.api.validation import RequestValidator, ValidationException
+from src.application.base.infrastructure_handlers import BaseAPIHandler, RequestContext
+from src.application.request.dto import RequestStatusResponse
+from src.application.request.queries import (
+    GetActiveRequestsQuery,
+    GetRequestStatusQuery,
+)
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.domain.request.exceptions import RequestNotFoundError
+from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.monitoring.metrics import MetricsCollector
 
 
 @injectable
@@ -295,4 +298,4 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
 
 
 if TYPE_CHECKING:
-    from src.infrastructure.di.buses import QueryBus, CommandBus
+    from src.infrastructure.di.buses import CommandBus, QueryBus

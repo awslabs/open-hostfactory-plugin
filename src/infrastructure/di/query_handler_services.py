@@ -80,7 +80,6 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
                 ListTemplatesQuery,
                 ValidateTemplateQuery,
             )
-
             from src.application.queries.handlers import (
                 GetTemplateHandler,
                 ListTemplatesHandler,
@@ -102,7 +101,6 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
                 ListActiveRequestsQuery,
                 ListReturnRequestsQuery,
             )
-
             from src.application.queries.handlers import (
                 GetRequestHandler,
                 GetRequestStatusQueryHandler,
@@ -121,8 +119,10 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
         # Register machine query handlers
         try:
             from src.application.dto.queries import GetMachineQuery, ListMachinesQuery
-
-            from src.application.queries.handlers import GetMachineHandler, ListMachinesHandler
+            from src.application.queries.handlers import (
+                GetMachineHandler,
+                ListMachinesHandler,
+            )
 
             query_bus.register(GetMachineQuery, container.get(GetMachineHandler))
             query_bus.register(ListMachinesQuery, container.get(ListMachinesHandler))
@@ -134,16 +134,15 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
         try:
             from src.application.queries.system import (
                 GetProviderConfigQuery,
-                ValidateProviderConfigQuery,
-                GetSystemStatusQuery,
                 GetProviderMetricsQuery,
+                GetSystemStatusQuery,
+                ValidateProviderConfigQuery,
             )
-
             from src.application.queries.system_handlers import (
                 GetProviderConfigHandler,
-                ValidateProviderConfigHandler,
-                GetSystemStatusHandler,
                 GetProviderMetricsHandler,
+                GetSystemStatusHandler,
+                ValidateProviderConfigHandler,
             )
 
             query_bus.register(GetProviderConfigQuery, container.get(GetProviderConfigHandler))
@@ -160,14 +159,13 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
         try:
             from src.application.dto.queries import (
                 GetActiveMachineCountQuery,
-                GetRequestSummaryQuery,
                 GetMachineHealthQuery,
+                GetRequestSummaryQuery,
             )
-
             from src.application.queries.specialized_handlers import (
                 GetActiveMachineCountHandler,
-                GetRequestSummaryHandler,
                 GetMachineHealthHandler,
+                GetRequestSummaryHandler,
             )
 
             query_bus.register(

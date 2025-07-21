@@ -1,12 +1,13 @@
 """Tests for enhanced base registry supporting both single and multi choice patterns."""
 
-import pytest
 from unittest.mock import Mock
 
+import pytest
+
 from src.infrastructure.registry.enhanced_base_registry import (
+    BaseRegistration,
     EnhancedBaseRegistry,
     RegistryMode,
-    BaseRegistration,
 )
 
 

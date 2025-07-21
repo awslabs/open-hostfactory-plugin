@@ -1,12 +1,12 @@
 """DynamoDB storage strategy implementation using componentized architecture."""
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from botocore.exceptions import ClientError
 
-from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
-from src.infrastructure.persistence.exceptions import PersistenceError
-from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
 
 # Import components
 from src.infrastructure.persistence.components import (
@@ -15,6 +15,7 @@ from src.infrastructure.persistence.components import (
     DynamoDBTransactionManager,
     LockManager,
 )
+from src.infrastructure.persistence.exceptions import PersistenceError
 
 
 @injectable

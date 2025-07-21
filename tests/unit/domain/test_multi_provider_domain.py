@@ -1,11 +1,12 @@
 """Tests for multi-provider domain model updates."""
 
-import pytest
 from datetime import datetime
 
-from src.domain.template.aggregate import Template
+import pytest
+
 from src.domain.request.aggregate import Request
-from src.domain.request.value_objects import RequestType, RequestId
+from src.domain.request.value_objects import RequestId, RequestType
+from src.domain.template.aggregate import Template
 
 
 class TestTemplateMultiProviderFields:

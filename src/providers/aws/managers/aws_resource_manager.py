@@ -1,14 +1,14 @@
 """AWS Resource Manager implementation using unified base hierarchy."""
 
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.base.resource_manager import (
-    ResourceSpecification,
     ResourceAllocation,
-    ResourceType,
     ResourceId,
+    ResourceSpecification,
+    ResourceType,
 )
 from src.infrastructure.base.resource_manager import CloudProviderResourceManager
 from src.providers.aws.configuration.config import AWSProviderConfig

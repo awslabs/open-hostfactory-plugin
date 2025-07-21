@@ -4,28 +4,26 @@ This module implements query handlers for retrieving provider strategy informati
 leveraging the existing provider strategy ecosystem through clean CQRS interfaces.
 """
 
-from typing import Dict, Any, List
 import time
+from typing import Any, Dict, List
 
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
 from src.application.dto.system import (
-    ProviderHealthDTO,
     ProviderCapabilitiesDTO,
+    ProviderHealthDTO,
     ProviderMetricsDTO,
     ProviderStrategyConfigDTO,
 )
 from src.application.provider.queries import (
-    GetProviderHealthQuery,
-    ListAvailableProvidersQuery,
     GetProviderCapabilitiesQuery,
+    GetProviderHealthQuery,
     GetProviderMetricsQuery,
     GetProviderStrategyConfigQuery,
+    ListAvailableProvidersQuery,
 )
-
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 from src.providers.base.strategy import ProviderContext
-
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
 
 
 @query_handler(GetProviderHealthQuery)

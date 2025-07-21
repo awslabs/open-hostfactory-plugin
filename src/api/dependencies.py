@@ -1,12 +1,13 @@
 """FastAPI dependency injection integration."""
 
 from typing import Any, Type, TypeVar
+
 from fastapi import Depends
 
-from src.infrastructure.di.container import get_container
-from src.infrastructure.di.buses import QueryBus, CommandBus
 from src.config.manager import ConfigurationManager
 from src.config.schemas.server_schema import ServerConfig
+from src.infrastructure.di.buses import CommandBus, QueryBus
+from src.infrastructure.di.container import get_container
 
 T = TypeVar("T")
 
@@ -84,7 +85,9 @@ def get_request_status_handler():
     """Get request status API handler from DI container."""
 
     def _get_handler(container=Depends(get_di_container)):
-        from src.api.handlers.get_request_status_handler import GetRequestStatusRESTHandler
+        from src.api.handlers.get_request_status_handler import (
+            GetRequestStatusRESTHandler,
+        )
 
         return container.get(GetRequestStatusRESTHandler)
 
@@ -95,7 +98,9 @@ def get_return_requests_handler():
     """Get return requests API handler from DI container."""
 
     def _get_handler(container=Depends(get_di_container)):
-        from src.api.handlers.get_return_requests_handler import GetReturnRequestsRESTHandler
+        from src.api.handlers.get_return_requests_handler import (
+            GetReturnRequestsRESTHandler,
+        )
 
         return container.get(GetReturnRequestsRESTHandler)
 

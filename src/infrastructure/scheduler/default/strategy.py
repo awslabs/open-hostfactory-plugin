@@ -1,13 +1,13 @@
 """Default scheduler strategy using native domain fields - no conversion needed."""
 
-from typing import Dict, Any, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List
 
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.base.ports.logging_port import LoggingPort
-from src.domain.template.aggregate import Template
-from src.domain.request.aggregate import Request
-from src.domain.machine.aggregate import Machine
 from src.config.manager import ConfigurationManager
+from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.domain.machine.aggregate import Machine
+from src.domain.request.aggregate import Request
+from src.domain.template.aggregate import Template
 
 
 class DefaultSchedulerStrategy(SchedulerPort):

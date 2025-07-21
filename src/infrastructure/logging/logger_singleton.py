@@ -1,9 +1,10 @@
 """Logger singleton implementation."""
 
 from __future__ import annotations
+
 import logging
 import threading
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 from src.infrastructure.logging.logger import ContextLogger, get_logger, with_context
 from src.infrastructure.patterns.singleton_registry import SingletonRegistry
@@ -48,7 +49,9 @@ class LoggerSingleton:
         with self._lock:
             if name not in self._loggers:
                 # Import the logger module's get_logger function directly to avoid recursion
-                from src.infrastructure.logging.logger import get_logger as logger_module_get_logger
+                from src.infrastructure.logging.logger import (
+                    get_logger as logger_module_get_logger,
+                )
 
                 self._loggers[name] = logger_module_get_logger(name)
             return self._loggers[name]

@@ -6,7 +6,7 @@ dependencies and maintaining proper dependency direction.
 """
 
 from functools import wraps
-from typing import Callable, TypeVar, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Optional, TypeVar
 
 if TYPE_CHECKING:
     from src.domain.base.ports import ContainerPort, ErrorHandlingPort

@@ -7,7 +7,8 @@ sending notifications, updating caches, triggering workflows, etc.
 """
 
 from abc import abstractmethod
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
+
 from .event_handler import EventHandler
 
 # Import types - using string imports to avoid circular dependencies

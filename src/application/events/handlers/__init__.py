@@ -10,11 +10,13 @@ and can be discovered and instantiated by the EventBus.
 """
 
 # Import all handler modules to ensure decorators are executed
-from . import machine_handlers
-from . import request_handlers
-from . import system_handlers
-from . import infrastructure_handlers
-from . import template_handlers
+from . import (
+    infrastructure_handlers,
+    machine_handlers,
+    request_handlers,
+    system_handlers,
+    template_handlers,
+)
 
 __all__ = [
     "machine_handlers",

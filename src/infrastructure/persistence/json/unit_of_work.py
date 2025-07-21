@@ -4,8 +4,11 @@ import os
 from pathlib import Path
 from typing import Optional
 
-from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
+
+# Import JSON storage strategy
+from src.infrastructure.persistence.json.strategy import JSONStorageStrategy
 
 # Import new simplified repositories
 from src.infrastructure.persistence.repositories.machine_repository import (
@@ -17,9 +20,6 @@ from src.infrastructure.persistence.repositories.request_repository import (
 from src.infrastructure.persistence.repositories.template_repository import (
     TemplateRepositoryImpl as TemplateRepository,
 )
-
-# Import JSON storage strategy
-from src.infrastructure.persistence.json.strategy import JSONStorageStrategy
 
 
 class JSONUnitOfWork(BaseUnitOfWork):

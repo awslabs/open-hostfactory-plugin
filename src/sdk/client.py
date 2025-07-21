@@ -6,14 +6,15 @@ application service and CQRS infrastructure with automatic
 handler discovery for zero code duplication.
 """
 
-from typing import Optional, Dict, List, Any, Callable
-from contextlib import asynccontextmanager
 import asyncio
+from contextlib import asynccontextmanager
+from typing import Any, Callable, Dict, List, Optional
 
 from src.bootstrap import Application
+
 from .config import SDKConfig
-from .discovery import SDKMethodDiscovery, MethodInfo
-from .exceptions import SDKError, ConfigurationError, ProviderError
+from .discovery import MethodInfo, SDKMethodDiscovery
+from .exceptions import ConfigurationError, ProviderError, SDKError
 
 
 class OpenHFPluginSDK:

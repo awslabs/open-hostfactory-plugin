@@ -6,11 +6,14 @@ while maintaining a consistent interface.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from src.domain.base.contracts.template_contract import (
+    TemplateContract,
+    TemplateValidationResult,
+)
 from src.domain.base.ports.logging_port import LoggingPort
-from src.domain.base.contracts.template_contract import TemplateContract, TemplateValidationResult
 
 
 class TemplateAdapterPort(ABC):

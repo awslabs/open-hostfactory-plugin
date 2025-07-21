@@ -6,22 +6,33 @@ command and query handlers, ensuring proper integration between
 application services, domain aggregates, and infrastructure.
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List
 import time
 import uuid
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from src.application.commands.request_handlers import (
     CreateMachineRequestHandler,
     CreateReturnRequestHandler,
 )
-from src.application.services.provider_capability_service import ProviderCapabilityService
+from src.application.dto.commands import (
+    CreateRequestCommand,
+    CreateReturnRequestCommand,
+)
+from src.application.services.provider_capability_service import (
+    ProviderCapabilityService,
+)
 from src.application.services.provider_selection_service import ProviderSelectionService
-from src.application.dto.commands import CreateRequestCommand, CreateReturnRequestCommand
-from src.infrastructure.di.buses import CommandBus, QueryBus
-from src.domain.base.ports import LoggingPort, ContainerPort, EventPublisherPort, ErrorHandlingPort
 from src.domain.base import UnitOfWorkFactory
+from src.domain.base.ports import (
+    ContainerPort,
+    ErrorHandlingPort,
+    EventPublisherPort,
+    LoggingPort,
+)
+from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.providers.base.strategy import ProviderContext
 
 
@@ -97,7 +108,9 @@ class TestCQRSArchitectureIntegration:
         service = Mock(spec=ProviderSelectionService)
 
         # Mock selection result
-        from src.application.services.provider_selection_service import ProviderSelectionResult
+        from src.application.services.provider_selection_service import (
+            ProviderSelectionResult,
+        )
 
         selection_result = ProviderSelectionResult(
             provider_type="aws",
@@ -114,7 +127,9 @@ class TestCQRSArchitectureIntegration:
         service = Mock(spec=ProviderCapabilityService)
 
         # Mock validation result
-        from src.application.services.provider_capability_service import ValidationResult
+        from src.application.services.provider_capability_service import (
+            ValidationResult,
+        )
 
         validation_result = ValidationResult(
             is_valid=True,

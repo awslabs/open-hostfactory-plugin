@@ -1,9 +1,10 @@
 """Configuration adapter implementing domain ConfigurationPort."""
 
-from typing import Dict, Any
-from src.domain.base.ports import ConfigurationPort
-from src.config.manager import ConfigurationManager
+from typing import Any, Dict
+
 from src.config import NamingConfig, RequestConfig, TemplateConfig
+from src.config.manager import ConfigurationManager
+from src.domain.base.ports import ConfigurationPort
 
 
 class ConfigurationAdapter(ConfigurationPort):

@@ -1,7 +1,8 @@
 """Template configuration port for application layer."""
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from src.domain.template.aggregate import Template
 
 

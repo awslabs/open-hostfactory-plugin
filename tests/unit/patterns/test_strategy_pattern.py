@@ -8,23 +8,28 @@ This module validates the Strategy pattern implementation including:
 - Load balancing strategies
 """
 
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List
 
 # Import strategy components with error handling
 try:
-    from src.providers.base.strategy.provider_strategy import (
-        ProviderStrategy,
-        ProviderOperation,
-        ProviderResult,
+    from src.infrastructure.factories.provider_strategy_factory import (
+        ProviderStrategyFactory,
     )
     from src.providers.base.strategy.composite_strategy import CompositeProviderStrategy
     from src.providers.base.strategy.fallback_strategy import FallbackProviderStrategy
-    from src.providers.base.strategy.load_balancing_strategy import LoadBalancingProviderStrategy
+    from src.providers.base.strategy.load_balancing_strategy import (
+        LoadBalancingProviderStrategy,
+    )
     from src.providers.base.strategy.provider_context import ProviderContext
     from src.providers.base.strategy.provider_selector import ProviderSelector
-    from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
+    from src.providers.base.strategy.provider_strategy import (
+        ProviderOperation,
+        ProviderResult,
+        ProviderStrategy,
+    )
 
     STRATEGY_AVAILABLE = True
 except ImportError as e:

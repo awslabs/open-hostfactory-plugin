@@ -11,7 +11,7 @@ Architecture:
 
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Any, Optional, Dict
+from typing import Any, Dict, Generic, Optional, TypeVar
 
 # Import the CQRS interface
 from src.application.interfaces.command_handler import CommandHandler

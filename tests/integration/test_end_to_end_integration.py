@@ -6,30 +6,39 @@ Tests the complete flow from request creation through AWS provisioning
 with launch template management, provider tracking, and machine creation.
 """
 
-import pytest
-from unittest.mock import Mock, MagicMock, patch
-import sys
 import os
+import sys
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from src.domain.template.aggregate import Template
-from src.domain.request.aggregate import Request, RequestStatus
 from src.domain.machine.aggregate import Machine
+from src.domain.request.aggregate import Request, RequestStatus
+from src.domain.template.aggregate import Template
+from src.infrastructure.persistence.repositories.machine_repository import (
+    MachineRepositoryImpl,
+)
+from src.infrastructure.persistence.repositories.request_repository import (
+    RequestRepositoryImpl,
+)
+from src.infrastructure.persistence.repositories.template_repository import (
+    TemplateRepositoryImpl,
+)
 from src.providers.aws.domain.template.aggregate import AWSTemplate
+from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
+from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+    SpotFleetHandler,
+)
 from src.providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
     LaunchTemplateResult,
 )
-from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
 from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-from src.infrastructure.persistence.repositories.template_repository import TemplateRepositoryImpl
-from src.infrastructure.persistence.repositories.request_repository import RequestRepositoryImpl
-from src.infrastructure.persistence.repositories.machine_repository import MachineRepositoryImpl
 
 
 class TestEnhancedEndToEnd:

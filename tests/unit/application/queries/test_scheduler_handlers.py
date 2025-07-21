@@ -1,23 +1,24 @@
 """Unit tests for scheduler query handlers."""
 
-import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+
+from src.application.dto.system import (
+    SchedulerConfigurationResponse,
+    SchedulerStrategyDTO,
+    SchedulerStrategyListResponse,
+    ValidationResultDTO,
+)
 from src.application.queries.scheduler import (
-    ListSchedulerStrategiesQuery,
     GetSchedulerConfigurationQuery,
+    ListSchedulerStrategiesQuery,
     ValidateSchedulerConfigurationQuery,
 )
 from src.application.queries.scheduler_handlers import (
-    ListSchedulerStrategiesHandler,
     GetSchedulerConfigurationHandler,
+    ListSchedulerStrategiesHandler,
     ValidateSchedulerConfigurationHandler,
-)
-from src.application.dto.system import (
-    SchedulerStrategyDTO,
-    SchedulerStrategyListResponse,
-    SchedulerConfigurationResponse,
-    ValidationResultDTO,
 )
 
 

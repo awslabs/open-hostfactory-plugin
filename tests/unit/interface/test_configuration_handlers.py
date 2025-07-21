@@ -1,14 +1,15 @@
 """Unit tests for configuration management CLI handlers."""
 
-import pytest
-from unittest.mock import Mock, patch
-from typing import Dict, Any
 from argparse import Namespace
+from typing import Any, Dict
+from unittest.mock import Mock, patch
+
+import pytest
 
 from src.interface.command_handlers import (
     handle_provider_config,
-    handle_validate_provider_config,
     handle_reload_provider_config,
+    handle_validate_provider_config,
 )
 
 
@@ -80,8 +81,8 @@ class TestConfigurationHandlerImports:
         """Test that all configuration handlers can be imported."""
         from src.interface.command_handlers import (
             handle_provider_config,
-            handle_validate_provider_config,
             handle_reload_provider_config,
+            handle_validate_provider_config,
         )
 
         # Verify all handlers are callable functions

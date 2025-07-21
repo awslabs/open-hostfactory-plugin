@@ -1,12 +1,16 @@
 """Base API handler implementation."""
 
-from abc import abstractmethod
 import json
 import time
 import uuid
-from typing import Any, Dict, Optional, TypeVar, Generic, Callable
+from abc import abstractmethod
+from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 
-from src.domain.base.exceptions import DomainException, ValidationError, EntityNotFoundError
+from src.domain.base.exceptions import (
+    DomainException,
+    EntityNotFoundError,
+    ValidationError,
+)
 from src.infrastructure.handlers.base.base_handler import BaseHandler
 from src.infrastructure.resilience import retry
 
@@ -314,7 +318,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
         def wrapper(request: T) -> R:
             # Import jsonschema directly - it's a required dependency
-            from jsonschema import validate, ValidationError as JsonSchemaValidationError
+            from jsonschema import ValidationError as JsonSchemaValidationError
+            from jsonschema import validate
 
             try:
                 # Validate input against schema

@@ -1,22 +1,27 @@
 """Command handlers for machine operations."""
 
 from typing import List
+
 from src.application.base.handlers import BaseCommandHandler
 from src.application.decorators import command_handler
+from src.application.dto.base import BaseResponse
 from src.application.machine.commands import (
-    UpdateMachineStatusCommand,
     CleanupMachineResourcesCommand,
-    RegisterMachineCommand,
-    DeregisterMachineCommand,
-    ConvertMachineStatusCommand,
     ConvertBatchMachineStatusCommand,
+    ConvertMachineStatusCommand,
+    DeregisterMachineCommand,
+    RegisterMachineCommand,
+    UpdateMachineStatusCommand,
     ValidateProviderStateCommand,
 )
-from src.application.dto.base import BaseResponse
-from src.domain.machine.value_objects import MachineStatus
+from src.domain.base.ports import ErrorHandlingPort, EventPublisherPort, LoggingPort
 from src.domain.machine.repository import MachineRepository
-from src.providers.base.strategy import ProviderContext, ProviderOperation, ProviderOperationType
-from src.domain.base.ports import EventPublisherPort, LoggingPort, ErrorHandlingPort
+from src.domain.machine.value_objects import MachineStatus
+from src.providers.base.strategy import (
+    ProviderContext,
+    ProviderOperation,
+    ProviderOperationType,
+)
 
 
 class ConvertMachineStatusResponse(BaseResponse):

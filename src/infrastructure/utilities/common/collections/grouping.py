@@ -1,7 +1,7 @@
 """Collection grouping utility functions."""
 
-from typing import Dict, List, Tuple, Iterable, TypeVar, Callable, Optional
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
+from typing import Callable, Dict, Iterable, List, Optional, Tuple, TypeVar
 
 T = TypeVar("T")
 K = TypeVar("K")

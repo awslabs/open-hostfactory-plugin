@@ -1,12 +1,13 @@
 """Unit tests for ServiceRegistry component."""
 
-import pytest
 import threading
-from typing import Type, Any
+from typing import Any, Type
 from unittest.mock import Mock
 
+import pytest
+
+from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
 from src.infrastructure.di.components.service_registry import ServiceRegistry
-from src.domain.base.di_contracts import DependencyRegistration, DIScope, DILifecycle
 
 
 class TestServiceRegistry:

@@ -2,14 +2,15 @@
 
 import os
 from typing import Optional
+
+from src.config.schemas.performance_schema import PerformanceConfig
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.exceptions import InfrastructureError
+from src.domain.base.ports import ConfigurationPort, LoggingPort
+from src.domain.base.ports.template_resolver_port import TemplateResolverPort
 from src.providers.aws.configuration.template_extension import AMIResolutionConfig
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.template.ami_cache import RuntimeAMICache
-from src.domain.base.ports import LoggingPort, ConfigurationPort
-from src.domain.base.ports.template_resolver_port import TemplateResolverPort
-from src.domain.base.exceptions import InfrastructureError
-from src.domain.base.dependency_injection import injectable
-from src.config.schemas.performance_schema import PerformanceConfig
 
 
 @injectable

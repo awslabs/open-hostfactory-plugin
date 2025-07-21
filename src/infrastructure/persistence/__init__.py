@@ -2,8 +2,8 @@
 
 # Import only the base classes to avoid circular imports
 from src.infrastructure.persistence.base import (
-    StrategyBasedRepository,
     BaseUnitOfWork,
+    StrategyBasedRepository,
     StrategyUnitOfWork,
 )
 

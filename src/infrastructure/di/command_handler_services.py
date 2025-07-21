@@ -92,11 +92,11 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
 
         # Register machine command handlers
         from src.application.machine.commands import (
-            ConvertMachineStatusCommand,
-            ConvertBatchMachineStatusCommand,
-            ValidateProviderStateCommand,
-            UpdateMachineStatusCommand,
             CleanupMachineResourcesCommand,
+            ConvertBatchMachineStatusCommand,
+            ConvertMachineStatusCommand,
+            UpdateMachineStatusCommand,
+            ValidateProviderStateCommand,
         )
 
         command_bus.register(
@@ -121,19 +121,18 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
 
         # Register request command handlers
         try:
-            from src.application.dto.commands import (
-                CreateRequestCommand,
-                CreateReturnRequestCommand,
-                UpdateRequestStatusCommand,
-                CancelRequestCommand,
-                CleanupOldRequestsCommand,
-            )
-
             from src.application.commands.request_handlers import (
+                CancelRequestHandler,
                 CreateMachineRequestHandler,
                 CreateReturnRequestHandler,
                 UpdateRequestStatusHandler,
-                CancelRequestHandler,
+            )
+            from src.application.dto.commands import (
+                CancelRequestCommand,
+                CleanupOldRequestsCommand,
+                CreateRequestCommand,
+                CreateReturnRequestCommand,
+                UpdateRequestStatusCommand,
             )
 
             command_bus.register(CreateRequestCommand, container.get(CreateMachineRequestHandler))
@@ -150,7 +149,9 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
 
             # Register CleanupOldRequestsCommand if handler exists
             try:
-                from src.application.commands.cleanup_handlers import CleanupOldRequestsHandler
+                from src.application.commands.cleanup_handlers import (
+                    CleanupOldRequestsHandler,
+                )
 
                 container.register_singleton(CleanupOldRequestsHandler)
 

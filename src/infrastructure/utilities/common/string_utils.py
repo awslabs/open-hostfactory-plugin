@@ -4,10 +4,10 @@ String utility functions for the AWS Host Factory Plugin.
 This module contains utility functions for working with strings.
 """
 
+import hashlib
 import re
 import uuid
-import hashlib
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 
 
 def is_empty(value: Optional[str]) -> bool:

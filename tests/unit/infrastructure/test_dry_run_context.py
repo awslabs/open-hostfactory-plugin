@@ -1,13 +1,14 @@
 """Unit tests for dry-run context manager."""
 
-import pytest
 import threading
 from unittest.mock import patch
 
+import pytest
+
 from src.infrastructure.mocking.dry_run_context import (
     dry_run_context,
-    is_dry_run_active,
     get_dry_run_status,
+    is_dry_run_active,
 )
 
 

@@ -1,15 +1,19 @@
 """Unified retry decorator supporting multiple strategies."""
 
 import time
-from src.infrastructure.logging.logger import get_logger
 from functools import wraps
-from typing import Callable, TypeVar, Any
+from typing import Any, Callable, TypeVar
 
-from src.infrastructure.resilience.strategies.exponential import ExponentialBackoffStrategy
-from src.infrastructure.resilience.strategies.circuit_breaker import CircuitBreakerStrategy
+from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.resilience.exceptions import (
     InvalidRetryStrategyError,
     MaxRetriesExceededError,
+)
+from src.infrastructure.resilience.strategies.circuit_breaker import (
+    CircuitBreakerStrategy,
+)
+from src.infrastructure.resilience.strategies.exponential import (
+    ExponentialBackoffStrategy,
 )
 
 T = TypeVar("T")

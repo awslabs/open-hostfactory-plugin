@@ -1,10 +1,13 @@
 """Error handling middleware for the application."""
 
-from typing import Dict, Any, Optional, Callable
 import functools
 import json
+from typing import Any, Callable, Dict, Optional
 
-from src.infrastructure.error.exception_handler import ExceptionHandler, get_exception_handler
+from src.infrastructure.error.exception_handler import (
+    ExceptionHandler,
+    get_exception_handler,
+)
 from src.infrastructure.logging.logger import get_logger
 
 # Configure logger

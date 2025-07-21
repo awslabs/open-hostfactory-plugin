@@ -1,9 +1,10 @@
 """Template value objects - provider-agnostic domain logic."""
 
 # Import core domain value objects
-from src.domain.base.value_objects import ResourceId
-from typing import Dict, Any
 from enum import Enum
+from typing import Any, Dict
+
+from src.domain.base.value_objects import ResourceId
 
 # Export all public classes
 __all__ = ["TemplateId", "ProviderConfiguration"]
@@ -16,8 +17,8 @@ class TemplateId(ResourceId):
 
 
 """Template domain value objects and contracts."""
-from typing import Protocol, List, Any, Optional
 from enum import Enum
+from typing import Any, List, Optional, Protocol
 
 
 # Provider-agnostic contracts (Protocols)

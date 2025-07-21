@@ -1,17 +1,24 @@
 """Main application configuration schema."""
 
 import os
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from .template_schema import TemplateConfig
-from .storage_schema import StorageConfig
+from .common_schema import (
+    DatabaseConfig,
+    EventsConfig,
+    NamingConfig,
+    RequestConfig,
+    ResourceConfig,
+)
 from .logging_schema import LoggingConfig
-from .performance_schema import PerformanceConfig, CircuitBreakerConfig
-from .common_schema import NamingConfig, RequestConfig, DatabaseConfig, EventsConfig, ResourceConfig
+from .performance_schema import CircuitBreakerConfig, PerformanceConfig
 from .provider_strategy_schema import ProviderConfig
-from .server_schema import ServerConfig
 from .scheduler_schema import SchedulerConfig
+from .server_schema import ServerConfig
+from .storage_schema import StorageConfig
+from .template_schema import TemplateConfig
 
 
 class AppConfig(BaseModel):

@@ -1,18 +1,19 @@
 """Request aggregate - core request domain logic."""
 
-from typing import Dict, Any, List, Optional
 from datetime import datetime
-from pydantic import Field, ConfigDict
+from typing import Any, Dict, List, Optional
+
+from pydantic import ConfigDict, Field
 
 from src.domain.base.entity import AggregateRoot
-from src.domain.base.value_objects import InstanceId
 from src.domain.base.events import (
+    RequestCompletedEvent,
     RequestCreatedEvent,
     RequestStatusChangedEvent,
-    RequestCompletedEvent,
 )
-from src.domain.request.value_objects import RequestType, RequestId
+from src.domain.base.value_objects import InstanceId
 from src.domain.request.request_types import RequestStatus
+from src.domain.request.value_objects import RequestId, RequestType
 
 
 class Request(AggregateRoot):

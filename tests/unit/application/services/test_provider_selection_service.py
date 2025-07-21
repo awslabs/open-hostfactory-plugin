@@ -1,18 +1,22 @@
 """Tests for ProviderSelectionService."""
 
-import pytest
-from unittest.mock import Mock, MagicMock
 from typing import List
+from unittest.mock import MagicMock, Mock
+
+import pytest
 
 from src.application.services.provider_selection_service import (
-    ProviderSelectionService,
     ProviderSelectionResult,
+    ProviderSelectionService,
     SelectionStrategy,
 )
-from src.domain.template.aggregate import Template
 from src.config.managers.configuration_manager import ConfigurationManager
-from src.config.schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+from src.config.schemas.provider_strategy_schema import (
+    ProviderConfig,
+    ProviderInstanceConfig,
+)
 from src.domain.base.ports import LoggingPort
+from src.domain.template.aggregate import Template
 
 
 class TestProviderSelectionService:

@@ -6,10 +6,10 @@ This test validates that the configuration updates for launch template
 management are working correctly.
 """
 
-import sys
-import os
 import json
-from typing import Dict, Any
+import os
+import sys
+from typing import Any, Dict
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))

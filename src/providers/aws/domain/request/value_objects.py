@@ -2,13 +2,13 @@
 
 from src.domain.request.value_objects import *
 from src.providers.aws.domain.template.value_objects import (
-    AWSInstanceType,
-    AWSTags,
-    AWSImageId,
-    AWSSubnetId,
-    AWSSecurityGroupId,
     AWSFleetId,
+    AWSImageId,
+    AWSInstanceType,
     AWSLaunchTemplateId,
+    AWSSecurityGroupId,
+    AWSSubnetId,
+    AWSTags,
 )
 
 # Re-export all base request value objects with AWS extensions

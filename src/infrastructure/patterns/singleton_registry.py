@@ -1,7 +1,7 @@
 """Singleton registry implementation."""
 
 import threading
-from typing import Dict, Type, TypeVar, Any, Optional, cast
+from typing import Any, Dict, Optional, Type, TypeVar, cast
 
 T = TypeVar("T")
 

@@ -6,11 +6,11 @@ in the CQRS system, providing consistent event handling with proper separation
 of concerns and DRY compliance.
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
 import asyncio
 import time
+from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 # Import types - using string imports to avoid circular dependencies
 try:

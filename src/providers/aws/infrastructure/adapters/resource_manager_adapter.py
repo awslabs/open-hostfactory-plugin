@@ -6,21 +6,26 @@ interface with the new unified resource manager hierarchy, maintaining
 backward compatibility while using the improved architecture.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ConfigurationPort, LoggingPort
 from src.domain.base.resource_manager import (
+    ResourceAllocation,
+    ResourceId,
     ResourceManagerPort,
     ResourceSpecification,
-    ResourceAllocation,
     ResourceType,
-    ResourceId,
 )
-from src.infrastructure.ports.cloud_resource_manager_port import CloudResourceManagerPort
-from src.providers.aws.managers.aws_resource_manager import AWSResourceManagerImpl
+from src.infrastructure.ports.cloud_resource_manager_port import (
+    CloudResourceManagerPort,
+)
+from src.providers.aws.exceptions.aws_exceptions import (
+    AuthorizationError,
+    InfrastructureError,
+)
 from src.providers.aws.infrastructure.aws_client import AWSClient
-from src.providers.aws.exceptions.aws_exceptions import AuthorizationError, InfrastructureError
-from src.domain.base.ports import LoggingPort, ConfigurationPort
-from src.domain.base.dependency_injection import injectable
+from src.providers.aws.managers.aws_resource_manager import AWSResourceManagerImpl
 
 
 @injectable

@@ -1,9 +1,13 @@
 """Tests for config-driven provider registration."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
-from src.config.schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+import pytest
+
+from src.config.schemas.provider_strategy_schema import (
+    ProviderConfig,
+    ProviderInstanceConfig,
+)
 
 
 class TestConfigDrivenProviderRegistration:
@@ -152,7 +156,9 @@ class TestConfigDrivenProviderRegistration:
         )
 
         with patch("src.infrastructure.di.provider_services.get_logger"):
-            from src.infrastructure.di.provider_services import _validate_provider_config
+            from src.infrastructure.di.provider_services import (
+                _validate_provider_config,
+            )
 
             result = _validate_provider_config(provider_config)
             assert result is True
@@ -164,7 +170,9 @@ class TestConfigDrivenProviderRegistration:
         )
 
         with patch("src.infrastructure.di.provider_services.get_logger"):
-            from src.infrastructure.di.provider_services import _validate_provider_config
+            from src.infrastructure.di.provider_services import (
+                _validate_provider_config,
+            )
 
             result = _validate_provider_config(provider_config)
             assert result is False

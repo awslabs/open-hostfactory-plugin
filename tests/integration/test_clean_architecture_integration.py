@@ -1,16 +1,19 @@
 """Integration tests for clean architecture template defaults and extensions."""
 
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
-from typing import Dict, Any
 
 from src.application.services.template_defaults_service import TemplateDefaultsService
-from src.domain.template.extensions import TemplateExtensionRegistry
-from src.domain.template.factory import TemplateFactory
-from src.domain.template.aggregate import Template
-from src.providers.aws.configuration.template_extension import AWSTemplateExtensionConfig
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.template.aggregate import Template
+from src.domain.template.extensions import TemplateExtensionRegistry
+from src.domain.template.factory import TemplateFactory
+from src.providers.aws.configuration.template_extension import (
+    AWSTemplateExtensionConfig,
+)
 
 
 class TestCleanArchitectureIntegration:

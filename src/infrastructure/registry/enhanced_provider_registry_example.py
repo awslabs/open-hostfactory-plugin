@@ -1,7 +1,8 @@
 """Example: ProviderRegistry using EnhancedBaseRegistry (MULTI_CHOICE mode)."""
 
 from typing import Any, Callable, Dict
-from .enhanced_base_registry import EnhancedBaseRegistry, RegistryMode, BaseRegistration
+
+from .enhanced_base_registry import BaseRegistration, EnhancedBaseRegistry, RegistryMode
 
 
 class ProviderRegistration(BaseRegistration):

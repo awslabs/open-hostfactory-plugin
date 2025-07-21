@@ -1,7 +1,9 @@
 """Machine identifiers and core type definitions."""
 
 from __future__ import annotations
+
 import re
+
 from pydantic import field_validator
 
 from src.domain.base.value_objects import ValueObject

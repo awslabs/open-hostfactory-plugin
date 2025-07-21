@@ -10,11 +10,11 @@ import asyncio
 import time
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, TypeVar, Optional, Callable
 from datetime import datetime
+from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
 from src.application.interfaces.infrastructure_handler import InfrastructureHandler
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 
 TRequest = TypeVar("TRequest")
 TResponse = TypeVar("TResponse")

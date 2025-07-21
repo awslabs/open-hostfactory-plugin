@@ -1,11 +1,12 @@
 """Tests for scheduler configuration schema."""
 
 import os
-import pytest
 from unittest.mock import patch
 
-from src.config.schemas.scheduler_schema import SchedulerConfig
+import pytest
+
 from src.config.schemas.app_schema import AppConfig
+from src.config.schemas.scheduler_schema import SchedulerConfig
 
 
 class TestSchedulerConfig:

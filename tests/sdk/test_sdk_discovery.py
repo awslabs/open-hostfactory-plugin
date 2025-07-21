@@ -1,10 +1,11 @@
 """Unit tests for SDK method discovery following existing test patterns."""
 
-import pytest
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
-from src.sdk.discovery import SDKMethodDiscovery, MethodInfo
+import pytest
+
+from src.sdk.discovery import MethodInfo, SDKMethodDiscovery
 from src.sdk.exceptions import HandlerDiscoveryError, MethodExecutionError
 
 

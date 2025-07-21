@@ -1,18 +1,19 @@
 """Tests for CLI handler execution."""
 
-import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 import argparse
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from src.domain.base.ports import SchedulerPort
-from src.infrastructure.di.buses import QueryBus, CommandBus
+from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.infrastructure.di.container import DIContainer
+from src.interface.request_command_handlers import handle_get_request_status
+from src.interface.scheduler_command_handlers import handle_list_scheduler_strategies
+from src.interface.storage_command_handlers import handle_list_storage_strategies
 
 # Import CLI handlers
 from src.interface.template_command_handlers import handle_list_templates
-from src.interface.scheduler_command_handlers import handle_list_scheduler_strategies
-from src.interface.storage_command_handlers import handle_list_storage_strategies
-from src.interface.request_command_handlers import handle_get_request_status
 
 
 class TestCLIHandlerExecution:

@@ -1,6 +1,7 @@
 """Main configuration validator orchestrator."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from src.config.schemas import AppConfig, validate_config
 
 

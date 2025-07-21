@@ -4,11 +4,12 @@ This module tests the performance improvements achieved through lazy loading
 optimizations, including startup time, memory usage, and component loading.
 """
 
-import time
-import pytest
-import psutil
 import os
+import time
 from unittest.mock import patch
+
+import psutil
+import pytest
 
 from src.bootstrap import Application
 from src.infrastructure.di.container import get_container
@@ -132,8 +133,8 @@ class TestLazyLoadingPerformance:
 
     def test_handler_discovery_performance(self):
         """Test handler discovery performance."""
-        from src.infrastructure.di.handler_discovery import HandlerDiscoveryService
         from src.infrastructure.di.container import get_container
+        from src.infrastructure.di.handler_discovery import HandlerDiscoveryService
 
         container = get_container()
         discovery_service = HandlerDiscoveryService(container)
@@ -154,7 +155,9 @@ class TestLazyLoadingPerformance:
 
     def test_storage_registration_performance(self):
         """Test storage registration performance."""
-        from src.infrastructure.persistence.registration import register_minimal_storage_types
+        from src.infrastructure.persistence.registration import (
+            register_minimal_storage_types,
+        )
 
         start_time = time.time()
         register_minimal_storage_types()
@@ -167,7 +170,9 @@ class TestLazyLoadingPerformance:
 
     def test_scheduler_registration_performance(self):
         """Test scheduler registration performance."""
-        from src.infrastructure.scheduler.registration import register_active_scheduler_only
+        from src.infrastructure.scheduler.registration import (
+            register_active_scheduler_only,
+        )
 
         start_time = time.time()
         register_active_scheduler_only("default")
@@ -200,8 +205,8 @@ class TestLazyLoadingPerformance:
 
     def test_concurrent_access_performance(self):
         """Test performance under concurrent access."""
-        import threading
         import concurrent.futures
+        import threading
 
         def create_and_access_app():
             app = Application()

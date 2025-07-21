@@ -1,6 +1,7 @@
 """AWS-specific template extension configuration."""
 
 from typing import Dict, List, Optional
+
 from pydantic import BaseModel, Field, field_validator
 
 

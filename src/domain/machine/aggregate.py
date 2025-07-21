@@ -1,11 +1,13 @@
 """Machine aggregate - core machine domain logic."""
 
-from typing import Dict, Any, List, Optional
 from datetime import datetime
-from pydantic import Field, ConfigDict
+from typing import Any, Dict, List, Optional
+
+from pydantic import ConfigDict, Field
 
 from src.domain.base.entity import AggregateRoot
 from src.domain.base.value_objects import InstanceId, InstanceType, IPAddress, Tags
+
 from .machine_status import MachineStatus
 
 

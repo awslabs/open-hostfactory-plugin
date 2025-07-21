@@ -6,9 +6,10 @@ enabling the storage registry pattern for JSON persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import Any, Dict, Callable
-from src.infrastructure.registry.storage_registry import get_storage_registry
+from typing import Any, Callable, Dict
+
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.registry.storage_registry import get_storage_registry
 
 
 def create_json_strategy(config: Any) -> Any:
@@ -66,11 +67,11 @@ def create_json_unit_of_work(config: Any) -> Any:
     Returns:
         JSONUnitOfWork instance with properly extracted configuration
     """
-    from src.infrastructure.persistence.json.unit_of_work import JSONUnitOfWork
     from src.config.manager import ConfigurationManager
     from src.config.schemas.storage_schema import StorageConfig
-    from src.infrastructure.logging.logger import get_logger
     from src.domain.base.ports.scheduler_port import SchedulerPort
+    from src.infrastructure.logging.logger import get_logger
+    from src.infrastructure.persistence.json.unit_of_work import JSONUnitOfWork
 
     # Handle different config types
     if isinstance(config, ConfigurationManager):

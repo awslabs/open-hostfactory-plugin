@@ -1,6 +1,7 @@
 """AWS-specific exceptions."""
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from src.domain.base.exceptions import InfrastructureError
 
 

@@ -1,9 +1,9 @@
 """Unified base registry supporting both single-choice and multi-choice patterns."""
 
-from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional
 import threading
+from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 
 class RegistryMode(Enum):

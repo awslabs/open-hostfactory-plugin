@@ -1,6 +1,7 @@
 """AWS utility functions."""
 
-from typing import Callable, Dict, Any, List
+from typing import Any, Callable, Dict, List
+
 from botocore.exceptions import ClientError
 
 from src.infrastructure.logging.logger import get_logger

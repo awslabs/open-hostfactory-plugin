@@ -1,8 +1,9 @@
 """Provider strategy configuration schemas."""
 
-from typing import Dict, List, Optional, Any, Union
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .base_config import BaseCircuitBreakerConfig
 

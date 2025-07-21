@@ -1,18 +1,19 @@
 """FastAPI server factory and application setup."""
 
+import logging
 from typing import Optional
-from fastapi import FastAPI, Request, HTTPException
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-import logging
 
+from src.api.documentation import configure_openapi
+from src.api.middleware import AuthMiddleware, LoggingMiddleware
 from src.config.schemas.server_schema import ServerConfig
+from src.infrastructure.auth.registry import get_auth_registry
 from src.infrastructure.error.exception_handler import get_exception_handler
 from src.infrastructure.logging.logger import get_logger
-from src.api.middleware import AuthMiddleware, LoggingMiddleware
-from src.infrastructure.auth.registry import get_auth_registry
-from src.api.documentation import configure_openapi
 
 
 def create_fastapi_app(server_config: ServerConfig) -> FastAPI:
@@ -219,7 +220,7 @@ def _register_routers(app: FastAPI):
         app: FastAPI application
     """
     try:
-        from src.api.routers import templates, machines, requests
+        from src.api.routers import machines, requests, templates
 
         app.include_router(templates.router, prefix="/api/v1")
         app.include_router(machines.router, prefix="/api/v1")

@@ -1,6 +1,6 @@
 """Authentication strategy implementations."""
 
-from .no_auth_strategy import NoAuthStrategy
 from .bearer_token_strategy import BearerTokenStrategy
+from .no_auth_strategy import NoAuthStrategy
 
 __all__ = ["NoAuthStrategy", "BearerTokenStrategy"]

@@ -1,9 +1,9 @@
 """Runtime AMI cache for script execution with optional persistence."""
 
-from typing import Dict, Set, Optional
 import json
 import os
 import time
+from typing import Dict, Optional, Set
 
 
 class RuntimeAMICache:

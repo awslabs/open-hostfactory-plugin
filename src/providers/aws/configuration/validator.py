@@ -1,7 +1,7 @@
 """AWS configuration validation and naming patterns."""
 
-from typing import Dict, Optional
 from dataclasses import dataclass, field
+from typing import Dict, Optional
 
 
 @dataclass

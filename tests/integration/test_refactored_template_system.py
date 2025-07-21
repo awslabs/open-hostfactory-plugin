@@ -8,25 +8,30 @@ Tests the complete refactored architecture including:
 - Service orchestration
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
 
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
-from src.infrastructure.template.template_cache_service import (
-    TTLTemplateCacheService,
-    NoOpTemplateCacheService,
-    create_template_cache_service,
+import pytest
+
+from src.config.manager import ConfigurationManager
+from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
 )
+from src.infrastructure.template.dtos import TemplateDTO
 from src.infrastructure.template.services.template_persistence_service import (
     TemplatePersistenceService,
 )
-from src.providers.aws.infrastructure.adapters.template_adapter import AWSTemplateAdapter
-from src.infrastructure.template.dtos import TemplateDTO
-from src.domain.base.ports.logging_port import LoggingPort
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.config.manager import ConfigurationManager
+from src.infrastructure.template.template_cache_service import (
+    NoOpTemplateCacheService,
+    TTLTemplateCacheService,
+    create_template_cache_service,
+)
+from src.providers.aws.infrastructure.adapters.template_adapter import (
+    AWSTemplateAdapter,
+)
 
 
 class TestRefactoredTemplateSystem:

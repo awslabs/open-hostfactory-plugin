@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Simple test to verify import fixes."""
 
-import sys
 import importlib
+import sys
 
 
 def test_import_fixes():
@@ -19,7 +19,9 @@ def test_import_fixes():
         # Test 2: Check that ProviderHandlerType does NOT exist
         print("2. Testing that ProviderHandlerType is removed...")
         try:
-            from src.providers.aws.domain.template.value_objects import ProviderHandlerType
+            from src.providers.aws.domain.template.value_objects import (
+                ProviderHandlerType,
+            )
 
             print("   ❌ ProviderHandlerType still exists - should be removed!")
             return False

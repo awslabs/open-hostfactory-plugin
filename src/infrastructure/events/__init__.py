@@ -1,6 +1,9 @@
 """Infrastructure events package - CQRS-aligned event system."""
 
-from src.infrastructure.events.publisher import ConfigurableEventPublisher, create_event_publisher
+from src.infrastructure.events.publisher import (
+    ConfigurableEventPublisher,
+    create_event_publisher,
+)
 
 # Import new EventBus system
 try:

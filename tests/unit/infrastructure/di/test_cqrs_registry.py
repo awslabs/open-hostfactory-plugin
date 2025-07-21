@@ -1,9 +1,10 @@
 """Unit tests for CQRSHandlerRegistry component."""
 
-import pytest
 import threading
-from typing import Type, List
+from typing import List, Type
 from unittest.mock import Mock
+
+import pytest
 
 from src.infrastructure.di.components.cqrs_registry import CQRSHandlerRegistry
 

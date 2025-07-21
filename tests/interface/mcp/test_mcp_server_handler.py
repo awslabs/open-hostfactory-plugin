@@ -1,9 +1,10 @@
 """Tests for MCP server handler functionality."""
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch
 from types import SimpleNamespace
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from src.interface.mcp.server.handler import handle_mcp_serve
 
@@ -54,8 +55,8 @@ class TestMCPServerHandler:
     @pytest.mark.asyncio
     async def test_stdio_server_message_handling(self, mock_app):
         """Test stdio server message handling."""
-        from src.interface.mcp.server.handler import _run_stdio_server
         from src.interface.mcp.server.core import OpenHFPluginMCPServer
+        from src.interface.mcp.server.handler import _run_stdio_server
 
         mcp_server = OpenHFPluginMCPServer(app=mock_app)
 

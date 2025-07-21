@@ -3,99 +3,89 @@
 # Base classes and protocols
 from .base_events import (
     DomainEvent,
-    InfrastructureEvent,
-    EventPublisher,
-    TimedEvent,
     ErrorEvent,
+    EventPublisher,
+    InfrastructureEvent,
     OperationEvent,
     PerformanceEvent,
     StatusChangeEvent,
+    TimedEvent,
 )
 
 # Domain events (Request, Machine, Template)
-from .domain_events import (
-    # Request Events
-    RequestEvent,
-    RequestCreatedEvent,
-    RequestStatusChangedEvent,
-    RequestCompletedEvent,
-    RequestFailedEvent,
-    RequestTimeoutEvent,
-    # Machine Events
-    MachineEvent,
+from .domain_events import (  # Request Events; Machine Events; Template Events
     MachineCreatedEvent,
-    MachineStatusChangedEvent,
-    MachineProvisionedEvent,
-    MachineTerminatedEvent,
+    MachineEvent,
     MachineHealthCheckEvent,
-    # Template Events
-    TemplateEvent,
+    MachineProvisionedEvent,
+    MachineStatusChangedEvent,
+    MachineTerminatedEvent,
+    RequestCompletedEvent,
+    RequestCreatedEvent,
+    RequestEvent,
+    RequestFailedEvent,
+    RequestStatusChangedEvent,
+    RequestTimeoutEvent,
     TemplateCreatedEvent,
-    TemplateValidatedEvent,
-    TemplateUpdatedEvent,
     TemplateDeletedEvent,
+    TemplateEvent,
+    TemplateUpdatedEvent,
+    TemplateValidatedEvent,
 )
 
 # Infrastructure events (Provider resources and operations)
 from .infrastructure_events import (
-    ResourceEvent,
-    ResourceCreatedEvent,
-    ResourceUpdatedEvent,
-    ResourceDeletedEvent,
-    ResourceErrorEvent,
-    OperationStartedEvent,
     OperationCompletedEvent,
     OperationFailedEvent,
+    OperationStartedEvent,
+    ResourceCreatedEvent,
+    ResourceDeletedEvent,
+    ResourceErrorEvent,
+    ResourceEvent,
+    ResourceUpdatedEvent,
 )
 
 # Persistence events (Repository and storage)
-from .persistence_events import (
-    # Repository operations
+from .persistence_events import (  # Repository operations; Storage strategy
+    ConnectionPoolEvent,
     PersistenceEvent,
-    RepositoryOperationStartedEvent,
     RepositoryOperationCompletedEvent,
     RepositoryOperationFailedEvent,
+    RepositoryOperationStartedEvent,
     SlowQueryDetectedEvent,
-    TransactionStartedEvent,
-    TransactionCommittedEvent,
-    # Storage strategy
     StorageEvent,
-    StorageStrategySelectedEvent,
-    StorageStrategyFailoverEvent,
-    ConnectionPoolEvent,
-    StoragePerformanceEvent,
     StorageHealthCheckEvent,
-)
-
-# System events (Configuration, lifecycle, security, performance)
-from .system_events import (
-    # System base
-    SystemEvent,
-    # Configuration events
-    ConfigurationLoadedEvent,
-    ConfigurationChangedEvent,
-    ConfigurationErrorEvent,
-    # Application lifecycle events
-    ApplicationStartedEvent,
-    ApplicationShutdownEvent,
-    ApplicationErrorEvent,
-    # Security and audit events
-    SecurityEvent,
-    AuditTrailEvent,
-    ComplianceEvent,
-    # Performance and monitoring events
-    PerformanceMetricEvent,
-    HealthCheckEvent,
+    StoragePerformanceEvent,
+    StorageStrategyFailoverEvent,
+    StorageStrategySelectedEvent,
+    TransactionCommittedEvent,
+    TransactionStartedEvent,
 )
 
 # Provider events (Provider-agnostic)
 from .provider_events import (
+    ProviderConfigurationEvent,
+    ProviderCredentialsEvent,
+    ProviderHealthCheckEvent,
     ProviderOperationEvent,
     ProviderRateLimitEvent,
-    ProviderCredentialsEvent,
     ProviderResourceStateChangedEvent,
-    ProviderConfigurationEvent,
-    ProviderHealthCheckEvent,
+)
+
+# System events (Configuration, lifecycle, security, performance)
+from .system_events import (  # System base; Configuration events; Application lifecycle events; Security and audit events; Performance and monitoring events
+    ApplicationErrorEvent,
+    ApplicationShutdownEvent,
+    ApplicationStartedEvent,
+    AuditTrailEvent,
+    ComplianceEvent,
+    ConfigurationChangedEvent,
+    ConfigurationErrorEvent,
+    ConfigurationLoadedEvent,
+    HealthCheckEvent,
+    PerformanceMetricEvent,
+    SecurityEvent,
+    SystemEvent,
 )
 
 # Export all events

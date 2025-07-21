@@ -1,14 +1,16 @@
 """Repository migration utilities."""
 
-from typing import Dict, Any, Optional
-from datetime import datetime
 import json
 import os
+from datetime import datetime
+from typing import Any, Dict, Optional
 
-from src.infrastructure.logging.logger import get_logger
 from src.domain.base.domain_interfaces import Repository
-from src.domain.template.repository import TemplateRepository as TemplateRepositoryInterface
+from src.domain.template.repository import (
+    TemplateRepository as TemplateRepositoryInterface,
+)
 from src.infrastructure.di.container import DIContainer
+from src.infrastructure.logging.logger import get_logger
 
 
 class RepositoryMigrator:
@@ -117,8 +119,8 @@ class RepositoryMigrator:
 
             # If not registered, create a new JSON template repository
             if not template_repo:
-                from src.infrastructure.persistence.json import JSONTemplateRepository
                 from src.config.manager import get_config_manager
+                from src.infrastructure.persistence.json import JSONTemplateRepository
 
                 # Get configuration manager
                 config_manager = get_config_manager()
@@ -164,14 +166,15 @@ class RepositoryMigrator:
                 )
 
             elif storage_type == "sql":
-                from src.infrastructure.persistence.sql import (
-                    SQLMachineRepository,
-                    SQLRequestRepository,
-                    MachineModel,
-                    RequestModel,
-                )
                 from sqlalchemy import create_engine
                 from sqlalchemy.orm import sessionmaker
+
+                from src.infrastructure.persistence.sql import (
+                    MachineModel,
+                    RequestModel,
+                    SQLMachineRepository,
+                    SQLRequestRepository,
+                )
 
                 # Get SQL config
                 sql_config = self.config_manager.get("sql", {})

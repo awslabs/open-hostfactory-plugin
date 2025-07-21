@@ -8,14 +8,16 @@ This module coordinates the registration of all services across different layers
 - Server services (FastAPI, REST API handlers)
 """
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from src.infrastructure.di.container import DIContainer, get_container
 
 # Import focused service registration modules
 from src.infrastructure.di.core_services import register_core_services
+from src.infrastructure.di.infrastructure_services import (
+    register_infrastructure_services,
+)
 from src.infrastructure.di.provider_services import register_provider_services
-from src.infrastructure.di.infrastructure_services import register_infrastructure_services
 from src.infrastructure.di.server_services import register_server_services
 
 
@@ -56,7 +58,9 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
     register_core_services(container)
 
     # 2. Register minimal storage types (only JSON by default)
-    from src.infrastructure.persistence.registration import register_minimal_storage_types
+    from src.infrastructure.persistence.registration import (
+        register_minimal_storage_types,
+    )
 
     register_minimal_storage_types()
 
@@ -142,7 +146,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
 
         _setup_cqrs_infrastructure(c)
 
-    from src.infrastructure.di.buses import QueryBus, CommandBus
+    from src.infrastructure.di.buses import CommandBus, QueryBus
 
     container.register_on_demand(QueryBus, setup_cqrs_lazy)
     container.register_on_demand(CommandBus, setup_cqrs_lazy)
@@ -165,7 +169,9 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
 
     # Register scheduler services as lazy (Phase 3 optimization)
     def register_scheduler_lazy(c):
-        from src.infrastructure.scheduler.registration import register_active_scheduler_only
+        from src.infrastructure.scheduler.registration import (
+            register_active_scheduler_only,
+        )
 
         # Get scheduler type from config if available
         try:
@@ -232,7 +238,7 @@ def create_handler(handler_class, config: Optional[Dict[str, Any]] = None) -> An
 
                 def handler_factory(c):
                     # Get CQRS buses directly from container
-                    from src.infrastructure.di.buses import QueryBus, CommandBus
+                    from src.infrastructure.di.buses import CommandBus, QueryBus
                     from src.monitoring.metrics import MetricsCollector
 
                     query_bus = c.get(QueryBus)
@@ -251,7 +257,7 @@ def create_handler(handler_class, config: Optional[Dict[str, Any]] = None) -> An
 
             def handler_factory(c):
                 # Get CQRS buses directly from container
-                from src.infrastructure.di.buses import QueryBus, CommandBus
+                from src.infrastructure.di.buses import CommandBus, QueryBus
                 from src.monitoring.metrics import MetricsCollector
 
                 query_bus = c.get(QueryBus)

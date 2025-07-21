@@ -4,8 +4,8 @@ Test for Configuration Defaults Integration
 Tests that templates get proper defaults from configuration when fields are missing.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
@@ -15,12 +15,14 @@ def test_template_defaults_integration():
     print("=== Configuration Defaults Integration Test ===")
 
     try:
+        from src.application.services.template_defaults_service import (
+            TemplateDefaultsService,
+        )
+        from src.config.manager import ConfigurationManager
+        from src.infrastructure.logging.logger import get_logger
         from src.infrastructure.persistence.repositories.template_repository import (
             TemplateSerializer,
         )
-        from src.application.services.template_defaults_service import TemplateDefaultsService
-        from src.config.manager import ConfigurationManager
-        from src.infrastructure.logging.logger import get_logger
 
         # Create configuration manager and defaults service
         config_manager = ConfigurationManager()
@@ -74,12 +76,14 @@ def test_template_defaults_precedence():
     print("\n=== Template Defaults Precedence Test ===")
 
     try:
+        from src.application.services.template_defaults_service import (
+            TemplateDefaultsService,
+        )
+        from src.config.manager import ConfigurationManager
+        from src.infrastructure.logging.logger import get_logger
         from src.infrastructure.persistence.repositories.template_repository import (
             TemplateSerializer,
         )
-        from src.application.services.template_defaults_service import TemplateDefaultsService
-        from src.config.manager import ConfigurationManager
-        from src.infrastructure.logging.logger import get_logger
 
         # Create configuration manager and defaults service
         config_manager = ConfigurationManager()
@@ -136,7 +140,9 @@ def test_defaults_service_directly():
     print("\n=== Direct TemplateDefaultsService Test ===")
 
     try:
-        from src.application.services.template_defaults_service import TemplateDefaultsService
+        from src.application.services.template_defaults_service import (
+            TemplateDefaultsService,
+        )
         from src.config.manager import ConfigurationManager
         from src.infrastructure.logging.logger import get_logger
 

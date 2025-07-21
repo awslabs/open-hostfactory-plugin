@@ -1,14 +1,18 @@
 """Infrastructure service registrations for dependency injection."""
 
+from src.domain.base.ports import LoggingPort
+from src.domain.machine.repository import MachineRepository
+from src.domain.request.repository import RequestRepository
+from src.domain.template.image_resolver import ImageResolver
+from src.domain.template.repository import TemplateRepository
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
-from src.domain.base.ports import LoggingPort
-from src.domain.request.repository import RequestRepository
-from src.domain.machine.repository import MachineRepository
-from src.domain.template.repository import TemplateRepository
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
-from src.providers.aws.infrastructure.template.caching_ami_resolver import CachingAMIResolver
-from src.domain.template.image_resolver import ImageResolver
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
+from src.providers.aws.infrastructure.template.caching_ami_resolver import (
+    CachingAMIResolver,
+)
 
 
 def register_infrastructure_services(container: DIContainer) -> None:
@@ -28,8 +32,10 @@ def _register_template_services(container: DIContainer) -> None:
     container.register_singleton(TemplateConfigurationManager)
 
     # Register template defaults port with service implementation
+    from src.application.services.template_defaults_service import (
+        TemplateDefaultsService,
+    )
     from src.domain.template.ports.template_defaults_port import TemplateDefaultsPort
-    from src.application.services.template_defaults_service import TemplateDefaultsService
 
     container.register_singleton(TemplateDefaultsPort, TemplateDefaultsService)
 
@@ -42,7 +48,9 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
     try:
         from src.config.manager import ConfigurationManager
         from src.domain.template.extensions import TemplateExtensionRegistry
-        from src.providers.aws.configuration.template_extension import AWSTemplateExtensionConfig
+        from src.providers.aws.configuration.template_extension import (
+            AWSTemplateExtensionConfig,
+        )
 
         config_manager = container.get(ConfigurationManager)
         logger = get_logger(__name__)
@@ -119,7 +127,9 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
             if default_aws_config.ami_resolution.enabled:
                 container.register_singleton(CachingAMIResolver)
                 # Register interface to resolve to concrete implementation
-                from src.domain.base.ports.template_resolver_port import TemplateResolverPort
+                from src.domain.base.ports.template_resolver_port import (
+                    TemplateResolverPort,
+                )
 
                 container.register_singleton(
                     TemplateResolverPort, lambda c: c.get(CachingAMIResolver)
@@ -133,7 +143,9 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
             # Register with default configuration as fallback
             container.register_singleton(CachingAMIResolver)
             # Register interface to resolve to concrete implementation
-            from src.domain.base.ports.template_resolver_port import TemplateResolverPort
+            from src.domain.base.ports.template_resolver_port import (
+                TemplateResolverPort,
+            )
 
             container.register_singleton(TemplateResolverPort, lambda c: c.get(CachingAMIResolver))
             logger.info("AMI resolver registered with fallback configuration")
@@ -145,10 +157,16 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
 
 def _register_repository_services(container: DIContainer) -> None:
     """Register repository services."""
-    from src.infrastructure.utilities.factories.repository_factory import RepositoryFactory
     from src.infrastructure.persistence.registration import register_all_storage_types
-    from src.infrastructure.template.template_repository_impl import create_template_repository_impl
-    from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
+    from src.infrastructure.template.configuration_manager import (
+        TemplateConfigurationManager,
+    )
+    from src.infrastructure.template.template_repository_impl import (
+        create_template_repository_impl,
+    )
+    from src.infrastructure.utilities.factories.repository_factory import (
+        RepositoryFactory,
+    )
 
     # Ensure all storage types are registered
     try:

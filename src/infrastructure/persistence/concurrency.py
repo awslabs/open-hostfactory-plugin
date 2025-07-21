@@ -1,11 +1,11 @@
 """Optimistic concurrency control utilities."""
 
-from typing import TypeVar, Callable, Any, Optional, Dict, List
-from src.infrastructure.logging.logger import get_logger
 import time
 from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 from src.domain.base.exceptions import ConcurrencyError
+from src.infrastructure.logging.logger import get_logger
 
 T = TypeVar("T")  # Entity type
 R = TypeVar("R")  # Return type

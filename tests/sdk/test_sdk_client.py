@@ -1,12 +1,13 @@
 """Unit tests for SDK client following existing test patterns."""
 
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
-from typing import Dict, Any
 
 from src.sdk.client import OpenHFPluginSDK
 from src.sdk.config import SDKConfig
-from src.sdk.exceptions import SDKError, ConfigurationError, ProviderError
+from src.sdk.exceptions import ConfigurationError, ProviderError, SDKError
 
 
 class TestOpenHFPluginSDK:

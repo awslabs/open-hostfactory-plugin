@@ -4,8 +4,8 @@ Test for Phase 3: Storage Strategy Enhancement
 Tests that all repository enhancements work correctly with the new domain fields.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
@@ -79,9 +79,11 @@ def test_request_repository_enhancements():
 
     try:
         from src.domain.request.aggregate import Request
-        from src.domain.request.value_objects import RequestType, RequestId
         from src.domain.request.request_types import RequestStatus
-        from src.infrastructure.persistence.repositories.request_repository import RequestSerializer
+        from src.domain.request.value_objects import RequestId, RequestType
+        from src.infrastructure.persistence.repositories.request_repository import (
+            RequestSerializer,
+        )
 
         # Create a request with enhanced fields
         request_id = RequestId.generate(RequestType.ACQUIRE)
@@ -138,10 +140,12 @@ def test_machine_repository_enhancements():
     print("\n=== Machine Repository Enhancement Test ===")
 
     try:
-        from src.domain.machine.aggregate import Machine
         from src.domain.base.value_objects import InstanceId, InstanceType, Tags
+        from src.domain.machine.aggregate import Machine
         from src.domain.machine.machine_status import MachineStatus
-        from src.infrastructure.persistence.repositories.machine_repository import MachineSerializer
+        from src.infrastructure.persistence.repositories.machine_repository import (
+            MachineSerializer,
+        )
 
         # Create a machine with enhanced fields
         machine = Machine(

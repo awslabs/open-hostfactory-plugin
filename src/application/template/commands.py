@@ -1,6 +1,7 @@
 """Template commands - template use case commands."""
 
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
+
 from pydantic import Field
 
 from src.application.dto.base import BaseCommand, BaseResponse

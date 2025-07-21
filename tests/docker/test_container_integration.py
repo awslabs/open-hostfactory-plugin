@@ -1,11 +1,12 @@
 """Integration tests for Docker container functionality."""
 
-import pytest
+import json
 import subprocess
 import time
-import requests
-import json
 from pathlib import Path
+
+import pytest
+import requests
 
 
 class TestContainerIntegration:

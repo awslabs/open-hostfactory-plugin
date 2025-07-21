@@ -1,7 +1,7 @@
 """Configuration type conversion utilities."""
 
-from typing import Dict, Any, Type, TypeVar, List, Optional, cast
 import logging
+from typing import Any, Dict, List, Optional, Type, TypeVar, cast
 
 from src.domain.base.exceptions import ConfigurationError
 

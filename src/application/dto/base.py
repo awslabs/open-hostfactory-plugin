@@ -1,7 +1,8 @@
 """Base DTO class with stable API and clean snake_case format."""
 
-from typing import Dict, Any, Optional, Union
 from enum import Enum
+from typing import Any, Dict, Optional, Union
+
 from pydantic import BaseModel, ConfigDict
 
 

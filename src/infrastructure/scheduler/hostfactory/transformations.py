@@ -1,6 +1,7 @@
 """HostFactory-specific field transformations."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from src.infrastructure.logging.logger import get_logger
 
 

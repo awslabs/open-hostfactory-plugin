@@ -7,20 +7,20 @@ This module provides the main CLI interface including:
 - Integration with application services
 """
 
+import argparse
 import asyncio
+import inspect
+import logging
 import os
 import sys
-import argparse
-import logging
 import warnings
-import inspect
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
-from src.domain.request.value_objects import RequestStatus
-from src.domain.base.exceptions import DomainException
-from src.infrastructure.logging.logger import get_logger
-from src.cli.formatters import format_output
 from src.cli.completion import generate_bash_completion, generate_zsh_completion
+from src.cli.formatters import format_output
+from src.domain.base.exceptions import DomainException
+from src.domain.request.value_objects import RequestStatus
+from src.infrastructure.logging.logger import get_logger
 
 
 def parse_args() -> tuple[argparse.Namespace, dict]:
@@ -525,38 +525,18 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
     try:
         # Import function handlers - all are now async functions with decorators
-        from src.interface.template_command_handlers import (
-            handle_list_templates,
-            handle_get_template,
-            handle_create_template,
-            handle_update_template,
-            handle_delete_template,
-            handle_validate_template,
-            handle_refresh_templates,
+        from src.interface.mcp.server.handler import handle_mcp_serve
+        from src.interface.mcp_command_handlers import (
+            handle_mcp_tools_call,
+            handle_mcp_tools_info,
+            handle_mcp_tools_list,
+            handle_mcp_validate,
         )
         from src.interface.request_command_handlers import (
             handle_get_request_status,
-            handle_request_machines,
             handle_get_return_requests,
+            handle_request_machines,
             handle_request_return_machines,
-        )
-        from src.interface.system_command_handlers import (
-            handle_provider_health,
-            handle_list_providers,
-            handle_provider_config,
-            handle_validate_provider_config,
-            handle_reload_provider_config,
-            handle_select_provider_strategy,
-            handle_execute_provider_operation,
-            handle_provider_metrics,
-        )
-        from src.interface.storage_command_handlers import (
-            handle_list_storage_strategies,
-            handle_show_storage_config,
-            handle_validate_storage_config,
-            handle_test_storage,
-            handle_storage_health,
-            handle_storage_metrics,
         )
         from src.interface.scheduler_command_handlers import (
             handle_list_scheduler_strategies,
@@ -564,12 +544,32 @@ async def execute_command(args, app) -> Dict[str, Any]:
             handle_validate_scheduler_config,
         )
         from src.interface.serve_command_handler import handle_serve_api
-        from src.interface.mcp.server.handler import handle_mcp_serve
-        from src.interface.mcp_command_handlers import (
-            handle_mcp_tools_list,
-            handle_mcp_tools_call,
-            handle_mcp_tools_info,
-            handle_mcp_validate,
+        from src.interface.storage_command_handlers import (
+            handle_list_storage_strategies,
+            handle_show_storage_config,
+            handle_storage_health,
+            handle_storage_metrics,
+            handle_test_storage,
+            handle_validate_storage_config,
+        )
+        from src.interface.system_command_handlers import (
+            handle_execute_provider_operation,
+            handle_list_providers,
+            handle_provider_config,
+            handle_provider_health,
+            handle_provider_metrics,
+            handle_reload_provider_config,
+            handle_select_provider_strategy,
+            handle_validate_provider_config,
+        )
+        from src.interface.template_command_handlers import (
+            handle_create_template,
+            handle_delete_template,
+            handle_get_template,
+            handle_list_templates,
+            handle_refresh_templates,
+            handle_update_template,
+            handle_validate_template,
         )
 
         # Command handler mapping - all handlers are now async functions

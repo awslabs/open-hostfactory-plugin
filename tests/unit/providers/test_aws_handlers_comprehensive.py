@@ -1,20 +1,27 @@
 """Comprehensive tests for AWS handler implementations."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import List, Dict, Any, Optional
-import boto3
-from moto import mock_aws
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, Mock, patch
+
+import boto3
+import pytest
+from moto import mock_aws
 
 # Import AWS components
 try:
-    from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
-    from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
-    from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-    from src.providers.aws.infrastructure.handlers.run_instances_handler import RunInstancesHandler
-    from src.providers.aws.utilities.aws_operations import AWSOperations
     from src.providers.aws.configuration.config import AWSConfig
+    from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+    from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
+        EC2FleetHandler,
+    )
+    from src.providers.aws.infrastructure.handlers.run_instances_handler import (
+        RunInstancesHandler,
+    )
+    from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+        SpotFleetHandler,
+    )
+    from src.providers.aws.utilities.aws_operations import AWSOperations
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

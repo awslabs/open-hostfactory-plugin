@@ -26,27 +26,30 @@ Note:
     that can benefit from significant cost savings through Spot pricing.
 """
 
-from typing import Dict, Any, List
-from datetime import datetime
 import json
+from datetime import datetime
+from typing import Any, Dict, List
+
 from botocore.exceptions import ClientError
 
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
 from src.domain.request.aggregate import Request
-from src.providers.aws.domain.template.value_objects import ProviderApi, AWSFleetType
-from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
+from src.infrastructure.error.decorators import handle_infrastructure_exceptions
+from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
+from src.providers.aws.domain.template.aggregate import AWSTemplate
+from src.providers.aws.domain.template.value_objects import AWSFleetType, ProviderApi
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSValidationError,
     AWSEntityNotFoundError,
     AWSInfrastructureError,
+    AWSValidationError,
     IAMError,
 )
+from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
+from src.providers.aws.infrastructure.launch_template.manager import (
+    AWSLaunchTemplateManager,
+)
 from src.providers.aws.utilities.aws_operations import AWSOperations
-from src.domain.base.ports import LoggingPort
-from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
-from src.domain.base.dependency_injection import injectable
-from src.infrastructure.error.decorators import handle_infrastructure_exceptions
-from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
-from src.providers.aws.domain.template.aggregate import AWSTemplate
 
 
 @injectable

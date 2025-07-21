@@ -13,10 +13,10 @@ Key Principles:
 - Preserves @injectable decorator pattern while fixing architectural violations
 """
 
-from abc import ABC, abstractmethod
-from typing import Type, TypeVar, Any, Dict, Optional, Callable, List, Union, Generic
-from functools import wraps
 import inspect
+from abc import ABC, abstractmethod
+from functools import wraps
+from typing import Any, Callable, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 T = TypeVar("T")
 

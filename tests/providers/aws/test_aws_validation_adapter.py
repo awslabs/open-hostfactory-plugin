@@ -1,11 +1,14 @@
 """Tests for AWS validation adapter - infrastructure layer validation."""
 
-import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
-from src.providers.aws.infrastructure.adapters.aws_validation_adapter import AWSValidationAdapter
-from src.providers.aws.configuration.validator import AWSProviderConfig
+import pytest
+
 from src.domain.base.ports.logging_port import LoggingPort
+from src.providers.aws.configuration.validator import AWSProviderConfig
+from src.providers.aws.infrastructure.adapters.aws_validation_adapter import (
+    AWSValidationAdapter,
+)
 
 
 class TestAWSValidationAdapter:

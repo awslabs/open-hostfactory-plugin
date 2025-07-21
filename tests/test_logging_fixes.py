@@ -9,18 +9,23 @@ This test suite ensures that all the logging issues we fixed remain fixed:
 5. No template preloading during bootstrap
 """
 
-import pytest
 import asyncio
 import logging
-from unittest.mock import Mock, patch, MagicMock
-from io import StringIO
 import re
-from typing import List, Dict, Any
+from io import StringIO
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
+
+from src.application.services.provider_capability_service import (
+    ProviderCapabilityService,
+)
 from src.bootstrap import Application
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
 from src.providers.base.strategy.provider_context import ProviderContext
-from src.application.services.provider_capability_service import ProviderCapabilityService
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
 
 
 class LogCapture:

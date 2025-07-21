@@ -1,12 +1,13 @@
 """Integration tests for authentication flows."""
 
-import pytest
 import asyncio
-from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch
 
+import pytest
+from fastapi.testclient import TestClient
+
 from src.api.server import create_fastapi_app
-from src.config.schemas.server_schema import ServerConfig, AuthConfig
+from src.config.schemas.server_schema import AuthConfig, ServerConfig
 from src.infrastructure.auth.strategies import BearerTokenStrategy, NoAuthStrategy
 
 
@@ -136,8 +137,8 @@ class TestAuthenticationFlows:
     @pytest.mark.asyncio
     async def test_auth_context_creation(self):
         """Test authentication context creation from requests."""
-        from src.infrastructure.ports.auth import AuthContext
         from src.api.middleware.auth_middleware import AuthMiddleware
+        from src.infrastructure.ports.auth import AuthContext
 
         # Create mock request
         class MockRequest:

@@ -1,15 +1,17 @@
 """Single machine repository implementation using storage strategy composition."""
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from src.domain.machine.repository import MachineRepository as MachineRepositoryInterface
-from src.domain.machine.aggregate import Machine
-from src.domain.machine.value_objects import MachineId, MachineStatus
 from src.domain.base.value_objects import InstanceId
-from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
-from src.infrastructure.logging.logger import get_logger
+from src.domain.machine.aggregate import Machine
+from src.domain.machine.repository import (
+    MachineRepository as MachineRepositoryInterface,
+)
+from src.domain.machine.value_objects import MachineId, MachineStatus
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
+from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
 
 
 class MachineSerializer:

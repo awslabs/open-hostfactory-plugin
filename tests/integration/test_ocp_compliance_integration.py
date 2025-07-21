@@ -1,12 +1,16 @@
 """Integration tests for OCP compliance implementation."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock, patch
 
-from src.infrastructure.registry.provider_registry import ProviderRegistry, get_provider_registry
+import pytest
+
 from src.config.schemas.provider_strategy_schema import ProviderInstanceConfig
+from src.infrastructure.registry.provider_registry import (
+    ProviderRegistry,
+    get_provider_registry,
+)
 
 
 @pytest.mark.integration
@@ -89,8 +93,10 @@ class TestOCPComplianceIntegration:
     @patch("src.infrastructure.factories.provider_strategy_factory.get_provider_registry")
     def test_provider_strategy_factory_integration(self, mock_get_registry):
         """Test provider strategy factory integration with registry."""
-        from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
         from src.config.manager import ConfigurationManager
+        from src.infrastructure.factories.provider_strategy_factory import (
+            ProviderStrategyFactory,
+        )
         from src.infrastructure.logging.logger import get_logger
 
         # Setup mock registry
@@ -120,10 +126,14 @@ class TestOCPComplianceIntegration:
 
     def test_template_services_integration(self):
         """Test template services integration with registry."""
-        from src.infrastructure.template.template_resolver_service import TemplateResolverService
-        from src.infrastructure.template.template_validator_service import TemplateValidatorService
         from src.domain.template.aggregate import Template
         from src.domain.template.value_objects import TemplateId
+        from src.infrastructure.template.template_resolver_service import (
+            TemplateResolverService,
+        )
+        from src.infrastructure.template.template_validator_service import (
+            TemplateValidatorService,
+        )
 
         # Setup registry with mock resolver/validator
         registry = get_provider_registry()
@@ -175,7 +185,9 @@ class TestOCPComplianceIntegration:
 
     def test_command_handler_integration(self):
         """Test command handler integration with registry."""
-        from src.application.commands.provider_handlers import RegisterProviderStrategyHandler
+        from src.application.commands.provider_handlers import (
+            RegisterProviderStrategyHandler,
+        )
         from src.application.provider.commands import RegisterProviderStrategyCommand
 
         # Setup mock dependencies
@@ -258,7 +270,10 @@ class TestOCPComplianceIntegration:
 
     def test_configuration_schema_no_legacy_mode(self):
         """Test that configuration schema no longer supports legacy mode."""
-        from src.config.schemas.provider_strategy_schema import ProviderMode, UnifiedProviderConfig
+        from src.config.schemas.provider_strategy_schema import (
+            ProviderMode,
+            UnifiedProviderConfig,
+        )
 
         # Verify LEGACY mode is not in enum
         assert not hasattr(ProviderMode, "LEGACY")

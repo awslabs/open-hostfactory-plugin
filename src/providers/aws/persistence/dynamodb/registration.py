@@ -6,12 +6,12 @@ enabling the storage registry pattern for DynamoDB persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import Any, Dict, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Dict
 
 # Use TYPE_CHECKING to avoid direct infrastructure import
 if TYPE_CHECKING:
-    from src.infrastructure.registry.storage_registry import StorageRegistry
     from src.domain.base.ports import LoggingPort
+    from src.infrastructure.registry.storage_registry import StorageRegistry
 
 
 def create_dynamodb_strategy(config: Any) -> Any:
@@ -78,10 +78,11 @@ def create_dynamodb_unit_of_work(config: Any) -> Any:
     Returns:
         DynamoDBUnitOfWork instance with properly configured AWS client
     """
-    from src.providers.aws.persistence.dynamodb.unit_of_work import DynamoDBUnitOfWork
+    import boto3
+
     from src.config.manager import ConfigurationManager
     from src.config.schemas.storage_schema import StorageConfig
-    import boto3
+    from src.providers.aws.persistence.dynamodb.unit_of_work import DynamoDBUnitOfWork
 
     # Handle different config types
     if isinstance(config, ConfigurationManager):

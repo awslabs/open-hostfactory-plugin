@@ -1,12 +1,13 @@
 """Security tests for authentication system."""
 
-import pytest
-import jwt
 import time
+
+import jwt
+import pytest
 from fastapi.testclient import TestClient
 
 from src.api.server import create_fastapi_app
-from src.config.schemas.server_schema import ServerConfig, AuthConfig
+from src.config.schemas.server_schema import AuthConfig, ServerConfig
 from src.infrastructure.auth.strategies import BearerTokenStrategy
 
 

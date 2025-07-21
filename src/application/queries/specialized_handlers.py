@@ -1,25 +1,26 @@
 """Specialized query handlers for application services."""
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Any
+
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
-from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
 from src.application.dto.queries import (
     GetActiveMachineCountQuery,
-    GetRequestSummaryQuery,
     GetMachineHealthQuery,
+    GetRequestSummaryQuery,
 )
-from src.application.dto.responses import RequestSummaryDTO, MachineHealthDTO
+from src.application.dto.responses import MachineHealthDTO, RequestSummaryDTO
+from src.domain.base import UnitOfWorkFactory
+from src.domain.base.exceptions import EntityNotFoundError
+from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
 
 # Exception handling infrastructure
 from src.domain.machine.value_objects import MachineStatus
-from src.domain.base.exceptions import EntityNotFoundError
-from src.domain.base.ports import LoggingPort, ContainerPort, ErrorHandlingPort
+from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
 from src.infrastructure.utilities.factories.repository_factory import UnitOfWork
-from src.domain.base import UnitOfWorkFactory
 
 
 @query_handler(GetActiveMachineCountQuery)

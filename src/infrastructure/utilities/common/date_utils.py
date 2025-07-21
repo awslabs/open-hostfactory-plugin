@@ -4,8 +4,8 @@ Date utility functions for the AWS Host Factory Plugin.
 This module contains utility functions for working with dates and times.
 """
 
-import time
 import datetime
+import time
 from typing import List
 
 

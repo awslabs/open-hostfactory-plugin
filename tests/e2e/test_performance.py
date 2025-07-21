@@ -1,16 +1,19 @@
 """Performance and load tests for configuration-driven provider system."""
 
-import pytest
-import time
-import json
-import tempfile
-import os
-import threading
 import concurrent.futures
+import json
+import os
+import tempfile
+import threading
+import time
 from unittest.mock import Mock, patch
 
+import pytest
+
 from src.config.manager import ConfigurationManager
-from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
+from src.infrastructure.factories.provider_strategy_factory import (
+    ProviderStrategyFactory,
+)
 
 
 class TestPerformance:
@@ -254,8 +257,9 @@ class TestPerformance:
 
     def test_memory_usage_performance(self):
         """Test memory usage characteristics."""
-        import psutil
         import os
+
+        import psutil
 
         # Get initial memory usage
         process = psutil.Process(os.getpid())

@@ -2,7 +2,7 @@
 
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Awaitable, Union
+from typing import Awaitable, Generic, TypeVar, Union
 
 from src.application.dto.base import BaseCommand, BaseResponse
 

@@ -1,23 +1,24 @@
 """Comprehensive security validation tests."""
 
-import pytest
-import re
-import json
 import base64
-from unittest.mock import Mock, patch
-from typing import List, Dict, Any
 import hashlib
-import secrets
+import json
 import os
+import re
+import secrets
 import tempfile
+from typing import Any, Dict, List
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Import components for security testing
 try:
-    from src.domain.request.aggregate import Request
-    from src.domain.template.aggregate import Template
     from src.application.service import ApplicationService
     from src.domain.base.value_objects import InstanceId, Tags
+    from src.domain.request.aggregate import Request
     from src.domain.request.exceptions import RequestValidationError
+    from src.domain.template.aggregate import Template
     from src.domain.template.exceptions import TemplateValidationError
 
     IMPORTS_AVAILABLE = True

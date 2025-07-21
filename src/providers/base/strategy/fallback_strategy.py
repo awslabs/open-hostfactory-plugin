@@ -1,5 +1,5 @@
-from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
 
 """Fallback Provider Strategy - Resilience and failover for provider operations.
 
@@ -8,19 +8,19 @@ enabling automatic failover, circuit breaker patterns, and graceful degradation
 when primary providers fail or become unavailable.
 """
 
-from typing import Dict, List, Optional, Any
+import time
 from dataclasses import dataclass
 from enum import Enum
-import time
 from threading import Lock
+from typing import Any, Dict, List, Optional
 
 from src.providers.base.strategy.provider_strategy import (
-    ProviderStrategy,
-    ProviderOperation,
-    ProviderResult,
     ProviderCapabilities,
     ProviderHealthStatus,
+    ProviderOperation,
     ProviderOperationType,
+    ProviderResult,
+    ProviderStrategy,
 )
 
 

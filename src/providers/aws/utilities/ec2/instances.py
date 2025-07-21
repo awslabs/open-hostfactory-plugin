@@ -1,12 +1,12 @@
 """EC2 instance management utility functions."""
 
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 from botocore.exceptions import ClientError
 
 from src.domain.base.exceptions import InfrastructureError
-from src.infrastructure.resilience import retry
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.resilience import retry
 
 # Logger
 logger = get_logger(__name__)

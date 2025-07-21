@@ -1,11 +1,14 @@
 """Tests for format conversion consistency."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.domain.base.ports import SchedulerPort
 from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy
-from src.infrastructure.scheduler.hostfactory.strategy import HostFactorySchedulerStrategy
+from src.infrastructure.scheduler.hostfactory.strategy import (
+    HostFactorySchedulerStrategy,
+)
 
 
 class TestFormatConversionConsistency:
@@ -209,8 +212,9 @@ class TestFormatConversionInHandlers:
     async def test_format_conversion_in_cli_handler(self, mock_get_container):
         """Test that format conversion is done using the scheduler strategy in CLI handlers."""
         # Arrange
-        from src.interface.template_command_handlers import handle_list_templates
         import argparse
+
+        from src.interface.template_command_handlers import handle_list_templates
 
         container = MagicMock()
         query_bus = MagicMock()

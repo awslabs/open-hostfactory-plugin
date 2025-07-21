@@ -1,11 +1,12 @@
 """Generic provider interface compliance tests."""
 
-import pytest
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import Mock
 
-from src.infrastructure.interfaces.provider import ProviderPort, ProviderConfig
+import pytest
+
 from src.domain.base.value_objects import InstanceId
+from src.infrastructure.interfaces.provider import ProviderConfig, ProviderPort
 from tests.fixtures.mock_provider import MockProvider, create_mock_provider
 
 
@@ -44,7 +45,9 @@ class TestProviderPort:
 
     def test_provider_factory_registration(self):
         """Test provider factory can register new providers."""
-        from src.infrastructure.utilities.factories.provider_factory import ProviderFactory
+        from src.infrastructure.utilities.factories.provider_factory import (
+            ProviderFactory,
+        )
 
         factory = ProviderFactory()
 

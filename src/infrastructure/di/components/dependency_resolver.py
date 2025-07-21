@@ -1,19 +1,29 @@
 """Dependency resolution engine for DI container."""
 
-from typing import Dict, Any, Type, TypeVar, Optional, Set, get_type_hints, Union, Callable
 import inspect
-import threading
 import logging
+import threading
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Set,
+    Type,
+    TypeVar,
+    Union,
+    get_type_hints,
+)
 
+from src.domain.base.dependency_injection import get_injectable_metadata, is_injectable
 from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
-from src.domain.base.dependency_injection import is_injectable, get_injectable_metadata
 from src.infrastructure.di.exceptions import (
+    CircularDependencyError,
     DependencyResolutionError,
+    FactoryError,
+    InstantiationError,
     UnregisteredDependencyError,
     UntypedParameterError,
-    CircularDependencyError,
-    InstantiationError,
-    FactoryError,
 )
 
 T = TypeVar("T")

@@ -2,11 +2,11 @@
 
 from .config import (
     AWSProviderConfig,
-    HandlersConfig,
     HandlerCapabilityConfig,
     HandlerDefaultsConfig,
+    HandlersConfig,
 )
-from .validator import AWSNamingConfig, AWSConfigManager, get_aws_config_manager
+from .validator import AWSConfigManager, AWSNamingConfig, get_aws_config_manager
 
 __all__ = [
     "AWSProviderConfig",

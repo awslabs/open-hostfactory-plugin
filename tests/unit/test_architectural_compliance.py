@@ -1,14 +1,15 @@
 """Architectural compliance tests for DDD, SOLID, and Clean Architecture principles."""
 
 import ast
+import importlib
+import inspect
 import os
 import sys
 from pathlib import Path
-from typing import List, Set, Dict, Any
-import pytest
-import importlib
-import inspect
+from typing import Any, Dict, List, Set
 from unittest.mock import Mock
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -111,9 +112,9 @@ class TestDDDCompliance:
         """Test that aggregate roots maintain business invariants."""
         # Import domain aggregates
         try:
+            from src.domain.machine.aggregate import Machine
             from src.domain.request.aggregate import Request
             from src.domain.template.aggregate import Template
-            from src.domain.machine.aggregate import Machine
         except ImportError as e:
             pytest.skip(f"Could not import aggregates: {e}")
 
@@ -260,8 +261,9 @@ class TestSOLIDCompliance:
         """Ensure high-level modules don't depend on low-level modules."""
         # Test that ApplicationService depends on abstractions, not concretions
         try:
-            from src.application.service import ApplicationService
             import inspect
+
+            from src.application.service import ApplicationService
         except ImportError as e:
             pytest.skip(f"Could not import ApplicationService: {e}")
 
@@ -452,8 +454,8 @@ class TestCodeQualityCompliance:
         # This would require sophisticated dependency analysis
         # For now, we test that basic imports work
         try:
-            from src.domain.request.aggregate import Request
             from src.application.service import ApplicationService
+            from src.domain.request.aggregate import Request
             from src.infrastructure.di.container import DIContainer
         except ImportError as e:
             pytest.fail(f"Circular import detected: {e}")

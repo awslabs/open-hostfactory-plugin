@@ -1,7 +1,7 @@
 """Error handling port for application layer."""
 
 from abc import ABC, abstractmethod
-from typing import Callable, TypeVar, Optional
+from typing import Callable, Optional, TypeVar
 
 T = TypeVar("T")
 

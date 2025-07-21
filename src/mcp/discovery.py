@@ -5,9 +5,9 @@ Automatically discovers SDK methods and creates MCP tool definitions
 with proper JSON schemas for AI assistant integration.
 """
 
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 import inspect
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 from src.sdk.client import OpenHFPluginSDK
 from src.sdk.discovery import MethodInfo

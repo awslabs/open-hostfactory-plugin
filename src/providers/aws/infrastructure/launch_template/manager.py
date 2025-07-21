@@ -5,21 +5,25 @@ This module provides centralized management of AWS launch templates,
 moving AWS-specific logic out of the base handler to maintain clean architecture.
 """
 
-from typing import Dict, List, Optional, Any
 import hashlib
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
 from botocore.exceptions import ClientError
 
-from src.providers.aws.infrastructure.aws_client import AWSClient
-from src.providers.aws.domain.template.aggregate import AWSTemplate
-from src.domain.request.aggregate import Request
-from src.domain.base.ports import LoggingPort
-from src.providers.aws.exceptions.aws_exceptions import AWSValidationError, InfrastructureError
-from src.infrastructure.utilities.common.resource_naming import (
-    get_launch_template_name,
-    get_instance_name,
-)
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.domain.request.aggregate import Request
+from src.infrastructure.utilities.common.resource_naming import (
+    get_instance_name,
+    get_launch_template_name,
+)
+from src.providers.aws.domain.template.aggregate import AWSTemplate
+from src.providers.aws.exceptions.aws_exceptions import (
+    AWSValidationError,
+    InfrastructureError,
+)
+from src.providers.aws.infrastructure.aws_client import AWSClient
 
 
 @dataclass

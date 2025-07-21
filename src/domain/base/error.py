@@ -1,8 +1,8 @@
 """Domain error concepts - core error representation."""
 
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, Optional
 
 
 @dataclass(frozen=True)

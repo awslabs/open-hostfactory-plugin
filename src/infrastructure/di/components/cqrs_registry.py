@@ -1,8 +1,8 @@
 """CQRS handler registration management for DI container."""
 
-from typing import Dict, Type, List, Any, Optional
-import threading
 import logging
+import threading
+from typing import Any, Dict, List, Optional, Type
 
 logger = logging.getLogger(__name__)
 

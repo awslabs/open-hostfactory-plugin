@@ -2,9 +2,9 @@
 
 from typing import Optional
 
-from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
-from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
 
 # Import new simplified repositories
 from src.infrastructure.persistence.repositories.machine_repository import (

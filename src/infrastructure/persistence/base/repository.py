@@ -1,11 +1,11 @@
 """Base repository interfaces and implementations."""
 
-from typing import TypeVar, Generic, Optional, List, Dict, Any
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from pydantic import ValidationError as PydanticValidationError
 
 from src.domain.base.domain_interfaces import Repository
-from src.domain.base.exceptions import EntityNotFoundError, ConcurrencyError
+from src.domain.base.exceptions import ConcurrencyError, EntityNotFoundError
 
 # Use lazy import for event_publisher to avoid circular imports
 from src.infrastructure.logging.logger import get_logger
@@ -66,21 +66,27 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             # Use Pydantic's serialization but process the result to handle value objects
             data = entity.model_dump()
             # Lazy import to avoid circular dependency
-            from src.infrastructure.utilities.common.serialization import process_value_objects
+            from src.infrastructure.utilities.common.serialization import (
+                process_value_objects,
+            )
 
             return process_value_objects(data)
         elif hasattr(entity, "to_dict"):
             # Process the result to handle value objects
             data = entity.to_dict()
             # Lazy import to avoid circular dependency
-            from src.infrastructure.utilities.common.serialization import process_value_objects
+            from src.infrastructure.utilities.common.serialization import (
+                process_value_objects,
+            )
 
             return process_value_objects(data)
         else:
             # Process the result to handle value objects
             data = vars(entity)
             # Lazy import to avoid circular dependency
-            from src.infrastructure.utilities.common.serialization import process_value_objects
+            from src.infrastructure.utilities.common.serialization import (
+                process_value_objects,
+            )
 
             return process_value_objects(data)
 
@@ -162,8 +168,9 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             # Publish events after successful save
             if events:
                 # Lazy import to avoid circular imports
-                from src.infrastructure.events import get_event_bus
                 import asyncio
+
+                from src.infrastructure.events import get_event_bus
 
                 event_bus = get_event_bus()
 

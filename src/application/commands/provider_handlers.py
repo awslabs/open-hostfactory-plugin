@@ -4,32 +4,30 @@ This module implements command handlers for provider strategy operations,
 integrating the existing provider strategy ecosystem with the CQRS architecture.
 """
 
-from typing import Dict, Any
 import time
+from typing import Any, Dict
 
 from src.application.base.handlers import BaseCommandHandler
 from src.application.decorators import command_handler
 from src.application.provider.commands import (
-    SelectProviderStrategyCommand,
+    ConfigureProviderStrategyCommand,
     ExecuteProviderOperationCommand,
     RegisterProviderStrategyCommand,
+    SelectProviderStrategyCommand,
     UpdateProviderHealthCommand,
-    ConfigureProviderStrategyCommand,
 )
-
+from src.domain.base.events.provider_events import (
+    ProviderHealthChangedEvent,
+    ProviderOperationExecutedEvent,
+    ProviderStrategyRegisteredEvent,
+    ProviderStrategySelectedEvent,
+)
+from src.domain.base.ports import ErrorHandlingPort, EventPublisherPort, LoggingPort
 from src.providers.base.strategy import (
     ProviderContext,
     ProviderResult,
     SelectionPolicy,
     SelectorFactory,
-)
-
-from src.domain.base.ports import EventPublisherPort, LoggingPort, ErrorHandlingPort
-from src.domain.base.events.provider_events import (
-    ProviderStrategySelectedEvent,
-    ProviderOperationExecutedEvent,
-    ProviderHealthChangedEvent,
-    ProviderStrategyRegisteredEvent,
 )
 
 
@@ -209,13 +207,15 @@ class RegisterProviderStrategyHandler(
 
         try:
             # Use provider registry to create strategy
-            from src.infrastructure.registry.provider_registry import get_provider_registry
+            from src.infrastructure.registry.provider_registry import (
+                get_provider_registry,
+            )
 
             registry = get_provider_registry()
 
             # Create a mock provider config for strategy creation
             from dataclasses import dataclass
-            from typing import Dict, Any
+            from typing import Any, Dict
 
             @dataclass
             class MockProviderConfig:

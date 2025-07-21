@@ -1,7 +1,8 @@
 """Base models for API requests and responses."""
 
-from typing import Dict, Any, Optional, List, Type, TypeVar, Generic
-from pydantic import BaseModel, Field, ConfigDict, create_model
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+
+from pydantic import BaseModel, ConfigDict, Field, create_model
 
 T = TypeVar("T")
 

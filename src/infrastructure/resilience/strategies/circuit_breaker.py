@@ -1,12 +1,13 @@
 """Circuit breaker retry strategy."""
 
-import time
 import secrets
+import time
 from enum import Enum
-from typing import Dict, Any
-from src.infrastructure.resilience.strategies.base import RetryStrategy
+from typing import Any, Dict
+
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.resilience.exceptions import CircuitBreakerOpenError
+from src.infrastructure.resilience.strategies.base import RetryStrategy
 
 logger = get_logger(__name__)
 

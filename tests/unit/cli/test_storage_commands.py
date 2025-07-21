@@ -1,16 +1,17 @@
 """Tests for storage command handlers."""
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from argparse import Namespace
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from src.interface.storage_command_handlers import (
     handle_list_storage_strategies,
     handle_show_storage_config,
-    handle_validate_storage_config,
-    handle_test_storage,
     handle_storage_health,
     handle_storage_metrics,
+    handle_test_storage,
+    handle_validate_storage_config,
 )
 
 
@@ -147,10 +148,10 @@ class TestStorageHandlerImports:
         from src.interface.storage_command_handlers import (
             handle_list_storage_strategies,
             handle_show_storage_config,
-            handle_validate_storage_config,
-            handle_test_storage,
             handle_storage_health,
             handle_storage_metrics,
+            handle_test_storage,
+            handle_validate_storage_config,
         )
 
         # Verify all handlers are callable functions

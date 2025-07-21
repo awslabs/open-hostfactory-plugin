@@ -12,7 +12,7 @@ Components:
 - LoadBalancingProviderStrategy: Main load balancing implementation
 """
 
-from .algorithms import LoadBalancingAlgorithm, HealthCheckMode
+from .algorithms import HealthCheckMode, LoadBalancingAlgorithm
 from .config import LoadBalancingConfig
 from .stats import StrategyStats
 from .strategy import LoadBalancingProviderStrategy

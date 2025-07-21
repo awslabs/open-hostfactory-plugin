@@ -1,6 +1,7 @@
 """Request type and status enumerations."""
 
 from __future__ import annotations
+
 from enum import Enum
 
 

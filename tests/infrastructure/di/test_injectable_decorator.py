@@ -2,13 +2,18 @@
 Tests for the injectable decorator functionality.
 """
 
-import pytest
 from typing import Optional
 from unittest.mock import Mock, patch
 
-from src.infrastructure.di.decorators import injectable, is_injectable, get_injectable_info
-from src.infrastructure.di.container import DIContainer
+import pytest
+
 from src.domain.base.ports import LoggingPort
+from src.infrastructure.di.container import DIContainer
+from src.infrastructure.di.decorators import (
+    get_injectable_info,
+    injectable,
+    is_injectable,
+)
 
 
 # Test interfaces

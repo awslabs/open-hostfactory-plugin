@@ -1,6 +1,7 @@
 """HostFactory-specific field mappings - moved from generic location."""
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from src.infrastructure.logging.logger import get_logger
 
 

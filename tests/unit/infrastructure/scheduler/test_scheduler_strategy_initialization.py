@@ -1,13 +1,16 @@
 """Tests for scheduler strategy initialization."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports import LoggingPort, SchedulerPort
-from src.infrastructure.scheduler.registration import create_default_strategy
 from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy
-from src.infrastructure.scheduler.hostfactory.strategy import HostFactorySchedulerStrategy
+from src.infrastructure.scheduler.hostfactory.strategy import (
+    HostFactorySchedulerStrategy,
+)
+from src.infrastructure.scheduler.registration import create_default_strategy
 
 
 class TestSchedulerStrategyInitialization:
@@ -68,7 +71,9 @@ class TestSchedulerStrategyRegistration:
     def test_register_scheduler_strategies(self, mock_create_default_strategy):
         """Test that register_scheduler_strategies registers the default strategy."""
         # Arrange
-        from src.infrastructure.scheduler.registration import register_scheduler_strategies
+        from src.infrastructure.scheduler.registration import (
+            register_scheduler_strategies,
+        )
 
         container = MagicMock()
         mock_strategy = MagicMock(spec=SchedulerPort)

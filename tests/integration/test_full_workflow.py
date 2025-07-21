@@ -1,22 +1,23 @@
 """Integration tests for full application workflow."""
 
-import pytest
 import json
 import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch
-from typing import Dict, Any, List
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List
+from unittest.mock import Mock, patch
 
-from src.bootstrap import Application
-from src.infrastructure.di.buses import CommandBus, QueryBus
-from src.config.manager import ConfigurationManager
-from src.domain.template.aggregate import Template
-from src.domain.request.aggregate import Request
-from src.domain.machine.aggregate import Machine
-from src.domain.base.value_objects import InstanceType, InstanceId
+import pytest
+
 from src.application.dto.commands import CreateRequestCommand
-from src.application.dto.queries import ListTemplatesQuery, GetRequestStatusQuery
+from src.application.dto.queries import GetRequestStatusQuery, ListTemplatesQuery
+from src.bootstrap import Application
+from src.config.manager import ConfigurationManager
+from src.domain.base.value_objects import InstanceId, InstanceType
+from src.domain.machine.aggregate import Machine
+from src.domain.request.aggregate import Request
+from src.domain.template.aggregate import Template
+from src.infrastructure.di.buses import CommandBus, QueryBus
 
 
 @pytest.mark.integration

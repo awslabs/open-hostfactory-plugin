@@ -1,10 +1,10 @@
 """System-related command handlers for the interface layer."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
-from src.infrastructure.error.decorators import handle_interface_exceptions
-from src.infrastructure.di.container import get_container
 from src.infrastructure.di.buses import QueryBus
+from src.infrastructure.di.container import get_container
+from src.infrastructure.error.decorators import handle_interface_exceptions
 
 
 @handle_interface_exceptions(context="provider_health", interface_type="cli")

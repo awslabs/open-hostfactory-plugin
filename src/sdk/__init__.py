@@ -22,7 +22,7 @@ Usage:
 
 from .client import OpenHFPluginSDK
 from .config import SDKConfig
-from .exceptions import SDKError, ConfigurationError, ProviderError
+from .exceptions import ConfigurationError, ProviderError, SDKError
 
 # Convenient alias
 OHFPSDK = OpenHFPluginSDK

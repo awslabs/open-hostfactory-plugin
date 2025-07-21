@@ -10,10 +10,10 @@ how those needs are fulfilled. This allows the domain to remain independent
 of infrastructure concerns.
 """
 
-from .resource_provisioning_port import ResourceProvisioningPort
 from .cloud_resource_manager_port import CloudResourceManagerPort
-from .request_adapter_port import RequestAdapterPort
 from .logger_port import LoggerPort
+from .request_adapter_port import RequestAdapterPort
+from .resource_provisioning_port import ResourceProvisioningPort
 
 __all__ = [
     "ResourceProvisioningPort",

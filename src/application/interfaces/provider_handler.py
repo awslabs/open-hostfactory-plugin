@@ -1,7 +1,7 @@
 """Provider Handler interface for CQRS pattern consistency."""
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Optional
+from typing import Generic, Optional, TypeVar
 
 TRequest = TypeVar("TRequest")
 TResponse = TypeVar("TResponse")

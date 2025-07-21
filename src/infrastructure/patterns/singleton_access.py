@@ -1,8 +1,8 @@
 """Standard singleton access functions."""
 
-from typing import TypeVar, Type, Any, cast
-from src.infrastructure.logging.logger import get_logger
+from typing import Any, Type, TypeVar, cast
 
+from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.patterns.singleton_registry import SingletonRegistry
 
 T = TypeVar("T")

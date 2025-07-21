@@ -4,8 +4,8 @@ Test for Phase 4: Integration Flow Fix
 Tests that the AWS provider strategy now uses the proper handler system instead of bypassing it.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
@@ -15,9 +15,9 @@ def test_aws_provider_strategy_uses_handlers():
     print("=== Phase 4: Integration Flow Fix Test ===")
 
     try:
-        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-        from src.providers.aws.configuration.config import AWSProviderConfig
         from src.infrastructure.logging.logger import get_logger
+        from src.providers.aws.configuration.config import AWSProviderConfig
+        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
         from src.providers.base.strategy import ProviderOperation, ProviderOperationType
 
         # Create AWS provider strategy
@@ -110,9 +110,9 @@ def test_no_instance_manager_bypass():
     print("\n=== No Instance Manager Bypass Test ===")
 
     try:
-        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-        from src.providers.aws.configuration.config import AWSProviderConfig
         from src.infrastructure.logging.logger import get_logger
+        from src.providers.aws.configuration.config import AWSProviderConfig
+        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
         # Create AWS provider strategy
         config = AWSProviderConfig(region="us-west-2", profile="default")

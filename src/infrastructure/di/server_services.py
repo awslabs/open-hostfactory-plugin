@@ -2,10 +2,10 @@
 
 from typing import Optional
 
-from src.infrastructure.di.container import DIContainer
-from src.infrastructure.di.decorators import injectable
 from src.config.manager import ConfigurationManager
 from src.config.schemas.server_schema import ServerConfig
+from src.infrastructure.di.container import DIContainer
+from src.infrastructure.di.decorators import injectable
 from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -43,6 +43,7 @@ def register_server_services(container: DIContainer) -> None:
 def _register_fastapi_services(container: DIContainer, server_config: ServerConfig) -> None:
     """Register FastAPI core services."""
     from fastapi import FastAPI
+
     from src.api.server import create_fastapi_app
 
     # Register FastAPI app as singleton
@@ -59,8 +60,8 @@ def _register_api_handlers(container: DIContainer) -> None:
         from src.api.handlers.get_available_templates_handler import (
             GetAvailableTemplatesRESTHandler,
         )
-        from src.infrastructure.di.buses import QueryBus, CommandBus
         from src.domain.base.ports import SchedulerPort
+        from src.infrastructure.di.buses import CommandBus, QueryBus
         from src.monitoring.metrics import MetricsCollector
 
         if not container.is_registered(GetAvailableTemplatesRESTHandler):
@@ -101,8 +102,10 @@ def _register_api_handlers(container: DIContainer) -> None:
 
     try:
         # Register request status handler
-        from src.api.handlers.get_request_status_handler import GetRequestStatusRESTHandler
-        from src.domain.base.ports import LoggingPort, ErrorHandlingPort
+        from src.api.handlers.get_request_status_handler import (
+            GetRequestStatusRESTHandler,
+        )
+        from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 
         if not container.is_registered(GetRequestStatusRESTHandler):
             container.register_singleton(
@@ -124,7 +127,9 @@ def _register_api_handlers(container: DIContainer) -> None:
 
     try:
         # Register return requests handler
-        from src.api.handlers.get_return_requests_handler import GetReturnRequestsRESTHandler
+        from src.api.handlers.get_return_requests_handler import (
+            GetReturnRequestsRESTHandler,
+        )
 
         if not container.is_registered(GetReturnRequestsRESTHandler):
             container.register_singleton(

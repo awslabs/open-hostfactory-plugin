@@ -1,10 +1,11 @@
 """Base value objects - immutable domain primitives."""
 
-from typing import ClassVar, TypeVar, Optional
 import ipaddress
 from abc import ABC
 from enum import Enum
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from typing import ClassVar, Optional, TypeVar
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 T = TypeVar("T", bound="ValueObject")
 

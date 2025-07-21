@@ -6,7 +6,7 @@ data consistently regardless of the underlying data format (snake_case,
 camelCase, HF format, etc.).
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 def get_field_value(

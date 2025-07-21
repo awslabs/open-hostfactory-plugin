@@ -1,22 +1,26 @@
 """Port adapter registrations for dependency injection."""
 
 import os
-from src.domain.base.ports import (
-    LoggingPort,
-    ContainerPort,
-    EventPublisherPort,
-    ErrorHandlingPort,
-    TemplateConfigurationPort,
-    ConfigurationPort,
-    SchedulerPort,
-)
-from src.infrastructure.adapters.logging_adapter import LoggingAdapter
-from src.infrastructure.adapters.factories.container_adapter_factory import ContainerAdapterFactory
-from src.infrastructure.adapters.error_handling_adapter import ErrorHandlingAdapter
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
 
 # Import configuration manager
 from src.config.manager import ConfigurationManager, get_config_manager
+from src.domain.base.ports import (
+    ConfigurationPort,
+    ContainerPort,
+    ErrorHandlingPort,
+    EventPublisherPort,
+    LoggingPort,
+    SchedulerPort,
+    TemplateConfigurationPort,
+)
+from src.infrastructure.adapters.error_handling_adapter import ErrorHandlingAdapter
+from src.infrastructure.adapters.factories.container_adapter_factory import (
+    ContainerAdapterFactory,
+)
+from src.infrastructure.adapters.logging_adapter import LoggingAdapter
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
 
 
 def register_port_adapters(container):
@@ -31,9 +35,11 @@ def register_port_adapters(container):
     # Register UnitOfWorkFactory (abstract -> concrete mapping)
     # This was previously in _setup_core_dependencies but got lost during DI cleanup
     # Using consistent Base* naming pattern for abstract classes
-    from src.infrastructure.utilities.factories.repository_factory import UnitOfWorkFactory
     from src.domain.base import UnitOfWorkFactory as BaseUnitOfWorkFactory
     from src.infrastructure.adapters.logging_adapter import LoggingAdapter
+    from src.infrastructure.utilities.factories.repository_factory import (
+        UnitOfWorkFactory,
+    )
 
     config_manager = get_config_manager()
     container.register_instance(
@@ -53,7 +59,9 @@ def register_port_adapters(container):
     # Register template configuration manager with manual factory (handles optional dependencies)
     def create_template_configuration_manager(c):
         # Import here to avoid circular imports
-        from src.application.services.provider_capability_service import ProviderCapabilityService
+        from src.application.services.provider_capability_service import (
+            ProviderCapabilityService,
+        )
 
         return TemplateConfigurationManager(
             config_manager=c.get(ConfigurationManager),

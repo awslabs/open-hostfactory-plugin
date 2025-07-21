@@ -1,7 +1,7 @@
 """Provider Validation Port - Interface for provider-specific validation operations."""
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Protocol
+from typing import Any, Dict, List, Protocol
 
 
 class ProviderValidationPort(Protocol):

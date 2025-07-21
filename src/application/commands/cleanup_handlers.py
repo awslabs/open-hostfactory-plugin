@@ -1,17 +1,21 @@
 """Domain cleanup command handlers following proper CQRS pattern."""
 
 from __future__ import annotations
+
 from datetime import datetime, timedelta
-from typing import Dict, Any
+from typing import Any, Dict
 
 from src.application.base.handlers import BaseCommandHandler
 from src.application.decorators import command_handler
-from src.application.dto.commands import CleanupOldRequestsCommand, CleanupAllResourcesCommand
-from src.domain.base.ports import EventPublisherPort, LoggingPort, ErrorHandlingPort
-from src.domain.base.events.infrastructure_events import ResourcesCleanedEvent
+from src.application.dto.commands import (
+    CleanupAllResourcesCommand,
+    CleanupOldRequestsCommand,
+)
 from src.domain.base import UnitOfWorkFactory
-from src.domain.request.repository import RequestRepository
+from src.domain.base.events.infrastructure_events import ResourcesCleanedEvent
+from src.domain.base.ports import ErrorHandlingPort, EventPublisherPort, LoggingPort
 from src.domain.machine.repository import MachineRepository
+from src.domain.request.repository import RequestRepository
 
 
 @command_handler(CleanupOldRequestsCommand)

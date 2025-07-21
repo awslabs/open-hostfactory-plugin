@@ -3,7 +3,7 @@
 import asyncio
 import signal
 import sys
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from src.infrastructure.error.decorators import handle_interface_exceptions
 from src.infrastructure.logging.logger import get_logger
@@ -31,9 +31,9 @@ async def handle_serve_api(args) -> Dict[str, Any]:
 
     try:
         # Import here to avoid circular dependencies
-        from src.interface.rest.server import create_app
         from src.config.manager import ConfigurationManager
         from src.config.schemas.server_schema import ServerConfig
+        from src.interface.rest.server import create_app
 
         # Get server configuration
         config_manager = ConfigurationManager()

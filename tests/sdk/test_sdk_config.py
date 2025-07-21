@@ -1,11 +1,12 @@
 """Unit tests for SDK configuration following existing test patterns."""
 
-import pytest
-import os
 import json
+import os
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from src.sdk.config import SDKConfig
 from src.sdk.exceptions import ConfigurationError

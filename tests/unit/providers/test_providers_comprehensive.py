@@ -1,10 +1,11 @@
 """Comprehensive provider tests."""
 
-import pytest
 import importlib
 import inspect
-from unittest.mock import Mock, patch, AsyncMock
 from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -170,7 +171,9 @@ class TestAWSProviderComprehensive:
     def test_aws_strategy_exists(self):
         """Test that AWS strategy exists."""
         try:
-            from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
+            from src.providers.aws.strategy.aws_provider_strategy import (
+                AWSProviderStrategy,
+            )
 
             assert AWSProviderStrategy is not None
         except ImportError:
@@ -179,7 +182,9 @@ class TestAWSProviderComprehensive:
     def test_aws_strategy_initialization(self):
         """Test AWS strategy initialization."""
         try:
-            from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
+            from src.providers.aws.strategy.aws_provider_strategy import (
+                AWSProviderStrategy,
+            )
 
             # Try to create strategy with mocked dependencies
             mock_deps = [Mock() for _ in range(10)]
@@ -303,7 +308,9 @@ class TestProviderStrategyPatternsComprehensive:
     def test_load_balancing_strategy_exists(self):
         """Test that load balancing strategy exists."""
         try:
-            from src.providers.base.strategy.load_balancing_strategy import LoadBalancingStrategy
+            from src.providers.base.strategy.load_balancing_strategy import (
+                LoadBalancingStrategy,
+            )
 
             assert LoadBalancingStrategy is not None
         except ImportError:
@@ -312,7 +319,9 @@ class TestProviderStrategyPatternsComprehensive:
     def test_load_balancing_strategy_initialization(self):
         """Test load balancing strategy initialization."""
         try:
-            from src.providers.base.strategy.load_balancing_strategy import LoadBalancingStrategy
+            from src.providers.base.strategy.load_balancing_strategy import (
+                LoadBalancingStrategy,
+            )
 
             # Try to create strategy
             try:
@@ -432,7 +441,9 @@ class TestAWSPersistenceComprehensive:
     def test_dynamodb_unit_of_work_exists(self):
         """Test that DynamoDB unit of work exists."""
         try:
-            from src.providers.aws.persistence.dynamodb.unit_of_work import DynamoDBUnitOfWork
+            from src.providers.aws.persistence.dynamodb.unit_of_work import (
+                DynamoDBUnitOfWork,
+            )
 
             assert DynamoDBUnitOfWork is not None
         except ImportError:

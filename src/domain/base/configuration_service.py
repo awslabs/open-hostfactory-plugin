@@ -1,6 +1,7 @@
 """Domain configuration service using ConfigurationPort."""
 
 from typing import Dict, Optional
+
 from src.domain.ports import ConfigurationPort
 
 

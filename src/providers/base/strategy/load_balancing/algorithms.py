@@ -1,6 +1,7 @@
 """Load balancing algorithms enumeration."""
 
 from enum import Enum
+
 from src.domain.base.dependency_injection import injectable
 
 

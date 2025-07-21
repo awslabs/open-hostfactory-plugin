@@ -1,10 +1,11 @@
 """Comprehensive API tests that adapt to existing code structure."""
 
-import pytest
 import importlib
 import inspect
-from unittest.mock import Mock, patch, AsyncMock
 from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 
 @pytest.mark.unit

@@ -3,11 +3,11 @@
 import pytest
 
 from src.application.provider.queries import (
-    GetProviderHealthQuery,
-    ListAvailableProvidersQuery,
     GetProviderCapabilitiesQuery,
+    GetProviderHealthQuery,
     GetProviderMetricsQuery,
     GetProviderStrategyConfigQuery,
+    ListAvailableProvidersQuery,
 )
 
 

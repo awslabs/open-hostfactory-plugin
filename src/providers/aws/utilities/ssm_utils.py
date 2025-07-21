@@ -5,14 +5,14 @@ This module contains utility functions for working with AWS SSM Parameter Store.
 """
 
 import re
-from typing import Optional, Dict, Any, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import boto3
 from botocore.exceptions import ClientError
 
 from src.domain.base.exceptions import InfrastructureError
-from src.infrastructure.resilience import retry
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.resilience import retry
 
 # Logger
 logger = get_logger(__name__)

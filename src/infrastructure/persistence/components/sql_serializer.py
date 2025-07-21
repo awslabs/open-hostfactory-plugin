@@ -1,9 +1,9 @@
 """SQL serialization components for domain to database mapping."""
 
 import json
-from typing import Dict, Any, Optional, List
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.persistence.components.resource_manager import DataConverter

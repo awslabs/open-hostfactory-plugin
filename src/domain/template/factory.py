@@ -1,11 +1,11 @@
 """Template factory for creating provider-specific templates with extensions."""
 
-from typing import Dict, Any, Optional, Protocol
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional, Protocol
 
+from src.domain.base.ports.logging_port import LoggingPort
 from src.domain.template.aggregate import Template
 from src.domain.template.extensions import TemplateExtensionRegistry
-from src.domain.base.ports.logging_port import LoggingPort
 
 
 class TemplateFactoryPort(Protocol):

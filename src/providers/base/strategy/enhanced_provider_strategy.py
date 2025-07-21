@@ -1,10 +1,12 @@
 """Enhanced Provider Strategy with API-specific capabilities."""
 
-from typing import Dict, Any, List, Optional
-from pydantic import BaseModel, Field
 from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional
 
-from .provider_strategy import ProviderStrategy, ProviderCapabilities as BaseProviderCapabilities
+from pydantic import BaseModel, Field
+
+from .provider_strategy import ProviderCapabilities as BaseProviderCapabilities
+from .provider_strategy import ProviderStrategy
 
 
 class EnhancedProviderCapabilities(BaseProviderCapabilities):

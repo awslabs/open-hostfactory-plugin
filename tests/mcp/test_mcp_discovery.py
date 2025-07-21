@@ -1,10 +1,11 @@
 """Unit tests for MCP discovery following existing test patterns."""
 
-import pytest
+from typing import Any, Dict
 from unittest.mock import Mock, patch
-from typing import Dict, Any
 
-from src.mcp.discovery import MCPToolDiscovery, MCPToolDefinition
+import pytest
+
+from src.mcp.discovery import MCPToolDefinition, MCPToolDiscovery
 from src.sdk.client import OpenHFPluginSDK
 from src.sdk.discovery import MethodInfo
 

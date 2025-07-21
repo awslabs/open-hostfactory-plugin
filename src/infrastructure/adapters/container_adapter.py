@@ -1,6 +1,7 @@
 """Container adapter implementing ContainerPort."""
 
-from typing import Type, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Type, TypeVar
+
 from src.domain.base.ports.container_port import ContainerPort
 
 if TYPE_CHECKING:

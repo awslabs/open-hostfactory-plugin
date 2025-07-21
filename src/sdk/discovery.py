@@ -6,15 +6,16 @@ expose all registered command and query handlers as SDK methods.
 Follows the same patterns as the infrastructure handler discovery.
 """
 
-from typing import Dict, Callable, Type, Any, List, Optional, get_type_hints
 import inspect
 import re
 from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional, Type, get_type_hints
 
 from src.application.decorators import (
-    get_registered_query_handlers,
     get_registered_command_handlers,
+    get_registered_query_handlers,
 )
+
 from .exceptions import HandlerDiscoveryError, MethodExecutionError
 
 

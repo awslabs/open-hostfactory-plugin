@@ -1,23 +1,33 @@
 """Comprehensive tests for business rule validation across all domain aggregates."""
 
-import pytest
-from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, patch
-from typing import List, Dict, Any
 import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List
+from unittest.mock import Mock, patch
+
+import pytest
 
 # Import domain components
 try:
-    from src.domain.request.aggregate import Request
-    from src.domain.template.aggregate import Template
-    from src.domain.machine.aggregate import Machine
-    from src.domain.request.value_objects import RequestStatus, RequestType
-    from src.domain.template.value_objects import TemplateId
-    from src.domain.machine.value_objects import MachineStatus
     from src.domain.base.value_objects import InstanceId, InstanceType, Tags
-    from src.domain.request.exceptions import RequestValidationError, InvalidRequestStateError
-    from src.domain.template.exceptions import TemplateValidationError, TemplateNotFoundError
-    from src.domain.machine.exceptions import MachineValidationError, InvalidMachineStateError
+    from src.domain.machine.aggregate import Machine
+    from src.domain.machine.exceptions import (
+        InvalidMachineStateError,
+        MachineValidationError,
+    )
+    from src.domain.machine.value_objects import MachineStatus
+    from src.domain.request.aggregate import Request
+    from src.domain.request.exceptions import (
+        InvalidRequestStateError,
+        RequestValidationError,
+    )
+    from src.domain.request.value_objects import RequestStatus, RequestType
+    from src.domain.template.aggregate import Template
+    from src.domain.template.exceptions import (
+        TemplateNotFoundError,
+        TemplateValidationError,
+    )
+    from src.domain.template.value_objects import TemplateId
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

@@ -1,12 +1,12 @@
 """Scheduler registration functions - same pattern as provider registration."""
 
-from typing import Any, Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
-    from src.infrastructure.registry.scheduler_registry import SchedulerRegistry
     from src.config.manager import ConfigurationManager
-    from src.infrastructure.di.container import DIContainer
     from src.domain.base.ports.scheduler_port import SchedulerPort
+    from src.infrastructure.di.container import DIContainer
+    from src.infrastructure.registry.scheduler_registry import SchedulerRegistry
 
 
 def create_symphony_hostfactory_strategy(container: "DIContainer") -> "SchedulerPort":
@@ -18,9 +18,11 @@ def create_symphony_hostfactory_strategy(container: "DIContainer") -> "Scheduler
     Returns:
         SchedulerPort: Symphony HostFactory scheduler strategy instance
     """
-    from src.infrastructure.scheduler.hostfactory.strategy import HostFactorySchedulerStrategy
     from src.config.manager import ConfigurationManager
     from src.domain.base.ports import LoggingPort
+    from src.infrastructure.scheduler.hostfactory.strategy import (
+        HostFactorySchedulerStrategy,
+    )
 
     config_manager = container.get(ConfigurationManager)
     logger = container.get(LoggingPort)
@@ -35,7 +37,9 @@ def create_hostfactory_config(data: Dict[str, Any]) -> Any:
 def register_symphony_hostfactory_scheduler(registry: "SchedulerRegistry" = None):
     """Register Symphony HostFactory scheduler."""
     if registry is None:
-        from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
+        from src.infrastructure.registry.scheduler_registry import (
+            get_scheduler_registry,
+        )
 
         registry = get_scheduler_registry()
 
@@ -78,9 +82,9 @@ def create_default_strategy(container: "DIContainer") -> "SchedulerPort":
     Returns:
         SchedulerPort: Default scheduler strategy instance
     """
-    from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy
     from src.config.manager import ConfigurationManager
     from src.domain.base.ports import LoggingPort
+    from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy
 
     config_manager = container.get(ConfigurationManager)
     logger = container.get(LoggingPort)
@@ -95,7 +99,9 @@ def create_default_config(data: Dict[str, Any]) -> Any:
 def register_default_scheduler(registry: "SchedulerRegistry" = None):
     """Register default scheduler."""
     if registry is None:
-        from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
+        from src.infrastructure.registry.scheduler_registry import (
+            get_scheduler_registry,
+        )
 
         registry = get_scheduler_registry()
 

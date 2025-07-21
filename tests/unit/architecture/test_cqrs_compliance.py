@@ -7,17 +7,21 @@ This module validates that the codebase properly implements CQRS patterns includ
 - Read/Write model synchronization
 """
 
-import pytest
 import inspect
 from typing import get_type_hints
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Import available components
 try:
     from src.application.base.command_handler import ApplicationCommandHandler
-    from src.application.interfaces.command_handler import CommandHandler
-    from src.application.dto.commands import CreateRequestCommand, UpdateRequestStatusCommand
+    from src.application.dto.commands import (
+        CreateRequestCommand,
+        UpdateRequestStatusCommand,
+    )
     from src.application.dto.queries import GetTemplateQuery, ListTemplatesQuery
+    from src.application.interfaces.command_handler import CommandHandler
     from src.infrastructure.di.container import DIContainer
 
     COMPONENTS_AVAILABLE = True

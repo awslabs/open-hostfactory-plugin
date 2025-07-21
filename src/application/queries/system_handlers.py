@@ -1,29 +1,32 @@
 """System query handlers for administrative operations."""
 
-from typing import Dict, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
+
 from src.application.base.handlers import BaseQueryHandler
-from src.application.queries.system import (
-    GetSystemStatusQuery,
-    GetProviderConfigQuery,
-    GetProviderMetricsQuery,
-    GetConfigurationQuery,
-    GetConfigurationSectionQuery,
-    ValidateProviderConfigQuery,
-)
 from src.application.decorators import query_handler
 from src.application.dto.system import (
-    ProviderConfigDTO,
-    ValidationResultDTO,
-    SystemStatusDTO,
-    ProviderMetricsDTO,
-    ConfigurationValueResponse,
     ConfigurationSectionResponse,
+    ConfigurationValueResponse,
+    ProviderConfigDTO,
+    ProviderMetricsDTO,
+    SystemStatusDTO,
+    ValidationResultDTO,
 )
-from src.domain.base.ports import LoggingPort, ContainerPort, ErrorHandlingPort
+from src.application.queries.system import (
+    GetConfigurationQuery,
+    GetConfigurationSectionQuery,
+    GetProviderConfigQuery,
+    GetProviderMetricsQuery,
+    GetSystemStatusQuery,
+    ValidateProviderConfigQuery,
+)
+from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
 
 # Use TYPE_CHECKING to avoid direct infrastructure imports
 if TYPE_CHECKING:
-    from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
+    from src.infrastructure.factories.provider_strategy_factory import (
+        ProviderStrategyFactory,
+    )
 
 
 @query_handler(GetConfigurationQuery)

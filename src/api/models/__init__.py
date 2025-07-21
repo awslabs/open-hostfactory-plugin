@@ -4,25 +4,25 @@ from src.api.models.base import (
     APIBaseModel,
     APIRequest,
     APIResponse,
-    PaginatedResponse,
     ErrorDetail,
-    format_api_error_response,
+    PaginatedResponse,
     create_request_model,
     create_response_model,
-)
-from src.api.models.responses import (
-    SuccessResponse,
-    format_error_for_api,
-    format_success_for_api,
-    create_error_response,
+    format_api_error_response,
 )
 from src.api.models.requests import (
     BaseRequestModel,
+    GetReturnRequestsModel,
     MachineReferenceModel,
     RequestMachinesModel,
-    RequestStatusModel,
     RequestReturnMachinesModel,
-    GetReturnRequestsModel,
+    RequestStatusModel,
+)
+from src.api.models.responses import (
+    SuccessResponse,
+    create_error_response,
+    format_error_for_api,
+    format_success_for_api,
 )
 
 __all__ = [

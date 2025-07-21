@@ -11,9 +11,9 @@ Architecture:
 - Thread-safe and compatible with existing AWS client patterns
 """
 
+import logging
 from contextlib import contextmanager
 from typing import Generator
-import logging
 
 from src.infrastructure.mocking.dry_run_context import is_dry_run_active
 

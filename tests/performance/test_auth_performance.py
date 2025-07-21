@@ -1,13 +1,14 @@
 """Performance tests for authentication middleware."""
 
-import pytest
-import time
 import asyncio
+import time
 from concurrent.futures import ThreadPoolExecutor
+
+import pytest
 from fastapi.testclient import TestClient
 
 from src.api.server import create_fastapi_app
-from src.config.schemas.server_schema import ServerConfig, AuthConfig
+from src.config.schemas.server_schema import AuthConfig, ServerConfig
 from src.infrastructure.auth.strategies import BearerTokenStrategy
 
 
@@ -201,8 +202,9 @@ class TestAuthenticationPerformance:
 
     def test_memory_usage_stability(self, auth_client_and_token):
         """Test memory usage stability under load."""
-        import psutil
         import os
+
+        import psutil
 
         client, token = auth_client_and_token
         headers = {"Authorization": f"Bearer {token}"}

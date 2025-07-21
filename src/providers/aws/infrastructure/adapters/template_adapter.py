@@ -6,17 +6,20 @@ consolidating validation, field extension, and reference resolution.
 Follows the Adapter/Port pattern established in the codebase.
 """
 
-from typing import Dict, List, Optional, Any
 import re
-from src.domain.template.aggregate import Template
-from src.providers.aws.domain.template.value_objects import ProviderApi
-from src.domain.base.ports.template_adapter_port import TemplateAdapterPort
-from src.domain.base.ports.logging_port import LoggingPort
+from typing import Any, Dict, List, Optional
+
 from src.domain.base.ports.configuration_port import ConfigurationPort
+from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.base.ports.template_adapter_port import TemplateAdapterPort
+from src.domain.template.aggregate import Template
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
 from src.infrastructure.template.dtos import TemplateDTO
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
-from src.providers.aws.infrastructure.aws_client import AWSClient
+from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.providers.aws.exceptions.aws_exceptions import AWSValidationError
+from src.providers.aws.infrastructure.aws_client import AWSClient
 
 
 class AWSTemplateAdapter(TemplateAdapterPort):

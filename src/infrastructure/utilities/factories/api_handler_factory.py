@@ -11,8 +11,8 @@ Clean Architecture Compliance:
 - No Infrastructure -> Interface dependencies
 """
 
-from typing import Dict, Type, Optional, TYPE_CHECKING
 import importlib
+from typing import TYPE_CHECKING, Dict, Optional, Type
 
 # Domain imports (Clean Architecture compliant)
 from src.domain.base.dependency_injection import injectable

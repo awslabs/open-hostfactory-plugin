@@ -1,6 +1,7 @@
 """Request-related queries for CQRS implementation."""
 
 from typing import Optional
+
 from src.application.dto.base import BaseQuery
 
 

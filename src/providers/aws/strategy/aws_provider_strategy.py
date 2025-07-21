@@ -5,30 +5,36 @@ enabling AWS operations to be executed through the strategy pattern while
 maintaining all existing AWS functionality and adding new capabilities.
 """
 
-from typing import Dict, Any, List, Optional
 import time
+from typing import Any, Dict, List, Optional
 
-from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
-
-# Import strategy pattern interfaces
-from src.providers.base.strategy import (
-    ProviderStrategy,
-    ProviderOperation,
-    ProviderResult,
-    ProviderCapabilities,
-    ProviderHealthStatus,
-    ProviderOperationType,
-)
+from src.domain.base.ports import LoggingPort
 
 # Import AWS-specific components
 from src.providers.aws.configuration.config import AWSProviderConfig
-from src.providers.aws.managers.aws_resource_manager import AWSResourceManager
 from src.providers.aws.infrastructure.aws_client import AWSClient
-from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
 from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
-from src.providers.aws.infrastructure.handlers.run_instances_handler import RunInstancesHandler
-from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
+from src.providers.aws.infrastructure.handlers.run_instances_handler import (
+    RunInstancesHandler,
+)
+from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+    SpotFleetHandler,
+)
+from src.providers.aws.infrastructure.launch_template.manager import (
+    AWSLaunchTemplateManager,
+)
+from src.providers.aws.managers.aws_resource_manager import AWSResourceManager
+
+# Import strategy pattern interfaces
+from src.providers.base.strategy import (
+    ProviderCapabilities,
+    ProviderHealthStatus,
+    ProviderOperation,
+    ProviderOperationType,
+    ProviderResult,
+    ProviderStrategy,
+)
 
 
 @injectable
@@ -199,7 +205,9 @@ class AWSProviderStrategy(ProviderStrategy):
 
         try:
             # Import dry-run context here to avoid circular imports
-            from src.providers.aws.infrastructure.dry_run_adapter import aws_dry_run_context
+            from src.providers.aws.infrastructure.dry_run_adapter import (
+                aws_dry_run_context,
+            )
 
             # Execute operation within appropriate context
             if is_dry_run:
@@ -510,7 +518,7 @@ class AWSProviderStrategy(ProviderStrategy):
 
             # Create a minimal request object for the handler
             from src.domain.request.aggregate import Request
-            from src.domain.request.value_objects import RequestType, RequestId
+            from src.domain.request.value_objects import RequestId, RequestType
 
             # Create request with the resource IDs
             request = Request.create_new_request(
@@ -661,7 +669,9 @@ class AWSProviderStrategy(ProviderStrategy):
             # This is a lightweight operation to verify AWS access
             try:
                 # Import dry-run context here to avoid circular imports
-                from src.providers.aws.infrastructure.dry_run_adapter import aws_dry_run_context
+                from src.providers.aws.infrastructure.dry_run_adapter import (
+                    aws_dry_run_context,
+                )
 
                 with aws_dry_run_context():
                     # Simple STS call to verify credentials and connectivity
@@ -729,7 +739,9 @@ class AWSProviderStrategy(ProviderStrategy):
         """Get available AWS templates using scheduler strategy."""
         try:
             # Use scheduler strategy to load templates from configuration
-            from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
+            from src.infrastructure.registry.scheduler_registry import (
+                get_scheduler_registry,
+            )
 
             scheduler_registry = get_scheduler_registry()
             scheduler_strategy = scheduler_registry.get_active_strategy()

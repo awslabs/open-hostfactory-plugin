@@ -12,26 +12,23 @@ This unified handler provides:
 Follows DDD/SOLID/DRY principles while preserving domain exception semantics.
 """
 
-from typing import Dict, Any, Type, Callable, Optional, Union
-from functools import lru_cache
 import json
 import threading
 from datetime import datetime
+from functools import lru_cache
 from http import HTTPStatus
+from typing import Any, Callable, Dict, Optional, Type, Union
+
 from pydantic import Field
 
+from src.application.dto.base import BaseDTO
 from src.domain.base.exceptions import (
-    DomainException,
-    ValidationError,
-    EntityNotFoundError,
     BusinessRuleViolationError,
-    InfrastructureError,
     ConfigurationError,
-)
-from src.domain.template.exceptions import (
-    TemplateException,
-    TemplateNotFoundError,
-    TemplateValidationError,
+    DomainException,
+    EntityNotFoundError,
+    InfrastructureError,
+    ValidationError,
 )
 from src.domain.machine.exceptions import (
     MachineException,
@@ -43,8 +40,12 @@ from src.domain.request.exceptions import (
     RequestNotFoundError,
     RequestValidationError,
 )
+from src.domain.template.exceptions import (
+    TemplateException,
+    TemplateNotFoundError,
+    TemplateValidationError,
+)
 from src.infrastructure.logging.logger import get_logger
-from src.application.dto.base import BaseDTO
 
 
 class ErrorCategory:

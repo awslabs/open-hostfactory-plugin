@@ -1,10 +1,12 @@
 """Request validation utilities for API handlers."""
 
-from typing import Type, TypeVar, Dict, Any, Optional, Union, List
 import json
-from src.infrastructure.logging.logger import get_logger
-from src.infrastructure.error.decorators import handle_interface_exceptions
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+
 from pydantic import BaseModel, ValidationError
+
+from src.infrastructure.error.decorators import handle_interface_exceptions
+from src.infrastructure.logging.logger import get_logger
 
 # Type variable for Pydantic models
 T = TypeVar("T", bound=BaseModel)

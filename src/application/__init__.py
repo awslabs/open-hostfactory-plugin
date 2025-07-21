@@ -14,6 +14,6 @@ Each context contains:
 - service.py: Application service (orchestrates use cases)
 """
 
-from .dto.base import BaseDTO, BaseCommand, BaseQuery, BaseResponse
+from .dto.base import BaseCommand, BaseDTO, BaseQuery, BaseResponse
 
 __all__ = ["BaseDTO", "BaseCommand", "BaseQuery", "BaseResponse"]

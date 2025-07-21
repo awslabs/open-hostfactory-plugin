@@ -1,9 +1,10 @@
 """Base event classes and protocols - foundation for event-driven architecture."""
 
-from typing import Any, Dict, Protocol, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Protocol
 from uuid import uuid4
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DomainEvent(BaseModel):

@@ -1,19 +1,20 @@
 """AWS-specific value objects and domain extensions."""
 
-from typing import Any, Dict, ClassVar, List, Optional
 import re
 from enum import Enum
-from pydantic import field_validator, model_validator, ConfigDict
+from typing import Any, ClassVar, Dict, List, Optional
+
+from pydantic import ConfigDict, field_validator, model_validator
 
 # Import core domain primitives
 from src.domain.base.value_objects import (
-    ValueObject,
-    ResourceId,
-    InstanceType,
-    Tags,
     ARN,
     AllocationStrategy,
+    InstanceType,
     PriceType,
+    ResourceId,
+    Tags,
+    ValueObject,
 )
 
 # Import domain protocols

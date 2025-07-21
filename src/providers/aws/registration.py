@@ -1,16 +1,18 @@
 """AWS Provider Registration - Register AWS provider with the provider registry."""
 
-from typing import Any, Dict, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 # Use TYPE_CHECKING to avoid direct infrastructure import
 if TYPE_CHECKING:
-    from src.infrastructure.registry.provider_registry import ProviderRegistry
     from src.domain.base.ports import LoggingPort
+    from src.infrastructure.registry.provider_registry import ProviderRegistry
 
 # Template extension imports for our new functionality
 from src.domain.template.extensions import TemplateExtensionRegistry
 from src.domain.template.factory import TemplateFactory
-from src.providers.aws.configuration.template_extension import AWSTemplateExtensionConfig
+from src.providers.aws.configuration.template_extension import (
+    AWSTemplateExtensionConfig,
+)
 
 
 def create_aws_strategy(provider_config: Any) -> Any:
@@ -23,9 +25,9 @@ def create_aws_strategy(provider_config: Any) -> Any:
     Returns:
         Configured AWSProviderStrategy instance
     """
-    from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-    from src.providers.aws.configuration.config import AWSProviderConfig
     from src.infrastructure.adapters.logging_adapter import LoggingAdapter
+    from src.providers.aws.configuration.config import AWSProviderConfig
+    from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
     try:
         # Handle both ProviderInstanceConfig object and raw dict
@@ -180,20 +182,21 @@ def _register_aws_template_store(logger: "LoggingPort" = None) -> None:
 def _register_aws_template_adapter(logger: "LoggingPort" = None) -> None:
     """Register AWS template adapter with the DI container."""
     try:
+        from src.domain.base.ports.template_adapter_port import TemplateAdapterPort
         from src.infrastructure.di.container import get_container
+
         from .infrastructure.adapters.template_adapter import (
             AWSTemplateAdapter,
             create_aws_template_adapter,
         )
-        from src.domain.base.ports.template_adapter_port import TemplateAdapterPort
 
         container = get_container()
 
         # Register AWS template adapter factory
         def aws_template_adapter_factory(container_instance):
             """Factory function to create AWS template adapter."""
+            from src.domain.base.ports import ConfigurationPort, LoggingPort
             from src.providers.aws.infrastructure.aws_client import AWSClient
-            from src.domain.base.ports import LoggingPort, ConfigurationPort
 
             aws_client = container_instance.get(AWSClient)
             logger_port = container_instance.get(LoggingPort)
@@ -257,7 +260,7 @@ def register_aws_provider_with_di(provider_instance, container) -> bool:
 
 def _register_aws_components_with_di(container, aws_config, instance_name: str) -> None:
     """Register AWS components with DI container for specific instance."""
-    from src.domain.base.ports import LoggingPort, ConfigurationPort
+    from src.domain.base.ports import ConfigurationPort, LoggingPort
     from src.providers.aws.infrastructure.aws_client import AWSClient
 
     # Register AWS client for this instance with instance-specific configuration
@@ -436,12 +439,12 @@ def register_aws_services_with_di(container) -> None:
 
     try:
         # Register AWS-specific services that need to be available globally
-        from src.providers.aws.infrastructure.template.caching_ami_resolver import (
-            CachingAMIResolver,
-        )
         from src.domain.base.ports.template_resolver_port import TemplateResolverPort
         from src.providers.aws.infrastructure.launch_template.manager import (
             AWSLaunchTemplateManager,
+        )
+        from src.providers.aws.infrastructure.template.caching_ami_resolver import (
+            CachingAMIResolver,
         )
 
         # Register AMI resolver if not already registered

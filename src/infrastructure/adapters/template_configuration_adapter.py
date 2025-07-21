@@ -1,9 +1,12 @@
 """Template configuration adapter implementing TemplateConfigurationPort."""
 
-from typing import List, Optional, Dict, Any, TYPE_CHECKING
-from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
 from src.domain.base.ports.logging_port import LoggingPort
-from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
+from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+from src.infrastructure.template.configuration_manager import (
+    TemplateConfigurationManager,
+)
 
 # Use TYPE_CHECKING to avoid direct domain import
 if TYPE_CHECKING:

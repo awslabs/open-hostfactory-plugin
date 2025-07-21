@@ -5,7 +5,7 @@ Follows the same patterns as domain and infrastructure exceptions
 for consistency and proper error handling throughout the system.
 """
 
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
 
 
 class SDKError(Exception):

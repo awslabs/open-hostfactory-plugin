@@ -2,8 +2,8 @@
 
 import json
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, Type, TypeVar
 from enum import Enum
+from typing import Any, Dict, Optional, Type, TypeVar
 
 from src.infrastructure.logging.logger import get_logger
 

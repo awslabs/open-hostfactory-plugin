@@ -1,8 +1,9 @@
 """Mock provider for testing provider-agnostic functionality."""
 
-from typing import Dict, Any, List, Optional
-from src.infrastructure.interfaces.provider import ProviderPort, ProviderConfig
+from typing import Any, Dict, List, Optional
+
 from src.domain.base.value_objects import InstanceId
+from src.infrastructure.interfaces.provider import ProviderConfig, ProviderPort
 
 
 class MockProviderConfig(ProviderConfig):

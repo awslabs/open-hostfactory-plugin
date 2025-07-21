@@ -1,9 +1,11 @@
-from typing import Dict, Any, Optional, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import Field
+
+from src.application.dto.base import BaseDTO
 from src.domain.machine.aggregate import Machine
 from src.domain.machine.value_objects import MachineStatus
-from src.application.dto.base import BaseDTO
 
 
 class MachineDTO(BaseDTO):

@@ -1,9 +1,10 @@
 """DynamoDB conversion components for domain to DynamoDB mapping."""
 
-from typing import Dict, Any, Optional, List
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from boto3.dynamodb.conditions import Attr
 
 from src.infrastructure.logging.logger import get_logger

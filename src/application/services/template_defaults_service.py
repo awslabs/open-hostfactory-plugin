@@ -1,9 +1,10 @@
 """Template Defaults Service - Hierarchical template default resolution with domain extensions."""
 
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
+
 from src.config.manager import ConfigurationManager
-from src.domain.base.ports.logging_port import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports.logging_port import LoggingPort
 from src.domain.template.aggregate import Template
 from src.domain.template.extensions import TemplateExtensionRegistry
 from src.domain.template.factory import TemplateFactory, TemplateFactoryPort

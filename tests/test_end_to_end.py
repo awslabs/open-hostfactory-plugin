@@ -2,10 +2,11 @@
 End-to-end functionality tests for core Host Factory operations.
 """
 
-import pytest
-import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
+import sys
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -56,8 +57,8 @@ def test_aws_provider_adapter(mock_boto_client):
 
 def test_template_operations():
     """Test template-related operations."""
-    from src.domain.template.value_objects import TemplateId
     from src.domain.template.aggregate import Template
+    from src.domain.template.value_objects import TemplateId
 
     # Test template ID creation
     template_id = TemplateId(value="test-template")
@@ -78,8 +79,8 @@ def test_template_operations():
 
 def test_request_operations():
     """Test request-related operations."""
-    from src.domain.request.value_objects import RequestId
     from src.domain.request.aggregate import Request
+    from src.domain.request.value_objects import RequestId
 
     # Test request ID creation
     request_id = RequestId(value="req-12345678-1234-1234-1234-123456789012")
@@ -99,8 +100,8 @@ def test_request_operations():
 
 def test_machine_operations():
     """Test machine-related operations."""
-    from src.domain.machine.value_objects import MachineId
     from src.domain.machine.aggregate import Machine
+    from src.domain.machine.value_objects import MachineId
 
     # Test machine ID creation
     machine_id = MachineId(value="i-1234567890abcdef0")

@@ -2,8 +2,8 @@
 
 from .configuration_manager import TemplateConfigurationManager
 from .template_cache_service import (
-    TemplateCacheService,
     NoOpTemplateCacheService,
+    TemplateCacheService,
     create_template_cache_service,
 )
 from .template_repository_impl import TemplateRepositoryImpl

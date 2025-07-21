@@ -20,12 +20,12 @@ Test Categories:
 5. Performance Metrics Integration Tests
 """
 
-import sys
-import os
 import asyncio
-from typing import Dict, Any, List
-from unittest.mock import Mock, MagicMock, patch, AsyncMock
+import os
+import sys
 from datetime import datetime
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -109,10 +109,10 @@ def test_end_to_end_integration():
 def test_provider_strategy_integration():
     """Test that provider strategy properly integrates with consolidated handlers."""
     try:
-        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-        from src.providers.aws.domain.template.aggregate import AWSTemplate
         from src.domain.request.aggregate import Request
+        from src.providers.aws.domain.template.aggregate import AWSTemplate
         from src.providers.aws.domain.template.value_objects import ProviderApi
+        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
         print("   Testing provider strategy handler integration...")
 
@@ -185,12 +185,14 @@ def test_provider_strategy_integration():
 def test_launch_template_integration():
     """Test that launch template manager integrates properly with handlers."""
     try:
+        from src.domain.request.aggregate import Request
+        from src.providers.aws.domain.template.aggregate import AWSTemplate
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
         from src.providers.aws.infrastructure.launch_template.manager import (
             AWSLaunchTemplateManager,
         )
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-        from src.providers.aws.domain.template.aggregate import AWSTemplate
-        from src.domain.request.aggregate import Request
 
         print("   Testing launch template manager integration...")
 
@@ -289,12 +291,16 @@ def test_handler_routing():
     """Test that handlers are properly routed based on provider API."""
     try:
         from src.providers.aws.domain.template.value_objects import ProviderApi
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
-        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
+        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
+            EC2FleetHandler,
+        )
         from src.providers.aws.infrastructure.handlers.run_instances_handler import (
             RunInstancesHandler,
         )
-        from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         print("   Testing handler routing logic...")
 
@@ -357,10 +363,12 @@ def test_handler_routing():
 def test_domain_model_flow():
     """Test that AWSTemplate flows properly through the system."""
     try:
+        from src.domain.request.aggregate import Request
         from src.providers.aws.domain.template.aggregate import AWSTemplate
         from src.providers.aws.domain.template.value_objects import ProviderApi
-        from src.domain.request.aggregate import Request
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         print("   Testing domain model flow...")
 
@@ -441,9 +449,11 @@ def test_domain_model_flow():
 def test_error_handling_integration():
     """Test that unified error handling works across the integration."""
     try:
-        from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
         from src.providers.aws.exceptions.aws_exceptions import AWSValidationError
+        from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         print("   Testing error handling integration...")
 
@@ -511,7 +521,9 @@ def test_performance_metrics_integration():
     """Test that performance metrics work across the integration."""
     try:
         from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         print("   Testing performance metrics integration...")
 
@@ -568,10 +580,12 @@ def test_performance_metrics_integration():
 def test_full_end_to_end_flow():
     """Test the complete end-to-end flow with mocked dependencies."""
     try:
+        from src.domain.request.aggregate import Request
         from src.providers.aws.domain.template.aggregate import AWSTemplate
         from src.providers.aws.domain.template.value_objects import ProviderApi
-        from src.domain.request.aggregate import Request
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
         from src.providers.aws.infrastructure.launch_template.manager import (
             AWSLaunchTemplateManager,
         )

@@ -1,6 +1,6 @@
 """Collection validation utility functions."""
 
-from typing import Dict, List, Set, Tuple, Iterable, TypeVar, Callable, Union
+from typing import Callable, Dict, Iterable, List, Set, Tuple, TypeVar, Union
 
 T = TypeVar("T")
 

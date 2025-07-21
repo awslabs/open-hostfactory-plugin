@@ -1,8 +1,9 @@
 """Tests for template defaults hierarchical resolution."""
 
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
-from typing import Dict, Any
 
 from src.application.services.template_defaults_service import TemplateDefaultsService
 from src.config.manager import ConfigurationManager
@@ -314,7 +315,9 @@ class TestTemplateDefaultsIntegration:
 
     def test_template_configuration_manager_integration(self):
         """Test integration with template configuration manager."""
-        from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
+        from src.infrastructure.template.configuration_manager import (
+            TemplateConfigurationManager,
+        )
         from src.infrastructure.template.dtos import TemplateDTO
 
         # Create mock dependencies
@@ -340,9 +343,12 @@ class TestTemplateDefaultsIntegration:
         )
 
         # Create mock file metadata
-        from src.infrastructure.template.configuration_manager import TemplateFileMetadata
-        from pathlib import Path
         from datetime import datetime
+        from pathlib import Path
+
+        from src.infrastructure.template.configuration_manager import (
+            TemplateFileMetadata,
+        )
 
         file_metadata = TemplateFileMetadata(
             path=Path("/fake/path"),

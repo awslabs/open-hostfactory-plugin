@@ -2,41 +2,46 @@
 Dependency Injection Container Implementation
 """
 
-from typing import Dict, Any, Type, TypeVar, Optional, List, Set
 import threading
 import time
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Any, Dict, Iterator, List, Optional, Set, Type, TypeVar
 
 from src.domain.base.dependency_injection import (
     DependencyInjectionPort,
-    is_injectable,
-    get_injectable_metadata,
     InjectableMetadata,
+    get_injectable_metadata,
+    is_injectable,
     is_singleton,
 )
 from src.domain.base.di_contracts import (
-    DIContainerPort,
-    DependencyRegistration,
-    DIScope,
-    DILifecycle,
-    CQRSHandlerRegistrationPort,
-    DependencyResolutionError as DomainDependencyResolutionError,
     CircularDependencyError as DomainCircularDependencyError,
+)
+from src.domain.base.di_contracts import (
+    CQRSHandlerRegistrationPort,
+    DependencyRegistration,
     DependencyRegistrationError,
 )
-from src.domain.base.ports import ContainerPort
-from src.infrastructure.logging.logger import get_logger
-from src.infrastructure.di.exceptions import (
-    DependencyResolutionError,
-    UnregisteredDependencyError,
-    CircularDependencyError,
+from src.domain.base.di_contracts import (
+    DependencyResolutionError as DomainDependencyResolutionError,
 )
+from src.domain.base.di_contracts import (
+    DIContainerPort,
+    DILifecycle,
+    DIScope,
+)
+from src.domain.base.ports import ContainerPort
 from src.infrastructure.di.components import (
-    ServiceRegistry,
     CQRSHandlerRegistry,
     DependencyResolver,
+    ServiceRegistry,
 )
+from src.infrastructure.di.exceptions import (
+    CircularDependencyError,
+    DependencyResolutionError,
+    UnregisteredDependencyError,
+)
+from src.infrastructure.logging.logger import get_logger
 
 T = TypeVar("T")
 logger = get_logger(__name__)
@@ -349,9 +354,11 @@ def _create_configured_container() -> DIContainer:
 def _setup_cqrs_infrastructure(container: DIContainer) -> None:
     """Setup CQRS infrastructure: handler discovery and buses."""
     try:
-        from src.infrastructure.di.handler_discovery import create_handler_discovery_service
-        from src.infrastructure.di.buses import BusFactory
         from src.domain.base.ports import LoggingPort
+        from src.infrastructure.di.buses import BusFactory
+        from src.infrastructure.di.handler_discovery import (
+            create_handler_discovery_service,
+        )
 
         logger.info("Setting up CQRS infrastructure")
 
@@ -382,7 +389,7 @@ def _setup_cqrs_infrastructure(container: DIContainer) -> None:
         query_bus, command_bus = BusFactory.create_buses(container, logging_port)
 
         # Register buses as singletons
-        from src.infrastructure.di.buses import QueryBus, CommandBus
+        from src.infrastructure.di.buses import CommandBus, QueryBus
 
         container.register_instance(QueryBus, query_bus)
         container.register_instance(CommandBus, command_bus)
@@ -399,7 +406,9 @@ def _setup_cqrs_infrastructure(container: DIContainer) -> None:
 def _ensure_infrastructure_services(container: DIContainer) -> None:
     """Ensure infrastructure services are registered for CQRS setup."""
     try:
-        from src.infrastructure.di.infrastructure_services import register_infrastructure_services
+        from src.infrastructure.di.infrastructure_services import (
+            register_infrastructure_services,
+        )
 
         logger.debug("Registering infrastructure services for CQRS setup")
         register_infrastructure_services(container)

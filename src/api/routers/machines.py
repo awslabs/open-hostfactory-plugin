@@ -1,11 +1,15 @@
 """Machine management API routes."""
 
-from typing import Optional, List, Dict, Any
-from fastapi import APIRouter, Depends, Body, Query
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-from src.api.dependencies import get_request_machines_handler, get_return_machines_handler
+from src.api.dependencies import (
+    get_request_machines_handler,
+    get_return_machines_handler,
+)
 from src.infrastructure.error.decorators import handle_rest_exceptions
 
 router = APIRouter(prefix="/machines", tags=["Machines"])

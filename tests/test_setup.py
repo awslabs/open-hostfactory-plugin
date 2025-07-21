@@ -1,9 +1,10 @@
 """Basic setup tests to verify test environment is working."""
 
-import pytest
 import os
 import sys
 from pathlib import Path
+
+import pytest
 
 
 @pytest.mark.unit
@@ -32,15 +33,18 @@ def test_imports_work():
     """Test that basic imports work."""
     try:
         # Test domain imports
-        from src.domain.base.entity import Entity
-        from src.domain.base.value_objects import InstanceId, InstanceType
-
         # Test application imports - using modern CQRS handlers instead of ApplicationService
-        from src.application.commands.request_handlers import CreateMachineRequestHandler
-        from src.application.services.provider_capability_service import ProviderCapabilityService
+        from src.application.commands.request_handlers import (
+            CreateMachineRequestHandler,
+        )
+        from src.application.services.provider_capability_service import (
+            ProviderCapabilityService,
+        )
 
         # Test infrastructure imports
         from src.config.manager import ConfigurationManager
+        from src.domain.base.entity import Entity
+        from src.domain.base.value_objects import InstanceId, InstanceType
 
         # If we get here, imports work
         assert True

@@ -1,7 +1,8 @@
 """Integration tests for Storage Registry Pattern."""
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 
 from src.infrastructure.registry.storage_registry import (
     get_storage_registry,
@@ -22,7 +23,9 @@ class TestStorageRegistryIntegration:
 
     def test_repository_factory_uses_storage_registry(self):
         """Test that repository factory uses storage registry."""
-        from src.infrastructure.utilities.factories.repository_factory import RepositoryFactory
+        from src.infrastructure.utilities.factories.repository_factory import (
+            RepositoryFactory,
+        )
 
         # Mock configuration manager
         mock_config_manager = Mock()
@@ -61,8 +64,10 @@ class TestStorageRegistryIntegration:
 
     def test_di_container_uses_repository_factory(self):
         """Test that DI container uses repository factory."""
-        from src.infrastructure.di.infrastructure_services import _register_repository_services
         from src.infrastructure.di.container import DIContainer
+        from src.infrastructure.di.infrastructure_services import (
+            _register_repository_services,
+        )
 
         # Mock container
         mock_container = Mock(spec=DIContainer)
@@ -97,7 +102,9 @@ class TestStorageRegistryIntegration:
 
     def test_unit_of_work_creation_via_registry(self):
         """Test unit of work creation via storage registry."""
-        from src.infrastructure.utilities.factories.repository_factory import RepositoryFactory
+        from src.infrastructure.utilities.factories.repository_factory import (
+            RepositoryFactory,
+        )
 
         # Mock configuration manager
         mock_config_manager = Mock()
@@ -170,7 +177,9 @@ class TestStorageRegistryIntegration:
 
     def test_end_to_end_repository_creation(self):
         """Test end-to-end repository creation flow."""
-        from src.infrastructure.utilities.factories.repository_factory import RepositoryFactory
+        from src.infrastructure.utilities.factories.repository_factory import (
+            RepositoryFactory,
+        )
 
         registry = get_storage_registry()
 

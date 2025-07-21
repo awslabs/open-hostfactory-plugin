@@ -1,6 +1,7 @@
 """Provider test scenarios for comprehensive testing."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from src.domain.base.value_objects import InstanceId
 
 

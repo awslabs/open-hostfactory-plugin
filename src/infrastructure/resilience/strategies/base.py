@@ -1,7 +1,7 @@
 """Base strategy interface for retry mechanisms."""
 
-from typing import Protocol
 from abc import abstractmethod
+from typing import Protocol
 
 
 class RetryStrategy(Protocol):

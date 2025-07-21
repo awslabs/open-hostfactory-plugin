@@ -5,9 +5,10 @@ This test verifies that the CLI migration from monolithic run.py
 to modular CLI package is working correctly.
 """
 
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 # Add project root to path
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -21,7 +22,12 @@ class TestCLIMigration:
     def test_cli_modules_can_be_imported(self):
         """Test that all CLI modules can be imported successfully."""
         # Test main CLI module
-        from src.cli.main import main, parse_args, execute_command, convert_to_legacy_args
+        from src.cli.main import (
+            convert_to_legacy_args,
+            execute_command,
+            main,
+            parse_args,
+        )
 
         assert callable(main)
         assert callable(parse_args)
@@ -29,7 +35,11 @@ class TestCLIMigration:
         assert callable(convert_to_legacy_args)
 
         # Test formatters module
-        from src.cli.formatters import format_output, format_table_output, format_list_output
+        from src.cli.formatters import (
+            format_list_output,
+            format_output,
+            format_table_output,
+        )
 
         assert callable(format_output)
         assert callable(format_table_output)

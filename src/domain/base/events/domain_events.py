@@ -1,10 +1,11 @@
 """Domain events - Request, Machine, and Template business events."""
 
-from typing import Any, Dict, Optional, List
 from datetime import datetime
-from pydantic import Field
-from .base_events import DomainEvent, StatusChangeEvent
+from typing import Any, Dict, List, Optional
 
+from pydantic import Field
+
+from .base_events import DomainEvent, StatusChangeEvent
 
 # =============================================================================
 # REQUEST DOMAIN EVENTS

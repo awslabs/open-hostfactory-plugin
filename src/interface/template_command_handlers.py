@@ -8,20 +8,25 @@ following the same pattern as other entities in the system.
 """
 
 from __future__ import annotations
-from typing import Dict, Any
-import argparse
 
-from src.infrastructure.error.decorators import handle_interface_exceptions
-from src.infrastructure.di.container import get_container
-from src.infrastructure.di.buses import CommandBus, QueryBus
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.application.dto.queries import GetTemplateQuery, ListTemplatesQuery, ValidateTemplateQuery
+import argparse
+from typing import Any, Dict
+
+from src.application.dto.queries import (
+    GetTemplateQuery,
+    ListTemplatesQuery,
+    ValidateTemplateQuery,
+)
 from src.application.template.commands import (
     CreateTemplateCommand,
-    UpdateTemplateCommand,
     DeleteTemplateCommand,
+    UpdateTemplateCommand,
     ValidateTemplateCommand,
 )
+from src.domain.base.ports.scheduler_port import SchedulerPort
+from src.infrastructure.di.buses import CommandBus, QueryBus
+from src.infrastructure.di.container import get_container
+from src.infrastructure.error.decorators import handle_interface_exceptions
 
 
 @handle_interface_exceptions(context="list_templates", interface_type="cli")
@@ -367,8 +372,9 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
         # Check if template file is provided
         if hasattr(args, "template_file") and args.template_file:
             import json
-            import yaml
             from pathlib import Path
+
+            import yaml
 
             template_file = Path(args.template_file)
             if not template_file.exists():

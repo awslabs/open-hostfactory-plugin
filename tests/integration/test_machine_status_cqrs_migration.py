@@ -5,18 +5,19 @@ This test suite verifies that the migration from MachineStatusConversionService
 to CQRS handlers maintains the same functionality.
 """
 
-import pytest
 from unittest.mock import Mock, patch
 
-from src.application.machine.commands import (
-    ConvertMachineStatusCommand,
-    ConvertBatchMachineStatusCommand,
-    ValidateProviderStateCommand,
-)
+import pytest
+
 from src.application.commands.machine_handlers import (
-    ConvertMachineStatusCommandHandler,
     ConvertBatchMachineStatusCommandHandler,
+    ConvertMachineStatusCommandHandler,
     ValidateProviderStateCommandHandler,
+)
+from src.application.machine.commands import (
+    ConvertBatchMachineStatusCommand,
+    ConvertMachineStatusCommand,
+    ValidateProviderStateCommand,
 )
 from src.domain.machine.value_objects import MachineStatus
 
@@ -191,8 +192,8 @@ class TestMachineStatusCQRSMigration:
 
     def test_performance_comparison(self, convert_handler):
         """Test performance of CQRS handlers vs original service."""
-        import time
         import asyncio
+        import time
 
         # Test multiple conversions
         commands = [

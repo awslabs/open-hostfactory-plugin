@@ -2,11 +2,12 @@
 
 import asyncio
 import sys
-from typing import Dict, Any
+from typing import Any, Dict
 
+from src.infrastructure.di.container import get_container
 from src.infrastructure.error.decorators import handle_interface_exceptions
 from src.infrastructure.logging.logger import get_logger
-from src.infrastructure.di.container import get_container
+
 from .core import OpenHFPluginMCPServer
 
 

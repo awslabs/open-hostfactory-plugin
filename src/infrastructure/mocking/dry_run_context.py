@@ -11,8 +11,8 @@ Architecture:
 - Thread-safe for concurrent operations
 """
 
-from contextlib import contextmanager
 import threading
+from contextlib import contextmanager
 from typing import Generator
 
 # Thread-local storage for dry-run state

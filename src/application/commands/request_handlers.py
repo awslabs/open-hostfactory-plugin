@@ -1,25 +1,31 @@
 """Command handlers for request operations."""
 
 from typing import Any, Dict, Optional
+
 from src.application.base.handlers import BaseCommandHandler
 from src.application.decorators import command_handler
 from src.application.dto.commands import (
+    CancelRequestCommand,
+    CompleteRequestCommand,
     CreateRequestCommand,
     CreateReturnRequestCommand,
     UpdateRequestStatusCommand,
-    CancelRequestCommand,
-    CompleteRequestCommand,
 )
-from src.domain.request.repository import RequestRepository
-from src.domain.machine.repository import MachineRepository
-from src.domain.base.exceptions import EntityNotFoundError
-from src.domain.base.ports import EventPublisherPort, LoggingPort, ContainerPort, ErrorHandlingPort
-from src.domain.base import UnitOfWorkFactory
-from src.application.services.provider_selection_service import ProviderSelectionService
 from src.application.services.provider_capability_service import (
     ProviderCapabilityService,
     ValidationLevel,
 )
+from src.application.services.provider_selection_service import ProviderSelectionService
+from src.domain.base import UnitOfWorkFactory
+from src.domain.base.exceptions import EntityNotFoundError
+from src.domain.base.ports import (
+    ContainerPort,
+    ErrorHandlingPort,
+    EventPublisherPort,
+    LoggingPort,
+)
+from src.domain.machine.repository import MachineRepository
+from src.domain.request.repository import RequestRepository
 from src.infrastructure.di.buses import QueryBus
 from src.providers.base.strategy import ProviderContext
 
@@ -285,10 +291,11 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
 
     def _create_machine_aggregate(self, instance_data: Dict[str, Any], request, template_id: str):
         """Create machine aggregate from instance data."""
-        from src.domain.machine.aggregate import Machine
-        from src.domain.base.value_objects import InstanceId, InstanceType
-        from src.domain.machine.machine_status import MachineStatus
         from datetime import datetime
+
+        from src.domain.base.value_objects import InstanceId, InstanceType
+        from src.domain.machine.aggregate import Machine
+        from src.domain.machine.machine_status import MachineStatus
 
         # Parse launch_time if it's a string
         launch_time = instance_data.get("launch_time")
@@ -316,7 +323,10 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         """Execute actual provisioning via selected provider using existing ProviderContext."""
         try:
             # Import required types (using existing imports)
-            from src.providers.base.strategy import ProviderOperation, ProviderOperationType
+            from src.providers.base.strategy import (
+                ProviderOperation,
+                ProviderOperationType,
+            )
 
             # Create provider operation using existing pattern
             operation = ProviderOperation(
@@ -426,11 +436,10 @@ class CreateReturnRequestHandler(BaseCommandHandler[CreateReturnRequestCommand, 
 
         try:
             # Create return request aggregate
-            from src.domain.request.aggregate import Request
-            from src.domain.request.value_objects import RequestType
-
             # Get provider type from configuration using injected container
             from src.config.manager import ConfigurationManager
+            from src.domain.request.aggregate import Request
+            from src.domain.request.value_objects import RequestType
 
             config_manager = self._container.get(ConfigurationManager)
             provider_type = config_manager.get("provider.type", "aws")

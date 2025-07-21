@@ -5,21 +5,22 @@ This module provides an adapter for AWS-specific machine operations.
 It extracts AWS-specific logic from the domain layer.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.domain.base.value_objects import InstanceType
 from src.domain.machine.aggregate import Machine
 from src.domain.machine.value_objects import MachineStatus, PriceType
-from src.domain.base.value_objects import InstanceType
 from src.providers.aws.domain.template.value_objects import ProviderApi
-from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.exceptions.aws_exceptions import (
+    AWSError,
     EC2InstanceNotFoundError,
-    ResourceCleanupError,
     NetworkError,
     RateLimitError,
-    AWSError,
+    ResourceCleanupError,
 )
-from src.domain.base.ports import LoggingPort
-from src.domain.base.dependency_injection import injectable
+from src.providers.aws.infrastructure.aws_client import AWSClient
 
 
 @injectable

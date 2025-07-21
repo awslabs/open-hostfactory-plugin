@@ -1,10 +1,11 @@
 """Core domain interfaces and abstract base classes."""
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List, Optional, Any, Protocol
 
-from .entity import Entity, AggregateRoot
+from abc import ABC, abstractmethod
+from typing import Any, Generic, List, Optional, Protocol, TypeVar
+
+from .entity import AggregateRoot, Entity
 
 T = TypeVar("T")  # Generic type for domain entities/aggregates
 A = TypeVar("A", bound=AggregateRoot)

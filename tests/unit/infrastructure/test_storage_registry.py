@@ -1,17 +1,18 @@
 """Unit tests for Storage Registry (Corrected Architecture)."""
 
-import pytest
-from unittest.mock import Mock, patch
 import threading
+from unittest.mock import Mock, patch
 
+import pytest
+
+from src.domain.base.exceptions import ConfigurationError
 from src.infrastructure.registry.storage_registry import (
-    StorageRegistry,
     StorageRegistration,
+    StorageRegistry,
     UnsupportedStorageError,
     get_storage_registry,
     reset_storage_registry,
 )
-from src.domain.base.exceptions import ConfigurationError
 
 
 class TestStorageRegistration:

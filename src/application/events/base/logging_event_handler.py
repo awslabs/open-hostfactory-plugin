@@ -8,6 +8,7 @@ Template Method pattern and provides consistent message formatting.
 
 from abc import abstractmethod
 from typing import Optional
+
 from .event_handler import EventHandler
 
 # Import types - using string imports to avoid circular dependencies

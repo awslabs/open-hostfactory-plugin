@@ -5,16 +5,20 @@ This test runs the actual CLI command and verifies that the logging output
 matches our expectations and doesn't contain any of the issues we fixed.
 """
 
-import pytest
-import subprocess
-import re
 import os
-from typing import List, Dict
-from moto import mock_aws
+import re
+import subprocess
+from typing import Dict, List
+
 import boto3
+import pytest
+from moto import mock_aws
 
 # Use existing test fixtures
-from tests.fixtures.environment.mock_env_vars import complete_test_environment, mock_aws_credentials
+from tests.fixtures.environment.mock_env_vars import (
+    complete_test_environment,
+    mock_aws_credentials,
+)
 
 
 class TestLoggingIntegration:

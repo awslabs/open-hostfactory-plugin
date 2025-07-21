@@ -1,6 +1,7 @@
 """Core provider interfaces - contracts that all providers must implement."""
 
-from typing import Dict, Any, List, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+
 from pydantic import BaseModel, ConfigDict
 
 from src.domain.base.value_objects import InstanceId

@@ -1,11 +1,12 @@
 """SQL Unit of Work implementation using simplified repositories."""
 
 from typing import Dict, Optional
-from sqlalchemy.orm import Session
-from sqlalchemy import Engine
 
-from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
+
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
 
 # Import new simplified repositories
 from src.infrastructure.persistence.repositories.machine_repository import (

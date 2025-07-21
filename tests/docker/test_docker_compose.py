@@ -1,10 +1,11 @@
 """Tests for Docker Compose configurations."""
 
-import pytest
 import subprocess
-import yaml
 import time
 from pathlib import Path
+
+import pytest
+import yaml
 
 
 class TestDockerCompose:

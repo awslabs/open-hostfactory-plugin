@@ -1,6 +1,7 @@
 """Core resource manager interface - provider-agnostic resource management."""
 
-from typing import Dict, Any, List, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+
 from pydantic import BaseModel, ConfigDict
 
 from src.domain.base.value_objects import ResourceId

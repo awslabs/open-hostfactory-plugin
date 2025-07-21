@@ -26,30 +26,33 @@ Note:
     launches and is suitable for large-scale, complex deployments.
 """
 
-from typing import Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List
+
 from botocore.exceptions import ClientError
 
-from src.domain.request.aggregate import Request
-from src.providers.aws.domain.template.value_objects import ProviderApi, AWSFleetType
-from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-from src.providers.aws.exceptions.aws_exceptions import (
-    AWSValidationError,
-    AWSEntityNotFoundError,
-    AWSInfrastructureError,
-)
-from src.infrastructure.resilience import CircuitBreakerOpenError
-from src.providers.aws.utilities.aws_operations import AWSOperations
-from src.domain.base.ports import LoggingPort
-from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
-from src.infrastructure.di.container import get_container
-from src.infrastructure.di.buses import QueryBus
 from src.application.dto.queries import GetTemplateQuery
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.domain.request.aggregate import Request
+from src.infrastructure.di.buses import QueryBus
+from src.infrastructure.di.container import get_container
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
-from src.providers.aws.infrastructure.launch_template.manager import AWSLaunchTemplateManager
-from src.providers.aws.domain.template.aggregate import AWSTemplate
+from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
+from src.infrastructure.resilience import CircuitBreakerOpenError
 from src.infrastructure.utilities.common.serialization import serialize_enum
+from src.providers.aws.domain.template.aggregate import AWSTemplate
+from src.providers.aws.domain.template.value_objects import AWSFleetType, ProviderApi
+from src.providers.aws.exceptions.aws_exceptions import (
+    AWSEntityNotFoundError,
+    AWSInfrastructureError,
+    AWSValidationError,
+)
+from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
+from src.providers.aws.infrastructure.launch_template.manager import (
+    AWSLaunchTemplateManager,
+)
+from src.providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable

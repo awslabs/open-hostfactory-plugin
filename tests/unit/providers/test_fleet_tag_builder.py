@@ -1,12 +1,13 @@
 """Unit tests for FleetTagBuilder utility."""
 
-import pytest
 from datetime import datetime
 from unittest.mock import Mock
 
-from src.providers.aws.infrastructure.handlers.components import FleetTagBuilder
+import pytest
+
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
+from src.providers.aws.infrastructure.handlers.components import FleetTagBuilder
 
 
 @pytest.mark.unit

@@ -10,7 +10,7 @@ from typing import Optional
 from src.application.base.event_handlers import BaseLoggingEventHandler
 from src.application.events.decorators import event_handler
 from src.domain.base.events import DomainEvent
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort, EventPublisherPort
+from src.domain.base.ports import ErrorHandlingPort, EventPublisherPort, LoggingPort
 
 
 @event_handler("RequestCreatedEvent")

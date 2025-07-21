@@ -1,20 +1,21 @@
 """SQL storage strategy implementation using componentized architecture."""
 
-from typing import Dict, Any, List, Optional
 from contextlib import contextmanager
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy import text
 
-from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
-from src.infrastructure.persistence.exceptions import PersistenceError
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
 
 # Import components
 from src.infrastructure.persistence.components import (
+    LockManager,
     SQLConnectionManager,
     SQLQueryBuilder,
     SQLSerializer,
-    LockManager,
 )
+from src.infrastructure.persistence.exceptions import PersistenceError
 
 
 class SQLStorageStrategy(BaseStorageStrategy):

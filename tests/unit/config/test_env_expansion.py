@@ -1,10 +1,11 @@
 """Tests for environment variable expansion utilities."""
 
 import os
-import pytest
 from unittest.mock import patch
 
-from src.config.utils.env_expansion import expand_env_vars, expand_config_env_vars
+import pytest
+
+from src.config.utils.env_expansion import expand_config_env_vars, expand_env_vars
 
 
 class TestEnvironmentVariableExpansion:

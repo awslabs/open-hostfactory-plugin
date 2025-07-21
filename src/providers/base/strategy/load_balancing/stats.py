@@ -1,8 +1,8 @@
 """Load balancing statistics tracking."""
 
+from collections import deque
 from dataclasses import dataclass
 from typing import Optional
-from collections import deque
 
 
 @dataclass

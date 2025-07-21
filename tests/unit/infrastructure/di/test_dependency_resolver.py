@@ -1,20 +1,21 @@
 """Unit tests for DependencyResolver component."""
 
-import pytest
 import threading
-from typing import Type, Optional, Set
-from unittest.mock import Mock, MagicMock
+from typing import Optional, Set, Type
+from unittest.mock import MagicMock, Mock
 
+import pytest
+
+from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
+from src.infrastructure.di.components.cqrs_registry import CQRSHandlerRegistry
 from src.infrastructure.di.components.dependency_resolver import DependencyResolver
 from src.infrastructure.di.components.service_registry import ServiceRegistry
-from src.infrastructure.di.components.cqrs_registry import CQRSHandlerRegistry
-from src.domain.base.di_contracts import DependencyRegistration, DIScope, DILifecycle
 from src.infrastructure.di.exceptions import (
-    DependencyResolutionError,
     CircularDependencyError,
-    UntypedParameterError,
-    InstantiationError,
+    DependencyResolutionError,
     FactoryError,
+    InstantiationError,
+    UntypedParameterError,
 )
 
 

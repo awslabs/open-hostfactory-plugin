@@ -1,14 +1,16 @@
 """Template repository implementation using storage strategy composition."""
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from src.domain.template.repository import TemplateRepository as TemplateRepositoryInterface
 from src.domain.template.aggregate import Template
+from src.domain.template.repository import (
+    TemplateRepository as TemplateRepositoryInterface,
+)
 from src.domain.template.value_objects import TemplateId
-from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
-from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
+from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
 
 
 class TemplateSerializer:
@@ -21,8 +23,10 @@ class TemplateSerializer:
         # Get defaults service from DI container if not provided
         if not self.defaults_service:
             try:
+                from src.domain.template.ports.template_defaults_port import (
+                    TemplateDefaultsPort,
+                )
                 from src.infrastructure.di.container import get_container
-                from src.domain.template.ports.template_defaults_port import TemplateDefaultsPort
 
                 container = get_container()
                 self.defaults_service = container.get(TemplateDefaultsPort)

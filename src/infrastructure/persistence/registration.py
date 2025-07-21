@@ -27,7 +27,9 @@ def register_all_storage_types() -> None:
 
     # Register JSON storage
     try:
-        from src.infrastructure.persistence.json.registration import register_json_storage
+        from src.infrastructure.persistence.json.registration import (
+            register_json_storage,
+        )
 
         register_json_storage()
         registered_types.append("json")
@@ -49,7 +51,9 @@ def register_all_storage_types() -> None:
 
     # Register DynamoDB storage
     try:
-        from src.providers.aws.persistence.dynamodb.registration import register_dynamodb_storage
+        from src.providers.aws.persistence.dynamodb.registration import (
+            register_dynamodb_storage,
+        )
 
         register_dynamodb_storage()
         registered_types.append("dynamodb")
@@ -94,11 +98,15 @@ def register_storage_type_on_demand(storage_type: str) -> bool:
 
     try:
         if storage_type == "json":
-            from src.infrastructure.persistence.json.registration import register_json_storage
+            from src.infrastructure.persistence.json.registration import (
+                register_json_storage,
+            )
 
             register_json_storage()
         elif storage_type == "sql":
-            from src.infrastructure.persistence.sql.registration import register_sql_storage
+            from src.infrastructure.persistence.sql.registration import (
+                register_sql_storage,
+            )
 
             register_sql_storage()
         elif storage_type == "dynamodb":
@@ -129,7 +137,9 @@ def register_minimal_storage_types() -> None:
 
     # Register only JSON storage (lightweight, always available)
     try:
-        from src.infrastructure.persistence.json.registration import register_json_storage
+        from src.infrastructure.persistence.json.registration import (
+            register_json_storage,
+        )
 
         register_json_storage()
         logger.info("Minimal storage registration complete: json")
@@ -165,7 +175,9 @@ def get_available_storage_types() -> list:
 
     # Check DynamoDB storage availability
     try:
-        from src.providers.aws.persistence.dynamodb.strategy import DynamoDBStorageStrategy
+        from src.providers.aws.persistence.dynamodb.strategy import (
+            DynamoDBStorageStrategy,
+        )
 
         available_types.append("dynamodb")
     except ImportError:
@@ -201,11 +213,15 @@ def register_storage_type(storage_type: str) -> bool:
 
     try:
         if storage_type == "json":
-            from src.infrastructure.persistence.json.registration import register_json_storage
+            from src.infrastructure.persistence.json.registration import (
+                register_json_storage,
+            )
 
             register_json_storage()
         elif storage_type == "sql":
-            from src.infrastructure.persistence.sql.registration import register_sql_storage
+            from src.infrastructure.persistence.sql.registration import (
+                register_sql_storage,
+            )
 
             register_sql_storage()
         elif storage_type == "dynamodb":

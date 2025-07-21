@@ -1,10 +1,11 @@
 """Domain port for scheduler-specific operations."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
-from src.domain.template.aggregate import Template
-from src.domain.request.aggregate import Request
+from typing import Any, Dict, List
+
 from src.domain.machine.aggregate import Machine
+from src.domain.request.aggregate import Request
+from src.domain.template.aggregate import Template
 
 
 class SchedulerPort(ABC):

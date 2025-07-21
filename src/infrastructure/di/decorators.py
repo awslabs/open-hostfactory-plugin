@@ -5,10 +5,10 @@ This decorator enables classes to automatically resolve their dependencies
 from the DI container without requiring explicit factory functions.
 """
 
-from typing import Type, TypeVar, get_type_hints, get_origin, get_args, Union, Any, Dict
-from functools import wraps
 import inspect
 import logging
+from functools import wraps
+from typing import Any, Dict, Type, TypeVar, Union, get_args, get_origin, get_type_hints
 
 T = TypeVar("T")
 

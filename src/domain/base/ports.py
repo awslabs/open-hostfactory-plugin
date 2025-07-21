@@ -1,6 +1,6 @@
 """Domain ports - interfaces for external dependencies."""
 
-from typing import Dict, Any, Optional, Protocol
+from typing import Any, Dict, Optional, Protocol
 
 
 class ConfigurationPort(Protocol):

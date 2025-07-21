@@ -1,6 +1,7 @@
 """System-level queries for administrative operations."""
 
-from typing import Optional, Any, Dict
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 from src.application.interfaces.command_query import Query

@@ -6,7 +6,7 @@ It follows the Port-Adapter pattern from Hexagonal Architecture (Ports and Adapt
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template

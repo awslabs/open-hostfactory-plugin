@@ -1,15 +1,16 @@
 """Tests for base registry and scheduler registry."""
 
-import pytest
 from unittest.mock import Mock
 
-from src.infrastructure.registry.base_registry import BaseRegistry, BaseRegistration
+import pytest
+
+from src.domain.base.exceptions import ConfigurationError
+from src.infrastructure.registry.base_registry import BaseRegistration, BaseRegistry
 from src.infrastructure.registry.scheduler_registry import (
     SchedulerRegistry,
-    get_scheduler_registry,
     UnsupportedSchedulerError,
+    get_scheduler_registry,
 )
-from src.domain.base.exceptions import ConfigurationError
 
 
 class TestBaseRegistry:

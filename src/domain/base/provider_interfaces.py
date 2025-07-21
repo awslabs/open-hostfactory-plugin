@@ -1,9 +1,9 @@
 """Provider interfaces for domain layer - comprehensive provider abstraction."""
 
 from abc import ABC
+from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional, Protocol
-from dataclasses import dataclass
 
 
 class ProviderType(str, Enum):

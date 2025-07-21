@@ -1,7 +1,9 @@
 """Integration tests for provider strategy system."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
+
 from src.config.managers.configuration_manager import ConfigurationManager
 from src.config.managers.type_converter import ConfigTypeConverter
 from src.providers.aws.configuration.config import AWSProviderConfig

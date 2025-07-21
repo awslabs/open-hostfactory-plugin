@@ -1,11 +1,12 @@
 """End-to-end integration tests for configuration-driven provider system."""
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+
+import pytest
 
 from src.bootstrap import Application
 from src.config.manager import ConfigurationManager
@@ -181,8 +182,11 @@ class TestConfigurationIntegration:
 
     def test_provider_strategy_factory_integration(self):
         """Test provider strategy factory integration with configuration."""
-        from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
         from unittest.mock import Mock
+
+        from src.infrastructure.factories.provider_strategy_factory import (
+            ProviderStrategyFactory,
+        )
 
         # Create configuration
         config_data = {
@@ -224,8 +228,11 @@ class TestConfigurationIntegration:
 
     def test_configuration_validation_e2e(self):
         """Test end-to-end configuration validation."""
-        from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
         from unittest.mock import Mock
+
+        from src.infrastructure.factories.provider_strategy_factory import (
+            ProviderStrategyFactory,
+        )
 
         # Test valid configuration
         valid_config = {
@@ -391,8 +398,11 @@ class TestConfigurationIntegration:
         config_path = self.create_config_file(config_data)
 
         # Test template defaults service integration
-        from src.application.services.template_defaults_service import TemplateDefaultsService
         from unittest.mock import Mock
+
+        from src.application.services.template_defaults_service import (
+            TemplateDefaultsService,
+        )
 
         config_manager = ConfigurationManager(config_path)
         mock_logger = Mock()

@@ -1,11 +1,12 @@
 """Integration tests for API endpoints."""
 
-import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch
 
+import pytest
+from fastapi.testclient import TestClient
+
 from src.api.server import create_fastapi_app
-from src.config.schemas.server_schema import ServerConfig, AuthConfig
+from src.config.schemas.server_schema import AuthConfig, ServerConfig
 
 
 class TestAPIEndpoints:

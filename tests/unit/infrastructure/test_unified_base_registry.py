@@ -1,12 +1,26 @@
 """Tests for unified base registry supporting both single and multi choice patterns."""
 
-import pytest
 from unittest.mock import Mock
 
-from src.infrastructure.registry.base_registry import BaseRegistry, RegistryMode, BaseRegistration
-from src.infrastructure.registry.storage_registry import StorageRegistry, get_storage_registry
-from src.infrastructure.registry.scheduler_registry import SchedulerRegistry, get_scheduler_registry
-from src.infrastructure.registry.provider_registry import ProviderRegistry, get_provider_registry
+import pytest
+
+from src.infrastructure.registry.base_registry import (
+    BaseRegistration,
+    BaseRegistry,
+    RegistryMode,
+)
+from src.infrastructure.registry.provider_registry import (
+    ProviderRegistry,
+    get_provider_registry,
+)
+from src.infrastructure.registry.scheduler_registry import (
+    SchedulerRegistry,
+    get_scheduler_registry,
+)
+from src.infrastructure.registry.storage_registry import (
+    StorageRegistry,
+    get_storage_registry,
+)
 
 
 class TestUnifiedBaseRegistry:

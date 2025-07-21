@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-# Import DI container
-
 # Import configuration
 from src.config import AppConfig
 
 # Import logging
 from src.infrastructure.logging.logger import get_logger, setup_logging
+
+# Import DI container
+
+
 
 
 class Application:

@@ -1,15 +1,16 @@
 """Tests for ProviderCapabilityService."""
 
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 
 from src.application.services.provider_capability_service import (
     ProviderCapabilityService,
-    ValidationResult,
     ValidationLevel,
+    ValidationResult,
 )
-from src.domain.template.aggregate import Template
 from src.domain.base.ports import LoggingPort
+from src.domain.template.aggregate import Template
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
     ProviderOperationType,

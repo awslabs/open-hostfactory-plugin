@@ -1,15 +1,15 @@
 """Test script to verify the injectable decorator migration."""
 
-import unittest
-import sys
 import os
-from typing import Dict, Any
+import sys
+import unittest
+from typing import Any, Dict
 
 # Add src directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
+from src.domain.base.ports import ConfigurationPort, LoggingPort
 from src.infrastructure.di.container import DIContainer
-from src.domain.base.ports import LoggingPort, ConfigurationPort
 
 
 class MockConfigurationPort(ConfigurationPort):
@@ -111,7 +111,9 @@ class TestInjectableMigration(unittest.TestCase):
         )
 
         # Register AWS handler factory manually
-        from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
+        from src.providers.aws.infrastructure.aws_handler_factory import (
+            AWSHandlerFactory,
+        )
 
         self.container.register_singleton(
             AWSHandlerFactory,
@@ -146,7 +148,9 @@ class TestInjectableMigration(unittest.TestCase):
         self.assertIsNotNone(instance_manager)
 
         # Register and test AWSResourceManagerImpl
-        from src.providers.aws.managers.aws_resource_manager import AWSResourceManagerImpl
+        from src.providers.aws.managers.aws_resource_manager import (
+            AWSResourceManagerImpl,
+        )
 
         self.container.register_singleton(AWSResourceManagerImpl)
         resource_manager = self.container.get(AWSResourceManagerImpl)

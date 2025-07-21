@@ -1,9 +1,10 @@
 """Template repository interface - contract for template data access."""
 
-from typing import List, Optional, Dict, Any
 from abc import abstractmethod
+from typing import Any, Dict, List, Optional
 
 from src.domain.base.domain_interfaces import AggregateRepository
+
 from .aggregate import Template
 
 

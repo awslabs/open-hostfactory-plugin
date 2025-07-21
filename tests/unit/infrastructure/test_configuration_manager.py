@@ -1,12 +1,13 @@
 """Unit tests for ConfigurationManager."""
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 
 from src.config.manager import ConfigurationManager
 from src.config.schemas.app_schema import AppConfig

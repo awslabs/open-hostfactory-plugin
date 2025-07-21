@@ -2,9 +2,10 @@
 Basic functionality tests to verify core components work.
 """
 
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -12,11 +13,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 def test_decorator_imports():
     """Test that decorators can be imported without circular imports."""
-    from src.infrastructure.error.decorators import (
-        handle_provider_exceptions,
-        handle_infrastructure_exceptions,
-    )
     from src.domain.base.decorators import handle_domain_exceptions
+    from src.infrastructure.error.decorators import (
+        handle_infrastructure_exceptions,
+        handle_provider_exceptions,
+    )
 
     # Test that decorators are callable
     assert callable(handle_provider_exceptions)
@@ -38,9 +39,11 @@ def test_decorator_functionality():
 
 def test_core_imports():
     """Test that core application components can be imported."""
-    from src.application.services.provider_capability_service import ProviderCapabilityService
-    from src.providers.aws.strategy.aws_provider_adapter import AWSProviderAdapter
+    from src.application.services.provider_capability_service import (
+        ProviderCapabilityService,
+    )
     from src.config.manager import ConfigurationManager
+    from src.providers.aws.strategy.aws_provider_adapter import AWSProviderAdapter
 
     # Test that classes are importable
     assert ProviderCapabilityService is not None

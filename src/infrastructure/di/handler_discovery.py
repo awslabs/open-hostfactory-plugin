@@ -15,20 +15,25 @@ Layer Separation:
 - Infrastructure: Discovery, module scanning, DI registration
 """
 
-from typing import Type, Dict, Any, Optional
 import importlib
-import pkgutil
-import os
 import json
+import os
+import pkgutil
 import time
 from pathlib import Path
+from typing import Any, Dict, Optional, Type
 
 from src.application.decorators import (
-    get_registered_query_handlers,
-    get_registered_command_handlers,
     get_handler_registry_stats,
+    get_registered_command_handlers,
+    get_registered_query_handlers,
 )
-from src.application.interfaces.command_query import QueryHandler, CommandHandler, Query, Command
+from src.application.interfaces.command_query import (
+    Command,
+    CommandHandler,
+    Query,
+    QueryHandler,
+)
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
 

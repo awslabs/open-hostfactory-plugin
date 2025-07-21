@@ -1,10 +1,10 @@
 """Authentication strategy registry."""
 
-from typing import Dict, Type, Callable, Any
 import threading
+from typing import Any, Callable, Dict, Type
 
-from src.infrastructure.ports.auth import AuthPort
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.ports.auth import AuthPort
 
 
 class AuthRegistry:

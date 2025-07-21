@@ -1,11 +1,12 @@
 """Bearer token authentication strategy."""
 
 import time
-import jwt
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
-from src.infrastructure.ports.auth import AuthPort, AuthContext, AuthResult, AuthStatus
+import jwt
+
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.ports.auth import AuthContext, AuthPort, AuthResult, AuthStatus
 
 
 class BearerTokenStrategy(AuthPort):

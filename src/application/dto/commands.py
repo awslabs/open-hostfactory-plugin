@@ -1,13 +1,15 @@
 """Command DTOs for application layer."""
 
 from __future__ import annotations
-from typing import List, Optional, Dict, Any
+
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
-from src.application.interfaces.command_query import Command
 from src.application.dto.base import BaseCommand
-from src.domain.request.value_objects import RequestStatus
+from src.application.interfaces.command_query import Command
 from src.domain.machine.value_objects import MachineStatus
+from src.domain.request.value_objects import RequestStatus
 
 
 class CreateRequestCommand(BaseCommand):

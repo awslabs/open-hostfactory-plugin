@@ -6,9 +6,9 @@ This test isolates domain model validation issues to understand what's failing
 and ensure we're creating valid domain objects correctly.
 """
 
-import sys
 import os
-from typing import Dict, Any
+import sys
+from typing import Any, Dict
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -117,7 +117,10 @@ def test_aws_template_spot_fleet():
     """Test SpotFleet AWSTemplate creation."""
     try:
         from src.providers.aws.domain.template.aggregate import AWSTemplate
-        from src.providers.aws.domain.template.value_objects import ProviderApi, AWSFleetType
+        from src.providers.aws.domain.template.value_objects import (
+            AWSFleetType,
+            ProviderApi,
+        )
 
         print("   Testing SpotFleet AWSTemplate creation...")
 
@@ -193,15 +196,21 @@ def test_request_creation():
 def test_base_handler_validation():
     """Test base handler validation logic."""
     try:
-        from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
-        from src.providers.aws.domain.template.aggregate import AWSTemplate
-        from src.providers.aws.domain.template.value_objects import ProviderApi, AWSFleetType
         from unittest.mock import Mock
+
+        from src.providers.aws.domain.template.aggregate import AWSTemplate
+        from src.providers.aws.domain.template.value_objects import (
+            AWSFleetType,
+            ProviderApi,
+        )
+        from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 
         print("   Testing base handler validation...")
 
         # Create a concrete handler for testing (using SpotFleetHandler)
-        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
+        from src.providers.aws.infrastructure.handlers.spot_fleet_handler import (
+            SpotFleetHandler,
+        )
 
         # Create mocks
         mock_aws_client = Mock()

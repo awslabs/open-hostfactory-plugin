@@ -53,8 +53,15 @@ creates duplicate registrations and architectural confusion.
 """
 
 from __future__ import annotations
-from typing import Type, TypeVar, Dict, Set
-from src.application.interfaces.command_query import QueryHandler, CommandHandler, Query, Command
+
+from typing import Dict, Set, Type, TypeVar
+
+from src.application.interfaces.command_query import (
+    Command,
+    CommandHandler,
+    Query,
+    QueryHandler,
+)
 
 # Type variables
 TQuery = TypeVar("TQuery", bound=Query)

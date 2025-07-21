@@ -1,6 +1,7 @@
 """AWS provider configuration - unified single source of truth."""
 
 from typing import Optional
+
 from pydantic import BaseModel, Field, model_validator
 
 from src.infrastructure.interfaces.provider import BaseProviderConfig

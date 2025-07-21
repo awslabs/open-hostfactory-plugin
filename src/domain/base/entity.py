@@ -1,8 +1,9 @@
 """Base domain entities - foundation for all domain objects."""
 
-from typing import Any, List, Optional, TypeVar
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Any, List, Optional, TypeVar
+
 from pydantic import BaseModel, ConfigDict
 
 T = TypeVar("T", bound="Entity")

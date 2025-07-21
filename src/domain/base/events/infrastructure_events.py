@@ -1,10 +1,11 @@
 """Infrastructure events - Generic resource and operation tracking."""
 
-from typing import Any, Dict, Optional
 from datetime import datetime
-from pydantic import Field
-from .base_events import InfrastructureEvent
+from typing import Any, Dict, Optional
 
+from pydantic import Field
+
+from .base_events import InfrastructureEvent
 
 # =============================================================================
 # INFRASTRUCTURE EVENTS

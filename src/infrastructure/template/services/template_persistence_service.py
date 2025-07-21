@@ -4,19 +4,19 @@ Handles CRUD operations for templates while delegating to scheduler strategies
 for format conversion and file operations.
 """
 
-from typing import Dict, Any, Optional
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional
 
-from src.domain.base.ports.logging_port import LoggingPort
-from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.base.ports.event_publisher_port import EventPublisherPort
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.events.domain_events import (
     TemplateCreatedEvent,
-    TemplateUpdatedEvent,
     TemplateDeletedEvent,
+    TemplateUpdatedEvent,
 )
+from src.domain.base.ports.event_publisher_port import EventPublisherPort
+from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.base.ports.scheduler_port import SchedulerPort
 from src.infrastructure.template.dtos import TemplateDTO
 
 
@@ -176,6 +176,7 @@ class TemplatePersistenceService:
         """Write templates to a file using appropriate format."""
         try:
             import json
+
             import yaml
 
             # Ensure directory exists

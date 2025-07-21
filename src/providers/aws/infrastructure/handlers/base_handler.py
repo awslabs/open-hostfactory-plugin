@@ -9,27 +9,28 @@ and proper integration with our DI/CQRS system.
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, TypeVar, Callable, Optional
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, TypeVar
+
 from botocore.exceptions import ClientError
 
-from src.domain.base.ports import LoggingPort, ErrorHandlingPort
-from src.domain.template.aggregate import Template
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 from src.domain.request.aggregate import Request
+from src.domain.template.aggregate import Template
+from src.infrastructure.resilience import retry
 from src.providers.aws.domain.template.aggregate import AWSTemplate
-from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.exceptions.aws_exceptions import (
+    AuthorizationError,
     AWSEntityNotFoundError,
     AWSValidationError,
-    QuotaExceededError,
-    ResourceInUseError,
-    AuthorizationError,
-    RateLimitError,
-    NetworkError,
     InfrastructureError,
+    NetworkError,
+    QuotaExceededError,
+    RateLimitError,
+    ResourceInUseError,
 )
-from src.infrastructure.resilience import retry
-from src.domain.base.dependency_injection import injectable
+from src.providers.aws.infrastructure.aws_client import AWSClient
 
 T = TypeVar("T")
 

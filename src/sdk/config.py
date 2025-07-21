@@ -5,11 +5,11 @@ Integrates with the existing configuration system while providing
 SDK-specific configuration options and validation.
 """
 
-from typing import Dict, Any, Optional
-from dataclasses import dataclass, field
-import os
 import json
+import os
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from .exceptions import ConfigurationError
 

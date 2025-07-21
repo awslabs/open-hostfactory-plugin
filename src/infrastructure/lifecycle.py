@@ -1,8 +1,8 @@
 """Component lifecycle management."""
 
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict, Type
 from threading import RLock
+from typing import Dict, List, Optional, Type
 
 from src.infrastructure.logging.logger import get_logger
 

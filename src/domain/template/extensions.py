@@ -1,8 +1,9 @@
 """Template extension registry for provider-specific extensions."""
 
-from typing import Dict, Type, Optional, Any
-from pydantic import BaseModel
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional, Type
+
+from pydantic import BaseModel
 
 
 class TemplateExtension(ABC):

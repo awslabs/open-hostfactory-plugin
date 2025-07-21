@@ -7,16 +7,16 @@ All functionality maintains backward compatibility.
 
 from typing import Optional
 
-# Import the main configuration manager from the new modular structure
-from .managers.configuration_manager import ConfigurationManager
-
 # Import supporting classes for direct access if needed
 from .managers import (
-    ConfigTypeConverter,
-    ConfigPathResolver,
-    ProviderConfigManager,
     ConfigCacheManager,
+    ConfigPathResolver,
+    ConfigTypeConverter,
+    ProviderConfigManager,
 )
+
+# Import the main configuration manager from the new modular structure
+from .managers.configuration_manager import ConfigurationManager
 
 # Singleton instance management
 _config_manager_instance = None

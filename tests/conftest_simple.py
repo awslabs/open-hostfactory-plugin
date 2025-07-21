@@ -3,11 +3,12 @@ Simple test configuration for basic functionality testing.
 This avoids the complex DI system that has circular import issues.
 """
 
-import pytest
 import os
 import sys
-from unittest.mock import Mock, MagicMock
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+from unittest.mock import MagicMock, Mock
+
+import pytest
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))

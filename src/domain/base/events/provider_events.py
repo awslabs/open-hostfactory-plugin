@@ -5,7 +5,7 @@ from typing import Optional
 from uuid import uuid4
 
 from src.domain.base.events.base_events import DomainEvent
-from src.domain.base.provider_interfaces import ProviderType, ProviderInstanceState
+from src.domain.base.provider_interfaces import ProviderInstanceState, ProviderType
 
 
 @dataclass(frozen=True)

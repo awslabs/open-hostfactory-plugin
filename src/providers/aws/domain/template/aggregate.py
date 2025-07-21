@@ -1,18 +1,19 @@
 """AWS-specific template domain extensions."""
 
-from typing import Dict, Any, Optional
-from pydantic import model_validator, ConfigDict
+from typing import Any, Dict, Optional
+
+from pydantic import ConfigDict, model_validator
 
 from src.domain.template.aggregate import Template as CoreTemplate
 from src.providers.aws.domain.template.value_objects import (
-    ProviderApi,
-    AWSFleetType,
     AWSAllocationStrategy,
     AWSConfiguration,
+    AWSFleetType,
     AWSInstanceType,
-    AWSSubnetId,
     AWSSecurityGroupId,
+    AWSSubnetId,
     AWSTags,
+    ProviderApi,
 )
 
 

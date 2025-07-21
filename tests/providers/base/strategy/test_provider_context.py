@@ -1,21 +1,25 @@
 """Tests for ProviderContext functionality."""
 
-import pytest
 import time
-from unittest.mock import Mock, MagicMock
 from threading import Thread
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock
 
-from src.providers.base.strategy.provider_context import ProviderContext, StrategyMetrics
+import pytest
+
+from src.domain.base.ports import LoggingPort
+from src.providers.base.strategy.provider_context import (
+    ProviderContext,
+    StrategyMetrics,
+)
 from src.providers.base.strategy.provider_strategy import (
-    ProviderStrategy,
-    ProviderOperation,
-    ProviderResult,
     ProviderCapabilities,
     ProviderHealthStatus,
+    ProviderOperation,
     ProviderOperationType,
+    ProviderResult,
+    ProviderStrategy,
 )
-from src.domain.base.ports import LoggingPort
 
 
 class MockProviderStrategy(ProviderStrategy):

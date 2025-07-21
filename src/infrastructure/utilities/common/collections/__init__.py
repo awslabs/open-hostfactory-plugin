@@ -1,10 +1,10 @@
 """Collection utility functions organized by responsibility."""
 
 # Import all functions from submodules
-from src.infrastructure.utilities.common.collections.validation import *
 from src.infrastructure.utilities.common.collections.filtering import *
-from src.infrastructure.utilities.common.collections.transforming import *
 from src.infrastructure.utilities.common.collections.grouping import *
+from src.infrastructure.utilities.common.collections.transforming import *
+from src.infrastructure.utilities.common.collections.validation import *
 
 # Export commonly used functions
 __all__ = [

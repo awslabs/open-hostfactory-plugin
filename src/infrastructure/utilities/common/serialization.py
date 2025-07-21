@@ -1,7 +1,7 @@
 """Helper functions for serializing and deserializing domain objects."""
 
 from enum import Enum
-from typing import TypeVar, Type, Any, Optional
+from typing import Any, Optional, Type, TypeVar
 
 E = TypeVar("E", bound=Enum)
 

@@ -1,15 +1,18 @@
 """End-to-end integration tests for dry-run functionality."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock, patch
 
-from src.application.dto.commands import CreateRequestCommand
+import pytest
+
 from src.application.commands.request_handlers import CreateMachineRequestHandler
-from src.providers.aws.infrastructure.adapters.provisioning_adapter import AWSProvisioningAdapter
-from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-from src.providers.aws.configuration.config import AWSProviderConfig
+from src.application.dto.commands import CreateRequestCommand
 from src.infrastructure.mocking.dry_run_context import dry_run_context
+from src.providers.aws.configuration.config import AWSProviderConfig
+from src.providers.aws.infrastructure.adapters.provisioning_adapter import (
+    AWSProvisioningAdapter,
+)
+from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
 
 class TestEndToEndDryRun:
@@ -62,7 +65,9 @@ class TestEndToEndDryRun:
 
         # Mock container to return appropriate services
         from src.config.manager import ConfigurationManager
-        from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
+        from src.infrastructure.ports.resource_provisioning_port import (
+            ResourceProvisioningPort,
+        )
 
         mock_config_manager = Mock()
         mock_config_manager.get.return_value = "aws"
@@ -234,7 +239,7 @@ class TestEndToEndDryRun:
     def test_provisioning_adapter_strategy_selection(self):
         """Test that provisioning adapter correctly selects strategy vs handlers."""
         from src.domain.request.aggregate import Request
-        from src.domain.request.value_objects import RequestType, RequestId
+        from src.domain.request.value_objects import RequestId, RequestType
         from src.domain.template.aggregate import Template
 
         # Create test request with dry-run metadata
@@ -271,7 +276,7 @@ class TestEndToEndDryRun:
     def test_provisioning_adapter_handler_selection(self):
         """Test that provisioning adapter uses handlers for normal operations."""
         from src.domain.request.aggregate import Request
-        from src.domain.request.value_objects import RequestType, RequestId
+        from src.domain.request.value_objects import RequestId, RequestType
         from src.domain.template.aggregate import Template
 
         # Create test request without dry-run metadata

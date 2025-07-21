@@ -1,18 +1,19 @@
 """AWS client wrapper with enhanced functionality."""
 
-from typing import Optional, Dict, Any, TypeVar, TYPE_CHECKING
 import threading
+from typing import TYPE_CHECKING, Any, Dict, Optional, TypeVar
+
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-from src.providers.aws.exceptions.aws_exceptions import (
-    AWSConfigurationError,
-    AuthorizationError,
-    NetworkError,
-)
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import ConfigurationPort, LoggingPort
+from src.providers.aws.exceptions.aws_exceptions import (
+    AuthorizationError,
+    AWSConfigurationError,
+    NetworkError,
+)
 
 if TYPE_CHECKING:
     from src.config.manager import ConfigurationManager

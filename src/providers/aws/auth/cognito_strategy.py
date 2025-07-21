@@ -1,13 +1,14 @@
 """AWS Cognito authentication strategy."""
 
+from typing import List, Optional
+
 import boto3
 import jwt
-from typing import Optional, List
 from botocore.exceptions import ClientError
 
-from src.infrastructure.ports.auth import AuthPort, AuthContext, AuthResult, AuthStatus
-from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
+from src.infrastructure.ports.auth import AuthContext, AuthPort, AuthResult, AuthStatus
 
 
 @injectable

@@ -1,15 +1,16 @@
 """Unit tests for DIContainer integration."""
 
-import pytest
 import threading
-from typing import Type, Optional, List
+from typing import List, Optional, Type
 from unittest.mock import Mock, patch
 
+import pytest
+
+from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
 from src.infrastructure.di.container import DIContainer, timed_operation
-from src.domain.base.di_contracts import DependencyRegistration, DIScope, DILifecycle
 from src.infrastructure.di.exceptions import (
-    DependencyResolutionError,
     CircularDependencyError,
+    DependencyResolutionError,
     UnregisteredDependencyError,
 )
 

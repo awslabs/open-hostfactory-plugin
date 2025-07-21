@@ -5,20 +5,20 @@ providing a unified interface for executing operations across different
 provider strategies while handling strategy selection, switching, and lifecycle.
 """
 
-from typing import Dict, List, Optional
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
 from threading import Lock
+from typing import Dict, List, Optional
 
+from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
 from src.providers.base.strategy.provider_strategy import (
-    ProviderStrategy,
-    ProviderOperation,
-    ProviderResult,
     ProviderCapabilities,
     ProviderHealthStatus,
+    ProviderOperation,
+    ProviderResult,
+    ProviderStrategy,
 )
-from src.domain.base.ports import LoggingPort
-from src.domain.base.dependency_injection import injectable
 
 
 @dataclass

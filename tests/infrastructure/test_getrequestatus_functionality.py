@@ -1,11 +1,15 @@
 """Test suite for getRequestStatus functionality."""
 
-import pytest
 import json
 from unittest.mock import Mock, patch
-from src.infrastructure.scheduler.hostfactory.strategy import HostFactorySchedulerStrategy
+
+import pytest
+
 from src.config.manager import ConfigurationManager
 from src.infrastructure.logging.logger import get_logger
+from src.infrastructure.scheduler.hostfactory.strategy import (
+    HostFactorySchedulerStrategy,
+)
 
 
 class MockRequestDTO:

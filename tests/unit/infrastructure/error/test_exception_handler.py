@@ -6,42 +6,45 @@ with all types of exceptions while preserving domain semantics.
 """
 
 import json
-import pytest
+from typing import Any, Dict
 from unittest.mock import Mock, patch
-from typing import Dict, Any
 
-from src.infrastructure.error.exception_handler import (
-    ExceptionHandler,
-    ExceptionContext,
-    get_exception_handler,
-    reset_exception_handler,
-)
-from src.infrastructure.error.decorators import (
-    handle_exceptions,
-    handle_domain_exceptions,
-    handle_application_exceptions,
-    handle_infrastructure_exceptions,
-    handle_provider_exceptions,
-)
+import pytest
 
 # Import all exception types for testing
 from src.domain.base.exceptions import (
-    DomainException,
-    ValidationError,
-    EntityNotFoundError,
     BusinessRuleViolationError,
-    InfrastructureError,
     ConfigurationError,
+    DomainException,
+    EntityNotFoundError,
+    InfrastructureError,
+    ValidationError,
 )
-from src.domain.template.exceptions import TemplateNotFoundError, TemplateValidationError
 from src.domain.machine.exceptions import MachineNotFoundError, MachineValidationError
 from src.domain.request.exceptions import RequestNotFoundError, RequestValidationError
+from src.domain.template.exceptions import (
+    TemplateNotFoundError,
+    TemplateValidationError,
+)
+from src.infrastructure.error.decorators import (
+    handle_application_exceptions,
+    handle_domain_exceptions,
+    handle_exceptions,
+    handle_infrastructure_exceptions,
+    handle_provider_exceptions,
+)
+from src.infrastructure.error.exception_handler import (
+    ExceptionContext,
+    ExceptionHandler,
+    get_exception_handler,
+    reset_exception_handler,
+)
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSError,
     LaunchError,
-    TerminationError,
-    RateLimitError,
     NetworkError,
+    RateLimitError,
+    TerminationError,
 )
 
 

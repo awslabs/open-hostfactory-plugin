@@ -9,6 +9,7 @@ This module handles presentation formatting for the CLI, including:
 """
 
 from typing import Any, Dict, List
+
 from src.domain.request.value_objects import RequestStatus
 
 
@@ -69,8 +70,8 @@ def format_templates_table(templates: List[Dict]) -> str:
         return "No templates found."
 
     try:
-        from rich.table import Table
         from rich.console import Console
+        from rich.table import Table
 
         # Create Rich table
         table = Table(show_header=True, header_style="bold magenta", show_lines=True)

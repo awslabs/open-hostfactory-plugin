@@ -7,8 +7,8 @@ while maintaining the power and flexibility of dependency injection.
 """
 
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar, Any, Dict, List, Optional, Callable, Union
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union
 
 T = TypeVar("T")
 

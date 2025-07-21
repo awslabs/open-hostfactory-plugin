@@ -1,15 +1,19 @@
 """Provider service registrations for dependency injection."""
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
+from src.application.services.provider_capability_service import (
+    ProviderCapabilityService,
+)
+from src.application.services.provider_selection_service import ProviderSelectionService
+from src.config.manager import ConfigurationManager, get_config_manager
+from src.domain.base.ports import ConfigurationPort, LoggingPort
 from src.infrastructure.di.container import DIContainer
-from src.config.manager import get_config_manager, ConfigurationManager
-from src.domain.base.ports import LoggingPort, ConfigurationPort
+from src.infrastructure.factories.provider_strategy_factory import (
+    ProviderStrategyFactory,
+)
 from src.infrastructure.logging.logger import get_logger
 from src.providers.base.strategy import ProviderContext
-from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
-from src.application.services.provider_selection_service import ProviderSelectionService
-from src.application.services.provider_capability_service import ProviderCapabilityService
 
 
 def register_provider_services(container: DIContainer) -> None:
@@ -259,8 +263,10 @@ def _register_provider_instance(provider_instance) -> bool:
         )
 
         if provider_instance.type == "aws":
+            from src.infrastructure.registry.provider_registry import (
+                get_provider_registry,
+            )
             from src.providers.aws.registration import register_aws_provider
-            from src.infrastructure.registry.provider_registry import get_provider_registry
 
             # Get provider registry
             registry = get_provider_registry()
@@ -408,11 +414,10 @@ def _register_aws_provider_to_context(
     logger = container.get(LoggingPort)
 
     try:
-        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-        from src.providers.aws.infrastructure.aws_client import AWSClient
-
         # Create AWS provider configuration for this instance
         from src.providers.aws.configuration.config import AWSProviderConfig
+        from src.providers.aws.infrastructure.aws_client import AWSClient
+        from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
         aws_config = AWSProviderConfig(
             region=provider_instance.config.get("region", "us-east-1"),
@@ -469,7 +474,9 @@ def _register_aws_services(container: DIContainer) -> None:
             raise
 
         try:
-            from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
+            from src.providers.aws.infrastructure.aws_handler_factory import (
+                AWSHandlerFactory,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSHandlerFactory: {e}")
             raise
@@ -497,7 +504,9 @@ def _register_aws_services(container: DIContainer) -> None:
             raise
 
         try:
-            from src.providers.aws.infrastructure.adapters.machine_adapter import AWSMachineAdapter
+            from src.providers.aws.infrastructure.adapters.machine_adapter import (
+                AWSMachineAdapter,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSMachineAdapter: {e}")
             raise
@@ -511,7 +520,9 @@ def _register_aws_services(container: DIContainer) -> None:
             raise
 
         try:
-            from src.providers.aws.infrastructure.adapters.request_adapter import AWSRequestAdapter
+            from src.providers.aws.infrastructure.adapters.request_adapter import (
+                AWSRequestAdapter,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSRequestAdapter: {e}")
             raise
@@ -525,35 +536,45 @@ def _register_aws_services(container: DIContainer) -> None:
             raise
 
         try:
-            from src.providers.aws.strategy.aws_provider_adapter import AWSProviderAdapter
+            from src.providers.aws.strategy.aws_provider_adapter import (
+                AWSProviderAdapter,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSProviderAdapter: {e}")
             raise
 
         try:
-            from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
+            from src.providers.aws.strategy.aws_provider_strategy import (
+                AWSProviderStrategy,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSProviderStrategy: {e}")
             raise
 
         try:
-            from src.providers.aws.managers.aws_instance_manager import AWSInstanceManager
+            from src.providers.aws.managers.aws_instance_manager import (
+                AWSInstanceManager,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSInstanceManager: {e}")
             raise
 
         try:
-            from src.providers.aws.managers.aws_resource_manager import AWSResourceManagerImpl
+            from src.providers.aws.managers.aws_resource_manager import (
+                AWSResourceManagerImpl,
+            )
         except Exception as e:
             logger.debug(f"Failed to import AWSResourceManagerImpl: {e}")
             raise
 
         try:
-            from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
             from src.infrastructure.ports.cloud_resource_manager_port import (
                 CloudResourceManagerPort,
             )
             from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
+            from src.infrastructure.ports.resource_provisioning_port import (
+                ResourceProvisioningPort,
+            )
         except Exception as e:
             logger.debug(f"Failed to import infrastructure ports: {e}")
             raise

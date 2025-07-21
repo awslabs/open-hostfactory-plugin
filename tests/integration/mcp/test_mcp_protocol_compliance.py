@@ -1,9 +1,10 @@
 """Integration tests for MCP protocol compliance."""
 
-import pytest
-import json
 import asyncio
-from unittest.mock import Mock, AsyncMock
+import json
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 from src.interface.mcp.server.core import OpenHFPluginMCPServer
 

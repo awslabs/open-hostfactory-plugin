@@ -1,18 +1,19 @@
 """Integration tests for provider strategy dry-run functionality."""
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock, patch
 
-from src.providers.base.strategy import (
-    ProviderStrategy,
-    ProviderOperation,
-    ProviderResult,
-    ProviderOperationType,
-)
-from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
-from src.providers.aws.configuration.config import AWSProviderConfig
+import pytest
+
 from src.infrastructure.mocking.dry_run_context import dry_run_context
+from src.providers.aws.configuration.config import AWSProviderConfig
+from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
+from src.providers.base.strategy import (
+    ProviderOperation,
+    ProviderOperationType,
+    ProviderResult,
+    ProviderStrategy,
+)
 
 
 class TestProviderStrategyDryRun:

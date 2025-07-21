@@ -1,6 +1,6 @@
 """YAML file operations utilities."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def read_yaml_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
@@ -43,6 +43,7 @@ def write_yaml_file(file_path: str, data: Dict[str, Any], encoding: str = "utf-8
         yaml.YAMLError: If data cannot be serialized to YAML
     """
     import yaml
+
     from .directory_utils import ensure_parent_directory_exists
 
     try:

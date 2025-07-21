@@ -1,12 +1,13 @@
 """End-to-end CLI integration tests for configuration-driven provider system."""
 
-import pytest
 import json
-import tempfile
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
+
+import pytest
 
 
 class TestCLIIntegration:

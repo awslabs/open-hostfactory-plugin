@@ -7,13 +7,14 @@ This module validates that the codebase properly implements Clean Architecture p
 - Dependency inversion principle
 """
 
-import pytest
 import ast
-import os
 import importlib
+import os
 from pathlib import Path
-from typing import Set, List
+from typing import List, Set
 from unittest.mock import Mock, patch
+
+import pytest
 
 
 @pytest.mark.unit
@@ -168,9 +169,9 @@ class TestCleanArchitecture:
         """Validate layer boundaries are maintained."""
         # Test that domain layer doesn't import infrastructure
         from src.domain.base import entity
-        from src.domain.template import aggregate
-        from src.domain.request import aggregate as request_agg
         from src.domain.machine import aggregate as machine_agg
+        from src.domain.request import aggregate as request_agg
+        from src.domain.template import aggregate
 
         # Domain modules should not have infrastructure dependencies
         domain_modules = [entity, aggregate, request_agg, machine_agg]
@@ -225,11 +226,13 @@ class TestCleanArchitecture:
     def test_ports_and_adapters_pattern(self):
         """Test ports and adapters (hexagonal architecture) implementation."""
         # Test that ports (interfaces) are defined
-        from src.infrastructure.ports.cloud_resource_manager_port import CloudResourceManagerPort
-        from src.infrastructure.ports.logger_port import LoggerPort
-
         # Ports should be abstract interfaces
         import inspect
+
+        from src.infrastructure.ports.cloud_resource_manager_port import (
+            CloudResourceManagerPort,
+        )
+        from src.infrastructure.ports.logger_port import LoggerPort
 
         assert inspect.isabstract(CloudResourceManagerPort) or hasattr(
             CloudResourceManagerPort, "__abstractmethods__"
@@ -298,8 +301,10 @@ class TestCleanArchitecture:
     def test_infrastructure_layer_boundaries(self):
         """Test infrastructure layer boundaries and responsibilities."""
         # Infrastructure should handle external concerns
-        from src.infrastructure.persistence.base.repository import StrategyBasedRepository
         from src.infrastructure.di.container import DIContainer
+        from src.infrastructure.persistence.base.repository import (
+            StrategyBasedRepository,
+        )
 
         # Infrastructure components should exist
         assert StrategyBasedRepository is not None
@@ -315,8 +320,8 @@ class TestCleanArchitecture:
 
     def test_interface_layer_responsibilities(self):
         """Test interface layer (CLI, API) responsibilities."""
-        from src.cli.main import parse_args
         from src.api.server import create_fastapi_app
+        from src.cli.main import parse_args
 
         # Interface layer should handle external communication
         assert callable(parse_args)
@@ -338,10 +343,9 @@ class TestCleanArchitecture:
     def test_cross_cutting_concerns(self):
         """Test that cross-cutting concerns are properly handled."""
         # Logging should be abstracted
-        from src.infrastructure.logging.logger import get_logger
-
         # Error handling should be centralized
         from src.infrastructure.error.exception_handler import ExceptionHandler
+        from src.infrastructure.logging.logger import get_logger
 
         # Cross-cutting concerns should be injectable
         logger = get_logger(__name__)

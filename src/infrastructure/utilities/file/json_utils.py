@@ -1,7 +1,7 @@
 """JSON file operations utilities."""
 
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def read_json_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:

@@ -6,17 +6,17 @@ providing consistent event handling with proper dependency injection, error hand
 and middleware support.
 """
 
-from typing import Dict, List, Type, Optional, Any
 import asyncio
 import time
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Type
 
 # Import types - using string imports to avoid circular dependencies
 try:
-    from src.domain.base.events import DomainEvent
-    from src.domain.base.ports import LoggingPort
     from src.application.events.base.event_handler import EventHandler
     from src.application.events.decorators import EventHandlerRegistry
+    from src.domain.base.events import DomainEvent
+    from src.domain.base.ports import LoggingPort
 except ImportError:
     # Fallback for testing or when dependencies aren't available
     DomainEvent = Any

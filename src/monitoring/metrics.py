@@ -1,12 +1,12 @@
 """Application metrics collection and monitoring."""
 
-import time
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass, field
-import threading
-from datetime import datetime, timedelta
 import json
+import threading
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from src.infrastructure.logging.logger import get_logger
 

@@ -5,8 +5,9 @@ This module provides strongly-typed DTOs for system operations,
 replacing Dict[str, Any] returns with proper type safety.
 """
 
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from pydantic import Field
 
 from src.application.dto.base import BaseDTO

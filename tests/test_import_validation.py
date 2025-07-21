@@ -4,9 +4,10 @@ This test suite validates that all critical imports work correctly and catches
 issues that might be introduced during code refactoring or module reorganization.
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -20,17 +21,17 @@ class TestCriticalImports:
         """Test all imports needed by run.py."""
         # These imports must work for CLI scripts to function
         from src.bootstrap import Application
-        from src.domain.request.value_objects import RequestStatus
         from src.domain.base.exceptions import DomainException
+        from src.domain.request.value_objects import RequestStatus
         from src.infrastructure.logging.logger import get_logger
 
         # Interface command handlers (function-based)
         from src.interface.command_handlers import (
             CLICommandHandler,
             handle_get_request_status,
+            handle_get_return_requests,
             handle_list_templates,
             handle_request_machines,
-            handle_get_return_requests,
             handle_request_return_machines,
         )
 
@@ -45,28 +46,27 @@ class TestCriticalImports:
     def test_value_object_locations(self):
         """Test that value objects are in their correct locations after decomposition."""
         # Request domain value objects
-        from src.domain.request.value_objects import (
-            RequestStatus,
-            RequestType,
-            RequestId,
-            MachineReference,
-            RequestTimeout,
-            MachineCount,
-        )
+        # Base domain value objects
+        from src.domain.base.value_objects import InstanceId, InstanceType, ResourceId
 
         # Machine domain value objects
         from src.domain.machine.value_objects import (
-            MachineStatus,
             MachineId,
+            MachineStatus,
             MachineType,
             PriceType,
         )
+        from src.domain.request.value_objects import (
+            MachineCount,
+            MachineReference,
+            RequestId,
+            RequestStatus,
+            RequestTimeout,
+            RequestType,
+        )
 
         # Template domain value objects
-        from src.domain.template.value_objects import TemplateId, ProviderConfiguration
-
-        # Base domain value objects
-        from src.domain.base.value_objects import InstanceId, InstanceType, ResourceId
+        from src.domain.template.value_objects import ProviderConfiguration, TemplateId
 
         # Verify all imports successful
         assert all(
@@ -108,8 +108,8 @@ class TestCriticalImports:
 
     def test_command_handler_inheritance(self):
         """Test that command handlers have correct inheritance."""
-        from src.interface.command_handlers import CLICommandHandler
         from src.application.interfaces.command_handler import CommandHandler
+        from src.interface.command_handlers import CLICommandHandler
 
         # CLICommandHandler should inherit from CommandHandler (CQRS interface)
         assert issubclass(CLICommandHandler, CommandHandler)
@@ -179,8 +179,12 @@ class TestBackwardCompatibility:
 
     def test_provider_layer_imports(self):
         """Test imports used in provider layer."""
-        from src.providers.aws.infrastructure.adapters.machine_adapter import MachineStatus
-        from src.providers.aws.infrastructure.adapters.request_adapter import RequestType
+        from src.providers.aws.infrastructure.adapters.machine_adapter import (
+            MachineStatus,
+        )
+        from src.providers.aws.infrastructure.adapters.request_adapter import (
+            RequestType,
+        )
 
         assert MachineStatus is not None
         assert RequestType is not None

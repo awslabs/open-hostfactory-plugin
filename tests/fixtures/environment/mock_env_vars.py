@@ -1,10 +1,11 @@
 """Mock environment variables for testing."""
 
 import os
-import pytest
 from pathlib import Path
+from typing import Any, Dict
 from unittest.mock import patch
-from typing import Dict, Any
+
+import pytest
 
 
 @pytest.fixture

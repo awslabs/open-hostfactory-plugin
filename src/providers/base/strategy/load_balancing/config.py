@@ -1,7 +1,8 @@
 """Load balancing configuration."""
 
 from dataclasses import dataclass
-from .algorithms import LoadBalancingAlgorithm, HealthCheckMode
+
+from .algorithms import HealthCheckMode, LoadBalancingAlgorithm
 
 
 @dataclass

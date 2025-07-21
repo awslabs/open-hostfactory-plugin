@@ -1,9 +1,9 @@
 """Performance monitoring utilities."""
 
-import time
 import functools
-from typing import Dict, Any, Optional, Callable, TYPE_CHECKING
+import time
 from contextlib import contextmanager
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 
 if TYPE_CHECKING:
     from src.domain.base.ports import LoggingPort

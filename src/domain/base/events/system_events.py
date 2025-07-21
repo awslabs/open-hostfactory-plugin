@@ -1,9 +1,10 @@
 """System events - Configuration, lifecycle, security, and performance monitoring."""
 
-from typing import Any, Dict, Optional, List
-from pydantic import Field
-from .base_events import InfrastructureEvent, TimedEvent, ErrorEvent, PerformanceEvent
+from typing import Any, Dict, List, Optional
 
+from pydantic import Field
+
+from .base_events import ErrorEvent, InfrastructureEvent, PerformanceEvent, TimedEvent
 
 # =============================================================================
 # SYSTEM-WIDE EVENTS

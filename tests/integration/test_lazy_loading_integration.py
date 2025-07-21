@@ -4,13 +4,14 @@ This module tests that lazy loading implementation maintains all existing
 functionality while providing performance improvements.
 """
 
-import pytest
 import asyncio
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
+
+from src.application.queries.handlers import ListTemplatesQuery
 from src.bootstrap import Application
 from src.infrastructure.di.container import get_container
-from src.application.queries.handlers import ListTemplatesQuery
 
 
 class TestLazyLoadingIntegration:

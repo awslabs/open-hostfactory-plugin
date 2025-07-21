@@ -1,6 +1,7 @@
 """Base query handlers - foundation for query processing."""
 
 from typing import Protocol
+
 from src.application.dto.base import BaseQuery, BaseResponse
 
 

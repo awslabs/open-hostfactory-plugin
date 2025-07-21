@@ -1,8 +1,9 @@
 """Integration tests for bootstrap with configuration-driven providers."""
 
+from typing import Any, Dict
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any
 
 from src.bootstrap import Application
 
@@ -30,8 +31,8 @@ class TestBootstrapIntegration:
 
         # Mock unified provider configuration
         from src.config.schemas.provider_strategy_schema import (
-            UnifiedProviderConfig,
             ProviderInstanceConfig,
+            UnifiedProviderConfig,
         )
 
         unified_config = UnifiedProviderConfig(

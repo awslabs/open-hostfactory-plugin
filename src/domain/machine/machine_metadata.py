@@ -1,13 +1,15 @@
 """Machine metadata, configuration, and monitoring value objects."""
 
 from __future__ import annotations
-from enum import Enum
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+
 import re
+from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
 from pydantic import field_validator, model_validator
 
-from src.domain.base.value_objects import ValueObject, IPAddress
+from src.domain.base.value_objects import IPAddress, ValueObject
 
 
 class PriceType(str, Enum):

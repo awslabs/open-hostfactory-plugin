@@ -1,14 +1,17 @@
 """System validation tests for complete integration."""
 
-import pytest
 import json
-import tempfile
 import os
+import tempfile
 from unittest.mock import Mock
+
+import pytest
 
 from src.bootstrap import Application
 from src.config.manager import ConfigurationManager
-from src.infrastructure.factories.provider_strategy_factory import ProviderStrategyFactory
+from src.infrastructure.factories.provider_strategy_factory import (
+    ProviderStrategyFactory,
+)
 
 
 class TestSystemValidation:

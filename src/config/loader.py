@@ -1,13 +1,14 @@
 """Configuration loading utilities."""
 
 from __future__ import annotations
-import os
-import json
-from pathlib import Path
-from typing import Dict, Any, Optional, TypeVar
 
+import json
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional, TypeVar
+
+from src.config import AppConfig, validate_config
 from src.domain.base.exceptions import ConfigurationError
-from src.config import validate_config, AppConfig
 
 T = TypeVar("T")
 

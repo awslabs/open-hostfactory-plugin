@@ -1,14 +1,15 @@
 """Unit tests for provider configuration."""
 
+from typing import Any, Dict
+
 import pytest
-from typing import Dict, Any
 
 from src.config.schemas.provider_strategy_schema import (
+    CircuitBreakerConfig,
+    HealthCheckConfig,
     ProviderConfig,
     ProviderInstanceConfig,
     ProviderMode,
-    HealthCheckConfig,
-    CircuitBreakerConfig,
 )
 
 

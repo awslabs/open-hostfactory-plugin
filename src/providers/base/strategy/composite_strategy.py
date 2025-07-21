@@ -1,5 +1,5 @@
-from src.domain.base.ports import LoggingPort
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports import LoggingPort
 
 """Composite Provider Strategy - Multi-provider composition and orchestration.
 
@@ -8,19 +8,19 @@ enabling complex multi-provider operations, load distribution, and
 coordinated resource management across different cloud providers.
 """
 
-from typing import Dict, List, Optional
+import secrets
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from enum import Enum
-import time
-import secrets
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Optional
 
 from src.providers.base.strategy.provider_strategy import (
-    ProviderStrategy,
-    ProviderOperation,
-    ProviderResult,
     ProviderCapabilities,
     ProviderHealthStatus,
+    ProviderOperation,
+    ProviderResult,
+    ProviderStrategy,
 )
 
 

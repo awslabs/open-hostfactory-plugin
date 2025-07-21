@@ -14,30 +14,26 @@ def validate_critical_imports():
     """Validate critical imports that are used by main entry points."""
     critical_imports = [
         # Bootstrap and main entry points
-        'src.bootstrap',
-        'src.run',
-        
+        "src.bootstrap",
+        "src.run",
         # Domain core
-        'src.domain.base.exceptions',
-        'src.domain.request.value_objects',
-        'src.domain.machine.value_objects',
-        
+        "src.domain.base.exceptions",
+        "src.domain.request.value_objects",
+        "src.domain.machine.value_objects",
         # Application layer
-        'src.application.base.handlers',
-        'src.application.commands.machine_handlers',
-        'src.application.queries.handlers',
-        
+        "src.application.base.handlers",
+        "src.application.commands.machine_handlers",
+        "src.application.queries.handlers",
         # Infrastructure core
-        'src.infrastructure.di.container',
-        'src.infrastructure.logging.logger',
-        'src.config.manager',
-        
+        "src.infrastructure.di.container",
+        "src.infrastructure.logging.logger",
+        "src.config.manager",
         # Interface layer
-        'src.interface.command_handlers',
+        "src.interface.command_handlers",
     ]
-    
+
     failed_imports = []
-    
+
     for module_name in critical_imports:
         try:
             importlib.import_module(module_name)
@@ -48,7 +44,7 @@ def validate_critical_imports():
         except Exception as e:
             failed_imports.append((module_name, f"Unexpected error: {e}"))
             print(f"⚠️ {module_name}: Unexpected error: {e}")
-    
+
     if failed_imports:
         print(f"\n❌ {len(failed_imports)} critical imports failed:")
         for module, error in failed_imports:
@@ -62,18 +58,18 @@ def validate_critical_imports():
 def main():
     """Main entry point."""
     print("Validating critical Python imports...")
-    
+
     # Add project root to Python path
     project_root = Path(__file__).parent.parent
     sys.path.insert(0, str(project_root))
-    
+
     success = validate_critical_imports()
-    
+
     if not success:
         print("\n💡 Tip: Run the import validation tests for more detailed analysis:")
         print("   python -m pytest tests/test_import_validation.py -v")
         sys.exit(1)
-    
+
     print("\n🎉 Import validation completed successfully!")
 
 

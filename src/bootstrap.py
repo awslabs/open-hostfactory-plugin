@@ -13,8 +13,6 @@ from src.infrastructure.logging.logger import get_logger, setup_logging
 # Import DI container
 
 
-
-
 class Application:
     """DI-based application context manager with registration pattern."""
 

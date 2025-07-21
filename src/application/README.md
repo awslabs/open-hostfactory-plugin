@@ -1,503 +1,270 @@
-# Application Layer - Use Cases and Orchestration
+# Application Layer
 
-The application layer orchestrates domain objects and coordinates business workflows. It implements the CQRS (Command Query Responsibility Segregation) pattern for complex operations while using simpler service patterns for basic CRUD operations.
+The Application Layer implements use cases and orchestrates domain operations through CQRS (Command Query Responsibility Segregation) patterns. This layer contains the business workflows and application-specific logic.
 
-This layer contains 41 files implementing comprehensive use cases and business workflow orchestration.
+## Architecture
 
-## Architecture Overview
-
-### Mixed Pattern Architecture
-The application layer uses different patterns based on complexity:
-
-**CQRS Pattern** (Complex Operations):
-- **Commands**: Write operations with business logic
-- **Queries**: Read operations with data projection
-- **Handlers**: Use case implementations
-
-**Service Pattern** (Simple Operations):
-- **Services**: Direct CRUD operations
-- **DTOs**: Data transfer objects
-
-### Dependency Flow
 ```
-API Layer → Application Layer → Domain Layer
+application/
+├── base/              # Base classes for handlers
+├── commands/          # Command handlers (write operations)
+├── queries/           # Query handlers (read operations)  
+├── events/            # Event handlers (side effects)
+├── dto/               # Data Transfer Objects
+├── decorators.py      # CQRS decorators
+└── interfaces/        # Handler interfaces
 ```
-
-## Package Structure
-
-### 📁 `base/` - Base Application Components
-Foundation classes and interfaces for the application layer.
-
-**Key Components:**
-- **`commands.py`**: Base command and command bus interfaces
-- **`queries.py`**: Base query and query bus interfaces
-- **Command/Query Bus**: Message routing infrastructure
-
-### 📁 `dto/` - Data Transfer Objects
-Objects for transferring data between layers and external systems.
-
-**Key Components:**
-- **`base.py`**: Base DTO classes with validation
-- **`commands.py`**: Command DTOs for write operations
-- **`queries.py`**: Query DTOs for read operations
-- **`responses.py`**: Response DTOs for API layer
-
-**Design Principles:**
-- Immutable data structures
-- Input validation and sanitization
-- Layer boundary enforcement
-- Serialization support
-
-### 📁 `commands/` - Command Handlers (Write Operations)
-Implements write operations using CQRS pattern for complex business logic.
-
-**Key Components:**
-- **`handlers.py`**: Main command handlers
-- **`request_handlers.py`**: Request-specific command handlers
-- **`machine_handlers.py`**: Machine-specific command handlers
-- **`cleanup_handlers.py`**: Cleanup and maintenance handlers
-
-**Command Types:**
-- **CreateRequestCommand**: Create new provisioning request
-- **UpdateRequestStatusCommand**: Update request status
-- **TerminateMachinesCommand**: Terminate machine instances
-- **CleanupExpiredRequestsCommand**: Clean up old requests
-
-### 📁 `queries/` - Query Handlers (Read Operations)
-Implements read operations using CQRS pattern for complex data projections.
-
-**Key Components:**
-- **`handlers.py`**: Main query handlers
-- **`request_handlers.py`**: Request-specific query handlers
-- **`machine_handlers.py`**: Machine-specific query handlers
-- **`specialized_handlers.py`**: Complex query handlers
-
-**Query Types:**
-- **GetRequestStatusQuery**: Get request status and details
-- **GetAvailableTemplatesQuery**: Get available VM templates
-- **GetMachinesByRequestQuery**: Get machines for a request
-- **GetReturnRequestsQuery**: Get return requests
-
-### 📁 `events/` - Event Handlers
-Handles domain events for cross-cutting concerns and workflow coordination.
-
-**Event Handler Categories:**
-- **Audit Handlers**: Log business events for audit trail
-- **Notification Handlers**: Send notifications for important events
-- **Workflow Handlers**: Coordinate multi-step business processes
-- **Monitoring Handlers**: Update metrics and health status
-
-**Key Event Handlers:**
-- **RequestCreatedHandler**: Handle new request creation
-- **MachineProvisionedHandler**: Handle machine provisioning
-- **RequestCompletedHandler**: Handle request completion
-- **ErrorOccurredHandler**: Handle error conditions
-
-### 📁 `template/` - Template Services
-Simple service pattern for template management (CRUD operations).
-
-**Key Components:**
-- **`service.py`**: Template service implementation
-- **`dto.py`**: Template-specific DTOs
-- **`commands.py`**: Template command definitions
-- **`queries.py`**: Template query definitions
-
-**Operations:**
-- Get available templates
-- Validate template configurations
-- Resolve template parameters
-
-### 📁 `request/` - Request Use Cases
-Request-specific application logic and DTOs.
-
-**Key Components:**
-- **`commands.py`**: Request command definitions
-- **`queries.py`**: Request query definitions
-- **`dto.py`**: Request-specific DTOs
-
-### 📁 `machine/` - Machine Use Cases
-Machine-specific application logic and DTOs.
-
-**Key Components:**
-- **`commands.py`**: Machine command definitions
-- **`queries.py`**: Machine query definitions
-- **`dto.py`**: Machine-specific DTOs
-
-### 📁 `interfaces/` - Application Interfaces
-Contracts and interfaces for application layer components.
-
-**Key Components:**
-- **`command_query.py`**: Command and query interface definitions
 
 ## CQRS Implementation
 
-### Command Side (Write Operations)
+### Command Handlers
+Handle write operations that modify system state:
 
-**Command Pattern:**
 ```python
-@dataclass(frozen=True)
-class CreateRequestCommand:
-    """Command to create a new provisioning request."""
-    template_id: str
-    machine_count: int
-    request_type: RequestType = RequestType.PROVISION
-    timeout: Optional[int] = None
-    tags: Optional[Dict[str, str]] = None
-    metadata: Optional[Dict[str, Any]] = None
-```
-
-**Command Handler:**
-```python
-class CreateRequestHandler:
-    """Handler for CreateRequestCommand."""
-    
-    def __init__(self, 
-                 request_repository: RequestRepository,
-                 template_repository: TemplateRepository):
-        self._request_repository = request_repository
-        self._template_repository = template_repository
-    
-    async def handle(self, command: CreateRequestCommand) -> RequestId:
-        """Handle request creation command."""
-        # Validate template exists
-        template = await self._template_repository.find_by_id(command.template_id)
-        if not template:
-            raise TemplateNotFoundError(command.template_id)
+@command_handler(CreateMachineCommand)
+class CreateMachineHandler(BaseCommandHandler[CreateMachineCommand, MachineDTO]):
+    async def execute_command(self, command: CreateMachineCommand) -> MachineDTO:
+        # Validate command
+        await self.validate_command(command)
         
-        # Create request aggregate
-        request = Request.create_new_request(
-            template_id=command.template_id,
-            machine_count=command.machine_count,
-            request_type=command.request_type,
-            timeout=command.timeout,
-            tags=Tags(command.tags) if command.tags else None,
-            metadata=command.metadata
-        )
+        # Execute business logic
+        machine = await self.machine_service.create_machine(command.template_id)
         
-        # Save request (events will be published automatically)
-        await self._request_repository.save(request)
+        # Publish events
+        await self.publish_events([MachineCreatedEvent(machine.id)])
         
-        return request.request_id
+        return MachineDTO.from_domain(machine)
 ```
 
-### Query Side (Read Operations)
-
-**Query Pattern:**
-```python
-@dataclass(frozen=True)
-class GetRequestStatusQuery:
-    """Query to get request status and details."""
-    request_id: str
-```
-
-**Query Handler:**
-```python
-class GetRequestStatusHandler:
-    """Handler for GetRequestStatusQuery."""
-    
-    def __init__(self, request_repository: RequestRepository):
-        self._request_repository = request_repository
-    
-    async def handle(self, query: GetRequestStatusQuery) -> RequestStatusDTO:
-        """Handle request status query."""
-        request_id = RequestId(query.request_id)
-        request = await self._request_repository.find_by_id(request_id)
-        
-        if not request:
-            raise RequestNotFoundError(query.request_id)
-        
-        return RequestStatusDTO(
-            request_id=str(request.request_id.value),
-            status=request.status.value,
-            machine_count=request.machine_count,
-            machine_ids=request.machine_ids,
-            created_at=request.created_at,
-            updated_at=request.updated_at,
-            completed_at=request.completed_at,
-            error_message=request.error_message
-        )
-```
-
-## Service Pattern Implementation
-
-### Template Service (Simple CRUD)
-For simple operations that don't require complex business logic:
+### Query Handlers
+Handle read operations that retrieve data:
 
 ```python
-class TemplateService:
-    """Service for template management operations."""
-    
-    def __init__(self, template_repository: TemplateRepository):
-        self._template_repository = template_repository
-    
-    async def get_available_templates(self) -> List[TemplateDTO]:
-        """Get all available templates."""
-        templates = await self._template_repository.find_all()
-        return [self._to_dto(template) for template in templates]
-    
-    async def get_template_by_id(self, template_id: str) -> Optional[TemplateDTO]:
-        """Get template by ID."""
-        template = await self._template_repository.find_by_id(template_id)
-        return self._to_dto(template) if template else None
+@query_handler(ListMachinesQuery)
+class ListMachinesHandler(BaseQueryHandler[ListMachinesQuery, List[MachineDTO]]):
+    async def execute_query(self, query: ListMachinesQuery) -> List[MachineDTO]:
+        machines = await self.machine_repository.find_all()
+        return [MachineDTO.from_domain(m) for m in machines]
 ```
 
-## Event-Driven Coordination
-
-### Domain Event Handling
-Application layer responds to domain events for cross-cutting concerns:
+### Event Handlers
+Handle domain events for side effects:
 
 ```python
-class RequestCreatedHandler:
-    """Handle RequestCreatedEvent for audit and notification."""
-    
-    def __init__(self, 
-                 audit_service: AuditService,
-                 notification_service: NotificationService):
-        self._audit_service = audit_service
-        self._notification_service = notification_service
-    
-    async def handle(self, event: RequestCreatedEvent) -> None:
-        """Handle request created event."""
-        # Log for audit trail
-        await self._audit_service.log_event(
-            event_type="REQUEST_CREATED",
-            request_id=str(event.request_id.value),
-            details={
-                "template_id": event.template_id,
-                "machine_count": event.machine_count,
-                "created_at": event.created_at.isoformat()
-            }
-        )
+@event_handler("MachineCreatedEvent")
+class MachineCreatedHandler(BaseEventHandler[MachineCreatedEvent]):
+    async def handle(self, event: MachineCreatedEvent) -> None:
+        # Log machine creation
+        self.logger.info(f"Machine created: {event.machine_id}")
         
-        # Send notification if configured
-        if self._should_notify_on_request_created():
-            await self._notification_service.send_notification(
-                message=f"New request created: {event.request_id.value}",
-                details=event
-            )
+        # Send notifications
+        await self.notification_service.notify_machine_created(event)
 ```
 
-## Application Service Orchestration
+## Handler Discovery System
 
-### Main Application Service
-Coordinates between different patterns and bounded contexts:
+Handlers are automatically discovered and registered using decorators:
 
-```python
-class ApplicationService:
-    """Main application service orchestrating all operations."""
-    
-    def __init__(self, 
-                 provider_type: str,
-                 template_service: TemplateService,  # Service pattern
-                 command_bus: CommandBus,            # CQRS commands
-                 query_bus: QueryBus,               # CQRS queries
-                 provider: Optional[ProviderInterface] = None):
-        self._provider_type = provider_type
-        self._template_service = template_service
-        self._command_bus = command_bus
-        self._query_bus = query_bus
-        self._provider = provider
-    
-    # Simple operations use service pattern
-    async def get_available_templates(self) -> List[TemplateDTO]:
-        """Get available templates (simple operation)."""
-        return await self._template_service.get_available_templates()
-    
-    # Complex operations use CQRS pattern
-    async def request_machines(self, 
-                             template_id: str, 
-                             machine_count: int) -> str:
-        """Request machines (complex operation)."""
-        command = CreateRequestCommand(
-            template_id=template_id,
-            machine_count=machine_count
-        )
-        request_id = await self._command_bus.dispatch(command)
-        return str(request_id.value)
-    
-    async def get_request_status(self, request_id: str) -> RequestStatusDTO:
-        """Get request status (complex query)."""
-        query = GetRequestStatusQuery(request_id=request_id)
-        return await self._query_bus.dispatch(query)
-```
+### CQRS Decorators
+- `@command_handler(CommandType)` - Registers command handlers
+- `@query_handler(QueryType)` - Registers query handlers  
+- `@event_handler("EventName")` - Registers event handlers
+
+### Registration Process
+1. **Discovery**: Decorators mark handlers during import
+2. **Registration**: Handler Discovery System registers in DI container
+3. **Resolution**: Handlers resolved automatically when needed
+
+### Important Notes
+- **Use ONLY CQRS decorators** on handlers (not `@injectable`)
+- **Handler Discovery System** automatically handles DI registration
+- **One decorator per handler** - don't mix CQRS and `@injectable`
+
+## Base Classes
+
+### BaseCommandHandler
+Provides common command handling functionality:
+- Command validation
+- Event publishing
+- Error handling
+- Monitoring and logging
+
+### BaseQueryHandler  
+Provides common query handling functionality:
+- Caching support
+- Result formatting
+- Error handling
+- Performance monitoring
+
+### BaseEventHandler
+Provides common event handling functionality:
+- Async event processing
+- Error recovery
+- Event logging
+- Retry mechanisms
 
 ## Data Transfer Objects (DTOs)
 
-### Input Validation
-DTOs provide input validation and sanitization:
+### Purpose
+- **API Contracts**: Define input/output structures
+- **Type Safety**: Strong typing with Pydantic validation
+- **Serialization**: Automatic JSON/camelCase conversion
 
+### Example DTO
 ```python
-@dataclass(frozen=True)
-class CreateRequestDTO:
-    """DTO for creating a new request."""
-    template_id: str
-    machine_count: int
-    request_type: str = "provision"
-    timeout: Optional[int] = None
-    tags: Optional[Dict[str, str]] = None
+class MachineDTO(BaseDTO):
+    machine_id: str = Field(description="Unique machine identifier")
+    status: str = Field(description="Current machine status")
+    template_id: str = Field(description="Template used for machine")
+    created_at: datetime = Field(description="Creation timestamp")
     
-    def __post_init__(self):
-        """Validate DTO fields."""
-        if not self.template_id or not self.template_id.strip():
-            raise ValueError("Template ID cannot be empty")
-        
-        if self.machine_count <= 0:
-            raise ValueError("Machine count must be positive")
-        
-        if self.timeout is not None and self.timeout <= 0:
-            raise ValueError("Timeout must be positive")
-```
-
-### Response Formatting
-DTOs format responses for external consumers:
-
-```python
-@dataclass(frozen=True)
-class RequestStatusDTO:
-    """DTO for request status response."""
-    request_id: str
-    status: str
-    machine_count: int
-    machine_ids: List[str]
-    created_at: datetime
-    updated_at: datetime
-    completed_at: Optional[datetime] = None
-    error_message: Optional[str] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for JSON serialization."""
-        return {
-            "requestId": self.request_id,
-            "status": self.status,
-            "machineCount": self.machine_count,
-            "machineIds": self.machine_ids,
-            "createdAt": self.created_at.isoformat(),
-            "updatedAt": self.updated_at.isoformat(),
-            "completedAt": self.completed_at.isoformat() if self.completed_at else None,
-            "errorMessage": self.error_message
-        }
+    @classmethod
+    def from_domain(cls, machine: Machine) -> 'MachineDTO':
+        return cls(
+            machine_id=machine.id,
+            status=machine.status.value,
+            template_id=machine.template_id,
+            created_at=machine.created_at
+        )
 ```
 
 ## Error Handling
 
-### Application-Level Exceptions
-Application layer defines its own exception hierarchy:
+### Standardized Error Management
+All handlers use `BaseHandler.handle_with_error_management()`:
 
 ```python
-class ApplicationException(Exception):
-    """Base application exception."""
-    pass
-
-class ValidationError(ApplicationException):
-    """Input validation error."""
-    pass
-
-class BusinessRuleViolationError(ApplicationException):
-    """Business rule violation error."""
-    pass
-
-class ResourceNotFoundError(ApplicationException):
-    """Resource not found error."""
-    pass
+async def handle(self, command: MyCommand) -> MyResponse:
+    return await self.handle_with_error_management(
+        lambda: self.execute_command(command),
+        context=f"command_handling_{self.__class__.__name__}"
+    )
 ```
 
-### Error Handling Patterns
+### Error Types
+- **ValidationError**: Invalid input data
+- **BusinessRuleError**: Domain rule violations  
+- **InfrastructureError**: External system failures
+- **NotFoundError**: Resource not found
+
+## Dependencies
+
+### Allowed Dependencies
+- **Domain Layer**: Can import domain entities, value objects, ports
+- **No Infrastructure**: Cannot directly import infrastructure implementations
+- **No Interface**: Cannot import CLI or API layer components
+
+### Dependency Injection
+Services are injected through constructor parameters:
+
 ```python
-async def handle_command(self, command: Command) -> Any:
-    """Handle command with proper error handling."""
-    try:
-        # Validate command
-        self._validate_command(command)
-        
-        # Execute business logic
-        result = await self._execute_command(command)
-        
-        return result
-        
-    except DomainException as e:
-        # Domain errors are business rule violations
-        raise BusinessRuleViolationError(str(e)) from e
-    
-    except ValidationError:
-        # Re-raise validation errors
-        raise
-    
-    except Exception as e:
-        # Wrap unexpected errors
-        raise ApplicationException(f"Command execution failed: {str(e)}") from e
+class MyCommandHandler(BaseCommandHandler):
+    def __init__(self, 
+                 repository: MyRepositoryPort,
+                 service: MyDomainService,
+                 logger: LoggingPort):
+        super().__init__(logger)
+        self.repository = repository
+        self.service = service
 ```
 
-## Testing Strategy
+## Testing
 
 ### Unit Testing
-Test application logic in isolation:
+Test handlers in isolation with mocked dependencies:
 
 ```python
-class TestCreateRequestHandler:
-    """Test CreateRequestHandler."""
-    
-    @pytest.fixture
-    def handler(self):
-        """Create handler with mocked dependencies."""
-        request_repo = Mock(spec=RequestRepository)
-        template_repo = Mock(spec=TemplateRepository)
-        return CreateRequestHandler(request_repo, template_repo)
-    
-    async def test_handle_valid_command(self, handler):
-        """Test handling valid create request command."""
-        # Arrange
-        command = CreateRequestCommand(
-            template_id="template-1",
-            machine_count=2
-        )
-        
-        # Mock template exists
-        template = Mock(spec=Template)
-        handler._template_repository.find_by_id.return_value = template
-        
-        # Act
-        result = await handler.handle(command)
-        
-        # Assert
-        assert isinstance(result, RequestId)
-        handler._request_repository.save.assert_called_once()
+@pytest.fixture
+def handler(mock_repository, mock_logger):
+    return MyCommandHandler(mock_repository, mock_logger)
+
+async def test_command_execution(handler):
+    command = MyCommand(data="test")
+    result = await handler.handle(command)
+    assert result.success is True
 ```
 
 ### Integration Testing
-Test layer interactions:
+Test handler interactions with real dependencies:
 
 ```python
-async def test_request_machines_integration():
-    """Test complete request machines workflow."""
-    # Arrange
-    app_service = create_application_service()
-    
-    # Act
-    request_id = await app_service.request_machines(
-        template_id="template-1",
-        machine_count=2
-    )
-    
-    # Assert
-    status = await app_service.get_request_status(request_id)
-    assert status.status == "PENDING"
-    assert status.machine_count == 2
+async def test_command_integration(container):
+    handler = container.get(MyCommandHandler)
+    command = MyCommand(data="test")
+    result = await handler.handle(command)
+    # Verify database changes, events published, etc.
 ```
 
-## Future Extensions
+## Performance Considerations
 
-### Adding New Use Cases
-1. Define command/query DTOs
-2. Implement handlers
-3. Register with command/query bus
-4. Add event handlers if needed
+### Async Operations
+- All handlers are async for better concurrency
+- Use `await` for I/O operations
+- Avoid blocking operations in handlers
 
-### Adding New Bounded Contexts
-1. Create new package under `application/`
-2. Define context-specific commands and queries
-3. Implement handlers
-4. Add to application service orchestration
+### Caching
+- Query handlers support caching via `get_cache_key()`
+- Implement caching for expensive read operations
+- Cache invalidation on relevant commands
 
----
+### Monitoring
+- All handlers include performance monitoring
+- Metrics collected automatically
+- Error rates and response times tracked
 
-This application layer provides a clean, testable, and maintainable implementation of business use cases while maintaining proper separation between simple and complex operations.
+## Best Practices
+
+### Handler Design
+1. **Single Responsibility**: One handler per command/query/event
+2. **Async First**: All operations should be async
+3. **Error Handling**: Use standardized error management
+4. **Validation**: Validate inputs before processing
+5. **Events**: Publish events for side effects
+
+### Code Organization
+1. **Group by Feature**: Related handlers in same module
+2. **Clear Naming**: Handler names match their purpose
+3. **Consistent Patterns**: Follow established conventions
+4. **Documentation**: Document complex business logic
+
+### Testing Strategy
+1. **Unit Tests**: Test handler logic in isolation
+2. **Integration Tests**: Test with real dependencies
+3. **Contract Tests**: Verify DTO contracts
+4. **Performance Tests**: Test under load
+
+## Common Patterns
+
+### Command Validation
+```python
+async def validate_command(self, command: MyCommand) -> None:
+    if not command.required_field:
+        raise ValidationError("Required field missing")
+    
+    if not await self.business_rule_service.is_valid(command):
+        raise BusinessRuleError("Business rule violation")
+```
+
+### Event Publishing
+```python
+async def execute_command(self, command: MyCommand) -> MyResponse:
+    # Execute business logic
+    result = await self.domain_service.process(command)
+    
+    # Publish domain events
+    events = [MyDomainEvent(result.id, result.data)]
+    await self.publish_events(events)
+    
+    return MyResponse.from_domain(result)
+```
+
+### Query Caching
+```python
+def get_cache_key(self, query: MyQuery) -> Optional[str]:
+    return f"my_query_{query.filter_id}_{query.page}"
+
+def is_cacheable(self, query: MyQuery, result: MyResult) -> bool:
+    return len(result.items) > 0  # Only cache non-empty results
+```
+
+This Application Layer provides a robust, scalable foundation for implementing business use cases while maintaining clean architectural boundaries and following CQRS best practices.

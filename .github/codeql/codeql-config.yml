@@ -1,0 +1,29 @@
+name: "Open Host Factory Plugin CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+
+paths-ignore:
+  - "tests/**"
+  - "docs/**"
+  - "examples/**"
+  - "scripts/**"
+  - ".venv/**"
+  - "build/**"
+  - "dist/**"
+
+paths:
+  - "src/**"
+
+packs:
+  - codeql/python-queries:AlertSuppression.ql
+  - codeql/python-queries:Security/CWE-022/PathInjection.ql
+  - codeql/python-queries:Security/CWE-079/XSS.ql
+  - codeql/python-queries:Security/CWE-089/SqlInjection.ql
+  - codeql/python-queries:Security/CWE-094/CodeInjection.ql
+  - codeql/python-queries:Security/CWE-295/MissingHostnameVerification.ql
+  - codeql/python-queries:Security/CWE-327/BrokenCryptoAlgorithm.ql
+  - codeql/python-queries:Security/CWE-502/UnsafeDeserialization.ql

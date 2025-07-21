@@ -43,33 +43,64 @@ def handle_exceptions(
             return self.template_repository.get_by_id(template_id)
     """
     def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                # Get exception handler (use provided or global singleton)
-                exception_handler = handler or get_exception_handler()
-                
-                # Build rich context
-                context_data = _build_context_data(
-                    func, args, kwargs, additional_context
-                )
-                
-                # Create exception context
-                exc_context = ExceptionContext(
-                    operation=context,
-                    layer=layer,
-                    **context_data
-                )
-                
-                # Handle exception
-                handled_exception = exception_handler.handle(e, exc_context)
-                
-                # Re-raise with proper context chain
-                raise handled_exception from e
-        
-        return wrapper
+        if inspect.iscoroutinefunction(func):
+            # Async wrapper for async functions
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    # Get exception handler (use provided or global singleton)
+                    exception_handler = handler or get_exception_handler()
+                    
+                    # Build rich context
+                    context_data = _build_context_data(
+                        func, args, kwargs, additional_context
+                    )
+                    
+                    # Create exception context
+                    exc_context = ExceptionContext(
+                        operation=context,
+                        layer=layer,
+                        **context_data
+                    )
+                    
+                    # Handle exception
+                    handled_exception = exception_handler.handle(e, exc_context)
+                    
+                    # Re-raise with proper context chain
+                    raise handled_exception from e
+            
+            return async_wrapper
+        else:
+            # Sync wrapper for sync functions
+            @wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    # Get exception handler (use provided or global singleton)
+                    exception_handler = handler or get_exception_handler()
+                    
+                    # Build rich context
+                    context_data = _build_context_data(
+                        func, args, kwargs, additional_context
+                    )
+                    
+                    # Create exception context
+                    exc_context = ExceptionContext(
+                        operation=context,
+                        layer=layer,
+                        **context_data
+                    )
+                    
+                    # Handle exception
+                    handled_exception = exception_handler.handle(e, exc_context)
+                    
+                    # Re-raise with proper context chain
+                    raise handled_exception from e
+            
+            return sync_wrapper
     return decorator
 
 
@@ -164,7 +195,7 @@ def handle_provider_exceptions(
     
     Args:
         context: Provider operation context
-        provider: Provider name (e.g., "aws", "azure", "gcp")
+        provider: Provider name (e.g., "aws", "provider1", "provider2")
         additional_context: Additional provider context
         
     Example:

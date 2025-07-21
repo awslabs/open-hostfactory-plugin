@@ -34,7 +34,7 @@ from .persistence_events import (
     TransactionCommittedEvent,
     # Storage strategy
     StorageEvent, StorageStrategySelectedEvent, StorageStrategyFailoverEvent,
-    ConnectionPoolEvent, StoragePerformanceEvent, DataMigrationEvent,
+    ConnectionPoolEvent, StoragePerformanceEvent,
     StorageHealthCheckEvent,
 )
 
@@ -88,7 +88,7 @@ __all__ = [
     
     # Storage Strategy Events
     'StorageEvent', 'StorageStrategySelectedEvent', 'StorageStrategyFailoverEvent',
-    'ConnectionPoolEvent', 'StoragePerformanceEvent', 'DataMigrationEvent',
+    'ConnectionPoolEvent', 'StoragePerformanceEvent',
     'StorageHealthCheckEvent',
     
     # System Events

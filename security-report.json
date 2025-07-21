@@ -1,0 +1,39 @@
+{
+  "scan_timestamp": "Sun 13 Jul 2025 11:53:37 UTC",
+  "project": "Open Host Factory Plugin",
+  "scans_performed": [],
+  "sarif_files": [
+    "bandit-report.sarif",
+    "trivy-results.sarif",
+    "hadolint-results.sarif"
+  ],
+  "results": {
+    "Bandit": [
+      true,
+      "Bandit scan completed"
+    ],
+    "Safety": [
+      true,
+      "Safety scan completed"
+    ],
+    "SBOM Generation": [
+      true,
+      "SBOM generation completed"
+    ],
+    "Trivy": [
+      true,
+      "Trivy scan completed"
+    ],
+    "Hadolint": [
+      true,
+      "Hadolint scan completed"
+    ]
+  },
+  "recommendations": [
+    "Review all SARIF files for detailed security findings",
+    "Address high and critical severity vulnerabilities first",
+    "Update dependencies with known vulnerabilities",
+    "Review container base image for security updates",
+    "Implement security controls for identified issues"
+  ]
+}

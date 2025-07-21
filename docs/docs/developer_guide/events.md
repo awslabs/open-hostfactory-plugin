@@ -80,31 +80,77 @@ class Request(AggregateRoot):
 
 #### Template Events
 
-Events related to template management:
+Events related to template management and lifecycle operations:
 
 ```python
 @dataclass(frozen=True)
 class TemplateCreatedEvent(DomainEvent):
     template_id: str
-    name: str
-    instance_type: str
-    image_id: str
-    max_count: int
-    provider_api: str
-    created_at: datetime
+    template_name: str
+    template_type: str
+    timestamp: datetime
 
 @dataclass(frozen=True)
 class TemplateUpdatedEvent(DomainEvent):
     template_id: str
-    updated_fields: Dict[str, Any]
-    previous_values: Dict[str, Any]
-    updated_at: datetime
+    template_name: str
+    changes: Dict[str, Any]
+    timestamp: datetime
 
 @dataclass(frozen=True)
 class TemplateDeletedEvent(DomainEvent):
     template_id: str
-    deleted_at: datetime
-    reason: str
+    deletion_reason: str
+    timestamp: datetime
+
+@dataclass(frozen=True)
+class TemplateValidatedEvent(DomainEvent):
+    template_id: str
+    template_name: str
+    validation_result: str
+    timestamp: datetime
+```
+
+**Template Event Publishing Integration**
+
+The `TemplateConfigurationManager` supports optional event publishing for template operations. When an `EventPublisherPort` is provided during initialization, template lifecycle events are automatically published:
+
+```python
+class TemplateConfigurationManager:
+    def __init__(self, 
+                 config_manager: ConfigurationManager,
+                 scheduler_strategy: SchedulerPort,
+                 logger: LoggingPort,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        self.event_publisher = event_publisher
+        # ... other initialization
+    
+    async def save_template(self, template: TemplateDTO) -> None:
+        """Save template with optional event publishing."""
+        existing_template = await self.get_template_by_id(template.template_id)
+        is_update = existing_template is not None
+        
+        # Perform save operation
+        await self._perform_save_operation(template)
+        
+        # Publish domain event if event publisher is available
+        if self.event_publisher and self.event_publisher.is_enabled():
+            if is_update:
+                event = TemplateUpdatedEvent(
+                    template_id=template.template_id,
+                    template_name=template.name or template.template_id,
+                    changes=self._calculate_changes(existing_template, template),
+                    timestamp=datetime.utcnow()
+                )
+            else:
+                event = TemplateCreatedEvent(
+                    template_id=template.template_id,
+                    template_name=template.name or template.template_id,
+                    template_type=template.provider_api or 'aws',
+                    timestamp=datetime.utcnow()
+                )
+            
+            self.event_publisher.publish(event)
 ```
 
 #### Machine Events
@@ -282,6 +328,70 @@ class MachineAuditHandler(BaseEventHandler):
                 "instance_type": event.instance_type,
                 "provider_instance_id": event.provider_instance_id,
                 "created_at": event.created_at.isoformat()
+            }
+        )
+```
+
+#### Template Audit Handler
+
+```python
+class TemplateAuditHandler(BaseEventHandler):
+    """Handles audit logging for template events."""
+    
+    def __init__(self, audit_service: AuditService):
+        super().__init__()
+        self._audit_service = audit_service
+    
+    async def handle(self, event: DomainEvent) -> None:
+        if isinstance(event, TemplateCreatedEvent):
+            await self._handle_template_created(event)
+        elif isinstance(event, TemplateUpdatedEvent):
+            await self._handle_template_updated(event)
+        elif isinstance(event, TemplateDeletedEvent):
+            await self._handle_template_deleted(event)
+        elif isinstance(event, TemplateValidatedEvent):
+            await self._handle_template_validated(event)
+    
+    async def _handle_template_created(self, event: TemplateCreatedEvent) -> None:
+        await self._audit_service.log_event(
+            event_type="TEMPLATE_CREATED",
+            resource_id=event.template_id,
+            details={
+                "template_name": event.template_name,
+                "template_type": event.template_type,
+                "created_at": event.timestamp.isoformat()
+            }
+        )
+    
+    async def _handle_template_updated(self, event: TemplateUpdatedEvent) -> None:
+        await self._audit_service.log_event(
+            event_type="TEMPLATE_UPDATED",
+            resource_id=event.template_id,
+            details={
+                "template_name": event.template_name,
+                "changes": event.changes,
+                "updated_at": event.timestamp.isoformat()
+            }
+        )
+    
+    async def _handle_template_deleted(self, event: TemplateDeletedEvent) -> None:
+        await self._audit_service.log_event(
+            event_type="TEMPLATE_DELETED",
+            resource_id=event.template_id,
+            details={
+                "deletion_reason": event.deletion_reason,
+                "deleted_at": event.timestamp.isoformat()
+            }
+        )
+    
+    async def _handle_template_validated(self, event: TemplateValidatedEvent) -> None:
+        await self._audit_service.log_event(
+            event_type="TEMPLATE_VALIDATED",
+            resource_id=event.template_id,
+            details={
+                "template_name": event.template_name,
+                "validation_result": event.validation_result,
+                "validated_at": event.timestamp.isoformat()
             }
         )
 ```
@@ -714,6 +824,12 @@ def register_event_handlers(event_publisher: EventPublisher,
     event_publisher.register_handler("MachineCreatedEvent", machine_audit_handler)
     event_publisher.register_handler("MachineStatusChangedEvent", machine_audit_handler)
     event_publisher.register_handler("MachineTerminatedEvent", machine_audit_handler)
+    
+    # Template event handlers
+    event_publisher.register_handler("TemplateCreatedEvent", template_audit_handler)
+    event_publisher.register_handler("TemplateUpdatedEvent", template_audit_handler)
+    event_publisher.register_handler("TemplateDeletedEvent", template_audit_handler)
+    event_publisher.register_handler("TemplateValidatedEvent", template_audit_handler)
     
     # Register handlers for all events
     for event_type in get_all_event_types():

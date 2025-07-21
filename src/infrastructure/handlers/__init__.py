@@ -2,8 +2,6 @@
 
 from src.infrastructure.handlers.base import (
     BaseHandler,
-    BaseCommandHandler,
-    BaseQueryHandler,
     BaseEventHandler,
     BaseAPIHandler,
     RequestContext
@@ -11,8 +9,6 @@ from src.infrastructure.handlers.base import (
 
 __all__ = [
     'BaseHandler',
-    'BaseCommandHandler',
-    'BaseQueryHandler',
     'BaseEventHandler',
     'BaseAPIHandler',
     'RequestContext'

@@ -60,6 +60,7 @@ venv.bak/
 .settings/
 *.sublime-workspace
 *.sublime-project
+.kiro/
 
 # Testing
 .coverage
@@ -73,12 +74,13 @@ coverage.xml
 docs-backup/
 site/
 
-# Memory Bank (Internal)
+# Internal
 memory-bank/
 htmlcov/
 .tox/
 nosetests.xml
 coverage/
+bandit-*
 
 # Logs
 logs/

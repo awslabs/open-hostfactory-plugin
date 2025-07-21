@@ -35,6 +35,13 @@ types-requests>=2.31.0
 types-PyYAML>=6.0.12
 types-python-dateutil>=2.8.19
 
+# Security Scanning
+pip-audit>=2.6.1
+semgrep>=1.45.0
+cyclonedx-bom>=4.0.0
+spdx-tools>=0.8.0
+bandit-sarif-formatter>=1.1.1
+
 # MkDocs Documentation
 mkdocs>=1.5.0
 mkdocs-material>=9.1.0

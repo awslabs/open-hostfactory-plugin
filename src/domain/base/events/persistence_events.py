@@ -95,15 +95,6 @@ class StoragePerformanceEvent(StorageEvent, PerformanceEvent):
     throughput_ops_per_sec: Optional[float] = None
 
 
-class DataMigrationEvent(InfrastructureEvent):
-    """Event raised during data migration operations."""
-    migration_type: str  # "strategy_change", "schema_update", "data_cleanup"
-    source_strategy: str
-    target_strategy: str
-    records_migrated: int
-    migration_status: str  # "started", "in_progress", "completed", "failed"
-
-
 class StorageHealthCheckEvent(StorageEvent, PerformanceEvent):
     """Event raised during storage health checks."""
     health_status: str  # "healthy", "degraded", "unhealthy"

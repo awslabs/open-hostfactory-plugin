@@ -7,7 +7,7 @@ with a clean, maintainable architecture following DDD/SOLID/DRY principles.
 from typing import Optional
 
 # Import the new base classes and decorator
-from src.application.events.base import LoggingEventHandler
+from src.application.base.event_handlers import BaseLoggingEventHandler
 from src.application.events.decorators import event_handler
 
 # Import types - using string imports to avoid circular dependencies
@@ -21,7 +21,7 @@ except ImportError:
 
 
 @event_handler("DatabaseConnectionEvent")
-class DatabaseConnectionHandler(LoggingEventHandler):
+class DatabaseConnectionHandler(BaseLoggingEventHandler):
     """Handle database connection events - DRY compliant."""
     
     def format_message(self, event: DomainEvent) -> str:
@@ -48,7 +48,7 @@ class DatabaseConnectionHandler(LoggingEventHandler):
 
 
 @event_handler("CacheOperationEvent")
-class CacheOperationHandler(LoggingEventHandler):
+class CacheOperationHandler(BaseLoggingEventHandler):
     """Handle cache operation events - DRY compliant."""
     
     def format_message(self, event: DomainEvent) -> str:

@@ -10,12 +10,10 @@ __all__ = ['CommandHandler', 'CommandBus']
 class CommandBus(Protocol):
     """Protocol for command bus."""
     
-    async def send(self, command: BaseCommand) -> BaseResponse:
-        """Send a command for processing."""
+    async def execute(self, command: BaseCommand) -> BaseResponse:
+        """Execute a command asynchronously for processing."""
         ...
     
     def register_handler(self, command_type: type, handler: CommandHandler) -> None:
         """Register a command handler for a specific command type."""
-        ...
-        """Register a command handler."""
         ...

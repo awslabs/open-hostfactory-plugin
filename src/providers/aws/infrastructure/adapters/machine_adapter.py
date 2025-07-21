@@ -8,7 +8,7 @@ from typing import Dict, Any
 from src.domain.machine.aggregate import Machine
 from src.domain.machine.value_objects import MachineStatus, PriceType
 from src.domain.base.value_objects import InstanceType
-from src.providers.aws.domain.template.value_objects import ProviderHandlerType
+from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.exceptions.aws_exceptions import (
     EC2InstanceNotFoundError,
@@ -67,7 +67,7 @@ class AWSMachineAdapter:
             
             # Validate AWS handler type
             try:
-                ProviderHandlerType(provider_api)
+                ProviderApi(provider_api)
             except ValueError:
                 self._logger.error(f"Invalid provider API type: {provider_api}")
                 raise AWSError(f"Invalid provider API type: {provider_api}")

@@ -14,7 +14,51 @@ This guide provides practical implementation guidance for using CQRS in the Open
 After implementing CQRS patterns:
 1. **[Event Handling](./events.md)** - Domain events and event handlers
 2. **[Testing CQRS](../developer_guide/testing.md)** - Testing commands and queries
-3. **[Advanced CQRS](../architecture/cqrs_pattern.md)** - Advanced CQRS patterns and optimizations
+3. **[CQRS Patterns](../architecture/cqrs_pattern.md)** - Additional CQRS patterns and optimizations
+
+## Current CQRS Migration Status
+
+The system is actively migrating to full CQRS implementation. Here's the current status:
+
+**Completed Components:**
+- `CommandBus` and `QueryBus` infrastructure (`src/infrastructure/di/buses.py`)
+- Template queries: `ListTemplatesQuery`, `GetTemplateQuery`, `ValidateTemplateQuery`
+- Template commands: `CreateTemplateCommand`, `UpdateTemplateCommand`, `DeleteTemplateCommand`, `ValidateTemplateCommand`
+- Template list endpoint (`GET /api/v1/templates`) - **MIGRATED TO CQRS**
+
+**Implementation Status:**
+- Template endpoints (GET, POST, PUT, DELETE) - using CQRS handlers
+- Machine management endpoints - using CQRS pattern
+- Request processing endpoints
+- Provider management endpoints
+
+**Implementation Examples:**
+
+Current working CQRS implementation in templates router:
+```python
+# MIGRATED: List templates using QueryBus
+@router.get("/")
+async def list_templates(provider_api: Optional[str] = None):
+    container = get_container()
+    query_bus = container.get(QueryBus)
+    
+    query = ListTemplatesQuery(
+        provider_api=provider_api,
+        active_only=True,
+        include_configuration=False
+    )
+    
+    templates = query_bus.execute(query)
+    return JSONResponse(content={"templates": templates})
+
+# LEGACY: Still using direct handlers (to be migrated)
+@router.get("/{template_id}")
+async def get_template(template_id: str):
+    container = get_container()
+    query_handler = container.get(TemplateQueryHandler)  # Direct handler
+    result = await query_handler.handle_get_template(template_id)
+    return JSONResponse(content=result)
+```
 
 ## Quick Start Guide
 

@@ -23,24 +23,23 @@ class TestCriticalImports:
         from src.domain.base.exceptions import DomainException
         from src.infrastructure.logging.logger import get_logger
         
-        # Interface command handlers
+        # Interface command handlers (function-based)
         from src.interface.command_handlers import (
             CLICommandHandler,
-            GetRequestStatusCLIHandler,
-            GetAvailableTemplatesCLIHandler,
-            RequestMachinesCLIHandler,
-            GetReturnRequestsCLIHandler,
-            RequestReturnMachinesCLIHandler,
-            MigrateRepositoryCLIHandler
+            handle_get_request_status,
+            handle_list_templates,
+            handle_request_machines,
+            handle_get_return_requests,
+            handle_request_return_machines
         )
         
-        # Verify classes are importable
+        # Verify classes and functions are importable
         assert Application is not None
         assert RequestStatus is not None
         assert DomainException is not None
         assert get_logger is not None
         assert CLICommandHandler is not None
-        assert GetRequestStatusCLIHandler is not None
+        assert handle_get_request_status is not None
     
     def test_value_object_locations(self):
         """Test that value objects are in their correct locations after decomposition."""
@@ -65,23 +64,22 @@ class TestCriticalImports:
         # Template domain value objects
         from src.domain.template.value_objects import (
             TemplateId,
-            ProviderHandlerType
+            ProviderConfiguration
         )
         
         # Base domain value objects
         from src.domain.base.value_objects import (
             InstanceId,
             InstanceType,
-            ResourceId,
-            ResourceQuota
+            ResourceId
         )
         
         # Verify all imports successful
         assert all([
             RequestStatus, RequestType, RequestId, MachineReference,
             MachineStatus, MachineId, MachineType, PriceType,
-            TemplateId, ProviderHandlerType,
-            InstanceId, InstanceType, ResourceId, ResourceQuota
+            TemplateId, ProviderConfiguration,
+            InstanceId, InstanceType, ResourceId
         ])
     
     def test_deprecated_imports_fail(self):
@@ -101,7 +99,7 @@ class TestCriticalImports:
         # Should be able to create application instance
         app = Application()
         assert app is not None
-        assert hasattr(app, 'run')
+        assert hasattr(app, 'initialize')
     
     def test_command_handler_inheritance(self):
         """Test that command handlers have correct inheritance."""
@@ -147,7 +145,7 @@ class TestDomainBoundaries:
         from src.domain.template.value_objects import __all__ as template_exports
         
         expected_template_objects = [
-            'TemplateId', 'ProviderHandlerType'
+            'TemplateId', 'ProviderConfiguration'
         ]
         
         for obj in expected_template_objects:
@@ -162,11 +160,9 @@ class TestBackwardCompatibility:
         # These should work without issues
         from src.application.dto.commands import RequestStatus
         from src.application.request.dto import MachineReference
-        from src.application.queries.handlers import RequestId
         
         assert RequestStatus is not None
         assert MachineReference is not None
-        # RequestId is imported dynamically in handlers, so we can't test it directly
     
     def test_provider_layer_imports(self):
         """Test imports used in provider layer."""

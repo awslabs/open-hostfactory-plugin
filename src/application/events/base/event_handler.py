@@ -251,7 +251,7 @@ class EventHandler(ABC):
         Returns:
             Formatted status change string
         """
-        message = f"{old_status} → {new_status}"
+        message = f"{old_status} -> {new_status}"
         if reason:
             message += f" (Reason: {reason})"
         return message

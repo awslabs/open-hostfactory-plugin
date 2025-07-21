@@ -6,7 +6,7 @@ enabling the storage registry pattern for DynamoDB persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import Any, Dict, TYPE_CHECKING
+from typing import Any, Dict, Callable, TYPE_CHECKING
 
 # Use TYPE_CHECKING to avoid direct infrastructure import
 if TYPE_CHECKING:
@@ -70,26 +70,54 @@ def create_dynamodb_config(data: Dict[str, Any]) -> Any:
 
 def create_dynamodb_unit_of_work(config: Any) -> Any:
     """
-    Create DynamoDB unit of work.
+    Create DynamoDB unit of work with proper configuration extraction.
     
     Args:
-        config: Configuration object
+        config: Configuration object (ConfigurationManager or dict)
         
     Returns:
-        DynamoDBUnitOfWork instance
+        DynamoDBUnitOfWork instance with properly configured AWS client
     """
     from src.providers.aws.persistence.dynamodb.unit_of_work import DynamoDBUnitOfWork
     from src.config.manager import ConfigurationManager
+    from src.config.schemas.storage_schema import StorageConfig
+    import boto3
     
     # Handle different config types
     if isinstance(config, ConfigurationManager):
-        config_manager = config
+        # Extract DynamoDB-specific configuration through StorageConfig
+        storage_config = config.get_typed(StorageConfig)
+        dynamodb_config = storage_config.dynamodb_strategy
+        
+        # Create AWS client with extracted configuration
+        session = boto3.Session(profile_name=dynamodb_config.profile if dynamodb_config.profile else None)
+        aws_client = session.client('dynamodb', region_name=dynamodb_config.region)
+        
+        return DynamoDBUnitOfWork(
+            aws_client=aws_client,
+            region=dynamodb_config.region,
+            profile=dynamodb_config.profile,
+            machine_table=f"{dynamodb_config.table_prefix}-machines",
+            request_table=f"{dynamodb_config.table_prefix}-requests",
+            template_table=f"{dynamodb_config.table_prefix}-templates"
+        )
     else:
-        # For testing or other scenarios
-        config_manager = config
-    
-    # This is a factory function that will be called by the registry
-    return DynamoDBUnitOfWork
+        # For testing or other scenarios - assume it's a dict with AWS config
+        region = config.get('region', 'us-east-1')
+        profile = config.get('profile')
+        table_prefix = config.get('table_prefix', 'hostfactory')
+        
+        session = boto3.Session(profile_name=profile if profile else None)
+        aws_client = session.client('dynamodb', region_name=region)
+        
+        return DynamoDBUnitOfWork(
+            aws_client=aws_client,
+            region=region,
+            profile=profile,
+            machine_table=f"{table_prefix}-machines",
+            request_table=f"{table_prefix}-requests",
+            template_table=f"{table_prefix}-templates"
+        )
 
 
 def register_dynamodb_storage(registry: 'StorageRegistry' = None, logger: 'LoggingPort' = None) -> None:

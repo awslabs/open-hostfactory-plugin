@@ -9,8 +9,12 @@ from .machine_status import MachineStatus
 
 
 class Machine(AggregateRoot):
-    """Machine aggregate root - manages machine lifecycle and business rules."""
-    model_config = ConfigDict(frozen=False, validate_assignment=True)
+    """Machine aggregate root with both snake_case and camelCase support via aliases."""
+    model_config = ConfigDict(
+        frozen=False, 
+        validate_assignment=True,
+        populate_by_name=True  # Allow both field names and aliases
+    )
     
     # Core machine identification
     instance_id: InstanceId
@@ -29,7 +33,7 @@ class Machine(AggregateRoot):
     security_group_ids: List[str] = Field(default_factory=list)
     
     # Machine state
-    status: MachineStatus = MachineStatus.PENDING
+    status: MachineStatus = Field(default=MachineStatus.PENDING)
     status_reason: Optional[str] = None
     
     # Lifecycle timestamps
@@ -37,14 +41,14 @@ class Machine(AggregateRoot):
     termination_time: Optional[datetime] = None
     
     # Tags and metadata
-    tags: Tags = Field(default_factory=lambda: Tags(values={}))
+    tags: Tags = Field(default_factory=lambda: Tags(tags={}))
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
     # Provider-specific data
     provider_data: Dict[str, Any] = Field(default_factory=dict)
     
     # Versioning
-    version: int = 0
+    version: int = Field(default=0)
     
     def __init__(self, **data):
         # Set default ID if not provided
@@ -72,7 +76,7 @@ class Machine(AggregateRoot):
         now = datetime.utcnow()
         if new_status == MachineStatus.RUNNING and not self.launch_time:
             data['launch_time'] = now
-        elif new_status in [MachineStatus.TERMINATED, MachineStatus.ERROR]:
+        elif new_status in [MachineStatus.TERMINATED, MachineStatus.FAILED]:
             data['termination_time'] = now
         
         # Create updated machine instance
@@ -80,16 +84,23 @@ class Machine(AggregateRoot):
         
         # Generate domain event for status change (only if status actually changed)
         if old_status != new_status:
-            from src.domain.base.events import MachineStateChangedEvent
-            status_event = MachineStateChangedEvent.create(
+            from src.domain.base.events.domain_events import MachineStatusChangedEvent
+            status_event = MachineStatusChangedEvent(
+                # DomainEvent required fields
+                aggregate_id=str(self.instance_id),
+                aggregate_type="Machine",
+                # MachineEvent required fields
                 machine_id=str(self.instance_id),
                 request_id=str(self.request_id) if self.request_id else "unknown",
-                old_state=old_status.value,
-                new_state=new_status.value,
-                status_details={
+                # StatusChangeEvent required fields
+                old_status=old_status.value,
+                new_status=new_status.value,
+                reason=reason,
+                # Additional metadata in the metadata field
+                metadata={
                     "reason": reason,
                     "timestamp": now.isoformat(),
-                    "machine_type": self.instance_type,
+                    "machine_type": str(self.instance_type),
                     "provider_type": self.provider_type
                 }
             )
@@ -143,7 +154,7 @@ class Machine(AggregateRoot):
     @property
     def is_terminated(self) -> bool:
         """Check if machine is terminated."""
-        return self.status in [MachineStatus.TERMINATED, MachineStatus.TERMINATING]
+        return self.status in [MachineStatus.TERMINATED, MachineStatus.SHUTTING_DOWN]
     
     @property
     def is_healthy(self) -> bool:

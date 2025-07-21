@@ -485,6 +485,83 @@
 }
 ```
 
+## Scheduler Configuration
+
+The scheduler configuration determines how the system interfaces with job schedulers like IBM Symphony Host Factory.
+
+### Basic Scheduler Configuration
+```json
+{
+  "scheduler": {
+    "strategy": "hostfactory",
+    "config_root": "config"
+  }
+}
+```
+
+### Advanced Scheduler Configuration
+```json
+{
+  "scheduler": {
+    "strategy": "hostfactory",
+    "config_root": "config",
+    "template_path": "awsprov_templates.json",
+    "field_mapping": {
+      "template_id_field": "templateId",
+      "max_instances_field": "maxNumber",
+      "image_id_field": "imageId",
+      "instance_type_field": "vmType"
+    },
+    "output_format": {
+      "use_camel_case": true,
+      "include_attributes": true,
+      "attribute_format": "hostfactory"
+    }
+  }
+}
+```
+
+### Complete Configuration with Scheduler
+```json
+{
+  "version": "2.0.0",
+  "provider": {
+    "selection_policy": "FIRST_AVAILABLE",
+    "providers": [
+      {
+        "name": "aws-default",
+        "type": "aws",
+        "enabled": true,
+        "config": {
+          "region": "us-east-1",
+          "profile": "default"
+        }
+      }
+    ]
+  },
+  "scheduler": {
+    "strategy": "hostfactory",
+    "config_root": "config",
+    "template_path": "awsprov_templates.json"
+  },
+  "storage": {
+    "strategy": "json",
+    "json_strategy": {
+      "storage_type": "single_file",
+      "base_path": "data",
+      "filenames": {
+        "single_file": "request_database.json"
+      }
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "file_path": "logs/app.log",
+    "console_enabled": true
+  }
+}
+```
+
 ## Migration Examples
 
 ### From Legacy to New Format

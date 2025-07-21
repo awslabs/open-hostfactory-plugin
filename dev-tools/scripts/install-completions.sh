@@ -42,7 +42,7 @@ if [ ! -f "src/run.py" ]; then
     exit 1
 fi
 
-print_status "🚀 Installing shell completions for ohfp command"
+print_status "Installing shell completions for ohfp command"
 echo ""
 
 # Detect shell
@@ -123,9 +123,9 @@ if [ "$INSTALL_ZSH" = true ]; then
     fi
 fi
 
-print_success "✅ Installation complete!"
+print_success "Installation complete!"
 echo ""
-print_status "💡 To activate completions:"
+print_status "To activate completions:"
 if [ "$INSTALL_BASH" = true ]; then
     echo "  Bash: source ~/.bashrc (or restart terminal)"
 fi
@@ -138,7 +138,7 @@ echo "  ohfp <TAB>                    # Show available resources"
 echo "  ohfp templates <TAB>          # Show template actions"
 echo "  ohfp --format <TAB>           # Show format options"
 echo ""
-print_status "🔧 Manual installation commands:"
+print_status "Manual installation commands:"
 if [ "$INSTALL_BASH" = true ]; then
     echo "  Bash: python src/run.py --completion bash > ~/.local/share/bash-completion/completions/ohfp"
 fi

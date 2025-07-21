@@ -8,7 +8,6 @@ from enum import Enum
 # Export all public classes
 __all__ = [
     'TemplateId',
-    'FleetType',
     'ProviderConfiguration'
 ]
 

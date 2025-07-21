@@ -53,7 +53,8 @@ def get_error_handling_port() -> Optional['ErrorHandlingPort']:
             from src.domain.base.ports import ErrorHandlingPort
             return _domain_container.get(ErrorHandlingPort)
         except Exception:
-            # Graceful fallback if service not registered
+            # Graceful fallback if service not registered - no logging in domain layer
+            # Domain layer should not have direct infrastructure dependencies
             pass
     return None
 

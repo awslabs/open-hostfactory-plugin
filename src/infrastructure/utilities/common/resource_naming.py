@@ -19,7 +19,7 @@ def get_resource_prefix(resource_type: str, config: Optional[ResourceConfig] = N
     # Get config if not provided
     if config is None:
         config_manager = get_config_manager()
-        config = config_manager.config.resource
+        config = config_manager.app_config.resource
     
     # Get the specific prefix if it exists
     if hasattr(config.prefixes, resource_type):

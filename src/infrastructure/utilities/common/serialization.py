@@ -69,3 +69,7 @@ def process_value_objects(data: Any) -> Any:
         return data.value
     else:
         return data
+
+
+# Alias for clarity in field serialization contexts
+serialize_field = process_value_objects

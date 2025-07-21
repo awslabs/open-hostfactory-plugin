@@ -4,25 +4,15 @@ from unittest.mock import Mock, patch, AsyncMock
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
 
-# Import CQRS components
+# Import CQRS components with correct paths
 try:
-    from src.application.base.commands import Command, CommandBus, CommandHandler
-    from src.application.base.queries import Query, QueryBus, QueryHandler
-    from src.application.commands.handlers import (
-        CreateRequestHandler, UpdateRequestStatusHandler, TerminateMachinesHandler
-    )
-    from src.application.queries.handlers import (
-        GetRequestStatusHandler, GetAvailableTemplatesHandler, GetMachinesByRequestHandler
-    )
-    from src.application.dto.commands import (
-        CreateRequestCommand, UpdateRequestStatusCommand, TerminateMachinesCommand
-    )
-    from src.application.dto.queries import (
-        GetRequestStatusQuery, GetAvailableTemplatesQuery, GetMachinesByRequestQuery
-    )
-    from src.application.dto.responses import (
-        RequestStatusResponse, TemplateResponse, MachineResponse
-    )
+    from src.infrastructure.di.buses import CommandBus, QueryBus
+    from src.application.interfaces.command_query import Command, Query
+    from src.application.interfaces.command_handler import CommandHandler
+    from src.application.interfaces.query_handler import QueryHandler
+    from src.application.commands.request_handlers import CreateMachineRequestHandler
+    from src.application.dto.commands import CreateRequestCommand
+    from src.application.dto.queries import GetTemplateQuery
     IMPORTS_AVAILABLE = True
 except ImportError as e:
     IMPORTS_AVAILABLE = False

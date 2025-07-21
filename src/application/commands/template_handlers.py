@@ -1,7 +1,8 @@
 """Template command handlers for CQRS pattern."""
 
-from typing import Optional
-from src.application.interfaces.command_handler import CommandHandler
+from typing import Optional, Dict, Any
+from src.application.base.handlers import BaseCommandHandler
+from src.application.decorators import command_handler
 from src.application.template.commands import (
     CreateTemplateCommand,
     UpdateTemplateCommand,
@@ -11,13 +12,12 @@ from src.application.template.commands import (
 )
 from src.domain.template.aggregate import Template
 from src.domain.base.exceptions import EntityNotFoundError, BusinessRuleError
-from src.domain.base.ports import LoggingPort, ContainerPort
+from src.domain.base.ports import LoggingPort, ContainerPort, EventPublisherPort, ErrorHandlingPort
 from src.domain.base import UnitOfWorkFactory
-from src.domain.base.dependency_injection import injectable
 
 
-@injectable
-class CreateTemplateHandler(CommandHandler[CreateTemplateCommand, TemplateCommandResponse]):
+@command_handler(CreateTemplateCommand)
+class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCommandResponse]):
     """
     Handler for creating templates.
     
@@ -31,31 +31,42 @@ class CreateTemplateHandler(CommandHandler[CreateTemplateCommand, TemplateComman
     def __init__(self, 
                  uow_factory: UnitOfWorkFactory,
                  logger: LoggingPort,
-                 container: ContainerPort) -> None:
+                 container: ContainerPort,
+                 event_publisher: EventPublisherPort,
+                 error_handler: ErrorHandlingPort) -> None:
+        super().__init__(logger, event_publisher, error_handler)
         self._uow_factory = uow_factory
-        self._logger = logger
         self._container = container
     
+    async def validate_command(self, command: CreateTemplateCommand) -> None:
+        """Validate create template command."""
+        await super().validate_command(command)
+        if not command.template_id:
+            raise ValueError("template_id is required")
+        if not command.provider_api:
+            raise ValueError("provider_api is required")
+        if not command.image_id:
+            raise ValueError("image_id is required")
     
-    def handle(self, command: CreateTemplateCommand) -> TemplateCommandResponse:
+    async def execute_command(self, command: CreateTemplateCommand) -> TemplateCommandResponse:
         """Create new template with validation and events."""
-        self._logger.info(f"Creating template: {command.template_id}")
+        self.logger.info(f"Creating template: {command.template_id}")
         
-        # Get template configuration port for validation
-        from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
-        template_port = self._container.get(TemplateConfigurationPort)
-        
-        # Validate template configuration
-        validation_errors = template_port.validate_template_config(command.configuration)
-        if validation_errors:
-            self._logger.warning(f"Template validation failed for {command.template_id}: {validation_errors}")
-            return TemplateCommandResponse(
-                template_id=command.template_id,
-                validation_errors=validation_errors
-            )
-        
-        # Create template aggregate
         try:
+            # Get template configuration port for validation
+            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            template_port = self._container.get(TemplateConfigurationPort)
+            
+            # Validate template configuration
+            validation_errors = template_port.validate_template_config(command.configuration)
+            if validation_errors:
+                self.logger.warning(f"Template validation failed for {command.template_id}: {validation_errors}")
+                return TemplateCommandResponse(
+                    template_id=command.template_id,
+                    validation_errors=validation_errors
+                )
+            
+            # Create template aggregate
             template = Template.create(
                 template_id=command.template_id,
                 name=command.name or command.template_id,
@@ -68,13 +79,9 @@ class CreateTemplateHandler(CommandHandler[CreateTemplateCommand, TemplateComman
                 tags=command.tags,
                 configuration=command.configuration
             )
-        except Exception as e:
-            self._logger.error(f"Failed to create template aggregate: {e}")
-            raise BusinessRuleError(f"Template creation failed: {str(e)}")
-        
-        # Persist template through repository
-        with self._uow_factory.create_unit_of_work() as uow:
-            try:
+            
+            # Persist template through repository
+            with self._uow_factory.create_unit_of_work() as uow:
                 # Check if template already exists
                 existing_template = uow.templates.get_by_id(command.template_id)
                 if existing_template:
@@ -84,32 +91,24 @@ class CreateTemplateHandler(CommandHandler[CreateTemplateCommand, TemplateComman
                 uow.templates.add(template)
                 uow.commit()
                 
-                self._logger.info(f"Template created successfully: {command.template_id}")
-                
-                # Template aggregate will publish TemplateCreated event through repository
-                
-            except Exception as e:
-                self._logger.error(f"Failed to persist template {command.template_id}: {e}")
-                raise
-        
-        return TemplateCommandResponse(template_id=command.template_id)
-    
-    def _determine_provider_type(self, template_dto) -> Optional[str]:
-        """Determine provider type from template DTO."""
-        provider_api = template_dto.provider_api
-        if provider_api:
-            if provider_api in ['EC2Fleet', 'SpotFleet', 'RunInstances', 'AutoScalingGroup']:
-                return 'aws'
-        
-        config = template_dto.configuration
-        if config and ('aws' in config or any(key.startswith('aws_') for key in config.keys())):
-            return 'aws'
-        
-        return None
+                self.logger.info(f"Template created successfully: {command.template_id}")
+            
+            return TemplateCommandResponse(template_id=command.template_id)
+            
+        except BusinessRuleError as e:
+            self.logger.error(f"Business rule violation creating template {command.template_id}: {e}")
+            return TemplateCommandResponse(
+                template_id=command.template_id,
+                validation_errors=[str(e)]
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to create template {command.template_id}: {e}")
+            raise
 
 
-@injectable
-class UpdateTemplateHandler(CommandHandler[UpdateTemplateCommand, TemplateCommandResponse]):
+
+@command_handler(UpdateTemplateCommand)
+class UpdateTemplateHandler(BaseCommandHandler[UpdateTemplateCommand, TemplateCommandResponse]):
     """
     Handler for updating templates.
     
@@ -124,34 +123,41 @@ class UpdateTemplateHandler(CommandHandler[UpdateTemplateCommand, TemplateComman
     def __init__(self, 
                  uow_factory: UnitOfWorkFactory,
                  logger: LoggingPort,
-                 container: ContainerPort) -> None:
+                 container: ContainerPort,
+                 event_publisher: EventPublisherPort,
+                 error_handler: ErrorHandlingPort) -> None:
+        super().__init__(logger, event_publisher, error_handler)
         self._uow_factory = uow_factory
-        self._logger = logger
         self._container = container
     
+    async def validate_command(self, command: UpdateTemplateCommand) -> None:
+        """Validate update template command."""
+        await super().validate_command(command)
+        if not command.template_id:
+            raise ValueError("template_id is required")
     
-    def handle(self, command: UpdateTemplateCommand) -> TemplateCommandResponse:
+    async def execute_command(self, command: UpdateTemplateCommand) -> TemplateCommandResponse:
         """Update existing template with validation and events."""
-        self._logger.info(f"Updating template: {command.template_id}")
+        self.logger.info(f"Updating template: {command.template_id}")
         
-        # Get template configuration port for validation
-        from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
-        template_port = self._container.get(TemplateConfigurationPort)
-        
-        # Validate updated configuration if provided
-        validation_errors = []
-        if command.configuration:
-            validation_errors = template_port.validate_template_config(command.configuration)
-            if validation_errors:
-                self._logger.warning(f"Template update validation failed for {command.template_id}: {validation_errors}")
-                return TemplateCommandResponse(
-                    template_id=command.template_id,
-                    validation_errors=validation_errors
-                )
-        
-        # Update template through repository
-        with self._uow_factory.create_unit_of_work() as uow:
-            try:
+        try:
+            # Get template configuration port for validation
+            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            template_port = self._container.get(TemplateConfigurationPort)
+            
+            # Validate updated configuration if provided
+            validation_errors = []
+            if command.configuration:
+                validation_errors = template_port.validate_template_config(command.configuration)
+                if validation_errors:
+                    self.logger.warning(f"Template update validation failed for {command.template_id}: {validation_errors}")
+                    return TemplateCommandResponse(
+                        template_id=command.template_id,
+                        validation_errors=validation_errors
+                    )
+            
+            # Update template through repository
+            with self._uow_factory.create_unit_of_work() as uow:
                 # Get existing template
                 template = uow.templates.get_by_id(command.template_id)
                 if not template:
@@ -177,22 +183,20 @@ class UpdateTemplateHandler(CommandHandler[UpdateTemplateCommand, TemplateComman
                 uow.templates.update(template)
                 uow.commit()
                 
-                self._logger.info(f"Template updated successfully: {command.template_id}")
-                
-                # Template aggregate will publish TemplateUpdated event through repository
-                
-            except EntityNotFoundError:
-                self._logger.error(f"Template not found for update: {command.template_id}")
-                raise
-            except Exception as e:
-                self._logger.error(f"Failed to update template {command.template_id}: {e}")
-                raise
-        
-        return TemplateCommandResponse(template_id=command.template_id)
+                self.logger.info(f"Template updated successfully: {command.template_id}")
+            
+            return TemplateCommandResponse(template_id=command.template_id)
+            
+        except EntityNotFoundError as e:
+            self.logger.error(f"Template not found for update: {command.template_id}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Failed to update template {command.template_id}: {e}")
+            raise
 
 
-@injectable
-class DeleteTemplateHandler(CommandHandler[DeleteTemplateCommand, TemplateCommandResponse]):
+@command_handler(DeleteTemplateCommand)
+class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCommandResponse]):
     """
     Handler for deleting templates.
     
@@ -206,19 +210,26 @@ class DeleteTemplateHandler(CommandHandler[DeleteTemplateCommand, TemplateComman
     def __init__(self, 
                  uow_factory: UnitOfWorkFactory,
                  logger: LoggingPort,
-                 container: ContainerPort) -> None:
+                 container: ContainerPort,
+                 event_publisher: EventPublisherPort,
+                 error_handler: ErrorHandlingPort) -> None:
+        super().__init__(logger, event_publisher, error_handler)
         self._uow_factory = uow_factory
-        self._logger = logger
         self._container = container
     
+    async def validate_command(self, command: DeleteTemplateCommand) -> None:
+        """Validate delete template command."""
+        await super().validate_command(command)
+        if not command.template_id:
+            raise ValueError("template_id is required")
     
-    def handle(self, command: DeleteTemplateCommand) -> TemplateCommandResponse:
+    async def execute_command(self, command: DeleteTemplateCommand) -> TemplateCommandResponse:
         """Delete template with validation and events."""
-        self._logger.info(f"Deleting template: {command.template_id}")
+        self.logger.info(f"Deleting template: {command.template_id}")
         
-        # Delete template through repository
-        with self._uow_factory.create_unit_of_work() as uow:
-            try:
+        try:
+            # Delete template through repository
+            with self._uow_factory.create_unit_of_work() as uow:
                 # Get existing template
                 template = uow.templates.get_by_id(command.template_id)
                 if not template:
@@ -233,25 +244,23 @@ class DeleteTemplateHandler(CommandHandler[DeleteTemplateCommand, TemplateComman
                 uow.templates.remove(template)
                 uow.commit()
                 
-                self._logger.info(f"Template deleted successfully: {command.template_id}")
-                
-                # Template aggregate will publish TemplateDeleted event through repository
-                
-            except EntityNotFoundError:
-                self._logger.error(f"Template not found for deletion: {command.template_id}")
-                raise
-            except BusinessRuleError:
-                self._logger.error(f"Cannot delete template {command.template_id}: business rule violation")
-                raise
-            except Exception as e:
-                self._logger.error(f"Failed to delete template {command.template_id}: {e}")
-                raise
-        
-        return TemplateCommandResponse(template_id=command.template_id)
+                self.logger.info(f"Template deleted successfully: {command.template_id}")
+            
+            return TemplateCommandResponse(template_id=command.template_id)
+            
+        except EntityNotFoundError as e:
+            self.logger.error(f"Template not found for deletion: {command.template_id}")
+            raise
+        except BusinessRuleError as e:
+            self.logger.error(f"Cannot delete template {command.template_id}: business rule violation")
+            raise
+        except Exception as e:
+            self.logger.error(f"Failed to delete template {command.template_id}: {e}")
+            raise
 
 
-@injectable
-class ValidateTemplateCommandHandler(CommandHandler[ValidateTemplateCommand, TemplateCommandResponse]):
+@command_handler(ValidateTemplateCommand)
+class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, TemplateCommandResponse]):
     """
     Handler for validating template configurations.
     
@@ -264,28 +273,37 @@ class ValidateTemplateCommandHandler(CommandHandler[ValidateTemplateCommand, Tem
     
     def __init__(self, 
                  logger: LoggingPort,
-                 container: ContainerPort) -> None:
-        self._logger = logger
+                 container: ContainerPort,
+                 event_publisher: EventPublisherPort,
+                 error_handler: ErrorHandlingPort) -> None:
+        super().__init__(logger, event_publisher, error_handler)
         self._container = container
     
+    async def validate_command(self, command: ValidateTemplateCommand) -> None:
+        """Validate template validation command."""
+        await super().validate_command(command)
+        if not command.template_id:
+            raise ValueError("template_id is required")
+        if not command.configuration:
+            raise ValueError("configuration is required")
     
-    def handle(self, command: ValidateTemplateCommand) -> TemplateCommandResponse:
+    async def execute_command(self, command: ValidateTemplateCommand) -> TemplateCommandResponse:
         """Validate template configuration with detailed results."""
-        self._logger.info(f"Validating template configuration: {command.template_id}")
-        
-        # Get template configuration port for validation
-        from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
-        template_port = self._container.get(TemplateConfigurationPort)
+        self.logger.info(f"Validating template configuration: {command.template_id}")
         
         try:
+            # Get template configuration port for validation
+            from src.domain.base.ports.template_configuration_port import TemplateConfigurationPort
+            template_port = self._container.get(TemplateConfigurationPort)
+            
             # Validate template configuration
             validation_errors = template_port.validate_template_config(command.configuration)
             
             # Log validation results
             if validation_errors:
-                self._logger.warning(f"Template validation failed for {command.template_id}: {validation_errors}")
+                self.logger.warning(f"Template validation failed for {command.template_id}: {validation_errors}")
             else:
-                self._logger.info(f"Template validation passed for {command.template_id}")
+                self.logger.info(f"Template validation passed for {command.template_id}")
             
             # Publish validation event (could be useful for monitoring/auditing)
             # This would be handled by the domain event system
@@ -296,7 +314,7 @@ class ValidateTemplateCommandHandler(CommandHandler[ValidateTemplateCommand, Tem
             )
             
         except Exception as e:
-            self._logger.error(f"Template validation failed for {command.template_id}: {e}")
+            self.logger.error(f"Template validation failed for {command.template_id}: {e}")
             return TemplateCommandResponse(
                 template_id=command.template_id,
                 validation_errors=[f"Validation error: {str(e)}"]

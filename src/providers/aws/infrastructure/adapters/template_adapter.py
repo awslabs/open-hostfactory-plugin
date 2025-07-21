@@ -5,12 +5,15 @@ This module provides a unified adapter for AWS-specific template operations,
 consolidating validation, field extension, and reference resolution.
 Follows the Adapter/Port pattern established in the codebase.
 """
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import re
 from src.domain.template.aggregate import Template
-from src.providers.aws.domain.template.value_objects import ProviderHandlerType
+from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.domain.base.ports.template_adapter_port import TemplateAdapterPort
-from src.domain.base.ports import LoggingPort, ConfigurationPort
+from src.domain.base.ports.logging_port import LoggingPort
+from src.domain.base.ports.configuration_port import ConfigurationPort
+from src.infrastructure.template.dtos import TemplateDTO
+from src.infrastructure.template.configuration_manager import TemplateConfigurationManager
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.exceptions.aws_exceptions import AWSValidationError
 
@@ -36,18 +39,19 @@ class AWSTemplateAdapter(TemplateAdapterPort):
         'launch_template_configs', 'on_demand_target_capacity', 'spot_target_capacity'
     ]
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
+    def __init__(self, template_config_manager: TemplateConfigurationManager, 
+                 aws_client: AWSClient, logger: LoggingPort):
         """
         Initialize the adapter.
         
         Args:
+            template_config_manager: Template configuration manager
             aws_client: AWS client instance
             logger: Logger for logging messages
-            config: Configuration port for accessing configuration
         """
+        self._template_config_manager = template_config_manager
         self._aws_client = aws_client
         self._logger = logger
-        self._config = config
 
     def validate_template(self, template: Template) -> List[str]:
         """
@@ -157,10 +161,10 @@ class AWSTemplateAdapter(TemplateAdapterPort):
             errors['image_id'] = f"Invalid AMI ID format: {template.image_id}"
 
         # Validate instance type(s)
-        if not (template.vm_type or getattr(template, 'vm_types', None)):
-            errors['vm_type'] = "Either vm_type or vm_types must be specified"
-        elif template.vm_type and not self._is_valid_instance_type(template.vm_type):
-            errors['vm_type'] = f"Invalid instance type: {template.vm_type}"
+        if not (template.instance_type or getattr(template, 'instance_types', None)):
+            errors['instance_type'] = "Either instance_type or instance_types must be specified"
+        elif template.instance_type and not self._is_valid_instance_type(template.instance_type):
+            errors['instance_type'] = f"Invalid instance type: {template.instance_type}"
 
         # Validate subnet IDs
         if not template.subnet_ids or len(template.subnet_ids) == 0:
@@ -188,6 +192,52 @@ class AWSTemplateAdapter(TemplateAdapterPort):
             Provider API identifier
         """
         return "EC2Fleet"  # Default AWS provider API
+    
+    # === PORT INTERFACE METHODS ===
+    
+    async def get_template_by_id(self, template_id: str) -> Optional[TemplateDTO]:
+        """Get a template by its ID."""
+        return await self._template_config_manager.get_template_by_id(template_id)
+    
+    async def get_all_templates(self) -> List[TemplateDTO]:
+        """Get all available templates."""
+        return await self._template_config_manager.get_all_templates()
+    
+    async def get_templates_by_provider_api(self, provider_api: str) -> List[TemplateDTO]:
+        """Get templates filtered by provider API."""
+        return await self._template_config_manager.get_templates_by_provider(provider_api)
+    
+    async def validate_template(self, template: TemplateDTO) -> Dict[str, Any]:
+        """Validate a template configuration."""
+        return await self._template_config_manager.validate_template(template)
+    
+    async def save_template(self, template: TemplateDTO) -> None:
+        """Save a template."""
+        await self._template_config_manager.save_template(template)
+    
+    async def delete_template(self, template_id: str) -> None:
+        """Delete a template."""
+        await self._template_config_manager.delete_template(template_id)
+    
+    def get_supported_provider_apis(self) -> List[str]:
+        """Get the list of provider APIs supported by this adapter."""
+        return ['EC2Fleet', 'SpotFleet', 'ASG', 'RunInstances']
+    
+    def get_adapter_info(self) -> Dict[str, Any]:
+        """Get information about this adapter."""
+        return {
+            'adapter_name': 'AWSTemplateAdapter',
+            'provider_type': 'aws',
+            'supported_apis': self.get_supported_provider_apis(),
+            'supported_fields': self._AWS_SUPPORTED_FIELDS,
+            'features': [
+                'ami_resolution',
+                'ssm_parameter_resolution',
+                'field_validation',
+                'network_validation',
+                'fleet_type_support'
+            ]
+        }
 
     # === LEGACY COMPATIBILITY METHODS ===
 
@@ -281,7 +331,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
         if not template.image_id:
             errors.append("Image ID is required for AWS templates")
         
-        if not (template.vm_type or getattr(template, 'vm_types', None)):
+        if not (template.instance_type or getattr(template, 'instance_types', None)):
             errors.append("Instance type is required for AWS templates")
         
         if not template.subnet_ids or len(template.subnet_ids) == 0:

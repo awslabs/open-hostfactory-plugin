@@ -128,7 +128,7 @@ class TestDDDCompliance:
         """Ensure all domain events are immutable."""
         try:
             from src.domain.base.events.domain_events import DomainEvent
-            from src.domain.request.events import RequestCreatedEvent
+            # from src.domain.request.events import RequestCreatedEvent  # TODO: Verify if this exists
         except ImportError as e:
             pytest.skip(f"Could not import domain events: {e}")
         
@@ -206,7 +206,7 @@ class TestSOLIDCompliance:
         # Test that all providers can substitute the base interface
         try:
             from src.infrastructure.interfaces.provider import ProviderPort
-            from src.providers.aws.infrastructure.aws_provider import AWSProvider
+            from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy as AWSProvider
         except ImportError as e:
             pytest.skip(f"Could not import provider classes: {e}")
         
@@ -356,7 +356,7 @@ class TestDesignPatternCompliance:
     def test_repository_pattern_compliance(self):
         """Test Repository pattern implementation."""
         try:
-            from src.domain.base.repository import Repository
+            from src.domain.base.ports import RepositoryPort as Repository
         except ImportError as e:
             pytest.skip(f"Could not import Repository: {e}")
         

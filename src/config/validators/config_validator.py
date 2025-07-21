@@ -59,16 +59,18 @@ class ConfigValidator:
             config: Validated configuration object
             result: Validation result to update
         """
-        # Example business rule validations
-        if config.provider.type == "aws" and config.provider.aws:
-            aws_config = config.provider.aws
-            
-            # Validate AWS-specific business rules
-            if aws_config.max_retries > 10:
-                result.add_warning("AWS max_retries is very high, consider reducing for better performance")
-            
-            if aws_config.timeout > 300:
-                result.add_warning("AWS timeout is very high, consider reducing to avoid long waits")
+        # Validate provider instances
+        if hasattr(config.provider, 'providers') and config.provider.providers:
+            for provider in config.provider.providers:
+                if provider.type == "aws" and hasattr(provider, 'config'):
+                    aws_config = provider.config
+                    
+                    # Validate AWS-specific business rules
+                    if hasattr(aws_config, 'max_retries') and aws_config.max_retries > 10:
+                        result.add_warning(f"AWS provider '{provider.name}' max_retries is very high, consider reducing for better performance")
+                    
+                    if hasattr(aws_config, 'timeout') and aws_config.timeout > 300:
+                        result.add_warning(f"AWS provider '{provider.name}' timeout is very high, consider reducing to avoid long waits")
         
         # Validate template configuration
         if config.template:

@@ -269,9 +269,20 @@ providers/
 Follow PEP 8 with these specific guidelines:
 
 ```python
-# Use type hints
+# Use type hints with appropriate flexibility
 def create_request(template_id: str, machine_count: int) -> str:
     """Create a new machine request."""
+    pass
+
+# Use flexible typing for CLI argument handling
+from typing import Any
+
+def convert_cli_args_to_hostfactory_input(self, operation: str, args: Any) -> Dict[str, Any]:
+    """Convert CLI arguments to HostFactory JSON input format.
+    
+    Uses Any type for args parameter to support different argument sources
+    including argparse.Namespace, dict, or other argument containers.
+    """
     pass
 
 # Use dataclasses for DTOs

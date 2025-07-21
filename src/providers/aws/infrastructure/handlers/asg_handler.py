@@ -30,7 +30,7 @@ from datetime import datetime
 from botocore.exceptions import ClientError
 
 from src.domain.request.aggregate import Request
-from src.domain.template.aggregate import Template
+from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSValidationError, AWSEntityNotFoundError, AWSInfrastructureError
@@ -45,44 +45,66 @@ from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 class ASGHandler(AWSHandler):
     """Handler for Auto Scaling Group operations."""
     
-    def __init__(self, aws_client, logger: LoggingPort, aws_ops: AWSOperations, request_adapter: RequestAdapterPort = None):
+    def __init__(self, 
+                 aws_client, 
+                 logger: LoggingPort, 
+                 aws_ops: AWSOperations, 
+                 launch_template_manager,
+                 request_adapter: RequestAdapterPort = None):
         """
-        Initialize the ASG handler.
+        Initialize the ASG handler with unified dependencies.
         
         Args:
             aws_client: AWS client instance
             logger: Logger for logging messages
             aws_ops: AWS operations utility
+            launch_template_manager: Launch template manager for AWS-specific operations
             request_adapter: Optional request adapter for terminating instances
         """
-        # Use enhanced base class initialization - eliminates duplication
-        super().__init__(aws_client, logger, aws_ops, None, request_adapter)
+        # Use unified base class initialization
+        super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
 
     @handle_infrastructure_exceptions(context="asg_creation")
-    def acquire_hosts(self, request: Request, template: Template) -> str:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
         """
         Create an Auto Scaling Group to acquire hosts.
-        Returns the ASG name.
+        Returns structured result with resource IDs and instance data.
         """
-        return self.aws_ops.execute_with_standard_error_handling(
-            operation=lambda: self._create_asg_internal(request, template),
-            operation_name="create Auto Scaling Group",
-            context="ASG"
-        )
+        try:
+            asg_name = self.aws_ops.execute_with_standard_error_handling(
+                operation=lambda: self._create_asg_internal(request, aws_template),
+                operation_name="create Auto Scaling Group",
+                context="ASG"
+            )
+            
+            return {
+                'success': True,
+                'resource_ids': [asg_name],
+                'instances': [],  # ASG instances come later
+                'provider_data': {'resource_type': 'asg'}
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'resource_ids': [],
+                'instances': [],
+                'error_message': str(e)
+            }
 
-    def _create_asg_internal(self, request: Request, template: Template) -> str:
+    def _create_asg_internal(self, request: Request, aws_template: AWSTemplate) -> str:
         """Internal method for ASG creation with pure business logic."""
         # Validate ASG specific prerequisites
-        self._validate_asg_prerequisites(template)
+        self._validate_asg_prerequisites(aws_template)
 
-        # Create launch template directly without additional retry wrapper
-        launch_template = self.create_launch_template(template, request)
+        # Create launch template using the new manager
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
         
-        # Store launch template info in request
-        request.set_launch_template_info(
-            launch_template['LaunchTemplateId'],
-            launch_template['Version']
-        )
+        # Store launch template info in request (if request has this method)
+        if hasattr(request, 'set_launch_template_info'):
+            request.set_launch_template_info(
+                launch_template_result.template_id,
+                launch_template_result.version
+            )
 
         # Generate ASG name
         asg_name = f"hf-{request.request_id}"
@@ -90,10 +112,10 @@ class ASGHandler(AWSHandler):
         # Create ASG configuration
         asg_config = self._create_asg_config(
             asg_name=asg_name,
-            template=template,
+            aws_template=aws_template,
             request=request,
-            launch_template_id=launch_template['LaunchTemplateId'],
-            launch_template_version=launch_template['Version']
+            launch_template_id=launch_template_result.template_id,
+            launch_template_version=launch_template_result.version
         )
 
         # Create the ASG with circuit breaker for critical operation
@@ -106,15 +128,15 @@ class ASGHandler(AWSHandler):
         self._logger.info(f"Successfully created Auto Scaling Group: {asg_name}")
 
         # Add ASG tags
-        self._tag_asg(asg_name, template, request)
+        self._tag_asg(asg_name, aws_template, request)
 
         # Enable instance protection if specified
-        if template.instance_protection:
+        if hasattr(aws_template, 'instance_protection') and aws_template.instance_protection:
             self._enable_instance_protection(asg_name)
 
         # Set instance lifecycle hooks if needed
-        if template.lifecycle_hooks:
-            self._set_lifecycle_hooks(asg_name, template.lifecycle_hooks)
+        if hasattr(aws_template, 'lifecycle_hooks') and aws_template.lifecycle_hooks:
+            self._set_lifecycle_hooks(asg_name, aws_template.lifecycle_hooks)
 
         return asg_name
 
@@ -233,27 +255,27 @@ class ASGHandler(AWSHandler):
             self._logger.error(f"Unexpected error checking ASG status: {str(e)}")
             raise AWSInfrastructureError(f"Failed to check ASG status: {str(e)}")
 
-    def _validate_asg_prerequisites(self, template: Template) -> None:
+    def _validate_asg_prerequisites(self, aws_template: AWSTemplate) -> None:
         """Validate ASG specific prerequisites."""
         errors = []
 
         # First validate common prerequisites
         try:
-            self._validate_prerequisites(template)
+            self._validate_prerequisites(aws_template)
         except AWSValidationError as e:
             errors.extend(str(e).split('\n'))
 
         # Validate ASG specific requirements
-        if template.lifecycle_hooks:
-            for hook in template.lifecycle_hooks:
+        if hasattr(aws_template, 'lifecycle_hooks') and aws_template.lifecycle_hooks:
+            for hook in aws_template.lifecycle_hooks:
                 if not hook.get('role_arn'):
                     errors.append(f"IAM role ARN required for lifecycle hook {hook.get('name')}")
 
-        if template.target_group_arns:
+        if hasattr(aws_template, 'target_group_arns') and aws_template.target_group_arns:
             try:
                 self._retry_with_backoff(
                     self.aws_client.elbv2_client.describe_target_groups,
-                    TargetGroupArns=template.target_group_arns
+                    TargetGroupArns=aws_template.target_group_arns
                 )
             except Exception as e:
                 errors.append(f"Invalid target groups: {str(e)}")
@@ -263,7 +285,7 @@ class ASGHandler(AWSHandler):
 
     def _create_asg_config(self,
                           asg_name: str,
-                          template: Template,
+                          aws_template: AWSTemplate,
                           request: Request,
                           launch_template_id: str,
                           launch_template_version: str) -> Dict[str, Any]:
@@ -277,9 +299,9 @@ class ASGHandler(AWSHandler):
             'MinSize': request.machine_count,
             'MaxSize': request.machine_count,
             'DesiredCapacity': request.machine_count,
-            'VPCZoneIdentifier': ','.join(template.subnet_ids) if template.subnet_ids else template.subnet_id,
-            'HealthCheckType': template.health_check_type or 'EC2',
-            'HealthCheckGracePeriod': template.health_check_grace_period or 300,
+            'VPCZoneIdentifier': ','.join(aws_template.subnet_ids) if aws_template.subnet_ids else aws_template.subnet_id,
+            'HealthCheckType': getattr(aws_template, 'health_check_type', 'EC2'),
+            'HealthCheckGracePeriod': getattr(aws_template, 'health_check_grace_period', 300),
             'Tags': [
                 {
                     'Key': 'Name',
@@ -293,7 +315,7 @@ class ASGHandler(AWSHandler):
                 },
                 {
                     'Key': 'TemplateId',
-                    'Value': str(template.template_id),
+                    'Value': str(aws_template.template_id),
                     'PropagateAtLaunch': True
                 },
                 {
@@ -310,19 +332,20 @@ class ASGHandler(AWSHandler):
         }
 
         # Add template tags
-        for key, value in template.tags.items():
-            asg_config['Tags'].append({
-                'Key': key,
-                'Value': value,
-                'PropagateAtLaunch': True
-            })
+        if hasattr(aws_template, 'tags') and aws_template.tags:
+            for key, value in aws_template.tags.items():
+                asg_config['Tags'].append({
+                    'Key': key,
+                    'Value': value,
+                    'PropagateAtLaunch': True
+                })
 
         # Add target group ARNs if specified
-        if template.target_group_arns:
-            asg_config['TargetGroupARNs'] = template.target_group_arns
+        if hasattr(aws_template, 'target_group_arns') and aws_template.target_group_arns:
+            asg_config['TargetGroupARNs'] = aws_template.target_group_arns
 
         # Add mixed instances policy if multiple instance types are specified
-        if template.vm_types:
+        if hasattr(aws_template, 'instance_types') and aws_template.instance_types:
             asg_config['MixedInstancesPolicy'] = {
                 'LaunchTemplate': {
                     'LaunchTemplateSpecification': {
@@ -334,12 +357,12 @@ class ASGHandler(AWSHandler):
                             'InstanceType': instance_type,
                             'WeightedCapacity': str(weight)
                         }
-                        for instance_type, weight in template.vm_types.items()
+                        for instance_type, weight in aws_template.instance_types.items()
                     ]
                 },
                 'InstancesDistribution': {
-                    'OnDemandPercentageAboveBaseCapacity': template.on_demand_percentage or 0,
-                    'SpotAllocationStrategy': template.spot_allocation_strategy or 'capacity-optimized'
+                    'OnDemandPercentageAboveBaseCapacity': getattr(aws_template, 'on_demand_percentage', 0),
+                    'SpotAllocationStrategy': getattr(aws_template, 'spot_allocation_strategy', 'capacity-optimized')
                 }
             }
 
@@ -407,7 +430,7 @@ class ASGHandler(AWSHandler):
             instance.get('LifecycleState') == 'InService'
         )
 
-    def _tag_asg(self, asg_name: str, template: Template, request: Request) -> None:
+    def _tag_asg(self, asg_name: str, aws_template: AWSTemplate, request: Request) -> None:
         """Add tags to the ASG."""
         try:
             tags = [
@@ -423,18 +446,19 @@ class ASGHandler(AWSHandler):
                 },
                 {
                     'Key': 'TemplateId',
-                    'Value': str(template.template_id),
+                    'Value': str(aws_template.template_id),
                     'PropagateAtLaunch': True
                 }
             ]
 
             # Add template tags
-            for key, value in template.tags.items():
-                tags.append({
-                    'Key': key,
-                    'Value': value,
-                    'PropagateAtLaunch': True
-                })
+            if hasattr(aws_template, 'tags') and aws_template.tags:
+                for key, value in aws_template.tags.items():
+                    tags.append({
+                        'Key': key,
+                        'Value': value,
+                        'PropagateAtLaunch': True
+                    })
 
             self._retry_with_backoff(
                 self.aws_client.autoscaling_client.create_or_update_tags,

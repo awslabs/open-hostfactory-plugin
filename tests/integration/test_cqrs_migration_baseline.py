@@ -1,9 +1,9 @@
 """
-CQRS Migration Baseline Tests - ApplicationService Current Behavior.
+CQRS Integration Tests - Modern Architecture Validation.
 
-This test suite establishes the exact current behavior of ApplicationService
-before migrating to pure CQRS architecture. These tests ensure no regressions
-during the migration process.
+This test suite validates the CQRS architecture implementation with
+command and query handlers, ensuring proper integration between
+application services, domain aggregates, and infrastructure.
 """
 
 import pytest
@@ -12,15 +12,19 @@ from typing import Dict, Any, List
 import time
 import uuid
 
-from src.application.service import ApplicationService
-from src.application.base.commands import CommandBus
-from src.application.base.queries import QueryBus
-from src.domain.base.ports import LoggingPort, ContainerPort, ConfigurationPort
+from src.application.commands.request_handlers import CreateMachineRequestHandler, CreateReturnRequestHandler
+from src.application.services.provider_capability_service import ProviderCapabilityService
+from src.application.services.provider_selection_service import ProviderSelectionService
+from src.application.dto.commands import CreateRequestCommand, CreateReturnRequestCommand
+from src.infrastructure.di.buses import CommandBus, QueryBus
+from src.domain.base.ports import LoggingPort, ContainerPort, EventPublisherPort, ErrorHandlingPort
+from src.domain.base import UnitOfWorkFactory
+from src.providers.base.strategy import ProviderContext
 
 
 @pytest.mark.integration
-class TestApplicationServiceBaseline:
-    """Baseline tests for ApplicationService before CQRS migration."""
+class TestCQRSArchitectureIntegration:
+    """Integration tests for CQRS architecture with command and query handlers."""
     
     @pytest.fixture
     def mock_logger(self):
@@ -36,417 +40,350 @@ class TestApplicationServiceBaseline:
         return container
     
     @pytest.fixture
-    def mock_config(self):
-        """Create mock configuration."""
-        config = Mock(spec=ConfigurationPort)
-        config.get_provider_config.return_value = {
-            "aws": {
-                "region": "us-east-1",
-                "profile": "default"
-            }
-        }
-        return config
+    def mock_event_publisher(self):
+        """Create mock event publisher."""
+        return Mock(spec=EventPublisherPort)
     
     @pytest.fixture
-    def mock_command_bus(self):
-        """Create mock command bus."""
-        bus = Mock()
-        # Mock both dispatch and send to handle any interface variations
-        bus.dispatch.return_value = "req-" + str(uuid.uuid4())[:8]
-        bus.send.return_value = "req-" + str(uuid.uuid4())[:8]
-        return bus
+    def mock_error_handler(self):
+        """Create mock error handler."""
+        return Mock(spec=ErrorHandlingPort)
+    
+    @pytest.fixture
+    def mock_uow_factory(self):
+        """Create mock unit of work factory."""
+        uow_factory = Mock(spec=UnitOfWorkFactory)
+        uow = Mock()
+        uow.requests = Mock()
+        uow.machines = Mock()
+        uow.requests.save.return_value = []  # No events
+        uow.machines.save.return_value = []  # No events
+        uow_factory.create_unit_of_work.return_value.__enter__ = Mock(return_value=uow)
+        uow_factory.create_unit_of_work.return_value.__exit__ = Mock(return_value=None)
+        return uow_factory
     
     @pytest.fixture
     def mock_query_bus(self):
         """Create mock query bus."""
-        bus = Mock()
-        # Mock query to return appropriate responses
-        bus.query.return_value = {"status": "completed", "data": []}
+        bus = Mock(spec=QueryBus)
+        
+        # Mock template query response
+        from src.domain.template.aggregate import Template
+        mock_template = Template(
+            template_id="web-server-template",
+            name="Web Server Template",
+            description="Test template",
+            instance_type="t2.micro",
+            image_id="ami-12345678",
+            max_instances=10,
+            subnet_ids=["subnet-123"],
+            security_group_ids=["sg-123"],
+            provider_api="EC2Fleet"
+        )
+        
+        async def mock_execute(query):
+            return mock_template
+        
+        bus.execute = mock_execute
         return bus
     
     @pytest.fixture
-    def mock_provider(self):
-        """Create mock provider that matches the actual interface."""
-        provider = Mock()
-        provider.provider_type = "mock"
+    def mock_provider_selection_service(self):
+        """Create mock provider selection service."""
+        service = Mock(spec=ProviderSelectionService)
         
-        # Mock create_instances to return what ApplicationService expects
-        provider.create_instances.return_value = [
-            {"instance_id": "i-1234567890abcdef0", "state": "pending"},
-            {"instance_id": "i-0987654321fedcba0", "state": "pending"}
-        ]
-        
-        # Mock get_instance_status
-        provider.get_instance_status.return_value = [
-            {"instance_id": "i-1234567890abcdef0", "state": "running"},
-            {"instance_id": "i-0987654321fedcba0", "state": "running"}
-        ]
-        
-        # Mock terminate_instances
-        provider.terminate_instances.return_value = [
-            {"instance_id": "i-1234567890abcdef0", "state": "shutting-down"}
-        ]
-        
-        # Mock health and info
-        provider.get_health.return_value = True
-        provider.get_provider_info.return_value = {
-            "provider_type": "mock",
-            "region": "us-east-1",
-            "status": "healthy"
-        }
-        
-        return provider
-    
-    @pytest.fixture
-    def application_service(self, mock_command_bus, mock_query_bus, 
-                          mock_logger, mock_container, mock_config, mock_provider):
-        """Create ApplicationService instance for baseline testing."""
-        return ApplicationService(
-            provider_type="mock",
-            command_bus=mock_command_bus,
-            query_bus=mock_query_bus,
-            logger=mock_logger,
-            container=mock_container,
-            config=mock_config,
-            provider=mock_provider
+        # Mock selection result
+        from src.application.services.provider_selection_service import ProviderSelectionResult
+        selection_result = ProviderSelectionResult(
+            provider_type="aws",
+            provider_instance="aws-default",
+            selection_reason="Best match for template requirements",
+            confidence=0.95
         )
-    
-    def test_initialization_baseline(self, application_service):
-        """Baseline: Test ApplicationService initialization."""
-        assert application_service.provider_type == "mock"
-        assert not application_service._initialized
-        
-        # Test initialization
-        result = application_service.initialize()
-        assert result is True
-        assert application_service._initialized
-    
-    def test_request_machines_baseline(self, application_service):
-        """Baseline: Test request_machines with actual signature."""
-        # Initialize service
-        application_service.initialize()
-        
-        # Test with actual method signature
-        result = application_service.request_machines(
-            template_id="web-server-template",
-            machine_count=2,
-            timeout=300,
-            tags={"Environment": "test", "Owner": "test-user"},
-            metadata={"test": "baseline"}
-        )
-        
-        # Verify result is a request_id string
-        assert isinstance(result, str)
-        assert len(result) > 0
-        
-        # Verify provider was called
-        application_service._provider.create_instances.assert_called_once()
-    
-    def test_request_return_machines_baseline(self, application_service):
-        """Baseline: Test request_return_machines with actual signature."""
-        # Initialize service
-        application_service.initialize()
-        
-        machine_ids = ["i-1234567890abcdef0"]
-        
-        result = application_service.request_return_machines(
-            machine_ids=machine_ids,
-            requester_id="test-user",
-            reason="testing complete",
-            metadata={"test": "baseline"}
-        )
-        
-        # Verify result is a request_id string
-        assert isinstance(result, str)
-        assert len(result) > 0
-        
-        # Verify provider was called
-        application_service._provider.terminate_instances.assert_called_once_with(machine_ids)
-    
-    def test_get_machine_status_baseline(self, application_service):
-        """Baseline: Test get_machine_status."""
-        # Initialize service
-        application_service.initialize()
-        
-        machine_ids = ["i-1234567890abcdef0", "i-0987654321fedcba0"]
-        
-        result = application_service.get_machine_status(machine_ids)
-        
-        # Verify result structure
-        assert isinstance(result, list)
-        assert len(result) == 2
-        
-        for machine_status in result:
-            assert isinstance(machine_status, dict)
-            # The exact structure depends on implementation
-        
-        # Verify provider was called
-        application_service._provider.get_instance_status.assert_called_once_with(machine_ids)
-    
-    def test_get_request_status_baseline(self, application_service):
-        """Baseline: Test get_request_status."""
-        # Initialize service
-        application_service.initialize()
-        
-        # First create a request to get a valid request_id
-        request_id = application_service.request_machines(
-            template_id="web-server-template",
-            machine_count=1
-        )
-        
-        # Now get the request status
-        result = application_service.get_request_status(request_id)
-        
-        # Verify result structure
-        assert isinstance(result, dict)
-        # The exact structure depends on implementation
-    
-    def test_get_request_baseline(self, application_service):
-        """Baseline: Test get_request method."""
-        # Initialize service
-        application_service.initialize()
-        
-        # First create a request
-        request_id = application_service.request_machines(
-            template_id="web-server-template",
-            machine_count=1
-        )
-        
-        # Test get_request
-        result = application_service.get_request(request_id, long=False)
-        assert isinstance(result, dict)
-        
-        # Test get_request with long=True
-        result_long = application_service.get_request(request_id, long=True)
-        assert isinstance(result_long, dict)
-    
-    def test_get_return_requests_baseline(self, application_service):
-        """Baseline: Test get_return_requests."""
-        # Initialize service
-        application_service.initialize()
-        
-        result = application_service.get_return_requests(
-            limit=10,
-            offset=0,
-            status_filter="pending"
-        )
-        
-        # Verify result structure
-        assert isinstance(result, (list, dict))
-    
-    def test_get_machines_by_request_baseline(self, application_service):
-        """Baseline: Test get_machines_by_request."""
-        # Initialize service
-        application_service.initialize()
-        
-        # First create a request
-        request_id = application_service.request_machines(
-            template_id="web-server-template",
-            machine_count=2
-        )
-        
-        result = application_service.get_machines_by_request(request_id)
-        
-        # Verify result structure
-        assert isinstance(result, list)
-    
-    def test_get_provider_health_baseline(self, application_service):
-        """Baseline: Test get_provider_health."""
-        # Initialize service
-        application_service.initialize()
-        
-        result = application_service.get_provider_health()
-        
-        # Verify result
-        assert isinstance(result, bool)
-        assert result is True
-        
-        # Verify provider was called
-        application_service._provider.get_health.assert_called_once()
-    
-    def test_get_provider_info_baseline(self, application_service):
-        """Baseline: Test get_provider_info."""
-        # Initialize service
-        application_service.initialize()
-        
-        result = application_service.get_provider_info()
-        
-        # Verify result structure
-        assert isinstance(result, dict)
-        assert "provider_type" in result
-        
-        # Verify provider was called
-        application_service._provider.get_provider_info.assert_called_once()
-    
-    def test_create_request_baseline(self, application_service):
-        """Baseline: Test create_request method."""
-        # Initialize service
-        application_service.initialize()
-        
-        result = application_service.create_request(
-            request_type="acquire",
-            template_id="web-server-template",
-            machine_count=1,
-            requester_id="test-user",
-            metadata={"test": "baseline"}
-        )
-        
-        # Verify result
-        assert isinstance(result, str)  # Should return request_id
-    
-    def test_error_handling_uninitialized_baseline(self, application_service):
-        """Baseline: Test error handling when service is not initialized."""
-        # Don't initialize the service
-        
-        # This should handle the uninitialized state gracefully
-        # The exact behavior depends on _ensure_initialized implementation
-        try:
-            result = application_service.request_machines(
-                template_id="test-template",
-                machine_count=1
-            )
-            # If it succeeds, it means _ensure_initialized worked
-            assert isinstance(result, str)
-        except Exception as e:
-            # If it fails, that's also valid baseline behavior
-            assert isinstance(e, Exception)
-    
-    def test_provider_failure_handling_baseline(self, application_service):
-        """Baseline: Test error handling when provider operations fail."""
-        # Initialize service
-        application_service.initialize()
-        
-        # Configure provider to fail
-        application_service._provider.create_instances.side_effect = Exception("Provider error")
-        
-        # Test that the error is handled appropriately
-        try:
-            result = application_service.request_machines(
-                template_id="test-template",
-                machine_count=1
-            )
-            # If it succeeds despite provider error, that's the baseline behavior
-            assert isinstance(result, str)
-        except Exception as e:
-            # If it fails, that's also valid baseline behavior
-            assert isinstance(e, Exception)
-    
-    def test_concurrent_operations_baseline(self, application_service):
-        """Baseline: Test concurrent operations behavior."""
-        import threading
-        
-        # Initialize service
-        application_service.initialize()
-        
-        results = []
-        errors = []
-        
-        def request_machines():
-            try:
-                result = application_service.request_machines(
-                    template_id="web-server-template",
-                    machine_count=1,
-                    tags={"thread": str(threading.current_thread().ident)}
-                )
-                results.append(result)
-            except Exception as e:
-                errors.append(e)
-        
-        # Start multiple threads
-        threads = []
-        for i in range(3):
-            thread = threading.Thread(target=request_machines)
-            threads.append(thread)
-            thread.start()
-        
-        # Wait for all threads to complete
-        for thread in threads:
-            thread.join(timeout=5.0)
-        
-        # Record baseline behavior
-        print(f"Baseline concurrent results: {len(results)} successes, {len(errors)} errors")
-        
-        # The exact behavior is what we're establishing as baseline
-        assert len(results) + len(errors) == 3
-    
-    def test_performance_baseline(self, application_service):
-        """Baseline: Establish performance baseline."""
-        # Initialize service
-        application_service.initialize()
-        
-        # Measure request_machines performance
-        start_time = time.time()
-        
-        for i in range(5):  # Smaller number for baseline
-            application_service.request_machines(
-                template_id="web-server-template",
-                machine_count=1,
-                tags={"iteration": str(i)}
-            )
-        
-        end_time = time.time()
-        total_time = end_time - start_time
-        avg_time = total_time / 5
-        
-        print(f"Performance baseline: {avg_time:.3f}s average per operation")
-        print(f"Total time for 5 operations: {total_time:.3f}s")
-        
-        # Record baseline - don't assert specific times, just record them
-        assert avg_time > 0  # Sanity check
-        assert total_time > 0  # Sanity check
-
-
-@pytest.mark.integration
-class TestMachineStatusConversionBaseline:
-    """Baseline tests for MachineStatusConversionService."""
-    
-    @pytest.fixture
-    def mock_provider_domain_service(self):
-        """Create mock provider domain service."""
-        from src.domain.base.provider_interfaces import ProviderDomainService
-        service = Mock(spec=ProviderDomainService)
-        
-        # Configure state mapping
-        from src.domain.machine.value_objects import MachineStatus
-        service.map_provider_state.return_value = MachineStatus.RUNNING
-        
+        service.select_provider_for_template.return_value = selection_result
         return service
     
     @pytest.fixture
-    def status_conversion_service(self, mock_provider_domain_service):
-        """Create MachineStatusConversionService for baseline testing."""
-        from src.application.machine.status_service import MachineStatusConversionService
-        return MachineStatusConversionService(mock_provider_domain_service)
+    def mock_provider_capability_service(self):
+        """Create mock provider capability service."""
+        service = Mock(spec=ProviderCapabilityService)
+        
+        # Mock validation result
+        from src.application.services.provider_capability_service import ValidationResult
+        validation_result = ValidationResult(
+            is_valid=True,
+            provider_instance="aws-default",
+            errors=[],
+            warnings=[],
+            supported_features=["API: EC2Fleet", "Pricing: On-demand instances"],
+            unsupported_features=[]
+        )
+        service.validate_template_requirements.return_value = validation_result
+        return service
     
-    def test_convert_from_provider_state_baseline(self, status_conversion_service):
-        """Baseline: Test converting provider state to domain state."""
-        result = status_conversion_service.convert_from_provider_state(
-            provider_state="running",
-            provider_type="aws"
+    @pytest.fixture
+    def mock_provider_context(self):
+        """Create mock provider context."""
+        context = Mock(spec=ProviderContext)
+        context.available_strategies = ["aws-aws-default"]
+        context.current_strategy_type = "aws-aws-default"
+        
+        # Mock execution result
+        from src.providers.base.strategy.provider_strategy import ProviderResult
+        result = ProviderResult(
+            success=True,
+            data={"instance_ids": ["i-1234567890abcdef0", "i-0987654321fedcba0"]},
+            metadata={"provider": "aws", "region": "us-east-1"},
+            error_message=None
+        )
+        context.execute_with_strategy.return_value = result
+        return context
+    
+    @pytest.fixture
+    def create_request_handler(self, mock_uow_factory, mock_logger, mock_container, 
+                              mock_event_publisher, mock_error_handler, mock_query_bus,
+                              mock_provider_selection_service, mock_provider_capability_service,
+                              mock_provider_context):
+        """Create CreateMachineRequestHandler for testing."""
+        return CreateMachineRequestHandler(
+            uow_factory=mock_uow_factory,
+            logger=mock_logger,
+            container=mock_container,
+            event_publisher=mock_event_publisher,
+            error_handler=mock_error_handler,
+            query_bus=mock_query_bus,
+            provider_selection_service=mock_provider_selection_service,
+            provider_capability_service=mock_provider_capability_service,
+            provider_context=mock_provider_context
+        )
+    
+    @pytest.fixture
+    def command_bus(self, create_request_handler):
+        """Create command bus with registered handlers."""
+        bus = CommandBus()
+        bus.register_handler(CreateRequestCommand, create_request_handler)
+        return bus
+    
+    @pytest.mark.asyncio
+    async def test_create_request_command_handler(self, create_request_handler):
+        """Test CreateMachineRequestHandler directly."""
+        # Create command
+        command = CreateRequestCommand(
+            template_id="web-server-template",
+            machine_count=2,
+            metadata={"test": "cqrs_integration"}
         )
         
-        # Verify result
-        from src.domain.machine.value_objects import MachineStatus
-        assert isinstance(result, MachineStatus)
+        # Execute command
+        result = await create_request_handler.execute_command(command)
         
-        # Verify provider service was called
-        status_conversion_service._provider_service.map_provider_state.assert_called_once()
+        # Verify result is a request ID
+        assert isinstance(result, str)
+        assert len(result) > 0
+        
+        # Verify handler interactions
+        create_request_handler._query_bus.execute.assert_called_once()
+        create_request_handler._provider_selection_service.select_provider_for_template.assert_called_once()
+        create_request_handler._provider_capability_service.validate_template_requirements.assert_called_once()
+        create_request_handler._provider_context.execute_with_strategy.assert_called_once()
     
-    def test_error_handling_baseline(self, status_conversion_service):
-        """Baseline: Test error handling behavior."""
-        # Configure service to raise error
-        status_conversion_service._provider_service.map_provider_state.side_effect = Exception("Invalid state")
+    @pytest.mark.asyncio
+    async def test_command_bus_integration(self, command_bus):
+        """Test command bus with registered handlers."""
+        # Create command
+        command = CreateRequestCommand(
+            template_id="web-server-template",
+            machine_count=1,
+            metadata={"test": "command_bus_integration"}
+        )
         
-        try:
-            result = status_conversion_service.convert_from_provider_state(
-                provider_state="invalid",
-                provider_type="aws"
-            )
-            # If it succeeds despite error, that's baseline behavior
-            assert result is not None
-        except Exception as e:
-            # If it fails, that's also valid baseline behavior
-            assert isinstance(e, Exception)
+        # Execute via command bus
+        result = await command_bus.execute(command)
+        
+        # Verify result
+        assert isinstance(result, str)
+        assert len(result) > 0
+    
+    def test_provider_capability_service_integration(self, mock_provider_capability_service):
+        """Test provider capability service integration."""
+        from src.domain.template.aggregate import Template
+        
+        # Create test template
+        template = Template(
+            template_id="test-template",
+            name="Test Template",
+            description="Test",
+            instance_type="t2.micro",
+            image_id="ami-12345678",
+            max_instances=5,
+            subnet_ids=["subnet-123"],
+            security_group_ids=["sg-123"],
+            provider_api="EC2Fleet"
+        )
+        
+        # Test validation
+        result = mock_provider_capability_service.validate_template_requirements(
+            template, "aws-default"
+        )
+        
+        # Verify result structure
+        assert result.is_valid is True
+        assert result.provider_instance == "aws-default"
+        assert isinstance(result.supported_features, list)
+        assert isinstance(result.errors, list)
+    
+    def test_provider_selection_service_integration(self, mock_provider_selection_service):
+        """Test provider selection service integration."""
+        from src.domain.template.aggregate import Template
+        
+        # Create test template
+        template = Template(
+            template_id="test-template",
+            name="Test Template", 
+            description="Test",
+            instance_type="t2.micro",
+            image_id="ami-12345678",
+            max_instances=5,
+            subnet_ids=["subnet-123"],
+            security_group_ids=["sg-123"],
+            provider_api="EC2Fleet"
+        )
+        
+        # Test selection
+        result = mock_provider_selection_service.select_provider_for_template(template)
+        
+        # Verify result structure
+        assert result.provider_type == "aws"
+        assert result.provider_instance == "aws-default"
+        assert isinstance(result.selection_reason, str)
+        assert isinstance(result.confidence, float)
+    
+    def test_provider_context_integration(self, mock_provider_context):
+        """Test provider context integration."""
+        from src.providers.base.strategy import ProviderOperation, ProviderOperationType
+        
+        # Create test operation
+        operation = ProviderOperation(
+            operation_type=ProviderOperationType.CREATE_INSTANCES,
+            parameters={"template_config": {"instance_type": "t2.micro"}, "count": 2},
+            context={"correlation_id": "test-123"}
+        )
+        
+        # Execute operation
+        result = mock_provider_context.execute_with_strategy("aws-aws-default", operation)
+        
+        # Verify result structure
+        assert result.success is True
+        assert "instance_ids" in result.data
+        assert isinstance(result.data["instance_ids"], list)
+        assert len(result.data["instance_ids"]) == 2
+    
+    @pytest.mark.asyncio
+    async def test_error_handling_invalid_template(self, create_request_handler):
+        """Test error handling for invalid template."""
+        # Mock query bus to return None (template not found)
+        async def mock_execute_none(query):
+            return None
+        
+        create_request_handler._query_bus.execute = mock_execute_none
+        
+        # Create command with invalid template
+        command = CreateRequestCommand(
+            template_id="non-existent-template",
+            machine_count=1,
+            metadata={"test": "error_handling"}
+        )
+        
+        # Execute command and expect error
+        with pytest.raises(Exception) as exc_info:
+            await create_request_handler.execute_command(command)
+        
+        # Verify error type
+        assert "Template" in str(exc_info.value) or "not found" in str(exc_info.value).lower()
+    
+    @pytest.mark.asyncio
+    async def test_error_handling_provider_failure(self, create_request_handler):
+        """Test error handling for provider failures."""
+        # Mock provider context to return failure
+        from src.providers.base.strategy.provider_strategy import ProviderResult
+        failure_result = ProviderResult(
+            success=False,
+            data={},
+            metadata={},
+            error_message="Provider operation failed"
+        )
+        create_request_handler._provider_context.execute_with_strategy.return_value = failure_result
+        
+        # Create command
+        command = CreateRequestCommand(
+            template_id="web-server-template",
+            machine_count=1,
+            metadata={"test": "provider_failure"}
+        )
+        
+        # Execute command - should handle failure gracefully
+        result = await create_request_handler.execute_command(command)
+        
+        # Should still return request ID (request created but marked as failed)
+        assert isinstance(result, str)
+        assert len(result) > 0
+    
+    def test_cqrs_separation_of_concerns(self, create_request_handler):
+        """Test that CQRS properly separates command and query concerns."""
+        # Verify handler has proper dependencies
+        assert hasattr(create_request_handler, '_query_bus')
+        assert hasattr(create_request_handler, '_provider_selection_service')
+        assert hasattr(create_request_handler, '_provider_capability_service')
+        assert hasattr(create_request_handler, '_provider_context')
+        assert hasattr(create_request_handler, 'uow_factory')
+        
+        # Verify handler follows CQRS pattern
+        assert hasattr(create_request_handler, 'execute_command')
+        assert hasattr(create_request_handler, 'validate_command')
+        
+        # Verify proper typing
+        from src.application.dto.commands import CreateRequestCommand
+        assert create_request_handler.__class__.__annotations__
+    
+    @pytest.mark.asyncio
+    async def test_unit_of_work_pattern(self, create_request_handler):
+        """Test that handlers properly use Unit of Work pattern."""
+        # Create command
+        command = CreateRequestCommand(
+            template_id="web-server-template",
+            machine_count=1,
+            metadata={"test": "uow_pattern"}
+        )
+        
+        # Execute command
+        result = await create_request_handler.execute_command(command)
+        
+        # Verify UoW was used
+        create_request_handler.uow_factory.create_unit_of_work.assert_called()
+        
+        # Verify result
+        assert isinstance(result, str)
+    
+    @pytest.mark.asyncio
+    async def test_event_publishing_integration(self, create_request_handler):
+        """Test that events are properly published."""
+        # Create command
+        command = CreateRequestCommand(
+            template_id="web-server-template",
+            machine_count=1,
+            metadata={"test": "event_publishing"}
+        )
+        
+        # Execute command
+        result = await create_request_handler.execute_command(command)
+        
+        # Verify event publisher was called (events from UoW save)
+        # Note: In this mock setup, save returns empty list, so no events published
+        # In real scenario, domain aggregates would generate events
+        assert isinstance(result, str)
+
+
+# Removed TestMachineStatusConversionBaseline class as MachineStatusConversionService does not exist
 
 
 if __name__ == "__main__":

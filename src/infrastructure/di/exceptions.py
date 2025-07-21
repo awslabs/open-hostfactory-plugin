@@ -81,8 +81,8 @@ class UntypedParameterError(DependencyResolutionError):
             parameter_name: Name of the parameter without type annotation
         """
         message = "Parameter has no type annotation"
-        # Use Any as a placeholder for dependency_type
-        super().__init__(Any, message, parent_type, parameter_name)
+        # Use str as a placeholder for dependency_type since Any is causing issues
+        super().__init__(str, message, parent_type, parameter_name)
 
 
 class CircularDependencyError(DependencyResolutionError):

@@ -1,167 +1,155 @@
 """
-Request Event Handlers - DRY-compliant handlers using new architecture.
+Request Event Handlers - CQRS-aligned handlers using BaseEventHandler pattern.
 
-These handlers replace the duplicated code in consolidated_event_handlers.py
-with a clean, maintainable architecture following DDD/SOLID/DRY principles.
+These handlers follow the same architectural patterns as BaseCommandHandler and
+BaseQueryHandler, ensuring consistency across all handler types in the CQRS system.
 """
 from typing import Optional
 
-# Import the new base classes and decorator
-from src.application.events.base import LoggingEventHandler
+from src.application.base.event_handlers import BaseLoggingEventHandler
 from src.application.events.decorators import event_handler
-
-# Import types - using string imports to avoid circular dependencies
-try:
-    from src.domain.base.events import DomainEvent
-    from src.domain.base.ports import LoggingPort
-except ImportError:
-    # Fallback for testing or when dependencies aren't available
-    DomainEvent = object
-    LoggingPort = object
+from src.domain.base.events import DomainEvent
+from src.domain.base.ports import LoggingPort, ErrorHandlingPort, EventPublisherPort
 
 
 @event_handler("RequestCreatedEvent")
-class RequestCreatedHandler(LoggingEventHandler):
-    """Handle request creation events - DRY compliant."""
+class RequestCreatedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle request creation events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format request created message."""
-        fields = self.extract_fields(event, {
-            'template_id': 'unknown',
-            'machine_count': 0,
-            'timeout': None,
-            'request_type': 'unknown'
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize request created handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format request created log message."""
+        template_id = getattr(event, 'template_id', 'unknown')
+        machine_count = getattr(event, 'machine_count', 0)
         
-        message = (
-            f"Request created: {event.aggregate_id} | "
-            f"Template: {fields['template_id']} | "
-            f"Count: {fields['machine_count']} | "
-            f"Type: {fields['request_type']}"
+        return (
+            f"Request created: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Template: {template_id} | "
+            f"Count: {machine_count}"
         )
-        
-        if fields['timeout']:
-            message += f" | Timeout: {fields['timeout']}s"
-        
-        return message
 
 
 @event_handler("RequestStatusUpdatedEvent")
-class RequestStatusUpdatedHandler(LoggingEventHandler):
-    """Handle request status update events - DRY compliant."""
+class RequestStatusUpdatedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle request status update events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format request status update message."""
-        fields = self.extract_fields(event, {
-            'old_status': 'unknown',
-            'new_status': 'unknown',
-            'reason': None
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize request status updated handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format request status updated log message."""
+        old_status = getattr(event, 'old_status', 'unknown')
+        new_status = getattr(event, 'new_status', 'unknown')
         
-        return self.format_status_change_message(
-            event, 
-            fields['old_status'], 
-            fields['new_status']
+        return (
+            f"Request status updated: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Status: {old_status} -> {new_status}"
         )
 
 
 @event_handler("RequestCompletedEvent")
-class RequestCompletedHandler(LoggingEventHandler):
-    """Handle request completion events - DRY compliant."""
+class RequestCompletedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle request completion events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format request completed message."""
-        fields = self.extract_fields(event, {
-            'completion_status': 'completed',
-            'machine_ids': [],
-            'completion_time': None,
-            'duration': None
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize request completed handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format request completed log message."""
+        duration = getattr(event, 'completion_duration', 'unknown')
+        machines_created = getattr(event, 'machines_created', 0)
         
-        machine_count = len(fields['machine_ids']) if fields['machine_ids'] else 0
-        
-        message = (
-            f"Request completed: {event.aggregate_id} | "
-            f"Status: {fields['completion_status']} | "
-            f"Machines: {machine_count}"
+        return (
+            f"Request completed: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Duration: {duration}s | "
+            f"Machines created: {machines_created}"
         )
-        
-        if fields['duration']:
-            message += f" | Duration: {self.format_duration(fields['duration'])}"
-        
-        return message
 
 
 @event_handler("RequestFailedEvent")
-class RequestFailedHandler(LoggingEventHandler):
-    """Handle request failure events - DRY compliant."""
+class RequestFailedHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle request failure events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format request failed message."""
-        fields = self.extract_fields(event, {
-            'error_message': 'Unknown error',
-            'error_code': None,
-            'failure_reason': 'Unknown'
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize request failed handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format request failed log message."""
+        failure_reason = getattr(event, 'failure_reason', 'unknown')
         
-        message = (
-            f"Request failed: {event.aggregate_id} | "
-            f"Reason: {fields['failure_reason']} | "
-            f"Error: {fields['error_message']}"
+        return (
+            f"Request failed: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Reason: {failure_reason}"
         )
-        
-        if fields['error_code']:
-            message += f" | Code: {fields['error_code']}"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - error for request failures."""
+        return 'error'
 
 
 @event_handler("RequestCancelledEvent")
-class RequestCancelledHandler(LoggingEventHandler):
-    """Handle request cancellation events - DRY compliant."""
+class RequestCancelledHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle request cancellation events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format request cancelled message."""
-        fields = self.extract_fields(event, {
-            'cancellation_reason': 'User requested',
-            'cancelled_by': 'unknown',
-            'partial_completion': False
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize request cancelled handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format request cancelled log message."""
+        cancellation_reason = getattr(event, 'cancellation_reason', 'user_requested')
         
-        message = (
-            f"Request cancelled: {event.aggregate_id} | "
-            f"Reason: {fields['cancellation_reason']} | "
-            f"By: {fields['cancelled_by']}"
+        return (
+            f"Request cancelled: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Reason: {cancellation_reason}"
         )
-        
-        if fields['partial_completion']:
-            message += " | Partial completion"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - warning for cancellations."""
+        return 'warning'
 
 
 @event_handler("RequestTimeoutEvent")
-class RequestTimeoutHandler(LoggingEventHandler):
-    """Handle request timeout events - DRY compliant."""
+class RequestTimeoutHandler(BaseLoggingEventHandler[DomainEvent]):
+    """Handle request timeout events using BaseEventHandler pattern."""
     
-    def format_message(self, event: DomainEvent) -> str:
-        """Format request timeout message."""
-        fields = self.extract_fields(event, {
-            'timeout_duration': 0,
-            'partial_results': {},
-            'retry_possible': False
-        })
+    def __init__(self, 
+                 logger: Optional[LoggingPort] = None,
+                 error_handler: Optional[ErrorHandlingPort] = None,
+                 event_publisher: Optional[EventPublisherPort] = None):
+        """Initialize request timeout handler."""
+        super().__init__(logger, error_handler, event_publisher)
+    
+    async def format_log_message(self, event: DomainEvent) -> str:
+        """Format request timeout log message."""
+        timeout_duration = getattr(event, 'timeout_duration', 'unknown')
         
-        message = (
-            f"Request timeout: {event.aggregate_id} | "
-            f"Duration: {fields['timeout_duration']}s"
+        return (
+            f"Request timed out: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Timeout after: {timeout_duration}s"
         )
-        
-        if fields['partial_results']:
-            partial_count = len(fields['partial_results'])
-            message += f" | Partial results: {partial_count}"
-        
-        if fields['retry_possible']:
-            message += " | Retry possible"
-        
-        return message
+    
+    def get_log_level(self, event: DomainEvent) -> str:
+        """Get log level - error for timeouts."""
+        return 'error'

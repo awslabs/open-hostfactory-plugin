@@ -1,6 +1,6 @@
 """Storage configuration schemas."""
 from typing import Dict, Any, Optional
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class JsonStrategyConfig(BaseModel):
@@ -23,7 +23,8 @@ class JsonStrategyConfig(BaseModel):
     backup_count: int = Field(5, description="Number of backup files to keep")
     pretty_print: bool = Field(True, description="Pretty print JSON files")
     
-    @validator('storage_type')
+    @field_validator('storage_type')
+    @classmethod
     def validate_storage_type(cls, v: str) -> str:
         """Validate storage type."""
         valid_types = ['single_file', 'split_files']
@@ -48,7 +49,8 @@ class SqlStrategyConfig(BaseModel):
     ssl_verify: bool = Field(True, description="Verify SSL certificate (for Aurora)")
     cluster_endpoint: Optional[str] = Field(None, description="Aurora cluster endpoint")
     
-    @validator('type')
+    @field_validator('type')
+    @classmethod
     def validate_type(cls, v: str) -> str:
         """Validate database type."""
         valid_types = ['sqlite', 'postgresql', 'mysql', 'aurora']
@@ -103,7 +105,8 @@ class BackoffConfig(BaseModel):
     step: float = Field(1.0, description="Step size for linear backoff in seconds")
     jitter: float = Field(0.1, description="Jitter factor (0.0 to 1.0)")
     
-    @validator('strategy_type')
+    @field_validator('strategy_type')
+    @classmethod
     def validate_strategy_type(cls, v: str) -> str:
         """Validate strategy type."""
         valid_types = ['constant', 'exponential', 'linear']
@@ -143,7 +146,8 @@ class RetryConfig(BaseModel):
         description="Service-specific retry configurations"
     )
     
-    @validator('max_attempts')
+    @field_validator('max_attempts')
+    @classmethod
     def validate_max_attempts(cls, v: int) -> int:
         """Validate max attempts."""
         if v < 0:
@@ -160,7 +164,8 @@ class StorageConfig(BaseModel):
     sql_strategy: SqlStrategyConfig = Field(default_factory=lambda: SqlStrategyConfig())
     dynamodb_strategy: DynamodbStrategyConfig = Field(default_factory=lambda: DynamodbStrategyConfig())
     
-    @validator('strategy')
+    @field_validator('strategy')
+    @classmethod
     def validate_strategy(cls, v: str) -> str:
         """Validate storage strategy."""
         valid_strategies = ['json', 'sql', 'dynamodb']

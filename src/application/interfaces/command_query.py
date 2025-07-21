@@ -16,9 +16,9 @@ class QueryHandler(Generic[T, R], ABC):
     """Base interface for query handlers."""
     
     @abstractmethod
-    def handle(self, query: T) -> R:
+    async def handle(self, query: T) -> R:
         """
-        Handle a query.
+        Handle a query asynchronously.
         
         Args:
             query: Query to handle (strongly typed)
@@ -33,5 +33,4 @@ class QueryHandler(Generic[T, R], ABC):
 class Command(ABC):
     """Base interface for commands."""
 
-# CommandHandler is now imported from the unified location
-# No duplicate definition needed here
+# CommandHandler is imported from the unified location

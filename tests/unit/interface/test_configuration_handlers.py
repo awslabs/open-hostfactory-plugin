@@ -2,16 +2,91 @@
 import pytest
 from unittest.mock import Mock, patch
 from typing import Dict, Any
+from argparse import Namespace
 
 from src.interface.command_handlers import (
-    GetProviderConfigCLIHandler,
-    ValidateProviderConfigCLIHandler,
-    ReloadProviderConfigCLIHandler,
-    MigrateProviderConfigCLIHandler
+    handle_provider_config,
+    handle_validate_provider_config,
+    handle_reload_provider_config
 )
 
 
-class TestGetProviderConfigCLIHandler:
+class TestProviderConfigHandlers:
+    """Test provider configuration handler functionality."""
+    
+    @pytest.mark.asyncio
+    async def test_handle_provider_config(self):
+        """Test handle_provider_config function."""
+        args = Namespace(resource='provider', action='config')
+        mock_app = Mock()
+        
+        with patch('src.interface.system_command_handlers.get_container') as mock_get_container:
+            mock_container = Mock()
+            mock_get_container.return_value = mock_container
+            
+            # Mock configuration manager
+            mock_config_manager = Mock()
+            mock_config_manager.get_provider_config.return_value = {'provider': 'aws'}
+            mock_container.get.return_value = mock_config_manager
+            
+            result = await handle_provider_config(args, mock_app)
+            
+            assert isinstance(result, dict)
+    
+    @pytest.mark.asyncio
+    async def test_handle_validate_provider_config(self):
+        """Test handle_validate_provider_config function."""
+        args = Namespace(resource='provider', action='validate')
+        mock_app = Mock()
+        
+        with patch('src.interface.system_command_handlers.get_container') as mock_get_container:
+            mock_container = Mock()
+            mock_get_container.return_value = mock_container
+            
+            # Mock configuration manager
+            mock_config_manager = Mock()
+            mock_config_manager.validate_provider_config.return_value = True
+            mock_container.get.return_value = mock_config_manager
+            
+            result = await handle_validate_provider_config(args, mock_app)
+            
+            assert isinstance(result, dict)
+    
+    @pytest.mark.asyncio
+    async def test_handle_reload_provider_config(self):
+        """Test handle_reload_provider_config function."""
+        args = Namespace(resource='provider', action='reload')
+        mock_app = Mock()
+        
+        with patch('src.interface.system_command_handlers.get_container') as mock_get_container:
+            mock_container = Mock()
+            mock_get_container.return_value = mock_container
+            
+            # Mock configuration manager
+            mock_config_manager = Mock()
+            mock_config_manager.reload_provider_config.return_value = True
+            mock_container.get.return_value = mock_config_manager
+            
+            result = await handle_reload_provider_config(args, mock_app)
+            
+            assert isinstance(result, dict)
+
+
+class TestConfigurationHandlerImports:
+    """Test that configuration handlers can be imported correctly."""
+    
+    def test_import_configuration_handlers(self):
+        """Test that all configuration handlers can be imported."""
+        from src.interface.command_handlers import (
+            handle_provider_config,
+            handle_validate_provider_config,
+            handle_reload_provider_config
+        )
+        
+        # Verify all handlers are callable functions
+        assert callable(handle_provider_config)
+        assert callable(handle_validate_provider_config)
+        assert callable(handle_reload_provider_config)
     """Test GetProviderConfigCLIHandler functionality."""
     
     def setup_method(self):

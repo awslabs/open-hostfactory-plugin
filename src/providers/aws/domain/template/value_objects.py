@@ -168,100 +168,108 @@ class AWSARN(ARN):
             object.__setattr__(self, 'account_id', parts[4])
             object.__setattr__(self, 'resource', ':'.join(parts[5:]))
 
-class ProviderHandlerType(str, Enum):
-    """AWS-specific handler types implementing ProviderHandlerTypePort."""
+class ProviderApi(str, Enum):
+    """AWS-specific provider API types - dynamically loaded from configuration."""
+    
+    @classmethod
+    def _missing_(cls, value):
+        """Handle missing enum values by checking configuration."""
+        # Get valid APIs from configuration
+        try:
+            from src.config.manager import get_config_manager
+            config_manager = get_config_manager()
+            raw_config = config_manager.get_raw_config()
+            
+            # Navigate to AWS handlers in configuration
+            aws_handlers = (raw_config.get('provider', {})
+                          .get('provider_defaults', {})
+                          .get('aws', {})
+                          .get('handlers', {}))
+            
+            if value in aws_handlers:
+                # Dynamically create enum member
+                new_member = object.__new__(cls)
+                new_member._name_ = value
+                new_member._value_ = value
+                return new_member
+        except Exception:
+            pass
+        
+        # Fallback to hardcoded values for safety
+        fallback_values = {
+            "EC2Fleet": "EC2Fleet",
+            "SpotFleet": "SpotFleet", 
+            "ASG": "ASG",
+            "RunInstances": "RunInstances"
+        }
+        
+        if value in fallback_values:
+            new_member = object.__new__(cls)
+            new_member._name_ = value
+            new_member._value_ = value
+            return new_member
+        
+        return None
+    
+    # Define common values as class attributes for IDE support
     EC2_FLEET = "EC2Fleet"
     SPOT_FLEET = "SpotFleet"
     ASG = "ASG"
     RUN_INSTANCES = "RunInstances"
-    
-    def validate(self, value: str) -> bool:
-        """Validate handler type against AWS configuration."""
-        from src.providers.aws.configuration.validator import get_aws_config_manager, AWSProviderConfig
-        
-        config = get_aws_config_manager().get_typed(AWSProviderConfig)
-        valid_types = list(config.handlers.types.values())
-        
-        return value in valid_types
-    
-    def get_supported_types(self) -> List[str]:
-        """Get all supported AWS handler type values from configuration."""
-        from src.providers.aws.configuration.validator import get_aws_config_manager, AWSProviderConfig
-        
-        config = get_aws_config_manager().get_typed(AWSProviderConfig)
-        return list(config.handlers.types.values())
-    
-    @classmethod
-    def validate_value(cls, value: str) -> None:
-        """Class method for validation (backward compatibility)."""
-        from src.providers.aws.configuration.config import get_aws_config_manager
-        from src.providers.aws.configuration.validator import AWSProviderConfig
-        
-        config = get_aws_config_manager().get_typed(AWSProviderConfig)
-        valid_types = list(config.handlers.types.values())
-        
-        if value not in valid_types:
-            raise ValueError(f"Invalid AWS handler type: {value}. Valid types are: {', '.join(valid_types)}")
+
 
 class AWSFleetType(str, Enum):
-    """AWS Fleet type implementing FleetTypePort with configuration-driven behavior."""
+    """AWS Fleet type - dynamically loaded from configuration."""
+    
+    @classmethod
+    def _missing_(cls, value):
+        """Handle missing enum values by checking configuration."""
+        # Get valid fleet types from configuration
+        try:
+            from src.config.manager import get_config_manager
+            config_manager = get_config_manager()
+            raw_config = config_manager.get_raw_config()
+            
+            # Check all handlers for supported fleet types
+            aws_handlers = (raw_config.get('provider', {})
+                          .get('provider_defaults', {})
+                          .get('aws', {})
+                          .get('handlers', {}))
+            
+            # Collect all unique fleet types from all handlers
+            all_fleet_types = set()
+            for handler_config in aws_handlers.values():
+                fleet_types = handler_config.get('supported_fleet_types', [])
+                all_fleet_types.update(fleet_types)
+            
+            if value in all_fleet_types:
+                # Dynamically create enum member
+                new_member = object.__new__(cls)
+                new_member._name_ = value.upper()
+                new_member._value_ = value
+                return new_member
+        except Exception:
+            pass
+        
+        # Fallback to hardcoded values for safety
+        fallback_values = {
+            "instant": "instant",
+            "request": "request",
+            "maintain": "maintain"
+        }
+        
+        if value in fallback_values:
+            new_member = object.__new__(cls)
+            new_member._name_ = value.upper()
+            new_member._value_ = value
+            return new_member
+        
+        return None
+    
+    # Define common values as class attributes for IDE support
     INSTANT = "instant"  # EC2 Fleet only
     REQUEST = "request"  # Both EC2 Fleet and Spot Fleet
     MAINTAIN = "maintain"  # Both EC2 Fleet and Spot Fleet
-    
-    def get_valid_types_for_handler(self, handler_type: ProviderHandlerType) -> List[str]:
-        """Get valid fleet types for a specific AWS handler type from config."""
-        from src.providers.aws.configuration.validator import get_aws_config_manager, AWSProviderConfig
-        
-        config = get_aws_config_manager().get_typed(AWSProviderConfig)
-        handler_capabilities = config.handlers.capabilities.get(handler_type.value, {})
-        supported_types = handler_capabilities.supported_fleet_types or []
-        
-        # If no supported types are defined in config, fall back to hardcoded values
-        if not supported_types:
-            if handler_type == ProviderHandlerType.EC2_FLEET:
-                return [self.INSTANT.value, self.REQUEST.value, self.MAINTAIN.value]
-            elif handler_type == ProviderHandlerType.SPOT_FLEET:
-                return [self.REQUEST.value, self.MAINTAIN.value]
-            else:
-                return []
-                
-        return supported_types
-    
-    def get_default_for_handler(self, handler_type: ProviderHandlerType) -> str:
-        """Get default fleet type for a handler type from AWS config."""
-        from src.providers.aws.configuration.validator import get_aws_config_manager, AWSProviderConfig
-
-        config = get_aws_config_manager().get_typed(AWSProviderConfig)
-        handler_capabilities = config.handlers.capabilities.get(handler_type.value, {})
-        
-        if handler_capabilities and handler_capabilities.default_fleet_type:
-            return handler_capabilities.default_fleet_type
-        
-        # Fallback defaults
-        if handler_type == ProviderHandlerType.EC2_FLEET:
-            return self.INSTANT.value
-        elif handler_type == ProviderHandlerType.SPOT_FLEET:
-            return self.REQUEST.value
-        else:
-            return self.REQUEST.value
-    
-    def validate_for_handler(self, handler_type: ProviderHandlerType) -> bool:
-        """Validate if this fleet type is supported by the handler type."""
-        valid_types = self.get_valid_types_for_handler(handler_type)
-        return self.value in valid_types
-        handler_capabilities = config.handlers.capabilities.get(handler_type.value, {})
-        
-        if handler_capabilities and handler_capabilities.default_fleet_type:
-            return cls(handler_capabilities.default_fleet_type)
-        
-        # Fall back to AWS defaults
-        if handler_type == ProviderHandlerType.EC2_FLEET:
-            return cls(config.handlers.defaults.ec2_fleet_type)
-        elif handler_type == ProviderHandlerType.SPOT_FLEET:
-            return cls(config.handlers.defaults.spot_fleet_type)
-        else:
-            return cls.REQUEST
 
 class AWSAllocationStrategy:
     """AWS-specific allocation strategy wrapper with AWS API formatting."""
@@ -309,10 +317,10 @@ class AWSAllocationStrategy:
         return mapping.get(self._strategy, "lowest-price")
 
 class AWSConfiguration(ValueObject):
-    """AWS-specific configuration value object."""
+    """AWS-specific configuration value object - clean domain object without infrastructure dependencies."""
     model_config = ConfigDict(arbitrary_types_allowed=True)
     
-    handler_type: ProviderHandlerType
+    handler_type: ProviderApi
     fleet_type: Optional[AWSFleetType] = None
     allocation_strategy: Optional[AllocationStrategy] = None  # Use core enum, not wrapper
     price_type: Optional[PriceType] = None
@@ -321,13 +329,11 @@ class AWSConfiguration(ValueObject):
     
     @model_validator(mode='after')
     def validate_aws_configuration(self) -> 'AWSConfiguration':
-        """Validate AWS-specific configuration."""
+        """Validate AWS-specific configuration - basic domain validation only."""
         # Set default fleet type if not provided
         if not self.fleet_type:
-            # Create a temporary instance to get the default
-            temp_fleet = AWSFleetType.REQUEST  # Default instance
-            default_fleet_type = temp_fleet.get_default_for_handler(self.handler_type)
-            object.__setattr__(self, 'fleet_type', AWSFleetType(default_fleet_type))
+            # Use simple default without configuration dependency
+            object.__setattr__(self, 'fleet_type', AWSFleetType.REQUEST)
         
         # Set default allocation strategy if not provided
         if not self.allocation_strategy:
@@ -337,13 +343,6 @@ class AWSConfiguration(ValueObject):
         if not self.price_type:
             object.__setattr__(self, 'price_type', PriceType.ONDEMAND)
         
-        # Validate fleet type is supported by handler
-        valid_fleet_types = self.fleet_type.get_valid_types_for_handler(self.handler_type)
-        if self.fleet_type.value not in valid_fleet_types:
-            raise ValueError(
-                f"Fleet type {self.fleet_type.value} not supported by handler {self.handler_type.value}. "
-                f"Valid types: {', '.join(valid_fleet_types)}"
-            )
         
         return self
     

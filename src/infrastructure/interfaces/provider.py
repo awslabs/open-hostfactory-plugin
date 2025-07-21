@@ -1,17 +1,16 @@
 """Core provider interfaces - contracts that all providers must implement."""
 from typing import Dict, Any, List, Optional, Protocol, runtime_checkable
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.domain.base.value_objects import InstanceId
 
 
 class BaseProviderConfig(BaseModel):
     """Base configuration for providers."""
+    model_config = ConfigDict(extra="allow")  # Allow provider-specific config fields
+    
     provider_type: str
     region: Optional[str] = None
-    
-    class Config:
-        extra = "allow"  # Allow provider-specific config fields
 
 
 # Alias for backward compatibility

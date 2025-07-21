@@ -24,7 +24,7 @@ def retry(strategy: str = "exponential",
           half_open_timeout: int = 30,
           **kwargs) -> Callable[[Callable[..., T]], Callable[..., T]]:
     """
-    Unified retry decorator supporting multiple strategies.
+    Retry decorator supporting multiple strategies.
     
     Args:
         strategy: Retry strategy ("exponential", "circuit_breaker", "adaptive")

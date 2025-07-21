@@ -84,6 +84,22 @@ The unified configuration format provides comprehensive provider management:
       }
     }
   },
+  "scheduler": {
+    "strategy": "hostfactory",
+    "config_root": "config",
+    "template_path": "awsprov_templates.json",
+    "field_mapping": {
+      "template_id_field": "templateId",
+      "max_instances_field": "maxNumber",
+      "image_id_field": "imageId",
+      "instance_type_field": "vmType"
+    },
+    "output_format": {
+      "use_camel_case": true,
+      "include_attributes": true,
+      "attribute_format": "hostfactory"
+    }
+  },
   "template": {
     "default_image_id": "ami-12345678",
     "default_instance_type": "t2.micro",
@@ -93,6 +109,16 @@ The unified configuration format provides comprehensive provider management:
       "enabled": true,
       "fallback_on_failure": true,
       "cache_enabled": true
+    }
+  },
+  "aws": {
+    "launch_template": {
+      "create_per_request": true,
+      "naming_strategy": "request_based",
+      "version_strategy": "incremental",
+      "reuse_existing": true,
+      "cleanup_old_versions": false,
+      "max_versions_per_template": 10
     }
   }
 }
@@ -242,6 +268,11 @@ export HF_LOGGING_CONSOLE_ENABLED=true
 
 # Storage configuration
 export HF_STORAGE_STRATEGY=json
+
+# Scheduler configuration
+export HF_SCHEDULER_STRATEGY=hostfactory
+export HF_SCHEDULER_CONFIG_ROOT=config
+export HF_SCHEDULER_TEMPLATE_PATH=awsprov_templates.json
 ```
 
 ### Configuration Validation

@@ -1,10 +1,21 @@
-"""Base AWS handler with common functionality."""
+"""
+Unified AWS Handler Base Class following Clean Architecture and CQRS patterns.
+
+This module provides a unified base handler that combines the best features of both
+AWSHandler and BaseAWSHandler patterns while maintaining clean architecture principles
+and proper integration with our DI/CQRS system.
+"""
+import asyncio
+import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, TypeVar, Callable
+from typing import Any, Dict, List, TypeVar, Callable, Optional
+from datetime import datetime
 from botocore.exceptions import ClientError
 
+from src.domain.base.ports import LoggingPort, ErrorHandlingPort
 from src.domain.template.aggregate import Template
 from src.domain.request.aggregate import Request
+from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSEntityNotFoundError,
@@ -16,53 +27,75 @@ from src.providers.aws.exceptions.aws_exceptions import (
     NetworkError,
     InfrastructureError
 )
-from src.domain.base.ports import LoggingPort
 from src.infrastructure.resilience import retry
-from src.infrastructure.utilities.common.resource_naming import (
-    get_launch_template_name,
-    get_instance_name
-)
 from src.domain.base.dependency_injection import injectable
 
 T = TypeVar('T')
 
 @injectable
 class AWSHandler(ABC):
-    """Base class for AWS resource handlers."""
-
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort, 
-                 aws_ops=None, template_config_store=None, request_adapter=None) -> None:
+    """
+    Unified AWS handler base class following Clean Architecture and CQRS patterns.
+    
+    This class provides the foundation for all AWS handlers in the system,
+    combining the best features of both synchronous and asynchronous patterns:
+    
+    - Clean Architecture compliance with proper dependency injection
+    - CQRS-aligned error handling and logging
+    - Professional retry logic with circuit breaker support
+    - Performance monitoring and metrics collection
+    - Consistent constructor pattern across all handlers
+    - Template method pattern for extensibility
+    - AWS-specific optimizations and error handling
+    
+    Architecture Alignment:
+    - Follows same patterns as other base handlers in the system
+    - Proper DI integration with standardized dependencies
+    - Clean separation of concerns
+    - Professional error handling and logging
+    """
+    
+    def __init__(self, 
+                 aws_client: AWSClient,
+                 logger: LoggingPort,
+                 aws_ops,
+                 launch_template_manager,
+                 request_adapter=None,
+                 error_handler: Optional[ErrorHandlingPort] = None):
         """
-        Initialize AWS handler with common dependencies.
+        Initialize AWS handler with standardized dependencies.
         
         Args:
-            aws_client: AWS client instance
-            logger: Logger for logging messages
-            aws_ops: AWS operations utility (optional)
-            template_config_store: Template configuration store for retrieving templates (optional)
+            aws_client: AWS client for API operations
+            logger: Logging port for operation logging
+            aws_ops: AWS operations utility (required)
+            launch_template_manager: Launch template manager (required)
             request_adapter: Request adapter for terminating instances (optional)
+            error_handler: Error handling port for exception management (optional)
         """
         self.aws_client = aws_client
         self._logger = logger
+        self.launch_template_manager = launch_template_manager
+        self.error_handler = error_handler
         self.max_retries = 3
         self.base_delay = 1  # seconds
         self.max_delay = 10  # seconds
+        self._metrics: Dict[str, Any] = {}
         
-        # Setup common dependencies if provided
-        if aws_ops:
-            self._setup_aws_operations(aws_ops)
-        if template_config_store is not None or request_adapter is not None:
-            self._setup_dependencies(template_config_store, request_adapter)
+        # Setup required dependencies
+        self._setup_aws_operations(aws_ops)
+        self._setup_dependencies(request_adapter)
     
     def _setup_aws_operations(self, aws_ops):
         """Configure AWS operations utility - eliminates duplication across handlers."""
         self.aws_ops = aws_ops
-        self.aws_ops.set_retry_method(self._retry_with_backoff)
-        self.aws_ops.set_pagination_method(self._paginate)
+        if hasattr(aws_ops, 'set_retry_method'):
+            aws_ops.set_retry_method(self._retry_with_backoff)
+        if hasattr(aws_ops, 'set_pagination_method'):
+            aws_ops.set_pagination_method(self._paginate)
     
-    def _setup_dependencies(self, template_config_store, request_adapter):
+    def _setup_dependencies(self, request_adapter):
         """Configure optional dependencies - eliminates duplication across handlers."""
-        self._template_config_store = template_config_store
         self._request_adapter = request_adapter
         
         # Standardized logging for request adapter status
@@ -72,19 +105,19 @@ class AWSHandler(ABC):
             self._logger.debug("No request adapter provided, will use EC2 client directly")
 
     @abstractmethod
-    def acquire_hosts(self, request: Request, template: Template) -> str:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> str:
         """
-        Acquire hosts using the specified template.
+        Acquire hosts using the specified AWS template.
         
         Args:
             request: The request to fulfill
-            template: The template to use
+            aws_template: The AWS template to use
             
         Returns:
-            str: The AWS resource ID (e.g., fleet ID)
+            str: The AWS resource ID (e.g., fleet ID, ASG name)
             
         Raises:
-            ValidationError: If the template is invalid
+            AWSValidationError: If the template is invalid
             QuotaExceededError: If AWS quotas would be exceeded
             InfrastructureError: For other AWS API errors
         """
@@ -117,155 +150,6 @@ class AWSHandler(ABC):
             AWSEntityNotFoundError: If the AWS resource is not found
             InfrastructureError: For other AWS API errors
         """
-
-    def create_launch_template(self, template: Template, request: Request) -> Dict[str, Any]:
-        """
-        Create an EC2 launch template or a new version if it already exists.
-        Uses ClientToken for idempotency to prevent duplicate versions.
-        
-        Args:
-            template: The template configuration
-            request: The associated request
-            
-        Returns:
-            Dict containing launch template ID and version
-            
-        Raises:
-            ValidationError: If the template configuration is invalid
-            InfrastructureError: For AWS API errors
-        """
-        try:
-            # Create launch template data
-            launch_template_data = self._create_launch_template_data(template, request)
-            
-            # Get the launch template name using the helper function
-            launch_template_name = get_launch_template_name(request.request_id)
-            
-            # Generate a deterministic client token based on the request ID, template ID, and image ID
-            # This ensures idempotency - identical requests will return the same result
-            import hashlib
-            client_token = hashlib.sha256(
-                f"{request.request_id}:{template.template_id}:{template.image_id}".encode()
-            ).hexdigest()[:32]  # Truncate to 32 chars to maintain compatibility with services expecting MD5 length
-            
-            # First try to describe the launch template to see if it exists
-            try:
-                existing_template = self._retry_with_backoff(
-                    self.aws_client.ec2_client.describe_launch_templates,
-                    LaunchTemplateNames=[launch_template_name],
-                    non_retryable_errors=['InvalidLaunchTemplateName.NotFoundException']
-                )
-                
-                # If we get here, the template exists, so create a new version with ClientToken
-                template_id = existing_template['LaunchTemplates'][0]['LaunchTemplateId']
-                self._logger.info(f"Launch template {launch_template_name} exists with ID {template_id}. Creating/reusing version.")
-                
-                response = self._retry_with_backoff(
-                    self.aws_client.ec2_client.create_launch_template_version,
-                    LaunchTemplateId=template_id,
-                    VersionDescription=f"For request {request.request_id}",
-                    LaunchTemplateData=launch_template_data,
-                    ClientToken=client_token  # Key for idempotency!
-                )
-                
-                version = str(response['LaunchTemplateVersion']['VersionNumber'])
-                self._logger.info(f"Using version {version} of launch template {template_id}")
-                
-                return {
-                    'LaunchTemplateId': template_id,
-                    'Version': version
-                }
-                
-            except ClientError as e:
-                if e.response['Error']['Code'] == 'InvalidLaunchTemplateName.NotFoundException':
-                    # Template doesn't exist, create it with ClientToken
-                    self._logger.info(f"Launch template {launch_template_name} does not exist. Creating new template.")
-                    
-                    response = self._retry_with_backoff(
-                        self.aws_client.ec2_client.create_launch_template,
-                        LaunchTemplateName=launch_template_name,
-                        VersionDescription=f"Created for request {request.request_id}",
-                        LaunchTemplateData=launch_template_data,
-                        ClientToken=client_token,  # Key for idempotency!
-                        TagSpecifications=[{
-                            'ResourceType': 'launch-template',
-                            'Tags': [
-                                {'Key': 'Name', 'Value': launch_template_name},
-                                {'Key': 'RequestId', 'Value': str(request.request_id)},
-                                {'Key': 'TemplateId', 'Value': str(template.template_id)},
-                                {'Key': 'CreatedBy', 'Value': 'HostFactory'}
-                            ]
-                        }]
-                    )
-
-                    launch_template = response['LaunchTemplate']
-                    self._logger.info(f"Created launch template {launch_template['LaunchTemplateId']}")
-
-                    return {
-                        'LaunchTemplateId': launch_template['LaunchTemplateId'],
-                        'Version': str(launch_template['LatestVersionNumber'])
-                    }
-                else:
-                    # Some other error
-                    raise e
-
-        except ClientError as e:
-            error = self._convert_client_error(e)
-            self._logger.error(f"Failed to create launch template: {str(error)}")
-            raise error
-        except Exception as e:
-            self._logger.error(f"Unexpected error creating launch template: {str(e)}")
-            raise InfrastructureError(f"Failed to create launch template: {str(e)}")
-
-    def _create_launch_template_data(self, template: Template, request: Request) -> Dict[str, Any]:
-        """Create launch template data from template configuration."""
-        # Template should already contain resolved AMI ID from boundary resolution
-        image_id = template.image_id
-        if not image_id:
-            error_msg = f"Template {template.template_id} has no image_id specified"
-            self._logger.error(error_msg)
-            raise InfrastructureError(error_msg)
-            
-        # Log the image_id being used
-        self._logger.info(f"Creating launch template with resolved image_id: {image_id}")
-        
-        # Get instance name using the helper function
-        instance_name = get_instance_name(request.request_id)
-        
-        launch_template_data = {
-            'ImageId': image_id,
-            'InstanceType': template.vm_type if template.vm_type else list(template.vm_types.keys())[0],
-            'TagSpecifications': [{
-                'ResourceType': 'instance',
-                'Tags': [
-                    {'Key': 'Name', 'Value': instance_name},
-                    {'Key': 'RequestId', 'Value': str(request.request_id)},
-                    {'Key': 'TemplateId', 'Value': str(template.template_id)},
-                    {'Key': 'CreatedBy', 'Value': 'HostFactory'}
-                ]
-            }]
-        }
-
-        # Add template tags if any
-        if template.tags:
-            instance_tags = [{'Key': k, 'Value': v} for k, v in template.tags.items()]
-            launch_template_data['TagSpecifications'][0]['Tags'].extend(instance_tags)
-
-        # Add optional configurations
-        if template.subnet_id:
-            launch_template_data['NetworkInterfaces'] = [{
-                'DeviceIndex': 0,
-                'SubnetId': template.subnet_id,
-                'AssociatePublicIpAddress': True
-            }]
-
-        if template.key_name:
-            launch_template_data['KeyName'] = template.key_name
-
-        if template.user_data:
-            launch_template_data['UserData'] = template.user_data
-
-        return launch_template_data
 
     def _retry_with_backoff(self, func: Callable[..., T], *args, 
                            operation_type: str = "standard",
@@ -351,6 +235,8 @@ class AWSHandler(ABC):
                 'service': service_name,
                 'max_attempts': 3,
                 'base_delay': 1.0,
+                'max_delay': 30.0,
+                'jitter': True,
                 'failure_threshold': 5,
                 'reset_timeout': 60,
                 'half_open_timeout': 30
@@ -426,8 +312,8 @@ class AWSHandler(ABC):
             InfrastructureError: For other AWS API errors
         """
         try:
-            # Use AWS client's describe_instances with adaptive batch sizing
-            response = self.aws_client.describe_instances(instance_ids=instance_ids)
+            # Use AWS client's EC2 client for describe_instances
+            response = self.aws_client.ec2_client.describe_instances(InstanceIds=instance_ids)
             
             instances = []
             for reservation in response.get('Reservations', []):
@@ -452,15 +338,15 @@ class AWSHandler(ABC):
             self._logger.error(f"Unexpected error getting instance details: {str(e)}")
             raise InfrastructureError(f"Failed to get instance details: {str(e)}")
 
-    def _validate_prerequisites(self, template: Template) -> None:
+    def _validate_prerequisites(self, template: AWSTemplate) -> None:
         """
-        Validate template prerequisites.
+        Validate AWS template prerequisites.
         
         Args:
-            template: The template to validate
+            template: The AWS template to validate
             
         Raises:
-            ValidationError: If prerequisites are not met
+            AWSValidationError: If prerequisites are not met
         """
         errors = {}
 
@@ -471,20 +357,70 @@ class AWSHandler(ABC):
         # The actual AWS API call will validate the AMI ID format
 
         # Validate instance type(s)
-        if not (template.vm_type or template.vm_types):
-            errors['instanceType'] = "Either vm_type or vm_types must be specified"
-        if template.vm_type and template.vm_types:
-            errors['instanceType'] = "Cannot specify both vm_type and vm_types"
+        if not (template.instance_type or template.instance_types):
+            errors['instanceType'] = "Either instance_type or instance_types must be specified"
+        if template.instance_type and template.instance_types:
+            errors['instanceType'] = "Cannot specify both instance_type and instance_types"
 
-        # Validate subnet(s)
-        if not (template.subnet_id or template.subnet_ids):
-            errors['subnet'] = "Either subnet_id or subnet_ids must be specified"
-        if template.subnet_id and template.subnet_ids:
-            errors['subnet'] = "Cannot specify both subnet_id and subnet_ids"
+        # Validate subnet(s) - subnet_id is a property of subnet_ids, so only check subnet_ids
+        if not template.subnet_ids:
+            errors['subnet'] = "At least one subnet must be specified in subnet_ids"
 
         # Validate security groups
         if not template.security_group_ids:
             errors['securityGroups'] = "At least one security group is required"
 
         if errors:
-            raise AWSValidationError("Template validation failed", errors)
+            # Create detailed error message
+            error_details = []
+            for field, message in errors.items():
+                error_details.append(f"{field}: {message}")
+            
+            detailed_message = f"Template validation failed - {'; '.join(error_details)}"
+            raise AWSValidationError(detailed_message, errors)
+
+    # Performance monitoring methods
+    def _record_success_metrics(self, request_type: str, duration: float) -> None:
+        """Record success metrics for monitoring."""
+        key = f"aws_{request_type}"
+        if key not in self._metrics:
+            self._metrics[key] = {
+                'success_count': 0,
+                'failure_count': 0,
+                'total_duration': 0.0,
+                'avg_duration': 0.0
+            }
+        
+        metrics = self._metrics[key]
+        metrics['success_count'] += 1
+        metrics['total_duration'] += duration
+        total_count = metrics['success_count'] + metrics['failure_count']
+        metrics['avg_duration'] = metrics['total_duration'] / total_count if total_count > 0 else 0.0
+    
+    def _record_failure_metrics(self, request_type: str, duration: float, error: Exception) -> None:
+        """Record failure metrics for monitoring."""
+        key = f"aws_{request_type}"
+        if key not in self._metrics:
+            self._metrics[key] = {
+                'success_count': 0,
+                'failure_count': 0,
+                'total_duration': 0.0,
+                'avg_duration': 0.0,
+                'last_error': None
+            }
+        
+        metrics = self._metrics[key]
+        metrics['failure_count'] += 1
+        metrics['total_duration'] += duration
+        metrics['last_error'] = str(error)
+        total_count = metrics['success_count'] + metrics['failure_count']
+        metrics['avg_duration'] = metrics['total_duration'] / total_count if total_count > 0 else 0.0
+    
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get handler performance metrics."""
+        return self._metrics.copy()
+    
+    # Utility methods for AWS operations (keeping existing functionality)
+    def get_handler_type(self) -> str:
+        """Get handler type from class name."""
+        return self.__class__.__name__.replace('Handler', '').lower()

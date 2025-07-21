@@ -40,7 +40,37 @@ The plugin provides all four required shell scripts:
 }
 ```
 
-**Compliance Status**: [IMPLEMENTED] Fully compliant with HostFactory specification
+**Intelligent Attribute Generation**:
+The plugin automatically generates accurate CPU and RAM specifications based on AWS instance types:
+
+```json
+{
+  "templates": [
+    {
+      "templateId": "t3-medium-template",
+      "maxNumber": 5,
+      "instanceType": "t3.medium",
+      "attributes": {
+        "type": ["String", "X86_64"],
+        "ncpus": ["Numeric", "2"],
+        "nram": ["Numeric", "4096"]
+      }
+    },
+    {
+      "templateId": "m5-xlarge-template", 
+      "maxNumber": 3,
+      "instanceType": "m5.xlarge",
+      "attributes": {
+        "type": ["String", "X86_64"],
+        "ncpus": ["Numeric", "4"],
+        "nram": ["Numeric", "16384"]
+      }
+    }
+  ]
+}
+```
+
+**Compliance Status**: [IMPLEMENTED] Fully compliant with HostFactory specification with enhanced attribute accuracy
 
 #### requestMachines
 

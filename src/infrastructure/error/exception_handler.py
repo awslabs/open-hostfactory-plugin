@@ -630,14 +630,16 @@ class ExceptionHandler:
     
     def _preserve_infrastructure_exception(self, 
                                          exc: InfrastructureError, 
-                                         context: str = None, 
+                                         context: ExceptionContext, 
                                          **kwargs) -> InfrastructureError:
         """Preserve infrastructure exception with context."""
-        exc.add_context(
-            {
-                'handler': 'infrastructure_exception_handler',
-                'context': context or 'infrastructure_operation',
-                'timestamp': datetime.utcnow().isoformat(),
+        self.logger.error(
+            f"Infrastructure error in {context.operation}",
+            extra={
+                "error_code": getattr(exc, 'error_code', 'INFRASTRUCTURE_ERROR'),
+                "infrastructure_error": str(exc),
+                "infrastructure_details": getattr(exc, 'details', {}),
+                "context": context.to_dict(),
                 **kwargs
             }
         )
@@ -645,14 +647,16 @@ class ExceptionHandler:
     
     def _preserve_configuration_exception(self, 
                                         exc: ConfigurationError, 
-                                        context: str = None, 
+                                        context: ExceptionContext, 
                                         **kwargs) -> ConfigurationError:
         """Preserve configuration exception with context."""
-        exc.add_context(
-            {
-                'handler': 'configuration_exception_handler',
-                'context': context or 'configuration_operation',
-                'timestamp': datetime.utcnow().isoformat(),
+        self.logger.error(
+            f"Configuration error in {context.operation}",
+            extra={
+                "error_code": getattr(exc, 'error_code', 'CONFIGURATION_ERROR'),
+                "configuration_error": str(exc),
+                "configuration_details": getattr(exc, 'details', {}),
+                "context": context.to_dict(),
                 **kwargs
             }
         )

@@ -34,7 +34,8 @@ class ApplicationCommandHandler(CommandHandler[TCommand, TResponse]):
     - Coordinating between bounded contexts
     """
     
-    def __init__(self, logger=None, metrics=None, event_publisher=None):
+    def __init__(self, logger: Optional[Any] = None, metrics: Optional[Any] = None, 
+                 event_publisher: Optional[Any] = None):
         """
         Initialize application command handler.
         
@@ -82,7 +83,8 @@ class CLICommandHandler(CommandHandler[TCommand, TResponse]):
     - Handling CLI-specific errors
     """
     
-    def __init__(self, query_bus=None, command_bus=None, logger=None, metrics=None):
+    def __init__(self, query_bus: Optional[Any] = None, command_bus: Optional[Any] = None, 
+                 logger: Optional[Any] = None, metrics: Optional[Any] = None):
         """
         Initialize CLI command handler.
         

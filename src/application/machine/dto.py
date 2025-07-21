@@ -12,8 +12,8 @@ class MachineDTO(BaseDTO):
     name: str
     status: str
     instance_type: str
-    private_ip: str = Field(alias="privateIpAddress")  # Map to expected API field name
-    public_ip: Optional[str] = Field(default=None, alias="publicIpAddress")  # Map to expected API field name
+    private_ip: str
+    public_ip: Optional[str] = None
     result: str  # 'executing', 'fail', or 'succeed'
     launch_time: int
     message: str = ""
@@ -74,9 +74,14 @@ class MachineDTO(BaseDTO):
         return cls(**common_fields)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to HostFactory API format using Pydantic's alias system."""
-        # Use the new model_dump_camel method which handles aliases automatically
-        return self.model_dump_camel()
+        """
+        Convert to dictionary format - returns snake_case for internal use.
+        External format conversion should be handled at scheduler strategy level.
+        
+        Returns:
+            Dictionary representation with snake_case keys
+        """
+        return super().to_dict()
 
 
 class MachineHealthDTO(BaseDTO):
@@ -90,12 +95,11 @@ class MachineHealthDTO(BaseDTO):
     last_check: datetime
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary format with camelCase keys for API."""
-        # Use the new model_dump_camel method
-        result = self.model_dump_camel()
+        """
+        Convert to dictionary format - returns snake_case for internal use.
+        External format conversion should be handled at scheduler strategy level.
         
-        # Format datetime fields
-        if self.last_check:
-            result["lastCheck"] = self.last_check.isoformat()
-            
-        return result
+        Returns:
+            Dictionary representation with snake_case keys
+        """
+        return super().to_dict()

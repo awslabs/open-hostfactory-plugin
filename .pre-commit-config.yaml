@@ -2,9 +2,17 @@
 repos:
   - repo: local
     hooks:
+      - id: professional-quality-check
+        name: Professional Quality Check
+        entry: bash -c 'source .venv/bin/activate && python scripts/quality_check.py --strict'
+        language: system
+        files: \.(py|md|rst|txt|yaml|yml|json|toml)$
+        pass_filenames: false
+        description: "Run comprehensive professional quality checks (emojis, language, docstrings, etc.)"
+      
       - id: validate-imports
         name: Validate Python Imports
-        entry: python scripts/validate_imports.py
+        entry: bash -c 'source .venv/bin/activate && python scripts/validate_imports.py'
         language: system
         files: \.(py)$
         pass_filenames: false
@@ -12,7 +20,7 @@ repos:
       
       - id: test-import-validation
         name: Run Import Validation Tests
-        entry: python -m pytest tests/test_import_validation.py -v
+        entry: bash -c 'source .venv/bin/activate && python -m pytest tests/test_import_validation.py -v'
         language: system
         files: \.(py)$
         pass_filenames: false
@@ -20,8 +28,74 @@ repos:
       
       - id: check-deprecated-imports
         name: Check for Deprecated Imports
-        entry: bash -c 'grep -r "from.*request.*value_objects.*import.*MachineStatus" . --include="*.py" && echo "❌ Found deprecated MachineStatus import" && exit 1 || echo "✅ No deprecated imports found"'
+        entry: bash -c 'grep -r "from.*request.*value_objects.*import.*MachineStatus" . --include="*.py" && echo "Found deprecated MachineStatus import" && exit 1 || echo "No deprecated imports found"'
         language: system
         files: \.(py)$
         pass_filenames: false
         description: "Check for deprecated import patterns"
+      
+      # Security Checks
+      - id: comprehensive-security-scan
+        name: Comprehensive Security Scan
+        entry: bash -c 'source .venv/bin/activate && python dev-tools/security/security_scan.py'
+        language: system
+        files: \.(py|txt|yml|yaml|toml|Dockerfile)$
+        pass_filenames: false
+        description: "Run comprehensive security scan (Bandit, Safety, SBOM, Trivy, Hadolint)"
+      
+      - id: bandit-security-check
+        name: Bandit Security Check (Fallback)
+        entry: bash -c 'source .venv/bin/activate && python -m bandit -r src/ -f json -q'
+        language: system
+        files: ^src/.*\.py$
+        pass_filenames: false
+        description: "Run Bandit security linter on source code (fallback if comprehensive scan fails)"
+      
+      - id: safety-dependency-check
+        name: Safety Dependency Check
+        entry: bash -c 'source .venv/bin/activate && python -m safety check --short-report'
+        language: system
+        files: requirements.*\.txt$
+        pass_filenames: false
+        description: "Check for known security vulnerabilities in dependencies"
+      
+      - id: secrets-detection
+        name: Detect Hardcoded Secrets
+        entry: bash -c 'grep -r -E "(password|secret|key|token)\s*=\s*[\"'\''][^\"'\'']{8,}" src/ --include="*.py" && echo "Potential hardcoded secrets found" && exit 1 || echo "No hardcoded secrets detected"'
+        language: system
+        files: ^src/.*\.py$
+        pass_filenames: false
+        description: "Detect potential hardcoded secrets in source code"
+      
+      - id: dockerfile-security
+        name: Dockerfile Security Check
+        entry: bash -c 'if command -v hadolint >/dev/null 2>&1; then hadolint Dockerfile; else echo "Hadolint not installed, skipping Dockerfile security check"; fi'
+        language: system
+        files: ^Dockerfile.*$
+        pass_filenames: false
+        description: "Run Hadolint security check on Dockerfiles"
+      
+      # Architecture Quality Gates
+      - id: check-file-sizes
+        name: Check File Sizes
+        entry: bash -c 'source .venv/bin/activate && python scripts/check_file_sizes.py --warn-only'
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Check for files that may violate Single Responsibility Principle"
+        
+      - id: validate-cqrs
+        name: Validate CQRS Patterns
+        entry: bash -c 'source .venv/bin/activate && python scripts/validate_cqrs.py --warn-only'
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Validate CQRS handler patterns and inheritance"
+        
+      - id: check-architecture
+        name: Check Clean Architecture
+        entry: bash -c 'source .venv/bin/activate && python scripts/check_architecture.py --warn-only'
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Validate Clean Architecture dependency rules"

@@ -1,6 +1,6 @@
 """Common configuration schemas."""
 from typing import Dict
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ResourcePrefixConfig(BaseModel):
@@ -175,7 +175,8 @@ class RequestConfig(BaseModel):
     
     max_machines_per_request: int = Field(100, description="Maximum number of machines per request")
     
-    @validator('max_machines_per_request')
+    @field_validator('max_machines_per_request')
+    @classmethod
     def validate_max_machines(cls, v: int) -> int:
         """Validate max machines per request."""
         if v < 1:
@@ -190,14 +191,16 @@ class DatabaseConfig(BaseModel):
     query_timeout: int = Field(60, description="Database query timeout in seconds")
     max_connections: int = Field(10, description="Maximum number of database connections")
     
-    @validator('connection_timeout', 'query_timeout')
+    @field_validator('connection_timeout', 'query_timeout')
+    @classmethod
     def validate_timeouts(cls, v: int) -> int:
         """Validate timeout values."""
         if v < 1:
             raise ValueError("Timeout must be at least 1 second")
         return v
     
-    @validator('max_connections')
+    @field_validator('max_connections')
+    @classmethod
     def validate_max_connections(cls, v: int) -> int:
         """Validate max connections."""
         if v < 1:
@@ -212,18 +215,18 @@ class EventsConfig(BaseModel):
     max_events_per_request: int = Field(1000, description="Maximum number of events per request")
     event_retention_days: int = Field(30, description="Number of days to retain events")
     
-    @validator('max_events_per_request')
+    @field_validator('max_events_per_request')
+    @classmethod
     def validate_max_events(cls, v: int) -> int:
         """Validate max events per request."""
         if v < 1:
             raise ValueError("Maximum events per request must be at least 1")
         return v
     
-    @validator('event_retention_days')
+    @field_validator('event_retention_days')
+    @classmethod
     def validate_retention_days(cls, v: int) -> int:
         """Validate event retention days."""
         if v < 1:
             raise ValueError("Event retention days must be at least 1")
         return v
-
-

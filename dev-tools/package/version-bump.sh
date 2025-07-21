@@ -48,7 +48,7 @@ else
             PATCH=$((PATCH + 1))
             ;;
         *)
-            echo "❌ Invalid bump type: $BUMP_TYPE"
+            echo "ERROR Invalid bump type: $BUMP_TYPE"
             echo "Use: major, minor, patch, or specific version (e.g., 1.2.3)"
             exit 1
             ;;
@@ -62,7 +62,7 @@ echo ""
 read -p "Update version to $NEW_VERSION? (y/N): " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ Cancelled"
+    echo "ERROR Cancelled"
     exit 1
 fi
 
@@ -78,7 +78,7 @@ if [ -f pyproject.toml ]; then
     rm pyproject.toml.bak
 fi
 
-echo "✅ Version updated to $NEW_VERSION"
+echo "SUCCESS Version updated to $NEW_VERSION"
 echo ""
 echo "🎯 Next steps:"
 echo "  • Review changes: git diff"

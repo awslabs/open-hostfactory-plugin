@@ -93,9 +93,11 @@ nav:
     - Architecture:
       - System Overview: architecture/system_overview.md
       - Clean Architecture: architecture/clean_architecture.md
+      - Template Infrastructure: architecture/template-infrastructure.md
       - System Diagrams: architecture/system_diagrams.md
       - CQRS Pattern: architecture/cqrs_pattern.md
       - Dependency Injection: architecture/dependency_injection.md
+      - Lazy Loading Design: architecture/lazy-loading-design.md
     - Design Patterns:
       - Strategy Pattern: patterns/strategy_pattern.md
       - Factory Pattern: patterns/factory_pattern.md
@@ -114,6 +116,7 @@ nav:
       - Event System: developer_guide/events.md
       - Provider System: developer_guide/providers.md
       - Resilience Patterns: developer_guide/resilience.md
+      - Performance Optimization: developer_guide/performance-optimization.md
       - Development Setup: developer_guide/development.md
       - Testing: development/testing.md
   - Deployment & Operations:

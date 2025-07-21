@@ -91,6 +91,7 @@ class ProviderContext:
         self._default_strategy_type: Optional[str] = None
         self._lock = Lock()
         self._initialized = False
+        self._provider_selection_service: Optional[Any] = None
     
     @property
     def is_initialized(self) -> bool:
@@ -100,19 +101,29 @@ class ProviderContext:
     @property
     def current_strategy_type(self) -> Optional[str]:
         """Get the current strategy type."""
-        return self._current_strategy.provider_type if self._current_strategy else None
+        if not self._current_strategy:
+            return None
+        
+        # Find the full strategy identifier (e.g., "aws-aws-primary" instead of just "aws")
+        for strategy_id, strategy in self._strategies.items():
+            if strategy == self._current_strategy:
+                return strategy_id
+        
+        # Fallback to provider type if not found
+        return self._current_strategy.provider_type
     
     @property
     def available_strategies(self) -> List[str]:
         """Get list of available strategy types."""
         return list(self._strategies.keys())
     
-    def register_strategy(self, strategy: ProviderStrategy) -> None:
+    def register_strategy(self, strategy: ProviderStrategy, instance_name: str = None) -> None:
         """
         Register a provider strategy.
         
         Args:
             strategy: The provider strategy to register
+            instance_name: Optional instance name for unique identification
             
         Raises:
             ValueError: If strategy is invalid or already registered
@@ -120,11 +131,16 @@ class ProviderContext:
         if not isinstance(strategy, ProviderStrategy):
             raise ValueError("Strategy must implement ProviderStrategy interface")
         
-        strategy_type = strategy.provider_type
+        # Create unique strategy identifier
+        base_type = strategy.provider_type
+        if instance_name:
+            strategy_type = f"{base_type}-{instance_name}"
+        else:
+            strategy_type = base_type
         
         with self._lock:
             if strategy_type in self._strategies:
-                self._logger.warning(f"Strategy {strategy_type} already registered, replacing")
+                self._logger.debug(f"Strategy {strategy_type} already registered, replacing")
             
             self._strategies[strategy_type] = strategy
             self._strategy_metrics[strategy_type] = StrategyMetrics()
@@ -134,7 +150,7 @@ class ProviderContext:
                 self._default_strategy_type = strategy_type
                 self._current_strategy = strategy
             
-            self._logger.info(f"Registered provider strategy: {strategy_type}")
+            self._logger.debug(f"Loaded strategy for provider instance: {base_type}:{instance_name or 'default'}")
     
     def unregister_strategy(self, strategy_type: str) -> bool:
         """
@@ -222,6 +238,10 @@ class ProviderContext:
             RuntimeError: If no strategy is available
             ValueError: If operation is invalid
         """
+        # Trigger lazy loading if no strategies are available
+        if not self._current_strategy and not self._strategies:
+            self._trigger_lazy_loading()
+        
         if not self._current_strategy:
             return ProviderResult.error_result(
                 "No provider strategy available",
@@ -235,6 +255,12 @@ class ProviderContext:
             # Check if strategy supports the operation
             capabilities = self._current_strategy.get_capabilities()
             if not capabilities.supports_operation(operation.operation_type):
+                # Record failed operation for unsupported operation
+                response_time_ms = (time.time() - start_time) * 1000
+                with self._lock:
+                    metrics = self._strategy_metrics[strategy_type]
+                    metrics.record_operation(False, response_time_ms)
+                
                 return ProviderResult.error_result(
                     f"Strategy {strategy_type} does not support operation {operation.operation_type}",
                     "OPERATION_NOT_SUPPORTED"
@@ -242,6 +268,84 @@ class ProviderContext:
             
             # Execute the operation
             result = self._current_strategy.execute_operation(operation)
+            
+            # Record metrics
+            response_time_ms = (time.time() - start_time) * 1000
+            with self._lock:
+                metrics = self._strategy_metrics[strategy_type]
+                metrics.record_operation(result.success, response_time_ms)
+            
+            self._logger.debug(
+                f"Operation {operation.operation_type} executed by {strategy_type}: "
+                f"success={result.success}, time={response_time_ms:.2f}ms"
+            )
+            
+            return result
+            
+        except Exception as e:
+            # Record failed operation
+            response_time_ms = (time.time() - start_time) * 1000
+            with self._lock:
+                metrics = self._strategy_metrics[strategy_type]
+                metrics.record_operation(False, response_time_ms)
+            
+            self._logger.error(f"Error executing operation {operation.operation_type} with {strategy_type}: {e}")
+            return ProviderResult.error_result(
+                f"Operation execution failed: {str(e)}",
+                "EXECUTION_ERROR"
+            )
+    
+    def execute_with_strategy(self, strategy_type: str, operation: ProviderOperation) -> ProviderResult:
+        """
+        Execute an operation using a specific strategy.
+        
+        Args:
+            strategy_type: Type of strategy to use
+            operation: The operation to execute
+            
+        Returns:
+            Result of the operation execution
+        """
+        strategy = self._strategies.get(strategy_type)
+        if not strategy:
+            return ProviderResult.error_result(
+                f"Strategy {strategy_type} not found",
+                "STRATEGY_NOT_FOUND"
+            )
+        
+        # Initialize strategy if needed (architectural fix for reliability)
+        if not strategy.is_initialized:
+            try:
+                if not strategy.initialize():
+                    return ProviderResult.error_result(
+                        f"Failed to initialize strategy {strategy_type}",
+                        "STRATEGY_INITIALIZATION_FAILED"
+                    )
+            except Exception as e:
+                return ProviderResult.error_result(
+                    f"Error initializing strategy {strategy_type}: {str(e)}",
+                    "STRATEGY_INITIALIZATION_ERROR"
+                )
+        
+        start_time = time.time()
+        
+        try:
+            # Check if strategy supports the operation
+            capabilities = strategy.get_capabilities()
+            if not capabilities.supports_operation(operation.operation_type):
+                # Record failed operation for unsupported operation
+                response_time_ms = (time.time() - start_time) * 1000
+                with self._lock:
+                    metrics = self._strategy_metrics[strategy_type]
+                    metrics.record_operation(False, response_time_ms)
+                
+                return ProviderResult.error_result(
+                    f"Strategy {strategy_type} does not support operation {operation.operation_type}",
+                    "OPERATION_NOT_SUPPORTED"
+                )
+            
+            # Execute the operation
+            result = strategy.execute_operation(operation)
             
             # Record metrics
             response_time_ms = (time.time() - start_time) * 1000
@@ -304,7 +408,8 @@ class ProviderContext:
             if not self._current_strategy:
                 return None
             strategy = self._current_strategy
-            strategy_type = strategy.provider_type
+            # Use the current strategy type property which returns the correct identifier
+            strategy_type = self.current_strategy_type
         else:
             strategy = self._strategies.get(strategy_type)
             if not strategy:
@@ -313,11 +418,12 @@ class ProviderContext:
         try:
             health_status = strategy.check_health()
             
-            # Update health check metrics
-            with self._lock:
-                metrics = self._strategy_metrics[strategy_type]
-                metrics.health_check_count += 1
-                metrics.last_health_check = time.time()
+            # Update health check metrics using the correct strategy identifier
+            if strategy_type and strategy_type in self._strategy_metrics:
+                with self._lock:
+                    metrics = self._strategy_metrics[strategy_type]
+                    metrics.health_check_count += 1
+                    metrics.last_health_check = time.time()
             
             return health_status
             
@@ -341,7 +447,8 @@ class ProviderContext:
         if strategy_type is None:
             if not self._current_strategy:
                 return None
-            strategy_type = self._current_strategy.provider_type
+            # Use the current strategy type property which returns the correct identifier
+            strategy_type = self.current_strategy_type
         
         return self._strategy_metrics.get(strategy_type)
     
@@ -360,15 +467,31 @@ class ProviderContext:
         if self._initialized:
             return True
         
+        # For lazy loading, don't trigger loading during initialize()
+        # Only set up the lazy loading mechanism
+        if hasattr(self, '_lazy_provider_loader') and self._lazy_provider_loader:
+            self._logger.info("Lazy loading configured - providers will load on first operation")
+            self._initialized = True  # Mark as "ready for lazy loading"
+            return True
+        
+        # For eager loading, proceed with normal initialization
+        # Trigger lazy loading if no strategies are available
+        if not self._strategies:
+            self._trigger_lazy_loading()
+        
         with self._lock:
             success_count = 0
             total_count = len(self._strategies)
+            
+            if total_count == 0:
+                self._logger.error("Provider context initialization failed: no strategies available")
+                return False
             
             for strategy_type, strategy in self._strategies.items():
                 try:
                     if strategy.initialize():
                         success_count += 1
-                        self._logger.info(f"Initialized strategy: {strategy_type}")
+                        self._logger.debug(f"Initialized strategy: {strategy_type}")
                     else:
                         self._logger.error(f"Failed to initialize strategy: {strategy_type}")
                 except Exception as e:
@@ -383,6 +506,17 @@ class ProviderContext:
                 self._logger.error("Provider context initialization failed: no strategies available")
             
             return self._initialized
+    
+    def _trigger_lazy_loading(self) -> None:
+        """Trigger lazy loading of providers if available."""
+        if hasattr(self, '_lazy_provider_loader') and self._lazy_provider_loader:
+            try:
+                self._logger.debug("Triggering lazy provider loading")
+                self._lazy_provider_loader()
+                # Remove the loader after use to prevent multiple calls
+                self._lazy_provider_loader = None
+            except Exception as e:
+                self._logger.error(f"Failed to trigger lazy provider loading: {e}")
     
     def cleanup(self) -> None:
         """Clean up all registered strategies and resources."""

@@ -29,23 +29,46 @@ class AWSInstanceManager:
         """Create instances based on template configuration."""
         with aws_dry_run_context():
             try:
-                ec2_client = self._aws_client.get_client('ec2')
+                ec2_client = self._aws_client.ec2_client
                 
-                # Build run_instances parameters from template config
+                # Use only internal domain field names (scheduler strategy handles translation)
+                instance_type = template_config.get('instance_type', 't2.micro')
+                image_id = template_config.get('image_id', 'ami-0b3e7dd7b2a99b08d')
+                
+                # Build run_instances parameters using domain fields
                 params = {
-                    'ImageId': template_config.get('image_id', template_config.get('imageId')),
-                    'InstanceType': template_config.get('vm_type', template_config.get('instance_type')),
+                    'ImageId': image_id,
+                    'InstanceType': instance_type,
                     'MinCount': count,
                     'MaxCount': count
                 }
                 
+                # Add optional parameters using domain field names
                 if template_config.get('user_data'):
                     params['UserData'] = template_config['user_data']
                 
-                # Create instances (mocked if dry-run is active)
+                # Add subnet configuration
+                subnet_ids = template_config.get('subnet_ids')
+                if subnet_ids:
+                    if isinstance(subnet_ids, list):
+                        params['SubnetId'] = subnet_ids[0]
+                    else:
+                        params['SubnetId'] = subnet_ids
+                
+                # Add security group configuration
+                security_groups = template_config.get('security_group_ids')
+                if security_groups:
+                    params['SecurityGroupIds'] = security_groups if isinstance(security_groups, list) else [security_groups]
+                
+                # Add key name if specified
+                key_name = template_config.get('key_name')
+                if key_name:
+                    params['KeyName'] = key_name
+                
+                # Create instances
                 response = ec2_client.run_instances(**params)
                 
-                # Return list of instance IDs (as expected by the strategy)
+                # Extract instance IDs
                 instance_ids = [instance['InstanceId'] for instance in response['Instances']]
                 
                 # Add tags if specified
@@ -64,7 +87,7 @@ class AWSInstanceManager:
         """Terminate instances by ID."""
         with aws_dry_run_context():
             try:
-                ec2_client = self._aws_client.get_client('ec2')
+                ec2_client = self._aws_client.ec2_client
                 # Terminate instances (mocked if dry-run is active)
                 response = ec2_client.terminate_instances(InstanceIds=instance_ids)
                 
@@ -81,7 +104,7 @@ class AWSInstanceManager:
         """Get status of instances."""
         with aws_dry_run_context():
             try:
-                ec2_client = self._aws_client.get_client('ec2')
+                ec2_client = self._aws_client.ec2_client
                 # Describe instances (mocked if dry-run is active)
                 response = ec2_client.describe_instances(InstanceIds=instance_ids)
                 
@@ -102,7 +125,7 @@ class AWSInstanceManager:
     def start_instances(self, instance_ids: List[str]) -> Dict[str, bool]:
         """Start stopped instances."""
         try:
-            ec2_client = self._aws_client.get_client('ec2')
+            ec2_client = self._aws_client.ec2_client
             response = ec2_client.start_instances(InstanceIds=instance_ids)
             
             results = {}
@@ -121,7 +144,7 @@ class AWSInstanceManager:
     def stop_instances(self, instance_ids: List[str]) -> Dict[str, bool]:
         """Stop running instances."""
         try:
-            ec2_client = self._aws_client.get_client('ec2')
+            ec2_client = self._aws_client.ec2_client
             response = ec2_client.stop_instances(InstanceIds=instance_ids)
             
             results = {}
@@ -141,7 +164,7 @@ class AWSInstanceManager:
         """Find instance IDs by tags."""
         with aws_dry_run_context():
             try:
-                ec2_client = self._aws_client.get_client('ec2')
+                ec2_client = self._aws_client.ec2_client
                 
                 # Build filters for tags
                 filters = []

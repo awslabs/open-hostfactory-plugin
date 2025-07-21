@@ -40,15 +40,15 @@ class MachineReferenceDTO(BaseDTO):
         return cls(
             machine_id=str(machine_ref.machine_id),
             name=machine_ref.name,
-            result=self.serialize_enum(machine_ref.result),
-            status=self.serialize_enum(machine_ref.status),
+            result=cls.serialize_enum(machine_ref.result),  # Fixed: cls instead of self
+            status=cls.serialize_enum(machine_ref.status),  # Fixed: cls instead of self
             private_ip_address=machine_ref.private_ip,
             public_ip_address=machine_ref.public_ip,
-            instance_type=metadata.get("instanceType"),
-            price_type=metadata.get("priceType"),
-            instance_tags=metadata.get("instanceTags"),
-            cloud_host_id=metadata.get("cloudHostId"),
-            launch_time=metadata.get("launchtime"),
+            instance_type=metadata.get("instance_type"),  # Fixed: snake_case
+            price_type=metadata.get("price_type"),  # Fixed: snake_case
+            instance_tags=metadata.get("instance_tags"),  # Fixed: snake_case
+            cloud_host_id=metadata.get("cloud_host_id"),  # Fixed: snake_case
+            launch_time=metadata.get("launch_time"),  # Fixed: snake_case
             message=machine_ref.message
         )
     
@@ -96,7 +96,7 @@ class RequestDTO(BaseDTO):
     request_id: str
     status: str
     template_id: Optional[str] = None
-    num_requested: int = Field(alias="numRequested")  # Map to expected API field name
+    requested_count: int
     created_at: datetime
     last_status_check: Optional[datetime] = None
     first_status_check: Optional[datetime] = None
@@ -134,7 +134,7 @@ class RequestDTO(BaseDTO):
             request_id=str(request.request_id),
             status=cls.serialize_enum(request.status),
             template_id=str(request.template_id) if request.template_id else None,
-            numRequested=request.requested_count,
+            requested_count=request.requested_count,  # Fixed: snake_case field name
             created_at=request.created_at,
             last_status_check=None,  # Not available in current domain model
             first_status_check=None,  # Not available in current domain model
@@ -151,41 +151,34 @@ class RequestDTO(BaseDTO):
 
     def to_dict(self, long: Optional[bool] = None) -> Dict[str, Any]:
         """
-        Convert to dictionary format with camelCase keys for API.
+        Convert to dictionary format - returns snake_case for internal use.
+        External format conversion should be handled at scheduler strategy level.
         
         Args:
             long: Whether to include detailed information. If None, uses the instance's long attribute.
             
         Returns:
-            Dictionary representation with camelCase keys
+            Dictionary representation with snake_case keys
         """
         # Use provided long parameter or fall back to instance attribute
         include_details = self.long if long is None else long
         
-        # Use the new model_dump_camel method
-        result = self.model_dump_camel()
+        # Get clean snake_case data using stable API
+        result = super().to_dict()
         
-        # Format datetime fields
-        if self.created_at:
-            result["createdAt"] = self.created_at.isoformat()
-        if self.last_status_check:
-            result["lastStatusCheck"] = self.last_status_check.isoformat()
-        if self.first_status_check:
-            result["firstStatusCheck"] = self.first_status_check.isoformat()
-        
-        # Handle machines field for API compatibility
+        # Handle machines field for compatibility
         result["machines"] = [m.to_dict() for m in self.machine_references] if self.machine_references else []
             
-        # Remove machineReferences field as it's replaced by machines
-        result.pop("machineReferences", None)
+        # Remove machine_references field as it's replaced by machines
+        result.pop("machine_references", None)
             
         # Remove fields based on detail level
         if not include_details:
             result.pop("metadata", None)
-            result.pop("firstStatusCheck", None)
-            result.pop("lastStatusCheck", None)
-            result.pop("launchTemplateId", None)
-            result.pop("launchTemplateVersion", None)
+            result.pop("first_status_check", None)
+            result.pop("last_status_check", None)
+            result.pop("launch_template_id", None)
+            result.pop("launch_template_version", None)
             
         return result
 

@@ -42,9 +42,8 @@ import boto3
 try:
     from src.config.manager import ConfigurationManager
     from src.config.schemas.app_schema import AppConfig
-    from src.application.service import ApplicationService
     from src.infrastructure.template.template_service import TemplateService
-    from src.application.bus import CommandBus, QueryBus
+    from src.infrastructure.di.buses import CommandBus, QueryBus
     from src.infrastructure.di.container import DIContainer
     from src.domain.template.aggregate import Template
     from src.domain.request.aggregate import Request
@@ -71,15 +70,22 @@ except ImportError as e:
         def __init__(self, **kwargs):
             pass
     
-    class ApplicationService:
+    class TemplateService:
+        pass
+    
+    class CommandBus:
         def __init__(self, **kwargs):
             pass
         
-        def get_application_service(self):
-            return self
+        def execute(self, command):
+            return {"success": True}
     
-    class TemplateService:
-        pass
+    class QueryBus:
+        def __init__(self, **kwargs):
+            pass
+        
+        def execute(self, query):
+            return {"success": True}
     
     class DIContainer:
         pass
@@ -469,25 +475,8 @@ def mock_config() -> Mock:
     """Create a mock configuration."""
     return Mock()
 
-@pytest.fixture
-def application_service(
-    mock_command_bus: Mock,
-    mock_query_bus: Mock,
-    mock_logger: Mock,
-    mock_container: Mock,
-    mock_config: Mock,
-    mock_provider: Mock
-) -> ApplicationService:
-    """Create an application service with mocked dependencies."""
-    return ApplicationService(
-        provider_type="mock",
-        command_bus=mock_command_bus,
-        query_bus=mock_query_bus,
-        logger=mock_logger,
-        container=mock_container,
-        config=mock_config,
-        provider_context=mock_provider
-    )
+# ApplicationService fixture removed - using direct CQRS buses instead
+# Use mock_command_bus and mock_query_bus fixtures directly in tests
 
 
 @pytest.fixture

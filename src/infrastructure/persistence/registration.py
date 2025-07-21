@@ -68,6 +68,66 @@ def register_all_storage_types() -> None:
         raise RuntimeError("Failed to register any storage types")
 
 
+def register_storage_type_on_demand(storage_type: str) -> bool:
+    """
+    Register a specific storage type on demand (Phase 3 optimization).
+    
+    Args:
+        storage_type: Name of the storage type to register
+        
+    Returns:
+        True if registration was successful, False otherwise
+    """
+    logger = get_logger(__name__)
+    
+    # Check if already registered
+    from src.infrastructure.registry.storage_registry import get_storage_registry
+    registry = get_storage_registry()
+    
+    if hasattr(registry, 'is_registered') and registry.is_registered(storage_type):
+        logger.debug(f"Storage type '{storage_type}' already registered")
+        return True
+    
+    try:
+        if storage_type == "json":
+            from src.infrastructure.persistence.json.registration import register_json_storage
+            register_json_storage()
+        elif storage_type == "sql":
+            from src.infrastructure.persistence.sql.registration import register_sql_storage
+            register_sql_storage()
+        elif storage_type == "dynamodb":
+            from src.providers.aws.persistence.dynamodb.registration import register_dynamodb_storage
+            register_dynamodb_storage()
+        else:
+            logger.error(f"Unknown storage type: {storage_type}")
+            return False
+        
+        logger.info(f"Successfully registered storage type on demand: {storage_type}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to register storage type '{storage_type}' on demand: {e}")
+        return False
+
+
+def register_minimal_storage_types() -> None:
+    """
+    Register only essential storage types for faster startup (Phase 3 optimization).
+    
+    This registers only JSON storage by default, with other types loaded on demand.
+    """
+    logger = get_logger(__name__)
+    
+    # Register only JSON storage (lightweight, always available)
+    try:
+        from src.infrastructure.persistence.json.registration import register_json_storage
+        register_json_storage()
+        logger.info("Minimal storage registration complete: json")
+    except Exception as e:
+        logger.error(f"Failed to register minimal storage types: {e}")
+        raise RuntimeError("Failed to register minimal storage types")
+
+
 def get_available_storage_types() -> list:
     """
     Get list of available storage types.

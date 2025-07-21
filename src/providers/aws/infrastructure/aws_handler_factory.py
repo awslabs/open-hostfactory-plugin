@@ -7,7 +7,7 @@ It follows the Factory Method pattern to create the appropriate handler for each
 from typing import Dict, Type
 
 from src.domain.template.aggregate import Template
-from src.providers.aws.domain.template.value_objects import ProviderHandlerType
+from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.exceptions.aws_exceptions import AWSValidationError
@@ -69,7 +69,7 @@ class AWSHandlerFactory:
         
         # Validate handler type
         try:
-            ProviderHandlerType(handler_type)
+            ProviderApi(handler_type)
         except ValueError:
             self._logger.error(f"Invalid AWS handler type: {handler_type}")
             raise AWSValidationError(f"Invalid AWS handler type: {handler_type}")
@@ -124,12 +124,10 @@ class AWSHandlerFactory:
         
         # Register handler classes
         self._handler_classes = {
-            ProviderHandlerType.EC2_FLEET.value: EC2FleetHandler,
-            ProviderHandlerType.SPOT_FLEET.value: SpotFleetHandler,
-            ProviderHandlerType.ASG.value: ASGHandler,
-            ProviderHandlerType.RUN_INSTANCES.value: RunInstancesHandler
+            ProviderApi.EC2_FLEET.value: EC2FleetHandler,
+            ProviderApi.SPOT_FLEET.value: SpotFleetHandler,
+            ProviderApi.ASG.value: ASGHandler,
+            ProviderApi.RUN_INSTANCES.value: RunInstancesHandler
         }
         
         self._logger.debug(f"Registered handler classes: {list(self._handler_classes.keys())}")
-
-

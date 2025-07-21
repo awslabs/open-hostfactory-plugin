@@ -3,7 +3,9 @@ import pytest
 from typing import Dict, Any, List
 from unittest.mock import Mock, patch
 
-from src.application.service import ApplicationService
+from src.application.commands.request_handlers import CreateMachineRequestHandler
+from src.application.services.provider_capability_service import ProviderCapabilityService
+from src.application.services.provider_selection_service import ProviderSelectionService
 from tests.fixtures.mock_provider import create_mock_provider
 from tests.fixtures.provider_scenarios import (
     ProviderScenarios, 
@@ -208,35 +210,28 @@ class TestHostFactoryLifecycle:
         except Exception as e:
             assert "request" in str(e).lower() or "not found" in str(e).lower()
     
-    def _create_app_service(self, provider_type: str) -> ApplicationService:
+    def _create_app_service(self, provider_type: str):
         """Create application service with specified provider type."""
         # This would use real configuration for actual providers
-        from src.application.service import create_application_service
-        return create_application_service(provider_type)
+        from src.bootstrap import Application
+        app = Application()
+        app.initialize()
+        return app.get_application_service()
     
-    def _create_app_service_with_provider(self, provider_type: str, provider) -> ApplicationService:
+    def _create_app_service_with_provider(self, provider_type: str, provider):
         """Create application service with mock provider."""
-        from src.application.template.service import TemplateService
-        from src.application.bus import CommandBus, QueryBus
+        from src.infrastructure.di.buses import CommandBus, QueryBus
+        from src.bootstrap import Application
         
-        # Create mock dependencies
-        template_service = Mock(spec=TemplateService)
-        command_bus = Mock(spec=CommandBus)
-        query_bus = Mock(spec=QueryBus)
+        # Create mock application with provider
+        app = Application()
+        app.initialize()
         
-        # Configure template service to return mock templates
-        template_service.get_available_templates.return_value = provider.get_available_templates()
+        # Mock the provider in the application
+        service = app.get_application_service()
+        service._provider = provider
         
-        # Create application service
-        app_service = ApplicationService(
-            provider_type=provider_type,
-            template_service=template_service,
-            command_bus=command_bus,
-            query_bus=query_bus,
-            provider=provider
-        )
-        
-        return app_service
+        return service
 
 
 @pytest.mark.integration

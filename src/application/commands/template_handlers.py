@@ -40,6 +40,7 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._uow_factory = uow_factory
         self._container = container

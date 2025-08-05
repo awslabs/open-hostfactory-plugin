@@ -53,6 +53,7 @@ class ProviderConfiguration:
     """Provider-agnostic configuration container."""
 
     def __init__(self, config_data: Dict[str, Any]):
+        """Initialize the instance."""
         self.config_data = config_data
 
     def get(self, key: str, default: Any = None) -> Any:

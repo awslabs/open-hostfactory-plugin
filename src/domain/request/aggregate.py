@@ -70,6 +70,7 @@ class Request(AggregateRoot):
     version: int = Field(default=0)
 
     def __init__(self, **data):
+        """Initialize the instance."""
         # Set default ID if not provided
         if "id" not in data:
             data["id"] = data.get("request_id", f"request-{datetime.utcnow().isoformat()}")

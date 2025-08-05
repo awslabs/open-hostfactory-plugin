@@ -16,6 +16,7 @@ class MockConfigurationPort(ConfigurationPort):
     """Mock implementation of ConfigurationPort for testing."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._config = {
             "provider": {"type": "aws", "aws": {"region": "us-east-1", "profile": "default"}},
             "naming": {"prefix": "test"},

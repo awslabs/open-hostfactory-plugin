@@ -138,6 +138,7 @@ class LaunchError(AWSError):
         launch_params: Dict[str, Any],
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(
             message,
             details={

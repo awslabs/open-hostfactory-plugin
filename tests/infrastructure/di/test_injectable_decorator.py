@@ -31,6 +31,7 @@ class MockAdapter(MockPort):
     """Mock adapter implementation."""
 
     def __init__(self, name: str = "test"):
+        """Initialize the instance."""
         self.name = name
 
 

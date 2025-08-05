@@ -22,6 +22,7 @@ class DefaultSchedulerStrategy(SchedulerPort):
     """
 
     def __init__(self, config_manager: ConfigurationManager, logger: "LoggingPort"):
+        """Initialize the instance."""
         self.config_manager = config_manager
         self._logger = logger
 

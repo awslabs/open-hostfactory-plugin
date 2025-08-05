@@ -12,6 +12,7 @@ class DomainException(Exception):
         error_code: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize the instance."""
         super().__init__(message)
         self.message = message
         self.error_code = error_code or self.__class__.__name__

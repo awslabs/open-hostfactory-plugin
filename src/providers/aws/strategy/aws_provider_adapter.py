@@ -115,6 +115,7 @@ class AWSProviderAdapter:
     """AWS provider adapter implementation."""
 
     def __init__(self, logger: LoggingPort):
+        """Initialize the instance."""
         self._state_mapper = AWSStateMapper()
         self._resource_validator = AWSResourceValidator()
         self._logger = logger

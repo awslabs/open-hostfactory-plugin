@@ -12,6 +12,7 @@ class MockQuery:
     """Mock query class for testing."""
 
     def __init__(self, **kwargs):
+        """Initialize the instance."""
         self.kwargs = kwargs
 
 

@@ -15,6 +15,7 @@ class MachineNotFoundError(EntityNotFoundError):
     """Raised when a machine is not found."""
 
     def __init__(self, machine_id: str):
+        """Initialize the instance."""
         super().__init__("Machine", machine_id)
 
 

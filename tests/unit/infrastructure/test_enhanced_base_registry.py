@@ -14,6 +14,7 @@ class SingleChoiceTestRegistry(EnhancedBaseRegistry):
     """Test registry for single choice mode."""
 
     def __init__(self):
+        """Initialize the instance."""
         super().__init__(mode=RegistryMode.SINGLE_CHOICE)
 
     def register(self, type_name, strategy_factory, config_factory, **kwargs):

@@ -32,6 +32,7 @@ class MCPToolDiscovery:
     """
 
     def __init__(self):
+        """Initialize the instance."""
         self._tool_definitions: Dict[str, MCPToolDefinition] = {}
 
     def discover_mcp_tools(self, sdk: OpenHFPluginSDK) -> Dict[str, MCPToolDefinition]:

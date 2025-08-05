@@ -274,6 +274,7 @@ class ExceptionContext:
     """Rich context information for exception handling."""
 
     def __init__(self, operation: str, layer: str = "application", **additional_context):
+        """Initialize the instance."""
         self.operation = operation
         self.layer = layer
         self.timestamp = datetime.utcnow()

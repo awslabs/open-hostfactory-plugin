@@ -132,6 +132,7 @@ class ProviderTemplateValidator:
     """Utility class for validating templates against provider capabilities."""
 
     def __init__(self, providers: Dict[str, EnhancedProviderStrategy]):
+        """Initialize the instance."""
         self.providers = providers
 
     def find_compatible_providers(

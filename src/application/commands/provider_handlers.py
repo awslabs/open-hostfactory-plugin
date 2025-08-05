@@ -44,6 +44,7 @@ class SelectProviderStrategyHandler(
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
     ):
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
 

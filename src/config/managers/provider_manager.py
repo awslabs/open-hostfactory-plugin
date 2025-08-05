@@ -19,6 +19,7 @@ class ProviderConfigManager:
     """Manages provider-specific configuration."""
 
     def __init__(self, raw_config: Dict[str, Any]):
+        """Initialize the instance."""
         self._raw_config = raw_config
 
     def get_storage_strategy(self) -> str:

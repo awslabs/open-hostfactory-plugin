@@ -22,6 +22,7 @@ class TransactionManager(ABC):
     """Base interface for transaction managers."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
         self.state = TransactionState.INACTIVE
 

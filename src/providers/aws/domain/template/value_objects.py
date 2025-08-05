@@ -312,6 +312,7 @@ class AWSAllocationStrategy:
     """AWS-specific allocation strategy wrapper with AWS API formatting."""
 
     def __init__(self, strategy: AllocationStrategy):
+        """Initialize the instance."""
         self._strategy = strategy
 
     @property

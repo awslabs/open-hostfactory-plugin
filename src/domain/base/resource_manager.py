@@ -165,6 +165,7 @@ class ResourceManagerDomainService(ABC):
     """
 
     def __init__(self, resource_manager: ResourceManagerPort):
+        """Initialize the instance."""
         self.resource_manager = resource_manager
 
     @abstractmethod

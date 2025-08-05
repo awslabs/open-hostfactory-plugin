@@ -15,6 +15,7 @@ class TemplateNotFoundError(EntityNotFoundError):
     """Raised when a template is not found."""
 
     def __init__(self, template_id: str):
+        """Initialize the instance."""
         super().__init__("Template", template_id)
 
 

@@ -24,6 +24,7 @@ class FlakyProviderStrategy(ProviderStrategy):
     """Provider strategy that simulates flaky behavior."""
 
     def __init__(self, provider_type: str, failure_rate: float = 0.5):
+        """Initialize the instance."""
         self._provider_type = provider_type
         self.failure_rate = failure_rate
         self._initialized = False

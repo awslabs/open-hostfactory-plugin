@@ -41,6 +41,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
         error_handler: ErrorHandlingPort,
         container: ContainerPort,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
         self._container = container

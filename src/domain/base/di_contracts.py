@@ -47,6 +47,7 @@ class DependencyRegistration:
         dependencies: Optional[List[Type]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize the instance."""
         self.dependency_type = dependency_type
         self.implementation_type = implementation_type or dependency_type
         self.instance = instance

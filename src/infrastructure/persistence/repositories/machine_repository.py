@@ -18,6 +18,7 @@ class MachineSerializer:
     """Handles Machine aggregate serialization/deserialization."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
 
     def to_dict(self, machine: Machine) -> Dict[str, Any]:

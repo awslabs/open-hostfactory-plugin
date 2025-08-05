@@ -16,6 +16,7 @@ class JsonFormatter(logging.Formatter):
     """Format log records as JSON."""
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize the instance."""
         super().__init__()
         self.default_fields = kwargs
 

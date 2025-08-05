@@ -44,6 +44,7 @@ class QueryBus:
     """
 
     def __init__(self, container: DIContainer, logger: LoggingPort):
+        """Initialize the instance."""
         self.container = container
         self.logger = logger
 

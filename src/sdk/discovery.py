@@ -40,6 +40,7 @@ class SDKMethodDiscovery:
     """
 
     def __init__(self):
+        """Initialize the instance."""
         self._method_info_cache: Dict[str, MethodInfo] = {}
 
     async def discover_cqrs_methods(self, query_bus, command_bus) -> Dict[str, Callable]:

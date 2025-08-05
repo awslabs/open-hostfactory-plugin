@@ -15,6 +15,7 @@ class SchedulerRegistration(BaseRegistration):
     """Scheduler registration container."""
 
     def __init__(self, scheduler_type: str, strategy_factory: Callable, config_factory: Callable):
+        """Initialize the instance."""
         super().__init__(scheduler_type, strategy_factory, config_factory)
         self.scheduler_type = scheduler_type
 

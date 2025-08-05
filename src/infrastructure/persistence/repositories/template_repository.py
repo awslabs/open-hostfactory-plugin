@@ -17,6 +17,7 @@ class TemplateSerializer:
     """Handles Template aggregate serialization/deserialization."""
 
     def __init__(self, defaults_service=None):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
         self.defaults_service = defaults_service
 

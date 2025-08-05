@@ -35,6 +35,7 @@ class ProviderRegistration(BaseRegistration):
         resolver_factory: Optional[Callable] = None,
         validator_factory: Optional[Callable] = None,
     ):
+        """Initialize the instance."""
         super().__init__(
             type_name,
             strategy_factory,

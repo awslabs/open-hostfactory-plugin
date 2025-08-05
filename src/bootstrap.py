@@ -17,6 +17,7 @@ class Application:
     """DI-based application context manager with registration pattern."""
 
     def __init__(self, config_path: Optional[str] = None) -> None:
+        """Initialize the instance."""
         self.config_path = config_path
         self._initialized = False
 

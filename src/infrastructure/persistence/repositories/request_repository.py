@@ -27,6 +27,7 @@ class RequestSerializer:
     """Handles Request aggregate serialization/deserialization."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
 
     def to_dict(self, request: Request) -> Dict[str, Any]:

@@ -14,6 +14,7 @@ class ServiceRegistry:
     """Manages service registration for dependency injection."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._registrations: Dict[Type, DependencyRegistration] = {}
         self._singletons: Dict[Type, Any] = {}
         self._lock = threading.RLock()

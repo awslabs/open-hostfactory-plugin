@@ -9,6 +9,7 @@ class ValidationResult:
     """Configuration validation result."""
 
     def __init__(self, errors: List[str] = None, warnings: List[str] = None):
+        """Initialize the instance."""
         self.errors = errors or []
         self.warnings = warnings or []
         self.is_valid = len(self.errors) == 0

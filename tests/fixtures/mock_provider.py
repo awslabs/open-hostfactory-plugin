@@ -17,6 +17,7 @@ class MockProvider(ProviderPort):
     """Mock provider for testing generic functionality."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._provider_type = "mock"
         self._initialized = False
         self._responses = {}

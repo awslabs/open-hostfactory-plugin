@@ -34,6 +34,7 @@ class DependencyResolver:
     """Handles dependency resolution and instance creation."""
 
     def __init__(self, service_registry, cqrs_registry):
+        """Initialize the instance."""
         self._service_registry = service_registry
         self._cqrs_registry = cqrs_registry
         self._lock = threading.RLock()

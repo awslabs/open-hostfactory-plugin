@@ -14,6 +14,7 @@ class MockRequestDTO:
     """Mock RequestDTO for testing."""
 
     def __init__(self, request_id="test-123", status="completed", machines=None):
+        """Initialize the instance."""
         self.request_id = request_id
         self.status = status
         self.machines = machines or []

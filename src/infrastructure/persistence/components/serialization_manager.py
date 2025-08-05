@@ -26,6 +26,7 @@ class JSONSerializer(SerializationManager):
     """JSON serialization manager with enum support."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
 
     def serialize(self, data: Dict[str, Any]) -> str:

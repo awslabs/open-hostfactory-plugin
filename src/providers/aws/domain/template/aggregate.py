@@ -53,6 +53,7 @@ class AWSTemplate(CoreTemplate):
     # No need to redefine them here - this was causing the field access issues
 
     def __init__(self, **data):
+        """Initialize the instance."""
         # Set provider_type to AWS
         data["provider_type"] = "aws"
         super().__init__(**data)

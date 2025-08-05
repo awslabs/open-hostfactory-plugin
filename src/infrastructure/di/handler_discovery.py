@@ -46,6 +46,7 @@ class HandlerDiscoveryService:
     """
 
     def __init__(self, container: DIContainer):
+        """Initialize the instance."""
         self.container = container
 
         # Get caching configuration from performance settings

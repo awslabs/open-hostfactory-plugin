@@ -34,6 +34,7 @@ class StorageRegistration(BaseRegistration):
         config_factory: Callable,
         unit_of_work_factory: Optional[Callable] = None,
     ):
+        """Initialize the instance."""
         super().__init__(
             type_name,
             strategy_factory,

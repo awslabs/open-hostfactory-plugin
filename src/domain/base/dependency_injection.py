@@ -96,6 +96,7 @@ class InjectableMetadata:
         factory: Optional[Callable] = None,
         lazy: bool = False,
     ):
+        """Initialize the instance."""
         self.auto_wire = auto_wire
         self.singleton = singleton
         self.dependencies = dependencies or []

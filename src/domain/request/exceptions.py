@@ -15,6 +15,7 @@ class RequestNotFoundError(EntityNotFoundError):
     """Raised when a request is not found."""
 
     def __init__(self, request_id: str):
+        """Initialize the instance."""
         super().__init__("Request", request_id)
 
 

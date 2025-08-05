@@ -18,6 +18,7 @@ class StorageResourceManager(ABC):
     """
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
         self._initialized = False
 

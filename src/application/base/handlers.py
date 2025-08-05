@@ -201,6 +201,7 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
         event_publisher: Optional[EventPublisherPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
     ):
+        """Initialize the instance."""
         super().__init__(logger, error_handler)
         self.event_publisher = event_publisher
 

@@ -46,6 +46,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         provider_capability_service: ProviderCapabilityService,
         provider_context: ProviderContext,
     ):
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self.uow_factory = uow_factory  # Use UoW factory pattern
         self._container = container

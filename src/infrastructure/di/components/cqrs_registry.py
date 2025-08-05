@@ -11,6 +11,7 @@ class CQRSHandlerRegistry:
     """Manages CQRS handler registration for dependency injection."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._command_handlers: Dict[Type, Type] = {}
         self._query_handlers: Dict[Type, Type] = {}
         self._event_handlers: Dict[Type, List[Type]] = {}

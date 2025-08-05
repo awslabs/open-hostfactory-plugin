@@ -29,6 +29,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         logger: LoggingPort,
         template_defaults_service=None,
     ):
+        """Initialize the instance."""
         self.config_manager = config_manager
         self._logger = logger
         self.template_defaults_service = template_defaults_service

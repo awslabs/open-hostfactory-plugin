@@ -32,6 +32,7 @@ class MockProvider1Strategy(ProviderStrategy):
     """Mock implementation of Provider1 for testing."""
 
     def __init__(self, config=None, should_fail=False, response_time_ms=100):
+        """Initialize the instance."""
         from src.infrastructure.interfaces.provider import ProviderConfig
 
         super().__init__(config or ProviderConfig(provider_type="provider1"))

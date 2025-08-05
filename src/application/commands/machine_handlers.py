@@ -58,6 +58,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
     ):
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._machine_repository = machine_repository
 

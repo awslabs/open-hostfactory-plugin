@@ -30,6 +30,7 @@ class LogCapture:
     """Helper class to capture and analyze log messages."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.log_records: List[logging.LogRecord] = []
         self.handler = None
 

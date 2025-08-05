@@ -30,6 +30,7 @@ class CleanupOldRequestsHandler(BaseCommandHandler[CleanupOldRequestsCommand, Di
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._request_repository = request_repository
         self._uow_factory = uow_factory

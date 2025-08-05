@@ -184,8 +184,7 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
             "ec2": {
                 "failure_threshold": 3,
                 "recovery_timeout": 30,
-                "backoff": {
-                    "strategy_type": "exponential",
+                "backoff": {"strategy_type": "exponential",
                     "max_retries": 3,
                     "base_delay": 1.0,
                     "max_delay": 30.0,
@@ -194,8 +193,7 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
             "dynamodb": {
                 "failure_threshold": 5,
                 "reset_timeout": 60,
-                "backoff": {
-                    "strategy_type": "exponential",
+                "backoff": {"strategy_type": "exponential",
                     "max_retries": 5,
                     "base_delay": 0.5,
                     "max_delay": 20.0,
@@ -204,8 +202,7 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
             "s3": {
                 "failure_threshold": 3,
                 "reset_timeout": 30,
-                "backoff": {
-                    "strategy_type": "exponential",
+                "backoff": {"strategy_type": "exponential",
                     "max_retries": 4,
                     "base_delay": 0.5,
                     "max_delay": 15.0,

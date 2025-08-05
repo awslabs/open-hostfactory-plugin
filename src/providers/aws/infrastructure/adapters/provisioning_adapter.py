@@ -85,9 +85,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             InfrastructureError: For other infrastructure errors
         """
         self._logger.info(
-            f"Provisioning resources for request {
-                request.request_id} using template {
-                template.template_id}"
+            f"Provisioning resources for request {request.request_id} using template {template.template_id}"
         )
 
         # Check if dry-run mode is requested
@@ -216,8 +214,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             # Check hosts status using the handler
             status = handler.check_hosts_status(request)
             self._logger.info(
-                f"Successfully checked status of resources for request {
-                    request.request_id}"
+                f"Successfully checked status of resources for request {request.request_id}"
             )
             return status
         except AWSEntityNotFoundError as e:

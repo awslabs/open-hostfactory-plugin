@@ -228,19 +228,16 @@ class FallbackProviderStrategy(ProviderStrategy):
                 if self._primary_strategy.initialize():
                     success_count += 1
                     self._self._logger.info(
-                        f"Primary strategy initialized: {
-                            self._primary_strategy.provider_type}"
+                        f"Primary strategy initialized: {self._primary_strategy.provider_type}"
                     )
                 else:
                     self._self._logger.error(
-                        f"Failed to initialize primary strategy: {
-                            self._primary_strategy.provider_type}"
+                        f"Failed to initialize primary strategy: {self._primary_strategy.provider_type}"
                     )
             else:
                 success_count += 1
                 self._self._logger.debug(
-                    f"Primary strategy already initialized: {
-                        self._primary_strategy.provider_type}"
+                    f"Primary strategy already initialized: {self._primary_strategy.provider_type}"
                 )
         except Exception as e:
             self._self._logger.error(f"Error initializing primary strategy: {e}")
@@ -252,25 +249,16 @@ class FallbackProviderStrategy(ProviderStrategy):
                     if strategy.initialize():
                         success_count += 1
                         self._self._logger.info(
-                            f"Fallback strategy {
-                                i+
-                                1} initialized: {
-                                strategy.provider_type}"
+                            f"Fallback strategy {i+1} initialized: {strategy.provider_type}"
                         )
                     else:
                         self._self._logger.error(
-                            f"Failed to initialize fallback strategy {
-                                i+
-                                1}: {
-                                strategy.provider_type}"
+                            f"Failed to initialize fallback strategy {i+1}: {strategy.provider_type}"
                         )
                 else:
                     success_count += 1
                     self._self._logger.debug(
-                        f"Fallback strategy {
-                            i+
-                            1} already initialized: {
-                            strategy.provider_type}"
+                        f"Fallback strategy {i+1} already initialized: {strategy.provider_type}"
                     )
             except Exception as e:
                 self._self._logger.error(f"Error initializing fallback strategy {i+1}: {e}")
@@ -382,8 +370,7 @@ class FallbackProviderStrategy(ProviderStrategy):
                     if self._circuit_state.failure_count >= self._config.circuit_breaker_threshold:
                         self._circuit_state.state = CircuitState.OPEN
                         self._self._logger.warning(
-                            f"Circuit breaker opened after {
-                                self._circuit_state.failure_count} failures"
+                            f"Circuit breaker opened after {self._circuit_state.failure_count} failures"
                         )
 
                     # Try fallback
@@ -414,9 +401,7 @@ class FallbackProviderStrategy(ProviderStrategy):
                     last_error = result.error_message
                     if attempt < self._config.max_retries:
                         self._self._logger.debug(
-                            f"Primary strategy failed, retrying in {
-                                self._config.retry_delay_seconds}s (attempt {
-                                attempt + 1})"
+                            f"Primary strategy failed, retrying in {self._config.retry_delay_seconds}s (attempt {attempt + 1})"
                         )
                         time.sleep(self._config.retry_delay_seconds)
 
@@ -424,15 +409,13 @@ class FallbackProviderStrategy(ProviderStrategy):
                 last_error = str(e)
                 if attempt < self._config.max_retries:
                     self._self._logger.debug(
-                        f"Primary strategy exception, retrying in {
-                            self._config.retry_delay_seconds}s: {e}"
+                        f"Primary strategy exception, retrying in {self._config.retry_delay_seconds}s: {e}"
                     )
                     time.sleep(self._config.retry_delay_seconds)
 
         # Primary failed after retries, try fallback
         self._self._logger.warning(
-            f"Primary strategy failed after {
-                self._config.max_retries} retries: {last_error}"
+            f"Primary strategy failed after {self._config.max_retries} retries: {last_error}"
         )
         return self._execute_fallback_chain(operation)
 
@@ -484,10 +467,7 @@ class FallbackProviderStrategy(ProviderStrategy):
                 if result.success:
                     self._current_strategy = fallback_strategy
                     self._self._logger.info(
-                        f"Fallback strategy {
-                            i+
-                            1} succeeded: {
-                            fallback_strategy.provider_type}"
+                        f"Fallback strategy {i+1} succeeded: {fallback_strategy.provider_type}"
                     )
                     return result
                 else:
@@ -699,11 +679,7 @@ class FallbackProviderStrategy(ProviderStrategy):
 
     def __str__(self) -> str:
         """Return string representation for debugging."""
-        return f"FallbackProviderStrategy(primary={
-            self._primary_strategy.provider_type}, fallbacks={
-            len(
-                self._fallback_strategies)}, mode={
-                self._config.mode.value})"
+        return f"FallbackProviderStrategy(primary={self._primary_strategy.provider_type}, fallbacks={len(self._fallback_strategies)}, mode={self._config.mode.value})"
 
     def __repr__(self) -> str:
         """Return detailed representation for debugging."""

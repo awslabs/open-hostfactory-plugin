@@ -55,11 +55,8 @@ class EnhancedProviderCapabilities(BaseProviderCapabilities):
         # Check if API is supported
         if not self.supports_api(template_provider_api):
             result["errors"].append(
-                f"Provider {
-                    self.provider_type} does not support API {template_provider_api}. "
-                f"Supported APIs: {
-                    ', '.join(
-                        self.supported_apis)}"
+                f"Provider {self.provider_type} does not support API {template_provider_api}. "
+                f"Supported APIs: {', '.join(self.supported_apis)}"
             )
             return result
 

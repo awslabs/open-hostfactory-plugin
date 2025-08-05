@@ -219,8 +219,7 @@ class ProviderStrategyFactory:
             ) from e
         except Exception as e:
             raise ProviderCreationError(
-                f"Failed to create { provider_config.type} provider '{
-                    provider_config.name}': { str(e)}"
+                f"Failed to create {provider_config.type} provider '{provider_config.name}': {str(e)}"
             ) from e
 
     def _parse_selection_policy(self, policy_name: str) -> SelectionPolicy:

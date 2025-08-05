@@ -169,8 +169,7 @@ class SpotFleetHandler(AWSHandler):
 
         # Log the validation start
         self._logger.debug(
-            f"Starting Spot Fleet prerequisites validation for template: {
-                aws_template.template_id}"
+            f"Starting Spot Fleet prerequisites validation for template: {aws_template.template_id}"
         )
 
         # First validate common prerequisites
@@ -593,14 +592,9 @@ class SpotFleetHandler(AWSHandler):
 
             # Log fleet status
             self._logger.debug(
-                f"Fleet status: {
-                    fleet.get('SpotFleetRequestState')}, "
-                f"Target capacity: {
-                    fleet.get(
-                        'SpotFleetRequestConfig',
-                        {}).get('TargetCapacity')}, "
-                f"Fulfilled capacity: {
-                    fleet.get('ActivityStatus')}"
+                f"Fleet status: {fleet.get('SpotFleetRequestState')}, "
+                f"Target capacity: {fleet.get('SpotFleetRequestConfig', {}).get('TargetCapacity')}, "
+                f"Fulfilled capacity: {fleet.get('ActivityStatus')}"
             )
 
             # Get instance information with pagination and retry
@@ -673,8 +667,7 @@ class SpotFleetHandler(AWSHandler):
                         TargetCapacity=new_capacity,
                     )
                     self._logger.info(
-                        f"Reduced maintain fleet {
-                            request.resource_id} capacity to {new_capacity}"
+                        f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}"
                     )
 
                 # Use consolidated AWS operations utility for instance termination

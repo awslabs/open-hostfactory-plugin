@@ -89,8 +89,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.error(
-                    f"Resource provisioning failed: { specification.name} in {
-                        duration:.3f}s - { str(e)}"
+                    f"Resource provisioning failed: { specification.name} in {duration:.3f}s - { str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))
@@ -131,8 +130,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.error(
-                    f"Resource deprovisioning failed: { allocation.resource_id} in {
-                        duration:.3f}s - { str(e)}"
+                    f"Resource deprovisioning failed: { allocation.resource_id} in {duration:.3f}s - { str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))

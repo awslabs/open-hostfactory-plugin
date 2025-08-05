@@ -89,14 +89,9 @@ class AWSClient:
 
             # Single comprehensive INFO log with all important details
             self._logger.info(
-                f"AWS client initialized with region: {
-                    self.region_name}, profile: {
-                    self.profile_name}, "
-                + f"retries: {
-                    self.boto_config.retries['max_attempts']}, "
-                + f"timeouts: connect={
-                    self.boto_config.connect_timeout}s, read={
-                        self.boto_config.read_timeout}s"
+                f"AWS client initialized with region: {self.region_name}, profile: {self.profile_name}, "
+                + f"retries: {self.boto_config.retries['max_attempts']}, "
+                + f"timeouts: connect={self.boto_config.connect_timeout}s, read={self.boto_config.read_timeout}s"
             )
 
         except ClientError as e:

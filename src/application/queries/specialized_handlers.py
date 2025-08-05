@@ -119,8 +119,7 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
                 )
 
                 self.logger.info(
-                    f"Generated summary for request {
-                        query.request_id}: {total_machines} machines"
+                    f"Generated summary for request {query.request_id}: {total_machines} machines"
                 )
                 return summary
 
@@ -198,8 +197,7 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
 
                 except Exception as health_error:
                     self.logger.warning(
-                        f"Could not get detailed health for machine {
-                            query.machine_id}: {health_error}"
+                        f"Could not get detailed health for machine {query.machine_id}: {health_error}"
                     )
                     health_status = "unknown"
                     health_details = {"error": str(health_error)}

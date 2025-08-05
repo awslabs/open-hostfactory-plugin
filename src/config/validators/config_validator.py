@@ -71,14 +71,12 @@ class ConfigValidator:
                     # Validate AWS-specific business rules
                     if hasattr(aws_config, "max_retries") and aws_config.max_retries > 10:
                         result.add_warning(
-                            f"AWS provider '{
-                                provider.name}' max_retries is very high, consider reducing for better performance"
+                            f"AWS provider '{provider.name}' max_retries is very high, consider reducing for better performance"
                         )
 
                     if hasattr(aws_config, "timeout") and aws_config.timeout > 300:
                         result.add_warning(
-                            f"AWS provider '{
-                                provider.name}' timeout is very high, consider reducing to avoid long waits"
+                            f"AWS provider '{provider.name}' timeout is very high, consider reducing to avoid long waits"
                         )
 
         # Validate template configuration

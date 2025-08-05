@@ -69,9 +69,7 @@ class AWSRetryStrategy(RetryStrategy):
         if is_retryable_aws_error(exception, self.service):
             error_info = get_aws_error_info(exception)
             self._logger.info(
-                f"AWS {
-                    self.service} operation failed with retryable error: {
-                    error_info['code']}",
+                f"AWS {self.service} operation failed with retryable error: {error_info['code']}",
                 extra={
                     "service": self.service,
                     "attempt": attempt + 1,

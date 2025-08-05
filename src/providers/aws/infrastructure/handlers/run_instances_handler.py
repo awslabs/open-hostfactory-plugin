@@ -166,8 +166,7 @@ class RunInstancesHandler(AWSHandler):
         request.metadata["run_instances_resource_id"] = resource_id
 
         self._logger.info(
-            f"Successfully created {
-                len(instance_ids)} instances via RunInstances with reservation ID {reservation_id}: {instance_ids}"
+            f"Successfully created {len(instance_ids)} instances via RunInstances with reservation ID {reservation_id}: {instance_ids}"
         )
 
         return resource_id
@@ -273,14 +272,12 @@ class RunInstancesHandler(AWSHandler):
                 # IDs (reservation IDs)
                 if hasattr(request, "resource_ids") and request.resource_ids:
                     self._logger.info(
-                        f"No instance IDs in metadata, searching by resource IDs: {
-                            request.resource_ids}"
+                        f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}"
                     )
                     return self._find_instances_by_resource_ids(request.resource_ids)
                 else:
                     self._logger.info(
-                        f"No instance IDs or resource IDs found in request {
-                            request.request_id}"
+                        f"No instance IDs or resource IDs found in request {request.request_id}"
                     )
                     return []
 
@@ -401,16 +398,13 @@ class RunInstancesHandler(AWSHandler):
                         }
                         matching_instances.append(instance_data)
                         self._logger.info(
-                            f"FALLBACK: Added instance {
-                                instance_data['InstanceId']} with IP {
-                                instance_data['PrivateIpAddress']}"
+                            f"FALLBACK: Added instance {instance_data['InstanceId']} with IP {instance_data['PrivateIpAddress']}"
                         )
                 else:
                     self._logger.info(f"FALLBACK: No match for reservation {reservation_id}")
 
             self._logger.info(
-                f"FALLBACK: Returning {
-                    len(matching_instances)} instances for resource IDs: {resource_ids}"
+                f"FALLBACK: Returning {len(matching_instances)} instances for resource IDs: {resource_ids}"
             )
             return matching_instances
 

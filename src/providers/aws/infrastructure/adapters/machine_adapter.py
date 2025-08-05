@@ -193,8 +193,7 @@ class AWSMachineAdapter:
 
             if not status["InstanceStatuses"]:
                 self._logger.warning(
-                    f"No status information available for instance: {
-                        machine.machine_id}"
+                    f"No status information available for instance: {machine.machine_id}"
                 )
                 health_checks["system"] = {
                     "status": False,
@@ -225,8 +224,7 @@ class AWSMachineAdapter:
             }
 
             self._logger.debug(
-                f"Health check completed for {
-                    machine.machine_id}: system={system_status}, instance={instance_health}"
+                f"Health check completed for {machine.machine_id}: system={system_status}, instance={instance_health}"
             )
             return health_checks
 
@@ -311,8 +309,7 @@ class AWSMachineAdapter:
                     try:
                         if volume["State"] == "in-use":
                             self._logger.debug(
-                                f"Detaching volume {volume_id} from {
-                                    machine.machine_id}"
+                                f"Detaching volume {volume_id} from {machine.machine_id}"
                             )
 
                             def detach_volume(volume_id=volume_id):
@@ -365,8 +362,7 @@ class AWSMachineAdapter:
                         if nic["Status"] == "in-use":
                             attachment_id = nic["Attachment"]["AttachmentId"]
                             self._logger.debug(
-                                f"Detaching network interface {nic_id} from {
-                                    machine.machine_id}"
+                                f"Detaching network interface {nic_id} from {machine.machine_id}"
                             )
 
                             def detach_network_interface(attachment_id=attachment_id):
@@ -403,9 +399,7 @@ class AWSMachineAdapter:
                         )
             except AWSError as e:
                 self._logger.error(
-                    f"Error processing network interfaces for {
-                        machine.machine_id}: {
-                        str(e)}"
+                    f"Error processing network interfaces for {machine.machine_id}: {str(e)}"
                 )
                 # Continue with other resources even if network interfaces fail
 

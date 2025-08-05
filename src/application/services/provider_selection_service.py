@@ -260,8 +260,7 @@ class ProviderSelectionService:
         if len(highest_priority_instances) == 1:
             selected = highest_priority_instances[0]
             self._logger.debug(
-                f"Selected provider { selected.name} (priority {
-                    selected.priority}, weight { selected.weight})"
+                f"Selected provider { selected.name} (priority {selected.priority}, weight { selected.weight})"
             )
             return selected
 
@@ -272,9 +271,7 @@ class ProviderSelectionService:
         # In production, this would maintain round-robin state
         selected = max(highest_priority_instances, key=lambda x: x.weight)
         self._logger.debug(
-            f"Selected provider { selected.name} (priority {
-                selected.priority}, weight {
-                selected.weight}) from { len(highest_priority_instances)} candidates"
+            f"Selected provider { selected.name} (priority {selected.priority}, weight {selected.weight}) from { len(highest_priority_instances)} candidates"
         )
         return selected
 

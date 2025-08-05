@@ -144,13 +144,11 @@ class AWSTags(Tags):
             # Use AWS limits from configuration
             if len(key) > config.limits.tag_key_length:
                 raise ValueError(
-                    f"AWS tag key length exceeds limit of {
-                        config.limits.tag_key_length}"
+                    f"AWS tag key length exceeds limit of {config.limits.tag_key_length}"
                 )
             if len(value) > config.limits.tag_value_length:
                 raise ValueError(
-                    f"AWS tag value length exceeds limit of {
-                        config.limits.tag_value_length}"
+                    f"AWS tag value length exceeds limit of {config.limits.tag_value_length}"
                 )
 
             # Use AWS pattern from configuration

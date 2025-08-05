@@ -191,8 +191,7 @@ def create_provider_context(logger=None) -> ProviderContext:
                             context.register_strategy(strategy, instance_name)
                         if logger:
                             logger.debug(
-                                f"Loaded strategy for provider instance: {
-                                    registration.type_name}:{instance_name}"
+                                f"Loaded strategy for provider instance: {registration.type_name}:{instance_name}"
                             )
             except Exception as e:
                 if logger:

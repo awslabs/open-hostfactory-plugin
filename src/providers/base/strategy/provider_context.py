@@ -151,8 +151,7 @@ class ProviderContext:
                 self._current_strategy = strategy
 
             self._logger.debug(
-                f"Loaded strategy for provider instance: {base_type}:{
-                    instance_name or 'default'}"
+                f"Loaded strategy for provider instance: {base_type}:{instance_name or 'default'}"
             )
 
     def unregister_strategy(self, strategy_type: str) -> bool:
@@ -263,8 +262,7 @@ class ProviderContext:
                     metrics.record_operation(False, response_time_ms)
 
                 return ProviderResult.error_result(
-                    f"Strategy {strategy_type} does not support operation {
-                        operation.operation_type}",
+                    f"Strategy {strategy_type} does not support operation {operation.operation_type}",
                     "OPERATION_NOT_SUPPORTED",
                 )
 
@@ -292,8 +290,7 @@ class ProviderContext:
                 metrics.record_operation(False, response_time_ms)
 
             self._logger.error(
-                f"Error executing operation {
-                    operation.operation_type} with {strategy_type}: {e}"
+                f"Error executing operation {operation.operation_type} with {strategy_type}: {e}"
             )
             return ProviderResult.error_result(
                 f"Operation execution failed: {str(e)}", "EXECUTION_ERROR"
@@ -345,8 +342,7 @@ class ProviderContext:
                     metrics.record_operation(False, response_time_ms)
 
                 return ProviderResult.error_result(
-                    f"Strategy {strategy_type} does not support operation {
-                        operation.operation_type}",
+                    f"Strategy {strategy_type} does not support operation {operation.operation_type}",
                     "OPERATION_NOT_SUPPORTED",
                 )
 
@@ -374,8 +370,7 @@ class ProviderContext:
                 metrics.record_operation(False, response_time_ms)
 
             self._logger.error(
-                f"Error executing operation {
-                    operation.operation_type} with {strategy_type}: {e}"
+                f"Error executing operation {operation.operation_type} with {strategy_type}: {e}"
             )
             return ProviderResult.error_result(
                 f"Operation execution failed: {str(e)}", "EXECUTION_ERROR"

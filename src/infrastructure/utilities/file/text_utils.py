@@ -77,9 +77,7 @@ def append_text_file(file_path: str, content: str, encoding: str = "utf-8") -> N
         raise OSError(f"Failed to append to text file {file_path}: {str(e)}")
 
 
-def read_text_lines(
-    file_path: str, encoding: str = "utf-8", strip_whitespace: bool = True
-) -> List[str]:
+def read_text_lines(file_path: str, encoding: str = "utf-8", strip_whitespace: bool = True) -> List[str]:
     """
     Read a text file and return its lines.
 
@@ -113,9 +111,7 @@ def read_text_lines(
         )
 
 
-def write_text_lines(
-    file_path: str, lines: List[str], encoding: str = "utf-8", add_newlines: bool = True
-) -> None:
+def write_text_lines(file_path: str, lines: List[str], encoding: str = "utf-8", add_newlines: bool = True) -> None:
     """
     Write lines of text to a file.
 

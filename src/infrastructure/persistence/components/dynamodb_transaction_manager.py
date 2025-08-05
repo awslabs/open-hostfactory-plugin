@@ -171,9 +171,7 @@ class DynamoDBTransactionManager(TransactionManager):
                 cancellation_reasons = e.response.get("CancellationReasons", [])
                 self.logger.error(f"DynamoDB transaction cancelled: {cancellation_reasons}")
             else:
-                self.logger.error(
-                    f"DynamoDB transaction failed: {error_code} - {e.response['Error']['Message']}"
-                )
+                self.logger.error(f"DynamoDB transaction failed: {error_code} - {e.response['Error']['Message']}")
 
             raise
         except Exception as e:
@@ -207,9 +205,7 @@ class DynamoDBTransactionManager(TransactionManager):
         """
         try:
             if len(read_items) > self.max_transaction_items:
-                raise RuntimeError(
-                    f"Read transaction cannot exceed {self.max_transaction_items} items"
-                )
+                raise RuntimeError(f"Read transaction cannot exceed {self.max_transaction_items} items")
 
             dynamodb_client = self.client_manager.get_client()
 

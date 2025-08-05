@@ -171,9 +171,7 @@ class ConfigurationMigrator:
             }
         }
 
-    def validate_migration(
-        self, original_config: Dict[str, Any], migrated_config: Dict[str, Any]
-    ) -> bool:
+    def validate_migration(self, original_config: Dict[str, Any], migrated_config: Dict[str, Any]) -> bool:
         """
         Validate that migration preserved essential configuration.
 
@@ -208,10 +206,7 @@ class ConfigurationMigrator:
                 # Check essential AWS configuration is preserved
                 essential_fields = ["region", "profile"]
                 for field in essential_fields:
-                    if (
-                        field in original_aws_config
-                        and migrated_aws_config.get(field) != original_aws_config[field]
-                    ):
+                    if field in original_aws_config and migrated_aws_config.get(field) != original_aws_config[field]:
                         self._logger.error(f"AWS {field} not preserved in migration")
                         return False
 
@@ -222,9 +217,7 @@ class ConfigurationMigrator:
             self._logger.error(f"Migration validation failed: {str(e)}")
             return False
 
-    def get_migration_summary(
-        self, original_config: Dict[str, Any], migrated_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def get_migration_summary(self, original_config: Dict[str, Any], migrated_config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Get summary of migration changes.
 
@@ -261,13 +254,9 @@ class ConfigurationMigrator:
                 summary["mode_after"] = unified_config.get_mode().value
 
                 if unified_config.active_provider:
-                    summary["changes"].append(
-                        f"Set active provider to '{unified_config.active_provider}'"
-                    )
+                    summary["changes"].append(f"Set active provider to '{unified_config.active_provider}'")
 
-                summary["changes"].append(
-                    f"Created {len(unified_config.providers)} provider instance(s)"
-                )
+                summary["changes"].append(f"Created {len(unified_config.providers)} provider instance(s)")
 
         except Exception as e:
             summary["error"] = str(e)

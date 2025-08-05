@@ -32,9 +32,7 @@ def register_core_services(container: DIContainer) -> None:
     )
 
     # Register command and query buses with factory functions
-    container.register_factory(
-        CommandBus, lambda c: CommandBus(container=c, logger=c.get(LoggingPort))
-    )
+    container.register_factory(CommandBus, lambda c: CommandBus(container=c, logger=c.get(LoggingPort)))
 
     container.register_factory(QueryBus, lambda c: QueryBus(container=c, logger=c.get(LoggingPort)))
 

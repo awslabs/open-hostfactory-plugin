@@ -125,8 +125,7 @@ class HealthCheck:
                 }
             else:
                 return {
-                    name: history[-1].to_dict() if history else None
-                    for name, history in self.status_history.items()
+                    name: history[-1].to_dict() if history else None for name, history in self.status_history.items()
                 }
 
     def _start_health_checker(self) -> None:

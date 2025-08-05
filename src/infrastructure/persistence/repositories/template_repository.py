@@ -113,14 +113,10 @@ class TemplateSerializer:
             # Parse datetime fields with defaults for legacy data
             now = datetime.now()
             created_at = (
-                datetime.fromisoformat(processed_data["created_at"])
-                if processed_data.get("created_at")
-                else now
+                datetime.fromisoformat(processed_data["created_at"]) if processed_data.get("created_at") else now
             )
             updated_at = (
-                datetime.fromisoformat(processed_data["updated_at"])
-                if processed_data.get("updated_at")
-                else now
+                datetime.fromisoformat(processed_data["updated_at"]) if processed_data.get("updated_at") else now
             )
 
             # Convert legacy format to new format
@@ -136,9 +132,7 @@ class TemplateSerializer:
                 "description": processed_data.get("description"),
                 "image_id": processed_data.get("imageId", processed_data.get("image_id")),
                 "instance_type": processed_data.get("vmType", processed_data.get("instance_type")),
-                "max_instances": processed_data.get(
-                    "maxNumber", processed_data.get("max_instances", 1)
-                ),
+                "max_instances": processed_data.get("maxNumber", processed_data.get("max_instances", 1)),
                 # Instance configuration
                 "instance_types": processed_data.get("instance_types", {}),
                 "primary_instance_type": processed_data.get("primary_instance_type"),
@@ -220,9 +214,7 @@ class TemplateRepositoryImpl(TemplateRepositoryInterface):
             events = template.get_domain_events()
             template.clear_domain_events()
 
-            self.logger.debug(
-                f"Saved template { template.template_id} and extracted { len(events)} events"
-            )
+            self.logger.debug(f"Saved template { template.template_id} and extracted { len(events)} events")
             return events
 
         except Exception as e:

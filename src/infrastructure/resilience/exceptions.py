@@ -18,9 +18,7 @@ class MaxRetriesExceededError(RetryError):
         """
         self.attempts = attempts
         self.last_exception = last_exception
-        super().__init__(
-            f"Maximum retry attempts ({attempts}) exceeded. Last error: {last_exception}"
-        )
+        super().__init__(f"Maximum retry attempts ({attempts}) exceeded. Last error: {last_exception}")
 
 
 class InvalidRetryStrategyError(RetryError):

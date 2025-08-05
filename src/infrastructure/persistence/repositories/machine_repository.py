@@ -43,9 +43,7 @@ class MachineSerializer:
                 "status_reason": machine.status_reason,
                 # Lifecycle timestamps
                 "launch_time": (machine.launch_time.isoformat() if machine.launch_time else None),
-                "termination_time": (
-                    machine.termination_time.isoformat() if machine.termination_time else None
-                ),
+                "termination_time": (machine.termination_time.isoformat() if machine.termination_time else None),
                 # Tags and metadata
                 "tags": machine.tags.to_dict() if machine.tags else {},
                 "metadata": machine.metadata or {},
@@ -70,20 +68,12 @@ class MachineSerializer:
             from src.domain.machine.machine_status import MachineStatus
 
             # Parse datetime fields
-            launch_time = (
-                datetime.fromisoformat(data["launch_time"]) if data.get("launch_time") else None
-            )
+            launch_time = datetime.fromisoformat(data["launch_time"]) if data.get("launch_time") else None
             termination_time = (
-                datetime.fromisoformat(data["termination_time"])
-                if data.get("termination_time")
-                else None
+                datetime.fromisoformat(data["termination_time"]) if data.get("termination_time") else None
             )
-            created_at = (
-                datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
-            )
-            updated_at = (
-                datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
-            )
+            created_at = datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
+            updated_at = datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
 
             # Build machine data with enhanced fields
             machine_data = {
@@ -149,9 +139,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
             events = machine.get_domain_events()
             machine.clear_domain_events()
 
-            self.logger.debug(
-                f"Saved machine { machine.instance_id} and extracted { len(events)} events"
-            )
+            self.logger.debug(f"Saved machine { machine.instance_id} and extracted { len(events)} events")
             return events
 
         except Exception as e:

@@ -38,9 +38,7 @@ class ReloadProviderConfigHandler(BaseCommandHandler[ReloadProviderConfigCommand
 
     async def execute_command(self, command: ReloadProviderConfigCommand) -> Dict[str, Any]:
         """Execute provider configuration reload command."""
-        self.logger.info(
-            f"Reloading provider configuration from: {command.config_path or 'default location'}"
-        )
+        self.logger.info(f"Reloading provider configuration from: {command.config_path or 'default location'}")
 
         try:
             # Get configuration manager from container

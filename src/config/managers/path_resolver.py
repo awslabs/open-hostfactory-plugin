@@ -14,9 +14,7 @@ class ConfigPathResolver:
         """Initialize the instance."""
         self._base_config_path = base_config_path
 
-    def resolve_path(
-        self, path_type: str, default_path: str, config_path: Optional[str] = None
-    ) -> str:
+    def resolve_path(self, path_type: str, default_path: str, config_path: Optional[str] = None) -> str:
         """
         Resolve configuration path with fallback logic.
 
@@ -89,37 +87,27 @@ class ConfigPathResolver:
         else:
             return os.path.abspath(filename)
 
-    def get_work_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_work_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get work directory path."""
         default = default_path or "work"
         return self.resolve_path("work", default, config_path)
 
-    def get_conf_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_conf_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get configuration directory path."""
         default = default_path or "conf"
         return self.resolve_path("conf", default, config_path)
 
-    def get_log_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_log_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get log directory path."""
         default = default_path or "logs"
         return self.resolve_path("log", default, config_path)
 
-    def get_events_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_events_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get events directory path."""
         default = default_path or "events"
         return self.resolve_path("events", default, config_path)
 
-    def get_snapshots_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_snapshots_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get snapshots directory path."""
         default = default_path or "snapshots"
         return self.resolve_path("snapshots", default, config_path)

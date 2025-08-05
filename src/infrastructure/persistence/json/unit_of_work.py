@@ -68,9 +68,7 @@ class JSONUnitOfWork(BaseUnitOfWork):
             entity_type="requests",
         )
 
-        template_path = (
-            template_file if os.path.isabs(template_file) else os.path.join(data_dir, template_file)
-        )
+        template_path = template_file if os.path.isabs(template_file) else os.path.join(data_dir, template_file)
         template_strategy = JSONStorageStrategy(
             file_path=template_path, create_dirs=create_dirs, entity_type="templates"
         )

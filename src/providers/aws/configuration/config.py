@@ -90,20 +90,14 @@ class AWSProviderConfig(BaseProviderConfig):
     timeout: int = Field(30, description="Timeout for AWS API calls in seconds")
 
     # AWS Services
-    service_role_spot_fleet: str = Field(
-        "AWSServiceRoleForEC2SpotFleet", description="Service role for Spot Fleet"
-    )
-    ssm_parameter_prefix: str = Field(
-        "/hostfactory/templates/", description="SSM parameter prefix for templates"
-    )
+    service_role_spot_fleet: str = Field("AWSServiceRoleForEC2SpotFleet", description="Service role for Spot Fleet")
+    ssm_parameter_prefix: str = Field("/hostfactory/templates/", description="SSM parameter prefix for templates")
 
     # Handler configuration
     handlers: HandlersConfig = Field(default_factory=lambda: HandlersConfig())
 
     # Launch template configuration
-    launch_template: LaunchTemplateConfiguration = Field(
-        default_factory=lambda: LaunchTemplateConfiguration()
-    )
+    launch_template: LaunchTemplateConfiguration = Field(default_factory=lambda: LaunchTemplateConfiguration())
 
     # Symphony/Legacy configuration fields
     credential_file: Optional[str] = Field(None, description="Path to AWS credentials file")
@@ -112,12 +106,8 @@ class AWSProviderConfig(BaseProviderConfig):
     proxy_port: Optional[int] = Field(None, description="Proxy server port")
     connection_timeout_ms: int = Field(10000, description="Connection timeout in milliseconds")
     request_retry_attempts: int = Field(0, description="Number of retry attempts for AWS requests")
-    instance_pending_timeout_sec: int = Field(
-        180, description="Timeout for pending instances in seconds"
-    )
-    describe_request_retry_attempts: int = Field(
-        0, description="Number of retries for status requests"
-    )
+    instance_pending_timeout_sec: int = Field(180, description="Timeout for pending instances in seconds")
+    describe_request_retry_attempts: int = Field(0, description="Number of retries for status requests")
     describe_request_interval: int = Field(0, description="Delay between retries in milliseconds")
 
     @model_validator(mode="after")

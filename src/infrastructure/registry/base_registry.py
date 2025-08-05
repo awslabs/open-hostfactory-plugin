@@ -244,9 +244,7 @@ class BaseRegistry(ABC):
         with self._registry_lock:
             if type_name not in self._type_registrations:
                 available_types = ", ".join(self.get_registered_types())
-                raise ValueError(
-                    f"Type '{type_name}' is not registered. Available types: {available_types}"
-                )
+                raise ValueError(f"Type '{type_name}' is not registered. Available types: {available_types}")
             return self._type_registrations[type_name]
 
     def _get_instance_registration(self, instance_name: str) -> BaseRegistration:
@@ -259,9 +257,7 @@ class BaseRegistry(ABC):
                 )
             return self._instance_registrations[instance_name]
 
-    def _create_strategy_from_registration(
-        self, registration: BaseRegistration, config: Any, identifier: str
-    ) -> Any:
+    def _create_strategy_from_registration(self, registration: BaseRegistration, config: Any, identifier: str) -> Any:
         """Create strategy from registration with error handling."""
         try:
             strategy = registration.strategy_factory(config)

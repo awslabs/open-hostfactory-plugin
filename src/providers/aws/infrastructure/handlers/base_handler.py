@@ -182,9 +182,7 @@ class AWSHandler(ABC):
         service_name = self._get_service_name()
 
         # Determine retry strategy based on operation type
-        strategy_config = self._get_retry_strategy_config(
-            operation_type, service_name, operation_name
-        )
+        strategy_config = self._get_retry_strategy_config(operation_type, service_name, operation_name)
 
         # Create retry decorator with appropriate strategy
         @retry(**strategy_config)
@@ -246,11 +244,7 @@ class AWSHandler(ABC):
         }
 
         # Auto-detect critical operations if not explicitly specified
-        if (
-            operation_type == "standard"
-            and operation_name
-            and operation_name in critical_operations
-        ):
+        if operation_type == "standard" and operation_name and operation_name in critical_operations:
             operation_type = "critical"
             self.logger.debug(f"Auto-detected critical operation: {operation_name}")
 
@@ -286,9 +280,7 @@ class AWSHandler(ABC):
                 "max_delay": 30.0,
             }
 
-    def _convert_client_error(
-        self, error: ClientError, operation_name: str = "unknown"
-    ) -> Exception:
+    def _convert_client_error(self, error: ClientError, operation_name: str = "unknown") -> Exception:
         """Convert AWS ClientError to domain exception."""
         error_code = error.response["Error"]["Code"]
         error_message = error.response["Error"]["Message"]
@@ -427,9 +419,7 @@ class AWSHandler(ABC):
         metrics["success_count"] += 1
         metrics["total_duration"] += duration
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = (
-            metrics["total_duration"] / total_count if total_count > 0 else 0.0
-        )
+        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
 
     def _record_failure_metrics(self, request_type: str, duration: float, error: Exception) -> None:
         """Record failure metrics for monitoring."""
@@ -448,9 +438,7 @@ class AWSHandler(ABC):
         metrics["total_duration"] += duration
         metrics["last_error"] = str(error)
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = (
-            metrics["total_duration"] / total_count if total_count > 0 else 0.0
-        )
+        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get handler performance metrics."""

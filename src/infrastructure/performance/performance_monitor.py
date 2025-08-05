@@ -91,9 +91,7 @@ def performance_monitor(operation_name: Optional[str] = None):
                         # none available
                         global_monitor = get_global_monitor()
                         if global_monitor and global_monitor.logger:
-                            global_monitor.logger.warning(
-                                f"Slow operation: {name} took {duration:.2f}s"
-                            )
+                            global_monitor.logger.warning(f"Slow operation: {name} took {duration:.2f}s")
                         # If no logger available, we have to use print as last resort
                         # This should only happen during early bootstrap before DI is
                         # ready

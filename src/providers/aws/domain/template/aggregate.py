@@ -89,13 +89,9 @@ class AWSTemplate(CoreTemplate):
                 try:
                     version_int = int(version)
                     if version_int < 1:
-                        raise ValueError(
-                            "launch_template_version must be a positive integer, '$Latest', or '$Default'"
-                        )
+                        raise ValueError("launch_template_version must be a positive integer, '$Latest', or '$Default'")
                 except ValueError:
-                    raise ValueError(
-                        "launch_template_version must be a positive integer, '$Latest', or '$Default'"
-                    )
+                    raise ValueError("launch_template_version must be a positive integer, '$Latest', or '$Default'")
 
         return self
 
@@ -164,9 +160,7 @@ class AWSTemplate(CoreTemplate):
             "instance_type": AWSInstanceType(value=data.get("vm_type", data.get("instance_type"))),
             "image_id": data.get("image_id"),
             "max_instances": data.get("max_number", data.get("max_instances", 1)),
-            "subnet_ids": data.get(
-                "subnet_ids", [data.get("subnet_id")] if data.get("subnet_id") else []
-            ),
+            "subnet_ids": data.get("subnet_ids", [data.get("subnet_id")] if data.get("subnet_id") else []),
             "security_group_ids": data.get("security_group_ids", []),
             "tags": AWSTags.from_dict(data.get("tags", data.get("instance_tags", {}))),
         }
@@ -175,9 +169,7 @@ class AWSTemplate(CoreTemplate):
         aws_data = {
             **core_data,
             "provider_api": ProviderApi(data.get("provider_api")),
-            "fleet_type": (
-                AWSFleetType(data.get("fleet_type")) if data.get("fleet_type") else None
-            ),
+            "fleet_type": (AWSFleetType(data.get("fleet_type")) if data.get("fleet_type") else None),
             "fleet_role": data.get("fleet_role"),
             "key_name": data.get("key_name"),
             "user_data": data.get("user_data"),
@@ -196,9 +188,7 @@ class AWSTemplate(CoreTemplate):
 
         # Handle optional AWS-specific fields
         if "allocation_strategy" in data:
-            aws_data["allocation_strategy"] = AWSAllocationStrategy.from_string(
-                data["allocation_strategy"]
-            )
+            aws_data["allocation_strategy"] = AWSAllocationStrategy.from_string(data["allocation_strategy"])
 
         if "allocation_strategy_on_demand" in data:
             aws_data["allocation_strategy_on_demand"] = AWSAllocationStrategy.from_string(
@@ -221,9 +211,7 @@ class AWSTemplate(CoreTemplate):
             handler_type=self.provider_api,
             fleet_type=self.fleet_type,
             allocation_strategy=(
-                self.allocation_strategy
-                if isinstance(self.allocation_strategy, AWSAllocationStrategy)
-                else None
+                self.allocation_strategy if isinstance(self.allocation_strategy, AWSAllocationStrategy) else None
             ),
             price_type=self.price_type,
             subnet_ids=[AWSSubnetId(value=sid) for sid in self.subnet_ids],

@@ -143,13 +143,9 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
 
             command_bus.register(CreateRequestCommand, container.get(CreateMachineRequestHandler))
 
-            command_bus.register(
-                CreateReturnRequestCommand, container.get(CreateReturnRequestHandler)
-            )
+            command_bus.register(CreateReturnRequestCommand, container.get(CreateReturnRequestHandler))
 
-            command_bus.register(
-                UpdateRequestStatusCommand, container.get(UpdateRequestStatusHandler)
-            )
+            command_bus.register(UpdateRequestStatusCommand, container.get(UpdateRequestStatusHandler))
 
             command_bus.register(CancelRequestCommand, container.get(CancelRequestHandler))
 
@@ -161,9 +157,7 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
 
                 container.register_singleton(CleanupOldRequestsHandler)
 
-                command_bus.register(
-                    CleanupOldRequestsCommand, container.get(CleanupOldRequestsHandler)
-                )
+                command_bus.register(CleanupOldRequestsCommand, container.get(CleanupOldRequestsHandler))
             except (ImportError, Exception) as e:
                 logger.debug(f"CleanupOldRequestsHandler not available: {e}")
 

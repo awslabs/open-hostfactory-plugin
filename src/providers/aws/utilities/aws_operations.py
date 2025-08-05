@@ -183,9 +183,7 @@ class AWSOperations:
             self._logger.error(f"Failed to describe {operation_name}: {str(e)}")
             raise
 
-    def _paginate_method(
-        self, client_method: Callable, result_key: str, **kwargs
-    ) -> List[Dict[str, Any]]:
+    def _paginate_method(self, client_method: Callable, result_key: str, **kwargs) -> List[Dict[str, Any]]:
         """Access handler's pagination functionality."""
         # This will be set by the handler when initializing AWSOperations
         if hasattr(self, "_paginate_func"):
@@ -215,9 +213,7 @@ class AWSOperations:
         if context:
             self._logger.debug(f"{operation} context: {context}")
 
-    def log_operation_success(
-        self, operation: str, resource_type: str, resource_id: str, **context
-    ):
+    def log_operation_success(self, operation: str, resource_type: str, resource_id: str, **context):
         """Standardized operation success logging."""
         self._logger.info(f"Successfully completed {operation} for {resource_type}: {resource_id}")
 
@@ -233,9 +229,7 @@ class AWSOperations:
     ):
         """Standardized operation failure logging."""
         if resource_id:
-            self._logger.error(
-                f"Failed {operation} for {resource_type} {resource_id}: {str(error)}"
-            )
+            self._logger.error(f"Failed {operation} for {resource_type} {resource_id}: {str(error)}")
         else:
             self._logger.error(f"Failed {operation} for {resource_type}: {str(error)}")
 
@@ -268,9 +262,7 @@ class AWSOperations:
             if not self._retry_with_backoff:
                 raise ValueError("Retry method not set. Call set_retry_method first.")
 
-            response = self._retry_with_backoff(
-                describe_method, operation_type="read_only", **describe_params
-            )
+            response = self._retry_with_backoff(describe_method, operation_type="read_only", **describe_params)
 
             # Navigate to status using dot notation path
             current_status = response
@@ -283,8 +275,7 @@ class AWSOperations:
 
             if expected_status and current_status != expected_status:
                 self._logger.warning(
-                    f"{resource_type} {resource_id} status is {current_status}, "
-                    f"expected {expected_status}"
+                    f"{resource_type} {resource_id} status is {current_status}, " f"expected {expected_status}"
                 )
 
             return str(current_status)
@@ -335,15 +326,11 @@ class AWSOperations:
                 elif isinstance(instance, str):
                     instance_ids.append(instance)
 
-            self._logger.debug(
-                f"Found {len(instance_ids)} instances for {resource_type} {resource_id}"
-            )
+            self._logger.debug(f"Found {len(instance_ids)} instances for {resource_type} {resource_id}")
             return instance_ids
 
         except Exception as e:
-            self._logger.error(
-                f"Failed to get instances for {resource_type} {resource_id}: {str(e)}"
-            )
+            self._logger.error(f"Failed to get instances for {resource_type} {resource_id}: {str(e)}")
             return []
 
     def execute_with_standard_error_handling(
@@ -385,9 +372,7 @@ class AWSOperations:
             self._logger.error(f"Unexpected error in {context}: {error_msg}")
             raise AWSInfrastructureError(error_msg)
 
-    def _convert_client_error(
-        self, error: ClientError, operation_name: str = "AWS operation"
-    ) -> Exception:
+    def _convert_client_error(self, error: ClientError, operation_name: str = "AWS operation") -> Exception:
         """
         Convert AWS ClientError to appropriate domain exception.
 

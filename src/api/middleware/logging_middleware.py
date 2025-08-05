@@ -71,8 +71,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         client_ip = request.client.host if request.client else "unknown"
 
         self.logger.info(
-            f"Request {request_id}: {request.method} {request.url.path} "
-            f"from {client_ip} (user: {user_id})"
+            f"Request {request_id}: {request.method} {request.url.path} " f"from {client_ip} (user: {user_id})"
         )
 
         # Log query parameters if present

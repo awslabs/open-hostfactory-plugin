@@ -119,9 +119,7 @@ class AWSProviderStrategy(ProviderStrategy):
         """Get the AWS launch template manager with lazy initialization."""
         if self._launch_template_manager is None and self.aws_client:
             self._logger.debug("Creating AWS launch template manager on first access")
-            self._launch_template_manager = AWSLaunchTemplateManager(
-                aws_client=self.aws_client, logger=self._logger
-            )
+            self._launch_template_manager = AWSLaunchTemplateManager(aws_client=self.aws_client, logger=self._logger)
         return self._launch_template_manager
 
     @property
@@ -194,9 +192,7 @@ class AWSProviderStrategy(ProviderStrategy):
             Result of the operation execution
         """
         if not self._initialized:
-            return ProviderResult.error_result(
-                "AWS provider strategy not initialized", "NOT_INITIALIZED"
-            )
+            return ProviderResult.error_result("AWS provider strategy not initialized", "NOT_INITIALIZED")
 
         start_time = time.time()
 
@@ -303,9 +299,7 @@ class AWSProviderStrategy(ProviderStrategy):
                         f"No handler available for provider_api: {provider_api}",
                         "HANDLER_NOT_FOUND",
                     )
-                self._logger.warning(
-                    f"Handler for {provider_api} not found, using RunInstances fallback"
-                )
+                self._logger.warning(f"Handler for {provider_api} not found, using RunInstances fallback")
 
             # Convert template_config to AWSTemplate domain object
             from src.providers.aws.domain.template.aggregate import AWSTemplate
@@ -349,17 +343,13 @@ class AWSProviderStrategy(ProviderStrategy):
                 error_message = handler_result.get("error_message")
 
                 if not success:
-                    return ProviderResult.error_result(
-                        error_message or "Handler reported failure", "HANDLER_ERROR"
-                    )
+                    return ProviderResult.error_result(error_message or "Handler reported failure", "HANDLER_ERROR")
             else:
                 # Handler returned single resource ID (legacy format)
                 resource_ids = [handler_result] if handler_result else []
                 instances = []
 
-            self._logger.info(
-                f"Handler returned resource_ids: {resource_ids}, instances: {len(instances)}"
-            )
+            self._logger.info(f"Handler returned resource_ids: {resource_ids}, instances: {len(instances)}")
 
             return ProviderResult.success_result(
                 {
@@ -377,9 +367,7 @@ class AWSProviderStrategy(ProviderStrategy):
             )
 
         except Exception as e:
-            return ProviderResult.error_result(
-                f"Failed to create instances: {str(e)}", "CREATE_INSTANCES_ERROR"
-            )
+            return ProviderResult.error_result(f"Failed to create instances: {str(e)}", "CREATE_INSTANCES_ERROR")
 
     def _handle_terminate_instances(self, operation: ProviderOperation) -> ProviderResult:
         """Handle instance termination operation."""
@@ -387,16 +375,12 @@ class AWSProviderStrategy(ProviderStrategy):
             instance_ids = operation.parameters.get("instance_ids", [])
 
             if not instance_ids:
-                return ProviderResult.error_result(
-                    "Instance IDs are required for termination", "MISSING_INSTANCE_IDS"
-                )
+                return ProviderResult.error_result("Instance IDs are required for termination", "MISSING_INSTANCE_IDS")
 
             # Use AWS client property (with lazy initialization) for termination
             aws_client = self.aws_client
             if not aws_client:
-                return ProviderResult.error_result(
-                    "AWS client not available", "AWS_CLIENT_NOT_AVAILABLE"
-                )
+                return ProviderResult.error_result("AWS client not available", "AWS_CLIENT_NOT_AVAILABLE")
 
             try:
                 response = aws_client.ec2_client.terminate_instances(InstanceIds=instance_ids)
@@ -410,14 +394,10 @@ class AWSProviderStrategy(ProviderStrategy):
 
             except Exception as e:
                 self._logger.error(f"Failed to terminate instances: {e}")
-                return ProviderResult.error_result(
-                    f"Failed to terminate instances: {str(e)}", "AWS_API_ERROR"
-                )
+                return ProviderResult.error_result(f"Failed to terminate instances: {str(e)}", "AWS_API_ERROR")
 
         except Exception as e:
-            return ProviderResult.error_result(
-                f"Failed to terminate instances: {str(e)}", "TERMINATE_INSTANCES_ERROR"
-            )
+            return ProviderResult.error_result(f"Failed to terminate instances: {str(e)}", "TERMINATE_INSTANCES_ERROR")
 
     def _handle_get_instance_status(self, operation: ProviderOperation) -> ProviderResult:
         """Handle instance status query operation."""
@@ -425,16 +405,12 @@ class AWSProviderStrategy(ProviderStrategy):
             instance_ids = operation.parameters.get("instance_ids", [])
 
             if not instance_ids:
-                return ProviderResult.error_result(
-                    "Instance IDs are required for status query", "MISSING_INSTANCE_IDS"
-                )
+                return ProviderResult.error_result("Instance IDs are required for status query", "MISSING_INSTANCE_IDS")
 
             # Use AWS client property (with lazy initialization) for status query
             aws_client = self.aws_client
             if not aws_client:
-                return ProviderResult.error_result(
-                    "AWS client not available", "AWS_CLIENT_NOT_AVAILABLE"
-                )
+                return ProviderResult.error_result("AWS client not available", "AWS_CLIENT_NOT_AVAILABLE")
 
             try:
                 response = aws_client.ec2_client.describe_instances(InstanceIds=instance_ids)
@@ -453,14 +429,10 @@ class AWSProviderStrategy(ProviderStrategy):
 
             except Exception as e:
                 self._logger.error(f"Failed to get instance status: {e}")
-                return ProviderResult.error_result(
-                    f"Failed to get instance status: {str(e)}", "AWS_API_ERROR"
-                )
+                return ProviderResult.error_result(f"Failed to get instance status: {str(e)}", "AWS_API_ERROR")
 
         except Exception as e:
-            return ProviderResult.error_result(
-                f"Failed to get instance status: {str(e)}", "GET_INSTANCE_STATUS_ERROR"
-            )
+            return ProviderResult.error_result(f"Failed to get instance status: {str(e)}", "GET_INSTANCE_STATUS_ERROR")
 
     def _handle_validate_template(self, operation: ProviderOperation) -> ProviderResult:
         """Handle template validation operation."""
@@ -482,9 +454,7 @@ class AWSProviderStrategy(ProviderStrategy):
             )
 
         except Exception as e:
-            return ProviderResult.error_result(
-                f"Failed to validate template: {str(e)}", "VALIDATE_TEMPLATE_ERROR"
-            )
+            return ProviderResult.error_result(f"Failed to validate template: {str(e)}", "VALIDATE_TEMPLATE_ERROR")
 
     def _handle_get_available_templates(self, operation: ProviderOperation) -> ProviderResult:
         """Handle available templates query operation."""
@@ -498,9 +468,7 @@ class AWSProviderStrategy(ProviderStrategy):
             )
 
         except Exception as e:
-            return ProviderResult.error_result(
-                f"Failed to get available templates: {str(e)}", "GET_TEMPLATES_ERROR"
-            )
+            return ProviderResult.error_result(f"Failed to get available templates: {str(e)}", "GET_TEMPLATES_ERROR")
 
     def _handle_describe_resource_instances(self, operation: ProviderOperation) -> ProviderResult:
         """Handle resource-to-instance discovery operation using appropriate handlers."""
@@ -524,9 +492,7 @@ class AWSProviderStrategy(ProviderStrategy):
                         f"No handler available for provider_api: {provider_api}",
                         "HANDLER_NOT_FOUND",
                     )
-                self._logger.warning(
-                    f"Handler for {provider_api} not found, using RunInstances fallback"
-                )
+                self._logger.warning(f"Handler for {provider_api} not found, using RunInstances fallback")
 
             # Create a minimal request object for the handler
             from src.domain.request.aggregate import Request
@@ -672,9 +638,7 @@ class AWSProviderStrategy(ProviderStrategy):
 
         try:
             if not self._aws_client:
-                return ProviderHealthStatus.unhealthy(
-                    "AWS client not initialized", {"error": "client_not_initialized"}
-                )
+                return ProviderHealthStatus.unhealthy("AWS client not initialized", {"error": "client_not_initialized"})
 
             # Check if we're in dry-run mode
             from src.infrastructure.mocking.dry_run_context import is_dry_run_active
@@ -745,9 +709,7 @@ class AWSProviderStrategy(ProviderStrategy):
         if "instance_type" in template_config:
             instance_type = template_config["instance_type"]
             # Basic instance type validation
-            if not any(
-                instance_type.startswith(prefix) for prefix in ["t3.", "t2.", "m5.", "c5.", "r5."]
-            ):
+            if not any(instance_type.startswith(prefix) for prefix in ["t3.", "t2.", "m5.", "c5.", "r5."]):
                 validation_warnings.append(f"Uncommon instance type: {instance_type}")
 
         return {

@@ -42,9 +42,7 @@ class TemplateDefaultsPort(ABC):
         """
 
     @abstractmethod
-    def get_effective_template_defaults(
-        self, provider_instance_name: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def get_effective_template_defaults(self, provider_instance_name: Optional[str] = None) -> Dict[str, Any]:
         """
         Get the effective template defaults for a provider instance.
 

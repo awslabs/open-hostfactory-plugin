@@ -78,9 +78,7 @@ class SQLQueryBuilder(QueryManager):
         """Build UPDATE query (implements QueryManager interface)."""
         return self.build_update(data, id_column, entity_id)
 
-    def build_delete_query(
-        self, entity_id: str, id_column: str = "id", **kwargs
-    ) -> Tuple[str, str]:
+    def build_delete_query(self, entity_id: str, id_column: str = "id", **kwargs) -> Tuple[str, str]:
         """Build DELETE query (implements QueryManager interface)."""
         return self.build_delete(id_column)
 
@@ -165,9 +163,7 @@ class SQLQueryBuilder(QueryManager):
         self.logger.debug(f"Built SELECT all query for {self.table_name}")
         return query
 
-    def build_update(
-        self, data: Dict[str, Any], id_column: str, entity_id: str
-    ) -> Tuple[str, Dict[str, Any]]:
+    def build_update(self, data: Dict[str, Any], id_column: str, entity_id: str) -> Tuple[str, Dict[str, Any]]:
         """
         Build UPDATE query with parameters.
 
@@ -305,9 +301,7 @@ class SQLQueryBuilder(QueryManager):
         self.logger.debug(f"Built COUNT query for {self.table_name}")
         return query
 
-    def build_batch_insert(
-        self, data_list: List[Dict[str, Any]]
-    ) -> Tuple[str, List[Dict[str, Any]]]:
+    def build_batch_insert(self, data_list: List[Dict[str, Any]]) -> Tuple[str, List[Dict[str, Any]]]:
         """
         Build batch INSERT query.
 
@@ -340,7 +334,5 @@ class SQLQueryBuilder(QueryManager):
             filtered_data = {k: v for k, v in data.items() if k in filtered_columns}
             filtered_data_list.append(filtered_data)
 
-        self.logger.debug(
-            f"Built batch INSERT query for { self.table_name} with { len(data_list)} items"
-        )
+        self.logger.debug(f"Built batch INSERT query for { self.table_name} with { len(data_list)} items")
         return query, filtered_data_list

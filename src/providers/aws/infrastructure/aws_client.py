@@ -73,9 +73,7 @@ class AWSClient:
 
         try:
             # Initialize session
-            self.session = boto3.Session(
-                region_name=self.region_name, profile_name=self.profile_name
-            )
+            self.session = boto3.Session(region_name=self.region_name, profile_name=self.profile_name)
 
             # Initialize service client attributes but don't create clients yet
             self._ec2_client = None
@@ -182,9 +180,7 @@ class AWSClient:
                     "cache_ttl": perf_config.cache_ttl,
                 }
         except Exception as e:
-            self._logger.debug(
-                f"Could not load performance config from ConfigurationManager: {str(e)}"
-            )
+            self._logger.debug(f"Could not load performance config from ConfigurationManager: {str(e)}")
 
         # Default configuration
         return {

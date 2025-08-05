@@ -55,9 +55,7 @@ class InfrastructureErrorResponse(BaseDTO):
         )
 
     @classmethod
-    def from_exception(
-        cls, exception: Exception, context: Optional[str] = None
-    ) -> "InfrastructureErrorResponse":
+    def from_exception(cls, exception: Exception, context: Optional[str] = None) -> "InfrastructureErrorResponse":
         """Create infrastructure error response from exception."""
         error_code, message, category, details = cls._exception_to_components(exception)
         http_status = cls._determine_http_status(category)

@@ -91,9 +91,7 @@ def create_dynamodb_unit_of_work(config: Any) -> Any:
         dynamodb_config = storage_config.dynamodb_strategy
 
         # Create AWS client with extracted configuration
-        session = boto3.Session(
-            profile_name=dynamodb_config.profile if dynamodb_config.profile else None
-        )
+        session = boto3.Session(profile_name=dynamodb_config.profile if dynamodb_config.profile else None)
         aws_client = session.client("dynamodb", region_name=dynamodb_config.region)
 
         return DynamoDBUnitOfWork(
@@ -123,9 +121,7 @@ def create_dynamodb_unit_of_work(config: Any) -> Any:
         )
 
 
-def register_dynamodb_storage(
-    registry: "StorageRegistry" = None, logger: "LoggingPort" = None
-) -> None:
+def register_dynamodb_storage(registry: "StorageRegistry" = None, logger: "LoggingPort" = None) -> None:
     """
     Register DynamoDB storage type with the storage registry.
 

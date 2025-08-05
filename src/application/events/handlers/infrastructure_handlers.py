@@ -35,10 +35,7 @@ class DatabaseConnectionHandler(BaseLoggingEventHandler):
             },
         )
 
-        message = (
-            f"Database connection: {fields['connection_status']} | "
-            f"Type: {fields['database_type']}"
-        )
+        message = f"Database connection: {fields['connection_status']} | " f"Type: {fields['database_type']}"
 
         if fields["connection_time"]:
             message += f" | Time: {self.format_duration(fields['connection_time'])}"

@@ -32,9 +32,7 @@ class JsonFormatter(logging.Formatter):
         except Exception as e:
             # Can't use logger here to avoid recursion
             # Just use full path and continue
-            print(
-                f"Warning: Error formatting log path: {e}"
-            )  # Simple console output for logging system errors
+            print(f"Warning: Error formatting log path: {e}")  # Simple console output for logging system errors
 
         message = {
             "timestamp": datetime.utcfromtimestamp(record.created).isoformat(),
@@ -229,9 +227,7 @@ class RequestLogger:
     """Logger for request-specific logging."""
 
     def __init__(self, request_id: str, correlation_id: Optional[str] = None) -> None:
-        self.logger = with_context(
-            request_id=request_id, correlation_id=correlation_id or request_id
-        )
+        self.logger = with_context(request_id=request_id, correlation_id=correlation_id or request_id)
 
     def info(self, msg: str, **kwargs: Any) -> None:
         """Log info message."""
@@ -296,9 +292,7 @@ class MetricsLogger:
     def __init__(self) -> None:
         self.logger = get_logger("metrics")
 
-    def log_timing(
-        self, operation: str, duration_ms: float, status: str = "success", **tags: str
-    ) -> None:
+    def log_timing(self, operation: str, duration_ms: float, status: str = "success", **tags: str) -> None:
         """
         Log operation timing.
 

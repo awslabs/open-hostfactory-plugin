@@ -30,9 +30,7 @@ class AWSRequestAdapter(RequestAdapterPort):
         self._aws_client = aws_client
         self._logger = logger
 
-    def create_launch_template(
-        self, request: Request, template_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def create_launch_template(self, request: Request, template_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Create AWS launch template for request.
 
@@ -69,9 +67,7 @@ class AWSRequestAdapter(RequestAdapterPort):
                     "TagSpecifications": [
                         {
                             "ResourceType": "instance",
-                            "Tags": [
-                                {"Key": key, "Value": value} for key, value in instance_tags.items()
-                            ]
+                            "Tags": [{"Key": key, "Value": value} for key, value in instance_tags.items()]
                             + [
                                 {"Key": "Name", "Value": f"hf-{request.request_id}"},
                                 {"Key": "RequestId", "Value": str(request.request_id)},
@@ -180,16 +176,12 @@ class AWSRequestAdapter(RequestAdapterPort):
             fleet = response["Fleets"][0]
 
             # Get instance information
-            instances_response = self._aws_client.ec2_client.describe_fleet_instances(
-                FleetId=request.resource_id
-            )
+            instances_response = self._aws_client.ec2_client.describe_fleet_instances(FleetId=request.resource_id)
 
             return {
                 "status": fleet["FleetState"],
                 "target_capacity": fleet["TargetCapacitySpecification"]["TotalTargetCapacity"],
-                "fulfilled_capacity": (
-                    fleet["FulfilledCapacity"] if "FulfilledCapacity" in fleet else 0
-                ),
+                "fulfilled_capacity": (fleet["FulfilledCapacity"] if "FulfilledCapacity" in fleet else 0),
                 "activity_status": fleet.get("ActivityStatus"),
                 "instances": [
                     {
@@ -443,9 +435,7 @@ class AWSRequestAdapter(RequestAdapterPort):
 
                 return {
                     "status": "success",
-                    "successful_fleets": [
-                        fleet["FleetId"] for fleet in response["SuccessfulFleetDeletions"]
-                    ],
+                    "successful_fleets": [fleet["FleetId"] for fleet in response["SuccessfulFleetDeletions"]],
                     "unsuccessful_fleets": [
                         {
                             "fleet_id": fleet["FleetId"],
@@ -462,9 +452,7 @@ class AWSRequestAdapter(RequestAdapterPort):
 
                 return {
                     "status": "success",
-                    "successful_fleets": [
-                        fleet["SpotFleetRequestId"] for fleet in response["SuccessfulFleetRequests"]
-                    ],
+                    "successful_fleets": [fleet["SpotFleetRequestId"] for fleet in response["SuccessfulFleetRequests"]],
                     "unsuccessful_fleets": [
                         {
                             "fleet_id": fleet["SpotFleetRequestId"],

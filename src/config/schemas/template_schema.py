@@ -26,22 +26,16 @@ class TemplateConfig(BaseModel):
     default_attributes: Dict[str, List[str]] = Field(
         default_factory=dict, description="Default attributes for templates"
     )
-    default_instance_tags: Dict[str, str] = Field(
-        default_factory=dict, description="Default instance tags"
-    )
+    default_instance_tags: Dict[str, str] = Field(default_factory=dict, description="Default instance tags")
     tags: Dict[str, str] = Field(default_factory=dict, description="Tags for templates")
 
     # Multi-provider template defaults (generic)
-    default_provider_type: Optional[str] = Field(
-        None, description="Default provider type (aws, provider1, provider2)"
-    )
+    default_provider_type: Optional[str] = Field(None, description="Default provider type (aws, provider1, provider2)")
     default_provider_name: Optional[str] = Field(None, description="Default provider instance name")
     default_provider_api: str = Field("EC2Fleet", description="Default provider API")
 
     # Generic pricing configuration
-    default_price_type: str = Field(
-        "ondemand", description="Default pricing type (ondemand, spot, heterogeneous)"
-    )
+    default_price_type: str = Field("ondemand", description="Default pricing type (ondemand, spot, heterogeneous)")
 
     # Note: All AWS-specific fields have been moved to AWS provider extensions:
     # - AMI resolution configuration -> AWS provider extensions

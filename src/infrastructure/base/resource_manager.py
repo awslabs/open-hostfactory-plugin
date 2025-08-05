@@ -78,9 +78,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
             duration = time.time() - start_time
             if self.logger:
-                self.logger.info(
-                    f"Resource provisioned successfully: { allocation.resource_id} in { duration:.3f}s"
-                )
+                self.logger.info(f"Resource provisioned successfully: { allocation.resource_id} in { duration:.3f}s")
 
             self._record_metric(operation_id, duration, "success")
             return allocation
@@ -88,9 +86,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         except Exception as e:
             duration = time.time() - start_time
             if self.logger:
-                self.logger.error(
-                    f"Resource provisioning failed: { specification.name} in {duration:.3f}s - { str(e)}"
-                )
+                self.logger.error(f"Resource provisioning failed: { specification.name} in {duration:.3f}s - { str(e)}")
 
             self._record_metric(operation_id, duration, "error", str(e))
             raise
@@ -120,9 +116,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
             duration = time.time() - start_time
             if self.logger:
-                self.logger.info(
-                    f"Resource deprovisioned successfully: { allocation.resource_id} in { duration:.3f}s"
-                )
+                self.logger.info(f"Resource deprovisioned successfully: { allocation.resource_id} in { duration:.3f}s")
 
             self._record_metric(operation_id, duration, "success")
 
@@ -154,9 +148,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             self._record_metric(operation_id, duration, "error", str(e))
             raise
 
-    async def list_resources(
-        self, resource_type: Optional[ResourceType] = None
-    ) -> List[ResourceAllocation]:
+    async def list_resources(self, resource_type: Optional[ResourceType] = None) -> List[ResourceAllocation]:
         """List resources with filtering and monitoring."""
         operation_id = f"{self.__class__.__name__}.list_resources"
         start_time = time.time()
@@ -176,9 +168,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             self._record_metric(operation_id, duration, "error", str(e))
             raise
 
-    async def get_resource_quota(
-        self, resource_type: ResourceType, region: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def get_resource_quota(self, resource_type: ResourceType, region: Optional[str] = None) -> Dict[str, Any]:
         """Get resource quota with caching."""
         operation_id = f"{self.__class__.__name__}.get_resource_quota"
         start_time = time.time()
@@ -223,9 +213,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         except Exception:
             # If quota check fails, log warning but don't block provisioning
             if self.logger:
-                self.logger.warning(
-                    f"Could not check quota for {specification.resource_type.value}"
-                )
+                self.logger.warning(f"Could not check quota for {specification.resource_type.value}")
 
     async def validate_allocation(self, allocation: ResourceAllocation) -> None:
         """
@@ -259,9 +247,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
     # Abstract methods that must be implemented by concrete classes
 
     @abstractmethod
-    async def execute_provisioning(
-        self, specification: ResourceSpecification
-    ) -> ResourceAllocation:
+    async def execute_provisioning(self, specification: ResourceSpecification) -> ResourceAllocation:
         """
         Execute the actual resource provisioning.
 
@@ -285,9 +271,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         """
 
     @abstractmethod
-    async def fetch_resource_list(
-        self, resource_type: Optional[ResourceType] = None
-    ) -> List[ResourceAllocation]:
+    async def fetch_resource_list(self, resource_type: Optional[ResourceType] = None) -> List[ResourceAllocation]:
         """
         Fetch list of resources from provider.
 
@@ -295,9 +279,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         """
 
     @abstractmethod
-    async def fetch_resource_quota(
-        self, resource_type: ResourceType, region: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def fetch_resource_quota(self, resource_type: ResourceType, region: Optional[str] = None) -> Dict[str, Any]:
         """
         Fetch resource quota information from provider.
 
@@ -306,9 +288,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
     # Private helper methods
 
-    async def _provision_with_retry(
-        self, specification: ResourceSpecification
-    ) -> ResourceAllocation:
+    async def _provision_with_retry(self, specification: ResourceSpecification) -> ResourceAllocation:
         """Provision resources with retry logic."""
         for attempt in range(self.max_retries + 1):
             try:
@@ -332,14 +312,10 @@ class BaseResourceManager(ResourceManagerPort, ABC):
                     raise
                 else:
                     if self.logger:
-                        self.logger.warning(
-                            f"Deprovisioning attempt {attempt + 1} failed: {str(e)}"
-                        )
+                        self.logger.warning(f"Deprovisioning attempt {attempt + 1} failed: {str(e)}")
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
 
-    def _record_metric(
-        self, operation: str, duration: float, status: str, error: Optional[str] = None
-    ) -> None:
+    def _record_metric(self, operation: str, duration: float, status: str, error: Optional[str] = None) -> None:
         """Record performance metrics."""
         self._metrics[operation] = {
             "duration": duration,
@@ -372,9 +348,7 @@ class CloudProviderResourceManager(BaseResourceManager, Generic[T]):
         """Initialize with provider-specific client."""
         super().__init__(logger)
         self.provider_client = provider_client
-        self.provider_name = self.__class__.__name__.replace("ResourceManager", "").replace(
-            "Impl", ""
-        )
+        self.provider_name = self.__class__.__name__.replace("ResourceManager", "").replace("Impl", "")
 
     async def validate_provider_connection(self) -> bool:
         """

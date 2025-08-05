@@ -77,8 +77,7 @@ class EventHandler(ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.debug(
-                    f"Event processed successfully: {event.event_type} "
-                    f"(ID: {event_id}) in {duration:.3f}s"
+                    f"Event processed successfully: {event.event_type} " f"(ID: {event_id}) in {duration:.3f}s"
                 )
 
         except Exception as e:
@@ -173,8 +172,7 @@ class EventHandler(ABC):
 
         if self.logger:
             self.logger.error(
-                f"Event processing failed: {event.event_type} "
-                f"(ID: {event_id}) after {duration:.3f}s - {str(error)}"
+                f"Event processing failed: {event.event_type} " f"(ID: {event_id}) after {duration:.3f}s - {str(error)}"
             )
 
         # Future: Send to dead letter queue, trigger alerts, etc.
@@ -236,9 +234,7 @@ class EventHandler(ABC):
         else:
             return f"{duration_ms/1000:.2f}s"
 
-    def format_status_change(
-        self, old_status: str, new_status: str, reason: Optional[str] = None
-    ) -> str:
+    def format_status_change(self, old_status: str, new_status: str, reason: Optional[str] = None) -> str:
         """
         Format status change for consistent display.
 

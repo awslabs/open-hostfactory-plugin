@@ -20,9 +20,7 @@ class ProviderConfigDTO(BaseDTO):
     active_providers: List[str] = Field(description="List of active provider names")
     provider_count: int = Field(description="Number of active providers")
     default_provider: Optional[str] = Field(None, description="Default provider name")
-    configuration_source: str = Field(
-        description="Source of configuration (e.g., 'file', 'environment')"
-    )
+    configuration_source: str = Field(description="Source of configuration (e.g., 'file', 'environment')")
     last_updated: Optional[datetime] = Field(None, description="Last configuration update time")
 
 
@@ -30,9 +28,7 @@ class ValidationResultDTO(BaseDTO):
     """DTO for provider configuration validation results."""
 
     is_valid: bool = Field(description="Whether the configuration is valid")
-    validation_errors: List[str] = Field(
-        default_factory=list, description="List of validation errors"
-    )
+    validation_errors: List[str] = Field(default_factory=list, description="List of validation errors")
     warnings: List[str] = Field(default_factory=list, description="List of validation warnings")
 
 
@@ -67,9 +63,7 @@ class SchedulerStrategyDTO(BaseDTO):
 class SchedulerStrategyListResponse(BaseDTO):
     """Response DTO for scheduler strategies list."""
 
-    strategies: List[SchedulerStrategyDTO] = Field(
-        description="List of available scheduler strategies"
-    )
+    strategies: List[SchedulerStrategyDTO] = Field(description="List of available scheduler strategies")
     current_strategy: str = Field(description="Currently active scheduler strategy")
     total_count: int = Field(description="Total number of strategies")
 
@@ -119,23 +113,15 @@ class ConfigurationSectionResponse(BaseDTO):
     section: str = Field(description="Configuration section name")
     config: Dict[str, Any] = Field(description="Configuration section data")
     found: bool = Field(description="Whether the configuration section was found")
-    validated_providers: List[str] = Field(
-        default_factory=list, description="List of successfully validated providers"
-    )
-    failed_providers: List[str] = Field(
-        default_factory=list, description="List of providers that failed validation"
-    )
-    validation_timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="When validation was performed"
-    )
+    validated_providers: List[str] = Field(default_factory=list, description="List of successfully validated providers")
+    failed_providers: List[str] = Field(default_factory=list, description="List of providers that failed validation")
+    validation_timestamp: datetime = Field(default_factory=datetime.utcnow, description="When validation was performed")
 
 
 class SystemStatusDTO(BaseDTO):
     """DTO for system status information."""
 
-    status: str = Field(
-        description="Overall system status (e.g., 'healthy', 'degraded', 'unhealthy')"
-    )
+    status: str = Field(description="Overall system status (e.g., 'healthy', 'degraded', 'unhealthy')")
     uptime_seconds: float = Field(description="System uptime in seconds")
     version: str = Field(description="Application version")
     environment: str = Field(description="Environment name (e.g., 'development', 'production')")
@@ -143,12 +129,8 @@ class SystemStatusDTO(BaseDTO):
     memory_usage_mb: float = Field(description="Memory usage in megabytes")
     cpu_usage_percent: float = Field(description="CPU usage percentage")
     disk_usage_percent: float = Field(description="Disk usage percentage")
-    last_health_check: datetime = Field(
-        default_factory=datetime.utcnow, description="Last health check timestamp"
-    )
-    components: Dict[str, str] = Field(
-        default_factory=dict, description="Status of individual components"
-    )
+    last_health_check: datetime = Field(default_factory=datetime.utcnow, description="Last health check timestamp")
+    components: Dict[str, str] = Field(default_factory=dict, description="Status of individual components")
 
 
 class ProviderMetricsDTO(BaseDTO):
@@ -164,9 +146,7 @@ class ProviderMetricsDTO(BaseDTO):
     last_request_time: Optional[datetime] = Field(None, description="Timestamp of last request")
     uptime_percent: float = Field(description="Provider uptime percentage")
     health_status: str = Field(description="Current health status")
-    metrics_timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="When metrics were collected"
-    )
+    metrics_timestamp: datetime = Field(default_factory=datetime.utcnow, description="When metrics were collected")
 
 
 class ProviderHealthDTO(BaseDTO):
@@ -193,9 +173,7 @@ class ProviderCapabilitiesDTO(BaseDTO):
     supports_spot_instances: bool = Field(description="Whether spot instances are supported")
     supports_auto_scaling: bool = Field(description="Whether auto scaling is supported")
     api_version: str = Field(description="API version")
-    last_updated: datetime = Field(
-        default_factory=datetime.utcnow, description="Last update timestamp"
-    )
+    last_updated: datetime = Field(default_factory=datetime.utcnow, description="Last update timestamp")
 
 
 class ProviderStrategyConfigDTO(BaseDTO):
@@ -211,21 +189,15 @@ class ProviderStrategyConfigDTO(BaseDTO):
     health_check_interval_seconds: int = Field(description="Health check interval in seconds")
     retry_attempts: int = Field(description="Number of retry attempts")
     timeout_seconds: int = Field(description="Timeout in seconds")
-    last_modified: datetime = Field(
-        default_factory=datetime.utcnow, description="Last modification timestamp"
-    )
+    last_modified: datetime = Field(default_factory=datetime.utcnow, description="Last modification timestamp")
 
 
 class ValidationDTO(BaseDTO):
     """DTO for template validation results."""
 
     is_valid: bool = Field(description="Whether the template is valid")
-    validation_errors: List[str] = Field(
-        default_factory=list, description="List of validation errors"
-    )
+    validation_errors: List[str] = Field(default_factory=list, description="List of validation errors")
     warnings: List[str] = Field(default_factory=list, description="List of validation warnings")
     template_id: str = Field(description="ID of the validated template")
-    validation_timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="When validation was performed"
-    )
+    validation_timestamp: datetime = Field(default_factory=datetime.utcnow, description="When validation was performed")
     schema_version: str = Field(description="Schema version used for validation")

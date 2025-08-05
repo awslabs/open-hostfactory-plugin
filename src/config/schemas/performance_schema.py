@@ -10,9 +10,7 @@ from .base_config import BaseCircuitBreakerConfig
 class BatchSizesConfig(BaseModel):
     """Batch sizes for different operations."""
 
-    terminate_instances: int = Field(
-        25, description="Batch size for terminate_instances operations"
-    )
+    terminate_instances: int = Field(25, description="Batch size for terminate_instances operations")
     create_tags: int = Field(20, description="Batch size for create_tags operations")
     describe_instances: int = Field(25, description="Batch size for describe_instances operations")
     run_instances: int = Field(10, description="Batch size for run_instances operations")
@@ -34,9 +32,7 @@ class AdaptiveBatchSizingConfig(BaseModel):
     max_batch_size: int = Field(50, description="Maximum batch size")
     increase_factor: float = Field(1.5, description="Factor to increase batch size on success")
     decrease_factor: float = Field(0.5, description="Factor to decrease batch size on failure")
-    success_threshold: int = Field(
-        3, description="Number of successful batches before increasing size"
-    )
+    success_threshold: int = Field(3, description="Number of successful batches before increasing size")
     failure_threshold: int = Field(1, description="Number of failed batches before decreasing size")
     history_size: int = Field(10, description="Size of history to maintain for each operation")
 
@@ -78,10 +74,7 @@ class AdaptiveBatchSizingConfig(BaseModel):
         if self.min_batch_size > self.max_batch_size:
             raise ValueError("Minimum batch size cannot be greater than maximum batch size")
 
-        if (
-            self.initial_batch_size < self.min_batch_size
-            or self.initial_batch_size > self.max_batch_size
-        ):
+        if self.initial_batch_size < self.min_batch_size or self.initial_batch_size > self.max_batch_size:
             raise ValueError("Initial batch size must be between minimum and maximum batch sizes")
 
         return self
@@ -128,15 +121,9 @@ class RequestStatusCacheConfig(BaseModel):
 class CachingConfig(BaseModel):
     """Caching configuration for performance optimization."""
 
-    ami_resolution: AMIResolutionCacheConfig = Field(
-        default_factory=lambda: AMIResolutionCacheConfig()
-    )
-    handler_discovery: HandlerDiscoveryCacheConfig = Field(
-        default_factory=lambda: HandlerDiscoveryCacheConfig()
-    )
-    request_status: RequestStatusCacheConfig = Field(
-        default_factory=lambda: RequestStatusCacheConfig()
-    )
+    ami_resolution: AMIResolutionCacheConfig = Field(default_factory=lambda: AMIResolutionCacheConfig())
+    handler_discovery: HandlerDiscoveryCacheConfig = Field(default_factory=lambda: HandlerDiscoveryCacheConfig())
+    request_status: RequestStatusCacheConfig = Field(default_factory=lambda: RequestStatusCacheConfig())
 
 
 class PerformanceConfig(BaseModel):
@@ -145,17 +132,11 @@ class PerformanceConfig(BaseModel):
     enable_batching: bool = Field(True, description="Whether to enable batching of API calls")
     batch_sizes: BatchSizesConfig = Field(default_factory=lambda: BatchSizesConfig())
     enable_parallel: bool = Field(True, description="Whether to enable parallel processing")
-    max_workers: int = Field(
-        10, description="Maximum number of worker threads for parallel processing"
-    )
+    max_workers: int = Field(10, description="Maximum number of worker threads for parallel processing")
     enable_caching: bool = Field(True, description="Whether to enable resource caching")
     cache_ttl: int = Field(300, description="Cache time-to-live in seconds")
-    enable_adaptive_batch_sizing: bool = Field(
-        True, description="Whether to enable adaptive batch sizing"
-    )
-    adaptive_batch_sizing: AdaptiveBatchSizingConfig = Field(
-        default_factory=lambda: AdaptiveBatchSizingConfig()
-    )
+    enable_adaptive_batch_sizing: bool = Field(True, description="Whether to enable adaptive batch sizing")
+    adaptive_batch_sizing: AdaptiveBatchSizingConfig = Field(default_factory=lambda: AdaptiveBatchSizingConfig())
     caching: CachingConfig = Field(default_factory=lambda: CachingConfig())
 
     @field_validator("max_workers")
@@ -184,7 +165,8 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
             "ec2": {
                 "failure_threshold": 3,
                 "recovery_timeout": 30,
-                "backoff": {"strategy_type": "exponential",
+                "backoff": {
+                    "strategy_type": "exponential",
                     "max_retries": 3,
                     "base_delay": 1.0,
                     "max_delay": 30.0,
@@ -193,7 +175,8 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
             "dynamodb": {
                 "failure_threshold": 5,
                 "reset_timeout": 60,
-                "backoff": {"strategy_type": "exponential",
+                "backoff": {
+                    "strategy_type": "exponential",
                     "max_retries": 5,
                     "base_delay": 0.5,
                     "max_delay": 20.0,
@@ -202,7 +185,8 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
             "s3": {
                 "failure_threshold": 3,
                 "reset_timeout": 30,
-                "backoff": {"strategy_type": "exponential",
+                "backoff": {
+                    "strategy_type": "exponential",
                     "max_retries": 4,
                     "base_delay": 0.5,
                     "max_delay": 15.0,

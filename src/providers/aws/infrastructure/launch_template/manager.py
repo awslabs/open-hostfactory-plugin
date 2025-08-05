@@ -52,9 +52,7 @@ class AWSLaunchTemplateManager:
         self.aws_client = aws_client
         self._logger = logger
 
-    def create_or_update_launch_template(
-        self, aws_template: AWSTemplate, request: Request
-    ) -> LaunchTemplateResult:
+    def create_or_update_launch_template(self, aws_template: AWSTemplate, request: Request) -> LaunchTemplateResult:
         """
         Create an EC2 launch template or a new version if it already exists.
         Uses ClientToken for idempotency to prevent duplicate versions.
@@ -88,9 +86,7 @@ class AWSLaunchTemplateManager:
             self._logger.error(error_msg)
             raise InfrastructureError(error_msg)
 
-    def _create_per_request_version(
-        self, aws_template: AWSTemplate, request: Request
-    ) -> LaunchTemplateResult:
+    def _create_per_request_version(self, aws_template: AWSTemplate, request: Request) -> LaunchTemplateResult:
         """
         Create a new version of launch template for each request.
         This ensures each request gets its own template version for tracking.
@@ -185,9 +181,7 @@ class AWSLaunchTemplateManager:
 
         try:
             # Validate that the template exists
-            response = self.aws_client.ec2_client.describe_launch_templates(
-                LaunchTemplateIds=[template_id]
-            )
+            response = self.aws_client.ec2_client.describe_launch_templates(LaunchTemplateIds=[template_id])
 
             template_name = response["LaunchTemplates"][0]["LaunchTemplateName"]
 
@@ -254,9 +248,7 @@ class AWSLaunchTemplateManager:
             is_new_version=True,
         )
 
-    def _create_launch_template_data(
-        self, aws_template: AWSTemplate, request: Request
-    ) -> Dict[str, Any]:
+    def _create_launch_template_data(self, aws_template: AWSTemplate, request: Request) -> Dict[str, Any]:
         """
         Create launch template data from AWS template configuration.
 
@@ -319,17 +311,12 @@ class AWSLaunchTemplateManager:
             launch_template_data["EbsOptimized"] = aws_template.ebs_optimized
 
         # Add monitoring if specified
-        if (
-            hasattr(aws_template, "monitoring_enabled")
-            and aws_template.monitoring_enabled is not None
-        ):
+        if hasattr(aws_template, "monitoring_enabled") and aws_template.monitoring_enabled is not None:
             launch_template_data["Monitoring"] = {"Enabled": aws_template.monitoring_enabled}
 
         return launch_template_data
 
-    def _create_instance_tags(
-        self, aws_template: AWSTemplate, request: Request
-    ) -> List[Dict[str, str]]:
+    def _create_instance_tags(self, aws_template: AWSTemplate, request: Request) -> List[Dict[str, str]]:
         """
         Create instance tags for the launch template.
 
@@ -357,9 +344,7 @@ class AWSLaunchTemplateManager:
 
         return tags
 
-    def _create_launch_template_tags(
-        self, aws_template: AWSTemplate, request: Request
-    ) -> List[Dict[str, str]]:
+    def _create_launch_template_tags(self, aws_template: AWSTemplate, request: Request) -> List[Dict[str, str]]:
         """
         Create tags for the launch template resource itself.
 

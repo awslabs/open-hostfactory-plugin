@@ -66,14 +66,10 @@ class GetConfigurationHandler(BaseQueryHandler[GetConfigurationQuery, Configurat
 
 
 @query_handler(GetConfigurationSectionQuery)
-class GetConfigurationSectionHandler(
-    BaseQueryHandler[GetConfigurationSectionQuery, ConfigurationSectionResponse]
-):
+class GetConfigurationSectionHandler(BaseQueryHandler[GetConfigurationSectionQuery, ConfigurationSectionResponse]):
     """Handler for getting configuration sections."""
 
-    async def execute_query(
-        self, query: GetConfigurationSectionQuery
-    ) -> ConfigurationSectionResponse:
+    async def execute_query(self, query: GetConfigurationSectionQuery) -> ConfigurationSectionResponse:
         """
         Execute configuration section query.
 
@@ -133,9 +129,7 @@ class GetProviderConfigHandler(BaseQueryHandler[GetProviderConfigQuery, Provider
 
                 return ProviderConfigDTO(
                     provider_mode=(
-                        provider_config.get_mode().value
-                        if hasattr(provider_config, "get_mode")
-                        else "legacy"
+                        provider_config.get_mode().value if hasattr(provider_config, "get_mode") else "legacy"
                     ),
                     active_providers=(
                         [p.name for p in provider_config.get_active_providers()]
@@ -170,9 +164,7 @@ class GetProviderConfigHandler(BaseQueryHandler[GetProviderConfigQuery, Provider
 
 
 @query_handler(ValidateProviderConfigQuery)
-class ValidateProviderConfigHandler(
-    BaseQueryHandler[ValidateProviderConfigQuery, ValidationResultDTO]
-):
+class ValidateProviderConfigHandler(BaseQueryHandler[ValidateProviderConfigQuery, ValidationResultDTO]):
     """Handler for validating provider configuration."""
 
     def __init__(
@@ -214,9 +206,7 @@ class ValidateProviderConfigHandler(
             # Additional validation logic
             try:
                 provider_config = (
-                    config_manager.get_provider_config()
-                    if hasattr(config_manager, "get_provider_config")
-                    else None
+                    config_manager.get_provider_config() if hasattr(config_manager, "get_provider_config") else None
                 )
                 if provider_config and hasattr(provider_config, "get_active_providers"):
                     active_providers = provider_config.get_active_providers()
@@ -225,9 +215,7 @@ class ValidateProviderConfigHandler(
                 else:
                     warnings.append("Unable to access provider configuration")
             except Exception as validation_error:
-                validation_errors.append(
-                    f"Provider configuration validation failed: {str(validation_error)}"
-                )
+                validation_errors.append(f"Provider configuration validation failed: {str(validation_error)}")
 
             is_valid = len(validation_errors) == 0
 

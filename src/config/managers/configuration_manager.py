@@ -177,27 +177,19 @@ class ConfigurationManager:
         self._cache_manager.clear_cache()
 
     # Delegate path resolution methods
-    def resolve_path(
-        self, path_type: str, default_path: str, config_path: Optional[str] = None
-    ) -> str:
+    def resolve_path(self, path_type: str, default_path: str, config_path: Optional[str] = None) -> str:
         """Resolve configuration path."""
         return self._ensure_path_resolver().resolve_path(path_type, default_path, config_path)
 
-    def get_work_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_work_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get work directory path."""
         return self._ensure_path_resolver().get_work_dir(default_path, config_path)
 
-    def get_conf_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_conf_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get configuration directory path."""
         return self._ensure_path_resolver().get_conf_dir(default_path, config_path)
 
-    def get_log_dir(
-        self, default_path: Optional[str] = None, config_path: Optional[str] = None
-    ) -> str:
+    def get_log_dir(self, default_path: Optional[str] = None, config_path: Optional[str] = None) -> str:
         """Get log directory path."""
         return self._ensure_path_resolver().get_log_dir(default_path, config_path)
 
@@ -315,9 +307,7 @@ class ConfigurationManager:
             }
 
             path_type = path_type_mapping.get(file_type, "conf")
-            default_dir = self.resolve_path(
-                path_type, "config" if path_type == "conf" else path_type
-            )
+            default_dir = self.resolve_path(path_type, "config" if path_type == "conf" else path_type)
 
         fallback_path = os.path.join(default_dir, filename)
         return fallback_path

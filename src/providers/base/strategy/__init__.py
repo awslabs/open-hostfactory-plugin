@@ -183,9 +183,7 @@ def create_provider_context(logger=None) -> ProviderContext:
 
                     if provider_instance_config:
                         # Create strategy using the actual instance config
-                        strategy = registry.create_strategy_from_instance(
-                            instance_name, provider_instance_config
-                        )
+                        strategy = registry.create_strategy_from_instance(instance_name, provider_instance_config)
                         if strategy:
                             # Register strategy with instance name to ensure uniqueness
                             context.register_strategy(strategy, instance_name)
@@ -195,9 +193,7 @@ def create_provider_context(logger=None) -> ProviderContext:
                             )
             except Exception as e:
                 if logger:
-                    logger.warning(
-                        f"Failed to load strategy for provider instance {instance_name}: {e}"
-                    )
+                    logger.warning(f"Failed to load strategy for provider instance {instance_name}: {e}")
 
     except Exception as e:
         if logger:

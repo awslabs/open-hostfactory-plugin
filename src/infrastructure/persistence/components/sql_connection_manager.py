@@ -120,9 +120,7 @@ class SQLConnectionManager(ResourceManager):
                 username = self.config.get("username", "user")
                 password = self.config.get("password", "")
 
-                connection_string = (
-                    f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
-                )
+                connection_string = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
 
                 self.engine = create_engine(
                     connection_string,
@@ -219,9 +217,7 @@ class SQLConnectionManager(ResourceManager):
                     conn.execute(create_sql)
                     self.logger.debug(f"Created table: {table_name}")
                 except Exception as e:
-                    self.logger.warning(
-                        f"Table {table_name} creation failed (may already exist): {e}"
-                    )
+                    self.logger.warning(f"Table {table_name} creation failed (may already exist): {e}")
 
     def table_exists(self, table_name: str) -> bool:
         """
@@ -242,9 +238,7 @@ class SQLConnectionManager(ResourceManager):
 
                 if db_type == "sqlite":
                     result = conn.execute(
-                        text(
-                            "SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"
-                        ),
+                        text("SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"),
                         {"table_name": table_name},
                     )
                 elif db_type == "postgresql":
@@ -254,9 +248,7 @@ class SQLConnectionManager(ResourceManager):
                     )
                 elif db_type == "mysql":
                     result = conn.execute(
-                        text(
-                            "SELECT table_name FROM information_schema.tables WHERE table_name = :table_name"
-                        ),
+                        text("SELECT table_name FROM information_schema.tables WHERE table_name = :table_name"),
                         {"table_name": table_name},
                     )
                 else:

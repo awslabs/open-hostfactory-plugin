@@ -259,10 +259,7 @@ class TemplateConfigurationManager:
             provider_config = self.config_manager.get_provider_config()
 
             # Check AWS provider defaults
-            if (
-                hasattr(provider_config, "provider_defaults")
-                and "aws" in provider_config.provider_defaults
-            ):
+            if hasattr(provider_config, "provider_defaults") and "aws" in provider_config.provider_defaults:
                 aws_defaults = provider_config.provider_defaults["aws"]
                 if hasattr(aws_defaults, "extensions") and aws_defaults.extensions:
                     ami_resolution = aws_defaults.extensions.get("ami_resolution", {})
@@ -383,9 +380,7 @@ class TemplateConfigurationManager:
             raise
         except Exception as e:
             self.logger.error(f"Failed to get template {template_id}: {e}")
-            raise TemplateConfigurationError(
-                f"Failed to retrieve template {template_id}: {str(e)}"
-            ) from e
+            raise TemplateConfigurationError(f"Failed to retrieve template {template_id}: {str(e)}") from e
 
     async def get_templates_by_provider(self, provider_api: str) -> List[TemplateDTO]:
         """
@@ -398,9 +393,7 @@ class TemplateConfigurationManager:
             List of templates for the specified provider
         """
         templates = await self.load_templates()
-        filtered_templates = [
-            t for t in templates if getattr(t, "provider_api", None) == provider_api
-        ]
+        filtered_templates = [t for t in templates if getattr(t, "provider_api", None) == provider_api]
 
         self.logger.debug(f"Found {len(filtered_templates)} templates for provider {provider_api}")
         return filtered_templates
@@ -475,9 +468,7 @@ class TemplateConfigurationManager:
             # No event loop running, create new one
             return asyncio.run(self.get_template_by_id(template_id))
 
-    async def validate_template(
-        self, template: TemplateDTO, provider_instance: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def validate_template(self, template: TemplateDTO, provider_instance: Optional[str] = None) -> Dict[str, Any]:
         """
         Validate template configuration.
 
@@ -503,9 +494,7 @@ class TemplateConfigurationManager:
 
             # Provider capability validation (if service available)
             if self.provider_capability_service and provider_instance:
-                await self._validate_with_provider_capabilities(
-                    template, provider_instance, validation_result
-                )
+                await self._validate_with_provider_capabilities(template, provider_instance, validation_result)
 
             self.logger.info(
                 f"Template validation completed for {template.template_id}: "
@@ -520,9 +509,7 @@ class TemplateConfigurationManager:
             validation_result["errors"].append(f"Validation error: {str(e)}")
             return validation_result
 
-    def _validate_basic_template_structure(
-        self, template: TemplateDTO, result: Dict[str, Any]
-    ) -> None:
+    def _validate_basic_template_structure(self, template: TemplateDTO, result: Dict[str, Any]) -> None:
         """Validate basic template structure and required fields."""
         # Check required fields
         if not template.template_id:
@@ -548,9 +535,7 @@ class TemplateConfigurationManager:
             if max_instances <= 0:
                 result["warnings"].append("Max instances should be greater than 0")
             elif max_instances > 1000:
-                result["warnings"].append(
-                    "Max instances is very high (>1000), consider if this is intentional"
-                )
+                result["warnings"].append("Max instances is very high (>1000), consider if this is intentional")
 
         self.logger.debug(f"Basic validation completed for template {template.template_id}")
 
@@ -587,14 +572,10 @@ class TemplateConfigurationManager:
             result["warnings"].extend(capability_result.warnings)
             result["supported_features"].extend(capability_result.supported_features)
 
-            self.logger.debug(
-                f"Provider capability validation completed for template { template.template_id}"
-            )
+            self.logger.debug(f"Provider capability validation completed for template { template.template_id}")
 
         except Exception as e:
-            self.logger.warning(
-                f"Provider capability validation failed for template { template.template_id}: {e}"
-            )
+            self.logger.warning(f"Provider capability validation failed for template { template.template_id}: {e}")
             result["warnings"].append(f"Could not validate provider capabilities: {str(e)}")
 
     def clear_cache(self) -> None:

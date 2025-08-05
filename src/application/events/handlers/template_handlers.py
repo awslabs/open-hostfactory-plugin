@@ -35,10 +35,7 @@ class TemplateValidatedHandler(BaseLoggingEventHandler):
             },
         )
 
-        message = (
-            f"Template validated: {fields['template_name']} | "
-            f"Status: {fields['validation_status']}"
-        )
+        message = f"Template validated: {fields['template_name']} | " f"Status: {fields['validation_status']}"
 
         if fields["validation_errors"]:
             error_count = len(fields["validation_errors"])

@@ -126,9 +126,7 @@ class ResourceManagerPort(Protocol):
         """
         ...
 
-    async def list_resources(
-        self, resource_type: Optional[ResourceType] = None
-    ) -> List[ResourceAllocation]:
+    async def list_resources(self, resource_type: Optional[ResourceType] = None) -> List[ResourceAllocation]:
         """
         List all resources, optionally filtered by type.
 
@@ -140,9 +138,7 @@ class ResourceManagerPort(Protocol):
         """
         ...
 
-    async def get_resource_quota(
-        self, resource_type: ResourceType, region: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def get_resource_quota(self, resource_type: ResourceType, region: Optional[str] = None) -> Dict[str, Any]:
         """
         Get resource quota information.
 
@@ -169,9 +165,7 @@ class ResourceManagerDomainService(ABC):
         self.resource_manager = resource_manager
 
     @abstractmethod
-    async def provision_resource_group(
-        self, specifications: List[ResourceSpecification]
-    ) -> List[ResourceAllocation]:
+    async def provision_resource_group(self, specifications: List[ResourceSpecification]) -> List[ResourceAllocation]:
         """
         Provision a group of related resources.
 

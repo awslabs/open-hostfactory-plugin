@@ -64,10 +64,7 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
             provider_config = config_manager.get_provider_config()
 
             # Look for AWS provider defaults
-            if (
-                hasattr(provider_config, "provider_defaults")
-                and "aws" in provider_config.provider_defaults
-            ):
+            if hasattr(provider_config, "provider_defaults") and "aws" in provider_config.provider_defaults:
                 aws_defaults = provider_config.provider_defaults["aws"]
                 if hasattr(aws_defaults, "extensions") and aws_defaults.extensions:
                     # Create AWS extension config from provider defaults
@@ -81,26 +78,16 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
                             TemplateResolverPort,
                         )
 
-                        container.register_singleton(
-                            TemplateResolverPort, lambda c: c.get(CachingAMIResolver)
-                        )
-                        logger.info(
-                            "AMI resolver registered - AMI resolution enabled in AWS extensions"
-                        )
+                        container.register_singleton(TemplateResolverPort, lambda c: c.get(CachingAMIResolver))
+                        logger.info("AMI resolver registered - AMI resolution enabled in AWS extensions")
                         return
 
             # Fallback: check if any AWS provider instances have AMI resolution enabled
             if hasattr(provider_config, "providers"):
                 for provider in provider_config.providers:
-                    if (
-                        provider.type == "aws"
-                        and hasattr(provider, "extensions")
-                        and provider.extensions
-                    ):
+                    if provider.type == "aws" and hasattr(provider, "extensions") and provider.extensions:
                         try:
-                            instance_extension_config = AWSTemplateExtensionConfig(
-                                **provider.extensions
-                            )
+                            instance_extension_config = AWSTemplateExtensionConfig(**provider.extensions)
                             if instance_extension_config.ami_resolution.enabled:
                                 container.register_singleton(CachingAMIResolver)
                                 # Register interface to resolve to concrete
@@ -118,9 +105,7 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
                                 )
                                 return
                         except Exception as e:
-                            logger.debug(
-                                f"Could not parse extensions for provider { provider.name}: {e}"
-                            )
+                            logger.debug(f"Could not parse extensions for provider { provider.name}: {e}")
 
             # Default: register with default AWS extension config
             default_aws_config = AWSTemplateExtensionConfig()
@@ -131,9 +116,7 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
                     TemplateResolverPort,
                 )
 
-                container.register_singleton(
-                    TemplateResolverPort, lambda c: c.get(CachingAMIResolver)
-                )
+                container.register_singleton(TemplateResolverPort, lambda c: c.get(CachingAMIResolver))
                 logger.info("AMI resolver registered with default AWS extension configuration")
             else:
                 logger.debug("AMI resolution disabled in default AWS configuration")
@@ -213,7 +196,5 @@ def _register_repository_services(container: DIContainer) -> None:
         )
 
     # Register with proper factory functions
-    container.register_singleton(
-        TemplateConfigurationManager, create_template_configuration_manager
-    )
+    container.register_singleton(TemplateConfigurationManager, create_template_configuration_manager)
     container.register_singleton(TemplateRepository, create_template_repository)

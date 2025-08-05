@@ -104,15 +104,11 @@ class ASGHandler(AWSHandler):
         self._validate_asg_prerequisites(aws_template)
 
         # Create launch template using the new manager
-        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
-            aws_template, request
-        )
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
 
         # Store launch template info in request (if request has this method)
         if hasattr(request, "set_launch_template_info"):
-            request.set_launch_template_info(
-                launch_template_result.template_id, launch_template_result.version
-            )
+            request.set_launch_template_info(launch_template_result.template_id, launch_template_result.version)
 
         # Generate ASG name
         asg_name = f"hf-{request.request_id}"
@@ -201,9 +197,7 @@ class ASGHandler(AWSHandler):
             self._logger.info(f"Detached instances from ASG: {instance_ids}")
 
             # Use consolidated AWS operations utility for instance termination
-            self.aws_ops.terminate_instances_with_fallback(
-                instance_ids, self._request_adapter, "ASG instances"
-            )
+            self.aws_ops.terminate_instances_with_fallback(instance_ids, self._request_adapter, "ASG instances")
             self._logger.info(f"Terminated instances: {instance_ids}")
         else:
             # Delete entire ASG
@@ -307,9 +301,7 @@ class ASGHandler(AWSHandler):
             "MaxSize": request.machine_count,
             "DesiredCapacity": request.machine_count,
             "VPCZoneIdentifier": (
-                ",".join(aws_template.subnet_ids)
-                if aws_template.subnet_ids
-                else aws_template.subnet_id
+                ",".join(aws_template.subnet_ids) if aws_template.subnet_ids else aws_template.subnet_id
             ),
             "HealthCheckType": getattr(aws_template, "health_check_type", "EC2"),
             "HealthCheckGracePeriod": getattr(aws_template, "health_check_grace_period", 300),
@@ -361,12 +353,8 @@ class ASGHandler(AWSHandler):
                     ],
                 },
                 "InstancesDistribution": {
-                    "OnDemandPercentageAboveBaseCapacity": getattr(
-                        aws_template, "on_demand_percentage", 0
-                    ),
-                    "SpotAllocationStrategy": getattr(
-                        aws_template, "spot_allocation_strategy", "capacity-optimized"
-                    ),
+                    "OnDemandPercentageAboveBaseCapacity": getattr(aws_template, "on_demand_percentage", 0),
+                    "SpotAllocationStrategy": getattr(aws_template, "spot_allocation_strategy", "capacity-optimized"),
                 },
             }
 
@@ -431,8 +419,7 @@ class ASGHandler(AWSHandler):
         return sum(
             1
             for instance in asg.get("Instances", [])
-            if instance.get("HealthStatus") == "Healthy"
-            and instance.get("LifecycleState") == "InService"
+            if instance.get("HealthStatus") == "Healthy" and instance.get("LifecycleState") == "InService"
         )
 
     def _tag_asg(self, asg_name: str, aws_template: AWSTemplate, request: Request) -> None:
@@ -461,9 +448,7 @@ class ASGHandler(AWSHandler):
                 for key, value in aws_template.tags.items():
                     tags.append({"Key": key, "Value": value, "PropagateAtLaunch": True})
 
-            self._retry_with_backoff(
-                self.aws_client.autoscaling_client.create_or_update_tags, Tags=tags
-            )
+            self._retry_with_backoff(self.aws_client.autoscaling_client.create_or_update_tags, Tags=tags)
             self._logger.debug(f"Successfully tagged ASG {asg_name}")
 
         except Exception as e:

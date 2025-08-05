@@ -70,9 +70,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
         self.error_handler = error_handler
         self._metrics: Dict[str, Any] = {}
 
-    async def handle(
-        self, request: TRequest, context: Optional[ProviderContext] = None
-    ) -> TResponse:
+    async def handle(self, request: TRequest, context: Optional[ProviderContext] = None) -> TResponse:
         """
         Handle provider request with monitoring and error management.
 
@@ -88,9 +86,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
         try:
             # Log request processing start
             if self.logger:
-                self.logger.info(
-                    f"Processing {self.provider_type} provider request: {request_type}"
-                )
+                self.logger.info(f"Processing {self.provider_type} provider request: {request_type}")
 
             # Validate request
             await self.validate_provider_request(request, context)
@@ -153,9 +149,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
             raise ValueError("Request cannot be None")
 
     @abstractmethod
-    async def execute_provider_request(
-        self, request: TRequest, context: ProviderContext
-    ) -> TResponse:
+    async def execute_provider_request(self, request: TRequest, context: ProviderContext) -> TResponse:
         """
         Execute provider request processing logic.
 
@@ -188,9 +182,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
         metrics["success_count"] += 1
         metrics["total_duration"] += duration
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = (
-            metrics["total_duration"] / total_count if total_count > 0 else 0.0
-        )
+        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
 
     def _record_failure_metrics(self, request_type: str, duration: float, error: Exception) -> None:
         """Record failure metrics for monitoring."""
@@ -209,9 +201,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
         metrics["total_duration"] += duration
         metrics["last_error"] = str(error)
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = (
-            metrics["total_duration"] / total_count if total_count > 0 else 0.0
-        )
+        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get handler performance metrics."""
@@ -265,9 +255,7 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
             context: Provider context
         """
 
-    async def execute_provider_request(
-        self, request: TRequest, context: ProviderContext
-    ) -> TResponse:
+    async def execute_provider_request(self, request: TRequest, context: ProviderContext) -> TResponse:
         """
         Execute AWS request with retry logic and error handling.
 

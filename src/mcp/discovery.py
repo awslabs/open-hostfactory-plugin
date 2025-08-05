@@ -110,9 +110,7 @@ class MCPToolDiscovery:
         words = method_name.replace("_", " ").title()
         return f"{words} - Execute {method_name} operation"
 
-    def _generate_schema(
-        self, method_name: str, method_info: Optional[MethodInfo]
-    ) -> Dict[str, Any]:
+    def _generate_schema(self, method_name: str, method_info: Optional[MethodInfo]) -> Dict[str, Any]:
         """
         Generate JSON schema for MCP tool from method signature.
 
@@ -156,9 +154,7 @@ class MCPToolDiscovery:
 
         return schema
 
-    def _convert_param_to_schema(
-        self, param_name: str, param_info: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _convert_param_to_schema(self, param_name: str, param_info: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert parameter information to JSON schema property.
 

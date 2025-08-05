@@ -141,9 +141,7 @@ class EventBus:
             return
 
         if self.logger:
-            self.logger.debug(
-                f"Publishing event {event_type} (ID: {event_id}) to { len(handlers)} handlers"
-            )
+            self.logger.debug(f"Publishing event {event_type} (ID: {event_id}) to { len(handlers)} handlers")
 
         # Execute all handlers concurrently
         tasks = []
@@ -163,9 +161,7 @@ class EventBus:
                 error_count += 1
                 if self.logger:
                     handler_name = handlers[i].__class__.__name__
-                    self.logger.error(
-                        f"Handler {handler_name} failed for event {event_type}: { str(result)}"
-                    )
+                    self.logger.error(f"Handler {handler_name} failed for event {event_type}: { str(result)}")
             else:
                 success_count += 1
 
@@ -179,8 +175,7 @@ class EventBus:
 
         if self.logger:
             self.logger.debug(
-                f"Event {event_type} processed: {success_count} succeeded, "
-                f"{error_count} failed in {duration:.3f}s"
+                f"Event {event_type} processed: {success_count} succeeded, " f"{error_count} failed in {duration:.3f}s"
             )
 
     async def _handle_with_error_isolation(self, handler: EventHandler, event: DomainEvent) -> None:
@@ -235,10 +230,7 @@ class EventBus:
         return {
             "events_processed": self._events_processed,
             "events_failed": self._events_failed,
-            "success_rate": (
-                (self._events_processed - self._events_failed) / max(self._events_processed, 1)
-            )
-            * 100,
+            "success_rate": ((self._events_processed - self._events_failed) / max(self._events_processed, 1)) * 100,
             "average_processing_time": avg_processing_time,
             "registered_event_types": len(self._handlers),
             "total_handlers": sum(len(handlers) for handlers in self._handlers.values()),

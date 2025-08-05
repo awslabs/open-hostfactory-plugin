@@ -86,9 +86,7 @@ class ProviderConfigManager:
         providers = getattr(provider_config, "providers", [])
         return [provider.name for provider in providers if getattr(provider, "enabled", True)]
 
-    def get_provider_instance_config(
-        self, provider_name: str
-    ) -> Optional["ProviderInstanceConfig"]:
+    def get_provider_instance_config(self, provider_name: str) -> Optional["ProviderInstanceConfig"]:
         """Get configuration for a specific provider instance."""
         provider_config = self.get_provider_config()
         if not provider_config:
@@ -106,9 +104,7 @@ class ProviderConfigManager:
         try:
             # Convert provider config to dict
             provider_dict = (
-                provider_config.model_dump()
-                if hasattr(provider_config, "model_dump")
-                else provider_config.__dict__
+                provider_config.model_dump() if hasattr(provider_config, "model_dump") else provider_config.__dict__
             )
 
             # Update the raw config

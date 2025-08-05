@@ -132,9 +132,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
                 all_data = self._load_data()
 
                 if entity_id not in all_data:
-                    self.logger.warning(
-                        f"{self.entity_type} entity not found for deletion: {entity_id}"
-                    )
+                    self.logger.warning(f"{self.entity_type} entity not found for deletion: {entity_id}")
                     return
 
                 # Remove entity
@@ -170,9 +168,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
                 return exists
 
             except Exception as e:
-                self.logger.error(
-                    f"Failed to check existence of { self.entity_type} entity {entity_id}: {e}"
-                )
+                self.logger.error(f"Failed to check existence of { self.entity_type} entity {entity_id}: {e}")
                 return False
 
     def find_by_criteria(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -194,9 +190,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
                     if self._matches_criteria(entity_data, criteria):
                         matching_entities.append(entity_data)
 
-                self.logger.debug(
-                    f"Found { len(matching_entities)} { self.entity_type} entities matching criteria"
-                )
+                self.logger.debug(f"Found { len(matching_entities)} { self.entity_type} entities matching criteria")
                 return matching_entities
 
             except Exception as e:

@@ -217,9 +217,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         """Get query handler for a query type."""
         handler_type = self._cqrs_registry.get_query_handler_type(query_type)
         if handler_type is None:
-            raise DependencyResolutionError(
-                query_type, f"No query handler registered for {query_type.__name__}"
-            )
+            raise DependencyResolutionError(query_type, f"No query handler registered for {query_type.__name__}")
         return self.get(handler_type)
 
     def get_event_handlers(self, event_type: Type) -> List[Any]:

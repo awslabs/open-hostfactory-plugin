@@ -16,9 +16,7 @@ class AuthRegistry:
         self._lock = threading.Lock()
         self.logger = get_logger(__name__)
 
-    def register_strategy(
-        self, strategy_name: str, strategy_factory: Callable[..., AuthPort]
-    ) -> None:
+    def register_strategy(self, strategy_name: str, strategy_factory: Callable[..., AuthPort]) -> None:
         """
         Register an authentication strategy.
 
@@ -51,8 +49,7 @@ class AuthRegistry:
             if strategy_name not in self._strategies:
                 available = list(self._strategies.keys())
                 raise ValueError(
-                    f"Auth strategy '{strategy_name}' not registered. "
-                    f"Available strategies: {available}"
+                    f"Auth strategy '{strategy_name}' not registered. " f"Available strategies: {available}"
                 )
 
             strategy_factory = self._strategies[strategy_name]

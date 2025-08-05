@@ -126,9 +126,7 @@ class Template(BaseModel):
             import re
 
             if not re.match(r"^[a-zA-Z0-9_-]+$", self.provider_name):
-                raise ValueError(
-                    "provider_name must contain only alphanumeric characters, hyphens, and underscores"
-                )
+                raise ValueError("provider_name must contain only alphanumeric characters, hyphens, and underscores")
 
         # Validate provider_type format if provided
         if self.provider_type:

@@ -243,9 +243,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
         try:
             # Rollback transaction if an exception occurred
             if exc_type is not None and self._in_transaction:
-                self.logger.warning(
-                    f"Exception in context manager, rolling back transaction: {exc_val}"
-                )
+                self.logger.warning(f"Exception in context manager, rolling back transaction: {exc_val}")
                 self.rollback_transaction()
 
             # Clean up resources

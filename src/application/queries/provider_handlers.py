@@ -89,9 +89,7 @@ class GetProviderHealthHandler(BaseQueryHandler[GetProviderHealthQuery, Provider
 
 
 @query_handler(ListAvailableProvidersQuery)
-class ListAvailableProvidersHandler(
-    BaseQueryHandler[ListAvailableProvidersQuery, List[Dict[str, Any]]]
-):
+class ListAvailableProvidersHandler(BaseQueryHandler[ListAvailableProvidersQuery, List[Dict[str, Any]]]):
     """Handler for listing available providers."""
 
     def __init__(
@@ -151,9 +149,7 @@ class ListAvailableProvidersHandler(
 
 
 @query_handler(GetProviderCapabilitiesQuery)
-class GetProviderCapabilitiesHandler(
-    BaseQueryHandler[GetProviderCapabilitiesQuery, ProviderCapabilitiesDTO]
-):
+class GetProviderCapabilitiesHandler(BaseQueryHandler[GetProviderCapabilitiesQuery, ProviderCapabilitiesDTO]):
     """Handler for retrieving provider capabilities."""
 
     def __init__(
@@ -265,9 +261,7 @@ class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, Dict[s
             raise
 
 
-class GetProviderStrategyConfigHandler(
-    BaseQueryHandler[GetProviderStrategyConfigQuery, ProviderStrategyConfigDTO]
-):
+class GetProviderStrategyConfigHandler(BaseQueryHandler[GetProviderStrategyConfigQuery, ProviderStrategyConfigDTO]):
     """Handler for retrieving provider strategy configuration."""
 
     def __init__(

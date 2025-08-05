@@ -321,9 +321,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
                     )
             except Exception as e:
                 self._logger.error(f"Failed to resolve SSM parameter {ami_id_or_alias}: {e}")
-                raise AWSValidationError(
-                    f"Failed to resolve AMI ID from SSM parameter: {ami_id_or_alias}"
-                )
+                raise AWSValidationError(f"Failed to resolve AMI ID from SSM parameter: {ami_id_or_alias}")
 
         # Handle known aliases (could be extended)
         alias_mappings = {
@@ -388,9 +386,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
         # Validate fleet type if specified
         fleet_type = getattr(template, "fleet_type", None)
         if fleet_type and fleet_type not in ["instant", "request", "maintain"]:
-            errors.append(
-                f"Invalid fleet type: {fleet_type}. Must be 'instant', 'request', or 'maintain'"
-            )
+            errors.append(f"Invalid fleet type: {fleet_type}. Must be 'instant', 'request', or 'maintain'")
 
         # Validate spot price if specified
         spot_price = getattr(template, "spot_price", None)
@@ -416,10 +412,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
     def _determine_provider_api(self, template: Template) -> str:
         """Determine the appropriate provider API based on template configuration."""
         # Check for spot fleet indicators
-        if (
-            getattr(template, "spot_price", None)
-            or getattr(template, "fleet_type", None) == "request"
-        ):
+        if getattr(template, "spot_price", None) or getattr(template, "fleet_type", None) == "request":
             return "SpotFleet"
 
         # Default to EC2Fleet

@@ -104,10 +104,7 @@ class RequestFailedHandler(BaseLoggingEventHandler[DomainEvent]):
         """Format request failed log message."""
         failure_reason = getattr(event, "failure_reason", "unknown")
 
-        return (
-            f"Request failed: {getattr(event, 'aggregate_id', 'unknown')} | "
-            f"Reason: {failure_reason}"
-        )
+        return f"Request failed: {getattr(event, 'aggregate_id', 'unknown')} | " f"Reason: {failure_reason}"
 
     def get_log_level(self, event: DomainEvent) -> str:
         """Get log level - error for request failures."""
@@ -131,10 +128,7 @@ class RequestCancelledHandler(BaseLoggingEventHandler[DomainEvent]):
         """Format request cancelled log message."""
         cancellation_reason = getattr(event, "cancellation_reason", "user_requested")
 
-        return (
-            f"Request cancelled: {getattr(event, 'aggregate_id', 'unknown')} | "
-            f"Reason: {cancellation_reason}"
-        )
+        return f"Request cancelled: {getattr(event, 'aggregate_id', 'unknown')} | " f"Reason: {cancellation_reason}"
 
     def get_log_level(self, event: DomainEvent) -> str:
         """Get log level - warning for cancellations."""
@@ -159,8 +153,7 @@ class RequestTimeoutHandler(BaseLoggingEventHandler[DomainEvent]):
         timeout_duration = getattr(event, "timeout_duration", "unknown")
 
         return (
-            f"Request timed out: {getattr(event, 'aggregate_id', 'unknown')} | "
-            f"Timeout after: {timeout_duration}s"
+            f"Request timed out: {getattr(event, 'aggregate_id', 'unknown')} | " f"Timeout after: {timeout_duration}s"
         )
 
     def get_log_level(self, event: DomainEvent) -> str:

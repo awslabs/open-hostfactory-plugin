@@ -118,9 +118,7 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
                     metadata=request.metadata or {},
                 )
 
-                self.logger.info(
-                    f"Generated summary for request {query.request_id}: {total_machines} machines"
-                )
+                self.logger.info(f"Generated summary for request {query.request_id}: {total_machines} machines")
                 return summary
 
         except EntityNotFoundError:
@@ -196,9 +194,7 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                         }
 
                 except Exception as health_error:
-                    self.logger.warning(
-                        f"Could not get detailed health for machine {query.machine_id}: {health_error}"
-                    )
+                    self.logger.warning(f"Could not get detailed health for machine {query.machine_id}: {health_error}")
                     health_status = "unknown"
                     health_details = {"error": str(health_error)}
 
@@ -214,9 +210,7 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                     updated_at=machine.updated_at,
                 )
 
-                self.logger.info(
-                    f"Retrieved health for machine {query.machine_id}: {health_status}"
-                )
+                self.logger.info(f"Retrieved health for machine {query.machine_id}: {health_status}")
                 return health_dto
 
         except EntityNotFoundError:

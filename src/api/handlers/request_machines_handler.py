@@ -67,15 +67,11 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
 
         except ValidationException as e:
             if self.logger:
-                self.logger.warning(
-                    f"Request validation failed: {str(e)} - Correlation ID: {context.correlation_id}"
-                )
+                self.logger.warning(f"Request validation failed: {str(e)} - Correlation ID: {context.correlation_id}")
             raise
 
     @handle_interface_exceptions
-    async def execute_api_request(
-        self, request: RequestMachinesModel, context
-    ) -> RequestMachinesResponse:
+    async def execute_api_request(self, request: RequestMachinesModel, context) -> RequestMachinesResponse:
         """
         Execute the core API logic for requesting machines.
 
@@ -131,9 +127,7 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
 
         except Exception as e:
             if self.logger:
-                self.logger.error(
-                    f"Failed to request machines: {str(e)} - Correlation ID: {context.correlation_id}"
-                )
+                self.logger.error(f"Failed to request machines: {str(e)} - Correlation ID: {context.correlation_id}")
 
             # Record metrics if available
             if self._metrics:
@@ -141,9 +135,7 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
 
             raise
 
-    async def post_process_response(
-        self, response: RequestMachinesResponse, context
-    ) -> RequestMachinesResponse:
+    async def post_process_response(self, response: RequestMachinesResponse, context) -> RequestMachinesResponse:
         """
         Post-process the request machines response.
 

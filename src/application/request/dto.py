@@ -171,9 +171,7 @@ class RequestDTO(BaseDTO):
         result = super().to_dict()
 
         # Handle machines field for compatibility
-        result["machines"] = (
-            [m.to_dict() for m in self.machine_references] if self.machine_references else []
-        )
+        result["machines"] = [m.to_dict() for m in self.machine_references] if self.machine_references else []
 
         # Remove machine_references field as it's replaced by machines
         result.pop("machine_references", None)

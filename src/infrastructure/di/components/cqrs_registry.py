@@ -21,17 +21,13 @@ class CQRSHandlerRegistry:
         """Register a command handler."""
         with self._lock:
             self._command_handlers[command_type] = handler_type
-            logger.debug(
-                f"Registered command handler: {command_type.__name__} -> {handler_type.__name__}"
-            )
+            logger.debug(f"Registered command handler: {command_type.__name__} -> {handler_type.__name__}")
 
     def register_query_handler(self, query_type: Type, handler_type: Type) -> None:
         """Register a query handler."""
         with self._lock:
             self._query_handlers[query_type] = handler_type
-            logger.debug(
-                f"Registered query handler: {query_type.__name__} -> {handler_type.__name__}"
-            )
+            logger.debug(f"Registered query handler: {query_type.__name__} -> {handler_type.__name__}")
 
     def register_event_handler(self, event_type: Type, handler_type: Type) -> None:
         """Register an event handler."""
@@ -41,9 +37,7 @@ class CQRSHandlerRegistry:
 
             if handler_type not in self._event_handlers[event_type]:
                 self._event_handlers[event_type].append(handler_type)
-                logger.debug(
-                    f"Registered event handler: {event_type.__name__} -> {handler_type.__name__}"
-                )
+                logger.debug(f"Registered event handler: {event_type.__name__} -> {handler_type.__name__}")
 
     def get_command_handler_type(self, command_type: Type) -> Optional[Type]:
         """Get command handler type for a command."""
@@ -90,7 +84,5 @@ class CQRSHandlerRegistry:
                 "command_handlers": len(self._command_handlers),
                 "query_handlers": len(self._query_handlers),
                 "event_types": len(self._event_handlers),
-                "total_event_handlers": sum(
-                    len(handlers) for handlers in self._event_handlers.values()
-                ),
+                "total_event_handlers": sum(len(handlers) for handlers in self._event_handlers.values()),
             }

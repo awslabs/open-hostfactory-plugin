@@ -140,13 +140,9 @@ class RepositoryMigrator:
                 # Use centralized file resolution for consistent HF_PROVIDER_CONFDIR
                 # support
                 templates_path = config_manager.resolve_file("template", "templates.json")
-                legacy_templates_path = config_manager.resolve_file(
-                    "template", "awsprov_templates.json"
-                )
+                legacy_templates_path = config_manager.resolve_file("template", "awsprov_templates.json")
 
-                get_logger().info(
-                    "Repository migrator using centralized resolution for template files:"
-                )
+                get_logger().info("Repository migrator using centralized resolution for template files:")
                 get_logger().info(f"  templates.json: {templates_path}")
                 get_logger().info(f"  awsprov_templates.json: {legacy_templates_path}")
 
@@ -204,13 +200,9 @@ class RepositoryMigrator:
                 from src.domain.machine.aggregate import Machine
                 from src.domain.request.aggregate import Request
 
-                machine_repo = SQLMachineRepository(
-                    entity_class=Machine, model_class=MachineModel, session=session
-                )
+                machine_repo = SQLMachineRepository(entity_class=Machine, model_class=MachineModel, session=session)
 
-                request_repo = SQLRequestRepository(
-                    entity_class=Request, model_class=RequestModel, session=session
-                )
+                request_repo = SQLRequestRepository(entity_class=Request, model_class=RequestModel, session=session)
 
             else:  # Default to JSON
                 from src.infrastructure.persistence.json import (
@@ -270,16 +262,11 @@ class RepositoryMigrator:
                     backup_file = os.path.join(backup_dir, f"{collection}.json")
                     with open(backup_file, "w") as f:
                         json.dump(
-                            [
-                                item.to_dict() if hasattr(item, "to_dict") else item
-                                for item in items
-                            ],
+                            [item.to_dict() if hasattr(item, "to_dict") else item for item in items],
                             f,
                             indent=2,
                         )
-                    self.logger.debug(
-                        f"Backed up { len(items)} items from {collection} to {backup_file}"
-                    )
+                    self.logger.debug(f"Backed up { len(items)} items from {collection} to {backup_file}")
             except Exception as e:
                 self.logger.warning(f"Failed to backup {collection}: {str(e)}")
 
@@ -331,11 +318,7 @@ class RepositoryMigrator:
                             raise ValueError(f"Item without ID found in {collection_name}")
 
                         # Check if the item is already an entity object
-                        if (
-                            hasattr(item, "id")
-                            or hasattr(item, "request_id")
-                            or hasattr(item, "machine_id")
-                        ):
+                        if hasattr(item, "id") or hasattr(item, "request_id") or hasattr(item, "machine_id"):
                             # Item is already an entity, just save it
                             target_repo.save(item)
                         else:
@@ -357,9 +340,7 @@ class RepositoryMigrator:
                                         self.logger.error(
                                             f"Failed to convert item {item_id} to entity: { str(conversion_error)}"
                                         )
-                                        raise ValueError(
-                                            f"Entity conversion failed: { str(conversion_error)}"
-                                        )
+                                        raise ValueError(f"Entity conversion failed: { str(conversion_error)}")
                                 else:
                                     # Try to determine the entity class from the
                                     # repository
@@ -387,9 +368,7 @@ class RepositoryMigrator:
                                             self.logger.error(
                                                 f"Failed to create entity from item {item_id}: { str(conversion_error)}"
                                             )
-                                            raise ValueError(
-                                                f"Entity creation failed: { str(conversion_error)}"
-                                            )
+                                            raise ValueError(f"Entity creation failed: { str(conversion_error)}")
                                     else:
                                         # Fallback to direct save, which might fail
                                         self.logger.warning(

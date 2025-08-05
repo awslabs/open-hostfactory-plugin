@@ -60,9 +60,7 @@ class RequestSerializer:
                 # Timestamps
                 "created_at": request.created_at.isoformat(),
                 "started_at": (request.started_at.isoformat() if request.started_at else None),
-                "completed_at": (
-                    request.completed_at.isoformat() if request.completed_at else None
-                ),
+                "completed_at": (request.completed_at.isoformat() if request.completed_at else None),
                 # Versioning
                 "version": request.version,
                 # Legacy fields for backward compatibility
@@ -81,12 +79,8 @@ class RequestSerializer:
         try:
             # Parse datetime fields
             created_at = datetime.fromisoformat(data["created_at"])
-            started_at = (
-                datetime.fromisoformat(data["started_at"]) if data.get("started_at") else None
-            )
-            completed_at = (
-                datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
-            )
+            started_at = datetime.fromisoformat(data["started_at"]) if data.get("started_at") else None
+            completed_at = datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
 
             # Build request data with enhanced fields
             request_data = {
@@ -106,9 +100,7 @@ class RequestSerializer:
                 # HF output fields
                 "message": data.get("message"),
                 # Results and instances
-                "instance_ids": [
-                    InstanceId(value=machine_id) for machine_id in data.get("machine_ids", [])
-                ],
+                "instance_ids": [InstanceId(value=machine_id) for machine_id in data.get("machine_ids", [])],
                 "successful_count": data.get("successful_count", 0),
                 "failed_count": data.get("failed_count", 0),
                 # Metadata and error details
@@ -217,9 +209,7 @@ class RequestRepositoryImpl(RequestRepositoryInterface):
                     )
                 )
 
-            self.logger.debug(
-                f"Saved request {request.request_id} and extracted {len(events)} events"
-            )
+            self.logger.debug(f"Saved request {request.request_id} and extracted {len(events)} events")
             return events
 
         except Exception as e:

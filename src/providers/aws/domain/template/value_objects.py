@@ -143,13 +143,9 @@ class AWSTags(Tags):
 
             # Use AWS limits from configuration
             if len(key) > config.limits.tag_key_length:
-                raise ValueError(
-                    f"AWS tag key length exceeds limit of {config.limits.tag_key_length}"
-                )
+                raise ValueError(f"AWS tag key length exceeds limit of {config.limits.tag_key_length}")
             if len(value) > config.limits.tag_value_length:
-                raise ValueError(
-                    f"AWS tag value length exceeds limit of {config.limits.tag_value_length}"
-                )
+                raise ValueError(f"AWS tag value length exceeds limit of {config.limits.tag_value_length}")
 
             # Use AWS pattern from configuration
             if not re.match(config.patterns["tag_key"], key):
@@ -211,10 +207,7 @@ class ProviderApi(str, Enum):
 
             # Navigate to AWS handlers in configuration
             aws_handlers = (
-                raw_config.get("provider", {})
-                .get("provider_defaults", {})
-                .get("aws", {})
-                .get("handlers", {})
+                raw_config.get("provider", {}).get("provider_defaults", {}).get("aws", {}).get("handlers", {})
             )
 
             if value in aws_handlers:
@@ -264,10 +257,7 @@ class AWSFleetType(str, Enum):
 
             # Check all handlers for supported fleet types
             aws_handlers = (
-                raw_config.get("provider", {})
-                .get("provider_defaults", {})
-                .get("aws", {})
-                .get("handlers", {})
+                raw_config.get("provider", {}).get("provider_defaults", {}).get("aws", {}).get("handlers", {})
             )
 
             # Collect all unique fleet types from all handlers
@@ -390,9 +380,7 @@ class AWSConfiguration(ValueObject):
         return {
             "handler_type": self.handler_type.value,
             "fleet_type": self.fleet_type.value if self.fleet_type else None,
-            "allocation_strategy": (
-                self.allocation_strategy.value if self.allocation_strategy else None
-            ),
+            "allocation_strategy": (self.allocation_strategy.value if self.allocation_strategy else None),
             "price_type": self.price_type.value if self.price_type else None,
             "subnet_ids": [subnet.value for subnet in self.subnet_ids],
             "security_group_ids": [sg.value for sg in self.security_group_ids],

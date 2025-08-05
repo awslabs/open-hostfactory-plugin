@@ -88,9 +88,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
 
 
 @command_handler(ConvertMachineStatusCommand)
-class ConvertMachineStatusCommandHandler(
-    BaseCommandHandler[ConvertMachineStatusCommand, ConvertMachineStatusResponse]
-):
+class ConvertMachineStatusCommandHandler(BaseCommandHandler[ConvertMachineStatusCommand, ConvertMachineStatusResponse]):
     """Handler for converting provider-specific status to domain status."""
 
     def __init__(
@@ -112,15 +110,11 @@ class ConvertMachineStatusCommandHandler(
         if not command.provider_type:
             raise ValueError("provider_type is required")
 
-    async def execute_command(
-        self, command: ConvertMachineStatusCommand
-    ) -> ConvertMachineStatusResponse:
+    async def execute_command(self, command: ConvertMachineStatusCommand) -> ConvertMachineStatusResponse:
         """Execute machine status conversion command."""
         try:
             # Use provider strategy pattern for conversion
-            domain_status = await self._convert_using_provider_strategy(
-                command.provider_state, command.provider_type
-            )
+            domain_status = await self._convert_using_provider_strategy(command.provider_state, command.provider_type)
 
             return ConvertMachineStatusResponse(
                 success=True,
@@ -142,9 +136,7 @@ class ConvertMachineStatusCommandHandler(
                 metadata={**command.metadata, "used_fallback": True, "error": str(e)},
             )
 
-    async def _convert_using_provider_strategy(
-        self, provider_state: str, provider_type: str
-    ) -> MachineStatus:
+    async def _convert_using_provider_strategy(self, provider_state: str, provider_type: str) -> MachineStatus:
         """Convert using provider strategy pattern."""
         # Set the appropriate provider strategy
         if not self._provider_context.set_strategy(provider_type):
@@ -210,9 +202,7 @@ class ConvertBatchMachineStatusCommandHandler(
         if not command.provider_states:
             raise ValueError("provider_states is required")
 
-    async def execute_command(
-        self, command: ConvertBatchMachineStatusCommand
-    ) -> ConvertBatchMachineStatusResponse:
+    async def execute_command(self, command: ConvertBatchMachineStatusCommand) -> ConvertBatchMachineStatusResponse:
         """Execute batch conversion command."""
         statuses = []
 
@@ -261,9 +251,7 @@ class ValidateProviderStateCommandHandler(
         if not command.provider_type:
             raise ValueError("provider_type is required")
 
-    async def execute_command(
-        self, command: ValidateProviderStateCommand
-    ) -> ValidateProviderStateResponse:
+    async def execute_command(self, command: ValidateProviderStateCommand) -> ValidateProviderStateResponse:
         """Execute provider state validation command."""
         try:
             # Try to convert the state - if successful, it's valid

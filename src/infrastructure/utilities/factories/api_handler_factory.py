@@ -72,9 +72,7 @@ class APIHandlerFactory:
 
             if name not in cls._handlers:
                 available_handlers = list(cls._handlers.keys())
-                raise ValueError(
-                    f"Handler not found: {name}. " f"Available handlers: {available_handlers}"
-                )
+                raise ValueError(f"Handler not found: {name}. " f"Available handlers: {available_handlers}")
 
         handler_class = cls._handlers[name]
 

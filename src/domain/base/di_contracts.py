@@ -311,9 +311,7 @@ class DIEventPort(ABC):
     """
 
     @abstractmethod
-    def on_dependency_registered(
-        self, callback: Callable[[Type, DependencyRegistration], None]
-    ) -> None:
+    def on_dependency_registered(self, callback: Callable[[Type, DependencyRegistration], None]) -> None:
         """
         Register callback for dependency registration events.
 

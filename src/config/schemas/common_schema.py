@@ -94,17 +94,11 @@ class LimitsConfig(BaseModel):
     tag_key_length: int = Field(128, description="Maximum length of tag keys")
     tag_value_length: int = Field(256, description="Maximum length of tag values")
     max_tags_per_resource: int = Field(50, description="Maximum number of tags per resource")
-    max_instance_types_per_fleet: int = Field(
-        20, description="Maximum number of instance types per fleet"
-    )
+    max_instance_types_per_fleet: int = Field(20, description="Maximum number of instance types per fleet")
     max_subnets_per_fleet: int = Field(16, description="Maximum number of subnets per fleet")
-    max_security_groups_per_instance: int = Field(
-        5, description="Maximum number of security groups per instance"
-    )
+    max_security_groups_per_instance: int = Field(5, description="Maximum number of security groups per instance")
     max_batch_size: int = Field(100, description="Maximum batch size for API calls")
-    max_instances_per_request: int = Field(
-        1000, description="Maximum number of instances per request"
-    )
+    max_instances_per_request: int = Field(1000, description="Maximum number of instances per request")
 
 
 class NamingConfig(BaseModel):

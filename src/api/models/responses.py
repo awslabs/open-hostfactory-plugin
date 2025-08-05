@@ -45,8 +45,6 @@ class SuccessResponse(BaseModel):
 
 
 # Backward compatibility - create error response using formatter
-def create_error_response(
-    message: str, errors: Optional[List[Dict[str, Any]]] = None
-) -> Dict[str, Any]:
+def create_error_response(message: str, errors: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """Create error response for backward compatibility."""
     return {"status": "error", "message": message, "errors": errors or []}

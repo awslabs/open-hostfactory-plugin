@@ -39,11 +39,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
         self.logger = get_logger(__name__)
 
         # Log which files we found
-        if (
-            os.path.exists(self.file_path)
-            and self.legacy_file_path
-            and os.path.exists(self.legacy_file_path)
-        ):
+        if os.path.exists(self.file_path) and self.legacy_file_path and os.path.exists(self.legacy_file_path):
             self.logger.info("Found both template files, will merge contents")
             self.logger.debug(f"Templates file: {self.file_path}")
             self.logger.debug(f"Legacy templates file: {self.legacy_file_path}")
@@ -52,9 +48,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
         elif os.path.exists(self.file_path):
             self.logger.info(f"Found only templates.json: {self.file_path}")
         else:
-            self.logger.warning(
-                f"No template files found at { self.file_path} or { self.legacy_file_path}"
-            )
+            self.logger.warning(f"No template files found at { self.file_path} or { self.legacy_file_path}")
 
     def find_by_id(self, entity_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -85,9 +79,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
                     return legacy_data[entity_id]
 
             except Exception as e:
-                self.logger.error(
-                    f"Error reading legacy templates file {self.legacy_file_path}: {e}"
-                )
+                self.logger.error(f"Error reading legacy templates file {self.legacy_file_path}: {e}")
 
         return None
 
@@ -117,9 +109,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
                             all_entities[key] = value
 
             except Exception as e:
-                self.logger.error(
-                    f"Error reading legacy templates file {self.legacy_file_path}: {e}"
-                )
+                self.logger.error(f"Error reading legacy templates file {self.legacy_file_path}: {e}")
 
         # Load from main file (higher priority, will override legacy)
         main_entities = super().find_all()
@@ -182,9 +172,7 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
             try:
                 return self._data_to_aggregate(template_data)
             except Exception as e:
-                self.logger.error(
-                    f"Error converting template data to aggregate for '{template_id}': {e}"
-                )
+                self.logger.error(f"Error converting template data to aggregate for '{template_id}': {e}")
                 return None
         return None
 
@@ -204,9 +192,7 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
                 templates.append(template)
             except Exception as e:
                 template_id = template_data.get("template_id", "unknown")
-                self.logger.error(
-                    f"Error converting template data to aggregate for '{template_id}': {e}"
-                )
+                self.logger.error(f"Error converting template data to aggregate for '{template_id}': {e}")
                 continue
 
         return templates
@@ -369,9 +355,7 @@ def get_template_repository(
 
     if not registry.has("template_repository"):
         if not config_manager:
-            raise ConfigurationError(
-                "ConfigurationManager required for first template repository creation"
-            )
+            raise ConfigurationError("ConfigurationManager required for first template repository creation")
 
         repository = TemplateJSONRepository(config_manager)
         registry.register("template_repository", repository)

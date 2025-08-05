@@ -115,9 +115,7 @@ def resolve_ssm_parameter(parameter_path: str, aws_client: Any = None) -> str:
             extra={"parameter_path": path, "error": str(e)},
         )
 
-        raise InfrastructureError(
-            "AWS.SSM", f"Unexpected error resolving SSM parameter {path}: {str(e)}"
-        )
+        raise InfrastructureError("AWS.SSM", f"Unexpected error resolving SSM parameter {path}: {str(e)}")
 
 
 def _get_ssm_parameter_value(ssm_client: Any, parameter_path: str) -> str:

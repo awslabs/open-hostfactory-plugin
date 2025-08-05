@@ -75,9 +75,7 @@ def validate_request_body(model_class: Type[T], request_body: Union[str, Dict[st
         raise ValidationException(f"Validation error: {e}", error_details)
 
 
-def create_error_response(
-    message: str, errors: Optional[List[Dict[str, Any]]] = None
-) -> Dict[str, Any]:
+def create_error_response(message: str, errors: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """
     Create standardized error response.
 

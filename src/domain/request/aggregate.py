@@ -119,16 +119,12 @@ class Request(AggregateRoot):
 
         # Check if request is complete
         if data["successful_count"] + self.failed_count >= self.requested_count:
-            data["status"] = (
-                RequestStatus.COMPLETED if self.failed_count == 0 else RequestStatus.PARTIAL
-            )
+            data["status"] = RequestStatus.COMPLETED if self.failed_count == 0 else RequestStatus.PARTIAL
             data["completed_at"] = datetime.utcnow()
 
         return Request.model_validate(data)
 
-    def add_failure(
-        self, error_message: str, error_details: Optional[Dict[str, Any]] = None
-    ) -> "Request":
+    def add_failure(self, error_message: str, error_details: Optional[Dict[str, Any]] = None) -> "Request":
         """Add a failed instance creation."""
         data = self.model_dump()
         data["failed_count"] = self.failed_count + 1
@@ -146,9 +142,7 @@ class Request(AggregateRoot):
 
         # Check if request is complete
         if self.successful_count + data["failed_count"] >= self.requested_count:
-            data["status"] = (
-                RequestStatus.PARTIAL if self.successful_count > 0 else RequestStatus.FAILED
-            )
+            data["status"] = RequestStatus.PARTIAL if self.successful_count > 0 else RequestStatus.FAILED
             data["completed_at"] = datetime.utcnow()
             data["status_message"] = f"Request completed with {data['failed_count']} failures"
 
@@ -429,9 +423,7 @@ class Request(AggregateRoot):
             "instance_ids": [InstanceId(value=id) for id in data.get("instance_ids", [])],
             "successful_count": data.get("successful_count", 0),
             "failed_count": data.get("failed_count", 0),
-            "created_at": datetime.fromisoformat(
-                data.get("created_at", datetime.utcnow().isoformat())
-            ),
+            "created_at": datetime.fromisoformat(data.get("created_at", datetime.utcnow().isoformat())),
             "metadata": data.get("metadata", {}),
             "error_details": data.get("error_details", {}),
             "provider_data": data.get("provider_data", {}),

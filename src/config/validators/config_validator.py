@@ -99,9 +99,7 @@ class ConfigValidator:
             if sql_config.pool_size > 20:
                 result.add_warning("Large SQL connection pool size may consume excessive resources")
 
-    def validate_provider_config(
-        self, provider_type: str, provider_config: Dict[str, Any]
-    ) -> ValidationResult:
+    def validate_provider_config(self, provider_type: str, provider_config: Dict[str, Any]) -> ValidationResult:
         """
         Validate provider-specific configuration.
 

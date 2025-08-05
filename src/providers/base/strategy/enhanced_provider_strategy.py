@@ -31,9 +31,7 @@ class EnhancedProviderCapabilities(BaseProviderCapabilities):
         api_caps = self.get_api_capabilities(api_type)
         return api_caps.get(limitation_key, default)
 
-    def validate_template_compatibility(
-        self, template_provider_api: str, max_instances: int = 1
-    ) -> Dict[str, Any]:
+    def validate_template_compatibility(self, template_provider_api: str, max_instances: int = 1) -> Dict[str, Any]:
         """
         Validate if a template is compatible with this provider.
 
@@ -109,9 +107,7 @@ class EnhancedProviderStrategy(ProviderStrategy, ABC):
             performance_metrics=enhanced.performance_metrics,
         )
 
-    def validate_template(
-        self, template_provider_api: str, max_instances: int = 1
-    ) -> Dict[str, Any]:
+    def validate_template(self, template_provider_api: str, max_instances: int = 1) -> Dict[str, Any]:
         """Validate template compatibility with this provider."""
         capabilities = self.get_enhanced_capabilities()
         return capabilities.validate_template_compatibility(template_provider_api, max_instances)
@@ -132,9 +128,7 @@ class ProviderTemplateValidator:
         """Initialize the instance."""
         self.providers = providers
 
-    def find_compatible_providers(
-        self, template_provider_api: str, max_instances: int = 1
-    ) -> List[Dict[str, Any]]:
+    def find_compatible_providers(self, template_provider_api: str, max_instances: int = 1) -> List[Dict[str, Any]]:
         """
         Find all providers compatible with a template.
 
@@ -155,9 +149,7 @@ class ProviderTemplateValidator:
 
         return results
 
-    def get_best_provider(
-        self, template_provider_api: str, max_instances: int = 1
-    ) -> Optional[str]:
+    def get_best_provider(self, template_provider_api: str, max_instances: int = 1) -> Optional[str]:
         """
         Get the best provider for a template based on compatibility and capabilities.
 
@@ -177,9 +169,7 @@ class ProviderTemplateValidator:
 
         return compatible_providers[0]["provider"]
 
-    def validate_all_templates(
-        self, templates: List[Dict[str, Any]]
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    def validate_all_templates(self, templates: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """
         Validate multiple templates against all providers.
 

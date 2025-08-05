@@ -92,9 +92,7 @@ def read_json_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
         return json.load(f)
 
 
-def write_json_file(
-    file_path: str, data: Dict[str, Any], encoding: str = "utf-8", indent: int = 2
-) -> None:
+def write_json_file(file_path: str, data: Dict[str, Any], encoding: str = "utf-8", indent: int = 2) -> None:
     """
     Write data to a JSON file.
 

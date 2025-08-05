@@ -73,9 +73,7 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
         config_manager = get_config_manager()
         scheduler_config = config_manager.get("scheduler", {"type": "default"})
         scheduler_type = (
-            scheduler_config.get("type", "default")
-            if isinstance(scheduler_config, dict)
-            else str(scheduler_config)
+            scheduler_config.get("type", "default") if isinstance(scheduler_config, dict) else str(scheduler_config)
         )
         register_active_scheduler_only(scheduler_type)
     except Exception:
@@ -165,9 +163,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
 
     # Register infrastructure services on-demand when needed
     # Use a placeholder type for infrastructure services
-    container.register_on_demand(
-        type("InfrastructureServices", (), {}), register_infrastructure_lazy
-    )
+    container.register_on_demand(type("InfrastructureServices", (), {}), register_infrastructure_lazy)
 
     # Register scheduler services as lazy (Phase 3 optimization)
     def register_scheduler_lazy(c):
@@ -182,9 +178,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
             config_manager = get_config_manager()
             scheduler_config = config_manager.get("scheduler", {"type": "default"})
             scheduler_type = (
-                scheduler_config.get("type", "default")
-                if isinstance(scheduler_config, dict)
-                else str(scheduler_config)
+                scheduler_config.get("type", "default") if isinstance(scheduler_config, dict) else str(scheduler_config)
             )
             register_active_scheduler_only(scheduler_type)
         except Exception:

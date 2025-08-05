@@ -112,9 +112,7 @@ class OpenHFPluginSDK:
             self._discovery = SDKMethodDiscovery()
 
             # Auto-discover all handler methods using CQRS buses
-            self._methods = await self._discovery.discover_cqrs_methods(
-                self._query_bus, self._command_bus
-            )
+            self._methods = await self._discovery.discover_cqrs_methods(self._query_bus, self._command_bus)
 
             # Dynamically add methods to SDK instance
             for method_name, method_func in self._methods.items():
@@ -164,9 +162,7 @@ class OpenHFPluginSDK:
             List of method names available on this SDK instance
         """
         if not self._initialized:
-            raise SDKError(
-                "SDK not initialized. Call initialize() or use as async context manager."
-            )
+            raise SDKError("SDK not initialized. Call initialize() or use as async context manager.")
 
         return list(self._methods.keys())
 
@@ -181,9 +177,7 @@ class OpenHFPluginSDK:
             MethodInfo object with method details, or None if not found
         """
         if not self._initialized:
-            raise SDKError(
-                "SDK not initialized. Call initialize() or use as async context manager."
-            )
+            raise SDKError("SDK not initialized. Call initialize() or use as async context manager.")
 
         if not self._discovery:
             return None
@@ -201,9 +195,7 @@ class OpenHFPluginSDK:
             List of method names for the specified handler type
         """
         if not self._initialized:
-            raise SDKError(
-                "SDK not initialized. Call initialize() or use as async context manager."
-            )
+            raise SDKError("SDK not initialized. Call initialize() or use as async context manager.")
 
         if not self._discovery:
             return []

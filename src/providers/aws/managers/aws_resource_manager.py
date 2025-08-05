@@ -25,9 +25,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
         super().__init__(aws_client, logger)
         self._config = config
 
-    async def execute_provisioning(
-        self, specification: ResourceSpecification
-    ) -> ResourceAllocation:
+    async def execute_provisioning(self, specification: ResourceSpecification) -> ResourceAllocation:
         """Execute AWS-specific resource provisioning."""
         if specification.resource_type == ResourceType.COMPUTE_INSTANCE:
             return await self._provision_compute_instance(specification)
@@ -71,9 +69,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
             self.logger.error(f"Failed to fetch resource status: {str(e)}")
             raise
 
-    async def fetch_resource_list(
-        self, resource_type: Optional[ResourceType] = None
-    ) -> List[ResourceAllocation]:
+    async def fetch_resource_list(self, resource_type: Optional[ResourceType] = None) -> List[ResourceAllocation]:
         """Fetch list of resources from AWS."""
         resources = []
 
@@ -92,9 +88,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
             self.logger.error(f"Failed to list resources: {str(e)}")
             raise
 
-    async def fetch_resource_quota(
-        self, resource_type: ResourceType, region: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def fetch_resource_quota(self, resource_type: ResourceType, region: Optional[str] = None) -> Dict[str, Any]:
         """Fetch resource quota from AWS."""
         try:
             if resource_type == ResourceType.COMPUTE_INSTANCE:
@@ -110,9 +104,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
 
     # Private implementation methods
 
-    async def _provision_compute_instance(
-        self, specification: ResourceSpecification
-    ) -> ResourceAllocation:
+    async def _provision_compute_instance(self, specification: ResourceSpecification) -> ResourceAllocation:
         """Provision EC2 compute instance."""
         with aws_dry_run_context():
             # Implementation would call AWS EC2 APIs (mocked if dry-run is active)
@@ -131,9 +123,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
                 provider_specific_data={"aws_region": specification.region or "us-east-1"},
             )
 
-    async def _provision_storage_volume(
-        self, specification: ResourceSpecification
-    ) -> ResourceAllocation:
+    async def _provision_storage_volume(self, specification: ResourceSpecification) -> ResourceAllocation:
         """Provision EBS storage volume."""
         # Implementation would call AWS EBS APIs
         volume_config = specification.configuration

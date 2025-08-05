@@ -151,10 +151,7 @@ def register_logger_with_container() -> None:
             registry = SingletonRegistry.get_instance()
             # Check if the singleton is already registered by checking if it exists in
             # the registry's _singletons dict
-            if (
-                LoggerSingleton not in registry._singletons
-                or registry._singletons[LoggerSingleton] is None
-            ):
+            if LoggerSingleton not in registry._singletons or registry._singletons[LoggerSingleton] is None:
                 registry.register(LoggerSingleton, logger_singleton)
         except ImportError:
             # If the registry module can't be imported yet, that's okay

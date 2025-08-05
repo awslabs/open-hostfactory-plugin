@@ -34,9 +34,7 @@ def configure_openapi(app: FastAPI, server_config: ServerConfig) -> None:
 
         # Add security schemes if authentication is enabled
         if server_config.auth.enabled:
-            openapi_schema["components"]["securitySchemes"] = get_security_schemes(
-                server_config.auth
-            )
+            openapi_schema["components"]["securitySchemes"] = get_security_schemes(server_config.auth)
 
             # Add global security requirement
             security_scheme_name = _get_security_scheme_name(server_config.auth.strategy)

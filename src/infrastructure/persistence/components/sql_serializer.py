@@ -242,9 +242,7 @@ class SQLSerializer(DataConverter):
             elif isinstance(value, dict):
                 # Handle special operators
                 if "$in" in value:
-                    prepared[key] = {
-                        "$in": [v.value if isinstance(v, Enum) else v for v in value["$in"]]
-                    }
+                    prepared[key] = {"$in": [v.value if isinstance(v, Enum) else v for v in value["$in"]]}
                 elif "$like" in value:
                     prepared[key] = {"$like": value["$like"]}
                 else:

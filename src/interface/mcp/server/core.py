@@ -157,9 +157,7 @@ class OpenHFPluginMCPServer:
             if mcp_msg.method:
                 response = await self._handle_request(mcp_msg)
             else:
-                response = MCPMessage(
-                    id=mcp_msg.id, error={"code": -32600, "message": "Invalid Request"}
-                )
+                response = MCPMessage(id=mcp_msg.id, error={"code": -32600, "message": "Invalid Request"})
 
             return json.dumps(response.__dict__, default=str)
 
@@ -235,8 +233,7 @@ class OpenHFPluginMCPServer:
         for tool_name, tool_func in self.tools.items():
             # Get tool metadata from function docstring and signature
             description = (
-                getattr(tool_func, "__doc__", f"Execute {tool_name} operation")
-                or f"Execute {tool_name} operation"
+                getattr(tool_func, "__doc__", f"Execute {tool_name} operation") or f"Execute {tool_name} operation"
             )
 
             tool_def = {

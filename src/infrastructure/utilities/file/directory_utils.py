@@ -75,9 +75,7 @@ def delete_directory(directory_path: str, recursive: bool = False) -> None:
         raise OSError(f"Failed to delete directory {directory_path}: {str(e)}")
 
 
-def list_files(
-    directory_path: str, pattern: Optional[str] = None, recursive: bool = False
-) -> List[str]:
+def list_files(directory_path: str, pattern: Optional[str] = None, recursive: bool = False) -> List[str]:
     """
     List files in a directory.
 

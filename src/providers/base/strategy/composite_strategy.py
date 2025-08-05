@@ -244,9 +244,7 @@ class CompositeProviderStrategy(ProviderStrategy):
         if self._initialized:
             return True
 
-        self._self._logger.info(
-            f"Initializing composite strategy with {len(self._strategies)} strategies"
-        )
+        self._self._logger.info(f"Initializing composite strategy with {len(self._strategies)} strategies")
 
         success_count = 0
         total_count = len(self._strategies)
@@ -271,9 +269,7 @@ class CompositeProviderStrategy(ProviderStrategy):
         self._initialized = success_count >= min_required
 
         if self._initialized:
-            self._self._logger.info(
-                f"Composite strategy initialized: {success_count}/{total_count} strategies ready"
-            )
+            self._self._logger.info(f"Composite strategy initialized: {success_count}/{total_count} strategies ready")
         else:
             self._self._logger.error(
                 f"Composite strategy initialization failed: only {success_count}/{total_count} strategies ready, need {min_required}"
@@ -292,9 +288,7 @@ class CompositeProviderStrategy(ProviderStrategy):
             Aggregated result from the composed strategies
         """
         if not self._initialized:
-            return ProviderResult.error_result(
-                "Composite strategy not initialized", "NOT_INITIALIZED"
-            )
+            return ProviderResult.error_result("Composite strategy not initialized", "NOT_INITIALIZED")
 
         start_time = time.time()
 
@@ -343,9 +337,7 @@ class CompositeProviderStrategy(ProviderStrategy):
                 {"total_execution_time_ms": total_time_ms},
             )
 
-    def _filter_capable_strategies(
-        self, operation: ProviderOperation
-    ) -> Dict[str, ProviderStrategy]:
+    def _filter_capable_strategies(self, operation: ProviderOperation) -> Dict[str, ProviderStrategy]:
         """Filter strategies that can handle the operation."""
         capable = {}
 
@@ -366,9 +358,7 @@ class CompositeProviderStrategy(ProviderStrategy):
         futures = {}
 
         for strategy_type, strategy in strategies.items():
-            future = self._executor.submit(
-                self._execute_single_strategy, strategy_type, strategy, operation
-            )
+            future = self._executor.submit(self._execute_single_strategy, strategy_type, strategy, operation)
             futures[future] = strategy_type
 
         results = []
@@ -381,9 +371,7 @@ class CompositeProviderStrategy(ProviderStrategy):
                 results.append(
                     StrategyExecutionResult(
                         strategy_type=strategy_type,
-                        result=ProviderResult.error_result(
-                            f"Execution failed: {str(e)}", "EXECUTION_ERROR"
-                        ),
+                        result=ProviderResult.error_result(f"Execution failed: {str(e)}", "EXECUTION_ERROR"),
                         execution_time_ms=0.0,
                         success=False,
                         error=e,
@@ -403,10 +391,7 @@ class CompositeProviderStrategy(ProviderStrategy):
             results.append(result)
 
             # Stop on first success if configured
-            if (
-                self._config.aggregation_policy == AggregationPolicy.FIRST_SUCCESS
-                and result.success
-            ):
+            if self._config.aggregation_policy == AggregationPolicy.FIRST_SUCCESS and result.success:
                 break
 
         return results
@@ -472,9 +457,7 @@ class CompositeProviderStrategy(ProviderStrategy):
             execution_time_ms = (time.time() - start_time) * 1000
             return StrategyExecutionResult(
                 strategy_type=strategy_type,
-                result=ProviderResult.error_result(
-                    f"Strategy execution failed: {str(e)}", "STRATEGY_ERROR"
-                ),
+                result=ProviderResult.error_result(f"Strategy execution failed: {str(e)}", "STRATEGY_ERROR"),
                 execution_time_ms=execution_time_ms,
                 success=False,
                 error=e,

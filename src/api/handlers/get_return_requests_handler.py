@@ -84,9 +84,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
                     raise ValueError(f"Invalid time range format: {str(e)}")
 
     @handle_interface_exceptions(context="get_return_requests_api", interface_type="api")
-    async def execute_api_request(
-        self, request: Dict[str, Any], context: RequestContext
-    ) -> ReturnRequestResponse:
+    async def execute_api_request(self, request: Dict[str, Any], context: RequestContext) -> ReturnRequestResponse:
         """
         Execute the core API logic for getting return requests.
 
@@ -127,9 +125,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
                 return ReturnRequestResponse.from_dict(cached_result)
 
             # Get return requests using CQRS query
-            query = ListRequestsQuery(
-                status="return_requested", limit=100  # Filter for return requests
-            )
+            query = ListRequestsQuery(status="return_requested", limit=100)  # Filter for return requests
             return_requests = await self._query_bus.execute(query)
 
             # Apply filters if provided
@@ -140,16 +136,12 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
             formatted_requests = []
             for req in return_requests:
                 request_data = {
-                    "machine": (
-                        req.machines[0].name if hasattr(req, "machines") and req.machines else None
-                    ),
+                    "machine": (req.machines[0].name if hasattr(req, "machines") and req.machines else None),
                     "gracePeriod": await self._calculate_grace_period(req),
                     "status": (req.status.value if hasattr(req.status, "value") else req.status),
                     "requestId": str(req.request_id),
                     "createdAt": (
-                        req.created_at.isoformat()
-                        if hasattr(req.created_at, "isoformat")
-                        else req.created_at
+                        req.created_at.isoformat() if hasattr(req.created_at, "isoformat") else req.created_at
                     ),
                 }
 
@@ -230,12 +222,8 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
             response.metadata["processing_duration"] = time.time() - context.start_time
 
         # Apply scheduler strategy for format conversion if needed
-        if self._scheduler_strategy and hasattr(
-            self._scheduler_strategy, "format_return_requests_response"
-        ):
-            formatted_response = await self._scheduler_strategy.format_return_requests_response(
-                response
-            )
+        if self._scheduler_strategy and hasattr(self._scheduler_strategy, "format_return_requests_response"):
+            formatted_response = await self._scheduler_strategy.format_return_requests_response(response)
             return formatted_response
 
         return response
@@ -265,9 +253,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
         """
         if cache_key in self._cache:
             cached_data = self._cache[cache_key]
-            if (
-                datetime.utcnow() - cached_data["timestamp"]
-            ).total_seconds() < self._cache_duration:
+            if (datetime.utcnow() - cached_data["timestamp"]).total_seconds() < self._cache_duration:
                 return cached_data["data"]
             else:
                 del self._cache[cache_key]
@@ -312,11 +298,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
             filtered_requests = [
                 r
                 for r in filtered_requests
-                if (
-                    r.status.value
-                    if hasattr(r.status, "value") and not isinstance(r.status, str)
-                    else r.status
-                )
+                if (r.status.value if hasattr(r.status, "value") and not isinstance(r.status, str) else r.status)
                 == filters["status"]
             ]
 
@@ -324,16 +306,13 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
             filtered_requests = [
                 r
                 for r in filtered_requests
-                if hasattr(r, "machines")
-                and any(m.name == filters["machine_name"] for m in r.machines)
+                if hasattr(r, "machines") and any(m.name == filters["machine_name"] for m in r.machines)
             ]
 
         if "time_range" in filters:
             start_time = datetime.fromisoformat(filters["time_range"]["start"])
             end_time = datetime.fromisoformat(filters["time_range"]["end"])
-            filtered_requests = [
-                r for r in filtered_requests if start_time <= r.created_at <= end_time
-            ]
+            filtered_requests = [r for r in filtered_requests if start_time <= r.created_at <= end_time]
 
         return filtered_requests
 

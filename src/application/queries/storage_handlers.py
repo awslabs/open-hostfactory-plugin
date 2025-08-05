@@ -15,9 +15,7 @@ from src.application.queries.storage import (
 
 
 @query_handler(ListStorageStrategiesQuery)
-class ListStorageStrategiesHandler(
-    BaseQueryHandler[ListStorageStrategiesQuery, StorageStrategyListResponse]
-):
+class ListStorageStrategiesHandler(BaseQueryHandler[ListStorageStrategiesQuery, StorageStrategyListResponse]):
     """Handler for listing available storage strategies."""
 
     async def execute_query(self, query: ListStorageStrategiesQuery) -> StorageStrategyListResponse:

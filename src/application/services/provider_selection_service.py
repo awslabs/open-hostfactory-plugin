@@ -145,9 +145,7 @@ class ProviderSelectionService:
         # Apply load balancing strategy
         selected_instance = self._apply_load_balancing_strategy(instances)
 
-        self._logger.info(
-            f"Selected load-balanced provider: {selected_instance.name} (type: {provider_type})"
-        )
+        self._logger.info(f"Selected load-balanced provider: {selected_instance.name} (type: {provider_type})")
 
         return ProviderSelectionResult(
             provider_type=provider_type,
@@ -169,27 +167,21 @@ class ProviderSelectionService:
         # Select best instance (could be based on health, performance, etc.)
         selected_instance = self._select_best_compatible_instance(compatible_instances)
 
-        self._logger.info(
-            f"Selected capability-based provider: {selected_instance.name} for API: {provider_api}"
-        )
+        self._logger.info(f"Selected capability-based provider: {selected_instance.name} for API: {provider_api}")
 
         return ProviderSelectionResult(
             provider_type=selected_instance.type,
             provider_instance=selected_instance.name,
             selection_reason=f"Supports required API '{provider_api}'",
             confidence=0.8,
-            alternatives=[
-                inst.name for inst in compatible_instances if inst.name != selected_instance.name
-            ],
+            alternatives=[inst.name for inst in compatible_instances if inst.name != selected_instance.name],
         )
 
     def _select_default_provider(self, template: Template) -> ProviderSelectionResult:
         """Select default provider from configuration."""
         # Get default from configuration
         default_provider_type = getattr(self._provider_config, "default_provider_type", None)
-        default_provider_instance = getattr(
-            self._provider_config, "default_provider_instance", None
-        )
+        default_provider_instance = getattr(self._provider_config, "default_provider_instance", None)
 
         # If no defaults in config, use first enabled provider
         if not default_provider_instance:
@@ -225,9 +217,7 @@ class ProviderSelectionService:
             if provider.type == provider_type and provider.enabled
         ]
 
-    def _apply_load_balancing_strategy(
-        self, instances: List[ProviderInstanceConfig]
-    ) -> ProviderInstanceConfig:
+    def _apply_load_balancing_strategy(self, instances: List[ProviderInstanceConfig]) -> ProviderInstanceConfig:
         """Apply load balancing strategy to select instance."""
         selection_policy = self._provider_config.selection_policy
 
@@ -241,9 +231,7 @@ class ProviderSelectionService:
             # Default to highest priority (lowest priority number)
             return min(instances, key=lambda x: x.priority)
 
-    def _weighted_round_robin_selection(
-        self, instances: List[ProviderInstanceConfig]
-    ) -> ProviderInstanceConfig:
+    def _weighted_round_robin_selection(self, instances: List[ProviderInstanceConfig]) -> ProviderInstanceConfig:
         """Select instance using priority-first, then weighted selection."""
         # Sort by priority first (lower number = higher priority)
         sorted_instances = sorted(instances, key=lambda x: x.priority)
@@ -275,9 +263,7 @@ class ProviderSelectionService:
         )
         return selected
 
-    def _health_based_selection(
-        self, instances: List[ProviderInstanceConfig]
-    ) -> ProviderInstanceConfig:
+    def _health_based_selection(self, instances: List[ProviderInstanceConfig]) -> ProviderInstanceConfig:
         """Select instance based on health status."""
         # For now, return highest priority healthy instance
         # In production, this would check actual health status
@@ -316,9 +302,7 @@ class ProviderSelectionService:
         # In production, this would query actual provider capabilities
         return True
 
-    def _select_best_compatible_instance(
-        self, instances: List[ProviderInstanceConfig]
-    ) -> ProviderInstanceConfig:
+    def _select_best_compatible_instance(self, instances: List[ProviderInstanceConfig]) -> ProviderInstanceConfig:
         """Select the best instance from compatible providers."""
         # Select based on priority (lower number = higher priority)
         return min(instances, key=lambda x: x.priority)

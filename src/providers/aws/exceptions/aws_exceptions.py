@@ -237,9 +237,7 @@ class AMIValidationError(AWSValidationError):
 class SubnetValidationError(AWSValidationError):
     """Raised when there are issues validating a subnet."""
 
-    def __init__(
-        self, message: str, subnet_id: str, details: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def __init__(self, message: str, subnet_id: str, details: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(message, details={"subnet_id": subnet_id, **(details or {})})
         self.subnet_id = subnet_id
 
@@ -253,9 +251,7 @@ class SecurityGroupValidationError(AWSValidationError):
         security_group_id: str,
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
-        super().__init__(
-            message, details={"security_group_id": security_group_id, **(details or {})}
-        )
+        super().__init__(message, details={"security_group_id": security_group_id, **(details or {})})
         self.security_group_id = security_group_id
 
 

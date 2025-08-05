@@ -60,9 +60,7 @@ class AWSMachineAdapter:
         Raises:
             AWSError: If there's an issue processing the AWS instance data
         """
-        self._logger.debug(
-            f"Creating machine from AWS instance: {aws_instance_data.get('InstanceId')}"
-        )
+        self._logger.debug(f"Creating machine from AWS instance: {aws_instance_data.get('InstanceId')}")
 
         try:
             # Validate required fields
@@ -123,9 +121,7 @@ class AWSMachineAdapter:
                 },
             }
 
-            self._logger.debug(
-                f"Successfully created machine data for {machine_data['machine_id']}"
-            )
+            self._logger.debug(f"Successfully created machine data for {machine_data['machine_id']}")
             return machine_data
 
         except KeyError as e:
@@ -157,9 +153,7 @@ class AWSMachineAdapter:
             # Get instance status using circuit breaker
             def get_instance_status():
                 """Get EC2 instance status from AWS."""
-                return self._aws_client.ec2_client.describe_instance_status(
-                    InstanceIds=[str(machine.machine_id)]
-                )
+                return self._aws_client.ec2_client.describe_instance_status(InstanceIds=[str(machine.machine_id)])
 
             try:
                 status = self._aws_client.execute_with_circuit_breaker(
@@ -192,9 +186,7 @@ class AWSMachineAdapter:
                     )
 
             if not status["InstanceStatuses"]:
-                self._logger.warning(
-                    f"No status information available for instance: {machine.machine_id}"
-                )
+                self._logger.warning(f"No status information available for instance: {machine.machine_id}")
                 health_checks["system"] = {
                     "status": False,
                     "details": {"reason": "Instance status not available"},
@@ -263,14 +255,10 @@ class AWSMachineAdapter:
             # Check if instance exists using circuit breaker
             def check_instance_exists():
                 """Check if EC2 instance exists in AWS."""
-                return self._aws_client.ec2_client.describe_instances(
-                    InstanceIds=[str(machine.machine_id)]
-                )
+                return self._aws_client.ec2_client.describe_instances(InstanceIds=[str(machine.machine_id)])
 
             try:
-                self._aws_client.execute_with_circuit_breaker(
-                    "ec2", "describe_instances", check_instance_exists
-                )
+                self._aws_client.execute_with_circuit_breaker("ec2", "describe_instances", check_instance_exists)
             except NetworkError as e:
                 self._logger.error(f"Network error checking instance existence: {str(e)}")
                 raise AWSError(f"Network error checking instance existence: {str(e)}")
@@ -300,40 +288,30 @@ class AWSMachineAdapter:
                         ]
                     )
 
-                volumes = self._aws_client.execute_with_circuit_breaker(
-                    "ec2", "describe_volumes", get_volumes
-                )
+                volumes = self._aws_client.execute_with_circuit_breaker("ec2", "describe_volumes", get_volumes)
 
                 for volume in volumes["Volumes"]:
                     volume_id = volume["VolumeId"]
                     try:
                         if volume["State"] == "in-use":
-                            self._logger.debug(
-                                f"Detaching volume {volume_id} from {machine.machine_id}"
-                            )
+                            self._logger.debug(f"Detaching volume {volume_id} from {machine.machine_id}")
 
                             def detach_volume(volume_id=volume_id):
                                 return self._aws_client.ec2_client.detach_volume(VolumeId=volume_id)
 
-                            self._aws_client.execute_with_circuit_breaker(
-                                "ec2", "detach_volume", detach_volume
-                            )
+                            self._aws_client.execute_with_circuit_breaker("ec2", "detach_volume", detach_volume)
 
                             self._logger.debug(f"Deleting volume {volume_id}")
 
                             def delete_volume(vol_id=volume_id):
                                 return self._aws_client.ec2_client.delete_volume(VolumeId=vol_id)
 
-                            self._aws_client.execute_with_circuit_breaker(
-                                "ec2", "delete_volume", delete_volume
-                            )
+                            self._aws_client.execute_with_circuit_breaker("ec2", "delete_volume", delete_volume)
 
                             cleanup_results["volumes"]["success"].append(volume_id)
                     except AWSError as e:
                         self._logger.error(f"Failed to cleanup volume {volume_id}: {str(e)}")
-                        cleanup_results["volumes"]["failed"].append(
-                            {"id": volume_id, "error": str(e)}
-                        )
+                        cleanup_results["volumes"]["failed"].append({"id": volume_id, "error": str(e)})
             except AWSError as e:
                 self._logger.error(f"Error processing volumes for {machine.machine_id}: {str(e)}")
                 # Continue with other resources even if volumes fail
@@ -361,14 +339,10 @@ class AWSMachineAdapter:
                     try:
                         if nic["Status"] == "in-use":
                             attachment_id = nic["Attachment"]["AttachmentId"]
-                            self._logger.debug(
-                                f"Detaching network interface {nic_id} from {machine.machine_id}"
-                            )
+                            self._logger.debug(f"Detaching network interface {nic_id} from {machine.machine_id}")
 
                             def detach_network_interface(attachment_id=attachment_id):
-                                return self._aws_client.ec2_client.detach_network_interface(
-                                    AttachmentId=attachment_id
-                                )
+                                return self._aws_client.ec2_client.detach_network_interface(AttachmentId=attachment_id)
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2",
@@ -391,16 +365,10 @@ class AWSMachineAdapter:
 
                             cleanup_results["network_interfaces"]["success"].append(nic_id)
                     except AWSError as e:
-                        self._logger.error(
-                            f"Failed to cleanup network interface {nic_id}: {str(e)}"
-                        )
-                        cleanup_results["network_interfaces"]["failed"].append(
-                            {"id": nic_id, "error": str(e)}
-                        )
+                        self._logger.error(f"Failed to cleanup network interface {nic_id}: {str(e)}")
+                        cleanup_results["network_interfaces"]["failed"].append({"id": nic_id, "error": str(e)})
             except AWSError as e:
-                self._logger.error(
-                    f"Error processing network interfaces for {machine.machine_id}: {str(e)}"
-                )
+                self._logger.error(f"Error processing network interfaces for {machine.machine_id}: {str(e)}")
                 # Continue with other resources even if network interfaces fail
 
             self._logger.debug(f"Resource cleanup completed for {machine.machine_id}")
@@ -440,9 +408,7 @@ class AWSMachineAdapter:
             # Get instance details using circuit breaker
             def get_instance_details():
                 """Get detailed EC2 instance information from AWS."""
-                return self._aws_client.ec2_client.describe_instances(
-                    InstanceIds=[str(machine.machine_id)]
-                )
+                return self._aws_client.ec2_client.describe_instances(InstanceIds=[str(machine.machine_id)])
 
             try:
                 response = self._aws_client.execute_with_circuit_breaker(

@@ -22,22 +22,12 @@ class ConfigurationAdapter(ConfigurationPort):
                 "patterns": {
                     "request_id": config.patterns.get("request_id", r"^(req-|ret-)[a-f0-9\-]{36}$"),
                     "ec2_instance": config.patterns.get("ec2_instance", r"^i-[a-f0-9]{8,17}$"),
-                    "instance_type": config.patterns.get(
-                        "instance_type", r"^[a-z0-9]+\.[a-z0-9]+$"
-                    ),
-                    "cidr_block": config.patterns.get(
-                        "cidr_block", r"^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$"
-                    ),
+                    "instance_type": config.patterns.get("instance_type", r"^[a-z0-9]+\.[a-z0-9]+$"),
+                    "cidr_block": config.patterns.get("cidr_block", r"^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$"),
                 },
                 "prefixes": {
-                    "request": (
-                        config.prefixes.request if hasattr(config.prefixes, "request") else "req-"
-                    ),
-                    "return": (
-                        config.prefixes.return_prefix
-                        if hasattr(config.prefixes, "return_prefix")
-                        else "ret-"
-                    ),
+                    "request": (config.prefixes.request if hasattr(config.prefixes, "request") else "req-"),
+                    "return": (config.prefixes.return_prefix if hasattr(config.prefixes, "return_prefix") else "ret-"),
                 },
             }
         except Exception:
@@ -57,9 +47,7 @@ class ConfigurationAdapter(ConfigurationPort):
         try:
             request_config = self._config_manager.get_typed(RequestConfig)
             return {
-                "max_machines_per_request": getattr(
-                    request_config, "max_machines_per_request", 100
-                ),
+                "max_machines_per_request": getattr(request_config, "max_machines_per_request", 100),
                 "default_timeout": getattr(request_config, "default_timeout", 300),
                 "min_timeout": getattr(request_config, "min_timeout", 30),
                 "max_timeout": getattr(request_config, "max_timeout", 3600),
@@ -80,9 +68,7 @@ class ConfigurationAdapter(ConfigurationPort):
             return {
                 "default_instance_tags": getattr(template_config, "default_instance_tags", {}),
                 "default_image_id": getattr(template_config, "default_image_id", ""),
-                "default_instance_type": getattr(
-                    template_config, "default_instance_type", "t2.micro"
-                ),
+                "default_instance_type": getattr(template_config, "default_instance_type", "t2.micro"),
             }
         except Exception:
             # Fallback provider config
@@ -97,9 +83,7 @@ class ConfigurationAdapter(ConfigurationPort):
         try:
             request_config = self._config_manager.get_typed(RequestConfig)
             return {
-                "max_machines_per_request": getattr(
-                    request_config, "max_machines_per_request", 100
-                ),
+                "max_machines_per_request": getattr(request_config, "max_machines_per_request", 100),
                 "default_timeout": getattr(request_config, "default_timeout", 300),
                 "min_timeout": getattr(request_config, "min_timeout", 30),
                 "max_timeout": getattr(request_config, "max_timeout", 3600),
@@ -119,9 +103,7 @@ class ConfigurationAdapter(ConfigurationPort):
             return {
                 "default_instance_tags": getattr(template_config, "default_instance_tags", {}),
                 "default_image_id": getattr(template_config, "default_image_id", ""),
-                "default_instance_type": getattr(
-                    template_config, "default_instance_type", "t2.micro"
-                ),
+                "default_instance_type": getattr(template_config, "default_instance_type", "t2.micro"),
             }
         except Exception:
             return {
@@ -160,9 +142,7 @@ class ConfigurationAdapter(ConfigurationPort):
             logging_config = self._config_manager.get("logging", {})
             return {
                 "level": logging_config.get("level", "INFO"),
-                "format": logging_config.get(
-                    "format", "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                ),
+                "format": logging_config.get("format", "%(asctime)s - %(name)s - %(levelname)s - %(message)s"),
                 "file_enabled": logging_config.get("file_enabled", True),
             }
         except Exception:

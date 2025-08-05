@@ -149,9 +149,7 @@ class AWSProviderAdapter:
             region=region,
         )
 
-    def create_launch_template(
-        self, template_id: str, version: Optional[str] = None
-    ) -> ProviderLaunchTemplate:
+    def create_launch_template(self, template_id: str, version: Optional[str] = None) -> ProviderLaunchTemplate:
         """Create an AWS launch template."""
         template = ProviderLaunchTemplate(template_id=template_id, version=version)
 

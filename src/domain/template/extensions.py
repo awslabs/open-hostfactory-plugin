@@ -43,9 +43,7 @@ class TemplateExtensionRegistry:
         cls._extensions[provider_type] = extension_class
 
     @classmethod
-    def register_extension_instance(
-        cls, provider_type: str, extension_instance: TemplateExtension
-    ) -> None:
+    def register_extension_instance(cls, provider_type: str, extension_instance: TemplateExtension) -> None:
         """Register a provider-specific extension instance.
 
         Args:
@@ -53,9 +51,7 @@ class TemplateExtensionRegistry:
             extension_instance: The extension instance implementing TemplateExtension
         """
         if not isinstance(extension_instance, TemplateExtension):
-            raise ValueError(
-                f"Extension instance must implement TemplateExtension, got { type(extension_instance)}"
-            )
+            raise ValueError(f"Extension instance must implement TemplateExtension, got { type(extension_instance)}")
 
         cls._extension_instances[provider_type] = extension_instance
 
@@ -106,9 +102,7 @@ class TemplateExtensionRegistry:
         return list(all_providers)
 
     @classmethod
-    def create_extension_config(
-        cls, provider_type: str, config_data: Dict[str, Any]
-    ) -> Optional[BaseModel]:
+    def create_extension_config(cls, provider_type: str, config_data: Dict[str, Any]) -> Optional[BaseModel]:
         """Create an extension configuration instance for a provider.
 
         Args:
@@ -124,9 +118,7 @@ class TemplateExtensionRegistry:
         return None
 
     @classmethod
-    def get_extension_defaults(
-        cls, provider_type: str, config_data: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    def get_extension_defaults(cls, provider_type: str, config_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Get template defaults from provider extension.
 
         Args:
@@ -162,9 +154,7 @@ def register_provider_extension(provider_type: str, extension_class: Type[BaseMo
     TemplateExtensionRegistry.register_extension(provider_type, extension_class)
 
 
-def get_provider_extension_defaults(
-    provider_type: str, config_data: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+def get_provider_extension_defaults(provider_type: str, config_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Get provider extension defaults."""
     return TemplateExtensionRegistry.get_extension_defaults(provider_type, config_data)
 

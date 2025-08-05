@@ -77,9 +77,7 @@ class LoggingEventHandler(EventHandler):
             Formatted message string for logging
         """
 
-    def format_basic_message(
-        self, event: DomainEvent, action: str, details: Optional[str] = None
-    ) -> str:
+    def format_basic_message(self, event: DomainEvent, action: str, details: Optional[str] = None) -> str:
         """
         Format basic event messages.
 
@@ -104,9 +102,7 @@ class LoggingEventHandler(EventHandler):
 
         return message
 
-    def format_status_change_message(
-        self, event: DomainEvent, old_status: str, new_status: str
-    ) -> str:
+    def format_status_change_message(self, event: DomainEvent, old_status: str, new_status: str) -> str:
         """
         Format status change messages.
 

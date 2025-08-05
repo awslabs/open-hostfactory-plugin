@@ -84,9 +84,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                 raise ValueError(f"Validation error: {e.message}")
 
     @handle_interface_exceptions(context="get_request_status_api", interface_type="api")
-    async def execute_api_request(
-        self, request: Dict[str, Any], context: RequestContext
-    ) -> RequestStatusResponse:
+    async def execute_api_request(self, request: Dict[str, Any], context: RequestContext) -> RequestStatusResponse:
         """
         Execute the core API logic for checking request status.
 
@@ -123,9 +121,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
 
                 # Create response DTO
                 response = RequestStatusResponse(
-                    requests=[
-                        req.to_dict() if hasattr(req, "to_dict") else req for req in requests
-                    ],
+                    requests=[req.to_dict() if hasattr(req, "to_dict") else req for req in requests],
                     metadata={
                         "correlation_id": correlation_id,
                         "timestamp": request.get("timestamp"),
@@ -160,11 +156,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                                         if hasattr(request_data, "status")
                                         and hasattr(request_data.status, "value")
                                         and not isinstance(request_data.status, str)
-                                        else (
-                                            request_data.status
-                                            if hasattr(request_data, "status")
-                                            else request_data
-                                        )
+                                        else (request_data.status if hasattr(request_data, "status") else request_data)
                                     ),
                                 },
                             )
@@ -244,9 +236,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
             response.metadata["processing_duration"] = time.time() - context.start_time
 
         # Apply scheduler strategy for format conversion if needed
-        if self._scheduler_strategy and hasattr(
-            self._scheduler_strategy, "format_request_response"
-        ):
+        if self._scheduler_strategy and hasattr(self._scheduler_strategy, "format_request_response"):
             formatted_response = await self._scheduler_strategy.format_request_response(response)
             return formatted_response
 
@@ -284,9 +274,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                 last_error = e
                 if attempt < self._max_retries - 1:
                     if self.logger:
-                        self.logger.warning(
-                            f"Retry {attempt + 1}/{self._max_retries} for request {request_id}"
-                        )
+                        self.logger.warning(f"Retry {attempt + 1}/{self._max_retries} for request {request_id}")
                     continue
 
         # If we get here, all retries failed

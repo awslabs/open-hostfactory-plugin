@@ -44,9 +44,7 @@ class DependencyResolutionError(DIError):
         detail_str = " ".join(details)
         dependency_name = getattr(dependency_type, "__name__", str(dependency_type))
         if detail_str:
-            full_message = (
-                f"Failed to resolve dependency {dependency_name} ({detail_str}): {message}"
-            )
+            full_message = f"Failed to resolve dependency {dependency_name} ({detail_str}): {message}"
         else:
             full_message = f"Failed to resolve dependency {dependency_name}: {message}"
 

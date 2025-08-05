@@ -101,16 +101,12 @@ class ProviderHealthStatus(BaseModel):
     error_details: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def healthy(
-        cls, message: str = "Provider is healthy", response_time_ms: float = None
-    ) -> "ProviderHealthStatus":
+    def healthy(cls, message: str = "Provider is healthy", response_time_ms: float = None) -> "ProviderHealthStatus":
         """Create a healthy status."""
         return cls(is_healthy=True, status_message=message, response_time_ms=response_time_ms)
 
     @classmethod
-    def unhealthy(
-        cls, message: str, error_details: Dict[str, Any] = None
-    ) -> "ProviderHealthStatus":
+    def unhealthy(cls, message: str, error_details: Dict[str, Any] = None) -> "ProviderHealthStatus":
         """Create an unhealthy status."""
         return cls(is_healthy=False, status_message=message, error_details=error_details or {})
 

@@ -70,9 +70,7 @@ class MachineDTO(BaseDTO):
                     "provider_api": (str(machine.provider_api) if machine.provider_api else None),
                     "resource_id": (str(machine.resource_id) if machine.resource_id else None),
                     "price_type": (
-                        machine.price_type.value
-                        if hasattr(machine.price_type, "value")
-                        else str(machine.price_type)
+                        machine.price_type.value if hasattr(machine.price_type, "value") else str(machine.price_type)
                     ),
                     "cloud_host_id": machine.cloud_host_id,
                     "metadata": machine.metadata,

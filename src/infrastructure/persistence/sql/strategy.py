@@ -84,9 +84,7 @@ class SQLStorageStrategy(BaseStorageStrategy):
                 if self.exists(entity_id):
                     # Update existing entity
                     serialized_data = self.serializer.serialize_for_update(data)
-                    query, params = self.query_builder.build_update(
-                        serialized_data, self._get_id_column(), entity_id
-                    )
+                    query, params = self.query_builder.build_update(serialized_data, self._get_id_column(), entity_id)
                 else:
                     # Insert new entity
                     serialized_data = self.serializer.serialize_for_insert(entity_id, data)

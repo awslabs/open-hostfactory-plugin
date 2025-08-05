@@ -36,9 +36,7 @@ class RequestType(str, Enum):
         try:
             return cls(value.lower())
         except ValueError:
-            raise ValueError(
-                f"Invalid RequestType: {value}. Valid values: {[e.value for e in cls]}"
-            )
+            raise ValueError(f"Invalid RequestType: {value}. Valid values: {[e.value for e in cls]}")
 
     def to_operation_type(self) -> str:
         """
@@ -104,9 +102,7 @@ class RequestStatus(str, Enum):
         try:
             return cls(value.lower())
         except ValueError:
-            raise ValueError(
-                f"Invalid RequestStatus: {value}. Valid values: {[e.value for e in cls]}"
-            )
+            raise ValueError(f"Invalid RequestStatus: {value}. Valid values: {[e.value for e in cls]}")
 
     def is_terminal(self) -> bool:
         """Check if this status represents a terminal state."""
@@ -183,9 +179,7 @@ class MachineResult(str, Enum):
         try:
             return cls(value.lower())
         except ValueError:
-            raise ValueError(
-                f"Invalid MachineResult: {value}. Valid values: {[e.value for e in cls]}"
-            )
+            raise ValueError(f"Invalid MachineResult: {value}. Valid values: {[e.value for e in cls]}")
 
     def is_terminal(self) -> bool:
         """Check if this result represents a terminal state."""

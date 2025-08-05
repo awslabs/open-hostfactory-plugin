@@ -137,17 +137,13 @@ class StrategyUnitOfWork(BaseUnitOfWork):
                     try:
                         repo.storage_strategy.rollback_transaction()
                     except Exception as e:
-                        self.logger.warning(
-                            f"Error rolling back transaction for repository: {str(e)}"
-                        )
+                        self.logger.warning(f"Error rolling back transaction for repository: {str(e)}")
 
             # Fall back to snapshots for backward compatibility
             for repo, snapshot in self._snapshots.items():
                 repo._cache = snapshot.copy()
                 # Reload version map
-                repo._version_map = {
-                    entity_id: entity.version for entity_id, entity in snapshot.items()
-                }
+                repo._version_map = {entity_id: entity.version for entity_id, entity in snapshot.items()}
 
             # Clear snapshots
             self._snapshots.clear()

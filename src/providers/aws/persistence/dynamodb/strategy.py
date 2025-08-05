@@ -72,16 +72,12 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
 
                 attribute_definitions = [{"AttributeName": "id", "AttributeType": "S"}]  # String
 
-                success = self.client_manager.create_table(
-                    self.table_name, key_schema, attribute_definitions
-                )
+                success = self.client_manager.create_table(self.table_name, key_schema, attribute_definitions)
 
                 if success:
                     self._self._logger.info(f"Created DynamoDB table: {self.table_name}")
                 else:
-                    self._self._logger.warning(
-                        f"Failed to create DynamoDB table: {self.table_name}"
-                    )
+                    self._self._logger.warning(f"Failed to create DynamoDB table: {self.table_name}")
 
         except Exception as e:
             self._self._logger.error(f"Failed to initialize table {self.table_name}: {e}")
@@ -242,14 +238,10 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
         with self.lock_manager.read_lock():
             try:
                 # Build filter expression
-                filter_expression, expression_attribute_values = (
-                    self.converter.build_filter_expression(criteria)
-                )
+                filter_expression, expression_attribute_values = self.converter.build_filter_expression(criteria)
 
                 # Scan table with filter
-                items = self.client_manager.scan_table(
-                    self.table_name, filter_expression, expression_attribute_values
-                )
+                items = self.client_manager.scan_table(self.table_name, filter_expression, expression_attribute_values)
 
                 # Convert items to domain data
                 entities = self.converter.from_dynamodb_items(items)

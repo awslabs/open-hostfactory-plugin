@@ -232,10 +232,7 @@ def convert_dict_keys(data: Dict[str, Any], case_type: str) -> Dict[str, Any]:
         if isinstance(value, dict):
             result[new_key] = convert_dict_keys(value, case_type)
         elif isinstance(value, list):
-            result[new_key] = [
-                convert_dict_keys(item, case_type) if isinstance(item, dict) else item
-                for item in value
-            ]
+            result[new_key] = [convert_dict_keys(item, case_type) if isinstance(item, dict) else item for item in value]
         else:
             result[new_key] = value
 

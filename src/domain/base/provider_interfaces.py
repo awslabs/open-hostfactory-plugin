@@ -129,9 +129,7 @@ class ProviderAdapter(Protocol):
         """Create a provider-specific resource identifier."""
         ...
 
-    def create_launch_template(
-        self, template_id: str, version: Optional[str] = None
-    ) -> ProviderLaunchTemplate:
+    def create_launch_template(self, template_id: str, version: Optional[str] = None) -> ProviderLaunchTemplate:
         """Create a provider-specific launch template."""
         ...
 

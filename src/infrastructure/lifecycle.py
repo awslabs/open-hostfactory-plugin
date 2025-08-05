@@ -85,9 +85,7 @@ class LifecycleManager:
 
         self._components.append(component)
         self._component_types[component_type] = component
-        self._logger.debug(
-            f"Registered component for lifecycle management: {component_type.__name__}"
-        )
+        self._logger.debug(f"Registered component for lifecycle management: {component_type.__name__}")
 
     def initialize_all(self) -> None:
         """
@@ -102,9 +100,7 @@ class LifecycleManager:
                 component.initialize()
                 self._logger.debug(f"Initialized component: {component.__class__.__name__}")
             except Exception as e:
-                self._logger.error(
-                    f"Error initializing component { component.__class__.__name__}: { str(e)}"
-                )
+                self._logger.error(f"Error initializing component { component.__class__.__name__}: { str(e)}")
                 import traceback
 
                 self._logger.error(f"Initialization error details: {traceback.format_exc()}")
@@ -122,9 +118,7 @@ class LifecycleManager:
                 component.shutdown()
                 self._logger.debug(f"Shut down component: {component.__class__.__name__}")
             except Exception as e:
-                self._logger.error(
-                    f"Error shutting down component { component.__class__.__name__}: { str(e)}"
-                )
+                self._logger.error(f"Error shutting down component { component.__class__.__name__}: { str(e)}")
                 import traceback
 
                 self._logger.error(f"Shutdown error details: {traceback.format_exc()}")

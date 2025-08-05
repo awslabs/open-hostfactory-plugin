@@ -220,10 +220,7 @@ class CircuitBreakerStrategy(RetryStrategy):
         circuit_state["last_failure_time"] = current_time
 
         # Check if we should open the circuit
-        if (
-            circuit_state["state"] == CircuitState.CLOSED
-            and circuit_state["failure_count"] >= self.failure_threshold
-        ):
+        if circuit_state["state"] == CircuitState.CLOSED and circuit_state["failure_count"] >= self.failure_threshold:
 
             circuit_state["state"] = CircuitState.OPEN
 
@@ -263,9 +260,7 @@ class CircuitBreakerStrategy(RetryStrategy):
 
                 return CircuitState.HALF_OPEN
 
-        elif (  # noqa: SIM102 (false positive - proper if-elif structure)
-            current_state == CircuitState.HALF_OPEN
-        ):
+        elif current_state == CircuitState.HALF_OPEN:  # noqa: SIM102 (false positive - proper if-elif structure)
             # Check if we should timeout back to open
             if (
                 circuit_state["half_open_start_time"]

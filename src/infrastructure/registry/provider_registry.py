@@ -162,8 +162,7 @@ class ProviderRegistry(BaseRegistry):
         except ValueError as e:
             available_providers = ", ".join(self.get_registered_types())
             raise UnsupportedProviderError(
-                f"Provider type '{provider_type}' is not registered. "
-                f"Available providers: {available_providers}"
+                f"Provider type '{provider_type}' is not registered. " f"Available providers: {available_providers}"
             ) from e
 
     def create_strategy_from_instance(self, instance_name: str, config: Any) -> Any:
@@ -185,8 +184,7 @@ class ProviderRegistry(BaseRegistry):
         except ValueError as e:
             available_instances = ", ".join(self.get_registered_instances())
             raise UnsupportedProviderError(
-                f"Provider instance '{instance_name}' is not registered. "
-                f"Available instances: {available_instances}"
+                f"Provider instance '{instance_name}' is not registered. " f"Available instances: {available_instances}"
             ) from e
 
     def create_config(self, provider_type: str, data: Dict[str, Any]) -> Any:
@@ -211,13 +209,10 @@ class ProviderRegistry(BaseRegistry):
         except ValueError as e:
             available_providers = ", ".join(self.get_registered_types())
             raise UnsupportedProviderError(
-                f"Provider type '{provider_type}' is not registered. "
-                f"Available providers: {available_providers}"
+                f"Provider type '{provider_type}' is not registered. " f"Available providers: {available_providers}"
             ) from e
         except Exception as e:
-            raise ConfigurationError(
-                f"Failed to create config for provider '{provider_type}': {str(e)}"
-            ) from e
+            raise ConfigurationError(f"Failed to create config for provider '{provider_type}': {str(e)}") from e
 
     def create_resolver(self, provider_type: str) -> Optional[Any]:
         """
@@ -309,9 +304,7 @@ class ProviderRegistry(BaseRegistry):
         """
         return self.get_registered_instances()
 
-    def get_provider_instance_registration(
-        self, instance_name: str
-    ) -> Optional[ProviderRegistration]:
+    def get_provider_instance_registration(self, instance_name: str) -> Optional[ProviderRegistration]:
         """
         Get registration for a specific provider instance.
 

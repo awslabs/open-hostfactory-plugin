@@ -35,8 +35,11 @@ class TestLoggingIntegration:
         )
         return env
 
-    def _run_cli_command(self, complete_test_environment, command=["templates", "list"]):
+    def _run_cli_command(self, complete_test_environment, command=None):
         """Run CLI command with proper test environment and dry-run mode."""
+        if command is None:
+            command = ["templates", "list"]
+
         env = self._get_test_env(complete_test_environment)
 
         # Use sys.executable to get the current Python interpreter

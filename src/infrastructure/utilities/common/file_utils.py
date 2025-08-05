@@ -6,6 +6,9 @@ All functions maintain backward compatibility.
 """
 
 # Import only the functions that are actually used/exported
+from src.infrastructure.utilities.file import (
+    get_file_utils_logger,  # Import the actual function instead of redefining
+)
 from src.infrastructure.utilities.file import (  # YAML operations; JSON operations; Text operations; Binary operations; Directory operations; File operations; Path operations; Utility functions
     append_text_file,
     copy_file,
@@ -25,7 +28,6 @@ from src.infrastructure.utilities.file import (  # YAML operations; JSON operati
     get_file_name,
     get_file_name_without_extension,
     get_file_size,
-    get_file_utils_logger,
     get_relative_path,
     is_binary_file,
     is_text_file,
@@ -46,14 +48,6 @@ from src.infrastructure.utilities.file import (  # YAML operations; JSON operati
     write_text_file,
     write_yaml_file,
 )
-
-
-# Maintain backward compatibility with any legacy imports
-def get_file_utils_logger():
-    """Get logger for file utilities - backward compatibility."""
-    from src.infrastructure.utilities.file import get_file_utils_logger as _get_logger
-
-    return _get_logger()
 
 
 def _get_logger():

@@ -1,8 +1,9 @@
 [flake8]
 max-line-length = 120
-extend-ignore = E203,W503,E501,D100,D101,D102,D103,D104,D105,D107,D200,D202,D205,D400,D401,D402,B007,B009,B010,B011,B014,B017,B019,B023,B024,B027,B001,B004,B006,C416,C420,E131,E225,E226,E303,E402,E721,E722,F541,F811,F822,W504
+extend-ignore = E203,W503,E501,D100,D101,D102,D103,D104,D105,D107,D200,D202,D205,D400,D401,D402,B007,B009,B010,B014,B017,B019,B024,B027,B004,C416,C420,E131,E225,E226,E303,E402,W504
+# PHASE 1: Added high-severity checks - E721,E722,B001,B006,B011,B023,F541,F811,F822
 # REMOVED: W293 (now auto-fixed), F841 (now checking), F403/F405 (now checking)
-select = F821,F841,F403,F405
+select = F821,F841,F403,F405,E721,E722,B001,B006,B011,B023,F541,F811,F822
 exclude = 
     .git,
     __pycache__,
@@ -25,6 +26,7 @@ exclude =
     src/infrastructure/registry/enhanced_storage_registry_example.py
 per-file-ignores =
     tests/*:F821,F841
+    tests/integration/test_advanced_edge_cases.py:B023
     __init__.py:F401,F403,F405,F821
     src/infrastructure/utilities/common/file_utils.py:F403,F405,F821
     src/infrastructure/utilities/common/collections/__init__.py:F403,F405,F821

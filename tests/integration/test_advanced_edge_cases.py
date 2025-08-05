@@ -266,22 +266,32 @@ def test_concurrent_request_handling():
                 # Simulate concurrent operations
                 results = []
 
-                def simulate_operation(op_id):
-                    """Simulate a concurrent operation."""
-                    if operation_type == "launch_template_creation":
-                        # Simulate launch template creation with unique names
-                        return f"lt-{op_id}-{int(time.time() * 1000000) % 1000000}"
-                    elif operation_type == "request_processing":
-                        # Simulate request processing with queuing
-                        time.sleep(0.01)  # Simulate processing time
-                        return f"processed-{op_id}"
-                    elif operation_type == "request_id_generation":
-                        # Simulate request ID generation
-                        return f"req-{op_id}-{int(time.time() * 1000000) % 1000000}"
-                    elif operation_type == "machine_id_assignment":
-                        # Simulate machine ID assignment
-                        return f"i-{op_id}{int(time.time() * 1000000) % 1000000:010d}"
-                    return f"result-{op_id}"
+                # Extract operation type to avoid loop variable binding issues
+                current_operation_type = scenario["operation_type"]
+
+                def create_operation_func(op_type):
+                    """Create operation function with bound operation type."""
+
+                    def simulate_operation(op_id):
+                        """Simulate a concurrent operation."""
+                        if op_type == "launch_template_creation":
+                            # Simulate launch template creation with unique names
+                            return f"lt-{op_id}-{int(time.time() * 1000000) % 1000000}"
+                        elif op_type == "request_processing":
+                            # Simulate request processing with queuing
+                            time.sleep(0.01)  # Simulate processing time
+                            return f"processed-{op_id}"
+                        elif op_type == "request_id_generation":
+                            # Simulate request ID generation
+                            return f"req-{op_id}-{int(time.time() * 1000000) % 1000000}"
+                        elif op_type == "machine_id_assignment":
+                            # Simulate machine ID assignment
+                            return f"i-{op_id}{int(time.time() * 1000000) % 1000000:010d}"
+                        return f"result-{op_id}"
+
+                    return simulate_operation
+
+                simulate_operation = create_operation_func(current_operation_type)
 
                 # Execute concurrent operations
                 with ThreadPoolExecutor(max_workers=concurrent_ops) as executor:
@@ -417,17 +427,27 @@ def test_storage_strategy_stress():
                         # Simulate concurrent storage access
                         storage_file = os.path.join(temp_dir, "concurrent_test.json")
 
-                        def concurrent_write(thread_id):
-                            """Simulate concurrent write operation."""
-                            try:
-                                data = {"thread_id": thread_id, "timestamp": time.time()}
-                                # Simulate file locking by using thread-specific files
-                                thread_file = f"{storage_file}.{thread_id}"
-                                with open(thread_file, "w") as f:
-                                    json.dump(data, f)
-                                return True
-                            except Exception:
-                                return False
+                        # Extract storage file path to avoid loop variable binding issues
+                        current_storage_file = storage_file
+
+                        def create_concurrent_write_func(file_path):
+                            """Create concurrent write function with bound file path."""
+
+                            def concurrent_write(thread_id):
+                                """Simulate concurrent write operation."""
+                                try:
+                                    data = {"thread_id": thread_id, "timestamp": time.time()}
+                                    # Simulate file locking by using thread-specific files
+                                    thread_file = f"{file_path}.{thread_id}"
+                                    with open(thread_file, "w") as f:
+                                        json.dump(data, f)
+                                    return True
+                                except Exception:
+                                    return False
+
+                            return concurrent_write
+
+                        concurrent_write = create_concurrent_write_func(current_storage_file)
 
                         # Execute concurrent writes
                         with ThreadPoolExecutor(max_workers=scale) as executor:

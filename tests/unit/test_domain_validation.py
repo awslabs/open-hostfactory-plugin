@@ -250,7 +250,7 @@ def test_base_handler_validation():
                 print(f"   📋 Validation errors: {e.errors}")
 
             # Let's also check what fields the template actually has
-            print(f"   📋 Template fields:")
+            print("   📋 Template fields:")
             for field_name in dir(template):
                 if not field_name.startswith("_") and not callable(getattr(template, field_name)):
                     value = getattr(template, field_name)

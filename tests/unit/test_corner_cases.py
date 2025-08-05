@@ -378,7 +378,7 @@ class TestNetworkFailureCornerCases:
         # Application should handle timeout gracefully
         try:
             result = mock_service.call_api("test_endpoint")
-            assert False, "Should have raised TimeoutError"
+            raise AssertionError(), "Should have raised TimeoutError"
         except TimeoutError as e:
             assert "timed out" in str(e).lower()
 
@@ -389,7 +389,7 @@ class TestNetworkFailureCornerCases:
 
         try:
             mock_service.connect()
-            assert False, "Should have raised ConnectionRefusedError"
+            raise AssertionError(), "Should have raised ConnectionRefusedError"
         except ConnectionRefusedError as e:
             assert "refused" in str(e).lower()
 

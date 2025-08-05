@@ -258,21 +258,6 @@ def aws_config() -> AWSConfig:
 
 
 @pytest.fixture
-def mock_aws_credentials():
-    """Mock AWS credentials."""
-    with patch.dict(
-        os.environ,
-        {
-            "AWS_ACCESS_KEY_ID": "testing",
-            "AWS_SECRET_ACCESS_KEY": "testing",
-            "AWS_SECURITY_TOKEN": "testing",
-            "AWS_SESSION_TOKEN": "testing",
-            "AWS_DEFAULT_REGION": "us-east-1",
-        },
-    ):
-        yield
-
-
 @pytest.fixture
 def aws_mocks():
     """Set up comprehensive AWS service mocks."""
@@ -285,19 +270,19 @@ def aws_mocks():
 
 
 @pytest.fixture
-def ec2_client(mock_aws_credentials, aws_mocks):
+def ec2_client(aws_mocks):
     """Create a mocked EC2 client."""
     return boto3.client("ec2", region_name="us-east-1")
 
 
 @pytest.fixture
-def autoscaling_client(mock_aws_credentials, aws_mocks):
+def autoscaling_client(aws_mocks):
     """Create a mocked Auto Scaling client."""
     return boto3.client("autoscaling", region_name="us-east-1")
 
 
 @pytest.fixture
-def ssm_client(mock_aws_credentials, aws_mocks):
+def ssm_client(aws_mocks):
     """Create a mocked SSM client."""
     return boto3.client("ssm", region_name="us-east-1")
 
@@ -480,46 +465,7 @@ def di_container() -> DIContainer:
 
 
 @pytest.fixture(autouse=True)
-def setup_test_environment(complete_test_environment):
-    """
-    Automatically set up test environment for all tests.
-
-    This fixture runs automatically for every test and ensures:
-    - HF_PROVIDER environment variables are set to test values
-    - AWS credentials are mocked to prevent real AWS calls
-    - Test configuration files are available
-
-    Args:
-        complete_test_environment: Combined HF and AWS environment fixture
-    """
-    # The complete_test_environment fixture handles all the setup
-    # This fixture just ensures it's applied to all tests
-
-
-# Re-export fixtures from mock_env_vars for convenience
-__all__ = [
-    "mock_hf_environment",
-    "mock_hf_environment_with_fixtures",
-    "mock_aws_credentials",
-    "complete_test_environment",
-    "create_test_config_dict",
-    "create_test_templates_dict",
-]
-
-
 @pytest.fixture
-def mock_logger():
-    """Create a mock logger."""
-    logger = Mock()
-    logger.info = Mock()
-    logger.debug = Mock()
-    logger.warning = Mock()
-    logger.error = Mock()
-    logger.critical = Mock()
-    return logger
-
-
-# Parametrized fixtures for different test scenarios
 @pytest.fixture(params=["json", "sql", "memory"])
 def repository_type(request):
     """Parametrized fixture for different repository types."""

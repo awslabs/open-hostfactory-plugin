@@ -69,15 +69,17 @@ class AWSTemplate(CoreTemplate):
             raise ValueError("At least one subnet_id is required for AWS templates")
 
         # Auto-assign default fleet_type if not provided
-        if not self.fleet_type and self.provider_api:
-            if self.provider_api in [ProviderApi.EC2_FLEET, ProviderApi.SPOT_FLEET]:
-                # Use simple default without configuration dependency
-                object.__setattr__(self, "fleet_type", AWSFleetType.REQUEST)
+        if (
+            not self.fleet_type
+            and self.provider_api
+            and self.provider_api in [ProviderApi.EC2_FLEET, ProviderApi.SPOT_FLEET]
+        ):
+            # Use simple default without configuration dependency
+            object.__setattr__(self, "fleet_type", AWSFleetType.REQUEST)
 
         # Validate spot configuration
-        if self.percent_on_demand is not None:
-            if not (0 <= self.percent_on_demand <= 100):
-                raise ValueError("percent_on_demand must be between 0 and 100")
+        if self.percent_on_demand is not None and not (0 <= self.percent_on_demand <= 100):
+            raise ValueError("percent_on_demand must be between 0 and 100")
 
         # Validate launch template version format
         if self.launch_template_version is not None:

@@ -4,6 +4,7 @@ import inspect
 import logging
 import threading
 import typing
+from contextlib import suppress
 from typing import (
     Any,
     Callable,
@@ -247,11 +248,8 @@ class DependencyResolver:
                     parameters[param_name] = self.resolve(param_type, cls, dependency_chain)
                 else:
                     # Optional parameter - try to resolve, use default if not available
-                    try:
+                    with suppress(DependencyResolutionError, UnregisteredDependencyError):
                         parameters[param_name] = self.resolve(param_type, cls, dependency_chain)
-                    except (DependencyResolutionError, UnregisteredDependencyError):
-                        # Use default value
-                        pass
 
             return parameters
 
@@ -309,11 +307,8 @@ class DependencyResolver:
                     parameters[param_name] = self.resolve(param_type, None, dependency_chain)
                 else:
                     # Optional parameter
-                    try:
+                    with suppress(DependencyResolutionError, UnregisteredDependencyError):
                         parameters[param_name] = self.resolve(param_type, None, dependency_chain)
-                    except (DependencyResolutionError, UnregisteredDependencyError):
-                        # Use default value
-                        pass
 
             return parameters
 

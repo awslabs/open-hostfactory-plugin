@@ -99,13 +99,12 @@ class AWSResourceValidator:
             return False
 
         # Validate version if provided
-        if template.version:
+        if template.version and template.version not in ["$Latest", "$Default"]:
             # AWS launch template versions can be numbers or $Latest or $Default
-            if template.version not in ["$Latest", "$Default"]:
-                try:
-                    int(template.version)
-                except ValueError:
-                    return False
+            try:
+                int(template.version)
+            except ValueError:
+                return False
 
         return True
 

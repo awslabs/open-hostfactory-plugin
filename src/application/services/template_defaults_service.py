@@ -452,17 +452,19 @@ class TemplateDefaultsService(TemplateDefaultsPort):
 
             if hasattr(provider_config, "providers"):
                 for provider in provider_config.providers:
-                    if provider.name == provider_instance_name:
-                        # Check if provider has extensions field
-                        if hasattr(provider, "extensions") and provider.extensions:
-                            # Use extension registry to process the extensions
-                            if self.extension_registry.has_extension(provider_type):
-                                return self.extension_registry.get_extension_defaults(
-                                    provider_type, provider.extensions
-                                )
-                            else:
-                                # Return raw extensions if no registry entry
-                                return provider.extensions
+                    if (
+                        provider.name == provider_instance_name
+                        and hasattr(provider, "extensions")
+                        and provider.extensions
+                    ):
+                        # Use extension registry to process the extensions
+                        if self.extension_registry.has_extension(provider_type):
+                            return self.extension_registry.get_extension_defaults(
+                                provider_type, provider.extensions
+                            )
+                        else:
+                            # Return raw extensions if no registry entry
+                            return provider.extensions
 
             return {}
 

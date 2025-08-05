@@ -269,9 +269,10 @@ def _build_context_data(
         safe_kwargs = {}
         for key, value in kwargs.items():
             # Only include simple, non-sensitive values
-            if isinstance(value, (str, int, float, bool)) and len(str(value)) < 100:
-                # Skip potentially sensitive parameters
-                if not any(
+            if (
+                isinstance(value, (str, int, float, bool))
+                and len(str(value)) < 100
+                and not any(
                     sensitive in key.lower()
                     for sensitive in [
                         "password",
@@ -280,8 +281,9 @@ def _build_context_data(
                         "token",
                         "credential",
                     ]
-                ):
-                    safe_kwargs[key] = value
+                )
+            ):
+                safe_kwargs[key] = value
 
         if safe_kwargs:
             context_data["safe_kwargs"] = safe_kwargs

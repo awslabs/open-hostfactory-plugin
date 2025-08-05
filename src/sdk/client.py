@@ -6,6 +6,7 @@ application service and CQRS infrastructure with automatic
 handler discovery for zero code duplication.
 """
 
+from contextlib import suppress
 from typing import Any, Callable, Dict, List, Optional
 
 from src.bootstrap import Application
@@ -129,21 +130,20 @@ class OpenHFPluginSDK:
 
     async def cleanup(self) -> None:
         """Clean up resources and connections."""
-        try:
+
+        with suppress(Exception):
             if self._app and hasattr(self._app, "cleanup"):
                 await self._app.cleanup()
-        except Exception:
-            # Ignore cleanup errors
-            pass
-        finally:
-            self._initialized = False
-            self._methods.clear()
 
-            # Remove dynamically added methods
-            if self._discovery:
-                for method_name in self._discovery.list_available_methods():
-                    if hasattr(self, method_name):
-                        delattr(self, method_name)
+        # Always clean up state
+        self._initialized = False
+        self._methods.clear()
+
+        # Remove dynamically added methods
+        if self._discovery:
+            for method_name in self._discovery.list_available_methods():
+                if hasattr(self, method_name):
+                    delattr(self, method_name)
 
     # Context manager support
     async def __aenter__(self) -> "OpenHFPluginSDK":

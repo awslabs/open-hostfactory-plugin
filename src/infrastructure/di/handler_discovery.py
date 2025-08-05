@@ -20,6 +20,7 @@ import json
 import os
 import pkgutil
 import time
+from contextlib import suppress
 from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
@@ -342,11 +343,8 @@ class HandlerDiscoveryService:
                 for file in files:
                     if file.endswith(".py"):
                         filepath = os.path.join(root, file)
-                        try:
+                        with suppress(OSError):
                             mtimes[filepath] = os.path.getmtime(filepath)
-                        except OSError:
-                            # File might have been deleted, skip it
-                            pass
         except Exception as e:
             logger.debug(f"Failed to get source file modification times: {e}")
 

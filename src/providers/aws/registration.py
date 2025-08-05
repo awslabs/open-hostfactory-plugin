@@ -1,5 +1,6 @@
 """AWS Provider Registration - Register AWS provider with the provider registry."""
 
+from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 # Use TYPE_CHECKING to avoid direct infrastructure import
@@ -471,8 +472,6 @@ def register_aws_services_with_di(container) -> None:
 
 # Auto-register AWS extensions when module is imported
 # This ensures basic functionality even if explicit initialization is missed
-try:
+
+with suppress(Exception):
     register_aws_extensions()
-except Exception:
-    # Silently fail during import - initialization will be retried during startup
-    pass

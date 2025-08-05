@@ -208,10 +208,12 @@ class ConfigurationMigrator:
                 # Check essential AWS configuration is preserved
                 essential_fields = ["region", "profile"]
                 for field in essential_fields:
-                    if field in original_aws_config:
-                        if migrated_aws_config.get(field) != original_aws_config[field]:
-                            self._logger.error(f"AWS {field} not preserved in migration")
-                            return False
+                    if (
+                        field in original_aws_config
+                        and migrated_aws_config.get(field) != original_aws_config[field]
+                    ):
+                        self._logger.error(f"AWS {field} not preserved in migration")
+                        return False
 
             self._logger.info("Migration validation successful")
             return True

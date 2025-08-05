@@ -5,6 +5,16 @@ All command handlers are now automatically discovered and registered via
 """
 
 from src.infrastructure.di.container import DIContainer
+from src.infrastructure.di.buses import CommandBus
+from src.domain.base.ports import LoggingPort
+from src.providers.base.strategy.provider_context import ProviderContext
+from src.application.commands.machine_handlers import (
+    UpdateMachineStatusHandler,
+    ConvertMachineStatusCommandHandler,
+    ConvertBatchMachineStatusCommandHandler,
+    ValidateProviderStateCommandHandler,
+    CleanupMachineResourcesHandler,
+)
 
 
 def register_command_handler_services(container: DIContainer) -> None:
@@ -109,12 +119,12 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
         )
 
         command_bus.register(
-            UpdateMachineStatusCommand, container.get(UpdateMachineStatusCommandHandler)
+            UpdateMachineStatusCommand, container.get(UpdateMachineStatusHandler)
         )
 
         command_bus.register(
             CleanupMachineResourcesCommand,
-            container.get(CleanupMachineResourcesCommandHandler),
+            container.get(CleanupMachineResourcesHandler),
         )
 
         # Register request command handlers

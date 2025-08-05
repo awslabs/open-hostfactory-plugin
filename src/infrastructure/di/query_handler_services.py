@@ -5,6 +5,8 @@ All query handlers are now automatically discovered and registered via
 """
 
 from src.infrastructure.di.container import DIContainer
+from src.infrastructure.di.buses import QueryBus
+from src.domain.base.ports import LoggingPort
 
 
 def register_query_handler_services(container: DIContainer) -> None:

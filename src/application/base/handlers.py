@@ -26,7 +26,7 @@ TQuery = TypeVar("TQuery")
 TResult = TypeVar("TResult")
 
 
-class BaseHandler(ABC):
+class BaseHandler:
     """
     Root base handler with common cross-cutting concerns.
 

@@ -111,6 +111,7 @@ class EventHandler(ABC):
         if self.logger:
             self.logger.debug(f"Processing event: {event.event_type}")
 
+    @abstractmethod
     async def _post_process(self, event: DomainEvent) -> None:
         """
         Perform common post-processing logic.

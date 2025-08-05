@@ -215,6 +215,7 @@ class ProviderStrategy(ABC):
             Current health status of the provider
         """
 
+    @abstractmethod
     def cleanup(self) -> None:
         """
         Clean up resources used by the strategy.

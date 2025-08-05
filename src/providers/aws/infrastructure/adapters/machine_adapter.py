@@ -315,8 +315,8 @@ class AWSMachineAdapter:
                                     machine.machine_id}"
                             )
 
-                            def detach_volume():
-                                return self._aws_client.ec2_client.detach_volume(VolumeId=volume_id)
+                            def detach_volume(vol_id=volume_id):
+                                return self._aws_client.ec2_client.detach_volume(VolumeId=vol_id)
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2", "detach_volume", detach_volume
@@ -324,8 +324,8 @@ class AWSMachineAdapter:
 
                             self._logger.debug(f"Deleting volume {volume_id}")
 
-                            def delete_volume():
-                                return self._aws_client.ec2_client.delete_volume(VolumeId=volume_id)
+                            def delete_volume(vol_id=volume_id):
+                                return self._aws_client.ec2_client.delete_volume(VolumeId=vol_id)
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2", "delete_volume", delete_volume
@@ -369,9 +369,9 @@ class AWSMachineAdapter:
                                     machine.machine_id}"
                             )
 
-                            def detach_network_interface():
+                            def detach_network_interface(attach_id=attachment_id):
                                 return self._aws_client.ec2_client.detach_network_interface(
-                                    AttachmentId=attachment_id
+                                    AttachmentId=attach_id
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(
@@ -382,9 +382,9 @@ class AWSMachineAdapter:
 
                             self._logger.debug(f"Deleting network interface {nic_id}")
 
-                            def delete_network_interface():
+                            def delete_network_interface(network_id=nic_id):
                                 return self._aws_client.ec2_client.delete_network_interface(
-                                    NetworkInterfaceId=nic_id
+                                    NetworkInterfaceId=network_id
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(

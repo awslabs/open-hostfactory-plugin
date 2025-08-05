@@ -11,7 +11,7 @@ T = TypeVar("T")
 R = TypeVar("R")
 
 
-class BaseHandler(ABC):
+class BaseHandler:
     """
     Base class for all handlers.
 

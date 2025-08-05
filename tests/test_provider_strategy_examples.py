@@ -165,8 +165,8 @@ class TestProviderStrategyBasics:
         provider1 = MockProvider1Strategy()
 
         assert provider1.provider_type == "provider1"
-        assert provider1.initialize() == True
-        assert provider1.is_initialized == True
+        assert provider1.initialize()
+        assert provider1.is_initialized
 
         # Test capabilities
         capabilities = provider1.get_capabilities()
@@ -175,7 +175,7 @@ class TestProviderStrategyBasics:
 
         # Test health check
         health = provider1.check_health()
-        assert health.is_healthy == True
+        assert health.is_healthy
 
     def test_provider_operation_execution(self):
         """Test executing operations on provider strategies."""
@@ -188,7 +188,7 @@ class TestProviderStrategyBasics:
         )
 
         result = provider1.execute_operation(health_op)
-        assert result.success == True
+        assert result.success
         assert result.data["provider"] == "provider1"
 
         # Test create instances operation
@@ -198,7 +198,7 @@ class TestProviderStrategyBasics:
         )
 
         result = provider1.execute_operation(create_op)
-        assert result.success == True
+        assert result.success
         assert len(result.data["instance_ids"]) == 2
 
     def test_provider_failure_handling(self):
@@ -206,7 +206,7 @@ class TestProviderStrategyBasics:
         failing_provider = MockProvider1Strategy(should_fail=True)
 
         # Test initialization failure
-        assert failing_provider.initialize() == False
+        assert failing_provider.initialize() is False
 
         # Test operation failure
         operation = ProviderOperation(
@@ -214,7 +214,7 @@ class TestProviderStrategyBasics:
         )
 
         result = failing_provider.execute_operation(operation)
-        assert result.success == False
+        assert result.success is False
         assert "Provider1 simulated failure" in result.error_message
 
 
@@ -242,8 +242,8 @@ class TestProviderContextAndSwitching:
         self.context.register_strategy(self.provider1)
         self.context.register_strategy(self.provider2)
 
-        assert self.context.initialize() == True
-        assert self.context.is_initialized == True
+        assert self.context.initialize()
+        assert self.context.is_initialized
 
     def test_runtime_provider_switching(self):
         """Test switching providers at runtime."""
@@ -255,15 +255,15 @@ class TestProviderContextAndSwitching:
         assert self.context.current_strategy_type == "provider1"
 
         # Switch to provider2
-        assert self.context.set_strategy("provider2") == True
+        assert self.context.set_strategy("provider2")
         assert self.context.current_strategy_type == "provider2"
 
         # Switch back to provider1
-        assert self.context.set_strategy("provider1") == True
+        assert self.context.set_strategy("provider1")
         assert self.context.current_strategy_type == "provider1"
 
         # Try to switch to non-existent provider
-        assert self.context.set_strategy("nonexistent") == False
+        assert self.context.set_strategy("nonexistent") is False
 
     def test_operation_execution_with_switching(self):
         """Test executing operations after switching providers."""
@@ -279,14 +279,14 @@ class TestProviderContextAndSwitching:
         # Execute with provider1
         self.context.set_strategy("provider1")
         result1 = self.context.execute_operation(operation)
-        assert result1.success == True
+        assert result1.success
         assert len(result1.data["instance_ids"]) == 2
         assert "provider1" in result1.data["instance_ids"][0]
 
         # Switch and execute with provider2
         self.context.set_strategy("provider2")
         result2 = self.context.execute_operation(operation)
-        assert result2.success == True
+        assert result2.success
         assert len(result2.data["instance_ids"]) == 3
         assert "provider2" in result2.data["instance_ids"][0]
 
@@ -417,7 +417,7 @@ class TestLoadBalancing:
 
         # Check overall health
         health = load_balancer.check_health()
-        assert health.is_healthy == True  # Should be healthy if at least one provider is healthy
+        assert health.is_healthy  # Should be healthy if at least one provider is healthy
 
         # Get strategy statistics
         stats = load_balancer.strategy_stats
@@ -455,7 +455,7 @@ class TestFallbackAndResilience:
 
         # Should succeed using fallback
         result = fallback_strategy.execute_operation(operation)
-        assert result.success == True
+        assert result.success
 
         # Fallback should have been used
         assert self.fallback1.operation_count > 0
@@ -487,7 +487,7 @@ class TestFallbackAndResilience:
         for _ in range(5):
             result = fallback_strategy.execute_operation(operation)
             # Should succeed using fallback
-            assert result.success == True
+            assert result.success
 
         # Check circuit breaker metrics
         metrics = fallback_strategy.circuit_metrics
@@ -521,7 +521,7 @@ class TestFallbackAndResilience:
         end_time = time.time()
 
         # Should succeed using fallback after retries
-        assert result.success == True
+        assert result.success
 
         # Should have taken time for retries
         assert end_time - start_time >= 0.2  # At least 2 retry delays
@@ -553,7 +553,7 @@ class TestFallbackAndResilience:
         result = fallback_strategy.execute_operation(operation)
 
         # Should succeed using the second fallback
-        assert result.success == True
+        assert result.success
         assert working_fallback2.operation_count > 0
 
 
@@ -585,7 +585,7 @@ class TestCompositeStrategies:
         end_time = time.time()
 
         # Should succeed
-        assert result.success == True
+        assert result.success
 
         # Both providers should have been executed
         assert self.provider1.operation_count > 0
@@ -609,7 +609,7 @@ class TestCompositeStrategies:
         result = composite.execute_operation(operation)
 
         # Should succeed
-        assert result.success == True
+        assert result.success
 
         # Both providers should have been executed
         assert self.provider1.operation_count > 0
@@ -639,7 +639,7 @@ class TestCompositeStrategies:
         result = composite.execute_operation(operation)
 
         # Should succeed because one provider worked and we allow 50% failures
-        assert result.success == True
+        assert result.success
         assert working_provider.operation_count > 0
 
 
@@ -712,7 +712,7 @@ class TestIntegrationScenarios:
                 context.set_strategy("provider2")
 
             result = context.execute_operation(operation)
-            assert result.success == True
+            assert result.success
 
         # Both providers should have been used
         assert provider1.operation_count > 0

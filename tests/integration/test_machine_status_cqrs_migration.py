@@ -62,7 +62,7 @@ class TestMachineStatusCQRSMigration:
         result = asyncio.run(convert_handler.handle(command))
 
         # Verify result
-        assert result.success == True
+        assert result.success
         assert isinstance(result.status, MachineStatus)
         assert result.original_state == "running"
         assert result.provider_type == "aws"
@@ -83,9 +83,9 @@ class TestMachineStatusCQRSMigration:
         result = asyncio.run(handler.handle(command))
 
         # Should still succeed with fallback
-        assert result.success == True
+        assert result.success
         assert isinstance(result.status, MachineStatus)
-        assert result.metadata.get("used_fallback") == True
+        assert result.metadata.get("used_fallback")
 
     def test_batch_convert_handler(self, batch_convert_handler):
         """Test ConvertBatchMachineStatusCommandHandler functionality."""
@@ -105,7 +105,7 @@ class TestMachineStatusCQRSMigration:
         result = asyncio.run(batch_convert_handler.handle(command))
 
         # Verify result
-        assert result.success == True
+        assert result.success
         assert len(result.statuses) == 3
         assert result.count == 3
         assert all(isinstance(status, MachineStatus) for status in result.statuses)
@@ -123,7 +123,7 @@ class TestMachineStatusCQRSMigration:
         result = asyncio.run(validate_handler.handle(command))
 
         # Verify result
-        assert result.success == True
+        assert result.success
         assert isinstance(result.is_valid, bool)
         assert result.provider_state == "running"
         assert result.provider_type == "aws"
@@ -139,19 +139,19 @@ class TestMachineStatusCQRSMigration:
         )
 
         # Test convert handler
-        assert convert_handler.can_handle(convert_command) == True
-        assert convert_handler.can_handle(batch_command) == False
-        assert convert_handler.can_handle(validate_command) == False
+        assert convert_handler.can_handle(convert_command)
+        assert convert_handler.can_handle(batch_command) is False
+        assert convert_handler.can_handle(validate_command) is False
 
         # Test batch handler
-        assert batch_convert_handler.can_handle(convert_command) == False
-        assert batch_convert_handler.can_handle(batch_command) == True
-        assert batch_convert_handler.can_handle(validate_command) == False
+        assert batch_convert_handler.can_handle(convert_command) is False
+        assert batch_convert_handler.can_handle(batch_command)
+        assert batch_convert_handler.can_handle(validate_command) is False
 
         # Test validate handler
-        assert validate_handler.can_handle(convert_command) == False
-        assert validate_handler.can_handle(batch_command) == False
-        assert validate_handler.can_handle(validate_command) == True
+        assert validate_handler.can_handle(convert_command) is False
+        assert validate_handler.can_handle(batch_command) is False
+        assert validate_handler.can_handle(validate_command)
 
     def test_fallback_conversion_mapping(self, mock_provider_context):
         """Test fallback conversion mapping matches original service."""
@@ -187,8 +187,8 @@ class TestMachineStatusCQRSMigration:
         result = asyncio.run(handler.handle(command))
 
         # Should succeed with fallback
-        assert result.success == True
-        assert result.metadata.get("used_fallback") == True
+        assert result.success
+        assert result.metadata.get("used_fallback")
 
     def test_performance_comparison(self, convert_handler):
         """Test performance of CQRS handlers vs original service."""
@@ -206,7 +206,7 @@ class TestMachineStatusCQRSMigration:
 
         for command in commands:
             result = asyncio.run(convert_handler.handle(command))
-            assert result.success == True
+            assert result.success
 
         end_time = time.time()
         total_time = end_time - start_time

@@ -130,9 +130,7 @@ class TestDDDCompliance:
     def test_domain_events_are_immutable(self):
         """Ensure all domain events are immutable."""
         try:
-            pass
-
-            # from src.domain.request.events import RequestCreatedEvent  # TODO: Verify if this exists
+            from src.domain.base.events import RequestCreatedEvent
         except ImportError as e:
             pytest.skip(f"Could not import domain events: {e}")
 

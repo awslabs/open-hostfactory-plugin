@@ -25,7 +25,7 @@ class TestContainerIntegration:
     def built_image(self, project_root, test_image_name):
         """Build test image for integration tests."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "build",
@@ -59,7 +59,7 @@ class TestContainerIntegration:
         """Test container responds to environment variables."""
         try:
             # Test version command with environment variables
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",
@@ -88,7 +88,7 @@ class TestContainerIntegration:
         """Test container configuration loading."""
         try:
             # Test with different configuration
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",
@@ -119,7 +119,7 @@ class TestContainerIntegration:
     def test_container_aws_configuration(self, built_image):
         """Test container AWS configuration."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",
@@ -148,7 +148,7 @@ class TestContainerIntegration:
     def test_container_authentication_configuration(self, built_image):
         """Test container authentication configuration."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",
@@ -180,7 +180,7 @@ class TestContainerIntegration:
         container_id = None
         try:
             # Start container
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",
@@ -266,7 +266,7 @@ class TestContainerIntegration:
     def test_container_health_check_command(self, built_image):
         """Test container health check command."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["docker", "run", "--rm", built_image, "health"],
                 capture_output=True,
                 text=True,
@@ -284,7 +284,7 @@ class TestContainerIntegration:
     def test_container_bash_access(self, built_image):
         """Test container bash access for debugging."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",
@@ -311,7 +311,7 @@ class TestContainerIntegration:
         """Test container file permissions and ownership."""
         try:
             # Check that files are owned by ohfp user
-            result = subprocess.run(
+            _ = subprocess.run(
                 ["docker", "run", "--rm", built_image, "bash", "-c", "ls -la /app/ | head -5"],
                 capture_output=True,
                 text=True,
@@ -330,7 +330,7 @@ class TestContainerIntegration:
     def test_container_directory_structure(self, built_image):
         """Test container directory structure."""
         try:
-            result = subprocess.run(
+            _ = subprocess.run(
                 [
                     "docker",
                     "run",

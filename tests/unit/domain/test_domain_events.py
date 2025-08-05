@@ -8,6 +8,11 @@ import pytest
 try:
     from src.domain.base.events.base_events import BaseEvent
     from src.domain.base.events.domain_events import DomainEvent
+    from src.domain.base.events import (
+        RequestCompletedEvent,
+        RequestCreatedEvent,
+        RequestStatusChangedEvent,
+    )
     from src.domain.request.aggregate import Request
     from src.domain.request.value_objects import RequestStatus, RequestType
 

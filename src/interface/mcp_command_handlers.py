@@ -168,7 +168,8 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                                 {
                                     "check": "Tool Execution Test",
                                     "status": "PASS",
-                                    "details": f"Successfully executed {query_tools[0]}",
+                                    "details": f"Successfully executed {
+            query_tools[0]}",
                                 }
                             )
                         else:
@@ -176,7 +177,12 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                                 {
                                     "check": "Tool Execution Test",
                                     "status": "WARNING",
-                                    "details": f"Tool execution returned error (may be expected): {test_result.get('error', {}).get('message', 'Unknown error')}",
+                                    "details": f"Tool execution returned error (may be expected): {
+            test_result.get(
+                'error',
+                {}).get(
+                    'message',
+                    'Unknown error')}",
                                 }
                             )
                     except Exception as e:
@@ -184,7 +190,8 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                             {
                                 "check": "Tool Execution Test",
                                 "status": "WARNING",
-                                "details": f"Tool execution failed (may be expected): {str(e)}",
+                                "details": f"Tool execution failed (may be expected): {
+            str(e)}",
                             }
                         )
 
@@ -205,7 +212,8 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                     {
                         "check": "Configuration File",
                         "status": "PASS",
-                        "details": f"Valid JSON configuration with {len(config_data)} keys",
+                        "details": f"Valid JSON configuration with {
+            len(config_data)} keys",
                     }
                 )
             except Exception as e:
@@ -323,9 +331,7 @@ def _format_validation_table(result: Dict[str, Any]) -> Dict[str, Any]:
     rows = []
 
     for check in result["checks"]:
-        status_symbol = {"PASS": "✅", "WARNING": "⚠️", "FAIL": "❌"}.get(
-            check["status"], "❓"
-        )
+        status_symbol = {"PASS": "✅", "WARNING": "⚠️", "FAIL": "❌"}.get(check["status"], "❓")
 
         rows.append(
             [

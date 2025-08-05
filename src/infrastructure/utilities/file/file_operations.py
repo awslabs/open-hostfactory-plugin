@@ -148,9 +148,7 @@ def copy_file(source_path: str, destination_path: str) -> None:
         ensure_parent_directory_exists(destination_path)
         shutil.copy2(source_path, destination_path)
     except OSError as e:
-        raise OSError(
-            f"Failed to copy file from {source_path} to {destination_path}: {str(e)}"
-        )
+        raise OSError(f"Failed to copy file from {source_path} to {destination_path}: {str(e)}")
 
 
 def move_file(source_path: str, destination_path: str) -> None:
@@ -174,9 +172,7 @@ def move_file(source_path: str, destination_path: str) -> None:
         ensure_parent_directory_exists(destination_path)
         shutil.move(source_path, destination_path)
     except OSError as e:
-        raise OSError(
-            f"Failed to move file from {source_path} to {destination_path}: {str(e)}"
-        )
+        raise OSError(f"Failed to move file from {source_path} to {destination_path}: {str(e)}")
 
 
 def rename_file(file_path: str, new_name: str) -> str:
@@ -269,9 +265,7 @@ def create_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> str
         raise OSError(f"Failed to create temporary file: {str(e)}")
 
 
-def with_temp_file(
-    suffix: str = "", prefix: str = "", dir: str = None
-) -> ContextManager[str]:
+def with_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> ContextManager[str]:
     """
     Context manager for temporary file.
 

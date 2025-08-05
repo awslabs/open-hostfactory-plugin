@@ -84,9 +84,7 @@ class HandlerDiscoveryService:
         os.makedirs(cache_dir, exist_ok=True)
         return os.path.join(cache_dir, "handler_discovery.json")
 
-    def discover_and_register_handlers(
-        self, base_package: str = "src.application"
-    ) -> None:
+    def discover_and_register_handlers(self, base_package: str = "src.application") -> None:
         """
         Discover all handlers and register them with the DI container.
         Uses caching to improve performance on subsequent runs.
@@ -100,7 +98,8 @@ class HandlerDiscoveryService:
         cached_result = self._try_load_from_cache(base_package)
         if cached_result:
             logger.info(
-                f"Using cached handler discovery ({cached_result['total_handlers']} handlers)"
+                f"Using cached handler discovery ({
+        cached_result['total_handlers']} handlers)"
             )
             self._register_handlers_from_cache(cached_result["handlers"])
             return
@@ -135,9 +134,7 @@ class HandlerDiscoveryService:
             package_path = Path(package.__file__).parent
 
             # Walk through all modules in the package
-            for module_info in pkgutil.walk_packages(
-                [str(package_path)], f"{base_package}."
-            ):
+            for module_info in pkgutil.walk_packages([str(package_path)], f"{base_package}."):
                 try:
                     # Import the module to trigger decorator registration
                     importlib.import_module(module_info.name)
@@ -163,42 +160,38 @@ class HandlerDiscoveryService:
         query_handlers = get_registered_query_handlers()
         for query_type, handler_class in query_handlers.items():
             try:
-                # Register handler class for DI container to create instances with proper dependency injection
+                # Register handler class for DI container to create instances with
+                # proper dependency injection
                 self.container.register_singleton(handler_class)
                 logger.debug(
-                    f"Registered query handler: {handler_class.__name__} for {query_type.__name__}"
+                    f"Registered query handler: {
+        handler_class.__name__} for {
+            query_type.__name__}"
                 )
             except Exception as e:
-                logger.error(
-                    f"Failed to register query handler {handler_class.__name__}: {e}"
-                )
+                logger.error(f"Failed to register query handler {handler_class.__name__}: {e}")
 
         # Register command handlers
         command_handlers = get_registered_command_handlers()
         for command_type, handler_class in command_handlers.items():
             try:
-                # Register handler class for DI container to create instances with proper dependency injection
+                # Register handler class for DI container to create instances with
+                # proper dependency injection
                 self.container.register_singleton(handler_class)
                 logger.debug(
-                    f"Registered command handler: {handler_class.__name__} for {command_type.__name__}"
+                    f"Registered command handler: {
+        handler_class.__name__} for {
+            command_type.__name__}"
                 )
             except Exception as e:
-                logger.error(
-                    f"Failed to register command handler {handler_class.__name__}: {e}"
-                )
+                logger.error(f"Failed to register command handler {handler_class.__name__}: {e}")
 
         total_registered = len(query_handlers) + len(command_handlers)
-        logger.info(
-            f"Handler registration complete. Registered {total_registered} handlers"
-        )
+        logger.info(f"Handler registration complete. Registered {total_registered} handlers")
 
     def _try_load_from_cache(self, base_package: str) -> Optional[Dict[str, Any]]:
         """Try to load handler discovery results from cache if valid."""
-        if (
-            not self.cache_enabled
-            or not self.cache_file
-            or not os.path.exists(self.cache_file)
-        ):
+        if not self.cache_enabled or not self.cache_file or not os.path.exists(self.cache_file):
             return None
 
         try:
@@ -260,7 +253,10 @@ class HandlerDiscoveryService:
             os.rename(temp_file, self.cache_file)
 
             logger.debug(
-                f"Cached handler discovery results ({stats.get('total_handlers', 0)} handlers)"
+                f"Cached handler discovery results ({
+        stats.get(
+            'total_handlers',
+             0)} handlers)"
             )
 
         except Exception as e:
@@ -281,13 +277,14 @@ class HandlerDiscoveryService:
 
                     # Register with DI container
                     self.container.register_singleton(handler_class)
-                    logger.debug(
-                        f"Registered cached query handler: {handler_class.__name__}"
-                    )
+                    logger.debug(f"Registered cached query handler: {handler_class.__name__}")
 
                 except Exception as e:
                     logger.warning(
-                        f"Failed to register cached query handler {handler_info.get('class_name', 'unknown')}: {e}"
+                        f"Failed to register cached query handler {
+        handler_info.get(
+            'class_name',
+             'unknown')}: {e}"
                     )
                     # Fall back to full discovery if cache loading fails
                     self._fallback_to_full_discovery()
@@ -304,13 +301,13 @@ class HandlerDiscoveryService:
 
                     # Register with DI container
                     self.container.register_singleton(handler_class)
-                    logger.debug(
-                        f"Registered cached command handler: {handler_class.__name__}"
-                    )
+                    logger.debug(f"Registered cached command handler: {handler_class.__name__}")
 
                 except Exception as e:
                     logger.warning(
-                        f"Failed to register cached command handler {handler_info.get('class_name', 'unknown')}: {e}"
+                        f"Failed to register cached command handler {
+        handler_info.get(
+            'class_name', 'unknown')}: {e}"
                     )
                     # Fall back to full discovery if cache loading fails
                     self._fallback_to_full_discovery()
@@ -354,9 +351,7 @@ class HandlerDiscoveryService:
 
         return mtimes
 
-    def _serialize_handlers(
-        self, handlers: Dict[Type, Type]
-    ) -> Dict[str, Dict[str, str]]:
+    def _serialize_handlers(self, handlers: Dict[Type, Type]) -> Dict[str, Dict[str, str]]:
         """Serialize handler information for caching."""
         serialized = {}
 
@@ -366,14 +361,10 @@ class HandlerDiscoveryService:
                     "class_name": handler_class.__name__,
                     "module": handler_class.__module__,
                     "query_type_name": (
-                        handled_type.__name__
-                        if "Query" in handled_type.__name__
-                        else None
+                        handled_type.__name__ if "Query" in handled_type.__name__ else None
                     ),
                     "command_type_name": (
-                        handled_type.__name__
-                        if "Command" in handled_type.__name__
-                        else None
+                        handled_type.__name__ if "Command" in handled_type.__name__ else None
                     ),
                 }
             except Exception as e:

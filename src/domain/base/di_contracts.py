@@ -330,9 +330,7 @@ class DIEventPort(ABC):
         """
 
     @abstractmethod
-    def on_dependency_creation_failed(
-        self, callback: Callable[[Type, Exception], None]
-    ) -> None:
+    def on_dependency_creation_failed(self, callback: Callable[[Type, Exception], None]) -> None:
         """
         Register callback for dependency creation failures.
 
@@ -341,9 +339,7 @@ class DIEventPort(ABC):
         """
 
 
-class CompositeDIPort(
-    DIContainerPort, DIServiceLocatorPort, DIConfigurationPort, DIEventPort
-):
+class CompositeDIPort(DIContainerPort, DIServiceLocatorPort, DIConfigurationPort, DIEventPort):
     """
     Composite port combining all DI functionality.
 

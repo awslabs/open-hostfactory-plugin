@@ -64,9 +64,7 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
             raise ValueError(f"Invalid format: {request['format']}")
 
     @handle_interface_exceptions
-    async def execute_api_request(
-        self, request: Dict[str, Any], context
-    ) -> Dict[str, Any]:
+    async def execute_api_request(self, request: Dict[str, Any], context) -> Dict[str, Any]:
         """
         Execute the core API logic for retrieving available templates.
 
@@ -90,9 +88,7 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
             templates = await self._query_bus.execute(query)
 
             # Use scheduler strategy for format conversion - SINGLE MAPPING POINT
-            formatted_response = self._scheduler_strategy.format_templates_response(
-                templates
-            )
+            formatted_response = self._scheduler_strategy.format_templates_response(templates)
 
             # Add correlation ID and other metadata
             if isinstance(formatted_response, dict):
@@ -101,14 +97,14 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
 
             if self.logger:
                 self.logger.info(
-                    f"Successfully retrieved {len(templates)} templates - Correlation ID: {context.correlation_id}"
+                    f"Successfully retrieved {
+        len(templates)} templates - Correlation ID: {
+            context.correlation_id}"
                 )
 
             # Record metrics if available
             if self._metrics:
-                self._metrics.record_api_success(
-                    "get_available_templates", len(templates)
-                )
+                self._metrics.record_api_success("get_available_templates", len(templates))
 
             return formatted_response
 
@@ -124,9 +120,7 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
 
             raise
 
-    async def post_process_response(
-        self, response: Dict[str, Any], context
-    ) -> Dict[str, Any]:
+    async def post_process_response(self, response: Dict[str, Any], context) -> Dict[str, Any]:
         """
         Post-process the template list response.
 

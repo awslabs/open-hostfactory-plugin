@@ -107,9 +107,7 @@ class BaseHandler(ABC):
                     duration = time.time() - start_time
 
                     if self.logger:
-                        self.logger.info(
-                            f"Completed operation: {operation_id} in {duration:.3f}s"
-                        )
+                        self.logger.info(f"Completed operation: {operation_id} in {duration:.3f}s")
 
                     self._metrics[operation_id] = {
                         "duration": duration,
@@ -153,7 +151,8 @@ class BaseHandler(ABC):
 
                         if self.logger:
                             self.logger.info(
-                                f"Completed operation: {operation_id} in {duration:.3f}s"
+                                f"Completed operation: {operation_id} in {
+        duration:.3f}s"
                             )
 
                         return result
@@ -176,9 +175,7 @@ class BaseHandler(ABC):
         """Get handler performance metrics."""
         return self._metrics.copy()
 
-    def handle_error(
-        self, error: Exception, context: str
-    ) -> InfrastructureErrorResponse:
+    def handle_error(self, error: Exception, context: str) -> InfrastructureErrorResponse:
         """
         Unified error handling for all handlers.
 
@@ -323,9 +320,7 @@ class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
         except Exception as e:
             duration = time.time() - start_time
             if self.logger:
-                self.logger.error(
-                    f"Failed query: {operation_id} in {duration:.3f}s - {str(e)}"
-                )
+                self.logger.error(f"Failed query: {operation_id} in {duration:.3f}s - {str(e)}")
             raise
 
     def get_cache_key(self, query: TQuery) -> Optional[str]:
@@ -390,7 +385,8 @@ class BaseProviderHandler(BaseHandler):
                 duration = time.time() - start_time
                 if self.logger:
                     self.logger.info(
-                        f"Completed provider operation: {operation_id} in {duration:.3f}s"
+                        f"Completed provider operation: {operation_id} in {
+        duration:.3f}s"
                     )
 
                 return result
@@ -406,7 +402,10 @@ class BaseProviderHandler(BaseHandler):
                 else:
                     if self.logger:
                         self.logger.warning(
-                            f"Provider operation failed (attempt {attempt + 1}): {str(e)}"
+                            f"Provider operation failed (attempt {
+        attempt +
+        1}): {
+            str(e)}"
                         )
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
 

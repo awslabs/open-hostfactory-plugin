@@ -48,7 +48,8 @@ class OptimisticConcurrencyControl:
                     retries += 1
                     if retries > self.max_retries:
                         self.logger.warning(
-                            f"Maximum retries ({self.max_retries}) exceeded for concurrency error: {e}"
+                            f"Maximum retries ({
+        self.max_retries}) exceeded for concurrency error: {e}"
                         )
                         raise
 
@@ -84,9 +85,7 @@ class OptimisticConcurrencyControl:
                     entity_class_name, entity_id, version_map[entity_id], entity.version
                 )
 
-    def increment_version(
-        self, entity: T, entity_id: str, version_map: Dict[str, int]
-    ) -> None:
+    def increment_version(self, entity: T, entity_id: str, version_map: Dict[str, int]) -> None:
         """
         Increment entity version.
 

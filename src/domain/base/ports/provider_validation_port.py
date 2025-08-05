@@ -91,9 +91,7 @@ class ProviderValidationPort(Protocol):
         """
         ...
 
-    def validate_template_configuration(
-        self, template_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def validate_template_configuration(self, template_config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Validate a complete template configuration for this provider.
 
@@ -125,9 +123,7 @@ class BaseProviderValidationAdapter(ABC):
     def get_supported_provider_apis(self) -> List[str]:
         """Get supported provider APIs."""
 
-    def validate_template_configuration(
-        self, template_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def validate_template_configuration(self, template_config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Validate template configuration with defaults.
 

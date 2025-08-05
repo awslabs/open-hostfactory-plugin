@@ -69,14 +69,10 @@ class ASGHandler(AWSHandler):
             request_adapter: Optional request adapter for terminating instances
         """
         # Use unified base class initialization
-        super().__init__(
-            aws_client, logger, aws_ops, launch_template_manager, request_adapter
-        )
+        super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
 
     @handle_infrastructure_exceptions(context="asg_creation")
-    def acquire_hosts(
-        self, request: Request, aws_template: AWSTemplate
-    ) -> Dict[str, Any]:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
         """
         Create an Auto Scaling Group to acquire hosts.
         Returns structured result with resource IDs and instance data.
@@ -108,10 +104,8 @@ class ASGHandler(AWSHandler):
         self._validate_asg_prerequisites(aws_template)
 
         # Create launch template using the new manager
-        launch_template_result = (
-            self.launch_template_manager.create_or_update_launch_template(
-                aws_template, request
-            )
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
         )
 
         # Store launch template info in request (if request has this method)
@@ -145,10 +139,7 @@ class ASGHandler(AWSHandler):
         self._tag_asg(asg_name, aws_template, request)
 
         # Enable instance protection if specified
-        if (
-            hasattr(aws_template, "instance_protection")
-            and aws_template.instance_protection
-        ):
+        if hasattr(aws_template, "instance_protection") and aws_template.instance_protection:
             self._enable_instance_protection(asg_name)
 
         # Set instance lifecycle hooks if needed
@@ -197,9 +188,7 @@ class ASGHandler(AWSHandler):
                 DesiredCapacity=new_capacity,
                 MinSize=min(new_capacity, asg["MinSize"]),
             )
-            self._logger.info(
-                f"Reduced ASG {request.resource_id} capacity to {new_capacity}"
-            )
+            self._logger.info(f"Reduced ASG {request.resource_id} capacity to {new_capacity}")
 
             # Detach instances from ASG
             self._retry_with_backoff(
@@ -285,14 +274,9 @@ class ASGHandler(AWSHandler):
         if hasattr(aws_template, "lifecycle_hooks") and aws_template.lifecycle_hooks:
             for hook in aws_template.lifecycle_hooks:
                 if not hook.get("role_arn"):
-                    errors.append(
-                        f"IAM role ARN required for lifecycle hook {hook.get('name')}"
-                    )
+                    errors.append(f"IAM role ARN required for lifecycle hook {hook.get('name')}")
 
-        if (
-            hasattr(aws_template, "target_group_arns")
-            and aws_template.target_group_arns
-        ):
+        if hasattr(aws_template, "target_group_arns") and aws_template.target_group_arns:
             try:
                 self._retry_with_backoff(
                     self.aws_client.elbv2_client.describe_target_groups,
@@ -328,9 +312,7 @@ class ASGHandler(AWSHandler):
                 else aws_template.subnet_id
             ),
             "HealthCheckType": getattr(aws_template, "health_check_type", "EC2"),
-            "HealthCheckGracePeriod": getattr(
-                aws_template, "health_check_grace_period", 300
-            ),
+            "HealthCheckGracePeriod": getattr(aws_template, "health_check_grace_period", 300),
             "Tags": [
                 {
                     "Key": "Name",
@@ -359,15 +341,10 @@ class ASGHandler(AWSHandler):
         # Add template tags
         if hasattr(aws_template, "tags") and aws_template.tags:
             for key, value in aws_template.tags.items():
-                asg_config["Tags"].append(
-                    {"Key": key, "Value": value, "PropagateAtLaunch": True}
-                )
+                asg_config["Tags"].append({"Key": key, "Value": value, "PropagateAtLaunch": True})
 
         # Add target group ARNs if specified
-        if (
-            hasattr(aws_template, "target_group_arns")
-            and aws_template.target_group_arns
-        ):
+        if hasattr(aws_template, "target_group_arns") and aws_template.target_group_arns:
             asg_config["TargetGroupARNs"] = aws_template.target_group_arns
 
         # Add mixed instances policy if multiple instance types are specified
@@ -421,26 +398,18 @@ class ASGHandler(AWSHandler):
                     NotificationMetadata=hook.get("metadata"),
                     HeartbeatTimeout=hook.get("timeout", 3600),
                 )
-                self._logger.info(
-                    f"Set lifecycle hook {hook['name']} for ASG: {asg_name}"
-                )
+                self._logger.info(f"Set lifecycle hook {hook['name']} for ASG: {asg_name}")
             except Exception as e:
-                self._logger.warning(
-                    f"Failed to set lifecycle hook {hook['name']}: {str(e)}"
-                )
+                self._logger.warning(f"Failed to set lifecycle hook {hook['name']}: {str(e)}")
 
-    def _wait_for_instances_termination(
-        self, asg_name: str, timeout: int = 300
-    ) -> None:
+    def _wait_for_instances_termination(self, asg_name: str, timeout: int = 300) -> None:
         """Wait for all instances in the ASG to terminate."""
         import time
 
         start_time = time.time()
         while True:
             if time.time() - start_time > timeout:
-                raise TimeoutError(
-                    f"Timeout waiting for instances to terminate in ASG {asg_name}"
-                )
+                raise TimeoutError(f"Timeout waiting for instances to terminate in ASG {asg_name}")
 
             response = self._retry_with_backoff(
                 self.aws_client.autoscaling_client.describe_auto_scaling_groups,
@@ -454,9 +423,7 @@ class ASGHandler(AWSHandler):
             if not asg["Instances"]:
                 return
 
-            self._logger.info(
-                f"Waiting for {len(asg['Instances'])} instances to terminate..."
-            )
+            self._logger.info(f"Waiting for {len(asg['Instances'])} instances to terminate...")
             time.sleep(10)
 
     def _count_healthy_instances(self, asg: Dict[str, Any]) -> int:
@@ -468,9 +435,7 @@ class ASGHandler(AWSHandler):
             and instance.get("LifecycleState") == "InService"
         )
 
-    def _tag_asg(
-        self, asg_name: str, aws_template: AWSTemplate, request: Request
-    ) -> None:
+    def _tag_asg(self, asg_name: str, aws_template: AWSTemplate, request: Request) -> None:
         """Add tags to the ASG."""
         try:
             tags = [

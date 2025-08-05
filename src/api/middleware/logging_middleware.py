@@ -77,13 +77,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Log query parameters if present
         if request.query_params:
-            self.logger.debug(
-                f"Request {request_id} query params: {dict(request.query_params)}"
-            )
+            self.logger.debug(f"Request {request_id} query params: {dict(request.query_params)}")
 
-    def _log_response(
-        self, request: Request, response: Response, request_id: str, duration: float
-    ):
+    def _log_response(self, request: Request, response: Response, request_id: str, duration: float):
         """Log outgoing response."""
         user_id = getattr(request.state, "user_id", "anonymous")
 
@@ -93,9 +89,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             f"(user: {user_id}, duration: {duration:.3f}s)"
         )
 
-    def _log_error(
-        self, request: Request, error: Exception, request_id: str, duration: float
-    ):
+    def _log_error(self, request: Request, error: Exception, request_id: str, duration: float):
         """Log request error."""
         user_id = getattr(request.state, "user_id", "anonymous")
 

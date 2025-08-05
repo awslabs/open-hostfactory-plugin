@@ -82,10 +82,8 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
 
         # Use scheduler strategy for format conversion
         if scheduler_strategy:
-            formatted_response = (
-                scheduler_strategy.convert_domain_to_hostfactory_output(
-                    "getAvailableTemplates", templates
-                )
+            formatted_response = scheduler_strategy.convert_domain_to_hostfactory_output(
+                "getAvailableTemplates", templates
             )
             templates_data = formatted_response.get("templates", [])
         else:
@@ -150,9 +148,7 @@ async def handle_get_template(args: argparse.Namespace) -> Dict[str, Any]:
             return {
                 "success": True,
                 "template": (
-                    template.model_dump()
-                    if hasattr(template, "model_dump")
-                    else template
+                    template.model_dump() if hasattr(template, "model_dump") else template
                 ),
                 "message": f"Retrieved template {template_id} successfully",
             }
@@ -231,7 +227,9 @@ async def handle_create_template(args: argparse.Namespace) -> Dict[str, Any]:
         if response and response.validation_errors:
             return {
                 "success": False,
-                "error": f"Template validation failed: {', '.join(response.validation_errors)}",
+                "error": f"Template validation failed: {
+        ', '.join(
+            response.validation_errors)}",
                 "template_id": template_id,
             }
 
@@ -300,7 +298,9 @@ async def handle_update_template(args: argparse.Namespace) -> Dict[str, Any]:
         if response and response.validation_errors:
             return {
                 "success": False,
-                "error": f"Template validation failed: {', '.join(response.validation_errors)}",
+                "error": f"Template validation failed: {
+        ', '.join(
+            response.validation_errors)}",
                 "template_id": template_id,
             }
 
@@ -357,7 +357,9 @@ async def handle_delete_template(args: argparse.Namespace) -> Dict[str, Any]:
         if response and response.validation_errors:
             return {
                 "success": False,
-                "error": f"Template deletion failed: {', '.join(response.validation_errors)}",
+                "error": f"Template deletion failed: {
+        ', '.join(
+            response.validation_errors)}",
                 "template_id": template_id,
             }
 
@@ -456,11 +458,7 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
         validation_result = await query_bus.execute(query)
 
         # Check if validation result has errors
-        is_valid = (
-            not validation_result.errors
-            if hasattr(validation_result, "errors")
-            else True
-        )
+        is_valid = not validation_result.errors if hasattr(validation_result, "errors") else True
 
         return {
             "success": True,
@@ -469,9 +467,7 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
                 validation_result.errors if hasattr(validation_result, "errors") else []
             ),
             "validation_warnings": (
-                validation_result.warnings
-                if hasattr(validation_result, "warnings")
-                else []
+                validation_result.warnings if hasattr(validation_result, "warnings") else []
             ),
             "template_id": template_id,
             "message": "Validation completed successfully",
@@ -507,9 +503,7 @@ async def handle_refresh_templates(args: argparse.Namespace) -> Dict[str, Any]:
 
         # Force refresh by listing templates with force_refresh parameter
         # This will trigger cache refresh in the query handler
-        query = ListTemplatesQuery(
-            provider_api=None, active_only=True, include_configuration=False
-        )
+        query = ListTemplatesQuery(provider_api=None, active_only=True, include_configuration=False)
 
         templates = await query_bus.execute(query)
         template_count = len(templates) if templates else 0

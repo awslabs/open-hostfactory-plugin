@@ -80,19 +80,14 @@ def format_templates_table(templates: List[Dict]) -> str:
         table.add_column("RAM (MB)", style="yellow", justify="right", width=10)
         table.add_column("Max Inst", style="red", justify="right", width=8)
 
-        # Add rows - use direct field access since Pydantic provides consistent field names
+        # Add rows - use direct field access since Pydantic provides consistent
+        # field names
         for template in templates:
             # Handle both snake_case and camelCase field names (from Pydantic aliases)
-            template_id = template.get("template_id") or template.get(
-                "templateId", "N/A"
-            )
+            template_id = template.get("template_id") or template.get("templateId", "N/A")
             name = template.get("name", "N/A")
-            provider_api = template.get("provider_api") or template.get(
-                "providerApi", "N/A"
-            )
-            max_instances = template.get("max_instances") or template.get(
-                "maxNumber", "N/A"
-            )
+            provider_api = template.get("provider_api") or template.get("providerApi", "N/A")
+            max_instances = template.get("max_instances") or template.get("maxNumber", "N/A")
 
             # Handle different formats
             attributes = template.get("attributes")
@@ -110,9 +105,7 @@ def format_templates_table(templates: List[Dict]) -> str:
                 )
             else:
                 # Standard format - derive from instance_type
-                instance_type = template.get("instance_type") or template.get(
-                    "instanceType", "N/A"
-                )
+                instance_type = template.get("instance_type") or template.get("instanceType", "N/A")
                 cpus, ram = _derive_cpu_ram_from_instance_type(instance_type)
 
             # Truncate long values for table display
@@ -148,32 +141,20 @@ def _format_ascii_table(templates: List[Dict]) -> str:
     for template in templates:
         template_id = template.get("template_id") or template.get("templateId", "N/A")
         name = template.get("name", "N/A")
-        provider_api = template.get("provider_api") or template.get(
-            "providerApi", "N/A"
-        )
-        max_instances = template.get("max_instances") or template.get(
-            "maxNumber", "N/A"
-        )
+        provider_api = template.get("provider_api") or template.get("providerApi", "N/A")
+        max_instances = template.get("max_instances") or template.get("maxNumber", "N/A")
 
         # Handle different formats
         attributes = template.get("attributes")
         if attributes and isinstance(attributes, dict):
             # HF format - extract from attributes
             cpus = (
-                attributes.get("ncpus", ["Numeric", "N/A"])[1]
-                if attributes.get("ncpus")
-                else "N/A"
+                attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
             )
-            ram = (
-                attributes.get("nram", ["Numeric", "N/A"])[1]
-                if attributes.get("nram")
-                else "N/A"
-            )
+            ram = attributes.get("nram", ["Numeric", "N/A"])[1] if attributes.get("nram") else "N/A"
         else:
             # Standard format - derive from instance_type
-            instance_type = template.get("instance_type") or template.get(
-                "instanceType", "N/A"
-            )
+            instance_type = template.get("instance_type") or template.get("instanceType", "N/A")
             cpus, ram = _derive_cpu_ram_from_instance_type(instance_type)
 
         # Truncate long values for table display
@@ -233,15 +214,9 @@ def format_templates_list(templates: List[Dict]) -> str:
         # Use direct field access since Pydantic provides consistent field names
         template_id = template.get("template_id") or template.get("templateId", "N/A")
         name = template.get("name", "N/A")
-        provider_api = template.get("provider_api") or template.get(
-            "providerApi", "N/A"
-        )
-        instance_type = template.get("instance_type") or template.get(
-            "instanceType", "N/A"
-        )
-        max_instances = template.get("max_instances") or template.get(
-            "maxNumber", "N/A"
-        )
+        provider_api = template.get("provider_api") or template.get("providerApi", "N/A")
+        instance_type = template.get("instance_type") or template.get("instanceType", "N/A")
+        max_instances = template.get("max_instances") or template.get("maxNumber", "N/A")
 
         lines.append(f"Template: {template_id}")
         lines.append(f"  Name: {name}")
@@ -254,15 +229,9 @@ def format_templates_list(templates: List[Dict]) -> str:
         if attributes and isinstance(attributes, dict):
             # Extract info from HF attributes format
             cpus = (
-                attributes.get("ncpus", ["Numeric", "N/A"])[1]
-                if attributes.get("ncpus")
-                else "N/A"
+                attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
             )
-            ram = (
-                attributes.get("nram", ["Numeric", "N/A"])[1]
-                if attributes.get("nram")
-                else "N/A"
-            )
+            ram = attributes.get("nram", ["Numeric", "N/A"])[1] if attributes.get("nram") else "N/A"
             lines.append(f"  CPUs: {cpus}")
             lines.append(f"  RAM (MB): {ram}")
 
@@ -297,9 +266,7 @@ def format_requests_list(requests: List[Dict]) -> str:
         request_id = request.get("request_id") or request.get("requestId", "N/A")
         status = request.get("status", "N/A")
         template_id = request.get("template_id") or request.get("templateId", "N/A")
-        num_requested = request.get("requested_count") or request.get(
-            "numRequested", "N/A"
-        )
+        num_requested = request.get("requested_count") or request.get("numRequested", "N/A")
         created_at = request.get("created_at") or request.get("createdAt", "N/A")
 
         lines.append(f"Request: {request_id}")
@@ -330,9 +297,7 @@ def format_machines_list(machines: List[Dict]) -> str:
             or machine.get("machineId", "N/A")
         )
         name = (
-            machine.get("name")
-            or machine.get("machine_name")
-            or machine.get("machineName", "N/A")
+            machine.get("name") or machine.get("machine_name") or machine.get("machineName", "N/A")
         )
         status = machine.get("status") or machine.get("state", "N/A")
         instance_type = (
@@ -375,9 +340,7 @@ def format_machines_table(machines: List[Dict]) -> str:
             or machine.get("machineId", "N/A")
         )
         name = (
-            machine.get("name")
-            or machine.get("machine_name")
-            or machine.get("machineName", "N/A")
+            machine.get("name") or machine.get("machine_name") or machine.get("machineName", "N/A")
         )
         status = machine.get("status") or machine.get("state", "N/A")
         instance_type = (
@@ -420,9 +383,7 @@ def format_requests_table(requests: List[Dict]) -> str:
         request_id = request.get("request_id") or request.get("requestId", "N/A")
         status = request.get("status", "N/A")
         template_id = request.get("template_id") or request.get("templateId", "N/A")
-        num_requested = request.get("requested_count") or request.get(
-            "numRequested", "N/A"
-        )
+        num_requested = request.get("requested_count") or request.get("numRequested", "N/A")
         created_at = request.get("created_at") or request.get("createdAt", "N/A")
 
         # Truncate long values for table display
@@ -451,11 +412,7 @@ def _format_table_with_headers(headers: List[str], rows: List[List[str]]) -> str
 
     # Format table
     def format_row(row, widths):
-        return (
-            "| "
-            + " | ".join(str(row[i]).ljust(widths[i]) for i in range(len(row)))
-            + " |"
-        )
+        return "| " + " | ".join(str(row[i]).ljust(widths[i]) for i in range(len(row))) + " |"
 
     def format_separator(widths):
         return "+" + "+".join("-" * (w + 2) for w in widths) + "+"

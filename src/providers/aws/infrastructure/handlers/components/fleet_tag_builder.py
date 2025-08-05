@@ -52,9 +52,7 @@ class FleetTagBuilder:
         return tags
 
     @staticmethod
-    def build_instance_tags(
-        request: Request, template: Template
-    ) -> List[Dict[str, str]]:
+    def build_instance_tags(request: Request, template: Template) -> List[Dict[str, str]]:
         """Build tags specific to instance resources.
 
         Args:

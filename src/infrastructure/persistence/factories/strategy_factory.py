@@ -47,16 +47,12 @@ class StorageStrategyFactory:
                 self._strategy_cache[cache_key] = strategy
                 self.logger.debug(f"Created {storage_type} storage strategy")
             except Exception as e:
-                self.logger.error(
-                    f"Failed to create {storage_type} storage strategy: {e}"
-                )
+                self.logger.error(f"Failed to create {storage_type} storage strategy: {e}")
                 raise
 
         return self._strategy_cache[cache_key]
 
-    def create_machine_storage_strategy(
-        self, config: Optional[Any] = None
-    ) -> BaseStorageStrategy:
+    def create_machine_storage_strategy(self, config: Optional[Any] = None) -> BaseStorageStrategy:
         """Create storage strategy for machine entities."""
         if config is None and self.config_manager:
             config = self.config_manager.get_app_config()
@@ -64,9 +60,7 @@ class StorageStrategyFactory:
         storage_type = self._get_storage_type(config)
         return self.create_strategy(storage_type, config)
 
-    def create_request_storage_strategy(
-        self, config: Optional[Any] = None
-    ) -> BaseStorageStrategy:
+    def create_request_storage_strategy(self, config: Optional[Any] = None) -> BaseStorageStrategy:
         """Create storage strategy for request entities."""
         if config is None and self.config_manager:
             config = self.config_manager.get_app_config()
@@ -74,9 +68,7 @@ class StorageStrategyFactory:
         storage_type = self._get_storage_type(config)
         return self.create_strategy(storage_type, config)
 
-    def create_template_storage_strategy(
-        self, config: Optional[Any] = None
-    ) -> BaseStorageStrategy:
+    def create_template_storage_strategy(self, config: Optional[Any] = None) -> BaseStorageStrategy:
         """Create storage strategy for template entities."""
         if config is None and self.config_manager:
             config = self.config_manager.get_app_config()

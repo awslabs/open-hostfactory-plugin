@@ -39,9 +39,7 @@ class ServiceRegistry:
                     scope=DIScope.SINGLETON,
                     implementation_type=cls,
                 )
-            elif callable(instance_or_factory) and not isinstance(
-                instance_or_factory, type
-            ):
+            elif callable(instance_or_factory) and not isinstance(instance_or_factory, type):
                 # Register factory function
                 registration = DependencyRegistration(
                     dependency_type=cls,
@@ -124,9 +122,7 @@ class ServiceRegistry:
 
             logger.debug(f"Registered injectable class: {cls.__name__}")
 
-    def get_registration(
-        self, dependency_type: Type[T]
-    ) -> Optional[DependencyRegistration]:
+    def get_registration(self, dependency_type: Type[T]) -> Optional[DependencyRegistration]:
         """Get registration for a dependency type."""
         with self._lock:
             return self._registrations.get(dependency_type)

@@ -29,9 +29,7 @@ class ProviderContext:
         self.metadata: Dict[str, Any] = {}
 
 
-class BaseProviderHandler(
-    Generic[TRequest, TResponse], ProviderHandler[TRequest, TResponse], ABC
-):
+class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest, TResponse], ABC):
     """
     Base provider handler following CQRS architecture patterns.
 
@@ -137,9 +135,7 @@ class BaseProviderHandler(
             # Re-raise for upstream handling
             raise
 
-    async def validate_provider_request(
-        self, request: TRequest, context: ProviderContext
-    ) -> None:
+    async def validate_provider_request(self, request: TRequest, context: ProviderContext) -> None:
         """
         Validate provider request before processing.
 
@@ -196,9 +192,7 @@ class BaseProviderHandler(
             metrics["total_duration"] / total_count if total_count > 0 else 0.0
         )
 
-    def _record_failure_metrics(
-        self, request_type: str, duration: float, error: Exception
-    ) -> None:
+    def _record_failure_metrics(self, request_type: str, duration: float, error: Exception) -> None:
         """Record failure metrics for monitoring."""
         key = f"{self.provider_type}_{request_type}"
         if key not in self._metrics:
@@ -247,9 +241,7 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
         self.base_delay = 1  # seconds
         self.max_delay = 10  # seconds
 
-    async def validate_provider_request(
-        self, request: TRequest, context: ProviderContext
-    ) -> None:
+    async def validate_provider_request(self, request: TRequest, context: ProviderContext) -> None:
         """
         Validate AWS request with additional AWS-specific checks.
 
@@ -262,9 +254,7 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
         # Add AWS-specific validation
         await self.validate_aws_request(request, context)
 
-    async def validate_aws_request(
-        self, request: TRequest, context: ProviderContext
-    ) -> None:
+    async def validate_aws_request(self, request: TRequest, context: ProviderContext) -> None:
         """
         Validate AWS-specific request properties.
 
@@ -291,9 +281,7 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
         # Execute with AWS-specific retry logic
         return await self.execute_with_retry(request, context)
 
-    async def execute_with_retry(
-        self, request: TRequest, context: ProviderContext
-    ) -> TResponse:
+    async def execute_with_retry(self, request: TRequest, context: ProviderContext) -> TResponse:
         """
         Execute AWS request with exponential backoff retry logic.
 
@@ -331,9 +319,7 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
         raise last_exception
 
     @abstractmethod
-    async def execute_aws_request(
-        self, request: TRequest, context: ProviderContext
-    ) -> TResponse:
+    async def execute_aws_request(self, request: TRequest, context: ProviderContext) -> TResponse:
         """
         Execute core AWS request logic.
 

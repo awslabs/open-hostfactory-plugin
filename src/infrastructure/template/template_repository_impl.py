@@ -13,9 +13,7 @@ from src.infrastructure.template.configuration_manager import (
 class TemplateRepositoryImpl(TemplateRepository):
     """Template repository implementation for configuration-based template management."""
 
-    def __init__(
-        self, template_manager: TemplateConfigurationManager, logger: LoggingPort
-    ):
+    def __init__(self, template_manager: TemplateConfigurationManager, logger: LoggingPort):
         """Initialize repository with template configuration manager."""
         self._template_manager = template_manager
         self._logger = logger

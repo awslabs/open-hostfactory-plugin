@@ -21,16 +21,19 @@ class RepositoryProtocol(Protocol[T]):
     enforce specific parameter names, only their types.
     """
 
-    def save(self, obj: T) -> None: 
+    def save(self, obj: T) -> None:
         """Save an entity."""
         ...
-    def find_by_id(self, id_value: Any) -> Optional[T]: 
+
+    def find_by_id(self, id_value: Any) -> Optional[T]:
         """Find entity by ID."""
         ...
-    def delete(self, id_value: Any) -> None: 
+
+    def delete(self, id_value: Any) -> None:
         """Delete entity by ID."""
         ...
-    def find_all(self) -> List[T]: 
+
+    def find_all(self) -> List[T]:
         """Find all entities."""
         ...
 

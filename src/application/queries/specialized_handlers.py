@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
 from src.application.dto.queries import (
@@ -66,9 +65,7 @@ class GetActiveMachineCountHandler(BaseQueryHandler[GetActiveMachineCountQuery, 
 
 
 @query_handler(GetRequestSummaryQuery)
-class GetRequestSummaryHandler(
-    BaseQueryHandler[GetRequestSummaryQuery, RequestSummaryDTO]
-):
+class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestSummaryDTO]):
     """Handler for getting request summary information."""
 
     def __init__(
@@ -104,12 +101,8 @@ class GetRequestSummaryHandler(
 
                 # Calculate summary statistics
                 total_machines = len(machines)
-                running_machines = len(
-                    [m for m in machines if m.status == MachineStatus.RUNNING]
-                )
-                failed_machines = len(
-                    [m for m in machines if m.status == MachineStatus.FAILED]
-                )
+                running_machines = len([m for m in machines if m.status == MachineStatus.RUNNING])
+                failed_machines = len([m for m in machines if m.status == MachineStatus.FAILED])
 
                 # Create summary DTO
                 summary = RequestSummaryDTO(
@@ -126,7 +119,8 @@ class GetRequestSummaryHandler(
                 )
 
                 self.logger.info(
-                    f"Generated summary for request {query.request_id}: {total_machines} machines"
+                    f"Generated summary for request {
+        query.request_id}: {total_machines} machines"
                 )
                 return summary
 
@@ -139,9 +133,7 @@ class GetRequestSummaryHandler(
 
 
 @query_handler(GetMachineHealthQuery)
-class GetMachineHealthHandler(
-    BaseQueryHandler[GetMachineHealthQuery, MachineHealthDTO]
-):
+class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHealthDTO]):
     """Handler for getting machine health information."""
 
     def __init__(
@@ -183,9 +175,7 @@ class GetMachineHealthHandler(
                 try:
                     # Try to get health from provisioning service
                     if hasattr(self.provisioning_port, "get_machine_health"):
-                        health_info = self.provisioning_port.get_machine_health(
-                            machine.provider_id
-                        )
+                        health_info = self.provisioning_port.get_machine_health(machine.provider_id)
                         health_status = health_info.get("status", "unknown")
                         health_details = health_info.get("details", {})
                         last_health_check = health_info.get("timestamp")
@@ -208,7 +198,8 @@ class GetMachineHealthHandler(
 
                 except Exception as health_error:
                     self.logger.warning(
-                        f"Could not get detailed health for machine {query.machine_id}: {health_error}"
+                        f"Could not get detailed health for machine {
+        query.machine_id}: {health_error}"
                     )
                     health_status = "unknown"
                     health_details = {"error": str(health_error)}

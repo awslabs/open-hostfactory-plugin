@@ -133,9 +133,7 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
                 UpdateRequestStatusCommand,
             )
 
-            command_bus.register(
-                CreateRequestCommand, container.get(CreateMachineRequestHandler)
-            )
+            command_bus.register(CreateRequestCommand, container.get(CreateMachineRequestHandler))
 
             command_bus.register(
                 CreateReturnRequestCommand, container.get(CreateReturnRequestHandler)
@@ -145,9 +143,7 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
                 UpdateRequestStatusCommand, container.get(UpdateRequestStatusHandler)
             )
 
-            command_bus.register(
-                CancelRequestCommand, container.get(CancelRequestHandler)
-            )
+            command_bus.register(CancelRequestCommand, container.get(CancelRequestHandler))
 
             # Register CleanupOldRequestsCommand if handler exists
             try:

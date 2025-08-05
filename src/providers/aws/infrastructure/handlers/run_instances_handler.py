@@ -83,18 +83,14 @@ class RunInstancesHandler(AWSHandler):
         )
 
     @handle_infrastructure_exceptions(context="run_instances_creation")
-    def acquire_hosts(
-        self, request: Request, aws_template: AWSTemplate
-    ) -> Dict[str, Any]:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
         """
         Create EC2 instances using RunInstances to acquire hosts.
         Returns structured result with resource IDs and instance data.
         """
         try:
             resource_id = self.aws_ops.execute_with_standard_error_handling(
-                operation=lambda: self._create_instances_internal(
-                    request, aws_template
-                ),
+                operation=lambda: self._create_instances_internal(request, aws_template),
                 operation_name="run EC2 instances",
                 context="RunInstances",
             )
@@ -118,18 +114,14 @@ class RunInstancesHandler(AWSHandler):
                 "error_message": str(e),
             }
 
-    def _create_instances_internal(
-        self, request: Request, aws_template: AWSTemplate
-    ) -> str:
+    def _create_instances_internal(self, request: Request, aws_template: AWSTemplate) -> str:
         """Create RunInstances with pure business logic."""
         # Validate prerequisites
         self._validate_prerequisites(aws_template)
 
         # Create launch template using the new manager
-        launch_template_result = (
-            self.launch_template_manager.create_or_update_launch_template(
-                aws_template, request
-            )
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
         )
 
         # Store launch template info in request (if request has this method)
@@ -155,9 +147,7 @@ class RunInstancesHandler(AWSHandler):
 
         # Extract reservation ID and instance IDs from response
         reservation_id = response.get("ReservationId")
-        instance_ids = [
-            instance["InstanceId"] for instance in response.get("Instances", [])
-        ]
+        instance_ids = [instance["InstanceId"] for instance in response.get("Instances", [])]
 
         if not instance_ids:
             raise AWSInfrastructureError("No instances were created by RunInstances")
@@ -176,7 +166,8 @@ class RunInstancesHandler(AWSHandler):
         request.metadata["run_instances_resource_id"] = resource_id
 
         self._logger.info(
-            f"Successfully created {len(instance_ids)} instances via RunInstances with reservation ID {reservation_id}: {instance_ids}"
+            f"Successfully created {
+        len(instance_ids)} instances via RunInstances with reservation ID {reservation_id}: {instance_ids}"
         )
 
         return resource_id
@@ -223,7 +214,8 @@ class RunInstancesHandler(AWSHandler):
         # Handle networking overrides based on launch template source
         if aws_template.launch_template_id:
             # Using existing launch template - need to check what it contains
-            # For now, assume we can override (this should be enhanced to inspect the LT)
+            # For now, assume we can override (this should be enhanced to inspect the
+            # LT)
             if aws_template.subnet_id:
                 params["SubnetId"] = aws_template.subnet_id
             elif aws_template.subnet_ids and len(aws_template.subnet_ids) == 1:
@@ -263,9 +255,7 @@ class RunInstancesHandler(AWSHandler):
 
         # Add template tags if any
         if aws_template.tags:
-            instance_tags = [
-                {"Key": k, "Value": v} for k, v in aws_template.tags.items()
-            ]
+            instance_tags = [{"Key": k, "Value": v} for k, v in aws_template.tags.items()]
             tag_specifications[0]["Tags"].extend(instance_tags)
 
         params["TagSpecifications"] = tag_specifications
@@ -279,15 +269,18 @@ class RunInstancesHandler(AWSHandler):
             instance_ids = request.metadata.get("instance_ids", [])
 
             if not instance_ids:
-                # If no instance IDs in metadata, try to find instances using resource IDs (reservation IDs)
+                # If no instance IDs in metadata, try to find instances using resource
+                # IDs (reservation IDs)
                 if hasattr(request, "resource_ids") and request.resource_ids:
                     self._logger.info(
-                        f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}"
+                        f"No instance IDs in metadata, searching by resource IDs: {
+        request.resource_ids}"
                     )
                     return self._find_instances_by_resource_ids(request.resource_ids)
                 else:
                     self._logger.info(
-                        f"No instance IDs or resource IDs found in request {request.request_id}"
+                        f"No instance IDs or resource IDs found in request {
+        request.request_id}"
                     )
                     return []
 
@@ -295,23 +288,18 @@ class RunInstancesHandler(AWSHandler):
             return self._get_instance_details(instance_ids)
 
         except Exception as e:
-            self._logger.error(
-                f"Unexpected error checking RunInstances status: {str(e)}"
-            )
-            raise AWSInfrastructureError(
-                f"Failed to check RunInstances status: {str(e)}"
-            )
+            self._logger.error(f"Unexpected error checking RunInstances status: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to check RunInstances status: {str(e)}")
 
-    def _find_instances_by_resource_ids(
-        self, resource_ids: List[str]
-    ) -> List[Dict[str, Any]]:
+    def _find_instances_by_resource_ids(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Find instances using resource IDs (reservation IDs for RunInstances)."""
         try:
             all_instances = []
 
             for resource_id in resource_ids:
                 # For RunInstances, resource_id is the reservation ID
-                # Try to use describe_instances with Filters to find instances by reservation ID
+                # Try to use describe_instances with Filters to find instances by
+                # reservation ID
                 try:
                     response = self.aws_client.ec2_client.describe_instances(
                         Filters=[{"Name": "reservation-id", "Values": [resource_id]}]
@@ -340,7 +328,8 @@ class RunInstancesHandler(AWSHandler):
                         self._logger.warning(f"Reservation ID {resource_id} not found")
                         continue
                     elif "Filter dicts have not been implemented" in str(e):
-                        # Moto doesn't support reservation-id filter, fall back to describe all instances
+                        # Moto doesn't support reservation-id filter, fall back to
+                        # describe all instances
                         self._logger.info(
                             f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
                         )
@@ -349,7 +338,8 @@ class RunInstancesHandler(AWSHandler):
                         raise
                 except Exception as e:
                     if "Filter dicts have not been implemented" in str(e):
-                        # Moto doesn't support reservation-id filter, fall back to describe all instances
+                        # Moto doesn't support reservation-id filter, fall back to
+                        # describe all instances
                         self._logger.info(
                             f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
                         )
@@ -364,13 +354,9 @@ class RunInstancesHandler(AWSHandler):
 
         except Exception as e:
             self._logger.error(f"Failed to find instances by resource IDs: {str(e)}")
-            raise AWSInfrastructureError(
-                f"Failed to find instances by resource IDs: {str(e)}"
-            )
+            raise AWSInfrastructureError(f"Failed to find instances by resource IDs: {str(e)}")
 
-    def _find_instances_by_tags_fallback(
-        self, resource_ids: List[str]
-    ) -> List[Dict[str, Any]]:
+    def _find_instances_by_tags_fallback(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Fallback method to find instances by tags when reservation-id filter is not supported."""
         try:
             self._logger.info(
@@ -415,23 +401,23 @@ class RunInstancesHandler(AWSHandler):
                         }
                         matching_instances.append(instance_data)
                         self._logger.info(
-                            f"FALLBACK: Added instance {instance_data['InstanceId']} with IP {instance_data['PrivateIpAddress']}"
+                            f"FALLBACK: Added instance {
+        instance_data['InstanceId']} with IP {
+            instance_data['PrivateIpAddress']}"
                         )
                 else:
-                    self._logger.info(
-                        f"FALLBACK: No match for reservation {reservation_id}"
-                    )
+                    self._logger.info(f"FALLBACK: No match for reservation {reservation_id}")
 
             self._logger.info(
-                f"FALLBACK: Returning {len(matching_instances)} instances for resource IDs: {resource_ids}"
+                f"FALLBACK: Returning {
+        len(matching_instances)} instances for resource IDs: {resource_ids}"
             )
             return matching_instances
 
         except Exception as e:
-            self._logger.error(
-                f"FALLBACK: Fallback method failed to find instances: {e}"
-            )
-            # Return empty list rather than raising exception to allow graceful degradation
+            self._logger.error(f"FALLBACK: Fallback method failed to find instances: {e}")
+            # Return empty list rather than raising exception to allow graceful
+            # degradation
             return []
 
     def release_hosts(self, request: Request) -> None:
@@ -451,9 +437,7 @@ class RunInstancesHandler(AWSHandler):
                 instance_ids = request.metadata["instance_ids"]
 
             if not instance_ids:
-                self._logger.warning(
-                    f"No instance IDs found for request {request.request_id}"
-                )
+                self._logger.warning(f"No instance IDs found for request {request.request_id}")
                 return
 
             # Use consolidated AWS operations utility for instance termination
@@ -464,14 +448,8 @@ class RunInstancesHandler(AWSHandler):
 
         except ClientError as e:
             error = self._convert_client_error(e)
-            self._logger.error(
-                f"Failed to release RunInstances resources: {str(error)}"
-            )
+            self._logger.error(f"Failed to release RunInstances resources: {str(error)}")
             raise error
         except Exception as e:
-            self._logger.error(
-                f"Unexpected error releasing RunInstances resources: {str(e)}"
-            )
-            raise AWSInfrastructureError(
-                f"Failed to release RunInstances resources: {str(e)}"
-            )
+            self._logger.error(f"Unexpected error releasing RunInstances resources: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to release RunInstances resources: {str(e)}")

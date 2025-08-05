@@ -33,15 +33,14 @@ def create_json_strategy(config: Any) -> Any:
         if storage_type == "single_file":
             file_path = f"{base_path}/{json_config.filenames['single_file']}"
         else:
-            # For split files, we'll use a base path and let the strategy handle file naming
+            # For split files, we'll use a base path and let the strategy handle file
+            # naming
             file_path = base_path
     else:
         # Use configured file path or fallback to default
         file_path = getattr(config, "file_path", "data/request_database.json")
 
-    return JSONStorageStrategy(
-        file_path=file_path, create_dirs=True, entity_type="generic"
-    )
+    return JSONStorageStrategy(file_path=file_path, create_dirs=True, entity_type="generic")
 
 
 def create_json_config(data: Dict[str, Any]) -> Any:

@@ -71,28 +71,29 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             # Step 3: Get machines from storage
             machines = await self._get_machines_from_storage(query.request_id)
             self.logger.info(
-                f"DEBUG: Found {len(machines)} machines in storage for request {query.request_id}"
+                f"DEBUG: Found {
+        len(machines)} machines in storage for request {
+            query.request_id}"
             )
 
             # Step 4: Update machine status if needed
             if not machines and request.resource_ids:
                 self.logger.info(
-                    f"DEBUG: No machines in storage but have resource IDs {request.resource_ids}, checking provider"
+                    f"DEBUG: No machines in storage but have resource IDs {
+        request.resource_ids}, checking provider"
                 )
-                # No machines in storage but we have resource IDs - check provider and create machines
+                # No machines in storage but we have resource IDs - check provider and
+                # create machines
                 machines = await self._check_provider_and_create_machines(request)
-                self.logger.info(
-                    f"DEBUG: Provider check returned {len(machines)} machines"
-                )
+                self.logger.info(f"DEBUG: Provider check returned {len(machines)} machines")
             elif machines:
-                self.logger.info(
-                    f"DEBUG: Have {len(machines)} machines, updating status from AWS"
-                )
+                self.logger.info(f"DEBUG: Have {len(machines)} machines, updating status from AWS")
                 # We have machines - update their status from AWS
                 machines = await self._update_machine_status_from_aws(machines)
             else:
                 self.logger.info(
-                    f"DEBUG: No machines and no resource IDs for request {query.request_id}"
+                    f"DEBUG: No machines and no resource IDs for request {
+        query.request_id}"
                 )
 
             # Step 5: Convert to DTO with machine data
@@ -106,9 +107,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                         "public_ip": machine.public_ip,
                         "launch_time": machine.launch_time,
                         "launch_time_timestamp": (
-                            machine.launch_time.timestamp()
-                            if machine.launch_time
-                            else 0
+                            machine.launch_time.timestamp() if machine.launch_time else 0
                         ),
                     }
                 )
@@ -144,7 +143,9 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 self._cache_service.cache_request(request_dto)
 
             self.logger.info(
-                f"Retrieved request with {len(machines_data)} machines: {query.request_id}"
+                f"Retrieved request with {
+        len(machines_data)} machines: {
+            query.request_id}"
             )
             return request_dto
 
@@ -176,7 +177,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 self.logger.error("Provider context not available")
                 return []
 
-            # Create operation for resource-to-instance discovery using stored provider API
+            # Create operation for resource-to-instance discovery using stored
+            # provider API
             from src.providers.base.strategy import (
                 ProviderOperation,
                 ProviderOperationType,
@@ -186,9 +188,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 operation_type=ProviderOperationType.DESCRIBE_RESOURCE_INSTANCES,
                 parameters={
                     "resource_ids": request.resource_ids,
-                    "provider_api": request.metadata.get(
-                        "provider_api", "RunInstances"
-                    ),
+                    "provider_api": request.metadata.get("provider_api", "RunInstances"),
                     "template_id": request.template_id,
                 },
                 context={
@@ -198,23 +198,29 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             )
 
             # Execute operation using provider context with correct strategy identifier
-            strategy_identifier = f"{request.provider_type}-{request.provider_type}-{request.provider_instance or 'default'}"
+            strategy_identifier = f"{
+    request.provider_type}-{
+        request.provider_type}-{
+            request.provider_instance or 'default'}"
             self.logger.info(
-                f"Using provider strategy: {strategy_identifier} for request {request.request_id}"
+                f"Using provider strategy: {strategy_identifier} for request {
+        request.request_id}"
             )
             self.logger.info(f"Operation parameters: {operation.parameters}")
 
-            result = provider_context.execute_with_strategy(
-                strategy_identifier, operation
-            )
+            result = provider_context.execute_with_strategy(strategy_identifier, operation)
 
             self.logger.info(
-                f"Provider strategy result: success={result.success}, data_keys={list(result.data.keys()) if result.data else 'None'}"
+                f"Provider strategy result: success={
+        result.success}, data_keys={
+            list(
+                result.data.keys()) if result.data else 'None'}"
             )
 
             if not result.success:
                 self.logger.warning(
-                    f"Failed to discover instances from resources: {result.error_message}"
+                    f"Failed to discover instances from resources: {
+        result.error_message}"
                 )
                 return []
 
@@ -245,7 +251,9 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                         machine.clear_domain_events()
 
                 self.logger.info(
-                    f"Created and saved {len(machines)} machines for request {request.request_id}"
+                    f"Created and saved {
+        len(machines)} machines for request {
+            request.request_id}"
                 )
 
             return machines
@@ -292,19 +300,20 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             )
 
             # Execute operation using provider context
-            # Use the correct strategy identifier format: provider_type-provider_type-instance
-            strategy_identifier = f"{request.provider_type}-{request.provider_type}-{request.provider_instance or 'default'}"
-            result = provider_context.execute_with_strategy(
-                strategy_identifier, operation
-            )
+            # Use the correct strategy identifier format:
+            # provider_type-provider_type-instance
+            strategy_identifier = f"{
+    request.provider_type}-{
+        request.provider_type}-{
+            request.provider_instance or 'default'}"
+            result = provider_context.execute_with_strategy(strategy_identifier, operation)
 
             if not result.success:
-                self.logger.warning(
-                    f"Failed to check resource status: {result.error_message}"
-                )
+                self.logger.warning(f"Failed to check resource status: {result.error_message}")
                 return machines
 
-            # Extract domain machine entities from result (provider strategy already converted AWS data)
+            # Extract domain machine entities from result (provider strategy already
+            # converted AWS data)
             domain_machines = result.data.get("machines", [])
 
             # Update machine status if changed
@@ -325,7 +334,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
                     new_status = MachineStatus(domain_machine["status"])
 
-                    # Check if we need to update the machine (status or network info changed)
+                    # Check if we need to update the machine (status or network info
+                    # changed)
                     needs_update = (
                         machine.status != new_status
                         or machine.private_ip != domain_machine.get("private_ip")
@@ -545,9 +555,7 @@ class GetRequestStatusQueryHandler(BaseQueryHandler[GetRequestStatusQuery, str])
 
 
 @query_handler(ListActiveRequestsQuery)
-class ListActiveRequestsHandler(
-    BaseQueryHandler[ListActiveRequestsQuery, List[RequestDTO]]
-):
+class ListActiveRequestsHandler(BaseQueryHandler[ListActiveRequestsQuery, List[RequestDTO]]):
     """Handler for listing active requests."""
 
     def __init__(
@@ -599,9 +607,7 @@ class ListActiveRequestsHandler(
 
 
 @query_handler(ListReturnRequestsQuery)
-class ListReturnRequestsHandler(
-    BaseQueryHandler[ListReturnRequestsQuery, List[RequestDTO]]
-):
+class ListReturnRequestsHandler(BaseQueryHandler[ListReturnRequestsQuery, List[RequestDTO]]):
     """Handler for listing return requests."""
 
     def __init__(
@@ -677,7 +683,8 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
             if not template_dto:
                 raise EntityNotFoundError("Template", query.template_id)
 
-            # Convert TemplateDTO to Template domain object (same logic as ListTemplatesHandler)
+            # Convert TemplateDTO to Template domain object (same logic as
+            # ListTemplatesHandler)
             config = template_dto.configuration or {}
 
             template_data = {
@@ -685,17 +692,12 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
                 "name": template_dto.name or template_dto.template_id,
                 "provider_api": template_dto.provider_api or "aws",
                 # Extract required fields from configuration with defaults
-                "image_id": config.get("image_id")
-                or config.get("imageId")
-                or "default-image",
+                "image_id": config.get("image_id") or config.get("imageId") or "default-image",
                 "subnet_ids": config.get("subnet_ids")
                 or config.get("subnetIds")
                 or ["default-subnet"],
-                "instance_type": config.get("instance_type")
-                or config.get("instanceType"),
-                "max_instances": config.get("max_instances")
-                or config.get("maxNumber")
-                or 1,
+                "instance_type": config.get("instance_type") or config.get("instanceType"),
+                "max_instances": config.get("max_instances") or config.get("maxNumber") or 1,
                 "security_group_ids": config.get("security_group_ids")
                 or config.get("securityGroupIds")
                 or [],
@@ -784,9 +786,7 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
                         domain_templates.append(domain_template)
 
                     except Exception as e:
-                        self.logger.warning(
-                            f"Skipping invalid template {dto.template_id}: {e}"
-                        )
+                        self.logger.warning(f"Skipping invalid template {dto.template_id}: {e}")
                         continue
 
             self.logger.info(f"Found {len(domain_templates)} templates")
@@ -823,14 +823,13 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
             template_port = self.container.get(TemplateConfigurationPort)
 
             # Validate template configuration
-            validation_errors = template_port.validate_template_config(
-                query.configuration
-            )
+            validation_errors = template_port.validate_template_config(query.configuration)
 
             # Log validation results
             if validation_errors:
                 self.logger.warning(
-                    f"Template validation failed for {query.template_id}: {validation_errors}"
+                    f"Template validation failed for {
+        query.template_id}: {validation_errors}"
                 )
             else:
                 self.logger.info(f"Template validation passed for {query.template_id}")
@@ -843,9 +842,7 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
             }
 
         except Exception as e:
-            self.logger.error(
-                f"Template validation failed for {query.template_id}: {e}"
-            )
+            self.logger.error(f"Template validation failed for {query.template_id}: {e}")
             return {
                 "template_id": query.template_id,
                 "is_valid": False,
@@ -938,9 +935,7 @@ class ListMachinesHandler(BaseQueryHandler[ListMachinesQuery, List[MachineDTO]])
                         machine_id=str(machine.machine_id),
                         provider_id=machine.provider_id,
                         template_id=machine.template_id,
-                        request_id=(
-                            str(machine.request_id) if machine.request_id else None
-                        ),
+                        request_id=(str(machine.request_id) if machine.request_id else None),
                         status=machine.status.value,
                         instance_type=machine.instance_type,
                         created_at=machine.created_at,

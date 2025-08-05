@@ -75,23 +75,17 @@ class SpotFleetHandler(AWSHandler):
             request_adapter: Optional request adapter for terminating instances
         """
         # Use enhanced base class initialization - eliminates duplication
-        super().__init__(
-            aws_client, logger, aws_ops, launch_template_manager, request_adapter
-        )
+        super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
 
     @handle_infrastructure_exceptions(context="spot_fleet_creation")
-    def acquire_hosts(
-        self, request: Request, aws_template: AWSTemplate
-    ) -> Dict[str, Any]:
+    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
         """
         Create a Spot Fleet to acquire hosts.
         Returns structured result with resource IDs and instance data.
         """
         try:
             fleet_id = self.aws_ops.execute_with_standard_error_handling(
-                operation=lambda: self._create_spot_fleet_internal(
-                    request, aws_template
-                ),
+                operation=lambda: self._create_spot_fleet_internal(request, aws_template),
                 operation_name="create Spot Fleet",
                 context="SpotFleet",
             )
@@ -113,9 +107,7 @@ class SpotFleetHandler(AWSHandler):
                 "error_message": str(e),
             }
 
-    def _create_spot_fleet_internal(
-        self, request: Request, aws_template: AWSTemplate
-    ) -> str:
+    def _create_spot_fleet_internal(self, request: Request, aws_template: AWSTemplate) -> str:
         """Create Spot Fleet with pure business logic."""
         # Validate Spot Fleet specific prerequisites
         self._validate_spot_prerequisites(aws_template)
@@ -141,10 +133,8 @@ class SpotFleetHandler(AWSHandler):
             )
 
         # Create launch template using the new manager
-        launch_template_result = (
-            self.launch_template_manager.create_or_update_launch_template(
-                aws_template, request
-            )
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
         )
 
         # Store launch template info in request (if request has this method)
@@ -179,7 +169,8 @@ class SpotFleetHandler(AWSHandler):
 
         # Log the validation start
         self._logger.debug(
-            f"Starting Spot Fleet prerequisites validation for template: {aws_template.template_id}"
+            f"Starting Spot Fleet prerequisites validation for template: {
+        aws_template.template_id}"
         )
 
         # First validate common prerequisites
@@ -230,7 +221,8 @@ class SpotFleetHandler(AWSHandler):
         ):
             errors.append("percent_on_demand is required for heterogeneous price type")
 
-        # For heterogeneous price type with vm_types_on_demand, validate the configuration
+        # For heterogeneous price type with vm_types_on_demand, validate the
+        # configuration
         if (
             hasattr(aws_template, "price_type")
             and aws_template.price_type == "heterogeneous"
@@ -238,13 +230,8 @@ class SpotFleetHandler(AWSHandler):
             and aws_template.vm_types_on_demand
         ):
             # Validate that instance_types is also specified
-            if (
-                not hasattr(aws_template, "instance_types")
-                or not aws_template.instance_types
-            ):
-                errors.append(
-                    "instance_types must be specified when using instance_types_ondemand"
-                )
+            if not hasattr(aws_template, "instance_types") or not aws_template.instance_types:
+                errors.append("instance_types must be specified when using instance_types_ondemand")
 
             # Validate that instance_types_ondemand has valid instance types
             for instance_type, weight in aws_template.instance_types_ondemand.items():
@@ -305,9 +292,7 @@ class SpotFleetHandler(AWSHandler):
             identity = self.aws_client.sts_client.get_caller_identity()
 
             # Check permissions - create IAM client directly from session
-            iam_client = self.aws_client.session.client(
-                "iam", config=self.aws_client.boto_config
-            )
+            iam_client = self.aws_client.session.client("iam", config=self.aws_client.boto_config)
             response = iam_client.simulate_principal_policy(
                 PolicySourceArn=identity["Arn"],
                 ActionNames=[
@@ -366,13 +351,9 @@ class SpotFleetHandler(AWSHandler):
             ],
             "TargetCapacity": request.requested_count,
             "IamFleetRole": fleet_role,
-            "AllocationStrategy": self._get_allocation_strategy(
-                template.allocation_strategy
-            ),
+            "AllocationStrategy": self._get_allocation_strategy(template.allocation_strategy),
             "Type": template.fleet_type,
-            "TagSpecifications": [
-                {"ResourceType": "spot-fleet-request", "Tags": common_tags}
-            ],
+            "TagSpecifications": [{"ResourceType": "spot-fleet-request", "Tags": common_tags}],
         }
 
         # Configure based on price type
@@ -417,23 +398,16 @@ class SpotFleetHandler(AWSHandler):
         # Add instance type overrides if specified
         if template.instance_types:
             # For heterogeneous price type with on-demand instances
-            if (
-                template.price_type == "heterogeneous"
-                and template.instance_types_ondemand
-            ):
+            if template.price_type == "heterogeneous" and template.instance_types_ondemand:
                 # Create spot instance overrides
                 spot_overrides = [
                     {
                         "InstanceType": instance_type,
                         "WeightedCapacity": weight,
                         "Priority": idx + 1,
-                        "SpotPrice": (
-                            str(template.max_price) if template.max_price else None
-                        ),
+                        "SpotPrice": (str(template.max_price) if template.max_price else None),
                     }
-                    for idx, (instance_type, weight) in enumerate(
-                        template.instance_types.items()
-                    )
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items())
                 ]
 
                 # Create on-demand instance overrides
@@ -467,13 +441,9 @@ class SpotFleetHandler(AWSHandler):
                         "InstanceType": instance_type,
                         "WeightedCapacity": weight,
                         "Priority": idx + 1,
-                        "SpotPrice": (
-                            str(template.max_price) if template.max_price else None
-                        ),
+                        "SpotPrice": (str(template.max_price) if template.max_price else None),
                     }
-                    for idx, (instance_type, weight) in enumerate(
-                        template.instance_types.items()
-                    )
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items())
                 ]
 
         # Add subnet configuration
@@ -490,17 +460,13 @@ class SpotFleetHandler(AWSHandler):
                 # Create spot instance overrides with subnets
                 spot_overrides = []
                 for subnet_id in template.subnet_ids:
-                    for idx, (instance_type, weight) in enumerate(
-                        template.instance_types.items()
-                    ):
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items()):
                         override = {
                             "SubnetId": subnet_id,
                             "InstanceType": instance_type,
                             "WeightedCapacity": weight,
                             "Priority": idx + 1,
-                            "SpotPrice": (
-                                str(template.max_price) if template.max_price else None
-                            ),
+                            "SpotPrice": (str(template.max_price) if template.max_price else None),
                         }
                         spot_overrides.append(override)
 
@@ -534,9 +500,7 @@ class SpotFleetHandler(AWSHandler):
             elif template.instance_types:
                 overrides = []
                 for subnet_id in template.subnet_ids:
-                    for idx, (instance_type, weight) in enumerate(
-                        template.instance_types.items()
-                    ):
+                    for idx, (instance_type, weight) in enumerate(template.instance_types.items()):
                         override = {
                             "SubnetId": subnet_id,
                             "InstanceType": instance_type,
@@ -553,9 +517,7 @@ class SpotFleetHandler(AWSHandler):
                 ]
 
         # Log the final configuration
-        self._logger.debug(
-            f"Spot Fleet configuration: {json.dumps(fleet_config, indent=2)}"
-        )
+        self._logger.debug(f"Spot Fleet configuration: {json.dumps(fleet_config, indent=2)}")
 
         return fleet_config
 
@@ -587,9 +549,7 @@ class SpotFleetHandler(AWSHandler):
                 instance_types = [aws_template.instance_type]
 
             if not instance_types:
-                self._logger.warning(
-                    "No instance types found for spot price monitoring"
-                )
+                self._logger.warning("No instance types found for spot price monitoring")
                 return {}
 
             price_history = self._retry_with_backoff(
@@ -615,9 +575,7 @@ class SpotFleetHandler(AWSHandler):
         """Check the status of instances in the spot fleet."""
         try:
             if not request.resource_id:
-                raise AWSInfrastructureError(
-                    "No Spot Fleet Request ID found in request"
-                )
+                raise AWSInfrastructureError("No Spot Fleet Request ID found in request")
 
             # Get fleet information with pagination and retry
             fleet_list = self._retry_with_backoff(
@@ -629,17 +587,20 @@ class SpotFleetHandler(AWSHandler):
             )
 
             if not fleet_list:
-                raise AWSEntityNotFoundError(
-                    f"Spot Fleet Request {request.resource_id} not found"
-                )
+                raise AWSEntityNotFoundError(f"Spot Fleet Request {request.resource_id} not found")
 
             fleet = fleet_list[0]
 
             # Log fleet status
             self._logger.debug(
-                f"Fleet status: {fleet.get('SpotFleetRequestState')}, "
-                f"Target capacity: {fleet.get('SpotFleetRequestConfig', {}).get('TargetCapacity')}, "
-                f"Fulfilled capacity: {fleet.get('ActivityStatus')}"
+                f"Fleet status: {
+        fleet.get('SpotFleetRequestState')}, "
+                f"Target capacity: {
+            fleet.get(
+                'SpotFleetRequestConfig',
+                {}).get('TargetCapacity')}, "
+                f"Fulfilled capacity: {
+                    fleet.get('ActivityStatus')}"
             )
 
             # Get instance information with pagination and retry
@@ -654,9 +615,7 @@ class SpotFleetHandler(AWSHandler):
             instance_ids = [instance["InstanceId"] for instance in active_instances]
 
             if not instance_ids:
-                self._logger.info(
-                    f"No active instances found in Spot Fleet {request.resource_id}"
-                )
+                self._logger.info(f"No active instances found in Spot Fleet {request.resource_id}")
                 return []
 
             # Get detailed instance information
@@ -679,9 +638,7 @@ class SpotFleetHandler(AWSHandler):
         """
         try:
             if not request.resource_id:
-                raise AWSInfrastructureError(
-                    "No Spot Fleet Request ID found in request"
-                )
+                raise AWSInfrastructureError("No Spot Fleet Request ID found in request")
 
             # Get fleet configuration with pagination and retry
             fleet_list = self._retry_with_backoff(
@@ -693,9 +650,7 @@ class SpotFleetHandler(AWSHandler):
             )
 
             if not fleet_list:
-                raise AWSEntityNotFoundError(
-                    f"Spot Fleet {request.resource_id} not found"
-                )
+                raise AWSEntityNotFoundError(f"Spot Fleet {request.resource_id} not found")
 
             fleet = fleet_list[0]
             fleet_type = fleet["SpotFleetRequestConfig"].get("Type", "maintain")
@@ -718,7 +673,8 @@ class SpotFleetHandler(AWSHandler):
                         TargetCapacity=new_capacity,
                     )
                     self._logger.info(
-                        f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}"
+                        f"Reduced maintain fleet {
+        request.resource_id} capacity to {new_capacity}"
                     )
 
                 # Use consolidated AWS operations utility for instance termination
@@ -734,9 +690,7 @@ class SpotFleetHandler(AWSHandler):
                     SpotFleetRequestIds=[request.resource_id],
                     TerminateInstances=True,
                 )
-                self._logger.info(
-                    f"Cancelled entire Spot Fleet request: {request.resource_id}"
-                )
+                self._logger.info(f"Cancelled entire Spot Fleet request: {request.resource_id}")
 
         except ClientError as e:
             error = self._convert_client_error(e)

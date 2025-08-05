@@ -66,10 +66,7 @@ class TemplateUpdatedHandler(BaseLoggingEventHandler):
             },
         )
 
-        message = (
-            f"Template updated: {fields['template_name']} | "
-            f"By: {fields['updated_by']}"
-        )
+        message = f"Template updated: {fields['template_name']} | " f"By: {fields['updated_by']}"
 
         if fields["changes"]:
             change_count = len(fields["changes"])

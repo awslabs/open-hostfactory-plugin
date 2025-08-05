@@ -14,7 +14,8 @@ class RetryConfig(BaseModel):
     max_delay: float = Field(60.0, description="Maximum delay in seconds")
     jitter: bool = Field(True, description="Add jitter to delays")
 
-    # Generic retry configuration - provider-specific configs should be in provider layer
+    # Generic retry configuration - provider-specific configs should be in
+    # provider layer
 
     def get_service_config(self, service: str) -> Dict[str, Any]:
         """

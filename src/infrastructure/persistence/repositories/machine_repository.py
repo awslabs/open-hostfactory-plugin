@@ -41,13 +41,9 @@ class MachineSerializer:
                 "status": machine.status.value,
                 "status_reason": machine.status_reason,
                 # Lifecycle timestamps
-                "launch_time": (
-                    machine.launch_time.isoformat() if machine.launch_time else None
-                ),
+                "launch_time": (machine.launch_time.isoformat() if machine.launch_time else None),
                 "termination_time": (
-                    machine.termination_time.isoformat()
-                    if machine.termination_time
-                    else None
+                    machine.termination_time.isoformat() if machine.termination_time else None
                 ),
                 # Tags and metadata
                 "tags": machine.tags.to_dict() if machine.tags else {},
@@ -57,12 +53,8 @@ class MachineSerializer:
                 # Versioning
                 "version": machine.version,
                 # Base entity fields
-                "created_at": (
-                    machine.created_at.isoformat() if machine.created_at else None
-                ),
-                "updated_at": (
-                    machine.updated_at.isoformat() if machine.updated_at else None
-                ),
+                "created_at": (machine.created_at.isoformat() if machine.created_at else None),
+                "updated_at": (machine.updated_at.isoformat() if machine.updated_at else None),
                 # Schema version for migration support
                 "schema_version": "2.0.0",
             }
@@ -78,9 +70,7 @@ class MachineSerializer:
 
             # Parse datetime fields
             launch_time = (
-                datetime.fromisoformat(data["launch_time"])
-                if data.get("launch_time")
-                else None
+                datetime.fromisoformat(data["launch_time"]) if data.get("launch_time") else None
             )
             termination_time = (
                 datetime.fromisoformat(data["termination_time"])
@@ -88,14 +78,10 @@ class MachineSerializer:
                 else None
             )
             created_at = (
-                datetime.fromisoformat(data["created_at"])
-                if data.get("created_at")
-                else None
+                datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
             )
             updated_at = (
-                datetime.fromisoformat(data["updated_at"])
-                if data.get("updated_at")
-                else None
+                datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
             )
 
             # Build machine data with enhanced fields
@@ -114,9 +100,7 @@ class MachineSerializer:
                 "subnet_id": data.get("subnet_id"),
                 "security_group_ids": data.get("security_group_ids", []),
                 # Machine state
-                "status": MachineStatus(
-                    data.get("status", MachineStatus.PENDING.value)
-                ),
+                "status": MachineStatus(data.get("status", MachineStatus.PENDING.value)),
                 "status_reason": data.get("status_reason"),
                 # Lifecycle timestamps
                 "launch_time": launch_time,
@@ -165,7 +149,9 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
             machine.clear_domain_events()
 
             self.logger.debug(
-                f"Saved machine {machine.instance_id} and extracted {len(events)} events"
+                f"Saved machine {
+        machine.instance_id} and extracted {
+            len(events)} events"
             )
             return events
 
@@ -200,9 +186,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
                 return self.serializer.from_dict(data_list[0])
             return None
         except Exception as e:
-            self.logger.error(
-                f"Failed to find machine by instance_id {instance_id}: {e}"
-            )
+            self.logger.error(f"Failed to find machine by instance_id {instance_id}: {e}")
             raise
 
     @handle_infrastructure_exceptions(context="machine_repository_find_by_template_id")
@@ -213,9 +197,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
             data_list = self.storage_strategy.find_by_criteria(criteria)
             return [self.serializer.from_dict(data) for data in data_list]
         except Exception as e:
-            self.logger.error(
-                f"Failed to find machines by template_id {template_id}: {e}"
-            )
+            self.logger.error(f"Failed to find machines by template_id {template_id}: {e}")
             raise
 
     @handle_infrastructure_exceptions(context="machine_repository_find_by_status")
@@ -241,9 +223,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
 
             return [self.serializer.from_dict(data) for data in machine_data_list]
         except Exception as e:
-            self.logger.error(
-                f"Failed to find machines by request_id {request_id}: {e}"
-            )
+            self.logger.error(f"Failed to find machines by request_id {request_id}: {e}")
             raise
 
     @handle_infrastructure_exceptions(context="machine_repository_find_active_machines")

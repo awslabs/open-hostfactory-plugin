@@ -26,9 +26,7 @@ from src.providers.base.strategy import ProviderContext
 
 
 @query_handler(GetProviderHealthQuery)
-class GetProviderHealthHandler(
-    BaseQueryHandler[GetProviderHealthQuery, ProviderHealthDTO]
-):
+class GetProviderHealthHandler(BaseQueryHandler[GetProviderHealthQuery, ProviderHealthDTO]):
     """Handler for retrieving provider health status."""
 
     def __init__(
@@ -77,9 +75,7 @@ class GetProviderHealthHandler(
                 detailed_health = strategy.get_health_status()
                 health_info.update(detailed_health)
 
-            self.logger.info(
-                f"Provider {query.provider_name} health: {health_info['health']}"
-            )
+            self.logger.info(f"Provider {query.provider_name} health: {health_info['health']}")
             return health_info
 
         except Exception as e:
@@ -115,9 +111,7 @@ class ListAvailableProvidersHandler(
         super().__init__(logger, error_handler)
         self.provider_context = provider_context
 
-    async def execute_query(
-        self, query: ListAvailableProvidersQuery
-    ) -> List[Dict[str, Any]]:
+    async def execute_query(self, query: ListAvailableProvidersQuery) -> List[Dict[str, Any]]:
         """Execute list available providers query."""
         self.logger.info("Listing available providers")
 
@@ -138,9 +132,7 @@ class ListAvailableProvidersHandler(
                     }
                     available_providers.append(provider_info)
                 except Exception as e:
-                    self.logger.warning(
-                        f"Could not get info for provider {strategy_name}: {e}"
-                    )
+                    self.logger.warning(f"Could not get info for provider {strategy_name}: {e}")
                     available_providers.append(
                         {
                             "name": strategy_name,
@@ -181,9 +173,7 @@ class GetProviderCapabilitiesHandler(
         super().__init__(logger, error_handler)
         self.provider_context = provider_context
 
-    async def execute_query(
-        self, query: GetProviderCapabilitiesQuery
-    ) -> Dict[str, Any]:
+    async def execute_query(self, query: GetProviderCapabilitiesQuery) -> Dict[str, Any]:
         """Execute provider capabilities query."""
         self.logger.info(f"Getting capabilities for provider: {query.provider_name}")
 
@@ -210,9 +200,7 @@ class GetProviderCapabilitiesHandler(
                 detailed_capabilities = strategy.get_capabilities()
                 capabilities.update(detailed_capabilities)
 
-            self.logger.info(
-                f"Retrieved capabilities for provider: {query.provider_name}"
-            )
+            self.logger.info(f"Retrieved capabilities for provider: {query.provider_name}")
             return capabilities
 
         except Exception as e:
@@ -220,9 +208,7 @@ class GetProviderCapabilitiesHandler(
             raise
 
 
-class GetProviderMetricsHandler(
-    BaseQueryHandler[GetProviderMetricsQuery, Dict[str, Any]]
-):
+class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, Dict[str, Any]]):
     """Handler for retrieving provider metrics."""
 
     def __init__(
@@ -301,9 +287,7 @@ class GetProviderStrategyConfigHandler(
         super().__init__(logger, error_handler)
         self.provider_context = provider_context
 
-    async def execute_query(
-        self, query: GetProviderStrategyConfigQuery
-    ) -> Dict[str, Any]:
+    async def execute_query(self, query: GetProviderStrategyConfigQuery) -> Dict[str, Any]:
         """Execute provider strategy configuration query."""
         self.logger.info(f"Getting strategy config for provider: {query.provider_name}")
 
@@ -330,9 +314,7 @@ class GetProviderStrategyConfigHandler(
                 detailed_config = strategy.get_configuration()
                 config.update(detailed_config)
 
-            self.logger.info(
-                f"Retrieved strategy config for provider: {query.provider_name}"
-            )
+            self.logger.info(f"Retrieved strategy config for provider: {query.provider_name}")
             return config
 
         except Exception as e:

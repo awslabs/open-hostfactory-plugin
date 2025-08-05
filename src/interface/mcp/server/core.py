@@ -164,9 +164,7 @@ class OpenHFPluginMCPServer:
             return json.dumps(response.__dict__, default=str)
 
         except json.JSONDecodeError:
-            error_response = MCPMessage(
-                error={"code": -32700, "message": "Parse error"}
-            )
+            error_response = MCPMessage(error={"code": -32700, "message": "Parse error"})
             return json.dumps(error_response.__dict__)
         except Exception as e:
             self.logger.error(f"Error handling MCP message: {e}")
@@ -243,9 +241,7 @@ class OpenHFPluginMCPServer:
 
             tool_def = {
                 "name": tool_name,
-                "description": description.strip().split("\n")[
-                    0
-                ],  # First line of docstring
+                "description": description.strip().split("\n")[0],  # First line of docstring
                 "inputSchema": {
                     "type": "object",
                     "properties": self._get_tool_schema(tool_name),
@@ -271,11 +267,7 @@ class OpenHFPluginMCPServer:
         tool_func = self.tools[tool_name]
         result = await tool_func(args, self.app)
 
-        return {
-            "content": [
-                {"type": "text", "text": json.dumps(result, indent=2, default=str)}
-            ]
-        }
+        return {"content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}]}
 
     async def _handle_resources_list(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle resources/list request."""
@@ -366,9 +358,7 @@ class OpenHFPluginMCPServer:
 
         return {
             "description": self.prompts[prompt_name]["description"],
-            "messages": [
-                {"role": "user", "content": {"type": "text", "text": content}}
-            ],
+            "messages": [{"role": "user", "content": {"type": "text", "text": content}}],
         }
 
     def _get_tool_schema(self, tool_name: str) -> Dict[str, Any]:

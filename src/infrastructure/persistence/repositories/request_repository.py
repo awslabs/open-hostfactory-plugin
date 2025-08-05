@@ -49,9 +49,7 @@ class RequestSerializer:
                 # HF output fields
                 "message": request.message,
                 # Results and instances
-                "machine_ids": [
-                    str(instance_id.value) for instance_id in request.instance_ids
-                ],
+                "machine_ids": [str(instance_id.value) for instance_id in request.instance_ids],
                 "successful_count": request.successful_count,
                 "failed_count": request.failed_count,
                 # Metadata and error details
@@ -60,9 +58,7 @@ class RequestSerializer:
                 "provider_data": request.provider_data or {},
                 # Timestamps
                 "created_at": request.created_at.isoformat(),
-                "started_at": (
-                    request.started_at.isoformat() if request.started_at else None
-                ),
+                "started_at": (request.started_at.isoformat() if request.started_at else None),
                 "completed_at": (
                     request.completed_at.isoformat() if request.completed_at else None
                 ),
@@ -85,14 +81,10 @@ class RequestSerializer:
             # Parse datetime fields
             created_at = datetime.fromisoformat(data["created_at"])
             started_at = (
-                datetime.fromisoformat(data["started_at"])
-                if data.get("started_at")
-                else None
+                datetime.fromisoformat(data["started_at"]) if data.get("started_at") else None
             )
             completed_at = (
-                datetime.fromisoformat(data["completed_at"])
-                if data.get("completed_at")
-                else None
+                datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
             )
 
             # Build request data with enhanced fields
@@ -100,9 +92,7 @@ class RequestSerializer:
                 # Core request fields
                 "request_id": RequestId(value=data["request_id"]),
                 "template_id": data["template_id"],
-                "requested_count": data.get(
-                    "machine_count", data.get("requested_count", 1)
-                ),
+                "requested_count": data.get("machine_count", data.get("requested_count", 1)),
                 "request_type": RequestType(data["request_type"]),
                 "status": RequestStatus(data["status"]),
                 "status_message": data.get("status_message", data.get("error_message")),
@@ -116,8 +106,7 @@ class RequestSerializer:
                 "message": data.get("message"),
                 # Results and instances
                 "instance_ids": [
-                    InstanceId(value=machine_id)
-                    for machine_id in data.get("machine_ids", [])
+                    InstanceId(value=machine_id) for machine_id in data.get("machine_ids", [])
                 ],
                 "successful_count": data.get("successful_count", 0),
                 "failed_count": data.get("failed_count", 0),
@@ -300,9 +289,7 @@ class RequestRepositoryImpl(RequestRepositoryInterface):
             data_list = self.storage_strategy.find_by_criteria(criteria)
             return [self.serializer.from_dict(data) for data in data_list]
         except Exception as e:
-            self.logger.error(
-                f"Failed to find requests by template_id {template_id}: {e}"
-            )
+            self.logger.error(f"Failed to find requests by template_id {template_id}: {e}")
             raise
 
     @handle_infrastructure_exceptions(context="request_repository_find_by_type")
@@ -316,9 +303,7 @@ class RequestRepositoryImpl(RequestRepositoryInterface):
             self.logger.error(f"Failed to find requests by type {request_type}: {e}")
             raise
 
-    @handle_infrastructure_exceptions(
-        context="request_repository_find_pending_requests"
-    )
+    @handle_infrastructure_exceptions(context="request_repository_find_pending_requests")
     def find_pending_requests(self) -> List[Request]:
         """Find pending requests."""
         return self.find_by_status(RequestStatus.PENDING)
@@ -335,9 +320,7 @@ class RequestRepositoryImpl(RequestRepositoryInterface):
             raise
 
     @handle_infrastructure_exceptions(context="request_repository_find_by_date_range")
-    def find_by_date_range(
-        self, start_date: datetime, end_date: datetime
-    ) -> List[Request]:
+    def find_by_date_range(self, start_date: datetime, end_date: datetime) -> List[Request]:
         """Find requests within date range."""
         try:
             all_requests = self.find_all()

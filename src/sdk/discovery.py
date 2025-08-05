@@ -42,9 +42,7 @@ class SDKMethodDiscovery:
     def __init__(self):
         self._method_info_cache: Dict[str, MethodInfo] = {}
 
-    async def discover_cqrs_methods(
-        self, query_bus, command_bus
-    ) -> Dict[str, Callable]:
+    async def discover_cqrs_methods(self, query_bus, command_bus) -> Dict[str, Callable]:
         """
         Auto-discover all CQRS handlers and create SDK methods using direct bus access.
 
@@ -85,9 +83,7 @@ class SDKMethodDiscovery:
             return methods
 
         except Exception as e:
-            raise HandlerDiscoveryError(
-                f"Failed to discover SDK methods: {str(e)}"
-            ) from e
+            raise HandlerDiscoveryError(f"Failed to discover SDK methods: {str(e)}") from e
 
     async def discover_sdk_methods(self, service) -> Dict[str, Callable]:
         """
@@ -143,7 +139,8 @@ class SDKMethodDiscovery:
         """Convert CamelCase to snake_case."""
         # Insert underscore before uppercase letters that follow lowercase letters
         s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-        # Insert underscore before uppercase letters that follow lowercase letters or digits
+        # Insert underscore before uppercase letters that follow lowercase letters
+        # or digits
         return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
     def _create_method_info(
@@ -190,9 +187,7 @@ class SDKMethodDiscovery:
             # Fallback to basic method info
             return MethodInfo(
                 name=method_name,
-                description=self._generate_method_description(
-                    method_name, operation_type
-                ),
+                description=self._generate_method_description(method_name, operation_type),
                 parameters={},
                 required_params=[],
                 return_type=None,
@@ -200,9 +195,7 @@ class SDKMethodDiscovery:
                 original_class=handler_type,
             )
 
-    def _generate_method_description(
-        self, method_name: str, operation_type: str
-    ) -> str:
+    def _generate_method_description(self, method_name: str, operation_type: str) -> str:
         """Generate human-readable description from method name."""
         # Convert snake_case to Title Case
         words = method_name.replace("_", " ").title()
@@ -269,9 +262,7 @@ class SDKMethodDiscovery:
         return sdk_method
 
     # Legacy methods (deprecated)
-    def _create_query_method(
-        self, service, query_type: Type, method_info: MethodInfo
-    ) -> Callable:
+    def _create_query_method(self, service, query_type: Type, method_info: MethodInfo) -> Callable:
         """Create SDK method for query handler (deprecated)."""
         raise NotImplementedError(
             "Legacy method deprecated. Use _create_query_method_cqrs instead."

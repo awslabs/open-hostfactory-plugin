@@ -100,9 +100,7 @@ class RepositoryMigrator:
             stats["status"] = "success"
             stats["completed_at"] = datetime.utcnow().isoformat()
 
-            self.logger.info(
-                f"Migration completed: {stats['total_migrated']} items migrated"
-            )
+            self.logger.info(f"Migration completed: {stats['total_migrated']} items migrated")
 
         except Exception as e:
             self.logger.error(f"Migration failed: {str(e)}")
@@ -112,9 +110,7 @@ class RepositoryMigrator:
 
         return stats
 
-    def _create_repositories_for_storage_type(
-        self, storage_type: str
-    ) -> Dict[str, Repository]:
+    def _create_repositories_for_storage_type(self, storage_type: str) -> Dict[str, Repository]:
         """
         Create repositories for a specific storage type.
 
@@ -139,29 +135,22 @@ class RepositoryMigrator:
                 # Get configuration manager
                 config_manager = get_config_manager()
 
-                # Use centralized file resolution for consistent HF_PROVIDER_CONFDIR support
-                templates_path = config_manager.resolve_file(
-                    "template", "templates.json"
-                )
+                # Use centralized file resolution for consistent HF_PROVIDER_CONFDIR
+                # support
+                templates_path = config_manager.resolve_file("template", "templates.json")
                 legacy_templates_path = config_manager.resolve_file(
                     "template", "awsprov_templates.json"
                 )
 
-                logger.info(
-                    f"Repository migrator using centralized resolution for template files:"
-                )
+                logger.info(f"Repository migrator using centralized resolution for template files:")
                 logger.info(f"  templates.json: {templates_path}")
                 logger.info(f"  awsprov_templates.json: {legacy_templates_path}")
 
                 # Create a new template repository
-                template_repo = JSONTemplateRepository(
-                    templates_path, legacy_templates_path
-                )
+                template_repo = JSONTemplateRepository(templates_path, legacy_templates_path)
 
                 # Register it with the container
-                self.container.register_singleton(
-                    TemplateRepositoryInterface, template_repo
-                )
+                self.container.register_singleton(TemplateRepositoryInterface, template_repo)
 
             # For other repositories, create based on storage type
             if storage_type == "dynamodb":
@@ -200,9 +189,7 @@ class RepositoryMigrator:
 
                 # Get SQL config
                 sql_config = self.config_manager.get("sql", {})
-                connection_string = sql_config.get(
-                    "connection_string", "sqlite:///data.db"
-                )
+                connection_string = sql_config.get("connection_string", "sqlite:///data.db")
 
                 # Create engine and session
                 engine = create_engine(connection_string)
@@ -287,7 +274,8 @@ class RepositoryMigrator:
                             indent=2,
                         )
                     self.logger.debug(
-                        f"Backed up {len(items)} items from {collection} to {backup_file}"
+                        f"Backed up {
+        len(items)} items from {collection} to {backup_file}"
                     )
             except Exception as e:
                 self.logger.warning(f"Failed to backup {collection}: {str(e)}")
@@ -324,9 +312,7 @@ class RepositoryMigrator:
         try:
             items = source_repo.find_all()
             stats["total_items"] = len(items)
-            self.logger.info(
-                f"Migrating {stats['total_items']} items from {collection_name}"
-            )
+            self.logger.info(f"Migrating {stats['total_items']} items from {collection_name}")
 
             # Process in batches
             for i in range(0, len(items), batch_size):
@@ -339,9 +325,7 @@ class RepositoryMigrator:
                     try:
                         item_id = self._get_item_id(item, collection_name)
                         if not item_id:
-                            raise ValueError(
-                                f"Item without ID found in {collection_name}"
-                            )
+                            raise ValueError(f"Item without ID found in {collection_name}")
 
                         # Check if the item is already an entity object
                         if (
@@ -352,7 +336,8 @@ class RepositoryMigrator:
                             # Item is already an entity, just save it
                             target_repo.save(item)
                         else:
-                            # Item is a dictionary, we need to convert it to an entity first
+                            # Item is a dictionary, we need to convert it to an entity
+                            # first
                             try:
                                 # Check if the repository is a StrategyBasedRepository
                                 from src.infrastructure.persistence.base.repository import (
@@ -360,33 +345,35 @@ class RepositoryMigrator:
                                 )
 
                                 if isinstance(target_repo, StrategyBasedRepository):
-                                    # Use the _from_dict method to convert dictionary to entity
+                                    # Use the _from_dict method to convert dictionary to
+                                    # entity
                                     try:
                                         entity = target_repo._from_dict(item)
                                         target_repo.save(entity)
                                     except Exception as conversion_error:
                                         self.logger.error(
-                                            f"Failed to convert item {item_id} to entity: {str(conversion_error)}"
+                                            f"Failed to convert item {item_id} to entity: {
+        str(conversion_error)}"
                                         )
                                         raise ValueError(
-                                            f"Entity conversion failed: {str(conversion_error)}"
+                                            f"Entity conversion failed: {
+        str(conversion_error)}"
                                         )
                                 else:
-                                    # Try to determine the entity class from the repository
+                                    # Try to determine the entity class from the
+                                    # repository
                                     entity_class = None
-                                    # Use getattr with a default value to safely access the attribute
-                                    entity_class = getattr(
-                                        target_repo, "entity_class", None
-                                    )
+                                    # Use getattr with a default value to safely access
+                                    # the attribute
+                                    entity_class = getattr(target_repo, "entity_class", None)
 
                                     if entity_class:
                                         # Try to create entity using the entity class
                                         try:
                                             if hasattr(entity_class, "model_validate"):
-                                                # Use Pydantic's model_validate if available
-                                                entity = entity_class.model_validate(
-                                                    item
-                                                )
+                                                # Use Pydantic's model_validate if
+                                                # available
+                                                entity = entity_class.model_validate(item)
                                             elif hasattr(entity_class, "from_dict"):
                                                 # Use from_dict if available
                                                 entity = entity_class.from_dict(item)
@@ -397,10 +384,12 @@ class RepositoryMigrator:
                                             target_repo.save(entity)
                                         except Exception as conversion_error:
                                             self.logger.error(
-                                                f"Failed to create entity from item {item_id}: {str(conversion_error)}"
+                                                f"Failed to create entity from item {item_id}: {
+        str(conversion_error)}"
                                             )
                                             raise ValueError(
-                                                f"Entity creation failed: {str(conversion_error)}"
+                                                f"Entity creation failed: {
+        str(conversion_error)}"
                                             )
                                     else:
                                         # Fallback to direct save, which might fail
@@ -409,18 +398,14 @@ class RepositoryMigrator:
                                         )
                                         target_repo.save(item)
                             except Exception as e:
-                                raise ValueError(
-                                    f"Failed to save item {item_id}: {str(e)}"
-                                )
+                                raise ValueError(f"Failed to save item {item_id}: {str(e)}")
                         stats["migrated"] += 1
 
                     except Exception as e:
                         stats["failed"] += 1
                         error_id = item_id if item_id else "unknown"
                         stats["errors"].append({"item_id": error_id, "error": str(e)})
-                        self.logger.warning(
-                            f"Failed to migrate item {error_id}: {str(e)}"
-                        )
+                        self.logger.warning(f"Failed to migrate item {error_id}: {str(e)}")
 
                 self.logger.debug(
                     f"Migrated batch {stats['batches']} ({i+1}-{min(i+batch_size, len(items))}) of {collection_name}"
@@ -429,9 +414,7 @@ class RepositoryMigrator:
         except Exception as e:
             stats["failed"] = stats["total_items"] - stats["migrated"]
             stats["errors"].append({"collection": collection_name, "error": str(e)})
-            self.logger.error(
-                f"Failed to migrate collection {collection_name}: {str(e)}"
-            )
+            self.logger.error(f"Failed to migrate collection {collection_name}: {str(e)}")
 
         return stats
 
@@ -452,9 +435,7 @@ class RepositoryMigrator:
         if isinstance(item, dict):
             # Try collection-specific ID fields
             if collection_name == "templates":
-                return (
-                    item.get("id") or item.get("template_id") or item.get("templateId")
-                )
+                return item.get("id") or item.get("template_id") or item.get("templateId")
             elif collection_name == "requests":
                 return item.get("id") or item.get("request_id") or item.get("requestId")
             elif collection_name == "machines":

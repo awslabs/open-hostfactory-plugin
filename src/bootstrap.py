@@ -64,9 +64,7 @@ class Application:
             # Ensure config manager is available (lazy)
             self._ensure_config_manager()
 
-            self.logger.info(
-                f"Initializing application with provider: {self.provider_type}"
-            )
+            self.logger.info(f"Initializing application with provider: {self.provider_type}")
 
             # Log provider configuration information
             self._log_provider_configuration(self._config_manager)
@@ -79,16 +77,15 @@ class Application:
             if dry_run:
                 from src.infrastructure.mocking.dry_run_context import dry_run_context
 
-                self.logger.info(
-                    "DRY-RUN mode activated during application initialization"
-                )
+                self.logger.info("DRY-RUN mode activated during application initialization")
                 self._dry_run_context = dry_run_context(True)
                 self._dry_run_context.__enter__()
 
             # Ensure container is available (lazy)
             self._ensure_container()
 
-            # Register all services AFTER container creation but BEFORE service resolution
+            # Register all services AFTER container creation but BEFORE service
+            # resolution
             from src.infrastructure.di.services import register_all_services
 
             register_all_services(self._container)
@@ -103,14 +100,10 @@ class Application:
                 # Eager loading - initialize immediately
                 if hasattr(self._provider_context, "initialize"):
                     if not self._provider_context.initialize():
-                        self.logger.warning(
-                            "Provider context initialization returned False"
-                        )
+                        self.logger.warning("Provider context initialization returned False")
             else:
                 # Lazy loading - just mark as ready, don't trigger loading
-                self.logger.info(
-                    "Lazy loading enabled - providers will initialize on first use"
-                )
+                self.logger.info("Lazy loading enabled - providers will initialize on first use")
                 if hasattr(self._provider_context, "_initialized"):
                     self._provider_context._initialized = True
 
@@ -122,7 +115,8 @@ class Application:
 
             self._initialized = True
             self.logger.info(
-                f"Open HostFactory Plugin initialized successfully with {self.provider_type} provider"
+                f"Open HostFactory Plugin initialized successfully with {
+        self.provider_type} provider"
             )
             return True
 
@@ -140,23 +134,18 @@ class Application:
                 active_providers = unified_config.get_active_providers()
 
                 self.logger.info(f"Provider configuration mode: {mode.value}")
-                self.logger.info(
-                    f"Active providers: {[p.name for p in active_providers]}"
-                )
+                self.logger.info(f"Active providers: {[p.name for p in active_providers]}")
 
                 if mode.value == "multi":
+                    self.logger.info(f"Selection policy: {unified_config.selection_policy}")
                     self.logger.info(
-                        f"Selection policy: {unified_config.selection_policy}"
-                    )
-                    self.logger.info(
-                        f"Health check interval: {unified_config.health_check_interval}s"
+                        f"Health check interval: {
+        unified_config.health_check_interval}s"
                     )
 
             elif hasattr(config_manager, "is_provider_strategy_enabled"):
                 if config_manager.is_provider_strategy_enabled():
-                    self.logger.info(
-                        "Provider strategy enabled but configuration not available"
-                    )
+                    self.logger.info("Provider strategy enabled but configuration not available")
                 else:
                     self.logger.info("Provider strategy configuration not enabled")
             else:
@@ -181,9 +170,7 @@ class Application:
                 available_strategies = self._provider_context.available_strategies
                 current_strategy = self._provider_context.current_strategy_type
 
-                self.logger.info(
-                    f"Provider strategies available: {available_strategies}"
-                )
+                self.logger.info(f"Provider strategies available: {available_strategies}")
                 self.logger.info(f"Current provider strategy: {current_strategy}")
             elif hasattr(self, "provider_type"):
                 self.logger.info(f"Provider type: {self.provider_type}")
@@ -258,21 +245,15 @@ class Application:
 
                 for strategy_name in available_strategies:
                     try:
-                        health_status = self._provider_context.check_strategy_health(
-                            strategy_name
-                        )
+                        health_status = self._provider_context.check_strategy_health(strategy_name)
                         is_healthy = (
-                            health_status and health_status.is_healthy
-                            if health_status
-                            else False
+                            health_status and health_status.is_healthy if health_status else False
                         )
                         provider_health[strategy_name] = is_healthy
                         if is_healthy:
                             healthy_providers += 1
                     except Exception as e:
-                        self.logger.warning(
-                            f"Health check failed for {strategy_name}: {e}"
-                        )
+                        self.logger.warning(f"Health check failed for {strategy_name}: {e}")
                         provider_health[strategy_name] = False
 
                 total_providers = len(available_strategies)
@@ -286,9 +267,7 @@ class Application:
                     message = f"All {total_providers} provider(s) healthy"
                 elif healthy_providers > 0:
                     status = "degraded"
-                    message = (
-                        f"{healthy_providers}/{total_providers} provider(s) healthy"
-                    )
+                    message = f"{healthy_providers}/{total_providers} provider(s) healthy"
                 else:
                     status = "unhealthy"
                     message = f"All {total_providers} provider(s) unhealthy"
@@ -336,9 +315,7 @@ async def create_application(config_path: Optional[str] = None) -> Application:
     """Create and initialize a provider-aware application."""
     app = Application(config_path)
     if not await app.initialize():
-        raise RuntimeError(
-            f"Failed to initialize application with {app.provider_type} provider"
-        )
+        raise RuntimeError(f"Failed to initialize application with {app.provider_type} provider")
     return app
 
 
@@ -357,7 +334,8 @@ async def main() -> None:
         async with await create_application(config_path) as app:
             # Use existing app.logger - no need to create new logger
             app.logger.info(
-                f"Application started successfully with {app.provider_type.upper()} provider"
+                f"Application started successfully with {
+        app.provider_type.upper()} provider"
             )
 
             # Get provider info

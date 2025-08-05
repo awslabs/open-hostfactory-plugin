@@ -168,9 +168,7 @@ class AWSProviderStrategy(ProviderStrategy):
             True if initialization successful, False otherwise
         """
         try:
-            self._logger.info(
-                f"AWS provider strategy ready for region: {self._aws_config.region}"
-            )
+            self._logger.info(f"AWS provider strategy ready for region: {self._aws_config.region}")
 
             # Don't create AWS client here - let it be lazy
             # Don't create managers here - they depend on AWS client
@@ -178,9 +176,7 @@ class AWSProviderStrategy(ProviderStrategy):
             # Don't perform health check here - it would trigger AWS client creation
 
             self._initialized = True
-            self._logger.debug(
-                "AWS provider strategy initialized successfully (lazy mode)"
-            )
+            self._logger.debug("AWS provider strategy initialized successfully (lazy mode)")
             return True
 
         except Exception as e:
@@ -251,9 +247,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 },
             )
 
-    def _execute_operation_internal(
-        self, operation: ProviderOperation
-    ) -> ProviderResult:
+    def _execute_operation_internal(self, operation: ProviderOperation) -> ProviderResult:
         """
         Execute operations - separated for dry-run context wrapping.
 
@@ -270,10 +264,7 @@ class AWSProviderStrategy(ProviderStrategy):
             return self._handle_terminate_instances(operation)
         elif operation.operation_type == ProviderOperationType.GET_INSTANCE_STATUS:
             return self._handle_get_instance_status(operation)
-        elif (
-            operation.operation_type
-            == ProviderOperationType.DESCRIBE_RESOURCE_INSTANCES
-        ):
+        elif operation.operation_type == ProviderOperationType.DESCRIBE_RESOURCE_INSTANCES:
             return self._handle_describe_resource_instances(operation)
         elif operation.operation_type == ProviderOperationType.VALIDATE_TEMPLATE:
             return self._handle_validate_template(operation)
@@ -336,7 +327,8 @@ class AWSProviderStrategy(ProviderStrategy):
             from src.domain.request.aggregate import Request
             from src.domain.request.value_objects import RequestType
 
-            # Use the domain aggregate's factory method - it handles RequestId generation properly
+            # Use the domain aggregate's factory method - it handles RequestId
+            # generation properly
             request = Request.create_new_request(
                 request_type=RequestType.ACQUIRE,
                 template_id=aws_template.template_id,
@@ -366,7 +358,8 @@ class AWSProviderStrategy(ProviderStrategy):
                 instances = []
 
             self._logger.info(
-                f"Handler returned resource_ids: {resource_ids}, instances: {len(instances)}"
+                f"Handler returned resource_ids: {resource_ids}, instances: {
+        len(instances)}"
             )
 
             return ProviderResult.success_result(
@@ -389,9 +382,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 f"Failed to create instances: {str(e)}", "CREATE_INSTANCES_ERROR"
             )
 
-    def _handle_terminate_instances(
-        self, operation: ProviderOperation
-    ) -> ProviderResult:
+    def _handle_terminate_instances(self, operation: ProviderOperation) -> ProviderResult:
         """Handle instance termination operation."""
         try:
             instance_ids = operation.parameters.get("instance_ids", [])
@@ -409,9 +400,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 )
 
             try:
-                response = aws_client.ec2_client.terminate_instances(
-                    InstanceIds=instance_ids
-                )
+                response = aws_client.ec2_client.terminate_instances(InstanceIds=instance_ids)
                 terminating_count = len(response.get("TerminatingInstances", []))
                 success = terminating_count == len(instance_ids)
 
@@ -431,9 +420,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 f"Failed to terminate instances: {str(e)}", "TERMINATE_INSTANCES_ERROR"
             )
 
-    def _handle_get_instance_status(
-        self, operation: ProviderOperation
-    ) -> ProviderResult:
+    def _handle_get_instance_status(self, operation: ProviderOperation) -> ProviderResult:
         """Handle instance status query operation."""
         try:
             instance_ids = operation.parameters.get("instance_ids", [])
@@ -451,9 +438,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 )
 
             try:
-                response = aws_client.ec2_client.describe_instances(
-                    InstanceIds=instance_ids
-                )
+                response = aws_client.ec2_client.describe_instances(InstanceIds=instance_ids)
 
                 # Convert AWS instances to domain Machine entities
                 machines = []
@@ -502,9 +487,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 f"Failed to validate template: {str(e)}", "VALIDATE_TEMPLATE_ERROR"
             )
 
-    def _handle_get_available_templates(
-        self, operation: ProviderOperation
-    ) -> ProviderResult:
+    def _handle_get_available_templates(self, operation: ProviderOperation) -> ProviderResult:
         """Handle available templates query operation."""
         try:
             # Get available templates from AWS
@@ -520,9 +503,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 f"Failed to get available templates: {str(e)}", "GET_TEMPLATES_ERROR"
             )
 
-    def _handle_describe_resource_instances(
-        self, operation: ProviderOperation
-    ) -> ProviderResult:
+    def _handle_describe_resource_instances(self, operation: ProviderOperation) -> ProviderResult:
         """Handle resource-to-instance discovery operation using appropriate handlers."""
         try:
             resource_ids = operation.parameters.get("resource_ids", [])
@@ -564,7 +545,8 @@ class AWSProviderStrategy(ProviderStrategy):
             # Set the resource IDs in the request
             request.resource_ids = resource_ids
 
-            # Use the handler's check_hosts_status method for resource-to-instance discovery
+            # Use the handler's check_hosts_status method for resource-to-instance
+            # discovery
             instance_details = handler.check_hosts_status(request)
 
             if not instance_details:
@@ -765,8 +747,7 @@ class AWSProviderStrategy(ProviderStrategy):
             instance_type = template_config["instance_type"]
             # Basic instance type validation
             if not any(
-                instance_type.startswith(prefix)
-                for prefix in ["t3.", "t2.", "m5.", "c5.", "r5."]
+                instance_type.startswith(prefix) for prefix in ["t3.", "t2.", "m5.", "c5.", "r5."]
             ):
                 validation_warnings.append(f"Uncommon instance type: {instance_type}")
 
@@ -796,20 +777,14 @@ class AWSProviderStrategy(ProviderStrategy):
                 templates = []
                 for template_path in template_paths:
                     try:
-                        template_data = scheduler_strategy.load_templates_from_path(
-                            template_path
-                        )
+                        template_data = scheduler_strategy.load_templates_from_path(template_path)
                         templates.extend(template_data)
                     except Exception as e:
-                        self._logger.warning(
-                            f"Failed to load templates from {template_path}: {e}"
-                        )
+                        self._logger.warning(f"Failed to load templates from {template_path}: {e}")
 
                 return templates
             else:
-                self._logger.warning(
-                    "No scheduler strategy available, using fallback templates"
-                )
+                self._logger.warning("No scheduler strategy available, using fallback templates")
                 # Fallback to basic templates if no scheduler strategy
                 return self._get_fallback_templates()
 
@@ -836,9 +811,7 @@ class AWSProviderStrategy(ProviderStrategy):
             },
         ]
 
-    def _convert_aws_instance_to_machine(
-        self, aws_instance: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _convert_aws_instance_to_machine(self, aws_instance: Dict[str, Any]) -> Dict[str, Any]:
         """Convert AWS instance data to domain Machine entity data.
 
         This method translates AWS-specific field names and formats to domain entity format,
@@ -874,9 +847,7 @@ class AWSProviderStrategy(ProviderStrategy):
             "instance_type": aws_instance.get("InstanceType"),
             "subnet_id": aws_instance.get("SubnetId"),
             "vpc_id": aws_instance.get("VpcId"),
-            "availability_zone": aws_instance.get("Placement", {}).get(
-                "AvailabilityZone"
-            ),
+            "availability_zone": aws_instance.get("Placement", {}).get("AvailabilityZone"),
             "provider_type": "aws",
             "provider_data": {
                 "aws_instance_id": aws_instance.get("InstanceId"),
@@ -905,7 +876,9 @@ class AWSProviderStrategy(ProviderStrategy):
 
     def __str__(self) -> str:
         """Return string representation for debugging."""
-        return f"AWSProviderStrategy(region={self._aws_config.region}, initialized={self._initialized})"
+        return f"AWSProviderStrategy(region={
+    self._aws_config.region}, initialized={
+        self._initialized})"
 
     def __repr__(self) -> str:
         """Return detailed representation for debugging."""

@@ -48,17 +48,14 @@ def register_port_adapters(container):
     container.register_singleton(LoggingPort, lambda c: LoggingAdapter("application"))
 
     # Register container port adapter using factory to avoid circular dependency
-    container.register_singleton(
-        ContainerPort, lambda c: ContainerAdapterFactory.create_adapter(c)
-    )
+    container.register_singleton(ContainerPort, lambda c: ContainerAdapterFactory.create_adapter(c))
 
     # Register error handling port adapter
     container.register_singleton(ErrorHandlingAdapter, lambda c: ErrorHandlingAdapter())
-    container.register_singleton(
-        ErrorHandlingPort, lambda c: c.get(ErrorHandlingAdapter)
-    )
+    container.register_singleton(ErrorHandlingPort, lambda c: c.get(ErrorHandlingAdapter))
 
-    # Register template configuration manager with manual factory (handles optional dependencies)
+    # Register template configuration manager with manual factory (handles
+    # optional dependencies)
     def create_template_configuration_manager(c):
         # Import here to avoid circular imports
         from src.application.services.provider_capability_service import (

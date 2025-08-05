@@ -143,7 +143,8 @@ lint: dev-install quality-check  ## Run all linting checks including quality che
 	@echo "Running pylint (code analysis)..."
 	$(BIN)/pylint $(PACKAGE)
 
-format: dev-install  ## Format code (Black + isort)
+format: dev-install  ## Format code (Black + isort + autopep8)
+	$(BIN)/autopep8 --in-place --max-line-length=88 --select=E501 --recursive $(PACKAGE) $(TESTS)
 	$(BIN)/black $(PACKAGE) $(TESTS)
 	$(BIN)/isort $(PACKAGE) $(TESTS)
 

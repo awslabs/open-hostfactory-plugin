@@ -114,5 +114,6 @@ class SingletonRegistry:
             Dictionary mapping singleton classes to their instances
         """
         with self._lock:
-            # Return a copy of the singletons dictionary to avoid modification during iteration
+            # Return a copy of the singletons dictionary to avoid modification during
+            # iteration
             return dict(self._singletons)

@@ -18,9 +18,7 @@ from src.domain.base.ports import (
 
 
 @command_handler(ReloadProviderConfigCommand)
-class ReloadProviderConfigHandler(
-    BaseCommandHandler[ReloadProviderConfigCommand, Dict[str, Any]]
-):
+class ReloadProviderConfigHandler(BaseCommandHandler[ReloadProviderConfigCommand, Dict[str, Any]]):
     """Handler for reloading provider configuration."""
 
     def __init__(
@@ -38,12 +36,11 @@ class ReloadProviderConfigHandler(
         """Validate reload provider config command."""
         await super().validate_command(command)
 
-    async def execute_command(
-        self, command: ReloadProviderConfigCommand
-    ) -> Dict[str, Any]:
+    async def execute_command(self, command: ReloadProviderConfigCommand) -> Dict[str, Any]:
         """Execute provider configuration reload command."""
         self.logger.info(
-            f"Reloading provider configuration from: {command.config_path or 'default location'}"
+            f"Reloading provider configuration from: {
+        command.config_path or 'default location'}"
         )
 
         try:
@@ -52,7 +49,8 @@ class ReloadProviderConfigHandler(
 
             config_manager = self.container.get(ConfigurationPort)
 
-            # Reload configuration (implementation depends on ConfigurationManager capabilities)
+            # Reload configuration (implementation depends on ConfigurationManager
+            # capabilities)
             if hasattr(config_manager, "reload"):
                 config_manager.reload(command.config_path)
             else:
@@ -65,9 +63,7 @@ class ReloadProviderConfigHandler(
             if hasattr(config_manager, "get_provider_config"):
                 unified_config = config_manager.get_provider_config()
                 provider_mode = unified_config.get_mode().value
-                active_providers = [
-                    p.name for p in unified_config.get_active_providers()
-                ]
+                active_providers = [p.name for p in unified_config.get_active_providers()]
             else:
                 provider_mode = "strategy"
                 active_providers = []

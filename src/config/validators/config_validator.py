@@ -53,9 +53,7 @@ class ConfigValidator:
 
         return result
 
-    def _validate_business_rules(
-        self, config: AppConfig, result: ValidationResult
-    ) -> None:
+    def _validate_business_rules(self, config: AppConfig, result: ValidationResult) -> None:
         """
         Validate business rules beyond schema validation.
 
@@ -70,17 +68,16 @@ class ConfigValidator:
                     aws_config = provider.config
 
                     # Validate AWS-specific business rules
-                    if (
-                        hasattr(aws_config, "max_retries")
-                        and aws_config.max_retries > 10
-                    ):
+                    if hasattr(aws_config, "max_retries") and aws_config.max_retries > 10:
                         result.add_warning(
-                            f"AWS provider '{provider.name}' max_retries is very high, consider reducing for better performance"
+                            f"AWS provider '{
+        provider.name}' max_retries is very high, consider reducing for better performance"
                         )
 
                     if hasattr(aws_config, "timeout") and aws_config.timeout > 300:
                         result.add_warning(
-                            f"AWS provider '{provider.name}' timeout is very high, consider reducing to avoid long waits"
+                            f"AWS provider '{
+        provider.name}' timeout is very high, consider reducing to avoid long waits"
                         )
 
         # Validate template configuration
@@ -95,17 +92,13 @@ class ConfigValidator:
 
         # Validate performance settings
         if config.performance.max_workers > 50:
-            result.add_warning(
-                "High number of max_workers may cause resource contention"
-            )
+            result.add_warning("High number of max_workers may cause resource contention")
 
         # Validate storage configuration
         if config.storage.strategy == "sql":
             sql_config = config.storage.sql_strategy
             if sql_config.pool_size > 20:
-                result.add_warning(
-                    "Large SQL connection pool size may consume excessive resources"
-                )
+                result.add_warning("Large SQL connection pool size may consume excessive resources")
 
     def validate_provider_config(
         self, provider_type: str, provider_config: Dict[str, Any]

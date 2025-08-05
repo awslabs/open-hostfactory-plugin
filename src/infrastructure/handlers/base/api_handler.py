@@ -231,7 +231,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 }
 
             except DomainException as e:
-                # Handle all application-specific errors (DomainException and subclasses)
+                # Handle all application-specific errors (DomainException and
+                # subclasses)
                 error_dict = (
                     e.to_dict()
                     if hasattr(e, "to_dict")
@@ -269,9 +270,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
             except Exception as e:
                 # Handle unexpected errors
-                self.logger.error(
-                    "Unexpected error", exc_info=True, extra={"error": str(e)}
-                )
+                self.logger.error("Unexpected error", exc_info=True, extra={"error": str(e)})
 
                 # Return standardized error response for unexpected errors
                 return {

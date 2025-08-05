@@ -97,9 +97,7 @@ class AWSAMIResolver(ImageResolver):
         except ImportError:
             raise ValueError("boto3 is required for SSM parameter resolution")
         except Exception as e:
-            raise ValueError(
-                f"Unexpected error resolving SSM parameter {ssm_path}: {e}"
-            )
+            raise ValueError(f"Unexpected error resolving SSM parameter {ssm_path}: {e}")
 
     def _is_custom_alias(self, reference: str) -> bool:
         """
@@ -131,7 +129,8 @@ class AWSAMIResolver(ImageResolver):
         Raises:
             ValueError: If alias cannot be resolved
         """
-        # Common alias mappings - in a real implementation, this might come from configuration
+        # Common alias mappings - in a real implementation, this might come from
+        # configuration
         alias_mappings = {
             "amazon-linux-2": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2",
             "ubuntu-20.04": "/aws/service/canonical/ubuntu/server/20.04/stable/current/amd64/hvm/ebs-gp2/ami-id",

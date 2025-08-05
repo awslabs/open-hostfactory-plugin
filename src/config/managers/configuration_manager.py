@@ -181,9 +181,7 @@ class ConfigurationManager:
         self, path_type: str, default_path: str, config_path: Optional[str] = None
     ) -> str:
         """Resolve configuration path."""
-        return self._ensure_path_resolver().resolve_path(
-            path_type, default_path, config_path
-        )
+        return self._ensure_path_resolver().resolve_path(path_type, default_path, config_path)
 
     def get_work_dir(
         self, default_path: Optional[str] = None, config_path: Optional[str] = None

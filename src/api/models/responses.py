@@ -28,9 +28,7 @@ def format_error_for_api(error_response: InfrastructureErrorResponse) -> Dict[st
     }
 
 
-def format_success_for_api(
-    message: str, data: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+def format_success_for_api(message: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Format success response for API consumption."""
     response = {"status": "success", "message": message}
     if data is not None:

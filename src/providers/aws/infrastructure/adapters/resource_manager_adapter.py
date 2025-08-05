@@ -35,9 +35,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
     interface while using the new unified AWSResourceManagerImpl internally.
     """
 
-    def __init__(
-        self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort
-    ):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
         """
         Initialize AWS resource manager adapter.
 
@@ -53,12 +51,8 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
         # Use the new unified resource manager internally
         from src.providers.aws.configuration.config import AWSProviderConfig
 
-        aws_config = (
-            AWSProviderConfig()
-        )  # This should be injected in real implementation
-        self._resource_manager = AWSResourceManagerImpl(
-            self._aws_client, aws_config, self._logger
-        )
+        aws_config = AWSProviderConfig()  # This should be injected in real implementation
+        self._resource_manager = AWSResourceManagerImpl(self._aws_client, aws_config, self._logger)
 
     def get_resource_quota(
         self, resource_type: str, region: Optional[str] = None
@@ -107,10 +101,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             )
 
             # Convert to legacy format
-            return [
-                self._allocation_to_legacy_format(allocation)
-                for allocation in allocations
-            ]
+            return [self._allocation_to_legacy_format(allocation) for allocation in allocations]
 
         except Exception as e:
             self._logger.error(f"Failed to list resources: {str(e)}")
@@ -129,9 +120,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             # Use the new unified method
             import asyncio
 
-            allocation = asyncio.run(
-                self._resource_manager.provision_resources(specification)
-            )
+            allocation = asyncio.run(self._resource_manager.provision_resources(specification))
 
             return str(allocation.resource_id)
 
@@ -202,9 +191,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
 
         return mapping.get(legacy_type.lower(), ResourceType.COMPUTE_INSTANCE)
 
-    def _legacy_config_to_specification(
-        self, config: Dict[str, Any]
-    ) -> ResourceSpecification:
+    def _legacy_config_to_specification(self, config: Dict[str, Any]) -> ResourceSpecification:
         """Convert legacy resource config to new ResourceSpecification."""
         resource_type = self._map_legacy_resource_type(config.get("type", "instances"))
 
@@ -216,9 +203,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             region=config.get("region"),
         )
 
-    def _allocation_to_legacy_format(
-        self, allocation: ResourceAllocation
-    ) -> Dict[str, Any]:
+    def _allocation_to_legacy_format(self, allocation: ResourceAllocation) -> Dict[str, Any]:
         """Convert ResourceAllocation to legacy format."""
         return {
             "id": str(allocation.resource_id),

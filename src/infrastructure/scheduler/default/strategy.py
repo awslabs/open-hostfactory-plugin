@@ -71,9 +71,7 @@ class DefaultSchedulerStrategy(SchedulerPort):
             return Template(**raw_data)
         except Exception as e:
             # Provide helpful error message for debugging
-            raise ValueError(
-                f"Failed to create Template from data: {e}. Data: {raw_data}"
-            )
+            raise ValueError(f"Failed to create Template from data: {e}. Data: {raw_data}")
 
     def parse_request_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -84,9 +82,7 @@ class DefaultSchedulerStrategy(SchedulerPort):
         # Return as-is since it's already in domain format
         return {
             "template_id": raw_data.get("template_id"),
-            "requested_count": raw_data.get(
-                "requested_count", raw_data.get("count", 1)
-            ),
+            "requested_count": raw_data.get("requested_count", raw_data.get("count", 1)),
             "request_type": raw_data.get("request_type", "provision"),
             "metadata": raw_data.get("metadata", {}),
         }

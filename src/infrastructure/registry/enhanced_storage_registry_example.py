@@ -75,9 +75,7 @@ def example_usage():
     registry = EnhancedStorageRegistry()
 
     # Register storage types (only one active at a time)
-    registry.register(
-        "json", json_strategy_factory, json_config_factory, json_uow_factory
-    )
+    registry.register("json", json_strategy_factory, json_config_factory, json_uow_factory)
     registry.register("sql", sql_strategy_factory, sql_config_factory, sql_uow_factory)
 
     # Create strategy (single choice - only one at a time)

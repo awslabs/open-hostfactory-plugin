@@ -100,9 +100,7 @@ class IAMAuthStrategy(AuthPort):
             )
 
         except NoCredentialsError:
-            return AuthResult(
-                status=AuthStatus.FAILED, error_message="AWS credentials not found"
-            )
+            return AuthResult(status=AuthStatus.FAILED, error_message="AWS credentials not found")
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             return AuthResult(
@@ -110,9 +108,7 @@ class IAMAuthStrategy(AuthPort):
             )
         except Exception as e:
             self._logger.error(f"IAM authentication error: {e}")
-            return AuthResult(
-                status=AuthStatus.FAILED, error_message="IAM authentication failed"
-            )
+            return AuthResult(status=AuthStatus.FAILED, error_message="IAM authentication failed")
 
     async def validate_token(self, token: str) -> AuthResult:
         """
@@ -228,9 +224,7 @@ class IAMAuthStrategy(AuthPort):
 
         return permissions
 
-    async def _determine_roles(
-        self, identity: Dict[str, Any], permissions: List[str]
-    ) -> List[str]:
+    async def _determine_roles(self, identity: Dict[str, Any], permissions: List[str]) -> List[str]:
         """
         Determine user roles based on IAM identity and permissions.
 

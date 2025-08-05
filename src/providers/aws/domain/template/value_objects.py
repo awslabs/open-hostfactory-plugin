@@ -38,9 +38,7 @@ class ResourceId(ResourceId):
 
         # Fall back to class pattern if not in config
         if not pattern:
-            raise ValueError(
-                f"Pattern for {cls.resource_type} not found in AWS configuration"
-            )
+            raise ValueError(f"Pattern for {cls.resource_type} not found in AWS configuration")
 
         if not re.match(pattern, v):
             raise ValueError(f"Invalid AWS {cls.resource_type} ID format: {v}")
@@ -146,11 +144,13 @@ class AWSTags(Tags):
             # Use AWS limits from configuration
             if len(key) > config.limits.tag_key_length:
                 raise ValueError(
-                    f"AWS tag key length exceeds limit of {config.limits.tag_key_length}"
+                    f"AWS tag key length exceeds limit of {
+        config.limits.tag_key_length}"
                 )
             if len(value) > config.limits.tag_value_length:
                 raise ValueError(
-                    f"AWS tag value length exceeds limit of {config.limits.tag_value_length}"
+                    f"AWS tag value length exceeds limit of {
+        config.limits.tag_value_length}"
                 )
 
             # Use AWS pattern from configuration
@@ -362,9 +362,7 @@ class AWSConfiguration(ValueObject):
 
     handler_type: ProviderApi
     fleet_type: Optional[AWSFleetType] = None
-    allocation_strategy: Optional[AllocationStrategy] = (
-        None  # Use core enum, not wrapper
-    )
+    allocation_strategy: Optional[AllocationStrategy] = None  # Use core enum, not wrapper
     price_type: Optional[PriceType] = None
     subnet_ids: List[AWSSubnetId] = []
     security_group_ids: List[AWSSecurityGroupId] = []
@@ -379,9 +377,7 @@ class AWSConfiguration(ValueObject):
 
         # Set default allocation strategy if not provided
         if not self.allocation_strategy:
-            object.__setattr__(
-                self, "allocation_strategy", AllocationStrategy.LOWEST_PRICE
-            )
+            object.__setattr__(self, "allocation_strategy", AllocationStrategy.LOWEST_PRICE)
 
         # Set default price type if not provided
         if not self.price_type:

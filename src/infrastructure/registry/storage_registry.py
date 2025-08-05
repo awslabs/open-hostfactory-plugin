@@ -140,9 +140,7 @@ class StorageRegistry(BaseRegistry):
         except ValueError as e:
             raise UnsupportedStorageError(str(e)) from e
         except Exception as e:
-            error_msg = (
-                f"Failed to create config for storage type '{storage_type}': {str(e)}"
-            )
+            error_msg = f"Failed to create config for storage type '{storage_type}': {str(e)}"
             self.logger.error(error_msg)
             raise ConfigurationError(error_msg) from e
 

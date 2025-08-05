@@ -103,9 +103,7 @@ class AWSHandler(ABC):
         if request_adapter:
             self._logger.debug("Successfully initialized request adapter")
         else:
-            self._logger.debug(
-                "No request adapter provided, will use EC2 client directly"
-            )
+            self._logger.debug("No request adapter provided, will use EC2 client directly")
 
     @abstractmethod
     def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> str:
@@ -218,9 +216,7 @@ class AWSHandler(ABC):
         """Get service name from handler class name."""
         return self.__class__.__name__.replace("Handler", "").lower()
 
-    def _get_retry_strategy_config(
-        self, operation_type: str, service_name: str
-    ) -> Dict[str, Any]:
+    def _get_retry_strategy_config(self, operation_type: str, service_name: str) -> Dict[str, Any]:
         """
         Get retry strategy configuration based on operation type.
 
@@ -300,9 +296,7 @@ class AWSHandler(ABC):
         else:
             return InfrastructureError(f"AWS Error: {error_code} - {error_message}")
 
-    def _paginate(
-        self, client_method: Callable, result_key: str, **kwargs
-    ) -> List[Dict[str, Any]]:
+    def _paginate(self, client_method: Callable, result_key: str, **kwargs) -> List[Dict[str, Any]]:
         """
         Paginate through AWS API results.
 
@@ -334,9 +328,7 @@ class AWSHandler(ABC):
         """
         try:
             # Use AWS client's EC2 client for describe_instances
-            response = self.aws_client.ec2_client.describe_instances(
-                InstanceIds=instance_ids
-            )
+            response = self.aws_client.ec2_client.describe_instances(InstanceIds=instance_ids)
 
             instances = []
             for reservation in response.get("Reservations", []):
@@ -383,15 +375,12 @@ class AWSHandler(ABC):
 
         # Validate instance type(s)
         if not (template.instance_type or template.instance_types):
-            errors["instanceType"] = (
-                "Either instance_type or instance_types must be specified"
-            )
+            errors["instanceType"] = "Either instance_type or instance_types must be specified"
         if template.instance_type and template.instance_types:
-            errors["instanceType"] = (
-                "Cannot specify both instance_type and instance_types"
-            )
+            errors["instanceType"] = "Cannot specify both instance_type and instance_types"
 
-        # Validate subnet(s) - subnet_id is a property of subnet_ids, so only check subnet_ids
+        # Validate subnet(s) - subnet_id is a property of subnet_ids, so only
+        # check subnet_ids
         if not template.subnet_ids:
             errors["subnet"] = "At least one subnet must be specified in subnet_ids"
 
@@ -405,9 +394,7 @@ class AWSHandler(ABC):
             for field, message in errors.items():
                 error_details.append(f"{field}: {message}")
 
-            detailed_message = (
-                f"Template validation failed - {'; '.join(error_details)}"
-            )
+            detailed_message = f"Template validation failed - {'; '.join(error_details)}"
             raise AWSValidationError(detailed_message, errors)
 
     # Performance monitoring methods
@@ -430,9 +417,7 @@ class AWSHandler(ABC):
             metrics["total_duration"] / total_count if total_count > 0 else 0.0
         )
 
-    def _record_failure_metrics(
-        self, request_type: str, duration: float, error: Exception
-    ) -> None:
+    def _record_failure_metrics(self, request_type: str, duration: float, error: Exception) -> None:
         """Record failure metrics for monitoring."""
         key = f"aws_{request_type}"
         if key not in self._metrics:

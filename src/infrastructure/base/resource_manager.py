@@ -48,9 +48,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         self.max_retries = 3
         self.retry_delay = 2.0
 
-    async def provision_resources(
-        self, specification: ResourceSpecification
-    ) -> ResourceAllocation:
+    async def provision_resources(self, specification: ResourceSpecification) -> ResourceAllocation:
         """
         Provision resources with monitoring and retry logic.
 
@@ -62,7 +60,9 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         if self.logger:
             self.logger.info(
-                f"Starting resource provisioning: {specification.name} ({specification.resource_type.value})"
+                f"Starting resource provisioning: {
+        specification.name} ({
+            specification.resource_type.value})"
             )
 
         try:
@@ -81,7 +81,9 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.info(
-                    f"Resource provisioned successfully: {allocation.resource_id} in {duration:.3f}s"
+                    f"Resource provisioned successfully: {
+        allocation.resource_id} in {
+            duration:.3f}s"
                 )
 
             self._record_metric(operation_id, duration, "success")
@@ -91,7 +93,10 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.error(
-                    f"Resource provisioning failed: {specification.name} in {duration:.3f}s - {str(e)}"
+                    f"Resource provisioning failed: {
+        specification.name} in {
+            duration:.3f}s - {
+                str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))
@@ -108,9 +113,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         start_time = time.time()
 
         if self.logger:
-            self.logger.info(
-                f"Starting resource deprovisioning: {allocation.resource_id}"
-            )
+            self.logger.info(f"Starting resource deprovisioning: {allocation.resource_id}")
 
         try:
             # Pre-deprovisioning checks
@@ -125,7 +128,9 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.info(
-                    f"Resource deprovisioned successfully: {allocation.resource_id} in {duration:.3f}s"
+                    f"Resource deprovisioned successfully: {
+        allocation.resource_id} in {
+            duration:.3f}s"
                 )
 
             self._record_metric(operation_id, duration, "success")
@@ -134,7 +139,10 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.error(
-                    f"Resource deprovisioning failed: {allocation.resource_id} in {duration:.3f}s - {str(e)}"
+                    f"Resource deprovisioning failed: {
+        allocation.resource_id} in {
+            duration:.3f}s - {
+                str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))
@@ -170,9 +178,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
             duration = time.time() - start_time
             if self.logger:
-                self.logger.debug(
-                    f"Listed {len(resources)} resources in {duration:.3f}s"
-                )
+                self.logger.debug(f"Listed {len(resources)} resources in {duration:.3f}s")
 
             self._record_metric(operation_id, duration, "success")
             return resources
@@ -204,9 +210,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
     # Template methods for concrete implementations
 
-    async def validate_specification(
-        self, specification: ResourceSpecification
-    ) -> None:
+    async def validate_specification(self, specification: ResourceSpecification) -> None:
         """
         Validate resource specification before provisioning.
 
@@ -224,14 +228,10 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         Override in concrete implementations for provider-specific quota checks.
         """
         try:
-            quota = await self.get_resource_quota(
-                specification.resource_type, specification.region
-            )
+            quota = await self.get_resource_quota(specification.resource_type, specification.region)
             # Basic quota check - override for more sophisticated logic
             if quota.get("available", 0) <= 0:
-                raise ValueError(
-                    f"Insufficient quota for {specification.resource_type.value}"
-                )
+                raise ValueError(f"Insufficient quota for {specification.resource_type.value}")
         except Exception:
             # If quota check fails, log warning but don't block provisioning
             if self.logger:
@@ -248,9 +248,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         if not allocation.resource_id:
             raise ValueError("Resource allocation must have a valid resource_id")
         if not allocation.is_active() and not allocation.is_provisioning():
-            raise ValueError(
-                f"Resource allocation has invalid status: {allocation.status}"
-            )
+            raise ValueError(f"Resource allocation has invalid status: {allocation.status}")
 
     async def validate_deprovisioning(self, allocation: ResourceAllocation) -> None:
         """
@@ -261,18 +259,14 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         if not allocation.resource_id:
             raise ValueError("Cannot deprovision resource without valid resource_id")
 
-    async def cleanup_after_deprovisioning(
-        self, allocation: ResourceAllocation
-    ) -> None:
+    async def cleanup_after_deprovisioning(self, allocation: ResourceAllocation) -> None:
         """
         Cleanup after successful deprovisioning.
 
         Override in concrete implementations for provider-specific cleanup.
         """
         if self.logger:
-            self.logger.debug(
-                f"Cleanup completed for resource: {allocation.resource_id}"
-            )
+            self.logger.debug(f"Cleanup completed for resource: {allocation.resource_id}")
 
     # Abstract methods that must be implemented by concrete classes
 
@@ -295,9 +289,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         """
 
     @abstractmethod
-    async def fetch_resource_status(
-        self, resource_id: ResourceId
-    ) -> ResourceAllocation:
+    async def fetch_resource_status(self, resource_id: ResourceId) -> ResourceAllocation:
         """
         Fetch current resource status from provider.
 
@@ -338,9 +330,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
                     raise
                 else:
                     if self.logger:
-                        self.logger.warning(
-                            f"Provisioning attempt {attempt + 1} failed: {str(e)}"
-                        )
+                        self.logger.warning(f"Provisioning attempt {attempt + 1} failed: {str(e)}")
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
 
     async def _deprovision_with_retry(self, allocation: ResourceAllocation) -> None:
@@ -374,9 +364,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         """Get performance metrics."""
         return self._metrics.copy()
 
-    def handle_error(
-        self, error: Exception, context: str
-    ) -> InfrastructureErrorResponse:
+    def handle_error(self, error: Exception, context: str) -> InfrastructureErrorResponse:
         """Handle errors consistently."""
         if self.logger:
             self.logger.error(f"Resource manager error in {context}: {str(error)}")
@@ -396,9 +384,9 @@ class CloudProviderResourceManager(BaseResourceManager, Generic[T]):
         """Initialize with provider-specific client."""
         super().__init__(logger)
         self.provider_client = provider_client
-        self.provider_name = self.__class__.__name__.replace(
-            "ResourceManager", ""
-        ).replace("Impl", "")
+        self.provider_name = self.__class__.__name__.replace("ResourceManager", "").replace(
+            "Impl", ""
+        )
 
     async def validate_provider_connection(self) -> bool:
         """

@@ -350,7 +350,9 @@ class ProviderStrategyFactory:
                     validation_result["warnings"].append(
                         "Multiple active providers in single provider mode"
                     )
-            elif mode == ProviderMode.MULTI:
+            elif (  # noqa: SIM102 (false positive - proper if-elif structure)
+                mode == ProviderMode.MULTI
+            ):
                 if len(active_providers) < 2:
                     validation_result["errors"].append(
                         "Multi-provider mode requires at least 2 active providers"

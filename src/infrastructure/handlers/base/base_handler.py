@@ -60,11 +60,13 @@ class BaseHandler(ABC):
             error: Exception that was raised
             **kwargs: Additional logging context
         """
-        self.logger.error(f"Error in {method_name}: {str(error)}", exc_info=True, extra=kwargs)
+        self.logger.error(
+            f"Error in {method_name}: {str(error)}", exc_info=True, extra=kwargs
+        )
 
     def with_logging(self, func: Callable[..., T]) -> Callable[..., T]:
         """
-        Decorator for adding logging to methods.
+        Add logging to methods.
 
         Args:
             func: Function to decorate
@@ -87,9 +89,11 @@ class BaseHandler(ABC):
 
         return wrapper
 
-    def with_metrics(self, func: Callable[..., T], name: Optional[str] = None) -> Callable[..., T]:
+    def with_metrics(
+        self, func: Callable[..., T], name: Optional[str] = None
+    ) -> Callable[..., T]:
         """
-        Decorator for adding metrics to methods.
+        Add metrics to methods.
 
         Args:
             func: Function to decorate
@@ -111,7 +115,9 @@ class BaseHandler(ABC):
                 self.metrics.record_success(method_name, time.time() - start_time)
                 return result
             except Exception as e:
-                self.metrics.record_error(method_name, time.time() - start_time, error=str(e))
+                self.metrics.record_error(
+                    method_name, time.time() - start_time, error=str(e)
+                )
                 raise
 
         return wrapper
@@ -122,7 +128,7 @@ class BaseHandler(ABC):
         error_map: Optional[Dict[type, Callable[[Exception], Any]]] = None,
     ) -> Callable[..., T]:
         """
-        Decorator for standardized error handling.
+        Provide standardized error handling.
 
         Args:
             func: Function to decorate

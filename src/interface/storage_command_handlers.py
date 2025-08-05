@@ -70,7 +70,10 @@ async def handle_validate_storage_config(args) -> Dict[str, Any]:
     query = ValidateStorageConfigQuery()
     validation = await query_bus.execute(query)
 
-    return {"validation": validation, "message": "Storage configuration validated successfully"}
+    return {
+        "validation": validation,
+        "message": "Storage configuration validated successfully",
+    }
 
 
 @handle_interface_exceptions(context="test_storage", interface_type="cli")

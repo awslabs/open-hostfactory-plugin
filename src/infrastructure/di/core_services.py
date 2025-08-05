@@ -1,11 +1,7 @@
 """Core service registrations for dependency injection."""
 
-from typing import TYPE_CHECKING, Any, Dict, Optional
-
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports import (
-    ConfigurationPort,
-    ErrorHandlingPort,
     EventPublisherPort,
     LoggingPort,
     SchedulerPort,
@@ -14,7 +10,6 @@ from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
 from src.monitoring.metrics import MetricsCollector
-from src.providers.base.strategy import ProviderContext
 
 
 def register_core_services(container: DIContainer) -> None:
@@ -41,7 +36,9 @@ def register_core_services(container: DIContainer) -> None:
         CommandBus, lambda c: CommandBus(container=c, logger=c.get(LoggingPort))
     )
 
-    container.register_factory(QueryBus, lambda c: QueryBus(container=c, logger=c.get(LoggingPort)))
+    container.register_factory(
+        QueryBus, lambda c: QueryBus(container=c, logger=c.get(LoggingPort))
+    )
 
 
 def _create_scheduler_strategy(container: DIContainer) -> SchedulerPort:

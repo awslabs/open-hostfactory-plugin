@@ -12,6 +12,9 @@ from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
+# Module-level constant to avoid B008 warning
+DEFAULT_MAX_AGE = timedelta(days=7)
+
 
 @dataclass
 class Metric:
@@ -106,14 +109,18 @@ class MetricsCollector:
         self.register_gauge("memory_usage_bytes")
         self.register_gauge("cpu_usage_percent")
 
-    def register_counter(self, name: str, labels: Optional[Dict[str, str]] = None) -> Counter:
+    def register_counter(
+        self, name: str, labels: Optional[Dict[str, str]] = None
+    ) -> Counter:
         """Register a new counter metric."""
         with self._lock:
             counter = Counter(name, 0.0, labels=labels or {})
             self.metrics[name] = counter
             return counter
 
-    def register_gauge(self, name: str, labels: Optional[Dict[str, str]] = None) -> Gauge:
+    def register_gauge(
+        self, name: str, labels: Optional[Dict[str, str]] = None
+    ) -> Gauge:
         """Register a new gauge metric."""
         with self._lock:
             gauge = Gauge(name, 0.0, labels=labels or {})
@@ -136,9 +143,13 @@ class MetricsCollector:
             if isinstance(self.metrics[name], Gauge):
                 self.metrics[name].set(value)
 
-    def start_timer(self, name: str = "", labels: Optional[Dict[str, str]] = None) -> Timer:
+    def start_timer(
+        self, name: str = "", labels: Optional[Dict[str, str]] = None
+    ) -> Timer:
         """Start a new timer."""
-        return Timer(name, labels or {})
+        if labels is None:
+            labels = {}
+        return Timer(name, labels)
 
     def record_time(self, name: str, duration: float) -> None:
         """Record a timing duration."""
@@ -152,7 +163,10 @@ class MetricsCollector:
             self.set_gauge(f"{name}_seconds", avg_time)
 
     def record_success(
-        self, operation: str, start_time: float, metadata: Optional[Dict[str, Any]] = None
+        self,
+        operation: str,
+        start_time: float,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Record a successful operation."""
         duration = time.time() - start_time
@@ -166,7 +180,10 @@ class MetricsCollector:
             )
 
     def record_error(
-        self, operation: str, start_time: float, metadata: Optional[Dict[str, Any]] = None
+        self,
+        operation: str,
+        start_time: float,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Record a failed operation."""
         duration = time.time() - start_time
@@ -174,7 +191,10 @@ class MetricsCollector:
         self.record_time(f"{operation}_error_duration", duration)
 
         if metadata:
-            logger.error(f"{operation} failed", extra={"duration": duration, "metadata": metadata})
+            logger.error(
+                f"{operation} failed",
+                extra={"duration": duration, "metadata": metadata},
+            )
 
     def get_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Get all current metrics."""
@@ -199,7 +219,9 @@ class MetricsCollector:
                     prom_file = self.metrics_dir / "metrics.prom"
                     with prom_file.open("w") as f:
                         for name, metric in metrics.items():
-                            labels = ",".join(f'{k}="{v}"' for k, v in metric["labels"].items())
+                            labels = ",".join(
+                                f'{k}="{v}"' for k, v in metric["labels"].items()
+                            )
                             f.write(f'{name}{{{labels}}} {metric["value"]}\n')
 
                     time.sleep(self.config.get("METRICS_INTERVAL", 60))
@@ -242,7 +264,7 @@ class MetricsCollector:
                     metric.value = 0.0
             self.timers.clear()
 
-    def cleanup_old_metrics(self, max_age: timedelta = timedelta(days=7)) -> None:
+    def cleanup_old_metrics(self, max_age: timedelta = DEFAULT_MAX_AGE) -> None:
         """Clean up old metrics data."""
         cutoff = datetime.utcnow() - max_age
 

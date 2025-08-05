@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, List, Optional
 
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.template.aggregate import Template
 from src.domain.template.repository import TemplateRepository
@@ -14,7 +13,9 @@ from src.infrastructure.template.configuration_manager import (
 class TemplateRepositoryImpl(TemplateRepository):
     """Template repository implementation for configuration-based template management."""
 
-    def __init__(self, template_manager: TemplateConfigurationManager, logger: LoggingPort):
+    def __init__(
+        self, template_manager: TemplateConfigurationManager, logger: LoggingPort
+    ):
         """Initialize repository with template configuration manager."""
         self._template_manager = template_manager
         self._logger = logger

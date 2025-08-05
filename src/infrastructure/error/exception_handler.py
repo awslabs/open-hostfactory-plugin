@@ -17,7 +17,7 @@ import threading
 from datetime import datetime
 from functools import lru_cache
 from http import HTTPStatus
-from typing import Any, Callable, Dict, Optional, Type, Union
+from typing import Any, Callable, Dict, Optional, Type
 
 from pydantic import Field
 
@@ -197,7 +197,9 @@ class InfrastructureErrorResponse(BaseDTO):
         }
 
     @staticmethod
-    def _exception_to_components(exception: Exception) -> tuple[str, str, str, Dict[str, Any]]:
+    def _exception_to_components(
+        exception: Exception,
+    ) -> tuple[str, str, str, Dict[str, Any]]:
         """Convert exception to error components."""
         if isinstance(exception, ValidationError):
             return (
@@ -271,7 +273,9 @@ ErrorResponse = InfrastructureErrorResponse
 class ExceptionContext:
     """Rich context information for exception handling."""
 
-    def __init__(self, operation: str, layer: str = "application", **additional_context):
+    def __init__(
+        self, operation: str, layer: str = "application", **additional_context
+    ):
         self.operation = operation
         self.layer = layer
         self.timestamp = datetime.utcnow()
@@ -301,13 +305,17 @@ class ExceptionHandler:
         self.logger = logger or get_logger(__name__)
         self.metrics = metrics
         self._handlers: Dict[Type[Exception], Callable] = {}
-        self._http_handlers: Dict[Type[Exception], Callable[[Exception], ErrorResponse]] = {}
+        self._http_handlers: Dict[
+            Type[Exception], Callable[[Exception], ErrorResponse]
+        ] = {}
         self._performance_stats = {"total_handled": 0, "by_type": {}}
         self._lock = threading.Lock()
         self._register_handlers()
         self._register_http_handlers()
 
-    def handle(self, exception: Exception, context: ExceptionContext, **kwargs) -> Exception:
+    def handle(
+        self, exception: Exception, context: ExceptionContext, **kwargs
+    ) -> Exception:
         """
         Handle exception with logging and context preservation.
 
@@ -365,7 +373,9 @@ class ExceptionHandler:
         self._handlers[DomainException] = self._preserve_domain_exception
         self._handlers[ValidationError] = self._preserve_validation_exception
         self._handlers[EntityNotFoundError] = self._preserve_entity_not_found
-        self._handlers[BusinessRuleViolationError] = self._preserve_business_rule_violation
+        self._handlers[BusinessRuleViolationError] = (
+            self._preserve_business_rule_violation
+        )
 
         # TEMPLATE EXCEPTIONS - Preserve with template context
         self._handlers[TemplateException] = self._preserve_template_exception
@@ -761,7 +771,9 @@ class ExceptionHandler:
                 },
             )
 
-    def _wrap_value_error(self, exc: ValueError, context: str = None, **kwargs) -> ValidationError:
+    def _wrap_value_error(
+        self, exc: ValueError, context: str = None, **kwargs
+    ) -> ValidationError:
         """Wrap value error into validation exception."""
         return ValidationError(
             message=f"Invalid value: {str(exc)}",
@@ -775,7 +787,9 @@ class ExceptionHandler:
             },
         )
 
-    def _wrap_key_error(self, exc: KeyError, context: str = None, **kwargs) -> ValidationError:
+    def _wrap_key_error(
+        self, exc: KeyError, context: str = None, **kwargs
+    ) -> ValidationError:
         """Wrap key error into validation exception."""
         return ValidationError(
             message=f"Missing required key: {str(exc)}",
@@ -789,7 +803,9 @@ class ExceptionHandler:
             },
         )
 
-    def _wrap_type_error(self, exc: TypeError, context: str = None, **kwargs) -> ValidationError:
+    def _wrap_type_error(
+        self, exc: TypeError, context: str = None, **kwargs
+    ) -> ValidationError:
         """Wrap type error into validation exception."""
         return ValidationError(
             message=f"Type error: {str(exc)}",
@@ -871,7 +887,9 @@ class ExceptionHandler:
 
     def _register_http_handlers(self) -> None:
         """Register HTTP error handlers."""
-        self._http_handlers: Dict[Type[Exception], Callable[[Exception], ErrorResponse]] = {
+        self._http_handlers: Dict[
+            Type[Exception], Callable[[Exception], ErrorResponse]
+        ] = {
             # Domain errors
             ValidationError: self._handle_validation_error_http,
             EntityNotFoundError: self._handle_not_found_error_http,
@@ -892,7 +910,9 @@ class ExceptionHandler:
 
     # HTTP ERROR HANDLERS
 
-    def _handle_validation_error_http(self, exception: ValidationError) -> ErrorResponse:
+    def _handle_validation_error_http(
+        self, exception: ValidationError
+    ) -> ErrorResponse:
         """Handle validation errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.INVALID_INPUT,
@@ -902,7 +922,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.BAD_REQUEST,
         )
 
-    def _handle_not_found_error_http(self, exception: EntityNotFoundError) -> ErrorResponse:
+    def _handle_not_found_error_http(
+        self, exception: EntityNotFoundError
+    ) -> ErrorResponse:
         """Handle not found errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.RESOURCE_NOT_FOUND,
@@ -924,7 +946,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.UNPROCESSABLE_ENTITY,
         )
 
-    def _handle_request_not_found_http(self, exception: RequestNotFoundError) -> ErrorResponse:
+    def _handle_request_not_found_http(
+        self, exception: RequestNotFoundError
+    ) -> ErrorResponse:
         """Handle request not found errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.REQUEST_NOT_FOUND,
@@ -934,7 +958,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.NOT_FOUND,
         )
 
-    def _handle_request_validation_http(self, exception: RequestValidationError) -> ErrorResponse:
+    def _handle_request_validation_http(
+        self, exception: RequestValidationError
+    ) -> ErrorResponse:
         """Handle request validation errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.INVALID_INPUT,
@@ -944,7 +970,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.BAD_REQUEST,
         )
 
-    def _handle_machine_not_found_http(self, exception: MachineNotFoundError) -> ErrorResponse:
+    def _handle_machine_not_found_http(
+        self, exception: MachineNotFoundError
+    ) -> ErrorResponse:
         """Handle machine not found errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.MACHINE_NOT_FOUND,
@@ -954,7 +982,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.NOT_FOUND,
         )
 
-    def _handle_machine_validation_http(self, exception: MachineValidationError) -> ErrorResponse:
+    def _handle_machine_validation_http(
+        self, exception: MachineValidationError
+    ) -> ErrorResponse:
         """Handle machine validation errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.INVALID_INPUT,
@@ -964,7 +994,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.BAD_REQUEST,
         )
 
-    def _handle_template_not_found_http(self, exception: TemplateNotFoundError) -> ErrorResponse:
+    def _handle_template_not_found_http(
+        self, exception: TemplateNotFoundError
+    ) -> ErrorResponse:
         """Handle template not found errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.TEMPLATE_NOT_FOUND,
@@ -974,7 +1006,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.NOT_FOUND,
         )
 
-    def _handle_template_validation_http(self, exception: TemplateValidationError) -> ErrorResponse:
+    def _handle_template_validation_http(
+        self, exception: TemplateValidationError
+    ) -> ErrorResponse:
         """Handle template validation errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.INVALID_INPUT,
@@ -984,7 +1018,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.BAD_REQUEST,
         )
 
-    def _handle_infrastructure_error_http(self, exception: InfrastructureError) -> ErrorResponse:
+    def _handle_infrastructure_error_http(
+        self, exception: InfrastructureError
+    ) -> ErrorResponse:
         """Handle infrastructure errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.EXTERNAL_SERVICE_ERROR,
@@ -994,7 +1030,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.SERVICE_UNAVAILABLE,
         )
 
-    def _handle_configuration_error_http(self, exception: ConfigurationError) -> ErrorResponse:
+    def _handle_configuration_error_http(
+        self, exception: ConfigurationError
+    ) -> ErrorResponse:
         """Handle configuration errors for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.INTERNAL_ERROR,

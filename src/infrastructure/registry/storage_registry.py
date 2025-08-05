@@ -11,8 +11,6 @@ from .base_registry import BaseRegistration, BaseRegistry, RegistryMode
 class UnsupportedStorageError(Exception):
     """Exception raised when an unsupported storage type is requested."""
 
-    pass
-
 
 class StorageFactoryInterface(ABC):
     """Interface for storage factory functions."""
@@ -20,12 +18,10 @@ class StorageFactoryInterface(ABC):
     @abstractmethod
     def create_strategy(self, config: Any) -> Any:
         """Create a storage strategy."""
-        pass
 
     @abstractmethod
     def create_config(self, data: Dict[str, Any]) -> Any:
         """Create a storage configuration."""
-        pass
 
 
 class StorageRegistration(BaseRegistration):
@@ -39,7 +35,10 @@ class StorageRegistration(BaseRegistration):
         unit_of_work_factory: Optional[Callable] = None,
     ):
         super().__init__(
-            type_name, strategy_factory, config_factory, unit_of_work_factory=unit_of_work_factory
+            type_name,
+            strategy_factory,
+            config_factory,
+            unit_of_work_factory=unit_of_work_factory,
         )
         self.unit_of_work_factory = unit_of_work_factory
 
@@ -141,7 +140,9 @@ class StorageRegistry(BaseRegistry):
         except ValueError as e:
             raise UnsupportedStorageError(str(e)) from e
         except Exception as e:
-            error_msg = f"Failed to create config for storage type '{storage_type}': {str(e)}"
+            error_msg = (
+                f"Failed to create config for storage type '{storage_type}': {str(e)}"
+            )
             self.logger.error(error_msg)
             raise ConfigurationError(error_msg) from e
 

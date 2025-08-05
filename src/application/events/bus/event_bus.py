@@ -8,7 +8,6 @@ and middleware support.
 
 import asyncio
 import time
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 # Import types - using string imports to avoid circular dependencies
@@ -70,7 +69,9 @@ class EventBus:
         self._handlers[event_type].append(handler)
 
         if self.logger:
-            self.logger.debug(f"Registered handler {handler.__class__.__name__} for {event_type}")
+            self.logger.debug(
+                f"Registered handler {handler.__class__.__name__} for {event_type}"
+            )
 
     def register_handler_class(
         self,
@@ -91,7 +92,9 @@ class EventBus:
         """
         # Create or reuse handler instance
         if handler_class not in self._handler_instances:
-            self._handler_instances[handler_class] = handler_class(logger or self.logger)
+            self._handler_instances[handler_class] = handler_class(
+                logger or self.logger
+            )
 
         handler_instance = self._handler_instances[handler_class]
         self.register_handler(event_type, handler_instance)
@@ -108,16 +111,22 @@ class EventBus:
         """
         if not EventHandlerRegistry:
             if self.logger:
-                self.logger.warning("EventHandlerRegistry not available for auto-registration")
+                self.logger.warning(
+                    "EventHandlerRegistry not available for auto-registration"
+                )
             return
 
         registered_handlers = EventHandlerRegistry.get_handlers()
 
         for event_type, handler_class in registered_handlers.items():
-            self.register_handler_class(event_type, handler_class, logger or self.logger)
+            self.register_handler_class(
+                event_type, handler_class, logger or self.logger
+            )
 
         if self.logger:
-            self.logger.info(f"Auto-registered {len(registered_handlers)} event handlers")
+            self.logger.info(
+                f"Auto-registered {len(registered_handlers)} event handlers"
+            )
 
     async def publish(self, event: DomainEvent) -> None:
         """
@@ -149,7 +158,9 @@ class EventBus:
         # Execute all handlers concurrently
         tasks = []
         for handler in handlers:
-            task = asyncio.create_task(self._handle_with_error_isolation(handler, event))
+            task = asyncio.create_task(
+                self._handle_with_error_isolation(handler, event)
+            )
             tasks.append(task)
 
         # Wait for all handlers to complete
@@ -184,7 +195,9 @@ class EventBus:
                 f"{error_count} failed in {duration:.3f}s"
             )
 
-    async def _handle_with_error_isolation(self, handler: EventHandler, event: DomainEvent) -> None:
+    async def _handle_with_error_isolation(
+        self, handler: EventHandler, event: DomainEvent
+    ) -> None:
         """
         Handle event with error isolation.
 
@@ -231,18 +244,23 @@ class EventBus:
         """
         avg_processing_time = 0.0
         if self._processing_times:
-            avg_processing_time = sum(self._processing_times) / len(self._processing_times)
+            avg_processing_time = sum(self._processing_times) / len(
+                self._processing_times
+            )
 
         return {
             "events_processed": self._events_processed,
             "events_failed": self._events_failed,
             "success_rate": (
-                (self._events_processed - self._events_failed) / max(self._events_processed, 1)
+                (self._events_processed - self._events_failed)
+                / max(self._events_processed, 1)
             )
             * 100,
             "average_processing_time": avg_processing_time,
             "registered_event_types": len(self._handlers),
-            "total_handlers": sum(len(handlers) for handlers in self._handlers.values()),
+            "total_handlers": sum(
+                len(handlers) for handlers in self._handlers.values()
+            ),
         }
 
     def clear_handlers(self) -> None:

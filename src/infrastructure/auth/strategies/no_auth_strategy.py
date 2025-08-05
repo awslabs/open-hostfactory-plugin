@@ -1,7 +1,5 @@
 """No authentication strategy - allows all requests."""
 
-from typing import List
-
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.ports.auth import AuthContext, AuthPort, AuthResult, AuthStatus
 

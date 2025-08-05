@@ -91,7 +91,9 @@ class ProviderValidationPort(Protocol):
         """
         ...
 
-    def validate_template_configuration(self, template_config: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_template_configuration(
+        self, template_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Validate a complete template configuration for this provider.
 
@@ -114,21 +116,20 @@ class BaseProviderValidationAdapter(ABC):
     @abstractmethod
     def get_provider_type(self) -> str:
         """Get the provider type this adapter supports."""
-        pass
 
     @abstractmethod
     def validate_provider_api(self, api: str) -> bool:
         """Validate provider API support."""
-        pass
 
     @abstractmethod
     def get_supported_provider_apis(self) -> List[str]:
         """Get supported provider APIs."""
-        pass
 
-    def validate_template_configuration(self, template_config: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_template_configuration(
+        self, template_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
-        Default template configuration validation.
+        Validate template configuration with defaults.
 
         Subclasses can override this method to provide provider-specific validation.
 

@@ -16,7 +16,7 @@ from src.providers.aws.exceptions.aws_exceptions import (
 )
 
 if TYPE_CHECKING:
-    from src.config.manager import ConfigurationManager
+    pass
 
 # Type variable for generic function return type
 T = TypeVar("T")
@@ -39,14 +39,19 @@ class AWSClient:
         self._logger = logger
 
         # Get region from configuration
-        self.region_name = self._get_region_from_config_manager(self._config_manager) or "eu-west-1"
+        self.region_name = (
+            self._get_region_from_config_manager(self._config_manager) or "eu-west-1"
+        )
 
         self._logger.debug(f"AWS client region determined: {self.region_name}")
 
         # Configure retry settings
         self.boto_config = Config(
             region_name=self.region_name,
-            retries={"max_attempts": self.config.get("AWS_MAX_RETRIES", 3), "mode": "adaptive"},
+            retries={
+                "max_attempts": self.config.get("AWS_MAX_RETRIES", 3),
+                "mode": "adaptive",
+            },
             connect_timeout=self.config.get("AWS_CONNECT_TIMEOUT", 5),
             read_timeout=self.config.get("AWS_READ_TIMEOUT", 10),
         )
@@ -100,7 +105,9 @@ class AWSClient:
             elif error_code == "RequestTimeout":
                 raise NetworkError(f"AWS connection failed: {error_message}")
             else:
-                raise AWSConfigurationError(f"AWS client initialization failed: {error_message}")
+                raise AWSConfigurationError(
+                    f"AWS client initialization failed: {error_message}"
+                )
 
     def _get_region_from_config_manager(self, config_manager) -> Optional[str]:
         """
@@ -118,10 +125,14 @@ class AWSClient:
 
             aws_config = config_manager.get_typed(AWSProviderConfig)
             if aws_config and aws_config.region:
-                self._logger.debug(f"Using region from ConfigurationManager: {aws_config.region}")
+                self._logger.debug(
+                    f"Using region from ConfigurationManager: {aws_config.region}"
+                )
                 return aws_config.region
         except Exception as e:
-            self._logger.debug(f"Could not get region from ConfigurationManager: {str(e)}")
+            self._logger.debug(
+                f"Could not get region from ConfigurationManager: {str(e)}"
+            )
 
         return None
 
@@ -141,10 +152,14 @@ class AWSClient:
 
             aws_config = config_manager.get_typed(AWSProviderConfig)
             if aws_config and aws_config.profile:
-                self._logger.debug(f"Using profile from ConfigurationManager: {aws_config.profile}")
+                self._logger.debug(
+                    f"Using profile from ConfigurationManager: {aws_config.profile}"
+                )
                 return aws_config.profile
         except Exception as e:
-            self._logger.debug(f"Could not get profile from ConfigurationManager: {str(e)}")
+            self._logger.debug(
+                f"Could not get profile from ConfigurationManager: {str(e)}"
+            )
 
         return None
 
@@ -164,7 +179,9 @@ class AWSClient:
 
             perf_config = config_manager.get_typed(PerformanceConfig)
             if perf_config:
-                self._logger.debug("Loaded performance configuration from ConfigurationManager")
+                self._logger.debug(
+                    "Loaded performance configuration from ConfigurationManager"
+                )
                 return {
                     "enable_batching": perf_config.enable_batching,
                     "batch_sizes": {
@@ -220,7 +237,9 @@ class AWSClient:
         """Lazy initialization of Auto Scaling client."""
         if self._autoscaling_client is None:
             self._logger.debug("Initializing Auto Scaling client on first use")
-            self._autoscaling_client = self.session.client("autoscaling", config=self.boto_config)
+            self._autoscaling_client = self.session.client(
+                "autoscaling", config=self.boto_config
+            )
         return self._autoscaling_client
 
     @property

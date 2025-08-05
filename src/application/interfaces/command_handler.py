@@ -2,7 +2,7 @@
 
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Awaitable, Generic, TypeVar, Union
+from typing import Generic, TypeVar
 
 from src.application.dto.base import BaseCommand, BaseResponse
 
@@ -44,11 +44,10 @@ class CommandHandler(Generic[TCommand, TResponse], ABC):
             BusinessRuleViolationError: If command violates business rules
             InfrastructureError: If infrastructure operation fails
         """
-        pass
 
     def handle_sync(self, command: TCommand) -> TResponse:
         """
-        Synchronous wrapper for backward compatibility.
+        Provide synchronous wrapper for backward compatibility.
 
         This method provides a synchronous interface to the async handle method
         for cases where async/await cannot be used (e.g., legacy code, tests).

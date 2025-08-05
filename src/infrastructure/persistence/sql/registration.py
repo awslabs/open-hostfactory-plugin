@@ -6,7 +6,7 @@ enabling the storage registry pattern for SQL persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import Any, Callable, Dict
+from typing import Any, Dict
 
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.registry.storage_registry import get_storage_registry
@@ -96,7 +96,6 @@ def create_sql_unit_of_work(config: Any) -> Any:
 
     from src.config.manager import ConfigurationManager
     from src.config.schemas.storage_schema import StorageConfig
-    from src.infrastructure.logging.logger import get_logger
     from src.infrastructure.persistence.sql.unit_of_work import SQLUnitOfWork
 
     # Handle different config types

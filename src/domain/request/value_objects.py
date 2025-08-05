@@ -11,7 +11,6 @@ from .request_metadata import (
     LaunchTemplateInfo,
     MachineCount,
     RequestConfiguration,
-    RequestHistoryEvent,
     RequestTag,
     RequestTimeout,
 )

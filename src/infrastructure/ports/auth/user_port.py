@@ -67,7 +67,6 @@ class UserPort(ABC):
         Returns:
             User object if found, None otherwise
         """
-        pass
 
     @abstractmethod
     async def get_user_by_username(self, username: str) -> Optional[User]:
@@ -80,7 +79,6 @@ class UserPort(ABC):
         Returns:
             User object if found, None otherwise
         """
-        pass
 
     @abstractmethod
     async def get_user_by_email(self, email: str) -> Optional[User]:
@@ -93,7 +91,6 @@ class UserPort(ABC):
         Returns:
             User object if found, None otherwise
         """
-        pass
 
     @abstractmethod
     async def create_user(self, user: User) -> bool:
@@ -106,7 +103,6 @@ class UserPort(ABC):
         Returns:
             True if user was created successfully
         """
-        pass
 
     @abstractmethod
     async def update_user(self, user: User) -> bool:
@@ -119,7 +115,6 @@ class UserPort(ABC):
         Returns:
             True if user was updated successfully
         """
-        pass
 
     @abstractmethod
     async def delete_user(self, user_id: str) -> bool:
@@ -132,7 +127,6 @@ class UserPort(ABC):
         Returns:
             True if user was deleted successfully
         """
-        pass
 
     @abstractmethod
     async def list_users(
@@ -152,7 +146,6 @@ class UserPort(ABC):
         Returns:
             List of users
         """
-        pass
 
     @abstractmethod
     async def authenticate_user(self, username: str, password: str) -> Optional[User]:
@@ -166,4 +159,3 @@ class UserPort(ABC):
         Returns:
             User object if authentication successful, None otherwise
         """
-        pass

@@ -1,7 +1,7 @@
 """Error handling adapter implementing ErrorHandlingPort."""
 
 from functools import wraps
-from typing import Any, Callable, List, Optional, TypeVar
+from typing import Any, Callable, Optional, TypeVar
 
 from src.domain.base.exceptions import DomainException
 from src.domain.base.ports.error_handling_port import ErrorHandlingPort
@@ -20,19 +20,18 @@ class ErrorHandlingAdapter(ErrorHandlingPort):
 
     def __init__(self):
         """Initialize the error handling adapter."""
-        pass
 
     def handle_exceptions(self, func: Callable[..., T]) -> Callable[..., T]:
-        """Decorator for handling exceptions in application methods."""
+        """Handle exceptions in application methods."""
         return handle_application_exceptions(context="application_service")(func)
 
     def log_errors(self, func: Callable[..., T]) -> Callable[..., T]:
-        """Decorator for logging errors."""
+        """Log errors."""
         # Use the general handle_exceptions decorator for logging
         return handle_exceptions(context="error_logging", layer="application")(func)
 
     def retry_on_failure(self, max_retries: int = 3, delay: float = 1.0) -> Callable:
-        """Decorator for retrying operations on failure."""
+        """Retry operations on failure."""
 
         def decorator(func: Callable[..., T]) -> Callable[..., T]:
             @wraps(func)

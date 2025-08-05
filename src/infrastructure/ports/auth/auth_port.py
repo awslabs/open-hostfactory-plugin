@@ -92,7 +92,6 @@ class AuthPort(ABC):
         Returns:
             Authentication result with user information and permissions
         """
-        pass
 
     @abstractmethod
     async def validate_token(self, token: str) -> AuthResult:
@@ -105,7 +104,6 @@ class AuthPort(ABC):
         Returns:
             Authentication result with validation status
         """
-        pass
 
     @abstractmethod
     async def refresh_token(self, refresh_token: str) -> AuthResult:
@@ -118,7 +116,6 @@ class AuthPort(ABC):
         Returns:
             Authentication result with new token information
         """
-        pass
 
     @abstractmethod
     async def revoke_token(self, token: str) -> bool:
@@ -131,7 +128,6 @@ class AuthPort(ABC):
         Returns:
             True if token was successfully revoked
         """
-        pass
 
     @abstractmethod
     def get_strategy_name(self) -> str:
@@ -141,7 +137,6 @@ class AuthPort(ABC):
         Returns:
             Strategy name (e.g., 'oauth', 'iam', 'none')
         """
-        pass
 
     @abstractmethod
     def is_enabled(self) -> bool:
@@ -151,4 +146,3 @@ class AuthPort(ABC):
         Returns:
             True if authentication is enabled
         """
-        pass

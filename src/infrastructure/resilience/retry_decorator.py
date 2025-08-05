@@ -147,11 +147,22 @@ def get_retry_config_for_service(service: str) -> dict:
         Dictionary with retry configuration parameters
     """
     service_configs = {
-        "ec2": {"max_attempts": 3, "base_delay": 1.0, "max_delay": 30.0, "jitter": True},
-        "dynamodb": {"max_attempts": 5, "base_delay": 0.5, "max_delay": 20.0, "jitter": True},
+        "ec2": {
+            "max_attempts": 3,
+            "base_delay": 1.0,
+            "max_delay": 30.0,
+            "jitter": True,
+        },
+        "dynamodb": {
+            "max_attempts": 5,
+            "base_delay": 0.5,
+            "max_delay": 20.0,
+            "jitter": True,
+        },
         "s3": {"max_attempts": 4, "base_delay": 0.5, "max_delay": 15.0, "jitter": True},
     }
 
     return service_configs.get(
-        service, {"max_attempts": 3, "base_delay": 1.0, "max_delay": 60.0, "jitter": True}
+        service,
+        {"max_attempts": 3, "base_delay": 1.0, "max_delay": 60.0, "jitter": True},
     )

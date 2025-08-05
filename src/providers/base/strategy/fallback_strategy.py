@@ -14,6 +14,7 @@ from enum import Enum
 from threading import Lock
 from typing import Any, Dict, List, Optional
 
+from src.infrastructure.interfaces.provider import BaseProviderConfig
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
     ProviderHealthStatus,
@@ -147,7 +148,7 @@ class FallbackProviderStrategy(ProviderStrategy):
 
         # Create a dummy config for the parent class
 
-        dummy_config = ProviderConfig(provider_type="fallback")
+        dummy_config = BaseProviderConfig(provider_type="fallback")
         super().__init__(dummy_config)
 
         self._primary_strategy = primary_strategy

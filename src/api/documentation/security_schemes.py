@@ -79,7 +79,9 @@ def get_auth_examples() -> Dict[str, Any]:
         "bearer_token_example": {
             "summary": "Bearer Token Authentication",
             "description": "Example of using JWT Bearer token authentication",
-            "value": {"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."},
+            "value": {
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            },
         },
         "aws_iam_example": {
             "summary": "AWS IAM Authentication",

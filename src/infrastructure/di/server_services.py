@@ -1,11 +1,8 @@
 """Server service registrations for dependency injection."""
 
-from typing import Optional
-
 from src.config.manager import ConfigurationManager
 from src.config.schemas.server_schema import ServerConfig
 from src.infrastructure.di.container import DIContainer
-from src.infrastructure.di.decorators import injectable
 from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -40,7 +37,9 @@ def register_server_services(container: DIContainer) -> None:
         # Don't raise - server services are optional
 
 
-def _register_fastapi_services(container: DIContainer, server_config: ServerConfig) -> None:
+def _register_fastapi_services(
+    container: DIContainer, server_config: ServerConfig
+) -> None:
     """Register FastAPI core services."""
     from fastapi import FastAPI
 
@@ -71,7 +70,11 @@ def _register_api_handlers(container: DIContainer) -> None:
                     query_bus=c.get(QueryBus),
                     command_bus=c.get(CommandBus),
                     scheduler_strategy=c.get(SchedulerPort),
-                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None,
+                    metrics=(
+                        c.get(MetricsCollector)
+                        if c.is_registered(MetricsCollector)
+                        else None
+                    ),
                 ),
             )
 
@@ -91,9 +94,15 @@ def _register_api_handlers(container: DIContainer) -> None:
                     scheduler_strategy=c.get(SchedulerPort),
                     logger=c.get(LoggingPort),
                     error_handler=(
-                        c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None
+                        c.get(ErrorHandlingPort)
+                        if c.is_registered(ErrorHandlingPort)
+                        else None
                     ),
-                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None,
+                    metrics=(
+                        c.get(MetricsCollector)
+                        if c.is_registered(MetricsCollector)
+                        else None
+                    ),
                 ),
             )
 
@@ -116,9 +125,15 @@ def _register_api_handlers(container: DIContainer) -> None:
                     scheduler_strategy=c.get(SchedulerPort),
                     logger=c.get(LoggingPort),
                     error_handler=(
-                        c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None
+                        c.get(ErrorHandlingPort)
+                        if c.is_registered(ErrorHandlingPort)
+                        else None
                     ),
-                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None,
+                    metrics=(
+                        c.get(MetricsCollector)
+                        if c.is_registered(MetricsCollector)
+                        else None
+                    ),
                 ),
             )
 
@@ -140,9 +155,15 @@ def _register_api_handlers(container: DIContainer) -> None:
                     scheduler_strategy=c.get(SchedulerPort),
                     logger=c.get(LoggingPort),
                     error_handler=(
-                        c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None
+                        c.get(ErrorHandlingPort)
+                        if c.is_registered(ErrorHandlingPort)
+                        else None
                     ),
-                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None,
+                    metrics=(
+                        c.get(MetricsCollector)
+                        if c.is_registered(MetricsCollector)
+                        else None
+                    ),
                 ),
             )
 
@@ -164,9 +185,15 @@ def _register_api_handlers(container: DIContainer) -> None:
                     scheduler_strategy=c.get(SchedulerPort),
                     logger=c.get(LoggingPort),
                     error_handler=(
-                        c.get(ErrorHandlingPort) if c.is_registered(ErrorHandlingPort) else None
+                        c.get(ErrorHandlingPort)
+                        if c.is_registered(ErrorHandlingPort)
+                        else None
                     ),
-                    metrics=c.get(MetricsCollector) if c.is_registered(MetricsCollector) else None,
+                    metrics=(
+                        c.get(MetricsCollector)
+                        if c.is_registered(MetricsCollector)
+                        else None
+                    ),
                 ),
             )
 

@@ -53,14 +53,19 @@ class SelectProviderStrategyHandler(
         if not command.operation_type:
             raise ValueError("operation_type is required")
 
-    async def execute_command(self, command: SelectProviderStrategyCommand) -> Dict[str, Any]:
+    async def execute_command(
+        self, command: SelectProviderStrategyCommand
+    ) -> Dict[str, Any]:
         """Handle provider strategy selection command."""
-        self.logger.info(f"Selecting provider strategy for operation: {command.operation_type}")
+        self.logger.info(
+            f"Selecting provider strategy for operation: {command.operation_type}"
+        )
 
         try:
             # Use existing provider context to select strategy
             selector = SelectorFactory.create_selector(
-                SelectionPolicy.CAPABILITY_BASED, self.logger  # Use capability-based selection
+                SelectionPolicy.CAPABILITY_BASED,
+                self.logger,  # Use capability-based selection
             )
 
             # Get available strategies from context
@@ -86,13 +91,17 @@ class SelectProviderStrategyHandler(
             )
             self.event_publisher.publish(event)
 
-            self.logger.info(f"Selected strategy: {selection_result.selected_strategy.name}")
+            self.logger.info(
+                f"Selected strategy: {selection_result.selected_strategy.name}"
+            )
 
             return {
                 "selected_strategy": selection_result.selected_strategy.name,
                 "selection_reason": selection_result.selection_reason,
                 "confidence_score": selection_result.confidence_score,
-                "alternatives": [s.name for s in selection_result.alternative_strategies],
+                "alternatives": [
+                    s.name for s in selection_result.alternative_strategies
+                ],
             }
 
         except Exception as e:
@@ -122,7 +131,9 @@ class ExecuteProviderOperationHandler(
         if not command.operation:
             raise ValueError("operation is required")
 
-    async def execute_command(self, command: ExecuteProviderOperationCommand) -> ProviderResult:
+    async def execute_command(
+        self, command: ExecuteProviderOperationCommand
+    ) -> ProviderResult:
         """Handle provider operation execution command."""
         operation = command.operation
         self.logger.info(f"Executing provider operation: {operation.operation_type}")
@@ -140,7 +151,9 @@ class ExecuteProviderOperationHandler(
                 # Use context's strategy selection
                 result = self._provider_context.execute_operation(operation)
 
-            execution_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+            execution_time = (
+                time.time() - start_time
+            ) * 1000  # Convert to milliseconds
 
             # Publish operation execution event
             event = ProviderOperationExecutedEvent(
@@ -153,7 +166,9 @@ class ExecuteProviderOperationHandler(
             self.event_publisher.publish(event)
 
             if result.success:
-                self.logger.info(f"Operation completed successfully in {execution_time:.2f}ms")
+                self.logger.info(
+                    f"Operation completed successfully in {execution_time:.2f}ms"
+                )
             else:
                 self.logger.error(f"Operation failed: {result.error_message}")
 
@@ -174,7 +189,9 @@ class ExecuteProviderOperationHandler(
             self.event_publisher.publish(event)
 
             # Return error result instead of raising
-            return ProviderResult.error_result(error_message=str(e), error_code="EXECUTION_FAILED")
+            return ProviderResult.error_result(
+                error_message=str(e), error_code="EXECUTION_FAILED"
+            )
 
 
 @command_handler(RegisterProviderStrategyCommand)
@@ -201,7 +218,9 @@ class RegisterProviderStrategyHandler(
         if not command.provider_type:
             raise ValueError("provider_type is required")
 
-    async def execute_command(self, command: RegisterProviderStrategyCommand) -> Dict[str, Any]:
+    async def execute_command(
+        self, command: RegisterProviderStrategyCommand
+    ) -> Dict[str, Any]:
         """Handle provider strategy registration command."""
         self.logger.info(f"Registering provider strategy: {command.strategy_name}")
 
@@ -231,7 +250,9 @@ class RegisterProviderStrategyHandler(
                 config=command.strategy_config,
             )
 
-            strategy = registry.create_strategy(command.provider_type.lower(), provider_config)
+            strategy = registry.create_strategy(
+                command.provider_type.lower(), provider_config
+            )
 
             # Register strategy with context
             self._provider_context.register_strategy(strategy, command.strategy_name)
@@ -245,7 +266,9 @@ class RegisterProviderStrategyHandler(
             )
             self.event_publisher.publish(event)
 
-            self.logger.info(f"Successfully registered strategy: {command.strategy_name}")
+            self.logger.info(
+                f"Successfully registered strategy: {command.strategy_name}"
+            )
 
             return {
                 "strategy_name": command.strategy_name,
@@ -260,7 +283,9 @@ class RegisterProviderStrategyHandler(
 
 
 @command_handler(UpdateProviderHealthCommand)
-class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand, Dict[str, Any]]):
+class UpdateProviderHealthHandler(
+    BaseCommandHandler[UpdateProviderHealthCommand, Dict[str, Any]]
+):
     """Handler for updating provider health status."""
 
     def __init__(
@@ -281,13 +306,17 @@ class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand
         if not command.health_status:
             raise ValueError("health_status is required")
 
-    async def execute_command(self, command: UpdateProviderHealthCommand) -> Dict[str, Any]:
+    async def execute_command(
+        self, command: UpdateProviderHealthCommand
+    ) -> Dict[str, Any]:
         """Handle provider health status update command."""
         self.logger.debug(f"Updating health for provider: {command.provider_name}")
 
         try:
             # Get current health status for comparison
-            old_status = self._provider_context.check_strategy_health(command.provider_name)
+            old_status = self._provider_context.check_strategy_health(
+                command.provider_name
+            )
 
             # Update health status in context
             self._provider_context.update_provider_health(
@@ -295,7 +324,10 @@ class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand
             )
 
             # Publish health change event if status changed
-            if old_status is None or old_status.is_healthy != command.health_status.is_healthy:
+            if (
+                old_status is None
+                or old_status.is_healthy != command.health_status.is_healthy
+            ):
                 event = ProviderHealthChangedEvent(
                     provider_name=command.provider_name,
                     old_status=old_status,
@@ -304,8 +336,12 @@ class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand
                 )
                 self.event_publisher.publish(event)
 
-                status_change = "healthy" if command.health_status.is_healthy else "unhealthy"
-                self.logger.info(f"Provider {command.provider_name} is now {status_change}")
+                status_change = (
+                    "healthy" if command.health_status.is_healthy else "unhealthy"
+                )
+                self.logger.info(
+                    f"Provider {command.provider_name} is now {status_change}"
+                )
 
             return {
                 "provider_name": command.provider_name,
@@ -339,7 +375,9 @@ class ConfigureProviderStrategyHandler(
         await super().validate_command(command)
         # Configuration commands can have optional parameters, so minimal validation
 
-    async def execute_command(self, command: ConfigureProviderStrategyCommand) -> Dict[str, Any]:
+    async def execute_command(
+        self, command: ConfigureProviderStrategyCommand
+    ) -> Dict[str, Any]:
         """Handle provider strategy configuration command."""
         self.logger.info("Configuring provider strategy policies")
 

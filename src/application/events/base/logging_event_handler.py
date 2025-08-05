@@ -76,20 +76,19 @@ class LoggingEventHandler(EventHandler):
         Returns:
             Formatted message string for logging
         """
-        pass
 
     def format_basic_message(
         self, event: DomainEvent, action: str, details: Optional[str] = None
     ) -> str:
         """
-        Helper method to format basic event messages.
+        Format basic event messages.
 
         This provides a consistent format for simple event messages
         and can be used by concrete handlers as a starting point.
 
         Args:
             event: The domain event
-            action: The action that occurred (e.g., "created", "updated")
+            action: The action being performed
             details: Optional additional details
 
         Returns:
@@ -109,7 +108,7 @@ class LoggingEventHandler(EventHandler):
         self, event: DomainEvent, old_status: str, new_status: str
     ) -> str:
         """
-        Helper method to format status change messages.
+        Format status change messages.
 
         Args:
             event: The domain event
@@ -127,7 +126,7 @@ class LoggingEventHandler(EventHandler):
 
     def format_error_message(self, event: DomainEvent, error_message: str) -> str:
         """
-        Helper method to format error event messages.
+        Format error event messages.
 
         Args:
             event: The domain event

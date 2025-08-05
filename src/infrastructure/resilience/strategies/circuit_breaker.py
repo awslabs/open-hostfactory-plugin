@@ -206,7 +206,10 @@ class CircuitBreakerStrategy(RetryStrategy):
 
             logger.info(
                 f"Circuit breaker CLOSED for {self.service_name} after successful recovery",
-                extra={"service_name": self.service_name, "state": CircuitState.CLOSED.value},
+                extra={
+                    "service_name": self.service_name,
+                    "state": CircuitState.CLOSED.value,
+                },
             )
 
     def _record_failure(self, current_time: float) -> None:
@@ -243,7 +246,8 @@ class CircuitBreakerStrategy(RetryStrategy):
             # Check if we should transition to half-open
             if (
                 circuit_state["last_failure_time"]
-                and current_time - circuit_state["last_failure_time"] >= self.reset_timeout
+                and current_time - circuit_state["last_failure_time"]
+                >= self.reset_timeout
             ):
 
                 circuit_state["state"] = CircuitState.HALF_OPEN
@@ -264,7 +268,8 @@ class CircuitBreakerStrategy(RetryStrategy):
             # Check if we should timeout back to open
             if (
                 circuit_state["half_open_start_time"]
-                and current_time - circuit_state["half_open_start_time"] >= self.half_open_timeout
+                and current_time - circuit_state["half_open_start_time"]
+                >= self.half_open_timeout
             ):
 
                 circuit_state["state"] = CircuitState.OPEN
@@ -319,7 +324,6 @@ class CircuitBreakerStrategy(RetryStrategy):
         Returns:
             Delay in seconds
         """
-        import random
 
         # Exponential backoff: base_delay * (2 ^ attempt)
         delay = self.base_delay * (2**attempt)

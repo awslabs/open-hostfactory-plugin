@@ -6,14 +6,12 @@ while maintaining a consistent interface.
 """
 
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from src.domain.base.contracts.template_contract import (
     TemplateContract,
     TemplateValidationResult,
 )
-from src.domain.base.ports.logging_port import LoggingPort
 
 
 class TemplateAdapterPort(ABC):
@@ -35,7 +33,6 @@ class TemplateAdapterPort(ABC):
         Returns:
             TemplateContract if found, None otherwise
         """
-        pass
 
     @abstractmethod
     async def get_all_templates(self) -> List[TemplateContract]:
@@ -45,10 +42,11 @@ class TemplateAdapterPort(ABC):
         Returns:
             List of all TemplateContract objects
         """
-        pass
 
     @abstractmethod
-    async def get_templates_by_provider_api(self, provider_api: str) -> List[TemplateContract]:
+    async def get_templates_by_provider_api(
+        self, provider_api: str
+    ) -> List[TemplateContract]:
         """
         Get templates filtered by provider API.
 
@@ -58,10 +56,11 @@ class TemplateAdapterPort(ABC):
         Returns:
             List of TemplateContract objects for the specified provider API
         """
-        pass
 
     @abstractmethod
-    async def validate_template(self, template: TemplateContract) -> TemplateValidationResult:
+    async def validate_template(
+        self, template: TemplateContract
+    ) -> TemplateValidationResult:
         """
         Validate a template configuration.
 
@@ -71,7 +70,6 @@ class TemplateAdapterPort(ABC):
         Returns:
             TemplateValidationResult containing validation results
         """
-        pass
 
     @abstractmethod
     async def save_template(self, template: TemplateContract) -> None:
@@ -81,7 +79,6 @@ class TemplateAdapterPort(ABC):
         Args:
             template: The template to save
         """
-        pass
 
     @abstractmethod
     async def delete_template(self, template_id: str) -> None:
@@ -91,7 +88,6 @@ class TemplateAdapterPort(ABC):
         Args:
             template_id: The template identifier to delete
         """
-        pass
 
     @abstractmethod
     def get_supported_provider_apis(self) -> List[str]:
@@ -101,7 +97,6 @@ class TemplateAdapterPort(ABC):
         Returns:
             List of supported provider API names
         """
-        pass
 
     @abstractmethod
     def get_adapter_info(self) -> Dict[str, Any]:
@@ -111,4 +106,3 @@ class TemplateAdapterPort(ABC):
         Returns:
             Dictionary containing adapter metadata
         """
-        pass

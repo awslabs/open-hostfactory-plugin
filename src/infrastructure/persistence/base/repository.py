@@ -162,7 +162,8 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             self._version_map[entity_id] = entity_version + 1
 
             self.logger.debug(
-                f"Saved {self.entity_class.__name__} {entity_id}", extra={"entity_id": entity_id}
+                f"Saved {self.entity_class.__name__} {entity_id}",
+                extra={"entity_id": entity_id},
             )
 
             # Publish events after successful save
@@ -175,7 +176,9 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 event_bus = get_event_bus()
 
                 # Handle both new EventBus and legacy publisher
-                if hasattr(event_bus, "publish") and asyncio.iscoroutinefunction(event_bus.publish):
+                if hasattr(event_bus, "publish") and asyncio.iscoroutinefunction(
+                    event_bus.publish
+                ):
                     # New EventBus (async)
                     for event in events:
                         try:
@@ -207,7 +210,9 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                     entity.clear_domain_events()
                     # Update cache with the entity that has events cleared
                     self._cache[entity_id] = entity
-                elif hasattr(entity, "clear_events") and callable(getattr(entity, "clear_events")):
+                elif hasattr(entity, "clear_events") and callable(
+                    getattr(entity, "clear_events")
+                ):
                     # Backward compatibility
                     updated_entity = entity.clear_events()
                     self._cache[entity_id] = updated_entity

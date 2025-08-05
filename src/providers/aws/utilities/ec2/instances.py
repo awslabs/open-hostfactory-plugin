@@ -37,7 +37,9 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
 
         # Check if instance exists
         if not response["Reservations"] or not response["Reservations"][0]["Instances"]:
-            raise InfrastructureError("AWS.EC2", f"EC2 instance {instance_id} not found")
+            raise InfrastructureError(
+                "AWS.EC2", f"EC2 instance {instance_id} not found"
+            )
 
         return response["Reservations"][0]["Instances"][0]
 
@@ -55,7 +57,8 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
         )
 
         raise InfrastructureError(
-            "AWS.EC2", f"Failed to get EC2 instance {instance_id}: {error_code} - {error_message}"
+            "AWS.EC2",
+            f"Failed to get EC2 instance {instance_id}: {error_code} - {error_message}",
         )
 
     except Exception as e:
@@ -105,7 +108,12 @@ def create_instance(
         ec2_client = aws_client.ec2_client
 
         # Build parameters
-        params = {"ImageId": image_id, "InstanceType": instance_type, "MinCount": 1, "MaxCount": 1}
+        params = {
+            "ImageId": image_id,
+            "InstanceType": instance_type,
+            "MinCount": 1,
+            "MaxCount": 1,
+        }
 
         if key_name:
             params["KeyName"] = key_name
@@ -161,10 +169,16 @@ def create_instance(
     except Exception as e:
         logger.error(
             f"Unexpected error creating EC2 instance: {str(e)}",
-            extra={"image_id": image_id, "instance_type": instance_type, "error": str(e)},
+            extra={
+                "image_id": image_id,
+                "instance_type": instance_type,
+                "error": str(e),
+            },
         )
 
-        raise InfrastructureError("AWS.EC2", f"Unexpected error creating EC2 instance: {str(e)}")
+        raise InfrastructureError(
+            "AWS.EC2", f"Unexpected error creating EC2 instance: {str(e)}"
+        )
 
 
 def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, Any]:
@@ -190,7 +204,9 @@ def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, An
         # Terminate instance with retry built-in
         response = _terminate_instance(ec2_client, instance_id)
 
-        logger.info(f"Terminated EC2 instance {instance_id}", extra={"instance_id": instance_id})
+        logger.info(
+            f"Terminated EC2 instance {instance_id}", extra={"instance_id": instance_id}
+        )
 
         return response
 
@@ -219,7 +235,8 @@ def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, An
         )
 
         raise InfrastructureError(
-            "AWS.EC2", f"Unexpected error terminating EC2 instance {instance_id}: {str(e)}"
+            "AWS.EC2",
+            f"Unexpected error terminating EC2 instance {instance_id}: {str(e)}",
         )
 
 
@@ -243,6 +260,8 @@ def _terminate_instance(ec2_client: Any, instance_id: str) -> Dict[str, Any]:
 
 
 @retry(strategy="exponential", max_attempts=3, base_delay=1.0, service="ec2")
-def _create_tags(ec2_client: Any, instance_id: str, tags: List[Dict[str, str]]) -> Dict[str, Any]:
+def _create_tags(
+    ec2_client: Any, instance_id: str, tags: List[Dict[str, str]]
+) -> Dict[str, Any]:
     """Create tags for an EC2 instance."""
     return ec2_client.create_tags(Resources=[instance_id], Tags=tags)

@@ -99,7 +99,9 @@ class TemplatePersistenceService:
                         configuration=template.configuration,
                     )
                 self.event_publisher.publish(event)
-                self.logger.debug(f"Published domain event for template {template.template_id}")
+                self.logger.debug(
+                    f"Published domain event for template {template.template_id}"
+                )
 
             self.logger.info(f"Saved template {template.template_id} to {target_file}")
 
@@ -107,7 +109,9 @@ class TemplatePersistenceService:
             self.logger.error(f"Failed to save template {template.template_id}: {e}")
             raise
 
-    async def delete_template(self, template_id: str, source_file: Optional[Path] = None) -> None:
+    async def delete_template(
+        self, template_id: str, source_file: Optional[Path] = None
+    ) -> None:
         """
         Delete template from configuration files.
 
@@ -123,7 +127,9 @@ class TemplatePersistenceService:
                 # Use first template path as default
                 template_paths = self.scheduler_strategy.get_template_paths()
                 if not template_paths:
-                    raise ValueError("No template paths available from scheduler strategy")
+                    raise ValueError(
+                        "No template paths available from scheduler strategy"
+                    )
                 target_file = Path(template_paths[0])
 
             # Load existing templates from source file
@@ -134,7 +140,8 @@ class TemplatePersistenceService:
             existing_templates = [
                 t
                 for t in existing_templates
-                if t.get("template_id") != template_id and t.get("templateId") != template_id
+                if t.get("template_id") != template_id
+                and t.get("templateId") != template_id
             ]
 
             if len(existing_templates) == original_count:
@@ -152,7 +159,9 @@ class TemplatePersistenceService:
                     deletion_time=datetime.now(),
                 )
                 self.event_publisher.publish(event)
-                self.logger.debug(f"Published deletion event for template {template_id}")
+                self.logger.debug(
+                    f"Published deletion event for template {template_id}"
+                )
 
             self.logger.info(f"Deleted template {template_id} from {target_file}")
 

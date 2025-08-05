@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .provider_strategy import ProviderCapabilities as BaseProviderCapabilities
 from .provider_strategy import ProviderStrategy
@@ -26,7 +26,9 @@ class EnhancedProviderCapabilities(BaseProviderCapabilities):
         """Get capabilities for a specific API type."""
         return self.api_capabilities.get(api_type, {})
 
-    def get_api_limitation(self, api_type: str, limitation_key: str, default: Any = None) -> Any:
+    def get_api_limitation(
+        self, api_type: str, limitation_key: str, default: Any = None
+    ) -> Any:
         """Get a specific limitation for an API type."""
         api_caps = self.get_api_capabilities(api_type)
         return api_caps.get(limitation_key, default)
@@ -82,7 +84,9 @@ class EnhancedProviderCapabilities(BaseProviderCapabilities):
         result["limitations"] = {
             key: value
             for key, value in api_caps.items()
-            if key.endswith("_required") or key.startswith("supports_") or key.endswith("_limit")
+            if key.endswith("_required")
+            or key.startswith("supports_")
+            or key.endswith("_limit")
         }
 
         # Mark as compatible if no errors
@@ -97,7 +101,6 @@ class EnhancedProviderStrategy(ProviderStrategy, ABC):
     @abstractmethod
     def get_enhanced_capabilities(self) -> EnhancedProviderCapabilities:
         """Get enhanced provider capabilities with API support."""
-        pass
 
     def get_capabilities(self) -> BaseProviderCapabilities:
         """Get base capabilities (for backward compatibility)."""
@@ -115,7 +118,9 @@ class EnhancedProviderStrategy(ProviderStrategy, ABC):
     ) -> Dict[str, Any]:
         """Validate template compatibility with this provider."""
         capabilities = self.get_enhanced_capabilities()
-        return capabilities.validate_template_compatibility(template_provider_api, max_instances)
+        return capabilities.validate_template_compatibility(
+            template_provider_api, max_instances
+        )
 
     def get_supported_apis(self) -> List[str]:
         """Get list of supported API types."""
@@ -144,9 +149,15 @@ class ProviderTemplateValidator:
         results = []
 
         for provider_name, provider in self.providers.items():
-            validation = provider.validate_template(template_provider_api, max_instances)
+            validation = provider.validate_template(
+                template_provider_api, max_instances
+            )
             results.append(
-                {"provider": provider_name, "provider_type": provider.provider_type, **validation}
+                {
+                    "provider": provider_name,
+                    "provider_type": provider.provider_type,
+                    **validation,
+                }
             )
 
         return results
@@ -160,7 +171,9 @@ class ProviderTemplateValidator:
         Returns:
             Provider name or None if no compatible provider found
         """
-        compatible = self.find_compatible_providers(template_provider_api, max_instances)
+        compatible = self.find_compatible_providers(
+            template_provider_api, max_instances
+        )
 
         # Filter to only compatible providers
         compatible_providers = [p for p in compatible if p["compatible"]]
@@ -193,7 +206,9 @@ class ProviderTemplateValidator:
             max_instances = template.get("max_instances", 1)
 
             if provider_api:
-                results[template_id] = self.find_compatible_providers(provider_api, max_instances)
+                results[template_id] = self.find_compatible_providers(
+                    provider_api, max_instances
+                )
             else:
                 results[template_id] = [
                     {

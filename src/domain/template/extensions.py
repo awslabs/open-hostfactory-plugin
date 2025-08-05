@@ -12,12 +12,10 @@ class TemplateExtension(ABC):
     @abstractmethod
     def to_template_defaults(self) -> Dict[str, Any]:
         """Convert extension to template defaults format."""
-        pass
 
     @abstractmethod
     def get_provider_type(self) -> str:
         """Get the provider type this extension supports."""
-        pass
 
 
 class TemplateExtensionRegistry:
@@ -32,7 +30,9 @@ class TemplateExtensionRegistry:
     _extension_instances: Dict[str, TemplateExtension] = {}
 
     @classmethod
-    def register_extension(cls, provider_type: str, extension_class: Type[BaseModel]) -> None:
+    def register_extension(
+        cls, provider_type: str, extension_class: Type[BaseModel]
+    ) -> None:
         """Register a provider-specific extension configuration class.
 
         Args:
@@ -40,7 +40,9 @@ class TemplateExtensionRegistry:
             extension_class: The Pydantic model class for the extension configuration
         """
         if not issubclass(extension_class, BaseModel):
-            raise ValueError(f"Extension class must be a Pydantic BaseModel, got {extension_class}")
+            raise ValueError(
+                f"Extension class must be a Pydantic BaseModel, got {extension_class}"
+            )
 
         cls._extensions[provider_type] = extension_class
 
@@ -95,7 +97,10 @@ class TemplateExtensionRegistry:
         Returns:
             True if the provider has registered extensions
         """
-        return provider_type in cls._extensions or provider_type in cls._extension_instances
+        return (
+            provider_type in cls._extensions
+            or provider_type in cls._extension_instances
+        )
 
     @classmethod
     def get_supported_providers(cls) -> list[str]:
@@ -104,7 +109,9 @@ class TemplateExtensionRegistry:
         Returns:
             List of provider types that have registered extensions
         """
-        all_providers = set(cls._extensions.keys()) | set(cls._extension_instances.keys())
+        all_providers = set(cls._extensions.keys()) | set(
+            cls._extension_instances.keys()
+        )
         return list(all_providers)
 
     @classmethod
@@ -159,18 +166,20 @@ class TemplateExtensionRegistry:
 
 
 # Convenience functions for common operations
-def register_provider_extension(provider_type: str, extension_class: Type[BaseModel]) -> None:
-    """Convenience function to register a provider extension."""
+def register_provider_extension(
+    provider_type: str, extension_class: Type[BaseModel]
+) -> None:
+    """Register a provider extension."""
     TemplateExtensionRegistry.register_extension(provider_type, extension_class)
 
 
 def get_provider_extension_defaults(
     provider_type: str, config_data: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    """Convenience function to get provider extension defaults."""
+    """Get provider extension defaults."""
     return TemplateExtensionRegistry.get_extension_defaults(provider_type, config_data)
 
 
 def has_provider_extension(provider_type: str) -> bool:
-    """Convenience function to check if provider has extensions."""
+    """Check if provider has extensions."""
     return TemplateExtensionRegistry.has_extension(provider_type)

@@ -64,10 +64,14 @@ def register_all_storage_types() -> None:
 
     # Log summary
     if registered_types:
-        logger.info(f"Successfully registered storage types: {', '.join(registered_types)}")
+        logger.info(
+            f"Successfully registered storage types: {', '.join(registered_types)}"
+        )
 
     if failed_types:
-        failed_summary = ", ".join([f"{name} ({error})" for name, error in failed_types])
+        failed_summary = ", ".join(
+            [f"{name} ({error})" for name, error in failed_types]
+        )
         logger.warning(f"Failed to register storage types: {failed_summary}")
 
     if not registered_types:
@@ -159,7 +163,7 @@ def get_available_storage_types() -> list:
 
     # Check JSON storage availability
     try:
-        from src.infrastructure.persistence.json.strategy import JSONStorageStrategy
+        pass
 
         available_types.append("json")
     except ImportError:
@@ -167,7 +171,7 @@ def get_available_storage_types() -> list:
 
     # Check SQL storage availability
     try:
-        from src.infrastructure.persistence.sql.strategy import SQLStorageStrategy
+        pass
 
         available_types.append("sql")
     except ImportError:
@@ -175,9 +179,7 @@ def get_available_storage_types() -> list:
 
     # Check DynamoDB storage availability
     try:
-        from src.providers.aws.persistence.dynamodb.strategy import (
-            DynamoDBStorageStrategy,
-        )
+        pass
 
         available_types.append("dynamodb")
     except ImportError:

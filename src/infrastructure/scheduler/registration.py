@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
-    from src.config.manager import ConfigurationManager
     from src.domain.base.ports.scheduler_port import SchedulerPort
     from src.infrastructure.di.container import DIContainer
     from src.infrastructure.registry.scheduler_registry import SchedulerRegistry
@@ -156,7 +155,9 @@ def register_active_scheduler_only(scheduler_type: str = "default") -> bool:
             register_default_scheduler()
             logger.info(f"Registered active scheduler: {scheduler_type}")
         else:
-            logger.warning(f"Unknown scheduler type: {scheduler_type}, falling back to default")
+            logger.warning(
+                f"Unknown scheduler type: {scheduler_type}, falling back to default"
+            )
             register_default_scheduler()
             logger.info("Registered active scheduler: default (fallback)")
 
@@ -190,9 +191,13 @@ def register_scheduler_on_demand(scheduler_type: str) -> bool:
             logger.error(f"Unknown scheduler type: {scheduler_type}")
             return False
 
-        logger.info(f"Successfully registered scheduler type on demand: {scheduler_type}")
+        logger.info(
+            f"Successfully registered scheduler type on demand: {scheduler_type}"
+        )
         return True
 
     except Exception as e:
-        logger.error(f"Failed to register scheduler type '{scheduler_type}' on demand: {e}")
+        logger.error(
+            f"Failed to register scheduler type '{scheduler_type}' on demand: {e}"
+        )
         return False

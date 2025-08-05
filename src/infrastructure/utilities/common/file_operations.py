@@ -3,11 +3,10 @@
 import json
 import os
 import tempfile
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
-    from src.domain.base.ports import LoggingPort
+    pass
 
 
 def ensure_directory_exists(directory_path: str) -> None:
@@ -129,7 +128,9 @@ def get_file_size(file_path: str) -> int:
 
 
 def create_temp_file(
-    suffix: Optional[str] = None, prefix: Optional[str] = None, dir: Optional[str] = None
+    suffix: Optional[str] = None,
+    prefix: Optional[str] = None,
+    dir: Optional[str] = None,
 ) -> str:
     """
     Create a temporary file and return its path.
@@ -148,7 +149,9 @@ def create_temp_file(
 
 
 def create_temp_directory(
-    suffix: Optional[str] = None, prefix: Optional[str] = None, dir: Optional[str] = None
+    suffix: Optional[str] = None,
+    prefix: Optional[str] = None,
+    dir: Optional[str] = None,
 ) -> str:
     """
     Create a temporary directory and return its path.

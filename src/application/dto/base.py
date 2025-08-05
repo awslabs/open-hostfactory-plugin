@@ -81,7 +81,9 @@ class BaseCommand(BaseDTO):
     command_id: Optional[str] = None
     correlation_id: Optional[str] = None
     metadata: Dict[str, Any] = {}
-    dry_run: bool = False  # Enable dry-run mode for testing without real resource creation
+    dry_run: bool = (
+        False  # Enable dry-run mode for testing without real resource creation
+    )
 
 
 class BaseQuery(BaseDTO):

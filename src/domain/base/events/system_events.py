@@ -76,7 +76,9 @@ class ApplicationErrorEvent(SystemEvent, ErrorEvent):
 class SecurityEvent(InfrastructureEvent):
     """Event raised for security-related operations."""
 
-    event_type: str  # "authentication", "authorization", "access_denied", "suspicious_activity"
+    event_type: (
+        str  # "authentication", "authorization", "access_denied", "suspicious_activity"
+    )
     user_context: str
     resource_accessed: str
     success: bool
@@ -98,7 +100,9 @@ class AuditTrailEvent(InfrastructureEvent):
 class ComplianceEvent(InfrastructureEvent):
     """Event raised for compliance monitoring."""
 
-    compliance_type: str  # "data_retention", "access_control", "encryption", "audit_log"
+    compliance_type: (
+        str  # "data_retention", "access_control", "encryption", "audit_log"
+    )
     compliance_status: str  # "compliant", "non_compliant", "warning"
     policy_name: str
     violation_details: Optional[str] = None

@@ -11,7 +11,7 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import wraps
-from typing import Any, Callable, Dict, Generic, Optional, TypeVar
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from src.application.dto.base import BaseCommand, BaseResponse
 from src.application.interfaces.command_handler import CommandHandler
@@ -77,13 +77,17 @@ class BaseHandler(ABC):
                 if self.logger:
                     self.logger.log_domain_event(
                         "error",
-                        {"context": context, "error": str(e), "handler": self.__class__.__name__},
+                        {
+                            "context": context,
+                            "error": str(e),
+                            "handler": self.__class__.__name__,
+                        },
                     )
                 raise
 
     def with_monitoring(self, operation: str) -> Callable:
         """
-        Decorator for adding monitoring to handler operations.
+        Add monitoring to handler operations.
 
         Provides consistent logging, timing, and error handling
         across all handler operations.
@@ -103,7 +107,9 @@ class BaseHandler(ABC):
                     duration = time.time() - start_time
 
                     if self.logger:
-                        self.logger.info(f"Completed operation: {operation_id} in {duration:.3f}s")
+                        self.logger.info(
+                            f"Completed operation: {operation_id} in {duration:.3f}s"
+                        )
 
                     self._metrics[operation_id] = {
                         "duration": duration,
@@ -170,7 +176,9 @@ class BaseHandler(ABC):
         """Get handler performance metrics."""
         return self._metrics.copy()
 
-    def handle_error(self, error: Exception, context: str) -> InfrastructureErrorResponse:
+    def handle_error(
+        self, error: Exception, context: str
+    ) -> InfrastructureErrorResponse:
         """
         Unified error handling for all handlers.
 
@@ -253,7 +261,6 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
 
         Must be implemented by concrete command handlers.
         """
-        pass
 
     async def publish_events(self, events: list[DomainEvent]) -> None:
         """Publish domain events after successful command execution."""
@@ -316,7 +323,9 @@ class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
         except Exception as e:
             duration = time.time() - start_time
             if self.logger:
-                self.logger.error(f"Failed query: {operation_id} in {duration:.3f}s - {str(e)}")
+                self.logger.error(
+                    f"Failed query: {operation_id} in {duration:.3f}s - {str(e)}"
+                )
             raise
 
     def get_cache_key(self, query: TQuery) -> Optional[str]:
@@ -343,7 +352,6 @@ class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
         Must be implemented by concrete query handlers.
         Now async for consistency with command handlers.
         """
-        pass
 
 
 class BaseProviderHandler(BaseHandler):
@@ -409,4 +417,3 @@ class BaseProviderHandler(BaseHandler):
 
         Must be implemented by concrete provider handlers.
         """
-        pass

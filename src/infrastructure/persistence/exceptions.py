@@ -35,7 +35,9 @@ class PersistenceError(InfrastructureError):
 class ConnectionError(PersistenceError):
     """Exception for connection errors."""
 
-    def __init__(self, message: str, connection_details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, message: str, connection_details: Optional[Dict[str, Any]] = None
+    ) -> None:
         """
         Initialize connection error.
 
@@ -68,7 +70,10 @@ class DataIntegrityError(PersistenceError):
     """Exception for data integrity errors."""
 
     def __init__(
-        self, message: str, entity_type: Optional[str] = None, entity_id: Optional[str] = None
+        self,
+        message: str,
+        entity_type: Optional[str] = None,
+        entity_id: Optional[str] = None,
     ) -> None:
         """
         Initialize data integrity error.

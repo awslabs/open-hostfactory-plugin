@@ -1,7 +1,6 @@
 """Template value objects - provider-agnostic domain logic."""
 
 # Import core domain value objects
-from enum import Enum
 from typing import Any, Dict
 
 from src.domain.base.value_objects import ResourceId
@@ -17,15 +16,16 @@ class TemplateId(ResourceId):
 
 
 """Template domain value objects and contracts."""
-from enum import Enum
-from typing import Any, List, Optional, Protocol
+from typing import Any, List, Protocol
 
 
 # Provider-agnostic contracts (Protocols)
 class FleetTypePort(Protocol):
     """Contract for provider-specific fleet type implementations."""
 
-    def get_valid_types_for_handler(self, handler_type: "ProviderHandlerTypePort") -> List[str]:
+    def get_valid_types_for_handler(
+        self, handler_type: "ProviderHandlerTypePort"
+    ) -> List[str]:
         """Get valid fleet types for a specific handler type."""
         ...
 

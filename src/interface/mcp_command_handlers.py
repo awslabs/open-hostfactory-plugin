@@ -7,9 +7,8 @@ interface layer patterns and error handling conventions.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-from src.cli.formatters import format_output
 from src.infrastructure.error.decorators import handle_interface_exceptions
 from src.mcp.tools import OpenHFPluginMCPTools
 
@@ -255,7 +254,10 @@ def _format_tools_table(tools: list) -> Dict[str, Any]:
             ]
         )
 
-    return {"table": {"headers": headers, "rows": rows}, "summary": f"Found {len(tools)} MCP tools"}
+    return {
+        "table": {"headers": headers, "rows": rows},
+        "summary": f"Found {len(tools)} MCP tools",
+    }
 
 
 def _format_result_table(result: Dict[str, Any], tool_name: str) -> Dict[str, Any]:
@@ -284,7 +286,10 @@ def _format_result_table(result: Dict[str, Any], tool_name: str) -> Dict[str, An
                 "summary": f"Tool '{tool_name}' executed successfully",
             }
         elif isinstance(data, list):
-            return {"result": data, "summary": f"Tool '{tool_name}' returned {len(data)} items"}
+            return {
+                "result": data,
+                "summary": f"Tool '{tool_name}' returned {len(data)} items",
+            }
 
     return result
 
@@ -318,7 +323,9 @@ def _format_validation_table(result: Dict[str, Any]) -> Dict[str, Any]:
     rows = []
 
     for check in result["checks"]:
-        status_symbol = {"PASS": "✅", "WARNING": "⚠️", "FAIL": "❌"}.get(check["status"], "❓")
+        status_symbol = {"PASS": "✅", "WARNING": "⚠️", "FAIL": "❌"}.get(
+            check["status"], "❓"
+        )
 
         rows.append(
             [

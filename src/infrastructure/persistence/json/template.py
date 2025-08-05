@@ -21,7 +21,10 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
     """JSON storage strategy for templates with legacy format support."""
 
     def __init__(
-        self, file_path: str, legacy_file_path: Optional[str] = None, create_dirs: bool = True
+        self,
+        file_path: str,
+        legacy_file_path: Optional[str] = None,
+        create_dirs: bool = True,
     ):
         """
         Initialize with both main and legacy file paths.
@@ -45,7 +48,9 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
             self.logger.debug(f"Templates file: {self.file_path}")
             self.logger.debug(f"Legacy templates file: {self.legacy_file_path}")
         elif self.legacy_file_path and os.path.exists(self.legacy_file_path):
-            self.logger.info(f"Found only legacy templates file: {self.legacy_file_path}")
+            self.logger.info(
+                f"Found only legacy templates file: {self.legacy_file_path}"
+            )
         elif os.path.exists(self.file_path):
             self.logger.info(f"Found only templates.json: {self.file_path}")
         else:
@@ -76,7 +81,10 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
 
                 if isinstance(legacy_data, list):
                     for item in legacy_data:
-                        if isinstance(item, dict) and item.get("template_id") == entity_id:
+                        if (
+                            isinstance(item, dict)
+                            and item.get("template_id") == entity_id
+                        ):
                             return item
                 elif isinstance(legacy_data, dict) and entity_id in legacy_data:
                     return legacy_data[entity_id]
@@ -130,7 +138,9 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
 class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
     """JSON-based template repository with provider-specific file support."""
 
-    def __init__(self, config_manager: ConfigurationManager, use_provider_strategy: bool = True):
+    def __init__(
+        self, config_manager: ConfigurationManager, use_provider_strategy: bool = True
+    ):
         """
         Initialize template repository.
 
@@ -144,12 +154,16 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
         # Get template file paths from configuration
         app_config = config_manager.get_app_config()
         templates_file_path = app_config.templates_file_path
-        legacy_templates_file_path = getattr(app_config, "legacy_templates_file_path", None)
+        legacy_templates_file_path = getattr(
+            app_config, "legacy_templates_file_path", None
+        )
 
         # Choose strategy based on configuration
         if use_provider_strategy:
             strategy = ProviderTemplateStrategy(
-                base_file_path=templates_file_path, config_manager=config_manager, create_dirs=True
+                base_file_path=templates_file_path,
+                config_manager=config_manager,
+                create_dirs=True,
             )
             self.logger.info("Using provider-specific template loading strategy")
         else:
@@ -239,7 +253,11 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
             List of templates for the specified provider type
         """
         all_templates = self.find_all()
-        return [template for template in all_templates if template.provider_type == provider_type]
+        return [
+            template
+            for template in all_templates
+            if template.provider_type == provider_type
+        ]
 
     def find_by_provider_name(self, provider_name: str) -> List[Template]:
         """
@@ -252,7 +270,11 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
             List of templates for the specified provider name
         """
         all_templates = self.find_all()
-        return [template for template in all_templates if template.provider_name == provider_name]
+        return [
+            template
+            for template in all_templates
+            if template.provider_name == provider_name
+        ]
 
     def get_template_source_info(self, template_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -299,7 +321,9 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
 
         max_instances = data.get("max_instances", 1)
         if max_instances <= 0:
-            raise ValueError(f"Template '{template_id}' max_instances must be greater than 0")
+            raise ValueError(
+                f"Template '{template_id}' max_instances must be greater than 0"
+            )
 
         # Create Template aggregate with all fields
         return Template(
@@ -348,7 +372,9 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
 
 
 # Register the repository in the singleton registry
-def get_template_repository(config_manager: ConfigurationManager = None) -> TemplateJSONRepository:
+def get_template_repository(
+    config_manager: ConfigurationManager = None,
+) -> TemplateJSONRepository:
     """
     Get template repository instance.
 

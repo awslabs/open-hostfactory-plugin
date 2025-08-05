@@ -1,6 +1,6 @@
 """Example: StorageRegistry using EnhancedBaseRegistry (SINGLE_CHOICE mode)."""
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from .enhanced_base_registry import BaseRegistration, EnhancedBaseRegistry, RegistryMode
 
@@ -16,7 +16,10 @@ class StorageRegistration(BaseRegistration):
         unit_of_work_factory: Callable = None,
     ):
         super().__init__(
-            type_name, strategy_factory, config_factory, unit_of_work_factory=unit_of_work_factory
+            type_name,
+            strategy_factory,
+            config_factory,
+            unit_of_work_factory=unit_of_work_factory,
         )
         self.unit_of_work_factory = unit_of_work_factory
 
@@ -72,7 +75,9 @@ def example_usage():
     registry = EnhancedStorageRegistry()
 
     # Register storage types (only one active at a time)
-    registry.register("json", json_strategy_factory, json_config_factory, json_uow_factory)
+    registry.register(
+        "json", json_strategy_factory, json_config_factory, json_uow_factory
+    )
     registry.register("sql", sql_strategy_factory, sql_config_factory, sql_uow_factory)
 
     # Create strategy (single choice - only one at a time)

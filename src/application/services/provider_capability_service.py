@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.template.aggregate import Template
 from src.infrastructure.registry.provider_registry import ProviderRegistry
@@ -65,7 +64,9 @@ class ProviderCapabilityService:
     - Provide detailed validation results with actionable feedback
     """
 
-    def __init__(self, logger: LoggingPort, provider_registry: Optional[ProviderRegistry] = None):
+    def __init__(
+        self, logger: LoggingPort, provider_registry: Optional[ProviderRegistry] = None
+    ):
         """
         Initialize provider capability service.
 
@@ -149,7 +150,9 @@ class ProviderCapabilityService:
 
         return result
 
-    def _get_provider_capabilities(self, provider_instance: str) -> Optional[ProviderCapabilities]:
+    def _get_provider_capabilities(
+        self, provider_instance: str
+    ) -> Optional[ProviderCapabilities]:
         """Get capabilities for specified provider instance."""
         if not self._provider_registry:
             # Fallback to hardcoded capabilities for testing
@@ -157,17 +160,23 @@ class ProviderCapabilityService:
 
         try:
             # Get provider strategy from registry
-            strategy = self._provider_registry.create_strategy_from_instance(provider_instance, {})
+            strategy = self._provider_registry.create_strategy_from_instance(
+                provider_instance, {}
+            )
             return strategy.get_capabilities()
         except Exception as e:
-            self._logger.warning(f"Failed to get capabilities for {provider_instance}: {str(e)}")
+            self._logger.warning(
+                f"Failed to get capabilities for {provider_instance}: {str(e)}"
+            )
             return None
 
     def _get_default_capabilities(self, provider_instance: str) -> ProviderCapabilities:
         """Get default capabilities based on provider instance name."""
         # Extract provider type from instance name
         provider_type = (
-            provider_instance.split("-")[0] if "-" in provider_instance else provider_instance
+            provider_instance.split("-")[0]
+            if "-" in provider_instance
+            else provider_instance
         )
 
         if provider_type == "aws":
@@ -220,7 +229,10 @@ class ProviderCapabilityService:
             )
 
     def _validate_api_support(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate that provider supports the required API."""
         if not template.provider_api:
@@ -236,7 +248,10 @@ class ProviderCapabilityService:
             result.supported_features.append(f"API: {template.provider_api}")
 
     def _validate_pricing_model(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate pricing model support (spot/on-demand)."""
         if not template.provider_api:
@@ -263,7 +278,10 @@ class ProviderCapabilityService:
                 result.supported_features.append("Pricing: On-demand instances")
 
     def _validate_fleet_type_support(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate fleet type support."""
         if not template.provider_api:
@@ -273,7 +291,9 @@ class ProviderCapabilityService:
         fleet_type = getattr(template, "fleet_type", None)
         if not fleet_type:
             # Try to get from metadata
-            fleet_type = template.metadata.get("fleet_type") if template.metadata else None
+            fleet_type = (
+                template.metadata.get("fleet_type") if template.metadata else None
+            )
 
         if not fleet_type:
             return  # No fleet type specified
@@ -290,7 +310,10 @@ class ProviderCapabilityService:
             result.supported_features.append(f"Fleet type: {fleet_type}")
 
     def _validate_instance_limits(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate instance count limits."""
         if not template.provider_api:
@@ -309,7 +332,9 @@ class ProviderCapabilityService:
                 f"Instance count: {template.max_instances} (within limit)"
             )
 
-    def get_provider_api_capabilities(self, provider_instance: str, api: str) -> Dict[str, Any]:
+    def get_provider_api_capabilities(
+        self, provider_instance: str, api: str
+    ) -> Dict[str, Any]:
         """Get detailed capabilities for specific provider API."""
         capabilities = self._get_provider_capabilities(provider_instance)
         if not capabilities:

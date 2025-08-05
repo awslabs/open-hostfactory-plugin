@@ -36,7 +36,9 @@ class EntityNotFoundError(DomainException):
     def __init__(self, entity_type: str, entity_id: str):
         message = f"{entity_type} with ID '{entity_id}' not found"
         super().__init__(
-            message, "ENTITY_NOT_FOUND", {"entity_type": entity_type, "entity_id": entity_id}
+            message,
+            "ENTITY_NOT_FOUND",
+            {"entity_type": entity_type, "entity_id": entity_id},
         )
 
 

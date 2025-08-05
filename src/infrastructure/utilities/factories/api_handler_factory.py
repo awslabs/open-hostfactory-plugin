@@ -51,7 +51,9 @@ class APIHandlerFactory:
         logger.debug(f"Registered API handler: {name} -> {handler_class.__name__}")
 
     @classmethod
-    def create_handler(cls, name: str, app_service: Optional["ApplicationService"] = None):
+    def create_handler(
+        cls, name: str, app_service: Optional["ApplicationService"] = None
+    ):
         """
         Create a handler instance.
 
@@ -73,7 +75,8 @@ class APIHandlerFactory:
             if name not in cls._handlers:
                 available_handlers = list(cls._handlers.keys())
                 raise ValueError(
-                    f"Handler not found: {name}. " f"Available handlers: {available_handlers}"
+                    f"Handler not found: {name}. "
+                    f"Available handlers: {available_handlers}"
                 )
 
         handler_class = cls._handlers[name]

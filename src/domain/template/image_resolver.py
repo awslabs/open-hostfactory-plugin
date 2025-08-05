@@ -25,7 +25,6 @@ class ImageResolver(ABC):
         Raises:
             ValueError: If image cannot be resolved
         """
-        pass
 
     @abstractmethod
     def supports_reference_format(self, image_reference: str) -> bool:
@@ -38,4 +37,3 @@ class ImageResolver(ABC):
         Returns:
             True if this resolver can handle the reference format
         """
-        pass

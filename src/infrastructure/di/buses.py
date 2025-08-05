@@ -88,7 +88,9 @@ class QueryBus:
                     )
                     raise
             else:
-                self.logger.error(f"No handler registered for query: {type(query).__name__}")
+                self.logger.error(
+                    f"No handler registered for query: {type(query).__name__}"
+                )
                 raise
         except Exception as e:
             self.logger.error(f"Query execution failed: {str(e)}")
@@ -162,7 +164,9 @@ class CommandBus:
                     )
                     raise
             else:
-                self.logger.error(f"No handler registered for command: {type(command).__name__}")
+                self.logger.error(
+                    f"No handler registered for command: {type(command).__name__}"
+                )
                 raise
         except Exception as e:
             self.logger.error(f"Command execution failed: {str(e)}")
@@ -193,7 +197,9 @@ class BusFactory:
         return CommandBus(container, logger)
 
     @staticmethod
-    def create_buses(container: DIContainer, logger: LoggingPort) -> tuple[QueryBus, CommandBus]:
+    def create_buses(
+        container: DIContainer, logger: LoggingPort
+    ) -> tuple[QueryBus, CommandBus]:
         """Create both query and command buses."""
         query_bus = BusFactory.create_query_bus(container, logger)
         command_bus = BusFactory.create_command_bus(container, logger)

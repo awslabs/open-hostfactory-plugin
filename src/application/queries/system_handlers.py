@@ -24,16 +24,18 @@ from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
 
 # Use TYPE_CHECKING to avoid direct infrastructure imports
 if TYPE_CHECKING:
-    from src.infrastructure.factories.provider_strategy_factory import (
-        ProviderStrategyFactory,
-    )
+    pass
 
 
 @query_handler(GetConfigurationQuery)
-class GetConfigurationHandler(BaseQueryHandler[GetConfigurationQuery, ConfigurationValueResponse]):
+class GetConfigurationHandler(
+    BaseQueryHandler[GetConfigurationQuery, ConfigurationValueResponse]
+):
     """Handler for getting configuration values."""
 
-    async def execute_query(self, query: GetConfigurationQuery) -> ConfigurationValueResponse:
+    async def execute_query(
+        self, query: GetConfigurationQuery
+    ) -> ConfigurationValueResponse:
         """
         Execute configuration value query.
 
@@ -60,7 +62,10 @@ class GetConfigurationHandler(BaseQueryHandler[GetConfigurationQuery, Configurat
             value = config_manager.get(query.key, query.default)
 
         return ConfigurationValueResponse(
-            key=query.key, value=value, section=query.section, found=value != query.default
+            key=query.key,
+            value=value,
+            section=query.section,
+            found=value != query.default,
         )
 
 
@@ -96,11 +101,16 @@ class GetConfigurationSectionHandler(
 
 
 @query_handler(GetProviderConfigQuery)
-class GetProviderConfigHandler(BaseQueryHandler[GetProviderConfigQuery, ProviderConfigDTO]):
+class GetProviderConfigHandler(
+    BaseQueryHandler[GetProviderConfigQuery, ProviderConfigDTO]
+):
     """Handler for getting provider configuration information."""
 
     def __init__(
-        self, logger: LoggingPort, container: ContainerPort, error_handler: ErrorHandlingPort
+        self,
+        logger: LoggingPort,
+        container: ContainerPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get provider config handler.
@@ -172,7 +182,10 @@ class ValidateProviderConfigHandler(
     """Handler for validating provider configuration."""
 
     def __init__(
-        self, logger: LoggingPort, container: ContainerPort, error_handler: ErrorHandlingPort
+        self,
+        logger: LoggingPort,
+        container: ContainerPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize validate provider config handler.
@@ -241,7 +254,10 @@ class GetSystemStatusHandler(BaseQueryHandler[GetSystemStatusQuery, SystemStatus
     """Handler for getting system status information."""
 
     def __init__(
-        self, logger: LoggingPort, container: ContainerPort, error_handler: ErrorHandlingPort
+        self,
+        logger: LoggingPort,
+        container: ContainerPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get system status handler.
@@ -308,11 +324,16 @@ class GetSystemStatusHandler(BaseQueryHandler[GetSystemStatusQuery, SystemStatus
 
 
 @query_handler(GetProviderMetricsQuery)
-class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, ProviderMetricsDTO]):
+class GetProviderMetricsHandler(
+    BaseQueryHandler[GetProviderMetricsQuery, ProviderMetricsDTO]
+):
     """Handler for getting provider metrics information."""
 
     def __init__(
-        self, logger: LoggingPort, container: ContainerPort, error_handler: ErrorHandlingPort
+        self,
+        logger: LoggingPort,
+        container: ContainerPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get provider metrics handler.
@@ -371,13 +392,19 @@ class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, Provid
                         for provider in active_providers:
                             metrics["providers"][provider.name] = {
                                 "status": "active",
-                                "type": provider.type if hasattr(provider, "type") else "unknown",
+                                "type": (
+                                    provider.type
+                                    if hasattr(provider, "type")
+                                    else "unknown"
+                                ),
                                 "requests": 0,
                                 "errors": 0,
                                 "avg_response_time": 0.0,
                             }
             except Exception as provider_error:
-                self.logger.warning(f"Could not get provider-specific metrics: {provider_error}")
+                self.logger.warning(
+                    f"Could not get provider-specific metrics: {provider_error}"
+                )
                 metrics["providers"]["default"] = {
                     "status": "unknown",
                     "type": "unknown",

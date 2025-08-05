@@ -71,7 +71,9 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
             is_valid = api in supported_apis
 
             if not is_valid:
-                self._logger.debug(f"AWS API validation failed: {api} not in {supported_apis}")
+                self._logger.debug(
+                    f"AWS API validation failed: {api} not in {supported_apis}"
+                )
 
             return is_valid
 
@@ -128,7 +130,9 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
             # Get handler capabilities from configuration
             handler_capabilities = self._config.handlers.capabilities.get(api, {})
 
-            if handler_capabilities and hasattr(handler_capabilities, "default_fleet_type"):
+            if handler_capabilities and hasattr(
+                handler_capabilities, "default_fleet_type"
+            ):
                 return handler_capabilities.default_fleet_type
 
             # Fallback to hardcoded defaults based on API type
@@ -140,7 +144,9 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
                 return "request"
 
         except Exception as e:
-            self._logger.error(f"Error getting default fleet type for AWS API {api}: {e}")
+            self._logger.error(
+                f"Error getting default fleet type for AWS API {api}: {e}"
+            )
             return "request"  # Safe fallback
 
     def get_valid_fleet_types_for_api(self, api: str) -> List[str]:
@@ -194,7 +200,9 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
                 return ["request"]
 
         except Exception as e:
-            self._logger.error(f"Error getting valid fleet types for AWS API {api}: {e}")
+            self._logger.error(
+                f"Error getting valid fleet types for AWS API {api}: {e}"
+            )
             return ["request"]  # Safe fallback
 
     def validate_fleet_type_for_api(self, fleet_type: str, api: str) -> bool:
@@ -220,10 +228,14 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
             return is_valid
 
         except Exception as e:
-            self._logger.error(f"Error validating fleet type {fleet_type} for AWS API {api}: {e}")
+            self._logger.error(
+                f"Error validating fleet type {fleet_type} for AWS API {api}: {e}"
+            )
             return False
 
-    def validate_template_configuration(self, template_config: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_template_configuration(
+        self, template_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """
         Validate a complete AWS template configuration.
 
@@ -249,13 +261,17 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
                     fleet_type = template_config.get("fleet_type")
                     if fleet_type:
                         validated_fields.append("fleet_type")
-                        if not self.validate_fleet_type_for_api(fleet_type, provider_api):
+                        if not self.validate_fleet_type_for_api(
+                            fleet_type, provider_api
+                        ):
                             errors.append(
                                 f"Fleet type '{fleet_type}' is not compatible with AWS API '{provider_api}'"
                             )
 
             # Validate AWS-specific fields
-            self._validate_aws_specific_fields(template_config, errors, warnings, validated_fields)
+            self._validate_aws_specific_fields(
+                template_config, errors, warnings, validated_fields
+            )
 
         except Exception as e:
             self._logger.error(f"Error during AWS template validation: {e}")
@@ -362,7 +378,7 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
 
 def create_aws_validation_adapter(logger: LoggingPort) -> AWSValidationAdapter:
     """
-    Factory function to create AWS validation adapter with configuration.
+    Create AWS validation adapter with configuration.
 
     Args:
         logger: Logger for validation operations

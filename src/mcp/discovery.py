@@ -5,7 +5,6 @@ Automatically discovers SDK methods and creates MCP tool definitions
 with proper JSON schemas for AI assistant integration.
 """
 
-import inspect
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -92,7 +91,9 @@ class MCPToolDiscovery:
             for tool_def in self._tool_definitions.values()
         ]
 
-    def _generate_description(self, method_name: str, method_info: Optional[MethodInfo]) -> str:
+    def _generate_description(
+        self, method_name: str, method_info: Optional[MethodInfo]
+    ) -> str:
         """
         Generate MCP tool description from method info.
 
@@ -188,7 +189,11 @@ class MCPToolDiscovery:
                 "items": {"type": "string"},  # Default to string items
             }
         elif "Dict" in str(param_type) or "dict" in str(param_type):
-            return {"type": "object", "description": description, "additionalProperties": True}
+            return {
+                "type": "object",
+                "description": description,
+                "additionalProperties": True,
+            }
         else:
             # Default to string for unknown types
             return {"type": "string", "description": description}

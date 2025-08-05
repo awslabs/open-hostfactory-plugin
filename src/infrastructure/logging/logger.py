@@ -146,12 +146,16 @@ def setup_logging(config: LoggingConfig) -> None:
 
     try:
         config_manager = get_config_manager()
-        console_enabled = config_manager.get("logging.console_enabled", config.console_enabled)
+        console_enabled = config_manager.get(
+            "logging.console_enabled", config.console_enabled
+        )
         if isinstance(console_enabled, str):
             console_enabled = console_enabled.lower() in ("true", "1", "yes")
     except Exception as e:
         # Fallback to config if ConfigurationManager fails
-        logger.debug(f"Could not get console_enabled from ConfigurationManager: {str(e)}")
+        logger.debug(
+            f"Could not get console_enabled from ConfigurationManager: {str(e)}"
+        )
         console_enabled = config.console_enabled
 
     if console_enabled:
@@ -167,7 +171,9 @@ def setup_logging(config: LoggingConfig) -> None:
 
         # Create rotating file handler
         file_handler = logging.handlers.RotatingFileHandler(
-            filename=str(log_path), maxBytes=config.max_size, backupCount=config.backup_count
+            filename=str(log_path),
+            maxBytes=config.max_size,
+            backupCount=config.backup_count,
         )
         file_handler.setFormatter(json_formatter)
         root_logger.addHandler(file_handler)
@@ -234,7 +240,9 @@ class RequestLogger:
         """Log info message."""
         self.logger.info(msg, extra=kwargs)
 
-    def error(self, msg: str, exc_info: Optional[Exception] = None, **kwargs: Any) -> None:
+    def error(
+        self, msg: str, exc_info: Optional[Exception] = None, **kwargs: Any
+    ) -> None:
         """Log error message."""
         self.logger.error(msg, exc_info=exc_info, extra=kwargs)
 

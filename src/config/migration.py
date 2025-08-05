@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from .schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+from .schemas.provider_strategy_schema import ProviderConfig
 
 
 class ConfigurationMigrator:
@@ -41,7 +41,9 @@ class ConfigurationMigrator:
             return config_data
 
         # Unknown format
-        self._logger.warning(f"Unknown provider configuration format: {provider_config}")
+        self._logger.warning(
+            f"Unknown provider configuration format: {provider_config}"
+        )
         return config_data
 
     def _migrate_legacy_aws(self, config_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -61,7 +63,11 @@ class ConfigurationMigrator:
             "active_provider": "aws-default",  # Single provider mode
             "selection_policy": "FIRST_AVAILABLE",
             "health_check_interval": 300,
-            "circuit_breaker": {"enabled": True, "failure_threshold": 5, "recovery_timeout": 60},
+            "circuit_breaker": {
+                "enabled": True,
+                "failure_threshold": 5,
+                "recovery_timeout": 60,
+            },
             "providers": [
                 {
                     "name": "aws-default",
@@ -145,7 +151,12 @@ class ConfigurationMigrator:
                 "weight": 100 // len(regions),  # Distribute weight evenly
                 "config": provider_config,
                 "capabilities": self._infer_aws_capabilities(provider_config),
-                "health_check": {"enabled": True, "interval": 300, "timeout": 30, "retry_count": 3},
+                "health_check": {
+                    "enabled": True,
+                    "interval": 300,
+                    "timeout": 30,
+                    "retry_count": 3,
+                },
             }
             providers.append(provider)
 
@@ -188,7 +199,9 @@ class ConfigurationMigrator:
 
             # Validate AWS configuration is preserved (if applicable)
             if original_config.get("provider", {}).get("type") == "aws":
-                aws_provider = next((p for p in active_providers if p.type == "aws"), None)
+                aws_provider = next(
+                    (p for p in active_providers if p.type == "aws"), None
+                )
                 if not aws_provider:
                     self._logger.error("AWS provider not found after migration")
                     return False
@@ -201,7 +214,9 @@ class ConfigurationMigrator:
                 for field in essential_fields:
                     if field in original_aws_config:
                         if migrated_aws_config.get(field) != original_aws_config[field]:
-                            self._logger.error(f"AWS {field} not preserved in migration")
+                            self._logger.error(
+                                f"AWS {field} not preserved in migration"
+                            )
                             return False
 
             self._logger.info("Migration validation successful")
@@ -240,7 +255,9 @@ class ConfigurationMigrator:
                 summary["migration_type"] = "legacy_aws_to_unified"
                 summary["providers_before"] = 1
                 summary["mode_before"] = "legacy"
-                summary["changes"].append("Converted legacy AWS configuration to unified format")
+                summary["changes"].append(
+                    "Converted legacy AWS configuration to unified format"
+                )
 
             # Analyze migrated configuration
             migrated_provider = migrated_config.get("provider", {})

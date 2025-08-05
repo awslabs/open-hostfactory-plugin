@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.infrastructure.di.buses import CommandBus, QueryBus
+from src.infrastructure.di.buses import QueryBus
 from src.infrastructure.di.container import get_container
 from src.infrastructure.error.decorators import handle_interface_exceptions
 
@@ -56,7 +56,10 @@ async def handle_show_scheduler_config(args) -> Dict[str, Any]:
     query = GetSchedulerConfigurationQuery()
     config = await query_bus.execute(query)
 
-    return {"config": config, "message": "Scheduler configuration retrieved successfully"}
+    return {
+        "config": config,
+        "message": "Scheduler configuration retrieved successfully",
+    }
 
 
 @handle_interface_exceptions(context="validate_scheduler_config", interface_type="cli")
@@ -78,4 +81,7 @@ async def handle_validate_scheduler_config(args) -> Dict[str, Any]:
     query = ValidateSchedulerConfigurationQuery()
     validation = await query_bus.execute(query)
 
-    return {"validation": validation, "message": "Scheduler configuration validated successfully"}
+    return {
+        "validation": validation,
+        "message": "Scheduler configuration validated successfully",
+    }

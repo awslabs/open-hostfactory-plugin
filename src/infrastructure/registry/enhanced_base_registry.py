@@ -3,7 +3,7 @@
 import threading
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 
 class RegistryMode(Enum):
@@ -68,7 +68,9 @@ class EnhancedBaseRegistry(ABC):
             return
 
         self.mode = mode
-        self._type_registrations: Dict[str, BaseRegistration] = {}  # Type-based registrations
+        self._type_registrations: Dict[str, BaseRegistration] = (
+            {}
+        )  # Type-based registrations
         self._instance_registrations: Dict[str, BaseRegistration] = (
             {}
         )  # Instance-based registrations (multi-choice only)
@@ -81,15 +83,17 @@ class EnhancedBaseRegistry(ABC):
 
     @abstractmethod
     def register(
-        self, type_name: str, strategy_factory: Callable, config_factory: Callable, **kwargs
+        self,
+        type_name: str,
+        strategy_factory: Callable,
+        config_factory: Callable,
+        **kwargs,
     ):
         """Register a strategy factory."""
-        pass
 
     @abstractmethod
     def create_strategy(self, type_name: str, config: Any) -> Any:
         """Create a strategy instance."""
-        pass
 
     def register_type(
         self,
@@ -139,7 +143,9 @@ class EnhancedBaseRegistry(ABC):
             ValueError: If not in multi-choice mode or instance already registered
         """
         if self.mode != RegistryMode.MULTI_CHOICE:
-            raise ValueError("Instance registration only supported in MULTI_CHOICE mode")
+            raise ValueError(
+                "Instance registration only supported in MULTI_CHOICE mode"
+            )
 
         with self._registry_lock:
             if instance_name in self._instance_registrations:
@@ -149,7 +155,9 @@ class EnhancedBaseRegistry(ABC):
                 type_name, strategy_factory, config_factory, **additional_factories
             )
             self._instance_registrations[instance_name] = registration
-            self.logger.info(f"Registered instance: {instance_name} (type: {type_name})")
+            self.logger.info(
+                f"Registered instance: {instance_name} (type: {type_name})"
+            )
 
     def create_strategy_by_type(self, type_name: str, config: Any) -> Any:
         """Create strategy by type name."""
@@ -159,10 +167,14 @@ class EnhancedBaseRegistry(ABC):
     def create_strategy_by_instance(self, instance_name: str, config: Any) -> Any:
         """Create strategy by instance name (multi-choice mode only)."""
         if self.mode != RegistryMode.MULTI_CHOICE:
-            raise ValueError("Instance-based creation only supported in MULTI_CHOICE mode")
+            raise ValueError(
+                "Instance-based creation only supported in MULTI_CHOICE mode"
+            )
 
         registration = self._get_instance_registration(instance_name)
-        return self._create_strategy_from_registration(registration, config, instance_name)
+        return self._create_strategy_from_registration(
+            registration, config, instance_name
+        )
 
     def is_type_registered(self, type_name: str) -> bool:
         """Check if a type is registered."""
@@ -202,7 +214,9 @@ class EnhancedBaseRegistry(ABC):
                 return True
             return False
 
-    def create_additional_component(self, type_name: str, factory_name: str) -> Optional[Any]:
+    def create_additional_component(
+        self, type_name: str, factory_name: str
+    ) -> Optional[Any]:
         """Create additional component (resolver, validator, etc.) by type."""
         registration = self._get_type_registration(type_name)
         factory = registration.get_factory(factory_name)
@@ -214,7 +228,9 @@ class EnhancedBaseRegistry(ABC):
             self.logger.debug(f"Created {factory_name} for type: {type_name}")
             return component
         except Exception as e:
-            self.logger.warning(f"Failed to create {factory_name} for type '{type_name}': {str(e)}")
+            self.logger.warning(
+                f"Failed to create {factory_name} for type '{type_name}': {str(e)}"
+            )
             return None
 
     def clear_registrations(self) -> None:
@@ -234,7 +250,9 @@ class EnhancedBaseRegistry(ABC):
         **additional_factories,
     ) -> BaseRegistration:
         """Create registration object - can be overridden by subclasses."""
-        return BaseRegistration(type_name, strategy_factory, config_factory, **additional_factories)
+        return BaseRegistration(
+            type_name, strategy_factory, config_factory, **additional_factories
+        )
 
     def _get_type_registration(self, type_name: str) -> BaseRegistration:
         """Get type registration with error handling."""

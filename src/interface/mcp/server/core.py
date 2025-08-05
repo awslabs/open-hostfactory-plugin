@@ -1,13 +1,10 @@
 """Core MCP Server implementation for Open Host Factory Plugin."""
 
-import asyncio
 import json
-import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
-from src.infrastructure.error.decorators import handle_interface_exceptions
 from src.infrastructure.logging.logger import get_logger
 
 
@@ -167,7 +164,9 @@ class OpenHFPluginMCPServer:
             return json.dumps(response.__dict__, default=str)
 
         except json.JSONDecodeError:
-            error_response = MCPMessage(error={"code": -32700, "message": "Parse error"})
+            error_response = MCPMessage(
+                error={"code": -32700, "message": "Parse error"}
+            )
             return json.dumps(error_response.__dict__)
         except Exception as e:
             self.logger.error(f"Error handling MCP message: {e}")
@@ -199,7 +198,8 @@ class OpenHFPluginMCPServer:
                 result = await self._handle_prompts_get(params)
             else:
                 return MCPMessage(
-                    id=message.id, error={"code": -32601, "message": f"Method not found: {method}"}
+                    id=message.id,
+                    error={"code": -32601, "message": f"Method not found: {method}"},
                 )
 
             return MCPMessage(id=message.id, result=result)
@@ -207,7 +207,8 @@ class OpenHFPluginMCPServer:
         except Exception as e:
             self.logger.error(f"Error handling method {method}: {e}")
             return MCPMessage(
-                id=message.id, error={"code": -32603, "message": f"Internal error: {str(e)}"}
+                id=message.id,
+                error={"code": -32603, "message": f"Internal error: {str(e)}"},
             )
 
     async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -242,7 +243,9 @@ class OpenHFPluginMCPServer:
 
             tool_def = {
                 "name": tool_name,
-                "description": description.strip().split("\n")[0],  # First line of docstring
+                "description": description.strip().split("\n")[
+                    0
+                ],  # First line of docstring
                 "inputSchema": {
                     "type": "object",
                     "properties": self._get_tool_schema(tool_name),
@@ -268,7 +271,11 @@ class OpenHFPluginMCPServer:
         tool_func = self.tools[tool_name]
         result = await tool_func(args, self.app)
 
-        return {"content": [{"type": "text", "text": json.dumps(result, indent=2, default=str)}]}
+        return {
+            "content": [
+                {"type": "text", "text": json.dumps(result, indent=2, default=str)}
+            ]
+        }
 
     async def _handle_resources_list(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle resources/list request."""
@@ -359,7 +366,9 @@ class OpenHFPluginMCPServer:
 
         return {
             "description": self.prompts[prompt_name]["description"],
-            "messages": [{"role": "user", "content": {"type": "text", "text": content}}],
+            "messages": [
+                {"role": "user", "content": {"type": "text", "text": content}}
+            ],
         }
 
     def _get_tool_schema(self, tool_name: str) -> Dict[str, Any]:
@@ -377,7 +386,10 @@ class OpenHFPluginMCPServer:
         elif "request" in tool_name:
             return {"request_id": common_props["request_id"]}
         elif "machine" in tool_name:
-            return {"template_id": common_props["template_id"], "count": common_props["count"]}
+            return {
+                "template_id": common_props["template_id"],
+                "count": common_props["count"],
+            }
         else:
             return {"provider": common_props["provider"]}
 

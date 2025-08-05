@@ -4,7 +4,10 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from src.config.schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+    from src.config.schemas.provider_strategy_schema import (
+        ProviderConfig,
+        ProviderInstanceConfig,
+    )
 
 from src.config.schemas.provider_strategy_schema import ProviderMode
 from src.domain.base.exceptions import ConfigurationError
@@ -80,7 +83,11 @@ class ProviderConfigManager:
             return []
 
         providers = getattr(provider_config, "providers", [])
-        return [provider.name for provider in providers if getattr(provider, "enabled", True)]
+        return [
+            provider.name
+            for provider in providers
+            if getattr(provider, "enabled", True)
+        ]
 
     def get_provider_instance_config(
         self, provider_name: str

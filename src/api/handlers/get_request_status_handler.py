@@ -1,8 +1,7 @@
 """API handler for checking request status."""
 
 import time
-import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from src.api.models import RequestStatusModel
 from src.api.validation import RequestValidator, ValidationException
@@ -21,7 +20,9 @@ from src.monitoring.metrics import MetricsCollector
 
 
 @injectable
-class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusResponse]):
+class GetRequestStatusRESTHandler(
+    BaseAPIHandler[Dict[str, Any], RequestStatusResponse]
+):
     """API handler for checking request status."""
 
     def __init__(
@@ -55,7 +56,9 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
         self._max_retries = max_retries
         self.validator = RequestValidator()
 
-    async def validate_api_request(self, request: Dict[str, Any], context: RequestContext) -> None:
+    async def validate_api_request(
+        self, request: Dict[str, Any], context: RequestContext
+    ) -> None:
         """
         Validate API request for checking request status.
 
@@ -125,7 +128,8 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                 # Create response DTO
                 response = RequestStatusResponse(
                     requests=[
-                        req.to_dict() if hasattr(req, "to_dict") else req for req in requests
+                        req.to_dict() if hasattr(req, "to_dict") else req
+                        for req in requests
                     ],
                     metadata={
                         "correlation_id": correlation_id,
@@ -139,7 +143,9 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                 validated_data = context.metadata.get("validated_data")
                 if not validated_data:
                     # Fallback validation if not done in validate_api_request
-                    validated_data = self.validator.validate(RequestStatusModel, input_data)
+                    validated_data = self.validator.validate(
+                        RequestStatusModel, input_data
+                    )
 
                 request_ids = validated_data.request_ids
                 requests = []
@@ -148,7 +154,9 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                 # Process each request ID
                 for request_id in request_ids:
                     try:
-                        request_data = await self._get_request_with_retry(request_id, long)
+                        request_data = await self._get_request_with_retry(
+                            request_id, long
+                        )
 
                         if self.logger:
                             self.logger.info(
@@ -248,7 +256,9 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
         if self._scheduler_strategy and hasattr(
             self._scheduler_strategy, "format_request_response"
         ):
-            formatted_response = await self._scheduler_strategy.format_request_response(response)
+            formatted_response = await self._scheduler_strategy.format_request_response(
+                response
+            )
             return formatted_response
 
         return response
@@ -272,11 +282,15 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
             try:
                 if long:
                     # Get full request details with machines using CQRS query
-                    query = GetRequestStatusQuery(request_id=request_id, include_machines=True)
+                    query = GetRequestStatusQuery(
+                        request_id=request_id, include_machines=True
+                    )
                     return await self._query_bus.execute(query)
                 else:
                     # Get basic request status using CQRS query
-                    query = GetRequestStatusQuery(request_id=request_id, include_machines=False)
+                    query = GetRequestStatusQuery(
+                        request_id=request_id, include_machines=False
+                    )
                     return await self._query_bus.execute(query)
             except RequestNotFoundError:
                 # Don't retry if request not found
@@ -294,7 +308,9 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
         if last_error:
             raise last_error
         else:
-            raise Exception(f"Failed to get request status after {self._max_retries} attempts")
+            raise Exception(
+                f"Failed to get request status after {self._max_retries} attempts"
+            )
 
 
 if TYPE_CHECKING:

@@ -37,4 +37,3 @@ class InfrastructureHandler(Generic[TRequest, TResponse], ABC):
             ValidationError: If request is invalid
             InfrastructureError: If infrastructure operation fails
         """
-        pass

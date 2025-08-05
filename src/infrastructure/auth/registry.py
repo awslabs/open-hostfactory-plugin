@@ -1,7 +1,7 @@
 """Authentication strategy registry."""
 
 import threading
-from typing import Any, Callable, Dict, Type
+from typing import Callable, Dict
 
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.ports.auth import AuthPort
@@ -28,7 +28,9 @@ class AuthRegistry:
         """
         with self._lock:
             if strategy_name in self._strategies:
-                self.logger.warning(f"Overriding existing auth strategy: {strategy_name}")
+                self.logger.warning(
+                    f"Overriding existing auth strategy: {strategy_name}"
+                )
 
             self._strategies[strategy_name] = strategy_factory
             self.logger.info(f"Registered auth strategy: {strategy_name}")

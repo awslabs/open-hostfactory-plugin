@@ -1,15 +1,13 @@
 """API handler for requesting machines."""
 
-import json
 import time
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from src.api.models import RequestMachinesModel
 from src.api.validation import RequestValidator, ValidationException
 from src.application.base.infrastructure_handlers import BaseAPIHandler
 from src.application.dto.commands import CreateRequestCommand
-from src.application.dto.queries import ListTemplatesQuery
 from src.application.request.dto import RequestMachinesResponse
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import ErrorHandlingPort, LoggingPort
@@ -21,7 +19,9 @@ if TYPE_CHECKING:
 
 
 @injectable
-class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMachinesResponse]):
+class RequestMachinesRESTHandler(
+    BaseAPIHandler[RequestMachinesModel, RequestMachinesResponse]
+):
     """API handler for requesting machines."""
 
     def __init__(
@@ -48,7 +48,9 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
         self._metrics = metrics
         self._validator = RequestValidator()
 
-    async def validate_api_request(self, request: RequestMachinesModel, context) -> None:
+    async def validate_api_request(
+        self, request: RequestMachinesModel, context
+    ) -> None:
         """
         Validate API request for requesting machines.
 

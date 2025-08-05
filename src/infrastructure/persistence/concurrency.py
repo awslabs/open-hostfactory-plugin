@@ -28,7 +28,7 @@ class OptimisticConcurrencyControl:
 
     def retry_on_concurrency_error(self, func: Callable[..., R]) -> Callable[..., R]:
         """
-        Decorator to retry a function on concurrency error.
+        Retry a function on concurrency error.
 
         Args:
             func: Function to retry
@@ -39,7 +39,7 @@ class OptimisticConcurrencyControl:
 
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> R:
-            """Wrapper function."""
+            """Wrap function."""
             retries = 0
             while True:
                 try:
@@ -60,7 +60,11 @@ class OptimisticConcurrencyControl:
         return wrapper
 
     def check_version(
-        self, entity: T, entity_id: str, version_map: Dict[str, int], entity_class_name: str
+        self,
+        entity: T,
+        entity_id: str,
+        version_map: Dict[str, int],
+        entity_class_name: str,
     ) -> None:
         """
         Check entity version.
@@ -80,7 +84,9 @@ class OptimisticConcurrencyControl:
                     entity_class_name, entity_id, version_map[entity_id], entity.version
                 )
 
-    def increment_version(self, entity: T, entity_id: str, version_map: Dict[str, int]) -> None:
+    def increment_version(
+        self, entity: T, entity_id: str, version_map: Dict[str, int]
+    ) -> None:
         """
         Increment entity version.
 
@@ -115,7 +121,10 @@ class OptimisticConcurrencyControl:
             self.check_version(entity, entity_id, version_map, entity_class_name)
 
     def batch_increment_versions(
-        self, entities: List[T], get_entity_id: Callable[[T], str], version_map: Dict[str, int]
+        self,
+        entities: List[T],
+        get_entity_id: Callable[[T], str],
+        version_map: Dict[str, int],
     ) -> None:
         """
         Increment versions for a batch of entities.

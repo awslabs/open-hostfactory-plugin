@@ -93,7 +93,6 @@ class TokenPort(ABC):
         Returns:
             Token creation result
         """
-        pass
 
     @abstractmethod
     async def validate_token(self, token: str) -> TokenValidationResult:
@@ -106,7 +105,6 @@ class TokenPort(ABC):
         Returns:
             Token validation result
         """
-        pass
 
     @abstractmethod
     async def refresh_token(self, refresh_token: str) -> TokenResult:
@@ -119,7 +117,6 @@ class TokenPort(ABC):
         Returns:
             New token result
         """
-        pass
 
     @abstractmethod
     async def revoke_token(self, token: str) -> bool:
@@ -132,7 +129,6 @@ class TokenPort(ABC):
         Returns:
             True if token was successfully revoked
         """
-        pass
 
     @abstractmethod
     async def introspect_token(self, token: str) -> Dict[str, Any]:
@@ -145,4 +141,3 @@ class TokenPort(ABC):
         Returns:
             Token information dictionary
         """
-        pass

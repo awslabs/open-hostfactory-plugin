@@ -121,7 +121,8 @@ class TaggingError(AWSError):
             details: Additional error context
         """
         super().__init__(
-            message, details={"resource_id": resource_id, "tags": tags, **(details or {})}
+            message,
+            details={"resource_id": resource_id, "tags": tags, **(details or {})},
         )
         self.resource_id = resource_id
         self.tags = tags
@@ -139,7 +140,11 @@ class LaunchError(AWSError):
     ) -> None:
         super().__init__(
             message,
-            details={"template_id": template_id, "launch_params": launch_params, **(details or {})},
+            details={
+                "template_id": template_id,
+                "launch_params": launch_params,
+                **(details or {}),
+            },
         )
         self.template_id = template_id
         self.launch_params = launch_params
@@ -149,16 +154,23 @@ class TerminationError(AWSError):
     """Raised when there are issues terminating AWS resources."""
 
     def __init__(
-        self, message: str, resource_ids: list[str], details: Optional[Dict[str, Any]] = None
+        self,
+        message: str,
+        resource_ids: list[str],
+        details: Optional[Dict[str, Any]] = None,
     ) -> None:
-        super().__init__(message, details={"resource_ids": resource_ids, **(details or {})})
+        super().__init__(
+            message, details={"resource_ids": resource_ids, **(details or {})}
+        )
         self.resource_ids = resource_ids
 
 
 class EC2InstanceNotFoundError(AWSEntityNotFoundError):
     """Raised when an EC2 instance cannot be found."""
 
-    def __init__(self, instance_id: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, instance_id: str, details: Optional[Dict[str, Any]] = None
+    ) -> None:
         super().__init__(
             f"EC2 instance not found: {instance_id}",
             details={"instance_id": instance_id, **(details or {})},
@@ -178,7 +190,11 @@ class ResourceCleanupError(AWSError):
     ) -> None:
         super().__init__(
             message,
-            details={"resource_id": resource_id, "resource_type": resource_type, **(details or {})},
+            details={
+                "resource_id": resource_id,
+                "resource_type": resource_type,
+                **(details or {}),
+            },
         )
         self.resource_id = resource_id
         self.resource_type = resource_type
@@ -216,7 +232,9 @@ class FleetRequestError(LaunchError):
 class AMIValidationError(AWSValidationError):
     """Raised when there are issues validating an AMI."""
 
-    def __init__(self, message: str, ami_id: str, details: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(
+        self, message: str, ami_id: str, details: Optional[Dict[str, Any]] = None
+    ) -> None:
         super().__init__(message, details={"ami_id": ami_id, **(details or {})})
         self.ami_id = ami_id
 
@@ -235,7 +253,10 @@ class SecurityGroupValidationError(AWSValidationError):
     """Raised when there are issues validating a security group."""
 
     def __init__(
-        self, message: str, security_group_id: str, details: Optional[Dict[str, Any]] = None
+        self,
+        message: str,
+        security_group_id: str,
+        details: Optional[Dict[str, Any]] = None,
     ) -> None:
         super().__init__(
             message, details={"security_group_id": security_group_id, **(details or {})}
@@ -307,7 +328,8 @@ class IAMError(AWSError):
         details: Optional[Dict[str, Any]] = None,
     ) -> None:
         super().__init__(
-            message, details={"role_arn": role_arn, "permission": permission, **(details or {})}
+            message,
+            details={"role_arn": role_arn, "permission": permission, **(details or {})},
         )
         self.role_arn = role_arn
         self.permission = permission

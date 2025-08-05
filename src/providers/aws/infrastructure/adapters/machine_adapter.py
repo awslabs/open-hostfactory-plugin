@@ -78,8 +78,12 @@ class AWSMachineAdapter:
             ]
             for field in required_fields:
                 if field not in aws_instance_data:
-                    self._logger.error(f"Missing required field in AWS instance data: {field}")
-                    raise AWSError(f"Missing required field in AWS instance data: {field}")
+                    self._logger.error(
+                        f"Missing required field in AWS instance data: {field}"
+                    )
+                    raise AWSError(
+                        f"Missing required field in AWS instance data: {field}"
+                    )
 
             # Validate AWS handler type
             try:
@@ -92,15 +96,21 @@ class AWSMachineAdapter:
             try:
                 InstanceType(aws_instance_data["InstanceType"])
             except ValueError:
-                self._logger.error(f"Invalid instance type: {aws_instance_data['InstanceType']}")
-                raise AWSError(f"Invalid instance type: {aws_instance_data['InstanceType']}")
+                self._logger.error(
+                    f"Invalid instance type: {aws_instance_data['InstanceType']}"
+                )
+                raise AWSError(
+                    f"Invalid instance type: {aws_instance_data['InstanceType']}"
+                )
 
             # Extract core machine data
             machine_data = {
                 "machine_id": aws_instance_data["InstanceId"],
                 "request_id": request_id,
                 "name": aws_instance_data.get("PrivateDnsName", ""),
-                "status": MachineStatus.from_aws_state(aws_instance_data["State"]["Name"]).value,
+                "status": MachineStatus.from_aws_state(
+                    aws_instance_data["State"]["Name"]
+                ).value,
                 "instance_type": aws_instance_data["InstanceType"],
                 "private_ip": aws_instance_data["PrivateIpAddress"],
                 "public_ip": aws_instance_data.get("PublicIpAddress"),
@@ -113,13 +123,20 @@ class AWSMachineAdapter:
                 ),
                 "cloud_host_id": aws_instance_data.get("Placement", {}).get("HostId"),
                 "metadata": {
-                    "availability_zone": aws_instance_data["Placement"]["AvailabilityZone"],
+                    "availability_zone": aws_instance_data["Placement"][
+                        "AvailabilityZone"
+                    ],
                     "subnet_id": aws_instance_data["SubnetId"],
                     "vpc_id": aws_instance_data["VpcId"],
                     "ami_id": aws_instance_data["ImageId"],
                     "ebs_optimized": aws_instance_data.get("EbsOptimized", False),
-                    "monitoring": aws_instance_data.get("Monitoring", {}).get("State", "disabled"),
-                    "tags": {tag["Key"]: tag["Value"] for tag in aws_instance_data.get("Tags", [])},
+                    "monitoring": aws_instance_data.get("Monitoring", {}).get(
+                        "State", "disabled"
+                    ),
+                    "tags": {
+                        tag["Key"]: tag["Value"]
+                        for tag in aws_instance_data.get("Tags", [])
+                    },
                 },
             }
 
@@ -173,7 +190,9 @@ class AWSMachineAdapter:
                 }
                 return health_checks
             except RateLimitError as e:
-                self._logger.warning(f"Rate limit exceeded during health check: {str(e)}")
+                self._logger.warning(
+                    f"Rate limit exceeded during health check: {str(e)}"
+                )
                 health_checks["system"] = {
                     "status": False,
                     "details": {"reason": f"Rate limit exceeded: {str(e)}"},
@@ -187,7 +206,8 @@ class AWSMachineAdapter:
                 else:
                     self._logger.error(f"AWS error during health check: {str(e)}")
                     raise AWSError(
-                        f"AWS error during health check: {str(e)}", error_code=error_code
+                        f"AWS error during health check: {str(e)}",
+                        error_code=error_code,
                     )
 
             if not status["InstanceStatuses"]:
@@ -271,19 +291,29 @@ class AWSMachineAdapter:
                     "ec2", "describe_instances", check_instance_exists
                 )
             except NetworkError as e:
-                self._logger.error(f"Network error checking instance existence: {str(e)}")
+                self._logger.error(
+                    f"Network error checking instance existence: {str(e)}"
+                )
                 raise AWSError(f"Network error checking instance existence: {str(e)}")
             except RateLimitError as e:
-                self._logger.warning(f"Rate limit exceeded checking instance existence: {str(e)}")
-                raise AWSError(f"Rate limit exceeded checking instance existence: {str(e)}")
+                self._logger.warning(
+                    f"Rate limit exceeded checking instance existence: {str(e)}"
+                )
+                raise AWSError(
+                    f"Rate limit exceeded checking instance existence: {str(e)}"
+                )
             except AWSError as e:
                 error_code = getattr(e, "error_code", "")
                 if error_code == "InvalidInstanceID.NotFound":
-                    self._logger.error(f"Instance not found during cleanup: {machine.machine_id}")
+                    self._logger.error(
+                        f"Instance not found during cleanup: {machine.machine_id}"
+                    )
                     raise EC2InstanceNotFoundError(str(machine.machine_id))
                 else:
                     self._logger.error(f"AWS error during cleanup: {str(e)}")
-                    raise AWSError(f"AWS error during cleanup: {str(e)}", error_code=error_code)
+                    raise AWSError(
+                        f"AWS error during cleanup: {str(e)}", error_code=error_code
+                    )
 
             # Detach and delete EBS volumes using circuit breaker
             try:
@@ -292,7 +322,10 @@ class AWSMachineAdapter:
                     """Get EBS volumes attached to the EC2 instance."""
                     return self._aws_client.ec2_client.describe_volumes(
                         Filters=[
-                            {"Name": "attachment.instance-id", "Value": [str(machine.machine_id)]}
+                            {
+                                "Name": "attachment.instance-id",
+                                "Value": [str(machine.machine_id)],
+                            }
                         ]
                     )
 
@@ -309,7 +342,9 @@ class AWSMachineAdapter:
                             )
 
                             def detach_volume():
-                                return self._aws_client.ec2_client.detach_volume(VolumeId=volume_id)
+                                return self._aws_client.ec2_client.detach_volume(
+                                    VolumeId=volume_id
+                                )
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2", "detach_volume", detach_volume
@@ -318,7 +353,9 @@ class AWSMachineAdapter:
                             self._logger.debug(f"Deleting volume {volume_id}")
 
                             def delete_volume():
-                                return self._aws_client.ec2_client.delete_volume(VolumeId=volume_id)
+                                return self._aws_client.ec2_client.delete_volume(
+                                    VolumeId=volume_id
+                                )
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2", "delete_volume", delete_volume
@@ -326,12 +363,16 @@ class AWSMachineAdapter:
 
                             cleanup_results["volumes"]["success"].append(volume_id)
                     except AWSError as e:
-                        self._logger.error(f"Failed to cleanup volume {volume_id}: {str(e)}")
+                        self._logger.error(
+                            f"Failed to cleanup volume {volume_id}: {str(e)}"
+                        )
                         cleanup_results["volumes"]["failed"].append(
                             {"id": volume_id, "error": str(e)}
                         )
             except AWSError as e:
-                self._logger.error(f"Error processing volumes for {machine.machine_id}: {str(e)}")
+                self._logger.error(
+                    f"Error processing volumes for {machine.machine_id}: {str(e)}"
+                )
                 # Continue with other resources even if volumes fail
 
             # Delete network interfaces using circuit breaker
@@ -341,7 +382,10 @@ class AWSMachineAdapter:
                     """Get network interfaces attached to the EC2 instance."""
                     return self._aws_client.ec2_client.describe_network_interfaces(
                         Filters=[
-                            {"Name": "attachment.instance-id", "Value": [str(machine.machine_id)]}
+                            {
+                                "Name": "attachment.instance-id",
+                                "Value": [str(machine.machine_id)],
+                            }
                         ]
                     )
 
@@ -364,7 +408,9 @@ class AWSMachineAdapter:
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(
-                                "ec2", "detach_network_interface", detach_network_interface
+                                "ec2",
+                                "detach_network_interface",
+                                detach_network_interface,
                             )
 
                             self._logger.debug(f"Deleting network interface {nic_id}")
@@ -375,10 +421,14 @@ class AWSMachineAdapter:
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(
-                                "ec2", "delete_network_interface", delete_network_interface
+                                "ec2",
+                                "delete_network_interface",
+                                delete_network_interface,
                             )
 
-                            cleanup_results["network_interfaces"]["success"].append(nic_id)
+                            cleanup_results["network_interfaces"]["success"].append(
+                                nic_id
+                            )
                     except AWSError as e:
                         self._logger.error(
                             f"Failed to cleanup network interface {nic_id}: {str(e)}"
@@ -438,7 +488,10 @@ class AWSMachineAdapter:
                     "ec2", "describe_instances", get_instance_details
                 )
 
-                if not response["Reservations"] or not response["Reservations"][0]["Instances"]:
+                if (
+                    not response["Reservations"]
+                    or not response["Reservations"][0]["Instances"]
+                ):
                     self._logger.error(f"Instance not found: {machine.machine_id}")
                     raise EC2InstanceNotFoundError(str(machine.machine_id))
 
@@ -448,7 +501,9 @@ class AWSMachineAdapter:
                 self._logger.error(f"Network error getting machine details: {str(e)}")
                 raise AWSError(f"Network error getting machine details: {str(e)}")
             except RateLimitError as e:
-                self._logger.warning(f"Rate limit exceeded getting machine details: {str(e)}")
+                self._logger.warning(
+                    f"Rate limit exceeded getting machine details: {str(e)}"
+                )
                 raise AWSError(f"Rate limit exceeded getting machine details: {str(e)}")
             except AWSError as e:
                 error_code = getattr(e, "error_code", "")
@@ -458,7 +513,8 @@ class AWSMachineAdapter:
                 else:
                     self._logger.error(f"AWS error getting machine details: {str(e)}")
                     raise AWSError(
-                        f"AWS error getting machine details: {str(e)}", error_code=error_code
+                        f"AWS error getting machine details: {str(e)}",
+                        error_code=error_code,
                     )
 
             # Build details object
@@ -474,11 +530,16 @@ class AWSMachineAdapter:
                     "ebs_optimized": instance_info["EbsOptimized"],
                     "monitoring": instance_info["Monitoring"],
                     "iam_instance_profile": instance_info.get("IamInstanceProfile", {}),
-                    "tags": {tag["Key"]: tag["Value"] for tag in instance_info.get("Tags", [])},
+                    "tags": {
+                        tag["Key"]: tag["Value"]
+                        for tag in instance_info.get("Tags", [])
+                    },
                 }
             }
 
-            self._logger.debug(f"Successfully retrieved details for {machine.machine_id}")
+            self._logger.debug(
+                f"Successfully retrieved details for {machine.machine_id}"
+            )
             return details
 
         except EC2InstanceNotFoundError:

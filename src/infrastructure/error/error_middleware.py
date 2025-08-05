@@ -114,7 +114,7 @@ class ErrorMiddleware:
 
 def with_error_handling(error_handler: Optional[ExceptionHandler] = None):
     """
-    Decorator for adding error handling to functions.
+    Add error handling to functions.
 
     Args:
         error_handler: Optional error handler instance
@@ -141,7 +141,7 @@ def with_error_handling(error_handler: Optional[ExceptionHandler] = None):
 
 def with_api_error_handling(error_handler: Optional[ExceptionHandler] = None):
     """
-    Decorator for adding API-specific error handling to functions.
+    Add API-specific error handling to functions.
 
     Args:
         error_handler: Optional error handler instance

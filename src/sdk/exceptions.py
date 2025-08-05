@@ -39,7 +39,10 @@ class ProviderError(SDKError):
     """Raised when provider initialization or operations fail."""
 
     def __init__(
-        self, message: str, provider: Optional[str] = None, details: Optional[Dict[str, Any]] = None
+        self,
+        message: str,
+        provider: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(message, details)
         self.provider = provider

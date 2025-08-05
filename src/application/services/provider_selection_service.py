@@ -6,18 +6,16 @@ based on template requirements, following DDD and Clean Architecture principles.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from src.config.managers.configuration_manager import ConfigurationManager
 from src.config.schemas.provider_strategy_schema import (
-    ProviderConfig,
     ProviderInstanceConfig,
 )
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.template.aggregate import Template
 from src.infrastructure.registry.provider_registry import ProviderRegistry
-from src.providers.base.strategy.provider_strategy import ProviderStrategy
 
 
 @dataclass
@@ -78,7 +76,9 @@ class ProviderSelectionService:
         self._provider_registry = provider_registry
         self._provider_config = config_manager.get_provider_config()
 
-    def select_provider_for_template(self, template: Template) -> ProviderSelectionResult:
+    def select_provider_for_template(
+        self, template: Template
+    ) -> ProviderSelectionResult:
         """
         Select provider type and instance for template.
 
@@ -121,7 +121,9 @@ class ProviderSelectionService:
         # Validate provider instance exists and is enabled
         provider_instance = self._get_provider_instance_config(provider_name)
         if not provider_instance:
-            raise ValueError(f"Provider instance '{provider_name}' not found in configuration")
+            raise ValueError(
+                f"Provider instance '{provider_name}' not found in configuration"
+            )
 
         if not provider_instance.enabled:
             raise ValueError(f"Provider instance '{provider_name}' is disabled")
@@ -135,14 +137,18 @@ class ProviderSelectionService:
             confidence=1.0,
         )
 
-    def _select_load_balanced_provider(self, template: Template) -> ProviderSelectionResult:
+    def _select_load_balanced_provider(
+        self, template: Template
+    ) -> ProviderSelectionResult:
         """Select provider instance using load balancing within provider type."""
         provider_type = template.provider_type
 
         # Get all enabled instances of the provider type
         instances = self._get_enabled_instances_by_type(provider_type)
         if not instances:
-            raise ValueError(f"No enabled instances found for provider type '{provider_type}'")
+            raise ValueError(
+                f"No enabled instances found for provider type '{provider_type}'"
+            )
 
         # Apply load balancing strategy
         selected_instance = self._apply_load_balancing_strategy(instances)
@@ -156,7 +162,9 @@ class ProviderSelectionService:
             provider_instance=selected_instance.name,
             selection_reason=f"Load balanced across {len(instances)} {provider_type} instances",
             confidence=0.9,
-            alternatives=[inst.name for inst in instances if inst.name != selected_instance.name],
+            alternatives=[
+                inst.name for inst in instances if inst.name != selected_instance.name
+            ],
         )
 
     def _select_by_api_capability(self, template: Template) -> ProviderSelectionResult:
@@ -181,21 +189,27 @@ class ProviderSelectionService:
             selection_reason=f"Supports required API '{provider_api}'",
             confidence=0.8,
             alternatives=[
-                inst.name for inst in compatible_instances if inst.name != selected_instance.name
+                inst.name
+                for inst in compatible_instances
+                if inst.name != selected_instance.name
             ],
         )
 
     def _select_default_provider(self, template: Template) -> ProviderSelectionResult:
         """Select default provider from configuration."""
         # Get default from configuration
-        default_provider_type = getattr(self._provider_config, "default_provider_type", None)
+        default_provider_type = getattr(
+            self._provider_config, "default_provider_type", None
+        )
         default_provider_instance = getattr(
             self._provider_config, "default_provider_instance", None
         )
 
         # If no defaults in config, use first enabled provider
         if not default_provider_instance:
-            enabled_instances = [p for p in self._provider_config.providers if p.enabled]
+            enabled_instances = [
+                p for p in self._provider_config.providers if p.enabled
+            ]
             if not enabled_instances:
                 raise ValueError("No enabled providers found in configuration")
 
@@ -212,14 +226,18 @@ class ProviderSelectionService:
             confidence=0.7,
         )
 
-    def _get_provider_instance_config(self, provider_name: str) -> Optional[ProviderInstanceConfig]:
+    def _get_provider_instance_config(
+        self, provider_name: str
+    ) -> Optional[ProviderInstanceConfig]:
         """Get provider instance configuration by name."""
         for provider in self._provider_config.providers:
             if provider.name == provider_name:
                 return provider
         return None
 
-    def _get_enabled_instances_by_type(self, provider_type: str) -> List[ProviderInstanceConfig]:
+    def _get_enabled_instances_by_type(
+        self, provider_type: str
+    ) -> List[ProviderInstanceConfig]:
         """Get all enabled provider instances of specified type."""
         return [
             provider
@@ -255,7 +273,9 @@ class ProviderSelectionService:
 
         # Get all instances with the highest priority
         highest_priority_instances = [
-            instance for instance in sorted_instances if instance.priority == highest_priority
+            instance
+            for instance in sorted_instances
+            if instance.priority == highest_priority
         ]
 
         # If only one instance with highest priority, select it
@@ -285,7 +305,9 @@ class ProviderSelectionService:
         # In production, this would check actual health status
         return min(instances, key=lambda x: x.priority)
 
-    def _find_compatible_providers(self, provider_api: str) -> List[ProviderInstanceConfig]:
+    def _find_compatible_providers(
+        self, provider_api: str
+    ) -> List[ProviderInstanceConfig]:
         """Find provider instances that support the specified API."""
         compatible = []
 
@@ -299,7 +321,9 @@ class ProviderSelectionService:
 
         return compatible
 
-    def _provider_supports_api(self, provider: ProviderInstanceConfig, api: str) -> bool:
+    def _provider_supports_api(
+        self, provider: ProviderInstanceConfig, api: str
+    ) -> bool:
         """Check if provider instance supports the specified API."""
         # Get effective handlers for this provider
         provider_defaults = self._provider_config.provider_defaults.get(provider.type)
@@ -331,7 +355,9 @@ class ProviderSelectionService:
 
         for provider in self._provider_config.providers:
             # Get effective handlers as capabilities
-            provider_defaults = self._provider_config.provider_defaults.get(provider.type)
+            provider_defaults = self._provider_config.provider_defaults.get(
+                provider.type
+            )
             effective_handlers = provider.get_effective_handlers(provider_defaults)
             capabilities = list(effective_handlers.keys())
 
@@ -348,7 +374,9 @@ class ProviderSelectionService:
 
         return providers
 
-    def validate_provider_selection(self, provider_type: str, provider_instance: str) -> bool:
+    def validate_provider_selection(
+        self, provider_type: str, provider_instance: str
+    ) -> bool:
         """Validate that a provider selection is valid."""
         provider_config = self._get_provider_instance_config(provider_instance)
 

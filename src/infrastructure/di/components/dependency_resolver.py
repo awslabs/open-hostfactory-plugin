@@ -3,6 +3,7 @@
 import inspect
 import logging
 import threading
+import typing
 from typing import (
     Any,
     Callable,
@@ -11,7 +12,6 @@ from typing import (
     Set,
     Type,
     TypeVar,
-    Union,
     get_type_hints,
 )
 
@@ -65,7 +65,10 @@ class DependencyResolver:
 
         # Check for circular dependencies
         if cls in dependency_chain:
-            chain_str = " -> ".join([c.__name__ for c in dependency_chain]) + f" -> {cls.__name__}"
+            chain_str = (
+                " -> ".join([c.__name__ for c in dependency_chain])
+                + f" -> {cls.__name__}"
+            )
             raise CircularDependencyError(f"Circular dependency detected: {chain_str}")
 
         # Add current class to dependency chain
@@ -93,7 +96,9 @@ class DependencyResolver:
             if isinstance(e, (DependencyResolutionError, CircularDependencyError)):
                 raise
             else:
-                raise DependencyResolutionError(cls, f"Failed to resolve {cls.__name__}: {str(e)}")
+                raise DependencyResolutionError(
+                    cls, f"Failed to resolve {cls.__name__}: {str(e)}"
+                )
 
     def _create_instance(self, cls: Type[T], dependency_chain: Set[Type]) -> T:
         """Create an instance of the specified type."""
@@ -135,10 +140,14 @@ class DependencyResolver:
                 )
 
         if registration.implementation_type is not None:
-            return self._create_direct_instance(registration.implementation_type, dependency_chain)
+            return self._create_direct_instance(
+                registration.implementation_type, dependency_chain
+            )
 
         # Fallback to dependency type
-        return self._create_direct_instance(registration.dependency_type, dependency_chain)
+        return self._create_direct_instance(
+            registration.dependency_type, dependency_chain
+        )
 
     def _create_direct_instance(self, cls: Type[T], dependency_chain: Set[Type]) -> T:
         """Create instance directly from class."""
@@ -148,7 +157,9 @@ class DependencyResolver:
                 self._auto_register_injectable_class(cls)
 
             # Get constructor parameters
-            constructor_params = self._resolve_constructor_parameters(cls, dependency_chain)
+            constructor_params = self._resolve_constructor_parameters(
+                cls, dependency_chain
+            )
 
             # Create instance
             instance = cls(**constructor_params)
@@ -160,7 +171,9 @@ class DependencyResolver:
             if isinstance(e, (DependencyResolutionError, CircularDependencyError)):
                 raise
             else:
-                raise InstantiationError(cls, f"Failed to instantiate {cls.__name__}: {str(e)}")
+                raise InstantiationError(
+                    cls, f"Failed to instantiate {cls.__name__}: {str(e)}"
+                )
 
     def _auto_register_injectable_class(self, cls: Type) -> None:
         """Auto-register an injectable class."""
@@ -184,7 +197,9 @@ class DependencyResolver:
                 self._service_registry.register_injectable_class(cls)
                 logger.debug(f"Auto-registered legacy injectable class: {cls.__name__}")
         except Exception as e:
-            logger.warning(f"Failed to auto-register injectable class {cls.__name__}: {e}")
+            logger.warning(
+                f"Failed to auto-register injectable class {cls.__name__}: {e}"
+            )
 
     def _resolve_constructor_parameters(
         self, cls: Type, dependency_chain: Set[Type]
@@ -203,7 +218,10 @@ class DependencyResolver:
                     continue
 
                 # Skip *args and **kwargs parameters - they can't be resolved as dependencies
-                if param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+                if param.kind in (
+                    inspect.Parameter.VAR_POSITIONAL,
+                    inspect.Parameter.VAR_KEYWORD,
+                ):
                     continue
 
                 # Get parameter type
@@ -236,11 +254,15 @@ class DependencyResolver:
                 # Resolve dependency
                 if param.default == inspect.Parameter.empty:
                     # Required parameter
-                    parameters[param_name] = self.resolve(param_type, cls, dependency_chain)
+                    parameters[param_name] = self.resolve(
+                        param_type, cls, dependency_chain
+                    )
                 else:
                     # Optional parameter - try to resolve, use default if not available
                     try:
-                        parameters[param_name] = self.resolve(param_type, cls, dependency_chain)
+                        parameters[param_name] = self.resolve(
+                            param_type, cls, dependency_chain
+                        )
                     except (DependencyResolutionError, UnregisteredDependencyError):
                         # Use default value
                         pass
@@ -249,12 +271,18 @@ class DependencyResolver:
 
         except Exception as e:
             if isinstance(
-                e, (DependencyResolutionError, CircularDependencyError, UntypedParameterError)
+                e,
+                (
+                    DependencyResolutionError,
+                    CircularDependencyError,
+                    UntypedParameterError,
+                ),
             ):
                 raise
             else:
                 raise DependencyResolutionError(
-                    cls, f"Failed to resolve constructor parameters for {cls.__name__}: {str(e)}"
+                    cls,
+                    f"Failed to resolve constructor parameters for {cls.__name__}: {str(e)}",
                 )
 
     def _resolve_function_parameters(
@@ -290,11 +318,15 @@ class DependencyResolver:
                 # Resolve dependency
                 if param.default == inspect.Parameter.empty:
                     # Required parameter
-                    parameters[param_name] = self.resolve(param_type, None, dependency_chain)
+                    parameters[param_name] = self.resolve(
+                        param_type, None, dependency_chain
+                    )
                 else:
                     # Optional parameter
                     try:
-                        parameters[param_name] = self.resolve(param_type, None, dependency_chain)
+                        parameters[param_name] = self.resolve(
+                            param_type, None, dependency_chain
+                        )
                     except (DependencyResolutionError, UnregisteredDependencyError):
                         # Use default value
                         pass
@@ -303,7 +335,12 @@ class DependencyResolver:
 
         except Exception as e:
             if isinstance(
-                e, (DependencyResolutionError, CircularDependencyError, UntypedParameterError)
+                e,
+                (
+                    DependencyResolutionError,
+                    CircularDependencyError,
+                    UntypedParameterError,
+                ),
             ):
                 raise
             else:
@@ -367,7 +404,8 @@ class DependencyResolver:
 
         except Exception as e:
             raise DependencyResolutionError(
-                context_class, f"Failed to resolve string annotation '{annotation}': {str(e)}"
+                context_class,
+                f"Failed to resolve string annotation '{annotation}': {str(e)}",
             )
 
     def _is_primitive_type(self, param_type: Type) -> bool:

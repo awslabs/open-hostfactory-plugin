@@ -1,6 +1,5 @@
 """Authentication middleware for FastAPI."""
 
-import logging
 from typing import List
 
 from fastapi import HTTPException, Request, Response, status
@@ -14,7 +13,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Authentication middleware for FastAPI requests."""
 
     def __init__(
-        self, app, auth_port: AuthPort, excluded_paths: List[str] = None, require_auth: bool = True
+        self,
+        app,
+        auth_port: AuthPort,
+        excluded_paths: List[str] = None,
+        require_auth: bool = True,
     ):
         """
         Initialize authentication middleware.
@@ -75,7 +78,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             request.state.user_roles = auth_result.user_roles
             request.state.permissions = auth_result.permissions
 
-            self.logger.debug(f"Authentication successful for user: {auth_result.user_id}")
+            self.logger.debug(
+                f"Authentication successful for user: {auth_result.user_id}"
+            )
 
             # Continue to next middleware/handler
             response = await call_next(request)
@@ -196,7 +201,8 @@ class AuthDependency:
 
         if not auth_result:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
             )
 
         if not auth_result.is_authenticated:
@@ -207,7 +213,9 @@ class AuthDependency:
         # Check required permissions
         for permission in self.required_permissions:
             if not auth_result.has_permission(permission):
-                self.logger.warning(f"User {auth_result.user_id} missing permission: {permission}")
+                self.logger.warning(
+                    f"User {auth_result.user_id} missing permission: {permission}"
+                )
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=f"Missing required permission: {permission}",
@@ -218,7 +226,8 @@ class AuthDependency:
             if not auth_result.has_role(role):
                 self.logger.warning(f"User {auth_result.user_id} missing role: {role}")
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN, detail=f"Missing required role: {role}"
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Missing required role: {role}",
                 )
 
         return auth_result

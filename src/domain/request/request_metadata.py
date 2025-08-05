@@ -138,7 +138,7 @@ class MachineCount(ValueObject):
         return self
 
     def __str__(self) -> str:
-        """String representation of machine count.
+        """Return string representation of machine count.
 
         Returns:
             Machine count as string
@@ -218,7 +218,7 @@ class RequestTag(ValueObject):
         return v.strip()
 
     def __str__(self) -> str:
-        """String representation of tag in key=value format.
+        """Return string representation of tag in key=value format.
 
         Returns:
             Tag formatted as 'key=value'
@@ -386,6 +386,7 @@ class LaunchTemplateInfo(ValueObject):
     @field_validator("template_id")
     @classmethod
     def validate_template_id(cls, v: str) -> str:
+        """Validate template ID format."""
         if not v or not isinstance(v, str):
             raise ValueError("Template ID must be a non-empty string")
         return v.strip()
@@ -393,6 +394,7 @@ class LaunchTemplateInfo(ValueObject):
     @field_validator("version")
     @classmethod
     def validate_version(cls, v: str) -> str:
+        """Validate template version format."""
         if not v or not isinstance(v, str):
             raise ValueError("Template version must be a non-empty string")
         return v.strip()
@@ -434,6 +436,7 @@ class RequestHistoryEvent(ValueObject):
     @field_validator("event_type")
     @classmethod
     def validate_event_type(cls, v: str) -> str:
+        """Validate event type format."""
         if not v or not isinstance(v, str):
             raise ValueError("Event type must be a non-empty string")
 
@@ -444,6 +447,7 @@ class RequestHistoryEvent(ValueObject):
     @field_validator("timestamp")
     @classmethod
     def validate_timestamp(cls, v: str) -> str:
+        """Validate timestamp format."""
         if not v or not isinstance(v, str):
             raise ValueError("Timestamp must be a non-empty string")
 
@@ -458,6 +462,7 @@ class RequestHistoryEvent(ValueObject):
     @field_validator("message")
     @classmethod
     def validate_message(cls, v: str) -> str:
+        """Validate event message format."""
         if not v or not isinstance(v, str):
             raise ValueError("Event message must be a non-empty string")
         return v.strip()

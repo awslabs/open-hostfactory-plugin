@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -13,6 +13,13 @@ from src.api.dependencies import (
 from src.infrastructure.error.decorators import handle_rest_exceptions
 
 router = APIRouter(prefix="/machines", tags=["Machines"])
+
+# Module-level dependency variables to avoid B008 warnings
+REQUEST_MACHINES_HANDLER = Depends(get_request_machines_handler)
+RETURN_MACHINES_HANDLER = Depends(get_return_machines_handler)
+STATUS_QUERY = Query(None, description="Filter by machine status")
+REQUEST_ID_QUERY = Query(None, description="Filter by request ID")
+LIMIT_QUERY = Query(None, description="Limit number of results")
 
 
 class RequestMachinesRequest(BaseModel):
@@ -30,11 +37,13 @@ class ReturnMachinesRequest(BaseModel):
 
 
 @router.post(
-    "/request", summary="Request Machines", description="Request new machines from a template"
+    "/request",
+    summary="Request Machines",
+    description="Request new machines from a template",
 )
 @handle_rest_exceptions(endpoint="/api/v1/machines/request", method="POST")
 async def request_machines(
-    request_data: RequestMachinesRequest, handler=Depends(get_request_machines_handler())
+    request_data: RequestMachinesRequest, handler=REQUEST_MACHINES_HANDLER
 ) -> JSONResponse:
     """
     Request new machines from a template.
@@ -53,10 +62,12 @@ async def request_machines(
     return JSONResponse(content=result)
 
 
-@router.post("/return", summary="Return Machines", description="Return machines to the provider")
+@router.post(
+    "/return", summary="Return Machines", description="Return machines to the provider"
+)
 @handle_rest_exceptions(endpoint="/api/v1/machines/return", method="POST")
 async def return_machines(
-    request_data: ReturnMachinesRequest, handler=Depends(get_return_machines_handler())
+    request_data: ReturnMachinesRequest, handler=RETURN_MACHINES_HANDLER
 ) -> JSONResponse:
     """
     Return machines to the provider.
@@ -71,12 +82,14 @@ async def return_machines(
     return JSONResponse(content=result)
 
 
-@router.get("/", summary="List Machines", description="List machines with optional filtering")
+@router.get(
+    "/", summary="List Machines", description="List machines with optional filtering"
+)
 @handle_rest_exceptions(endpoint="/api/v1/machines", method="GET")
 async def list_machines(
-    status: Optional[str] = Query(None, description="Filter by machine status"),
-    request_id: Optional[str] = Query(None, description="Filter by request ID"),
-    limit: Optional[int] = Query(None, description="Limit number of results"),
+    status: Optional[str] = STATUS_QUERY,
+    request_id: Optional[str] = REQUEST_ID_QUERY,
+    limit: Optional[int] = LIMIT_QUERY,
 ) -> JSONResponse:
     """
     List machines with optional filtering.
@@ -99,7 +112,9 @@ async def list_machines(
     )
 
 
-@router.get("/{machine_id}", summary="Get Machine", description="Get specific machine details")
+@router.get(
+    "/{machine_id}", summary="Get Machine", description="Get specific machine details"
+)
 @handle_rest_exceptions(endpoint="/api/v1/machines/{machine_id}", method="GET")
 async def get_machine(machine_id: str) -> JSONResponse:
     """

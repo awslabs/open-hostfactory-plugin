@@ -6,10 +6,8 @@ as BaseCommandHandler and BaseQueryHandler, ensuring consistency across all hand
 types in the CQRS system.
 """
 
-import asyncio
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, Dict, Generic, Optional, TypeVar
 
 from src.application.interfaces.event_handler import EventHandler
@@ -84,7 +82,9 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
             self._record_success_metrics(event_type, duration)
 
             if self.logger:
-                self.logger.info(f"Event processed successfully: {event_type} ({duration:.3f}s)")
+                self.logger.info(
+                    f"Event processed successfully: {event_type} ({duration:.3f}s)"
+                )
 
         except Exception as e:
             # Record failure metrics
@@ -144,7 +144,6 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
         Raises:
             Any exception that occurs during event processing
         """
-        pass
 
     async def publish_cascading_events(self, events: list[DomainEvent]) -> None:
         """
@@ -183,7 +182,9 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
             metrics["total_duration"] / total_count if total_count > 0 else 0.0
         )
 
-    def _record_failure_metrics(self, event_type: str, duration: float, error: Exception) -> None:
+    def _record_failure_metrics(
+        self, event_type: str, duration: float, error: Exception
+    ) -> None:
         """Record failure metrics for monitoring."""
         if event_type not in self._metrics:
             self._metrics[event_type] = {
@@ -257,7 +258,6 @@ class BaseLoggingEventHandler(BaseEventHandler[TEvent]):
         Returns:
             Formatted log message
         """
-        pass
 
     def get_log_level(self, event: TEvent) -> str:
         """

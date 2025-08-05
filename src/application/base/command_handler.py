@@ -9,9 +9,7 @@ Architecture:
 - CLICommandHandler: For CLI interface handlers
 """
 
-import asyncio
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Any, Dict, Optional, TypeVar
 
 # Import the CQRS interface
 from src.application.interfaces.command_handler import CommandHandler
@@ -141,7 +139,9 @@ class CLICommandHandler(CommandHandler[TCommand, TResponse]):
                     self.logger.debug(f"Loaded input from file: {command.file}")
             except Exception as e:
                 if self.logger:
-                    self.logger.error(f"Failed to load input from file {command.file}: {e}")
+                    self.logger.error(
+                        f"Failed to load input from file {command.file}: {e}"
+                    )
                 raise
         elif hasattr(command, "data") and command.data:
             try:

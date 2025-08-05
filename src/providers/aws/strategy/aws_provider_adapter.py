@@ -95,7 +95,9 @@ class AWSResourceValidator:
     def validate_launch_template(self, template: ProviderLaunchTemplate) -> bool:
         """Validate AWS launch template format."""
         # Validate template ID format
-        if not self.validate_resource_identifier(template.template_id, "launch_template"):
+        if not self.validate_resource_identifier(
+            template.template_id, "launch_template"
+        ):
             return False
 
         # Validate version if provided
@@ -138,8 +140,12 @@ class AWSProviderAdapter:
         self, resource_type: str, identifier: str, region: Optional[str] = None
     ) -> ProviderResourceIdentifier:
         """Create an AWS resource identifier."""
-        if not self._resource_validator.validate_resource_identifier(identifier, resource_type):
-            self._logger.warning(f"Invalid AWS {resource_type} identifier: {identifier}")
+        if not self._resource_validator.validate_resource_identifier(
+            identifier, resource_type
+        ):
+            self._logger.warning(
+                f"Invalid AWS {resource_type} identifier: {identifier}"
+            )
             raise ValueError(f"Invalid AWS {resource_type} identifier: {identifier}")
 
         return ProviderResourceIdentifier(

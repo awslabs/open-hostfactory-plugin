@@ -189,7 +189,11 @@ class MachineResult(str, Enum):
 
     def is_terminal(self) -> bool:
         """Check if this result represents a terminal state."""
-        return self in [MachineResult.SUCCESS, MachineResult.FAILED, MachineResult.SKIPPED]
+        return self in [
+            MachineResult.SUCCESS,
+            MachineResult.FAILED,
+            MachineResult.SKIPPED,
+        ]
 
     def is_successful(self) -> bool:
         """Check if this result represents a successful outcome."""

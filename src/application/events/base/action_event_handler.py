@@ -96,7 +96,6 @@ class ActionEventHandler(EventHandler):
         Returns:
             Result of the action (can be any type)
         """
-        pass
 
     async def handle_action_result(self, event: DomainEvent, result: Any) -> None:
         """
@@ -114,7 +113,9 @@ class ActionEventHandler(EventHandler):
             aggregate_id = getattr(event, "aggregate_id", "unknown")
             self.logger.debug(f"Action completed for {event_type} ({aggregate_id})")
 
-    async def _handle_error(self, event: DomainEvent, error: Exception, duration: float) -> None:
+    async def _handle_error(
+        self, event: DomainEvent, error: Exception, duration: float
+    ) -> None:
         """
         Enhanced error handling for action handlers.
 
@@ -147,7 +148,9 @@ class ActionEventHandler(EventHandler):
         if self.logger:
             event_type = getattr(event, "event_type", "unknown")
             aggregate_id = getattr(event, "aggregate_id", "unknown")
-            self.logger.error(f"Action failed for {event_type} ({aggregate_id}): {str(error)}")
+            self.logger.error(
+                f"Action failed for {event_type} ({aggregate_id}): {str(error)}"
+            )
 
     def extract_action_data(self, event: DomainEvent) -> Dict[str, Any]:
         """

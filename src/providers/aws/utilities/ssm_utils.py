@@ -7,7 +7,6 @@ This module contains utility functions for working with AWS SSM Parameter Store.
 import re
 from typing import Any, Dict, List, Optional, Union
 
-import boto3
 from botocore.exceptions import ClientError
 
 from src.domain.base.exceptions import InfrastructureError
@@ -106,7 +105,8 @@ def resolve_ssm_parameter(parameter_path: str, aws_client: Any = None) -> str:
         )
 
         raise InfrastructureError(
-            "AWS.SSM", f"Failed to resolve SSM parameter {path}: {error_code} - {error_message}"
+            "AWS.SSM",
+            f"Failed to resolve SSM parameter {path}: {error_code} - {error_message}",
         )
 
     except Exception as e:
@@ -254,7 +254,11 @@ def get_ssm_parameters_by_path(
 
         logger.error(
             f"Failed to get SSM parameters by path {path}: {error_code} - {error_message}",
-            extra={"path": path, "error_code": error_code, "error_message": error_message},
+            extra={
+                "path": path,
+                "error_code": error_code,
+                "error_message": error_message,
+            },
         )
 
         raise InfrastructureError(
@@ -264,7 +268,9 @@ def get_ssm_parameters_by_path(
 
 
 @retry(strategy="exponential", max_attempts=3, base_delay=1.0, service="ssm")
-def _get_parameters_by_path(ssm_client: Any, path: str, recursive: bool = True) -> Dict[str, str]:
+def _get_parameters_by_path(
+    ssm_client: Any, path: str, recursive: bool = True
+) -> Dict[str, str]:
     """Get SSM parameters by path with retry."""
     paginator = ssm_client.get_paginator("get_parameters_by_path")
     parameters = {}
@@ -276,7 +282,9 @@ def _get_parameters_by_path(ssm_client: Any, path: str, recursive: bool = True) 
     return parameters
 
 
-def _get_parameters_by_path(ssm_client: Any, path: str, recursive: bool = True) -> Dict[str, str]:
+def _get_parameters_by_path(
+    ssm_client: Any, path: str, recursive: bool = True
+) -> Dict[str, str]:
     """
     Get all SSM parameters under a path.
 
@@ -293,7 +301,12 @@ def _get_parameters_by_path(ssm_client: Any, path: str, recursive: bool = True) 
 
     while True:
         # Build request parameters
-        params = {"Path": path, "Recursive": recursive, "WithDecryption": True, "MaxResults": 10}
+        params = {
+            "Path": path,
+            "Recursive": recursive,
+            "WithDecryption": True,
+            "MaxResults": 10,
+        }
 
         if next_token:
             params["NextToken"] = next_token

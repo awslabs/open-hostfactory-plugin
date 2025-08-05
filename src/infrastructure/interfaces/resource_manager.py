@@ -37,10 +37,14 @@ class ResourceManagerPort(Protocol):
         """Get detailed information about a cloud resource."""
         ...
 
-    def list_resources(self, resource_type: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_resources(
+        self, resource_type: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """List cloud resources, optionally filtered by type."""
         ...
 
-    def update_resource_tags(self, resource_id: ResourceId, tags: Dict[str, str]) -> bool:
+    def update_resource_tags(
+        self, resource_id: ResourceId, tags: Dict[str, str]
+    ) -> bool:
         """Update tags on a cloud resource."""
         ...

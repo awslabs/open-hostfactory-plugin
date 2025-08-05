@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
@@ -15,12 +13,11 @@ from src.application.dto.queries import (
 from src.application.dto.responses import MachineHealthDTO, RequestSummaryDTO
 from src.domain.base import UnitOfWorkFactory
 from src.domain.base.exceptions import EntityNotFoundError
-from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 
 # Exception handling infrastructure
 from src.domain.machine.value_objects import MachineStatus
 from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
-from src.infrastructure.utilities.factories.repository_factory import UnitOfWork
 
 
 @query_handler(GetActiveMachineCountQuery)
@@ -28,7 +25,10 @@ class GetActiveMachineCountHandler(BaseQueryHandler[GetActiveMachineCountQuery, 
     """Handler for getting count of active machines."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get active machine count handler.
@@ -66,11 +66,16 @@ class GetActiveMachineCountHandler(BaseQueryHandler[GetActiveMachineCountQuery, 
 
 
 @query_handler(GetRequestSummaryQuery)
-class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestSummaryDTO]):
+class GetRequestSummaryHandler(
+    BaseQueryHandler[GetRequestSummaryQuery, RequestSummaryDTO]
+):
     """Handler for getting request summary information."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get request summary handler.
@@ -99,8 +104,12 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
 
                 # Calculate summary statistics
                 total_machines = len(machines)
-                running_machines = len([m for m in machines if m.status == MachineStatus.RUNNING])
-                failed_machines = len([m for m in machines if m.status == MachineStatus.FAILED])
+                running_machines = len(
+                    [m for m in machines if m.status == MachineStatus.RUNNING]
+                )
+                failed_machines = len(
+                    [m for m in machines if m.status == MachineStatus.FAILED]
+                )
 
                 # Create summary DTO
                 summary = RequestSummaryDTO(
@@ -130,7 +139,9 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
 
 
 @query_handler(GetMachineHealthQuery)
-class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHealthDTO]):
+class GetMachineHealthHandler(
+    BaseQueryHandler[GetMachineHealthQuery, MachineHealthDTO]
+):
     """Handler for getting machine health information."""
 
     def __init__(
@@ -172,7 +183,9 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                 try:
                     # Try to get health from provisioning service
                     if hasattr(self.provisioning_port, "get_machine_health"):
-                        health_info = self.provisioning_port.get_machine_health(machine.provider_id)
+                        health_info = self.provisioning_port.get_machine_health(
+                            machine.provider_id
+                        )
                         health_status = health_info.get("status", "unknown")
                         health_details = health_info.get("details", {})
                         last_health_check = health_info.get("timestamp")
@@ -180,7 +193,10 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                         # Fallback: derive health from machine status
                         if machine.status == MachineStatus.RUNNING:
                             health_status = "healthy"
-                        elif machine.status in [MachineStatus.FAILED, MachineStatus.TERMINATED]:
+                        elif machine.status in [
+                            MachineStatus.FAILED,
+                            MachineStatus.TERMINATED,
+                        ]:
                             health_status = "unhealthy"
                         else:
                             health_status = "unknown"

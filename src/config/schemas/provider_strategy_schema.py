@@ -56,7 +56,9 @@ class HealthCheckConfig(BaseModel):
     enabled: bool = Field(True, description="Enable health checks for this provider")
     interval: int = Field(300, description="Health check interval in seconds")
     timeout: int = Field(30, description="Health check timeout in seconds")
-    retry_count: int = Field(3, description="Number of retries for failed health checks")
+    retry_count: int = Field(
+        3, description="Number of retries for failed health checks"
+    )
 
     @field_validator("interval")
     @classmethod
@@ -203,9 +205,12 @@ class ProviderConfig(BaseModel):
     default_provider_instance: Optional[str] = Field(
         None, description="Default provider instance for templates"
     )
-    health_check_interval: int = Field(300, description="Global health check interval in seconds")
+    health_check_interval: int = Field(
+        300, description="Global health check interval in seconds"
+    )
     circuit_breaker: CircuitBreakerConfig = Field(
-        default_factory=CircuitBreakerConfig, description="Circuit breaker configuration"
+        default_factory=CircuitBreakerConfig,
+        description="Circuit breaker configuration",
     )
 
     # Provider defaults and instances
@@ -331,7 +336,9 @@ class ExtendedProviderConfig(BaseModel):
     """Extended provider configuration with integrated support."""
 
     # Support both legacy and new formats
-    config: Union[ProviderConfig, Dict[str, Any]] = Field(..., description="Provider configuration")
+    config: Union[ProviderConfig, Dict[str, Any]] = Field(
+        ..., description="Provider configuration"
+    )
 
     @model_validator(mode="before")
     def parse_provider_config(cls, values: Dict[str, Any]) -> Dict[str, Any]:

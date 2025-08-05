@@ -1,6 +1,6 @@
 """Example: ProviderRegistry using EnhancedBaseRegistry (MULTI_CHOICE mode)."""
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from .enhanced_base_registry import BaseRegistration, EnhancedBaseRegistry, RegistryMode
 
@@ -109,7 +109,11 @@ def example_usage():
 
     # Register provider types
     registry.register(
-        "aws", aws_strategy_factory, aws_config_factory, aws_resolver_factory, aws_validator_factory
+        "aws",
+        aws_strategy_factory,
+        aws_config_factory,
+        aws_resolver_factory,
+        aws_validator_factory,
     )
     registry.register("azure", azure_strategy_factory, azure_config_factory)
 

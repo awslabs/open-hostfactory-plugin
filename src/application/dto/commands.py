@@ -8,7 +8,6 @@ from pydantic import BaseModel, ConfigDict
 
 from src.application.dto.base import BaseCommand
 from src.application.interfaces.command_query import Command
-from src.domain.machine.value_objects import MachineStatus
 from src.domain.request.value_objects import RequestStatus
 
 

@@ -3,7 +3,6 @@
 from typing import Optional
 
 from src.domain.base.dependency_injection import injectable
-from src.domain.base.ports import LoggingPort
 from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
 
 # Import new simplified repositories
@@ -54,15 +53,24 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
 
         # Create storage strategies for each repository
         machine_strategy = DynamoDBStorageStrategy(
-            aws_client=aws_client, region=region, table_name=machine_table, profile=profile
+            aws_client=aws_client,
+            region=region,
+            table_name=machine_table,
+            profile=profile,
         )
 
         request_strategy = DynamoDBStorageStrategy(
-            aws_client=aws_client, region=region, table_name=request_table, profile=profile
+            aws_client=aws_client,
+            region=region,
+            table_name=request_table,
+            profile=profile,
         )
 
         template_strategy = DynamoDBStorageStrategy(
-            aws_client=aws_client, region=region, table_name=template_table, profile=profile
+            aws_client=aws_client,
+            region=region,
+            table_name=template_table,
+            profile=profile,
         )
 
         # Create repositories using simplified implementations
@@ -111,7 +119,9 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
             self.request_repository.storage_strategy.commit_transaction()
             self.template_repository.storage_strategy.commit_transaction()
 
-            self._self._logger.debug("DynamoDB transaction committed on all repositories")
+            self._self._logger.debug(
+                "DynamoDB transaction committed on all repositories"
+            )
         except Exception as e:
             self._self._logger.error(f"Failed to commit DynamoDB transaction: {e}")
             raise
@@ -124,7 +134,9 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
             self.request_repository.storage_strategy.rollback_transaction()
             self.template_repository.storage_strategy.rollback_transaction()
 
-            self._self._logger.debug("DynamoDB transaction rolled back on all repositories")
+            self._self._logger.debug(
+                "DynamoDB transaction rolled back on all repositories"
+            )
         except Exception as e:
             self._self._logger.error(f"Failed to rollback DynamoDB transaction: {e}")
             raise

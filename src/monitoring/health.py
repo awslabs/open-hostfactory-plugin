@@ -41,7 +41,9 @@ class HealthStatus:
 class HealthCheck:
     """Health check implementation."""
 
-    def __init__(self, config: ConfigurationManager, aws_client: Optional[AWSClient] = None):
+    def __init__(
+        self, config: ConfigurationManager, aws_client: Optional[AWSClient] = None
+    ):
         """Initialize health check."""
         self.config = config.get_config()
         self.aws_client = aws_client
@@ -99,7 +101,10 @@ class HealthCheck:
         except Exception as e:
             logger.error(f"Health check {name} failed: {e}")
             return HealthStatus(
-                name=name, status="unhealthy", details={"error": str(e)}, dependencies=[]
+                name=name,
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=[],
             )
 
     def run_all_checks(self) -> Dict[str, HealthStatus]:
@@ -139,7 +144,10 @@ class HealthCheck:
                     health_file = self.health_dir / "health.json"
                     with health_file.open("w") as f:
                         json.dump(
-                            {name: status.to_dict() for name, status in results.items()},
+                            {
+                                name: status.to_dict()
+                                for name, status in results.items()
+                            },
                             f,
                             indent=2,
                         )
@@ -205,7 +213,10 @@ class HealthCheck:
             )
         except Exception as e:
             return HealthStatus(
-                name="system", status="unhealthy", details={"error": str(e)}, dependencies=["os"]
+                name="system",
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=["os"],
             )
 
     def _check_disk_health(self) -> HealthStatus:
@@ -241,7 +252,10 @@ class HealthCheck:
             )
         except Exception as e:
             return HealthStatus(
-                name="disk", status="unhealthy", details={"error": str(e)}, dependencies=["os"]
+                name="disk",
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=["os"],
             )
 
     def _check_aws_health(self) -> HealthStatus:
@@ -270,7 +284,10 @@ class HealthCheck:
             )
         except Exception as e:
             return HealthStatus(
-                name="aws", status="unhealthy", details={"error": str(e)}, dependencies=["aws"]
+                name="aws",
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=["aws"],
             )
 
     def _check_ec2_health(self) -> HealthStatus:
@@ -287,7 +304,9 @@ class HealthCheck:
             # Check EC2 service
             response = self.aws_client.ec2_client.describe_instances(MaxResults=5)
 
-            instance_count = sum(len(r["Instances"]) for r in response.get("Reservations", []))
+            instance_count = sum(
+                len(r["Instances"]) for r in response.get("Reservations", [])
+            )
 
             return HealthStatus(
                 name="ec2",
@@ -407,7 +426,9 @@ class HealthCheck:
 
             # List tables
             tables = self.aws_client.session.client("dynamodb").list_tables()
-            project_tables = [t for t in tables["TableNames"] if t.startswith(table_prefix)]
+            project_tables = [
+                t for t in tables["TableNames"] if t.startswith(table_prefix)
+            ]
 
             return HealthStatus(
                 name="database",
@@ -431,7 +452,11 @@ class HealthCheck:
         """Check overall application health."""
         try:
             # Run all other checks
-            results = {name: self.run_check(name) for name in self.checks if name != "application"}
+            results = {
+                name: self.run_check(name)
+                for name in self.checks
+                if name != "application"
+            }
 
             # Count status types
             status_counts = {"healthy": 0, "degraded": 0, "unhealthy": 0, "unknown": 0}

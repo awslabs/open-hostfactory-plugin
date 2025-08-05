@@ -9,7 +9,9 @@ class TemplateDefaultsPort(ABC):
 
     @abstractmethod
     def resolve_template_defaults(
-        self, template_dict: Dict[str, Any], provider_instance_name: Optional[str] = None
+        self,
+        template_dict: Dict[str, Any],
+        provider_instance_name: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Apply hierarchical defaults to a template dictionary.
@@ -21,11 +23,12 @@ class TemplateDefaultsPort(ABC):
         Returns:
             Template dictionary with defaults applied
         """
-        pass
 
     @abstractmethod
     def resolve_provider_api_default(
-        self, template_dict: Dict[str, Any], provider_instance_name: Optional[str] = None
+        self,
+        template_dict: Dict[str, Any],
+        provider_instance_name: Optional[str] = None,
     ) -> str:
         """
         Resolve provider_api default using hierarchical configuration.
@@ -37,7 +40,6 @@ class TemplateDefaultsPort(ABC):
         Returns:
             Resolved provider_api value
         """
-        pass
 
     @abstractmethod
     def get_effective_template_defaults(
@@ -52,4 +54,3 @@ class TemplateDefaultsPort(ABC):
         Returns:
             Merged template defaults
         """
-        pass

@@ -4,12 +4,6 @@ from typing import Any, Dict, List
 
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
-from src.infrastructure.interfaces.instance_manager import (
-    Instance,
-    InstanceSpec,
-    InstanceState,
-    InstanceStatusResponse,
-)
 from src.providers.aws.configuration.config import AWSProviderConfig
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.dry_run_adapter import aws_dry_run_context
@@ -19,13 +13,17 @@ from src.providers.aws.infrastructure.dry_run_adapter import aws_dry_run_context
 class AWSInstanceManager:
     """AWS implementation of InstanceManagerPort."""
 
-    def __init__(self, aws_client: AWSClient, config: AWSProviderConfig, logger: LoggingPort):
+    def __init__(
+        self, aws_client: AWSClient, config: AWSProviderConfig, logger: LoggingPort
+    ):
         """Initialize AWS instance manager."""
         self._aws_client = aws_client
         self._config = config
         self._logger = logger
 
-    def create_instances(self, template_config: Dict[str, Any], count: int) -> List[str]:
+    def create_instances(
+        self, template_config: Dict[str, Any], count: int
+    ) -> List[str]:
         """Create instances based on template configuration."""
         with aws_dry_run_context():
             try:
@@ -59,7 +57,9 @@ class AWSInstanceManager:
                 security_groups = template_config.get("security_group_ids")
                 if security_groups:
                     params["SecurityGroupIds"] = (
-                        security_groups if isinstance(security_groups, list) else [security_groups]
+                        security_groups
+                        if isinstance(security_groups, list)
+                        else [security_groups]
                     )
 
                 # Add key name if specified
@@ -71,11 +71,16 @@ class AWSInstanceManager:
                 response = ec2_client.run_instances(**params)
 
                 # Extract instance IDs
-                instance_ids = [instance["InstanceId"] for instance in response["Instances"]]
+                instance_ids = [
+                    instance["InstanceId"] for instance in response["Instances"]
+                ]
 
                 # Add tags if specified
                 if template_config.get("tags") and instance_ids:
-                    tags = [{"Key": k, "Value": v} for k, v in template_config["tags"].items()]
+                    tags = [
+                        {"Key": k, "Value": v}
+                        for k, v in template_config["tags"].items()
+                    ]
                     ec2_client.create_tags(Resources=instance_ids, Tags=tags)
 
                 return instance_ids

@@ -82,7 +82,9 @@ class ResourceManagerPort(Protocol):
     to this interface.
     """
 
-    async def provision_resources(self, specification: ResourceSpecification) -> ResourceAllocation:
+    async def provision_resources(
+        self, specification: ResourceSpecification
+    ) -> ResourceAllocation:
         """
         Provision resources according to specification.
 
@@ -177,7 +179,6 @@ class ResourceManagerDomainService(ABC):
         This operation ensures that either all resources are provisioned
         successfully or none are (atomic operation).
         """
-        pass
 
     @abstractmethod
     async def migrate_resources(
@@ -189,4 +190,3 @@ class ResourceManagerDomainService(ABC):
         Complex operation that involves provisioning in target region,
         data migration, and cleanup of source resources.
         """
-        pass

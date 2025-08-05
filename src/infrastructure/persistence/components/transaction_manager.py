@@ -121,7 +121,9 @@ class MemoryTransactionManager(TransactionManager):
             self.rollback_operations.clear()
 
     def add_operation(
-        self, operation: Callable[[], None], rollback_operation: Optional[Callable[[], None]] = None
+        self,
+        operation: Callable[[], None],
+        rollback_operation: Optional[Callable[[], None]] = None,
     ):
         """Add operation to transaction."""
         if self.state != TransactionState.ACTIVE:

@@ -21,10 +21,18 @@ class RepositoryProtocol(Protocol[T]):
     enforce specific parameter names, only their types.
     """
 
-    def save(self, obj: T) -> None: ...
-    def find_by_id(self, id_value: Any) -> Optional[T]: ...
-    def delete(self, id_value: Any) -> None: ...
-    def find_all(self) -> List[T]: ...
+    def save(self, obj: T) -> None: 
+        """Save an entity."""
+        ...
+    def find_by_id(self, id_value: Any) -> Optional[T]: 
+        """Find entity by ID."""
+        ...
+    def delete(self, id_value: Any) -> None: 
+        """Delete entity by ID."""
+        ...
+    def find_all(self) -> List[T]: 
+        """Find all entities."""
+        ...
 
 
 class Repository(Generic[T], ABC):
@@ -99,6 +107,7 @@ class UnitOfWork(Protocol):
         """Register a removed entity."""
         ...
 
+    @abstractmethod
     def begin(self) -> None:
         """Begin a new transaction."""
 
@@ -109,18 +118,6 @@ class UnitOfWork(Protocol):
     @abstractmethod
     def rollback(self) -> None:
         """Rollback the current transaction."""
-
-    def __enter__(self) -> "UnitOfWork":
-        """Enter context manager."""
-        self.begin()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Exit context manager."""
-        if exc_type is not None:
-            self.rollback()
-        else:
-            self.commit()
 
     @property
     @abstractmethod

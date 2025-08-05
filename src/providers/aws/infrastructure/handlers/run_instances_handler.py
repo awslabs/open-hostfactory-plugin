@@ -39,9 +39,7 @@ from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
 from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSEntityNotFoundError,
     AWSInfrastructureError,
-    AWSValidationError,
 )
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.infrastructure.launch_template.manager import (
@@ -76,18 +74,27 @@ class RunInstancesHandler(AWSHandler):
         """
         # Use unified base class initialization
         super().__init__(
-            aws_client, logger, aws_ops, launch_template_manager, request_adapter, error_handler
+            aws_client,
+            logger,
+            aws_ops,
+            launch_template_manager,
+            request_adapter,
+            error_handler,
         )
 
     @handle_infrastructure_exceptions(context="run_instances_creation")
-    def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
+    def acquire_hosts(
+        self, request: Request, aws_template: AWSTemplate
+    ) -> Dict[str, Any]:
         """
         Create EC2 instances using RunInstances to acquire hosts.
         Returns structured result with resource IDs and instance data.
         """
         try:
             resource_id = self.aws_ops.execute_with_standard_error_handling(
-                operation=lambda: self._create_instances_internal(request, aws_template),
+                operation=lambda: self._create_instances_internal(
+                    request, aws_template
+                ),
                 operation_name="run EC2 instances",
                 context="RunInstances",
             )
@@ -104,16 +111,25 @@ class RunInstancesHandler(AWSHandler):
                 "provider_data": {"resource_type": "run_instances"},
             }
         except Exception as e:
-            return {"success": False, "resource_ids": [], "instances": [], "error_message": str(e)}
+            return {
+                "success": False,
+                "resource_ids": [],
+                "instances": [],
+                "error_message": str(e),
+            }
 
-    def _create_instances_internal(self, request: Request, aws_template: AWSTemplate) -> str:
-        """Internal method for RunInstances creation with pure business logic."""
+    def _create_instances_internal(
+        self, request: Request, aws_template: AWSTemplate
+    ) -> str:
+        """Create RunInstances with pure business logic."""
         # Validate prerequisites
         self._validate_prerequisites(aws_template)
 
         # Create launch template using the new manager
-        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
-            aws_template, request
+        launch_template_result = (
+            self.launch_template_manager.create_or_update_launch_template(
+                aws_template, request
+            )
         )
 
         # Store launch template info in request (if request has this method)
@@ -132,12 +148,16 @@ class RunInstancesHandler(AWSHandler):
 
         # Execute RunInstances API call with circuit breaker for critical operation
         response = self._retry_with_backoff(
-            self.aws_client.ec2_client.run_instances, operation_type="critical", **run_params
+            self.aws_client.ec2_client.run_instances,
+            operation_type="critical",
+            **run_params,
         )
 
         # Extract reservation ID and instance IDs from response
         reservation_id = response.get("ReservationId")
-        instance_ids = [instance["InstanceId"] for instance in response.get("Instances", [])]
+        instance_ids = [
+            instance["InstanceId"] for instance in response.get("Instances", [])
+        ]
 
         if not instance_ids:
             raise AWSInfrastructureError("No instances were created by RunInstances")
@@ -243,7 +263,9 @@ class RunInstancesHandler(AWSHandler):
 
         # Add template tags if any
         if aws_template.tags:
-            instance_tags = [{"Key": k, "Value": v} for k, v in aws_template.tags.items()]
+            instance_tags = [
+                {"Key": k, "Value": v} for k, v in aws_template.tags.items()
+            ]
             tag_specifications[0]["Tags"].extend(instance_tags)
 
         params["TagSpecifications"] = tag_specifications
@@ -273,10 +295,16 @@ class RunInstancesHandler(AWSHandler):
             return self._get_instance_details(instance_ids)
 
         except Exception as e:
-            self._logger.error(f"Unexpected error checking RunInstances status: {str(e)}")
-            raise AWSInfrastructureError(f"Failed to check RunInstances status: {str(e)}")
+            self._logger.error(
+                f"Unexpected error checking RunInstances status: {str(e)}"
+            )
+            raise AWSInfrastructureError(
+                f"Failed to check RunInstances status: {str(e)}"
+            )
 
-    def _find_instances_by_resource_ids(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
+    def _find_instances_by_resource_ids(
+        self, resource_ids: List[str]
+    ) -> List[Dict[str, Any]]:
         """Find instances using resource IDs (reservation IDs for RunInstances)."""
         try:
             all_instances = []
@@ -336,9 +364,13 @@ class RunInstancesHandler(AWSHandler):
 
         except Exception as e:
             self._logger.error(f"Failed to find instances by resource IDs: {str(e)}")
-            raise AWSInfrastructureError(f"Failed to find instances by resource IDs: {str(e)}")
+            raise AWSInfrastructureError(
+                f"Failed to find instances by resource IDs: {str(e)}"
+            )
 
-    def _find_instances_by_tags_fallback(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
+    def _find_instances_by_tags_fallback(
+        self, resource_ids: List[str]
+    ) -> List[Dict[str, Any]]:
         """Fallback method to find instances by tags when reservation-id filter is not supported."""
         try:
             self._logger.info(
@@ -386,7 +418,9 @@ class RunInstancesHandler(AWSHandler):
                             f"FALLBACK: Added instance {instance_data['InstanceId']} with IP {instance_data['PrivateIpAddress']}"
                         )
                 else:
-                    self._logger.info(f"FALLBACK: No match for reservation {reservation_id}")
+                    self._logger.info(
+                        f"FALLBACK: No match for reservation {reservation_id}"
+                    )
 
             self._logger.info(
                 f"FALLBACK: Returning {len(matching_instances)} instances for resource IDs: {resource_ids}"
@@ -394,7 +428,9 @@ class RunInstancesHandler(AWSHandler):
             return matching_instances
 
         except Exception as e:
-            self._logger.error(f"FALLBACK: Fallback method failed to find instances: {e}")
+            self._logger.error(
+                f"FALLBACK: Fallback method failed to find instances: {e}"
+            )
             # Return empty list rather than raising exception to allow graceful degradation
             return []
 
@@ -415,7 +451,9 @@ class RunInstancesHandler(AWSHandler):
                 instance_ids = request.metadata["instance_ids"]
 
             if not instance_ids:
-                self._logger.warning(f"No instance IDs found for request {request.request_id}")
+                self._logger.warning(
+                    f"No instance IDs found for request {request.request_id}"
+                )
                 return
 
             # Use consolidated AWS operations utility for instance termination
@@ -426,8 +464,14 @@ class RunInstancesHandler(AWSHandler):
 
         except ClientError as e:
             error = self._convert_client_error(e)
-            self._logger.error(f"Failed to release RunInstances resources: {str(error)}")
+            self._logger.error(
+                f"Failed to release RunInstances resources: {str(error)}"
+            )
             raise error
         except Exception as e:
-            self._logger.error(f"Unexpected error releasing RunInstances resources: {str(e)}")
-            raise AWSInfrastructureError(f"Failed to release RunInstances resources: {str(e)}")
+            self._logger.error(
+                f"Unexpected error releasing RunInstances resources: {str(e)}"
+            )
+            raise AWSInfrastructureError(
+                f"Failed to release RunInstances resources: {str(e)}"
+            )

@@ -15,7 +15,9 @@ class DynamoDBClientManager(ResourceManager):
     Handles AWS client initialization, session management, and error handling.
     """
 
-    def __init__(self, aws_client=None, region: str = "us-east-1", profile: Optional[str] = None):
+    def __init__(
+        self, aws_client=None, region: str = "us-east-1", profile: Optional[str] = None
+    ):
         """
         Initialize DynamoDB client manager.
 
@@ -88,7 +90,9 @@ class DynamoDBClientManager(ResourceManager):
         try:
             # Create session
             if self.profile:
-                session = boto3.Session(profile_name=self.profile, region_name=self.region)
+                session = boto3.Session(
+                    profile_name=self.profile, region_name=self.region
+                )
             else:
                 session = boto3.Session(region_name=self.region)
 
@@ -214,7 +218,9 @@ class DynamoDBClientManager(ResourceManager):
             self.logger.error(f"Failed to put item to {table_name}: {e}")
             return False
 
-    def get_item(self, table_name: str, key: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def get_item(
+        self, table_name: str, key: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         """
         Get item from DynamoDB table.
 
@@ -334,9 +340,13 @@ class DynamoDBClientManager(ResourceManager):
         elif error_code == "ValidationException":
             self.logger.error(f"{operation} failed: Validation error - {error_message}")
         elif error_code == "ConditionalCheckFailedException":
-            self.logger.error(f"{operation} failed: Conditional check failed - {error_message}")
+            self.logger.error(
+                f"{operation} failed: Conditional check failed - {error_message}"
+            )
         elif error_code == "ProvisionedThroughputExceededException":
-            self.logger.error(f"{operation} failed: Throughput exceeded - {error_message}")
+            self.logger.error(
+                f"{operation} failed: Throughput exceeded - {error_message}"
+            )
         else:
             self.logger.error(f"{operation} failed: {error_code} - {error_message}")
 

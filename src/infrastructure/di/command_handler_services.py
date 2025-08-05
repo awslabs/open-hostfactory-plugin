@@ -37,7 +37,6 @@ def _register_machine_command_handlers(container: DIContainer) -> None:
 
     # All machine command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_request_command_handlers(container: DIContainer) -> None:
@@ -45,7 +44,6 @@ def _register_request_command_handlers(container: DIContainer) -> None:
 
     # All request command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_template_command_handlers(container: DIContainer) -> None:
@@ -53,7 +51,6 @@ def _register_template_command_handlers(container: DIContainer) -> None:
 
     # All template command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_system_command_handlers(container: DIContainer) -> None:
@@ -61,7 +58,6 @@ def _register_system_command_handlers(container: DIContainer) -> None:
 
     # All system command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_provider_command_handlers(container: DIContainer) -> None:
@@ -69,7 +65,6 @@ def _register_provider_command_handlers(container: DIContainer) -> None:
 
     # All provider command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_cleanup_command_handlers(container: DIContainer) -> None:
@@ -77,7 +72,6 @@ def _register_cleanup_command_handlers(container: DIContainer) -> None:
 
     # All cleanup command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass
 
 
 def register_command_handlers_with_bus(container: DIContainer) -> None:
@@ -100,15 +94,18 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
         )
 
         command_bus.register(
-            ConvertMachineStatusCommand, container.get(ConvertMachineStatusCommandHandler)
+            ConvertMachineStatusCommand,
+            container.get(ConvertMachineStatusCommandHandler),
         )
 
         command_bus.register(
-            ConvertBatchMachineStatusCommand, container.get(ConvertBatchMachineStatusCommandHandler)
+            ConvertBatchMachineStatusCommand,
+            container.get(ConvertBatchMachineStatusCommandHandler),
         )
 
         command_bus.register(
-            ValidateProviderStateCommand, container.get(ValidateProviderStateCommandHandler)
+            ValidateProviderStateCommand,
+            container.get(ValidateProviderStateCommandHandler),
         )
 
         command_bus.register(
@@ -116,7 +113,8 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
         )
 
         command_bus.register(
-            CleanupMachineResourcesCommand, container.get(CleanupMachineResourcesCommandHandler)
+            CleanupMachineResourcesCommand,
+            container.get(CleanupMachineResourcesCommandHandler),
         )
 
         # Register request command handlers
@@ -135,7 +133,9 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
                 UpdateRequestStatusCommand,
             )
 
-            command_bus.register(CreateRequestCommand, container.get(CreateMachineRequestHandler))
+            command_bus.register(
+                CreateRequestCommand, container.get(CreateMachineRequestHandler)
+            )
 
             command_bus.register(
                 CreateReturnRequestCommand, container.get(CreateReturnRequestHandler)
@@ -145,7 +145,9 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
                 UpdateRequestStatusCommand, container.get(UpdateRequestStatusHandler)
             )
 
-            command_bus.register(CancelRequestCommand, container.get(CancelRequestHandler))
+            command_bus.register(
+                CancelRequestCommand, container.get(CancelRequestHandler)
+            )
 
             # Register CleanupOldRequestsCommand if handler exists
             try:
@@ -174,4 +176,3 @@ def _register_cli_command_handlers(container: DIContainer) -> None:
 
     # All CLI command handlers are now automatically discovered and registered
     # via @command_handler decorators through the Handler Discovery System
-    pass

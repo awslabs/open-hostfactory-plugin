@@ -16,7 +16,9 @@ if TYPE_CHECKING:
 class TemplateConfigurationAdapter(TemplateConfigurationPort):
     """Adapter implementing TemplateConfigurationPort using unified template configuration manager."""
 
-    def __init__(self, template_manager: TemplateConfigurationManager, logger: LoggingPort):
+    def __init__(
+        self, template_manager: TemplateConfigurationManager, logger: LoggingPort
+    ):
         """
         Initialize adapter with template configuration manager and logger.
 
@@ -89,7 +91,12 @@ class TemplateConfigurationAdapter(TemplateConfigurationPort):
         provider_api = config.get("provider_api", "")
 
         # Map provider APIs to provider types
-        if provider_api in ["EC2Fleet", "SpotFleet", "RunInstances", "AutoScalingGroup"]:
+        if provider_api in [
+            "EC2Fleet",
+            "SpotFleet",
+            "RunInstances",
+            "AutoScalingGroup",
+        ]:
             return "aws"
 
         # Check for AWS-specific fields
@@ -129,7 +136,9 @@ class TemplateConfigurationAdapter(TemplateConfigurationPort):
             List of Template domain objects
         """
         all_templates = self._template_manager.get_all_templates()
-        return [t for t in all_templates if getattr(t, "provider_api", None) == provider_api]
+        return [
+            t for t in all_templates if getattr(t, "provider_api", None) == provider_api
+        ]
 
     def clear_cache(self) -> None:
         """Clear template cache."""
@@ -150,7 +159,7 @@ def create_template_configuration_adapter(
     template_manager: TemplateConfigurationManager, logger: Optional[LoggingPort] = None
 ) -> TemplateConfigurationAdapter:
     """
-    Factory function to create TemplateConfigurationAdapter.
+    Create TemplateConfigurationAdapter.
 
     Args:
         template_manager: Template configuration manager

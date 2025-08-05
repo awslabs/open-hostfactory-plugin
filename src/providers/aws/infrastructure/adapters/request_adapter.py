@@ -70,7 +70,8 @@ class AWSRequestAdapter(RequestAdapterPort):
                         {
                             "ResourceType": "instance",
                             "Tags": [
-                                {"Key": key, "Value": value} for key, value in instance_tags.items()
+                                {"Key": key, "Value": value}
+                                for key, value in instance_tags.items()
                             ]
                             + [
                                 {"Key": "Name", "Value": f"hf-{request.request_id}"},
@@ -94,7 +95,9 @@ class AWSRequestAdapter(RequestAdapterPort):
 
             return {
                 "launch_template_id": response["LaunchTemplate"]["LaunchTemplateId"],
-                "launch_template_name": response["LaunchTemplate"]["LaunchTemplateName"],
+                "launch_template_name": response["LaunchTemplate"][
+                    "LaunchTemplateName"
+                ],
                 "version_number": response["LaunchTemplate"]["LatestVersionNumber"],
                 "created_time": response["LaunchTemplate"]["CreateTime"].isoformat(),
             }
@@ -129,7 +132,10 @@ class AWSRequestAdapter(RequestAdapterPort):
 
         except Exception as e:
             self._logger.error(f"Failed to get request status: {str(e)}")
-            return {"status": "error", "message": f"Failed to get request status: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to get request status: {str(e)}",
+            }
 
     def _get_acquire_request_status(self, request: Request) -> Dict[str, Any]:
         """
@@ -150,7 +156,10 @@ class AWSRequestAdapter(RequestAdapterPort):
         elif request.provider_api == "RunInstances":
             return self._get_run_instances_status(request)
         else:
-            return {"status": "unknown", "message": f"Unknown provider API: {request.provider_api}"}
+            return {
+                "status": "unknown",
+                "message": f"Unknown provider API: {request.provider_api}",
+            }
 
     def _get_ec2_fleet_status(self, request: Request) -> Dict[str, Any]:
         """
@@ -163,10 +172,15 @@ class AWSRequestAdapter(RequestAdapterPort):
             Dictionary with status information
         """
         try:
-            response = self._aws_client.ec2_client.describe_fleets(FleetIds=[request.resource_id])
+            response = self._aws_client.ec2_client.describe_fleets(
+                FleetIds=[request.resource_id]
+            )
 
             if not response["Fleets"]:
-                return {"status": "error", "message": f"Fleet not found: {request.resource_id}"}
+                return {
+                    "status": "error",
+                    "message": f"Fleet not found: {request.resource_id}",
+                }
 
             fleet = response["Fleets"][0]
 
@@ -177,7 +191,9 @@ class AWSRequestAdapter(RequestAdapterPort):
 
             return {
                 "status": fleet["FleetState"],
-                "target_capacity": fleet["TargetCapacitySpecification"]["TotalTargetCapacity"],
+                "target_capacity": fleet["TargetCapacitySpecification"][
+                    "TotalTargetCapacity"
+                ],
                 "fulfilled_capacity": (
                     fleet["FulfilledCapacity"] if "FulfilledCapacity" in fleet else 0
                 ),
@@ -195,7 +211,10 @@ class AWSRequestAdapter(RequestAdapterPort):
 
         except Exception as e:
             self._logger.error(f"Failed to get EC2 Fleet status: {str(e)}")
-            return {"status": "error", "message": f"Failed to get EC2 Fleet status: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to get EC2 Fleet status: {str(e)}",
+            }
 
     def _get_spot_fleet_status(self, request: Request) -> Dict[str, Any]:
         """
@@ -221,8 +240,10 @@ class AWSRequestAdapter(RequestAdapterPort):
             fleet = response["SpotFleetRequestConfigs"][0]
 
             # Get instance information
-            instances_response = self._aws_client.ec2_client.describe_spot_fleet_instances(
-                SpotFleetRequestId=request.resource_id
+            instances_response = (
+                self._aws_client.ec2_client.describe_spot_fleet_instances(
+                    SpotFleetRequestId=request.resource_id
+                )
             )
 
             return {
@@ -243,7 +264,10 @@ class AWSRequestAdapter(RequestAdapterPort):
 
         except Exception as e:
             self._logger.error(f"Failed to get Spot Fleet status: {str(e)}")
-            return {"status": "error", "message": f"Failed to get Spot Fleet status: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to get Spot Fleet status: {str(e)}",
+            }
 
     def _get_asg_status(self, request: Request) -> Dict[str, Any]:
         """
@@ -304,7 +328,9 @@ class AWSRequestAdapter(RequestAdapterPort):
 
             instance_ids = request.resource_id.split(",")
 
-            response = self._aws_client.ec2_client.describe_instances(InstanceIds=instance_ids)
+            response = self._aws_client.ec2_client.describe_instances(
+                InstanceIds=instance_ids
+            )
 
             instances = []
             for reservation in response["Reservations"]:
@@ -319,11 +345,17 @@ class AWSRequestAdapter(RequestAdapterPort):
                         }
                     )
 
-            return {"status": "active" if instances else "error", "instances": instances}
+            return {
+                "status": "active" if instances else "error",
+                "instances": instances,
+            }
 
         except Exception as e:
             self._logger.error(f"Failed to get RunInstances status: {str(e)}")
-            return {"status": "error", "message": f"Failed to get RunInstances status: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to get RunInstances status: {str(e)}",
+            }
 
     def _get_return_request_status(self, request: Request) -> Dict[str, Any]:
         """
@@ -342,7 +374,9 @@ class AWSRequestAdapter(RequestAdapterPort):
 
             instance_ids = request.resource_id.split(",")
 
-            response = self._aws_client.ec2_client.describe_instances(InstanceIds=instance_ids)
+            response = self._aws_client.ec2_client.describe_instances(
+                InstanceIds=instance_ids
+            )
 
             instances = []
             for reservation in response["Reservations"]:
@@ -356,7 +390,9 @@ class AWSRequestAdapter(RequestAdapterPort):
                     )
 
             # Check if all instances are terminated
-            all_terminated = all(instance["state"] == "terminated" for instance in instances)
+            all_terminated = all(
+                instance["state"] == "terminated" for instance in instances
+            )
 
             return {
                 "status": "complete" if all_terminated else "in_progress",
@@ -365,7 +401,10 @@ class AWSRequestAdapter(RequestAdapterPort):
 
         except Exception as e:
             self._logger.error(f"Failed to get return request status: {str(e)}")
-            return {"status": "error", "message": f"Failed to get return request status: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to get return request status: {str(e)}",
+            }
 
     def terminate_instances(self, instance_ids: List[str]) -> Dict[str, Any]:
         """
@@ -378,7 +417,9 @@ class AWSRequestAdapter(RequestAdapterPort):
             Dictionary with termination results
         """
         try:
-            response = self._aws_client.ec2_client.terminate_instances(InstanceIds=instance_ids)
+            response = self._aws_client.ec2_client.terminate_instances(
+                InstanceIds=instance_ids
+            )
 
             return {
                 "status": "success",
@@ -394,7 +435,10 @@ class AWSRequestAdapter(RequestAdapterPort):
 
         except Exception as e:
             self._logger.error(f"Failed to terminate instances: {str(e)}")
-            return {"status": "error", "message": f"Failed to terminate instances: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to terminate instances: {str(e)}",
+            }
 
     def cancel_fleet_request(self, request: Request) -> Dict[str, Any]:
         """
@@ -415,10 +459,14 @@ class AWSRequestAdapter(RequestAdapterPort):
                 return {
                     "status": "success",
                     "successful_fleets": [
-                        fleet["FleetId"] for fleet in response["SuccessfulFleetDeletions"]
+                        fleet["FleetId"]
+                        for fleet in response["SuccessfulFleetDeletions"]
                     ],
                     "unsuccessful_fleets": [
-                        {"fleet_id": fleet["FleetId"], "error": fleet["Error"]["Message"]}
+                        {
+                            "fleet_id": fleet["FleetId"],
+                            "error": fleet["Error"]["Message"],
+                        }
                         for fleet in response["UnsuccessfulFleetDeletions"]
                     ],
                 }
@@ -431,7 +479,8 @@ class AWSRequestAdapter(RequestAdapterPort):
                 return {
                     "status": "success",
                     "successful_fleets": [
-                        fleet["SpotFleetRequestId"] for fleet in response["SuccessfulFleetRequests"]
+                        fleet["SpotFleetRequestId"]
+                        for fleet in response["SuccessfulFleetRequests"]
                     ],
                     "unsuccessful_fleets": [
                         {
@@ -460,4 +509,7 @@ class AWSRequestAdapter(RequestAdapterPort):
 
         except Exception as e:
             self._logger.error(f"Failed to cancel fleet request: {str(e)}")
-            return {"status": "error", "message": f"Failed to cancel fleet request: {str(e)}"}
+            return {
+                "status": "error",
+                "message": f"Failed to cancel fleet request: {str(e)}",
+            }

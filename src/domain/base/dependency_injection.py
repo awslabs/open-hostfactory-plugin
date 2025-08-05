@@ -15,7 +15,6 @@ Key Principles:
 
 import inspect
 from abc import ABC, abstractmethod
-from functools import wraps
 from typing import Any, Callable, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 T = TypeVar("T")
@@ -43,10 +42,11 @@ class DependencyInjectionPort(ABC):
         Raises:
             DependencyResolutionError: If dependency cannot be resolved
         """
-        pass
 
     @abstractmethod
-    def register(self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]) -> None:
+    def register(
+        self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]
+    ) -> None:
         """
         Register dependency in container.
 
@@ -54,7 +54,6 @@ class DependencyInjectionPort(ABC):
             cls: The class type to register
             instance_or_factory: Instance or factory function
         """
-        pass
 
     @abstractmethod
     def register_singleton(
@@ -67,7 +66,6 @@ class DependencyInjectionPort(ABC):
             cls: The class type to register
             instance_or_factory: Instance or factory function
         """
-        pass
 
     @abstractmethod
     def is_registered(self, cls: Type[T]) -> bool:
@@ -80,13 +78,10 @@ class DependencyInjectionPort(ABC):
         Returns:
             True if registered, False otherwise
         """
-        pass
 
 
 class DependencyResolutionError(Exception):
     """Raised when dependency cannot be resolved."""
-
-    pass
 
 
 # Injectable Metadata Classes
@@ -205,7 +200,7 @@ def singleton(cls: Type[T]) -> Type[T]:
 
 def requires(*dependencies: Type) -> Callable[[Type[T]], Type[T]]:
     """
-    Decorator to specify explicit dependencies.
+    Specify explicit dependencies.
 
     Use this decorator when you need to explicitly specify dependencies
     that cannot be inferred from constructor parameters.

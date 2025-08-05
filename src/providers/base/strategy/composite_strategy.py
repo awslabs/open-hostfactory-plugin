@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional
 
+from src.infrastructure.interfaces.provider import BaseProviderConfig
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
     ProviderHealthStatus,
@@ -123,7 +124,7 @@ class CompositeProviderStrategy(ProviderStrategy):
 
         # Create a dummy config for the parent class
 
-        dummy_config = ProviderConfig(provider_type="composite")
+        dummy_config = BaseProviderConfig(provider_type="composite")
         super().__init__(dummy_config)
 
         self._strategies = {strategy.provider_type: strategy for strategy in strategies}

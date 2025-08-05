@@ -22,7 +22,8 @@ class Template(APIRequest):
     """Template model with both snake_case and camelCase support via aliases."""
 
     template_id: str = Field(
-        alias="templateId", description="Unique ID to identify this template in the host provider"
+        alias="templateId",
+        description="Unique ID to identify this template in the host provider",
     )
     max_number: int = Field(
         alias="maxNumber",

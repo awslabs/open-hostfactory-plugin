@@ -39,7 +39,9 @@ def configure_openapi(app: FastAPI, server_config: ServerConfig) -> None:
             )
 
             # Add global security requirement
-            security_scheme_name = _get_security_scheme_name(server_config.auth.strategy)
+            security_scheme_name = _get_security_scheme_name(
+                server_config.auth.strategy
+            )
             if security_scheme_name:
                 openapi_schema["security"] = [{security_scheme_name: []}]
 
@@ -51,7 +53,10 @@ def configure_openapi(app: FastAPI, server_config: ServerConfig) -> None:
                     "url": "https://github.com/your-org/open-hostfactory-plugin",
                     "email": "support@your-org.com",
                 },
-                "license": {"name": "MIT", "url": "https://opensource.org/licenses/MIT"},
+                "license": {
+                    "name": "MIT",
+                    "url": "https://opensource.org/licenses/MIT",
+                },
             }
         )
 
@@ -66,10 +71,19 @@ def configure_openapi(app: FastAPI, server_config: ServerConfig) -> None:
 
         # Add tags for better organization
         openapi_schema["tags"] = [
-            {"name": "System", "description": "System health and information endpoints"},
+            {
+                "name": "System",
+                "description": "System health and information endpoints",
+            },
             {"name": "Templates", "description": "VM template management operations"},
-            {"name": "Machines", "description": "Machine provisioning and management operations"},
-            {"name": "Requests", "description": "Request status and management operations"},
+            {
+                "name": "Machines",
+                "description": "Machine provisioning and management operations",
+            },
+            {
+                "name": "Requests",
+                "description": "Request status and management operations",
+            },
             {
                 "name": "Authentication",
                 "description": "Authentication and authorization operations",
@@ -126,7 +140,11 @@ This API uses URL path versioning (e.g., `/api/v1/`). Breaking changes will resu
 
 def _get_security_scheme_name(strategy: str) -> str:
     """Get security scheme name for the given auth strategy."""
-    scheme_mapping = {"bearer_token": "BearerAuth", "iam": "AWSAuth", "cognito": "CognitoAuth"}
+    scheme_mapping = {
+        "bearer_token": "BearerAuth",
+        "iam": "AWSAuth",
+        "cognito": "CognitoAuth",
+    }
     return scheme_mapping.get(strategy)
 
 

@@ -10,13 +10,13 @@ from .base_registry import BaseRegistration, BaseRegistry, RegistryMode
 class UnsupportedSchedulerError(Exception):
     """Exception raised when an unsupported scheduler type is requested."""
 
-    pass
-
 
 class SchedulerRegistration(BaseRegistration):
     """Scheduler registration container."""
 
-    def __init__(self, scheduler_type: str, strategy_factory: Callable, config_factory: Callable):
+    def __init__(
+        self, scheduler_type: str, strategy_factory: Callable, config_factory: Callable
+    ):
         super().__init__(scheduler_type, strategy_factory, config_factory)
         self.scheduler_type = scheduler_type
 
@@ -34,11 +34,17 @@ class SchedulerRegistry(BaseRegistry):
         super().__init__(mode=RegistryMode.SINGLE_CHOICE)
 
     def register(
-        self, scheduler_type: str, strategy_factory: Callable, config_factory: Callable, **kwargs
+        self,
+        scheduler_type: str,
+        strategy_factory: Callable,
+        config_factory: Callable,
+        **kwargs,
     ):
         """Register scheduler strategy factory - implements abstract method."""
         try:
-            self.register_type(scheduler_type, strategy_factory, config_factory, **kwargs)
+            self.register_type(
+                scheduler_type, strategy_factory, config_factory, **kwargs
+            )
         except ValueError as e:
             raise ConfigurationError(str(e)) from e
 

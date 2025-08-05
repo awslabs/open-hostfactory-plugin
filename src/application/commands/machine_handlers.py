@@ -187,7 +187,9 @@ class ConvertMachineStatusCommandHandler(
 
 @command_handler(ConvertBatchMachineStatusCommand)
 class ConvertBatchMachineStatusCommandHandler(
-    BaseCommandHandler[ConvertBatchMachineStatusCommand, ConvertBatchMachineStatusResponse]
+    BaseCommandHandler[
+        ConvertBatchMachineStatusCommand, ConvertBatchMachineStatusResponse
+    ]
 ):
     """Handler for batch machine status conversion."""
 
@@ -227,7 +229,10 @@ class ConvertBatchMachineStatusCommandHandler(
             statuses.append(result.status)
 
         return ConvertBatchMachineStatusResponse(
-            success=True, statuses=statuses, count=len(statuses), metadata=command.metadata
+            success=True,
+            statuses=statuses,
+            count=len(statuses),
+            metadata=command.metadata,
         )
 
 
@@ -270,7 +275,10 @@ class ValidateProviderStateCommandHandler(
 
             # Use the converter to validate
             converter = ConvertMachineStatusCommandHandler(
-                self._provider_context, self.logger, self.event_publisher, self.error_handler
+                self._provider_context,
+                self.logger,
+                self.event_publisher,
+                self.error_handler,
             )
             result = await converter.execute_command(convert_command)
 
@@ -296,7 +304,9 @@ class ValidateProviderStateCommandHandler(
 
 
 @command_handler(CleanupMachineResourcesCommand)
-class CleanupMachineResourcesHandler(BaseCommandHandler[CleanupMachineResourcesCommand, None]):
+class CleanupMachineResourcesHandler(
+    BaseCommandHandler[CleanupMachineResourcesCommand, None]
+):
     """Handler for cleaning up machine resources using unified base handler."""
 
     def __init__(
@@ -321,7 +331,9 @@ class CleanupMachineResourcesHandler(BaseCommandHandler[CleanupMachineResourcesC
         machine = await self._machine_repository.get_by_id(command.machine_id)
         if not machine:
             if self.logger:
-                self.logger.warning(f"Machine not found for cleanup: {command.machine_id}")
+                self.logger.warning(
+                    f"Machine not found for cleanup: {command.machine_id}"
+                )
             return None
 
         # Perform cleanup
@@ -403,7 +415,9 @@ class DeregisterMachineHandler(BaseCommandHandler[DeregisterMachineCommand, None
         machine = await self._machine_repository.get_by_id(command.machine_id)
         if not machine:
             if self.logger:
-                self.logger.warning(f"Machine not found for deregistration: {command.machine_id}")
+                self.logger.warning(
+                    f"Machine not found for deregistration: {command.machine_id}"
+                )
             return None
 
         # Deregister machine

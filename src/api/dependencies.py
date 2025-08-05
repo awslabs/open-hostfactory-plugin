@@ -1,8 +1,6 @@
 """FastAPI dependency injection integration."""
 
-from typing import Any, Type, TypeVar
-
-from fastapi import Depends
+from typing import Type, TypeVar
 
 from src.config.manager import ConfigurationManager
 from src.config.schemas.server_schema import ServerConfig
@@ -19,7 +17,7 @@ def get_di_container():
 
 def get_service(service_type: Type[T]) -> T:
     """
-    Generic dependency for getting services from DI container.
+    Get services from DI container.
 
     Args:
         service_type: Type of service to retrieve
@@ -28,31 +26,34 @@ def get_service(service_type: Type[T]) -> T:
         Service instance from DI container
     """
 
-    def _get_service(container=Depends(get_di_container)) -> T:
+    def _get_service() -> T:
+        container = get_di_container()
         return container.get(service_type)
 
     return _get_service
 
 
-def get_query_bus(container=Depends(get_di_container)) -> QueryBus:
+def get_query_bus() -> QueryBus:
     """Get QueryBus from DI container."""
+    container = get_di_container()
     return container.get(QueryBus)
 
 
-def get_command_bus(container=Depends(get_di_container)) -> CommandBus:
+def get_command_bus() -> CommandBus:
     """Get CommandBus from DI container."""
+    container = get_di_container()
     return container.get(CommandBus)
 
 
-def get_config_manager(container=Depends(get_di_container)) -> ConfigurationManager:
+def get_config_manager() -> ConfigurationManager:
     """Get ConfigurationManager from DI container."""
+    container = get_di_container()
     return container.get(ConfigurationManager)
 
 
-def get_server_config(
-    config_manager: ConfigurationManager = Depends(get_config_manager),
-) -> ServerConfig:
+def get_server_config() -> ServerConfig:
     """Get ServerConfig from configuration manager."""
+    config_manager = get_config_manager()
     return config_manager.get_typed(ServerConfig)
 
 
@@ -60,7 +61,8 @@ def get_server_config(
 def get_template_handler():
     """Get template API handler from DI container."""
 
-    def _get_handler(container=Depends(get_di_container)):
+    def _get_handler():
+        container = get_di_container()
         from src.api.handlers.get_available_templates_handler import (
             GetAvailableTemplatesRESTHandler,
         )
@@ -73,7 +75,8 @@ def get_template_handler():
 def get_request_machines_handler():
     """Get request machines API handler from DI container."""
 
-    def _get_handler(container=Depends(get_di_container)):
+    def _get_handler():
+        container = get_di_container()
         from src.api.handlers.request_machines_handler import RequestMachinesRESTHandler
 
         return container.get(RequestMachinesRESTHandler)
@@ -84,7 +87,8 @@ def get_request_machines_handler():
 def get_request_status_handler():
     """Get request status API handler from DI container."""
 
-    def _get_handler(container=Depends(get_di_container)):
+    def _get_handler():
+        container = get_di_container()
         from src.api.handlers.get_request_status_handler import (
             GetRequestStatusRESTHandler,
         )
@@ -97,7 +101,8 @@ def get_request_status_handler():
 def get_return_requests_handler():
     """Get return requests API handler from DI container."""
 
-    def _get_handler(container=Depends(get_di_container)):
+    def _get_handler():
+        container = get_di_container()
         from src.api.handlers.get_return_requests_handler import (
             GetReturnRequestsRESTHandler,
         )
@@ -110,7 +115,8 @@ def get_return_requests_handler():
 def get_return_machines_handler():
     """Get return machines API handler from DI container."""
 
-    def _get_handler(container=Depends(get_di_container)):
+    def _get_handler():
+        container = get_di_container()
         from src.api.handlers.request_return_machines_handler import (
             RequestReturnMachinesRESTHandler,
         )

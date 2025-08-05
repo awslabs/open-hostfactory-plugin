@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:
-    import argparse
+    pass
 
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports.logging_port import LoggingPort
@@ -13,7 +13,6 @@ from src.domain.machine.aggregate import Machine
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
 from src.infrastructure.utilities.common.serialization import (
-    process_value_objects,
     serialize_enum,
 )
 
@@ -132,8 +131,8 @@ class HostFactorySchedulerStrategy(SchedulerPort):
 
         # Set provider API using defaults service if available, otherwise fallback
         if self.template_defaults_service:
-            mapped["provider_api"] = self.template_defaults_service.resolve_provider_api_default(
-                template
+            mapped["provider_api"] = (
+                self.template_defaults_service.resolve_provider_api_default(template)
             )
         else:
             # Fallback to template value or default
@@ -169,14 +168,20 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         try:
             provider_config = self.config_manager.get_provider_config()
             active_provider = provider_config.active_provider  # e.g., 'aws-default'
-            provider_type = active_provider.split("-")[0]  # Extract 'aws' from 'aws-default'
+            provider_type = active_provider.split("-")[
+                0
+            ]  # Extract 'aws' from 'aws-default'
             self._logger.debug(f"Active provider type: {provider_type}")
             return provider_type
         except Exception as e:
-            self._logger.warning(f"Failed to get active provider type, defaulting to 'aws': {e}")
+            self._logger.warning(
+                f"Failed to get active provider type, defaulting to 'aws': {e}"
+            )
             return "aws"  # Default fallback
 
-    def convert_cli_args_to_hostfactory_input(self, operation: str, args: Any) -> Dict[str, Any]:
+    def convert_cli_args_to_hostfactory_input(
+        self, operation: str, args: Any
+    ) -> Dict[str, Any]:
         """Convert CLI arguments to HostFactory JSON input format.
 
         This method handles the conversion from CLI arguments to the expected
@@ -202,7 +207,8 @@ class HostFactorySchedulerStrategy(SchedulerPort):
             machine_ids = getattr(args, "machine_ids", [])
             return {
                 "machines": [
-                    {"name": machine_id, "machineId": machine_id} for machine_id in machine_ids
+                    {"name": machine_id, "machineId": machine_id}
+                    for machine_id in machine_ids
                 ]
             }
         else:
@@ -231,7 +237,10 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                     hf_template = self._convert_template_to_hostfactory(template)
                     templates.append(hf_template)
 
-                return {"templates": templates, "message": "Get available templates success."}
+                return {
+                    "templates": templates,
+                    "message": "Get available templates success.",
+                }
             else:
                 return {"templates": [], "message": "No templates found."}
 
@@ -283,8 +292,12 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 }
             elif isinstance(data, dict):
                 # Handle dict format (fallback)
-                machines = self._format_machines_for_hostfactory(data.get("machines", []))
-                status = self._map_domain_status_to_hostfactory(data.get("status", "unknown"))
+                machines = self._format_machines_for_hostfactory(
+                    data.get("machines", [])
+                )
+                status = self._map_domain_status_to_hostfactory(
+                    data.get("status", "unknown")
+                )
                 message = self._generate_status_message(
                     data.get("status", "unknown"), len(machines)
                 )
@@ -292,7 +305,9 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 return {
                     "requests": [
                         {
-                            "requestId": data.get("request_id", data.get("requestId", "")),
+                            "requestId": data.get(
+                                "request_id", data.get("requestId", "")
+                            ),
                             "status": status,
                             "message": message,
                             "machines": machines,
@@ -317,8 +332,12 @@ class HostFactorySchedulerStrategy(SchedulerPort):
 
         # Convert to HostFactory format with proper HF attributes
         hf_template = {
-            "templateId": template_dict.get("template_id", template_dict.get("templateId", "")),
-            "maxNumber": template_dict.get("max_instances", template_dict.get("maxNumber", 1)),
+            "templateId": template_dict.get(
+                "template_id", template_dict.get("templateId", "")
+            ),
+            "maxNumber": template_dict.get(
+                "max_instances", template_dict.get("maxNumber", 1)
+            ),
             "attributes": self._create_hf_attributes(template_dict),
         }
 
@@ -528,7 +547,8 @@ class HostFactorySchedulerStrategy(SchedulerPort):
             "requests": [
                 {
                     # Domain -> HostFactory field mapping using consistent serialization
-                    "requestId": serialize_enum(request.request_id) or str(request.request_id),
+                    "requestId": serialize_enum(request.request_id)
+                    or str(request.request_id),
                     "requestType": serialize_enum(request.request_type)
                     or str(request.request_type),
                     "templateId": str(request.template_id),
@@ -537,7 +557,8 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                     "status": serialize_enum(request.status) or str(request.status),
                     "statusMessage": request.status_message,
                     "instanceIds": [
-                        serialize_enum(inst_id) or str(inst_id) for inst_id in request.instance_ids
+                        serialize_enum(inst_id) or str(inst_id)
+                        for inst_id in request.instance_ids
                     ],
                     "createdAt": request.created_at,
                     "startedAt": request.started_at,
@@ -558,10 +579,12 @@ class HostFactorySchedulerStrategy(SchedulerPort):
             "machines": [
                 {
                     # Domain -> HostFactory field mapping using consistent serialization
-                    "instanceId": serialize_enum(machine.instance_id) or str(machine.instance_id),
+                    "instanceId": serialize_enum(machine.instance_id)
+                    or str(machine.instance_id),
                     "templateId": str(machine.template_id),
                     "requestId": str(machine.request_id),
-                    "vmType": serialize_enum(machine.instance_type) or str(machine.instance_type),
+                    "vmType": serialize_enum(machine.instance_type)
+                    or str(machine.instance_type),
                     "imageId": str(machine.image_id),
                     "privateIp": machine.private_ip,
                     "publicIp": machine.public_ip,

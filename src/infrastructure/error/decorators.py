@@ -24,7 +24,7 @@ def handle_exceptions(
     handler: Optional[ExceptionHandler] = None,
 ):
     """
-    Decorator for consistent exception handling across all layers.
+    Provide consistent exception handling across all layers.
 
     This decorator follows the Single Responsibility Principle by delegating
     exception handling to the ExceptionHandler service while keeping business
@@ -58,10 +58,14 @@ def handle_exceptions(
                     exception_handler = handler or get_exception_handler()
 
                     # Build rich context
-                    context_data = _build_context_data(func, args, kwargs, additional_context)
+                    context_data = _build_context_data(
+                        func, args, kwargs, additional_context
+                    )
 
                     # Create exception context
-                    exc_context = ExceptionContext(operation=context, layer=layer, **context_data)
+                    exc_context = ExceptionContext(
+                        operation=context, layer=layer, **context_data
+                    )
 
                     # Handle exception
                     handled_exception = exception_handler.handle(e, exc_context)
@@ -81,10 +85,14 @@ def handle_exceptions(
                     exception_handler = handler or get_exception_handler()
 
                     # Build rich context
-                    context_data = _build_context_data(func, args, kwargs, additional_context)
+                    context_data = _build_context_data(
+                        func, args, kwargs, additional_context
+                    )
 
                     # Create exception context
-                    exc_context = ExceptionContext(operation=context, layer=layer, **context_data)
+                    exc_context = ExceptionContext(
+                        operation=context, layer=layer, **context_data
+                    )
 
                     # Handle exception
                     handled_exception = exception_handler.handle(e, exc_context)
@@ -97,7 +105,9 @@ def handle_exceptions(
     return decorator
 
 
-def handle_domain_exceptions(context: str, additional_context: Optional[Dict[str, Any]] = None):
+def handle_domain_exceptions(
+    context: str, additional_context: Optional[Dict[str, Any]] = None
+):
     """
     Specialized decorator for domain layer exception handling.
 
@@ -113,7 +123,9 @@ def handle_domain_exceptions(context: str, additional_context: Optional[Dict[str
         def validate_template(self, template: Template) -> None:
             # Domain validation logic
     """
-    return handle_exceptions(context=context, layer="domain", additional_context=additional_context)
+    return handle_exceptions(
+        context=context, layer="domain", additional_context=additional_context
+    )
 
 
 def handle_application_exceptions(
@@ -191,7 +203,9 @@ def handle_provider_exceptions(
 
 
 def handle_interface_exceptions(
-    context: str, interface_type: str = "api", additional_context: Optional[Dict[str, Any]] = None
+    context: str,
+    interface_type: str = "api",
+    additional_context: Optional[Dict[str, Any]] = None,
 ):
     """
     Specialized decorator for interface layer exception handling.
@@ -219,7 +233,10 @@ def handle_interface_exceptions(
 
 
 def _build_context_data(
-    func: Callable, args: tuple, kwargs: dict, additional_context: Optional[Dict[str, Any]]
+    func: Callable,
+    args: tuple,
+    kwargs: dict,
+    additional_context: Optional[Dict[str, Any]],
 ) -> Dict[str, Any]:
     """
     Build rich context data for exception handling.
@@ -268,7 +285,13 @@ def _build_context_data(
                 # Skip potentially sensitive parameters
                 if not any(
                     sensitive in key.lower()
-                    for sensitive in ["password", "secret", "key", "token", "credential"]
+                    for sensitive in [
+                        "password",
+                        "secret",
+                        "key",
+                        "token",
+                        "credential",
+                    ]
                 ):
                     safe_kwargs[key] = value
 
@@ -279,7 +302,9 @@ def _build_context_data(
 
 
 def handle_rest_exceptions(
-    endpoint: str, method: str = "GET", additional_context: Optional[Dict[str, Any]] = None
+    endpoint: str,
+    method: str = "GET",
+    additional_context: Optional[Dict[str, Any]] = None,
 ):
     """
     Specialized decorator for REST API exception handling.

@@ -1,7 +1,7 @@
 """Template Resolver Port - Interface for template parameter resolution."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Optional
 
 
 class TemplateResolverPort(ABC):
@@ -29,7 +29,6 @@ class TemplateResolverPort(ABC):
         Returns:
             Resolved value or original parameter if resolution fails
         """
-        pass
 
     @abstractmethod
     def resolve_parameter(self, parameter: str) -> Optional[str]:
@@ -42,7 +41,6 @@ class TemplateResolverPort(ABC):
         Returns:
             Resolved value or None if resolution fails
         """
-        pass
 
     @abstractmethod
     def is_resolvable(self, parameter: str) -> bool:
@@ -55,7 +53,6 @@ class TemplateResolverPort(ABC):
         Returns:
             True if parameter can be resolved
         """
-        pass
 
     @abstractmethod
     def get_resolver_type(self) -> str:
@@ -65,4 +62,3 @@ class TemplateResolverPort(ABC):
         Returns:
             String identifying the resolver type
         """
-        pass

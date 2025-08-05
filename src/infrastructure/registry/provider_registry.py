@@ -11,8 +11,6 @@ from .base_registry import BaseRegistration, BaseRegistry, RegistryMode
 class UnsupportedProviderError(Exception):
     """Exception raised when an unsupported provider type is requested."""
 
-    pass
-
 
 class ProviderFactoryInterface(ABC):
     """Interface for provider factory functions."""
@@ -20,12 +18,10 @@ class ProviderFactoryInterface(ABC):
     @abstractmethod
     def create_strategy(self, config: Any) -> Any:
         """Create a provider strategy."""
-        pass
 
     @abstractmethod
     def create_config(self, data: Dict[str, Any]) -> Any:
         """Create a provider configuration."""
-        pass
 
 
 class ProviderRegistration(BaseRegistration):
@@ -104,7 +100,11 @@ class ProviderRegistry(BaseRegistry):
             ValueError: If provider_type is already registered
         """
         self.register(
-            provider_type, strategy_factory, config_factory, resolver_factory, validator_factory
+            provider_type,
+            strategy_factory,
+            config_factory,
+            resolver_factory,
+            validator_factory,
         )
 
     def register_provider_instance(
@@ -140,7 +140,9 @@ class ProviderRegistry(BaseRegistry):
                 validator_factory=validator_factory,
             )
         except ValueError as e:
-            raise ValueError(f"Provider instance '{instance_name}' is already registered") from e
+            raise ValueError(
+                f"Provider instance '{instance_name}' is already registered"
+            ) from e
 
     def create_strategy(self, provider_type: str, config: Any) -> Any:
         """

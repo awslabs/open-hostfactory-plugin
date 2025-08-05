@@ -35,4 +35,3 @@ class EventHandler(Generic[TEvent], ABC):
             BusinessRuleViolationError: If event violates business rules
             InfrastructureError: If infrastructure operation fails
         """
-        pass

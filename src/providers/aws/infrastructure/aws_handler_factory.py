@@ -25,7 +25,9 @@ class AWSHandlerFactory:
     ensuring that only one handler instance exists for each type.
     """
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
+    def __init__(
+        self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort
+    ):
         """
         Initialize the factory.
 
@@ -78,7 +80,9 @@ class AWSHandlerFactory:
         # Check if we have a registered handler class for this type
         if handler_type not in self._handler_classes:
             self._logger.error(f"No handler class registered for type: {handler_type}")
-            raise AWSValidationError(f"No handler class registered for type: {handler_type}")
+            raise AWSValidationError(
+                f"No handler class registered for type: {handler_type}"
+            )
 
         # Create the handler
         handler_class = self._handler_classes[handler_type]
@@ -138,4 +142,6 @@ class AWSHandlerFactory:
             ProviderApi.RUN_INSTANCES.value: RunInstancesHandler,
         }
 
-        self._logger.debug(f"Registered handler classes: {list(self._handler_classes.keys())}")
+        self._logger.debug(
+            f"Registered handler classes: {list(self._handler_classes.keys())}"
+        )

@@ -68,7 +68,8 @@ class CognitoAuthStrategy(AuthPort):
         """
         if not self.enabled:
             return AuthResult(
-                status=AuthStatus.FAILED, error_message="Cognito authentication is disabled"
+                status=AuthStatus.FAILED,
+                error_message="Cognito authentication is disabled",
             )
 
         # Extract Bearer token from Authorization header
@@ -76,7 +77,8 @@ class CognitoAuthStrategy(AuthPort):
 
         if not auth_header.startswith("Bearer "):
             return AuthResult(
-                status=AuthStatus.FAILED, error_message="Missing or invalid Authorization header"
+                status=AuthStatus.FAILED,
+                error_message="Missing or invalid Authorization header",
             )
 
         token = auth_header[7:]  # Remove "Bearer " prefix
@@ -98,13 +100,16 @@ class CognitoAuthStrategy(AuthPort):
             kid = unverified_header.get("kid")
 
             if not kid:
-                return AuthResult(status=AuthStatus.INVALID, error_message="Token missing key ID")
+                return AuthResult(
+                    status=AuthStatus.INVALID, error_message="Token missing key ID"
+                )
 
             # Get public key from JWKS (simplified - in production, cache this)
             public_key = await self._get_public_key(kid)
             if not public_key:
                 return AuthResult(
-                    status=AuthStatus.INVALID, error_message="Unable to verify token signature"
+                    status=AuthStatus.INVALID,
+                    error_message="Unable to verify token signature",
                 )
 
             # Verify and decode token
@@ -146,12 +151,18 @@ class CognitoAuthStrategy(AuthPort):
             )
 
         except jwt.ExpiredSignatureError:
-            return AuthResult(status=AuthStatus.EXPIRED, error_message="Token has expired")
+            return AuthResult(
+                status=AuthStatus.EXPIRED, error_message="Token has expired"
+            )
         except jwt.InvalidTokenError as e:
-            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {str(e)}")
+            return AuthResult(
+                status=AuthStatus.INVALID, error_message=f"Invalid token: {str(e)}"
+            )
         except Exception as e:
             self._logger.error(f"Cognito token validation error: {e}")
-            return AuthResult(status=AuthStatus.FAILED, error_message="Token validation failed")
+            return AuthResult(
+                status=AuthStatus.FAILED, error_message="Token validation failed"
+            )
 
     async def refresh_token(self, refresh_token: str) -> AuthResult:
         """
@@ -174,7 +185,9 @@ class CognitoAuthStrategy(AuthPort):
             new_access_token = auth_result.get("AccessToken")
 
             if not new_access_token:
-                return AuthResult(status=AuthStatus.FAILED, error_message="Failed to refresh token")
+                return AuthResult(
+                    status=AuthStatus.FAILED, error_message="Failed to refresh token"
+                )
 
             # Validate the new token to get user info
             return await self.validate_token(new_access_token)
@@ -182,11 +195,14 @@ class CognitoAuthStrategy(AuthPort):
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             return AuthResult(
-                status=AuthStatus.FAILED, error_message=f"Cognito refresh error: {error_code}"
+                status=AuthStatus.FAILED,
+                error_message=f"Cognito refresh error: {error_code}",
             )
         except Exception as e:
             self._logger.error(f"Token refresh error: {e}")
-            return AuthResult(status=AuthStatus.FAILED, error_message="Token refresh failed")
+            return AuthResult(
+                status=AuthStatus.FAILED, error_message="Token refresh failed"
+            )
 
     async def revoke_token(self, token: str) -> bool:
         """

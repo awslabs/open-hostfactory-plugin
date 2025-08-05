@@ -147,7 +147,9 @@ class AWSTemplate(CoreTemplate):
 
         # Add AWS-specific allocation strategies
         if self.allocation_strategy_on_demand:
-            aws_format["allocation_strategy_on_demand"] = self.allocation_strategy_on_demand.value
+            aws_format["allocation_strategy_on_demand"] = (
+                self.allocation_strategy_on_demand.value
+            )
 
         return aws_format
 
@@ -158,7 +160,9 @@ class AWSTemplate(CoreTemplate):
         core_data = {
             "template_id": data.get("template_id"),
             "name": data.get("name", data.get("template_id")),
-            "instance_type": AWSInstanceType(value=data.get("vm_type", data.get("instance_type"))),
+            "instance_type": AWSInstanceType(
+                value=data.get("vm_type", data.get("instance_type"))
+            ),
             "image_id": data.get("image_id"),
             "max_instances": data.get("max_number", data.get("max_instances", 1)),
             "subnet_ids": data.get(
@@ -172,7 +176,9 @@ class AWSTemplate(CoreTemplate):
         aws_data = {
             **core_data,
             "provider_api": ProviderApi(data.get("provider_api")),
-            "fleet_type": AWSFleetType(data.get("fleet_type")) if data.get("fleet_type") else None,
+            "fleet_type": (
+                AWSFleetType(data.get("fleet_type")) if data.get("fleet_type") else None
+            ),
             "fleet_role": data.get("fleet_role"),
             "key_name": data.get("key_name"),
             "user_data": data.get("user_data"),
@@ -196,8 +202,8 @@ class AWSTemplate(CoreTemplate):
             )
 
         if "allocation_strategy_on_demand" in data:
-            aws_data["allocation_strategy_on_demand"] = AWSAllocationStrategy.from_string(
-                data["allocation_strategy_on_demand"]
+            aws_data["allocation_strategy_on_demand"] = (
+                AWSAllocationStrategy.from_string(data["allocation_strategy_on_demand"])
             )
 
         if "price_type" in data:
@@ -222,5 +228,7 @@ class AWSTemplate(CoreTemplate):
             ),
             price_type=self.price_type,
             subnet_ids=[AWSSubnetId(value=sid) for sid in self.subnet_ids],
-            security_group_ids=[AWSSecurityGroupId(value=sgid) for sgid in self.security_group_ids],
+            security_group_ids=[
+                AWSSecurityGroupId(value=sgid) for sgid in self.security_group_ids
+            ],
         )

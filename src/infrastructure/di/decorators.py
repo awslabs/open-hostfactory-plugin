@@ -78,7 +78,9 @@ def injectable(cls: Type[T]) -> Type[T]:
             # Try to resolve from DI container
             if param_name in hints:
                 annotation = hints[param_name]
-                resolved_value = _resolve_dependency(annotation, param, cls.__name__, param_name)
+                resolved_value = _resolve_dependency(
+                    annotation, param, cls.__name__, param_name
+                )
                 if resolved_value is not None:
                     resolved_kwargs[param_name] = resolved_value
                 elif param.default != inspect.Parameter.empty:
@@ -93,7 +95,9 @@ def injectable(cls: Type[T]) -> Type[T]:
         try:
             original_init(self, **resolved_kwargs)
         except Exception as e:
-            logger.error(f"Failed to initialize {cls.__name__} with resolved dependencies: {e}")
+            logger.error(
+                f"Failed to initialize {cls.__name__} with resolved dependencies: {e}"
+            )
             logger.debug(f"Resolved kwargs: {resolved_kwargs}")
             raise
 
@@ -156,7 +160,9 @@ def _resolve_dependency(
                 logger.debug(
                     f"Skipping primitive type resolution for {param_name}: {inner_type.__name__} in {class_name}"
                 )
-                return param.default if param.default != inspect.Parameter.empty else None
+                return (
+                    param.default if param.default != inspect.Parameter.empty else None
+                )
 
             try:
                 return container.get(inner_type)
@@ -164,7 +170,9 @@ def _resolve_dependency(
                 logger.debug(
                     f"Could not resolve optional dependency {param_name}: {inner_type.__name__} for {class_name}: {e}"
                 )
-                return param.default if param.default != inspect.Parameter.empty else None
+                return (
+                    param.default if param.default != inspect.Parameter.empty else None
+                )
 
         # Don't try to resolve primitive types from DI container
         if _is_primitive_type(annotation):
@@ -228,7 +236,11 @@ def get_injectable_info(cls: Type) -> Dict[str, Any]:
                     "type": annotation,
                     "optional": _is_optional_type(annotation),
                     "has_default": param.default != inspect.Parameter.empty,
-                    "default": param.default if param.default != inspect.Parameter.empty else None,
+                    "default": (
+                        param.default
+                        if param.default != inspect.Parameter.empty
+                        else None
+                    ),
                 }
 
         return {

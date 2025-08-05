@@ -8,7 +8,9 @@ from typing import Any, Dict
 class ExceptionContext:
     """Rich context information for exception handling."""
 
-    def __init__(self, operation: str, layer: str = "application", **additional_context):
+    def __init__(
+        self, operation: str, layer: str = "application", **additional_context
+    ):
         self.operation = operation
         self.layer = layer
         self.timestamp = datetime.utcnow()

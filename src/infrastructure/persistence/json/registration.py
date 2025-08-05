@@ -6,7 +6,7 @@ enabling the storage registry pattern for JSON persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import Any, Callable, Dict
+from typing import Any, Dict
 
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.registry.storage_registry import get_storage_registry
@@ -39,7 +39,9 @@ def create_json_strategy(config: Any) -> Any:
         # Use configured file path or fallback to default
         file_path = getattr(config, "file_path", "data/request_database.json")
 
-    return JSONStorageStrategy(file_path=file_path, create_dirs=True, entity_type="generic")
+    return JSONStorageStrategy(
+        file_path=file_path, create_dirs=True, entity_type="generic"
+    )
 
 
 def create_json_config(data: Dict[str, Any]) -> Any:
@@ -70,7 +72,6 @@ def create_json_unit_of_work(config: Any) -> Any:
     from src.config.manager import ConfigurationManager
     from src.config.schemas.storage_schema import StorageConfig
     from src.domain.base.ports.scheduler_port import SchedulerPort
-    from src.infrastructure.logging.logger import get_logger
     from src.infrastructure.persistence.json.unit_of_work import JSONUnitOfWork
 
     # Handle different config types

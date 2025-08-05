@@ -32,7 +32,9 @@ class ValidationException(Exception):
 
 
 @handle_interface_exceptions(context="request_body_validation", interface_type="api")
-def validate_request_body(model_class: Type[T], request_body: Union[str, Dict[str, Any]]) -> T:
+def validate_request_body(
+    model_class: Type[T], request_body: Union[str, Dict[str, Any]]
+) -> T:
     """
     Validate request body against a Pydantic model.
 

@@ -50,7 +50,9 @@ async def handle_get_request_status(args: "argparse.Namespace") -> Dict[str, Any
     request_dto = await query_bus.execute(query)
 
     # Pass domain DTO to scheduler strategy - NO formatting logic here
-    return scheduler_strategy.convert_domain_to_hostfactory_output("getRequestStatus", request_dto)
+    return scheduler_strategy.convert_domain_to_hostfactory_output(
+        "getRequestStatus", request_dto
+    )
 
 
 @handle_interface_exceptions(context="request_machines", interface_type="cli")
@@ -82,22 +84,34 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
         if "template" in input_data:
             # HostFactory nested format: {"template": {"templateId": "...", "machineCount": ...}}
             template_data = input_data["template"]
-            template_id = template_data.get("templateId") or template_data.get("template_id")
-            machine_count = template_data.get("machineCount") or template_data.get("machine_count")
+            template_id = template_data.get("templateId") or template_data.get(
+                "template_id"
+            )
+            machine_count = template_data.get("machineCount") or template_data.get(
+                "machine_count"
+            )
         else:
             # Direct format: {"template_id": "...", "machine_count": ...}
             template_id = input_data.get("template_id") or input_data.get("templateId")
-            machine_count = input_data.get("machine_count") or input_data.get("machineCount")
+            machine_count = input_data.get("machine_count") or input_data.get(
+                "machineCount"
+            )
     else:
         # Use command line arguments (modern CLI style)
         template_id = getattr(args, "template_id", None)
         machine_count = getattr(args, "machine_count", None)
 
     if not template_id:
-        return {"error": "Template ID is required", "message": "Template ID must be provided"}
+        return {
+            "error": "Template ID is required",
+            "message": "Template ID must be provided",
+        }
 
     if not machine_count:
-        return {"error": "Machine count is required", "message": "Machine count must be provided"}
+        return {
+            "error": "Machine count is required",
+            "message": "Machine count must be provided",
+        }
 
     # Check if dry-run is active and add to metadata
     metadata = getattr(args, "metadata", {})
@@ -144,13 +158,18 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
         # Fallback if we can't get request details
         from src.domain.base.ports import LoggingPort
 
-        container.get(LoggingPort).warning(f"Could not get request details for resource ID: {e}")
+        container.get(LoggingPort).warning(
+            f"Could not get request details for resource ID: {e}"
+        )
         if scheduler_strategy:
             return scheduler_strategy.convert_domain_to_hostfactory_output(
                 "requestMachines", request_id
             )
         else:
-            return {"requestId": str(request_id), "message": "Request VM success from AWS."}
+            return {
+                "requestId": str(request_id),
+                "message": "Request VM success from AWS.",
+            }
 
 
 @handle_interface_exceptions(context="get_return_requests", interface_type="cli")
@@ -198,7 +217,8 @@ async def handle_request_return_machines(args: "argparse.Namespace") -> Dict[str
     from src.application.dto.commands import CreateReturnRequestCommand
 
     command = CreateReturnRequestCommand(
-        request_id=getattr(args, "request_id", None), machine_ids=getattr(args, "machine_ids", [])
+        request_id=getattr(args, "request_id", None),
+        machine_ids=getattr(args, "machine_ids", []),
     )
     result = await command_bus.execute(command)
 

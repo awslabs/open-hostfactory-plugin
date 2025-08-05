@@ -143,7 +143,7 @@ def test_provider_strategy_integration():
         for api in provider_apis:
             try:
                 # Create test AWS template
-                aws_template = AWSTemplate(
+                _ = AWSTemplate(
                     template_id=f"test-{api.value}",
                     provider_api=api,
                     vm_type="t2.micro",
@@ -242,7 +242,7 @@ def test_launch_template_integration():
             # Create test data
             from src.providers.aws.domain.template.value_objects import ProviderApi
 
-            aws_template = AWSTemplate(
+            _ = AWSTemplate(
                 template_id="test-template",
                 vm_type="t2.micro",
                 image_id="ami-12345",
@@ -252,7 +252,7 @@ def test_launch_template_integration():
 
             from src.domain.request.value_objects import RequestType
 
-            request = Request.create_new_request(
+            _ = Request.create_new_request(
                 request_type=RequestType.ACQUIRE,
                 template_id="test-template",
                 machine_count=1,
@@ -369,7 +369,7 @@ def test_domain_model_flow():
         print("   Testing domain model flow...")
 
         # Create test AWSTemplate
-        aws_template = AWSTemplate(
+        _ = AWSTemplate(
             template_id="test-template",
             provider_api=ProviderApi.SPOT_FLEET,
             vm_type="t2.micro",
@@ -381,7 +381,7 @@ def test_domain_model_flow():
         # Create test Request
         from src.domain.request.value_objects import RequestType
 
-        request = Request.create_new_request(
+        _ = Request.create_new_request(
             request_type=RequestType.ACQUIRE,
             template_id="test-template",
             machine_count=2,
@@ -591,7 +591,7 @@ def test_full_end_to_end_flow():
         # Create test data
         from src.providers.aws.domain.template.value_objects import AWSFleetType
 
-        aws_template = AWSTemplate(
+        _ = AWSTemplate(
             template_id="e2e-test-template",
             provider_api=ProviderApi.SPOT_FLEET,
             vm_type="t2.micro",
@@ -604,7 +604,7 @@ def test_full_end_to_end_flow():
 
         from src.domain.request.value_objects import RequestType
 
-        request = Request.create_new_request(
+        _ = Request.create_new_request(
             request_type=RequestType.ACQUIRE,
             template_id="e2e-test-template",
             machine_count=1,

@@ -59,7 +59,7 @@ class TestBootstrapIntegration:
         self.mock_container.get.return_value = self.mock_application_service
 
         # Execute
-        app = Application(config_path="/test/config.json")
+        _ = Application(config_path="/test/config.json")
         result = app.initialize()
 
         # Verify
@@ -105,7 +105,7 @@ class TestBootstrapIntegration:
         self.mock_container.get.return_value = self.mock_application_service
 
         # Execute
-        app = Application(config_path="/test/legacy_config.json")
+        _ = Application(config_path="/test/legacy_config.json")
         result = app.initialize()
 
         # Verify
@@ -129,7 +129,7 @@ class TestBootstrapIntegration:
         self.mock_config_manager.get.side_effect = Exception("Configuration error")
 
         # Execute
-        app = Application(config_path="/invalid/config.json")
+        _ = Application(config_path="/invalid/config.json")
         result = app.initialize()
 
         # Verify
@@ -167,7 +167,7 @@ class TestBootstrapIntegration:
         self.mock_container.get.return_value = self.mock_application_service
 
         # Execute
-        app = Application()
+        _ = Application()
         app.initialize()
         provider_info = app.get_provider_info()
 
@@ -179,7 +179,7 @@ class TestBootstrapIntegration:
     def test_get_provider_info_not_initialized(self):
         """Test provider info retrieval when not initialized."""
         # Execute
-        app = Application()
+        _ = Application()
         provider_info = app.get_provider_info()
 
         # Verify

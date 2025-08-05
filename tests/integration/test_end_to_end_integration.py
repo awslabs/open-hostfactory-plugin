@@ -107,7 +107,7 @@ class TestEnhancedEndToEnd:
     def test_complete_spot_fleet_flow(self):
         """Test complete flow with Spot Fleet handler."""
         # Mock launch template creation
-        lt_result = LaunchTemplateResult(
+        _ = LaunchTemplateResult(
             template_id="lt-123456",
             template_name="integration-test-template-req-integration-123",
             version="1",

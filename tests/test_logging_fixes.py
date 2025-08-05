@@ -229,7 +229,7 @@ class TestLoggingFixes:
         """Test that bootstrap doesn't preload templates unnecessarily."""
         with LogCapture() as log_capture:
             # Create application instance
-            app = Application()
+            _ = Application()
 
             # Verify that template preloading is controlled and not excessive
             # The _preload_templates method may exist but should not be called during init
@@ -390,7 +390,7 @@ class TestLoggingFixes:
                 }.get(cls.__name__ if hasattr(cls, "__name__") else str(cls), Mock())
 
                 # Create application
-                app = Application()
+                _ = Application()
 
                 # Initialize application
                 success = await app.initialize()

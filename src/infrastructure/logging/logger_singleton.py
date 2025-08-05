@@ -6,7 +6,7 @@ import logging
 import threading
 from typing import Any, Dict, Optional
 
-from src.infrastructure.logging.logger import ContextLogger, get_logger as base_get_logger, with_context
+from src.infrastructure.logging.logger import ContextLogger, with_context
 from src.infrastructure.patterns.singleton_registry import SingletonRegistry
 
 # Global singleton instance - initialized early to avoid circular imports

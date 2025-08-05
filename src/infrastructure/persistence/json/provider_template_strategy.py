@@ -48,7 +48,9 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
         # Discover all template files
         self._template_files = self._discover_template_files()
 
-        self.logger.info(f"Initialized provider template strategy with {len(self._template_files)} template files")
+        self.logger.info(
+            f"Initialized provider template strategy with {len(self._template_files)} template files"
+        )
         for file_path in self._template_files:
             self.logger.debug(f"Template file: {file_path}")
 
@@ -69,7 +71,9 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
             # 1. Provider instance-specific files (highest priority)
             for provider_instance in provider_config.providers:
                 if provider_instance.enabled:
-                    instance_file = os.path.join(base_dir, f"{provider_instance.name}_templates.json")
+                    instance_file = os.path.join(
+                        base_dir, f"{provider_instance.name}_templates.json"
+                    )
                     if os.path.exists(instance_file):
                         template_files.append(instance_file)
                         self.logger.debug(f"Found provider instance template file: {instance_file}")
@@ -128,7 +132,9 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                             if isinstance(template_data, dict) and "template_id" in template_data:
                                 template_id = template_data["template_id"]
                                 merged_templates[template_id] = template_data
-                                self.logger.debug(f"Loaded template '{template_id}' from {file_path}")
+                                self.logger.debug(
+                                    f"Loaded template '{template_id}' from {file_path}"
+                                )
 
                     elif isinstance(file_data, dict):
                         # Object format: {"template1": {...}, "template2": {...}}
@@ -137,7 +143,9 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                                 # Ensure template_id is set
                                 template_data["template_id"] = template_id
                                 merged_templates[template_id] = template_data
-                                self.logger.debug(f"Loaded template '{template_id}' from {file_path}")
+                                self.logger.debug(
+                                    f"Loaded template '{template_id}' from {file_path}"
+                                )
 
                     self.logger.info(
                         f"Loaded { len(file_data) if isinstance( file_data, (list, dict)) else 0} templates from {file_path}"
@@ -147,7 +155,9 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                 self.logger.error(f"Error loading templates from {file_path}: {e}")
                 continue
 
-        self.logger.info(f"Merged {len(merged_templates)} unique templates from {len(self._template_files)} files")
+        self.logger.info(
+            f"Merged {len(merged_templates)} unique templates from {len(self._template_files)} files"
+        )
         return merged_templates
 
     def _get_templates_cache(self) -> Dict[str, Dict[str, Any]]:
@@ -158,7 +168,11 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
             Dictionary of templates by template_id
         """
         # Check if we need to refresh cache
-        current_time = os.path.getmtime(max(self._template_files, key=os.path.getmtime)) if self._template_files else 0
+        current_time = (
+            os.path.getmtime(max(self._template_files, key=os.path.getmtime))
+            if self._template_files
+            else 0
+        )
 
         if self._template_cache is None or self._cache_timestamp != current_time:
             self._template_cache = self._load_merged_templates()

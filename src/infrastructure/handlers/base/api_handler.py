@@ -93,9 +93,9 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
         # Apply circuit breaker middleware if service_name is provided
         if service_name:
-            wrapped_func = self.with_retry_middleware(service_name=service_name, failure_threshold=3, reset_timeout=30)(
-                wrapped_func
-            )
+            wrapped_func = self.with_retry_middleware(
+                service_name=service_name, failure_threshold=3, reset_timeout=30
+            )(wrapped_func)
 
         # Apply error handling middleware
         wrapped_func = self.with_error_handling_middleware(wrapped_func)
@@ -185,7 +185,9 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
         return wrapper
 
-    def with_error_handling_middleware(self, func: Callable[[T], R]) -> Callable[[T], Dict[str, Any]]:
+    def with_error_handling_middleware(
+        self, func: Callable[[T], R]
+    ) -> Callable[[T], Dict[str, Any]]:
         """
         Provide standardized error handling.
 
@@ -215,7 +217,9 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
             except ValueError as e:
                 # Handle ValueError specifically for better error messages
                 error_message = str(e)
-                self.logger.error(f"Validation error: {error_message}", extra={"error": error_message})
+                self.logger.error(
+                    f"Validation error: {error_message}", extra={"error": error_message}
+                )
                 return {
                     "error": "ValidationError",
                     "message": error_message,
@@ -228,7 +232,11 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
             except DomainException as e:
                 # Handle all application-specific errors (DomainException and
                 # subclasses)
-                error_dict = e.to_dict() if hasattr(e, "to_dict") else {"code": e.__class__.__name__, "message": str(e)}
+                error_dict = (
+                    e.to_dict()
+                    if hasattr(e, "to_dict")
+                    else {"code": e.__class__.__name__, "message": str(e)}
+                )
 
                 # Add correlation ID if available from the request context
                 correlation_id = getattr(request, "correlation_id", None)
@@ -307,7 +315,9 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
         return decorator
 
-    def with_input_validation(self, schema: Dict[str, Any], func: Callable[[T], R]) -> Callable[[T], R]:
+    def with_input_validation(
+        self, schema: Dict[str, Any], func: Callable[[T], R]
+    ) -> Callable[[T], R]:
         """
         Validate input.
 

@@ -127,7 +127,9 @@ def _is_primitive_type(annotation: Type) -> bool:
     return False
 
 
-def _resolve_dependency(annotation: Type, param: inspect.Parameter, class_name: str, param_name: str) -> Any:
+def _resolve_dependency(
+    annotation: Type, param: inspect.Parameter, class_name: str, param_name: str
+) -> Any:
     """
     Resolve a single dependency from the DI container.
 
@@ -167,14 +169,18 @@ def _resolve_dependency(annotation: Type, param: inspect.Parameter, class_name: 
 
         # Don't try to resolve primitive types from DI container
         if _is_primitive_type(annotation):
-            logger.debug(f"Skipping primitive type resolution for {param_name}: { annotation.__name__} in {class_name}")
+            logger.debug(
+                f"Skipping primitive type resolution for {param_name}: { annotation.__name__} in {class_name}"
+            )
             return param.default if param.default != inspect.Parameter.empty else None
 
         # Handle regular types
         try:
             return container.get(annotation)
         except Exception as e:
-            logger.debug(f"Could not resolve dependency {param_name}: { annotation.__name__} for {class_name}: {e}")
+            logger.debug(
+                f"Could not resolve dependency {param_name}: { annotation.__name__} for {class_name}: {e}"
+            )
             return None
 
     except Exception as e:
@@ -223,7 +229,9 @@ def get_injectable_info(cls: Type) -> Dict[str, Any]:
                     "type": annotation,
                     "optional": _is_optional_type(annotation),
                     "has_default": param.default != inspect.Parameter.empty,
-                    "default}": (param.default if param.default != inspect.Parameter.empty else None),
+                    "default}": (
+                        param.default if param.default != inspect.Parameter.empty else None
+                    ),
                 }
 
         return {

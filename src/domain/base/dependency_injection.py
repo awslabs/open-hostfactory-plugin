@@ -54,7 +54,9 @@ class DependencyInjectionPort(ABC):
         """
 
     @abstractmethod
-    def register_singleton(self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]) -> None:
+    def register_singleton(
+        self, cls: Type[T], instance_or_factory: Union[T, Callable[[], T]]
+    ) -> None:
         """
         Register dependency as singleton.
 

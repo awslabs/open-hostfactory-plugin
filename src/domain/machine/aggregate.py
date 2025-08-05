@@ -118,7 +118,9 @@ class Machine(AggregateRoot):
         """Get the machine identifier."""
         return str(self.instance_id)
 
-    def update_network_info(self, private_ip: Optional[str] = None, public_ip: Optional[str] = None) -> "Machine":
+    def update_network_info(
+        self, private_ip: Optional[str] = None, public_ip: Optional[str] = None
+    ) -> "Machine":
         """Update machine network information."""
         data = self.model_dump()
 

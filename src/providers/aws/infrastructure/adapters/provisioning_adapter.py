@@ -98,7 +98,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             # Use legacy handler approach for normal operations
             return self._provision_via_handlers(request, template)
 
-    def _provision_via_strategy(self, request: Request, template: Template, dry_run: bool = False) -> str:
+    def _provision_via_strategy(
+        self, request: Request, template: Template, dry_run: bool = False
+    ) -> str:
         """
         Provision resources using the provider strategy pattern.
 
@@ -129,7 +131,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
         if result.success:
             # Extract resource ID from result
             resource_id = result.data.get("instance_ids", ["dry-run-resource-id"])[0]
-            self._logger.info(f"Successfully provisioned resources via strategy with ID {resource_id}")
+            self._logger.info(
+                f"Successfully provisioned resources via strategy with ID {resource_id}"
+            )
             return resource_id
         else:
             self._logger.error(f"Provider strategy operation failed: {result.error_message}")
@@ -186,7 +190,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
 
         # Get the template to determine the handler type
         if not self._template_config_manager:
-            self._logger.warning("TemplateConfigurationManager not injected, getting from container")
+            self._logger.warning(
+                "TemplateConfigurationManager not injected, getting from container"
+            )
             from src.infrastructure.di.container import get_container
 
             container = get_container()
@@ -207,7 +213,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
         try:
             # Check hosts status using the handler
             status = handler.check_hosts_status(request)
-            self._logger.info(f"Successfully checked status of resources for request {request.request_id}")
+            self._logger.info(
+                f"Successfully checked status of resources for request {request.request_id}"
+            )
             return status
         except AWSEntityNotFoundError as e:
             self._logger.error(f"Resource not found during status check: {str(e)}")
@@ -235,7 +243,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
 
         # Get the template to determine the handler type
         if not self._template_config_manager:
-            self._logger.warning("TemplateConfigurationManager not injected, getting from container")
+            self._logger.warning(
+                "TemplateConfigurationManager not injected, getting from container"
+            )
             from src.infrastructure.di.container import get_container
 
             container = get_container()
@@ -284,7 +294,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             # Determine the resource type from the ID format
             if resource_id.startswith("i-"):
                 # EC2 instance
-                response = self.aws_client.ec2_client.describe_instance_status(InstanceIds=[resource_id])
+                response = self.aws_client.ec2_client.describe_instance_status(
+                    InstanceIds=[resource_id]
+                )
                 if not response["InstanceStatuses"]:
                     raise AWSEntityNotFoundError(f"Instance {resource_id} not found")
 
@@ -315,7 +327,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                 }
             elif resource_id.startswith("sfr-"):
                 # Spot Fleet
-                response = self.aws_client.ec2_client.describe_spot_fleet_requests(SpotFleetRequestIds=[resource_id])
+                response = self.aws_client.ec2_client.describe_spot_fleet_requests(
+                    SpotFleetRequestIds=[resource_id]
+                )
                 if not response["SpotFleetRequestConfigs"]:
                     raise AWSEntityNotFoundError(f"Spot Fleet {resource_id} not found")
 
@@ -324,7 +338,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                     "resource_id": resource_id,
                     "resource_type": "spot_fleet",
                     "state": fleet["SpotFleetRequestState"],
-                    "status": ("active" if fleet["SpotFleetRequestState"] == "active" else "inactive"),
+                    "status": (
+                        "active" if fleet["SpotFleetRequestState"] == "active" else "inactive"
+                    ),
                     "target_capacity": fleet["SpotFleetRequestConfig"]["TargetCapacity"],
                     "fulfilled_capacity": fleet.get("FulfilledCapacity", 0),
                     "details": fleet,
@@ -354,7 +370,9 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                     )
 
                 # If we get here, we couldn't determine the resource type
-                raise AWSEntityNotFoundError(f"Resource {resource_id} not found or type not supported")
+                raise AWSEntityNotFoundError(
+                    f"Resource {resource_id} not found or type not supported"
+                )
         except AWSEntityNotFoundError:
             raise
         except Exception as e:

@@ -47,7 +47,9 @@ async def handle_serve_api(args) -> Dict[str, Any]:
             server_config.log_level = log_level
 
         logger.info(f"Starting REST API server on {server_config.host}:{server_config.port}")
-        logger.info(f"Workers: {server_config.workers}, Reload: {reload}, Log Level: {server_config.log_level}")
+        logger.info(
+            f"Workers: {server_config.workers}, Reload: {reload}, Log Level: {server_config.log_level}"
+        )
 
         # Create and configure the FastAPI app
         app = create_app()
@@ -59,7 +61,9 @@ async def handle_serve_api(args) -> Dict[str, Any]:
             app=app,
             host=server_config.host,
             port=server_config.port,
-            workers=(server_config.workers if not reload else 1),  # Reload mode requires single worker
+            workers=(
+                server_config.workers if not reload else 1
+            ),  # Reload mode requires single worker
             reload=reload,
             log_level=server_config.log_level,
             access_log=True,

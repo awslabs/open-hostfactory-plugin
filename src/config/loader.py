@@ -144,7 +144,9 @@ class ConfigurationLoader:
             # Extract filename from path for file resolution
             filename = os.path.basename(config_path) if config_path else "config.json"
 
-            file_config = cls._load_config_file("conf", filename, explicit_path=config_path, required=False)
+            file_config = cls._load_config_file(
+                "conf", filename, explicit_path=config_path, required=False
+            )
             if file_config:
                 cls._merge_config(config, file_config)
                 get_config_logger().info("Loaded user configuration")
@@ -181,7 +183,8 @@ class ConfigurationLoader:
             return config
         else:
             get_config_logger().warning(
-                "Failed to load default configuration from any location. " "Using empty configuration."
+                "Failed to load default configuration from any location. "
+                "Using empty configuration."
             )
             return {}
 
@@ -280,13 +283,19 @@ class ConfigurationLoader:
             return cls._load_from_file(resolved_path)
         else:
             if required:
-                get_config_logger().error(f"Required {file_type} configuration file not found: {filename}")
+                get_config_logger().error(
+                    f"Required {file_type} configuration file not found: {filename}"
+                )
             else:
-                get_config_logger().debug(f"Optional {file_type} configuration file not found: {filename}")
+                get_config_logger().debug(
+                    f"Optional {file_type} configuration file not found: {filename}"
+                )
             return None
 
     @classmethod
-    def _resolve_file_path(cls, file_type: str, filename: str, explicit_path: Optional[str] = None) -> Optional[str]:
+    def _resolve_file_path(
+        cls, file_type: str, filename: str, explicit_path: Optional[str] = None
+    ) -> Optional[str]:
         """
         Resolve file path using centralized logic (static version of ConfigurationManager.resolve_file).
 
@@ -426,7 +435,9 @@ class ConfigurationLoader:
         elif workdir:
             log_dir = os.path.join(workdir, "logs")
             config.setdefault("logging", {})["file_path"] = os.path.join(log_dir, "app.log")
-            get_config_logger().debug(f"Set logging file_path to {os.path.join(log_dir, 'app.log')}")
+            get_config_logger().debug(
+                f"Set logging file_path to {os.path.join(log_dir, 'app.log')}"
+            )
 
         # Set up storage paths based on workdir
         if workdir:
@@ -441,7 +452,9 @@ class ConfigurationLoader:
             if sql_strategy.get("type", "sqlite") == "sqlite":
                 # Always use workdir for SQLite, regardless of host value
                 sql_strategy["name"] = os.path.join(workdir, "database.db")
-                get_config_logger().debug(f"Set SQLite database path to {os.path.join(workdir, 'database.db')}")
+                get_config_logger().debug(
+                    f"Set SQLite database path to {os.path.join(workdir, 'database.db')}"
+                )
 
         # Set up config paths based on HF_PROVIDER_CONFDIR
         if confdir:
@@ -487,10 +500,14 @@ class ConfigurationLoader:
 
             if ami_resolution_enabled is not None:
                 ami_resolution_config["enabled"] = cls._convert_value(ami_resolution_enabled)
-                get_config_logger().debug(f"Set ami_resolution.enabled to {ami_resolution_config['enabled']}")
+                get_config_logger().debug(
+                    f"Set ami_resolution.enabled to {ami_resolution_config['enabled']}"
+                )
 
             if ami_resolution_fallback is not None:
-                ami_resolution_config["fallback_on_failure"] = cls._convert_value(ami_resolution_fallback)
+                ami_resolution_config["fallback_on_failure"] = cls._convert_value(
+                    ami_resolution_fallback
+                )
                 get_config_logger().debug(
                     f"Set ami_resolution.fallback_on_failure to {ami_resolution_config['fallback_on_failure']}"
                 )

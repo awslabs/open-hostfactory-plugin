@@ -101,7 +101,9 @@ class JSONSerializer(SerializationManager):
         return enum_value.value if hasattr(enum_value, "value") else str(enum_value)
 
     @staticmethod
-    def deserialize_enum(enum_class: Type[E], value: Any, default: Optional[E] = None) -> Optional[E]:
+    def deserialize_enum(
+        enum_class: Type[E], value: Any, default: Optional[E] = None
+    ) -> Optional[E]:
         """Deserialize string to enum value."""
         if value is None:
             return default

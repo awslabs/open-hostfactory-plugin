@@ -54,7 +54,9 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
         aws_config = AWSProviderConfig()  # This should be injected in real implementation
         self._resource_manager = AWSResourceManagerImpl(self._aws_client, aws_config, self._logger)
 
-    def get_resource_quota(self, resource_type: str, region: Optional[str] = None) -> Dict[str, Any]:
+    def get_resource_quota(
+        self, resource_type: str, region: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Get resource quota (legacy interface).
 
@@ -67,7 +69,9 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             # Use the new unified method
             import asyncio
 
-            quota_data = asyncio.run(self._resource_manager.fetch_resource_quota(resource_type_enum, region))
+            quota_data = asyncio.run(
+                self._resource_manager.fetch_resource_quota(resource_type_enum, region)
+            )
 
             return quota_data
 
@@ -92,7 +96,9 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             # Use the new unified method
             import asyncio
 
-            allocations = asyncio.run(self._resource_manager.fetch_resource_list(resource_type_enum))
+            allocations = asyncio.run(
+                self._resource_manager.fetch_resource_list(resource_type_enum)
+            )
 
             # Convert to legacy format
             return [self._allocation_to_legacy_format(allocation) for allocation in allocations]
@@ -132,7 +138,9 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             # Get resource allocation first
             import asyncio
 
-            allocation = asyncio.run(self._resource_manager.fetch_resource_status(ResourceId(resource_id)))
+            allocation = asyncio.run(
+                self._resource_manager.fetch_resource_status(ResourceId(resource_id))
+            )
 
             # Use the new unified method
             asyncio.run(self._resource_manager.deprovision_resources(allocation))
@@ -153,7 +161,9 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
             # Use the new unified method
             import asyncio
 
-            allocation = asyncio.run(self._resource_manager.fetch_resource_status(ResourceId(resource_id)))
+            allocation = asyncio.run(
+                self._resource_manager.fetch_resource_status(ResourceId(resource_id))
+            )
 
             # Convert to legacy format
             return self._allocation_to_legacy_format(allocation)

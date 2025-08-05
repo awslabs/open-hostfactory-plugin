@@ -76,7 +76,9 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
             Dictionary with templates and metadata
         """
         if self.logger:
-            self.logger.info(f"Processing get available templates request - Correlation ID: {context.correlation_id}")
+            self.logger.info(
+                f"Processing get available templates request - Correlation ID: {context.correlation_id}"
+            )
 
         try:
             # Create CQRS query
@@ -95,7 +97,8 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
 
             if self.logger:
                 self.logger.info(
-                    f"Successfully retrieved {len(templates)} templates - " f"Correlation ID: {context.correlation_id}"
+                    f"Successfully retrieved {len(templates)} templates - "
+                    f"Correlation ID: {context.correlation_id}"
                 )
 
             # Record metrics if available
@@ -106,7 +109,9 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
 
         except Exception as e:
             if self.logger:
-                self.logger.error(f"Failed to retrieve templates: {str(e)} - Correlation ID: {context.correlation_id}")
+                self.logger.error(
+                    f"Failed to retrieve templates: {str(e)} - Correlation ID: {context.correlation_id}"
+                )
 
             # Record metrics if available
             if self._metrics:

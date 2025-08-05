@@ -84,7 +84,9 @@ class ProviderResourceStateChangedEvent(DomainEvent):
 
     def __post_init__(self):
         object.__setattr__(self, "aggregate_id", self.resource_id)
-        object.__setattr__(self, "aggregate_type", f"{self.provider_type.value}_{self.resource_type}")
+        object.__setattr__(
+            self, "aggregate_type", f"{self.provider_type.value}_{self.resource_type}"
+        )
         super().__post_init__()
         if not self.resource_type:
             raise ValueError("Resource type cannot be empty")

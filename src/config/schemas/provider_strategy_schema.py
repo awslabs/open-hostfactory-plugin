@@ -31,11 +31,15 @@ class HandlerConfig(BaseModel):
 class ProviderDefaults(BaseModel):
     """Default configuration for a provider type."""
 
-    handlers: Dict[str, HandlerConfig] = Field(default_factory=dict, description="Default handler configurations")
+    handlers: Dict[str, HandlerConfig] = Field(
+        default_factory=dict, description="Default handler configurations"
+    )
     template_defaults: Dict[str, Any] = Field(
         default_factory=dict, description="Template defaults for this provider type"
     )
-    extensions: Optional[Dict[str, Any]] = Field(None, description="Provider-specific extensions configuration")
+    extensions: Optional[Dict[str, Any]] = Field(
+        None, description="Provider-specific extensions configuration"
+    )
 
 
 class ProviderMode(str, Enum):
@@ -91,10 +95,14 @@ class ProviderInstanceConfig(BaseModel):
     enabled: bool = Field(True, description="Whether this provider is enabled")
     priority: int = Field(0, description="Provider priority (lower = higher priority)")
     weight: int = Field(100, description="Provider weight for load balancing")
-    config: Dict[str, Any] = Field(default_factory=dict, description="Provider-specific configuration")
+    config: Dict[str, Any] = Field(
+        default_factory=dict, description="Provider-specific configuration"
+    )
 
     # Handler configuration with inheritance support
-    handlers: Optional[Dict[str, HandlerConfig]] = Field(None, description="Full handler override (ignores defaults)")
+    handlers: Optional[Dict[str, HandlerConfig]] = Field(
+        None, description="Full handler override (ignores defaults)"
+    )
     handler_overrides: Optional[Dict[str, Optional[HandlerConfig]]] = Field(
         None, description="Partial handler overrides (null to disable)"
     )
@@ -105,11 +113,17 @@ class ProviderInstanceConfig(BaseModel):
     )
 
     # Provider instance extensions
-    extensions: Optional[Dict[str, Any]] = Field(None, description="Instance-specific extension overrides")
+    extensions: Optional[Dict[str, Any]] = Field(
+        None, description="Instance-specific extension overrides"
+    )
 
-    health_check: HealthCheckConfig = Field(default_factory=HealthCheckConfig, description="Health check configuration")
+    health_check: HealthCheckConfig = Field(
+        default_factory=HealthCheckConfig, description="Health check configuration"
+    )
 
-    def get_effective_handlers(self, provider_defaults: Optional[ProviderDefaults] = None) -> Dict[str, HandlerConfig]:
+    def get_effective_handlers(
+        self, provider_defaults: Optional[ProviderDefaults] = None
+    ) -> Dict[str, HandlerConfig]:
         """Get effective handlers after applying defaults and overrides."""
 
         # If full handlers override is specified, use it directly
@@ -119,7 +133,9 @@ class ProviderInstanceConfig(BaseModel):
         # Start with provider type defaults
         effective_handlers = {}
         if provider_defaults and provider_defaults.handlers:
-            effective_handlers = {name: config for name, config in provider_defaults.handlers.items()}
+            effective_handlers = {
+                name: config for name, config in provider_defaults.handlers.items()
+            }
 
         # Apply handler overrides
         if self.handler_overrides:
@@ -131,7 +147,9 @@ class ProviderInstanceConfig(BaseModel):
                     # Merge or add handler
                     if handler_name in effective_handlers:
                         # Merge with existing default
-                        effective_handlers[handler_name] = effective_handlers[handler_name].merge_with(override_config)
+                        effective_handlers[handler_name] = effective_handlers[
+                            handler_name
+                        ].merge_with(override_config)
                     else:
                         # New handler not in defaults
                         effective_handlers[handler_name] = override_config
@@ -146,7 +164,9 @@ class ProviderInstanceConfig(BaseModel):
             raise ValueError("Provider name cannot be empty")
         # Ensure name is valid for use as identifier
         if not v.replace("-", "").replace("_", "").isalnum():
-            raise ValueError("Provider name must contain only alphanumeric characters, hyphens, and underscores")
+            raise ValueError(
+                "Provider name must contain only alphanumeric characters, hyphens, and underscores"
+            )
         return v.strip()
 
     @field_validator("type")
@@ -171,10 +191,18 @@ class ProviderConfig(BaseModel):
     """Provider configuration supporting single and multi-provider modes with comprehensive features."""
 
     # Provider strategy configuration
-    selection_policy: str = Field("FIRST_AVAILABLE", description="Default provider selection policy")
-    active_provider: Optional[str] = Field(None, description="Active provider for single-provider mode")
-    default_provider_type: Optional[str] = Field(None, description="Default provider type for templates")
-    default_provider_instance: Optional[str] = Field(None, description="Default provider instance for templates")
+    selection_policy: str = Field(
+        "FIRST_AVAILABLE", description="Default provider selection policy"
+    )
+    active_provider: Optional[str] = Field(
+        None, description="Active provider for single-provider mode"
+    )
+    default_provider_type: Optional[str] = Field(
+        None, description="Default provider type for templates"
+    )
+    default_provider_instance: Optional[str] = Field(
+        None, description="Default provider instance for templates"
+    )
     health_check_interval: int = Field(300, description="Global health check interval in seconds")
     circuit_breaker: CircuitBreakerConfig = Field(
         default_factory=CircuitBreakerConfig,
@@ -185,7 +213,9 @@ class ProviderConfig(BaseModel):
     provider_defaults: Dict[str, ProviderDefaults] = Field(
         default_factory=dict, description="Default configurations by provider type"
     )
-    providers: List[ProviderInstanceConfig] = Field(default_factory=list, description="List of provider instances")
+    providers: List[ProviderInstanceConfig] = Field(
+        default_factory=list, description="List of provider instances"
+    )
 
     # Legacy support fields
     type: Optional[str] = Field(None, description="Legacy provider type")
@@ -225,7 +255,9 @@ class ProviderConfig(BaseModel):
         if self.active_provider:
             provider_names = [p.name for p in self.providers]
             if self.active_provider not in provider_names:
-                raise ValueError(f"Active provider '{self.active_provider}' not found in providers list")
+                raise ValueError(
+                    f"Active provider '{self.active_provider}' not found in providers list"
+                )
 
         # Validate unique provider names
         provider_names = [p.name for p in self.providers]

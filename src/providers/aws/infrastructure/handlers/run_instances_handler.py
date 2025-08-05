@@ -120,11 +120,15 @@ class RunInstancesHandler(AWSHandler):
         self._validate_prerequisites(aws_template)
 
         # Create launch template using the new manager
-        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
+        )
 
         # Store launch template info in request (if request has this method)
         if hasattr(request, "set_launch_template_info"):
-            request.set_launch_template_info(launch_template_result.template_id, launch_template_result.version)
+            request.set_launch_template_info(
+                launch_template_result.template_id, launch_template_result.version
+            )
 
         # Create RunInstances parameters
         run_params = self._create_run_instances_params(
@@ -167,7 +171,9 @@ class RunInstancesHandler(AWSHandler):
 
         return resource_id
 
-    def _format_instance_data(self, instance_details: List[Dict[str, Any]], resource_id: str) -> List[Dict[str, Any]]:
+    def _format_instance_data(
+        self, instance_details: List[Dict[str, Any]], resource_id: str
+    ) -> List[Dict[str, Any]]:
         """Format AWS instance details to standard structure."""
         return [
             {
@@ -227,7 +233,9 @@ class RunInstancesHandler(AWSHandler):
             params["InstanceMarketOptions"] = {"MarketType": "spot"}
 
             if aws_template.max_spot_price:
-                params["InstanceMarketOptions"]["SpotOptions"] = {"MaxPrice": str(aws_template.max_spot_price)}
+                params["InstanceMarketOptions"]["SpotOptions"] = {
+                    "MaxPrice": str(aws_template.max_spot_price)
+                }
 
         # Add additional tags for instances (beyond launch template)
         tag_specifications = [
@@ -263,10 +271,14 @@ class RunInstancesHandler(AWSHandler):
                 # If no instance IDs in metadata, try to find instances using resource
                 # IDs (reservation IDs)
                 if hasattr(request, "resource_ids") and request.resource_ids:
-                    self._logger.info(f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}")
+                    self._logger.info(
+                        f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}"
+                    )
                     return self._find_instances_by_resource_ids(request.resource_ids)
                 else:
-                    self._logger.info(f"No instance IDs or resource IDs found in request {request.request_id}")
+                    self._logger.info(
+                        f"No instance IDs or resource IDs found in request {request.request_id}"
+                    )
                     return []
 
             # Get detailed instance information using instance IDs
@@ -299,7 +311,9 @@ class RunInstancesHandler(AWSHandler):
                                 "PrivateIpAddress": instance.get("PrivateIpAddress"),
                                 "PublicIpAddress": instance.get("PublicIpAddress"),
                                 "LaunchTime": (
-                                    instance["LaunchTime"].isoformat() if instance.get("LaunchTime") else None
+                                    instance["LaunchTime"].isoformat()
+                                    if instance.get("LaunchTime")
+                                    else None
                                 ),
                                 "Tags": instance.get("Tags", []),
                                 "InstanceType": instance["InstanceType"],
@@ -330,7 +344,9 @@ class RunInstancesHandler(AWSHandler):
                     else:
                         raise
 
-            self._logger.info(f"Found {len(all_instances)} instances for resource IDs: {resource_ids}")
+            self._logger.info(
+                f"Found {len(all_instances)} instances for resource IDs: {resource_ids}"
+            )
             return all_instances
 
         except Exception as e:
@@ -340,7 +356,9 @@ class RunInstancesHandler(AWSHandler):
     def _find_instances_by_tags_fallback(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Fallback method to find instances by tags when reservation-id filter is not supported."""
         try:
-            self._logger.info(f"FALLBACK: Starting fallback method for resource IDs: {resource_ids}")
+            self._logger.info(
+                f"FALLBACK: Starting fallback method for resource IDs: {resource_ids}"
+            )
 
             # In mock mode (moto), we can't use reservation-id filter
             # Instead, look for instances with our RequestId tag
@@ -348,12 +366,16 @@ class RunInstancesHandler(AWSHandler):
 
             # Get all instances and filter by tags
             response = self.aws_client.ec2_client.describe_instances()
-            self._logger.info(f"FALLBACK: Found {len(response.get('Reservations', []))} total reservations")
+            self._logger.info(
+                f"FALLBACK: Found {len(response.get('Reservations', []))} total reservations"
+            )
 
             matching_instances = []
             for reservation in response.get("Reservations", []):
                 reservation_id = reservation["ReservationId"]
-                self._logger.info(f"FALLBACK: Checking reservation {reservation_id} against targets {resource_ids}")
+                self._logger.info(
+                    f"FALLBACK: Checking reservation {reservation_id} against targets {resource_ids}"
+                )
 
                 # Check if this reservation matches any of our resource IDs
                 if reservation_id in resource_ids:
@@ -366,7 +388,11 @@ class RunInstancesHandler(AWSHandler):
                             "State": instance["State"]["Name"],
                             "PrivateIpAddress": instance.get("PrivateIpAddress"),
                             "PublicIpAddress": instance.get("PublicIpAddress"),
-                            "LaunchTime": (instance["LaunchTime"].isoformat() if instance.get("LaunchTime") else None),
+                            "LaunchTime": (
+                                instance["LaunchTime"].isoformat()
+                                if instance.get("LaunchTime")
+                                else None
+                            ),
                             "Tags": instance.get("Tags", []),
                             "InstanceType": instance["InstanceType"],
                         }

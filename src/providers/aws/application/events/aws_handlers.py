@@ -21,7 +21,9 @@ def handle_aws_client_operation(event: DomainEvent) -> None:
     )
 
     # Use list and join for better performance
-    message_parts = [f"AWS operation: {fields['service']}.{fields['operation']} | Success: {fields['success']}"]
+    message_parts = [
+        f"AWS operation: {fields['service']}.{fields['operation']} | Success: {fields['success']}"
+    ]
     if fields["region"]:
         message_parts.append(f"Region: {fields['region']}")
     if fields["request_id"]:
@@ -62,7 +64,9 @@ def handle_aws_credentials_event(event: DomainEvent) -> None:
     """Handle AWS credentials events."""
     from src.application.events.handlers.system_handlers import system_handler
 
-    fields = system_handler.extract_fields(event, {"event_type": "unknown", "profile": None, "region": None})
+    fields = system_handler.extract_fields(
+        event, {"event_type": "unknown", "profile": None, "region": None}
+    )
 
     message = f"AWS credentials: {fields['event_type']}"
     if fields["profile"]:

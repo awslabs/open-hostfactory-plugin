@@ -88,7 +88,8 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
             templates_data = formatted_response.get("templates", [])
         else:
             templates_data = [
-                template.model_dump() if hasattr(template, "model_dump") else template for template in templates
+                template.model_dump() if hasattr(template, "model_dump") else template
+                for template in templates
             ]
 
         return {
@@ -146,7 +147,9 @@ async def handle_get_template(args: argparse.Namespace) -> Dict[str, Any]:
         if template:
             return {
                 "success": True,
-                "template": (template.model_dump() if hasattr(template, "model_dump") else template),
+                "template": (
+                    template.model_dump() if hasattr(template, "model_dump") else template
+                ),
                 "message": f"Retrieved template {template_id} successfully",
             }
         else:
@@ -454,8 +457,12 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
         return {
             "success": True,
             "valid": is_valid,
-            "validation_errors": (validation_result.errors if hasattr(validation_result, "errors") else []),
-            "validation_warnings": (validation_result.warnings if hasattr(validation_result, "warnings") else []),
+            "validation_errors": (
+                validation_result.errors if hasattr(validation_result, "errors") else []
+            ),
+            "validation_warnings": (
+                validation_result.warnings if hasattr(validation_result, "warnings") else []
+            ),
             "template_id": template_id,
             "message": "Validation completed successfully",
         }

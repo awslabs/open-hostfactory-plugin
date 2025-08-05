@@ -86,7 +86,9 @@ class AWSAMIResolver(ImageResolver):
             ami_id = response["Parameter"]["Value"]
 
             if not ami_id.startswith("ami-"):
-                raise ValueError(f"SSM parameter {ssm_path} did not return a valid AMI ID: {ami_id}")
+                raise ValueError(
+                    f"SSM parameter {ssm_path} did not return a valid AMI ID: {ami_id}"
+                )
 
             return ami_id
 

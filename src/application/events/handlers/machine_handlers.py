@@ -85,7 +85,10 @@ class MachineTerminatedHandler(BaseLoggingEventHandler[DomainEvent]):
         """Format machine terminated log message."""
         reason = getattr(event, "termination_reason", "unknown")
 
-        return f"Machine terminated: {getattr(event, 'aggregate_id', 'unknown')} | " f"Reason: {reason}"
+        return (
+            f"Machine terminated: {getattr(event, 'aggregate_id', 'unknown')} | "
+            f"Reason: {reason}"
+        )
 
     def get_log_level(self, event: DomainEvent) -> str:
         """Get log level - warnings for unexpected terminations."""

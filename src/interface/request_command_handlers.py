@@ -110,7 +110,9 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
     metadata = getattr(args, "metadata", {})
     metadata["dry_run"] = is_dry_run_active()
 
-    command = CreateRequestCommand(template_id=template_id, requested_count=int(machine_count), metadata=metadata)
+    command = CreateRequestCommand(
+        template_id=template_id, requested_count=int(machine_count), metadata=metadata
+    )
 
     # Execute command and get request ID - let exceptions bubble up
     request_id = await command_bus.execute(command)
@@ -135,7 +137,9 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
 
         # Return success response in HostFactory format with resource ID info
         if scheduler_strategy:
-            return scheduler_strategy.convert_domain_to_hostfactory_output("requestMachines", request_data)
+            return scheduler_strategy.convert_domain_to_hostfactory_output(
+                "requestMachines", request_data
+            )
         else:
             # Fallback to HostFactory format if no scheduler strategy
             resource_id_msg = f" Resource ID: {resource_ids[0]}" if resource_ids else ""
@@ -149,7 +153,9 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
 
         container.get(LoggingPort).warning(f"Could not get request details for resource ID: {e}")
         if scheduler_strategy:
-            return scheduler_strategy.convert_domain_to_hostfactory_output("requestMachines", request_id)
+            return scheduler_strategy.convert_domain_to_hostfactory_output(
+                "requestMachines", request_id
+            )
         else:
             return {
                 "requestId": str(request_id),

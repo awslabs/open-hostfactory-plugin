@@ -61,7 +61,10 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
 
             # Navigate to AWS handlers in configuration
             aws_handlers = (
-                raw_config.get("provider", {}).get("provider_defaults", {}).get("aws", {}).get("handlers", {})
+                raw_config.get("provider", {})
+                .get("provider_defaults", {})
+                .get("aws", {})
+                .get("handlers", {})
             )
 
             supported_apis = list(aws_handlers.keys())
@@ -93,7 +96,10 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
 
             # Navigate to AWS handlers in configuration
             aws_handlers = (
-                raw_config.get("provider", {}).get("provider_defaults", {}).get("aws", {}).get("handlers", {})
+                raw_config.get("provider", {})
+                .get("provider_defaults", {})
+                .get("aws", {})
+                .get("handlers", {})
             )
 
             return list(aws_handlers.keys())
@@ -207,7 +213,9 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
             is_valid = fleet_type in valid_types
 
             if not is_valid:
-                self._logger.debug(f"AWS fleet type validation failed: {fleet_type} not valid for {api}")
+                self._logger.debug(
+                    f"AWS fleet type validation failed: {fleet_type} not valid for {api}"
+                )
 
             return is_valid
 
@@ -242,7 +250,9 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
                     if fleet_type:
                         validated_fields.append("fleet_type")
                         if not self.validate_fleet_type_for_api(fleet_type, provider_api):
-                            errors.append(f"Fleet type '{fleet_type}' is not compatible with AWS API '{provider_api}'")
+                            errors.append(
+                                f"Fleet type '{fleet_type}' is not compatible with AWS API '{provider_api}'"
+                            )
 
             # Validate AWS-specific fields
             self._validate_aws_specific_fields(template_config, errors, warnings, validated_fields)

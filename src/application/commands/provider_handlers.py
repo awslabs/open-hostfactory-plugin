@@ -32,7 +32,9 @@ from src.providers.base.strategy import (
 
 
 @command_handler(SelectProviderStrategyCommand)
-class SelectProviderStrategyHandler(BaseCommandHandler[SelectProviderStrategyCommand, Dict[str, Any]]):
+class SelectProviderStrategyHandler(
+    BaseCommandHandler[SelectProviderStrategyCommand, Dict[str, Any]]
+):
     """Handler for selecting optimal provider strategy."""
 
     def __init__(
@@ -70,7 +72,9 @@ class SelectProviderStrategyHandler(BaseCommandHandler[SelectProviderStrategyCom
                 raise ValueError("No provider strategies available")
 
             # Select optimal strategy based on criteria
-            selection_result = selector.select(available_strategies, command.selection_criteria, command.operation_type)
+            selection_result = selector.select(
+                available_strategies, command.selection_criteria, command.operation_type
+            )
 
             if not selection_result.selected_strategy:
                 raise ValueError("No suitable provider strategy found")
@@ -99,7 +103,9 @@ class SelectProviderStrategyHandler(BaseCommandHandler[SelectProviderStrategyCom
 
 
 @command_handler(ExecuteProviderOperationCommand)
-class ExecuteProviderOperationHandler(BaseCommandHandler[ExecuteProviderOperationCommand, ProviderResult]):
+class ExecuteProviderOperationHandler(
+    BaseCommandHandler[ExecuteProviderOperationCommand, ProviderResult]
+):
     """Handler for executing provider operations through strategy pattern."""
 
     def __init__(
@@ -129,7 +135,9 @@ class ExecuteProviderOperationHandler(BaseCommandHandler[ExecuteProviderOperatio
             # Execute operation through provider context
             if command.strategy_override:
                 # Use specific strategy if override provided
-                result = self._provider_context.execute_with_strategy(command.strategy_override, operation)
+                result = self._provider_context.execute_with_strategy(
+                    command.strategy_override, operation
+                )
             else:
                 # Use context's strategy selection
                 result = self._provider_context.execute_operation(operation)
@@ -172,7 +180,9 @@ class ExecuteProviderOperationHandler(BaseCommandHandler[ExecuteProviderOperatio
 
 
 @command_handler(RegisterProviderStrategyCommand)
-class RegisterProviderStrategyHandler(BaseCommandHandler[RegisterProviderStrategyCommand, Dict[str, Any]]):
+class RegisterProviderStrategyHandler(
+    BaseCommandHandler[RegisterProviderStrategyCommand, Dict[str, Any]]
+):
     """Handler for registering new provider strategies."""
 
     def __init__(
@@ -282,7 +292,9 @@ class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand
             old_status = self._provider_context.check_strategy_health(command.provider_name)
 
             # Update health status in context
-            self._provider_context.update_provider_health(command.provider_name, command.health_status)
+            self._provider_context.update_provider_health(
+                command.provider_name, command.health_status
+            )
 
             # Publish health change event if status changed
             if old_status is None or old_status.is_healthy != command.health_status.is_healthy:
@@ -309,7 +321,9 @@ class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand
 
 
 @command_handler(ConfigureProviderStrategyCommand)
-class ConfigureProviderStrategyHandler(BaseCommandHandler[ConfigureProviderStrategyCommand, Dict[str, Any]]):
+class ConfigureProviderStrategyHandler(
+    BaseCommandHandler[ConfigureProviderStrategyCommand, Dict[str, Any]]
+):
     """Handler for configuring provider strategy policies."""
 
     def __init__(

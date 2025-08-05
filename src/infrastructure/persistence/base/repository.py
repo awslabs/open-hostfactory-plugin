@@ -106,7 +106,9 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
         """
         try:
             if hasattr(self.entity_class, "model_validate"):
-                return self.entity_class.model_validate(entity_dict)  # Use Pydantic's deserialization
+                return self.entity_class.model_validate(
+                    entity_dict
+                )  # Use Pydantic's deserialization
             elif hasattr(self.entity_class, "from_dict"):
                 return self.entity_class.from_dict(entity_dict)  # Fallback
             else:
@@ -454,7 +456,9 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             if entity_batch:
                 self.storage_strategy.save_batch(entity_batch)
 
-                self.logger.debug(f"Saved batch of { len(entity_batch)} { self.entity_class.__name__} entities")
+                self.logger.debug(
+                    f"Saved batch of { len(entity_batch)} { self.entity_class.__name__} entities"
+                )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
             raise ValueError(f"Validation error: {e}")
@@ -487,7 +491,9 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             if entity_id_str in self._version_map:
                 del self._version_map[entity_id_str]
 
-        self.logger.debug(f"Deleted batch of { len(entity_id_strs)} { self.entity_class.__name__} entities")
+        self.logger.debug(
+            f"Deleted batch of { len(entity_id_strs)} { self.entity_class.__name__} entities"
+        )
 
     def clear_cache(self) -> None:
         """Clear the entity cache."""

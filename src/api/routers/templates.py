@@ -80,7 +80,9 @@ async def list_templates(
             raise HTTPException(status_code=500, detail="QueryBus not available")
 
         # Create and execute query through CQRS bus
-        query = ListTemplatesQuery(provider_api=provider_api, active_only=True, include_configuration=False)
+        query = ListTemplatesQuery(
+            provider_api=provider_api, active_only=True, include_configuration=False
+        )
 
         templates = query_bus.execute(query)
 
@@ -88,7 +90,8 @@ async def list_templates(
             status_code=200,
             content={
                 "templates": [
-                    (template.model_dump() if hasattr(template, "model_dump") else template) for template in templates
+                    (template.model_dump() if hasattr(template, "model_dump") else template)
+                    for template in templates
                 ],
                 "total_count": len(templates),
                 "timestamp": None,  # Could add timestamp from query result if needed
@@ -128,7 +131,9 @@ async def get_template(
             return JSONResponse(
                 status_code=200,
                 content={
-                    "template": (template.model_dump() if hasattr(template, "model_dump") else template),
+                    "template": (
+                        template.model_dump() if hasattr(template, "model_dump") else template
+                    ),
                     "timestamp": None,
                 },
             )
@@ -321,8 +326,12 @@ async def validate_template(template_data: Dict[str, Any] = TEMPLATE_DATA_BODY) 
             content={
                 "valid": is_valid,
                 "template_id": template_data.get("template_id", "validation-template"),
-                "validation_errors": (validation_result.errors if hasattr(validation_result, "errors") else []),
-                "validation_warnings": (validation_result.warnings if hasattr(validation_result, "warnings") else []),
+                "validation_errors": (
+                    validation_result.errors if hasattr(validation_result, "errors") else []
+                ),
+                "validation_warnings": (
+                    validation_result.warnings if hasattr(validation_result, "warnings") else []
+                ),
                 "timestamp": None,
             },
         )

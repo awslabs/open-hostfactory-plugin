@@ -28,7 +28,9 @@ class RequestContext:
         self.metadata: Dict[str, Any] = {}
 
 
-class BaseInfrastructureHandler(Generic[TRequest, TResponse], InfrastructureHandler[TRequest, TResponse], ABC):
+class BaseInfrastructureHandler(
+    Generic[TRequest, TResponse], InfrastructureHandler[TRequest, TResponse], ABC
+):
     """
     Base infrastructure handler following CQRS architecture patterns.
 
@@ -91,7 +93,9 @@ class BaseInfrastructureHandler(Generic[TRequest, TResponse], InfrastructureHand
             self._record_success_metrics(request_type, duration)
 
             if self.logger:
-                self.logger.info(f"Infrastructure request processed successfully: {request_type} ({ duration:.3f}s)")
+                self.logger.info(
+                    f"Infrastructure request processed successfully: {request_type} ({ duration:.3f}s)"
+                )
 
             return response
 
@@ -113,7 +117,9 @@ class BaseInfrastructureHandler(Generic[TRequest, TResponse], InfrastructureHand
                 )
 
             if self.logger:
-                self.logger.error(f"Infrastructure request processing failed: {request_type} - {str(e)}")
+                self.logger.error(
+                    f"Infrastructure request processing failed: {request_type} - {str(e)}"
+                )
 
             # Re-raise for upstream handling
             raise
@@ -168,7 +174,9 @@ class BaseInfrastructureHandler(Generic[TRequest, TResponse], InfrastructureHand
         metrics["success_count"] += 1
         metrics["total_duration"] += duration
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        metrics["avg_duration"] = (
+            metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        )
 
     def _record_failure_metrics(self, request_type: str, duration: float, error: Exception) -> None:
         """Record failure metrics for monitoring."""
@@ -186,7 +194,9 @@ class BaseInfrastructureHandler(Generic[TRequest, TResponse], InfrastructureHand
         metrics["total_duration"] += duration
         metrics["last_error"] = str(error)
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        metrics["avg_duration"] = (
+            metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        )
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get handler performance metrics."""
@@ -287,7 +297,9 @@ class BaseAPIHandler(BaseInfrastructureHandler[TRequest, TResponse]):
 
         return processed_request
 
-    async def post_process_response(self, response: TResponse, context: RequestContext) -> TResponse:
+    async def post_process_response(
+        self, response: TResponse, context: RequestContext
+    ) -> TResponse:
         """
         Post-process API response.
 

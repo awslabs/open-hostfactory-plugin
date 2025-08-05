@@ -62,7 +62,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         Returns:
             Template dictionary with defaults applied
         """
-        self.logger.debug(f"Resolving defaults for template { template_dict.get( 'template_id', 'unknown')}")
+        self.logger.debug(
+            f"Resolving defaults for template { template_dict.get( 'template_id', 'unknown')}"
+        )
 
         # Start with empty defaults
         resolved_defaults = {}
@@ -78,10 +80,14 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             if provider_type:
                 provider_type_defaults = self._get_provider_type_defaults(provider_type)
                 resolved_defaults.update(provider_type_defaults)
-                self.logger.debug(f"Applied { len(provider_type_defaults)} provider type defaults for {provider_type}")
+                self.logger.debug(
+                    f"Applied { len(provider_type_defaults)} provider type defaults for {provider_type}"
+                )
 
                 # 3. Apply provider instance defaults
-                provider_instance_defaults = self._get_provider_instance_defaults(provider_instance_name)
+                provider_instance_defaults = self._get_provider_instance_defaults(
+                    provider_instance_name
+                )
                 resolved_defaults.update(provider_instance_defaults)
                 self.logger.debug(
                     f"Applied { len(provider_instance_defaults)} provider instance defaults for {provider_instance_name}"
@@ -148,7 +154,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         self.logger.warning("No provider_api configured anywhere, using fallback 'EC2Fleet'")
         return "EC2Fleet"
 
-    def get_effective_template_defaults(self, provider_instance_name: Optional[str] = None) -> Dict[str, Any]:
+    def get_effective_template_defaults(
+        self, provider_instance_name: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Get the effective template defaults for a provider instance.
 
@@ -197,7 +205,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             for field in default_fields:
                 if field in config_dict and config_dict[field] is not None:
                     # Remove 'default_' prefix for clean field names
-                    clean_field = field.replace("default_", "") if field.startswith("default_") else field
+                    clean_field = (
+                        field.replace("default_", "") if field.startswith("default_") else field
+                    )
                     global_defaults[clean_field] = config_dict[field]
 
             return global_defaults
@@ -235,7 +245,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             return {}
 
         except Exception as e:
-            self.logger.warning(f"Could not get provider instance defaults for {provider_instance_name}: {e}")
+            self.logger.warning(
+                f"Could not get provider instance defaults for {provider_instance_name}: {e}"
+            )
             return {}
 
     def _get_provider_type(self, provider_instance_name: str) -> Optional[str]:
@@ -255,10 +267,14 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             return provider_instance_name
 
         except Exception as e:
-            self.logger.warning(f"Could not determine provider type for {provider_instance_name}: {e}")
+            self.logger.warning(
+                f"Could not determine provider type for {provider_instance_name}: {e}"
+            )
             return None
 
-    def validate_template_defaults(self, provider_instance_name: Optional[str] = None) -> Dict[str, Any]:
+    def validate_template_defaults(
+        self, provider_instance_name: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Validate template defaults configuration.
 
@@ -283,7 +299,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             essential_fields = ["provider_api", "price_type", "max_number"]
             for field in essential_fields:
                 if field not in effective_defaults:
-                    validation_result["warnings"].append(f"No default configured for essential field: {field}")
+                    validation_result["warnings"].append(
+                        f"No default configured for essential field: {field}"
+                    )
 
             # Check for AWS-specific defaults in global config
             global_defaults = self._get_global_template_defaults()
@@ -297,7 +315,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
                                 f"Consider moving to provider-specific defaults."
                             )
 
-            self.logger.info(f"Template defaults validation completed for { provider_instance_name or 'global'}")
+            self.logger.info(
+                f"Template defaults validation completed for { provider_instance_name or 'global'}"
+            )
 
         except Exception as e:
             validation_result["is_valid"] = False
@@ -324,20 +344,26 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         Returns:
             Domain template object with extensions applied
         """
-        self.logger.debug(f"Resolving template with extensions: { template_dict.get( 'template_id', 'unknown')}")
+        self.logger.debug(
+            f"Resolving template with extensions: { template_dict.get( 'template_id', 'unknown')}"
+        )
 
         # 1. Apply hierarchical defaults (existing logic)
         resolved_dict = self.resolve_template_defaults(template_dict, provider_instance_name)
 
         # 2. Determine provider type
-        provider_type = self._get_provider_type(provider_instance_name) if provider_instance_name else None
+        provider_type = (
+            self._get_provider_type(provider_instance_name) if provider_instance_name else None
+        )
 
         # 3. Apply provider extension defaults
         if provider_type:
             extension_defaults = self._get_extension_defaults(provider_type, provider_instance_name)
             # Extension defaults have lower priority than hierarchical defaults
             resolved_dict = {**extension_defaults, **resolved_dict}
-            self.logger.debug(f"Applied { len(extension_defaults)} extension defaults for {provider_type}")
+            self.logger.debug(
+                f"Applied { len(extension_defaults)} extension defaults for {provider_type}"
+            )
 
         # 4. Create appropriate template type via factory
         if self.template_factory:
@@ -358,7 +384,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             self.logger.error(f"Failed to create core template: {e}")
             raise
 
-    def _get_extension_defaults(self, provider_type: str, provider_instance_name: Optional[str]) -> Dict[str, Any]:
+    def _get_extension_defaults(
+        self, provider_type: str, provider_instance_name: Optional[str]
+    ) -> Dict[str, Any]:
         """
         Get provider extension defaults with hierarchy.
 
@@ -374,7 +402,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         try:
             # 1. Get provider type extension defaults
             if self.extension_registry.has_extension(provider_type):
-                type_extension_defaults = self.extension_registry.get_extension_defaults(provider_type)
+                type_extension_defaults = self.extension_registry.get_extension_defaults(
+                    provider_type
+                )
                 extension_defaults.update(type_extension_defaults)
                 self.logger.debug(f"Applied {len(type_extension_defaults)} type extension defaults")
 
@@ -384,7 +414,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
                     provider_instance_name, provider_type
                 )
                 extension_defaults.update(instance_extension_defaults)
-                self.logger.debug(f"Applied { len(instance_extension_defaults)} instance extension defaults")
+                self.logger.debug(
+                    f"Applied { len(instance_extension_defaults)} instance extension defaults"
+                )
 
         except Exception as e:
             self.logger.warning(f"Could not load extension defaults for {provider_type}: {e}")
@@ -416,7 +448,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
                     ):
                         # Use extension registry to process the extensions
                         if self.extension_registry.has_extension(provider_type):
-                            return self.extension_registry.get_extension_defaults(provider_type, provider.extensions)
+                            return self.extension_registry.get_extension_defaults(
+                                provider_type, provider.extensions
+                            )
                         else:
                             # Return raw extensions if no registry entry
                             return provider.extensions
@@ -424,7 +458,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
             return {}
 
         except Exception as e:
-            self.logger.warning(f"Could not get instance extension defaults for {provider_instance_name}: {e}")
+            self.logger.warning(
+                f"Could not get instance extension defaults for {provider_instance_name}: {e}"
+            )
             return {}
 
     def get_effective_template_with_extensions(
@@ -449,7 +485,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         resolved_dict = self.resolve_template_defaults(template_dict, provider_instance_name)
 
         # Apply extension defaults
-        provider_type = self._get_provider_type(provider_instance_name) if provider_instance_name else None
+        provider_type = (
+            self._get_provider_type(provider_instance_name) if provider_instance_name else None
+        )
         if provider_type:
             extension_defaults = self._get_extension_defaults(provider_type, provider_instance_name)
             resolved_dict = {**extension_defaults, **resolved_dict}
@@ -487,7 +525,9 @@ class TemplateDefaultsService(TemplateDefaultsPort):
                     validation_result["domain_validation"] = "failed"
 
             # Check for provider-specific validation
-            provider_type = self._get_provider_type(provider_instance_name) if provider_instance_name else None
+            provider_type = (
+                self._get_provider_type(provider_instance_name) if provider_instance_name else None
+            )
             if provider_type and hasattr(template, f"validate_{provider_type}"):
                 try:
                     getattr(template, f"validate_{provider_type}")()

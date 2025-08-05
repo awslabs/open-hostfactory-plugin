@@ -61,17 +61,25 @@ class SDKMethodDiscovery:
             query_handlers = get_registered_query_handlers()
             for query_type, handler_class in query_handlers.items():
                 method_name = self._query_to_method_name(query_type)
-                method_info = self._create_method_info(method_name, query_type, handler_class, "query")
+                method_info = self._create_method_info(
+                    method_name, query_type, handler_class, "query"
+                )
                 self._method_info_cache[method_name] = method_info
-                methods[method_name] = self._create_query_method_cqrs(query_bus, query_type, method_info)
+                methods[method_name] = self._create_query_method_cqrs(
+                    query_bus, query_type, method_info
+                )
 
             # Discover command handlers
             command_handlers = get_registered_command_handlers()
             for command_type, handler_class in command_handlers.items():
                 method_name = self._command_to_method_name(command_type)
-                method_info = self._create_method_info(method_name, command_type, handler_class, "command")
+                method_info = self._create_method_info(
+                    method_name, command_type, handler_class, "command"
+                )
                 self._method_info_cache[method_name] = method_info
-                methods[method_name] = self._create_command_method_cqrs(command_bus, command_type, method_info)
+                methods[method_name] = self._create_command_method_cqrs(
+                    command_bus, command_type, method_info
+                )
 
             return methods
 
@@ -90,7 +98,9 @@ class SDKMethodDiscovery:
         """
         # This method is deprecated but kept for backward compatibility
         # It should not be used in new code
-        raise NotImplementedError("discover_sdk_methods is deprecated. Use discover_cqrs_methods instead.")
+        raise NotImplementedError(
+            "discover_sdk_methods is deprecated. Use discover_cqrs_methods instead."
+        )
 
     def get_method_info(self, method_name: str) -> Optional[MethodInfo]:
         """Get information about a specific SDK method."""
@@ -192,7 +202,9 @@ class SDKMethodDiscovery:
         words = method_name.replace("_", " ").title()
         return f"{words} - {operation_type.title()} operation"
 
-    def _create_query_method_cqrs(self, query_bus, query_type: Type, method_info: MethodInfo) -> Callable:
+    def _create_query_method_cqrs(
+        self, query_bus, query_type: Type, method_info: MethodInfo
+    ) -> Callable:
         """Create SDK method for query handler using direct CQRS bus."""
 
         async def sdk_method(**kwargs):
@@ -220,7 +232,9 @@ class SDKMethodDiscovery:
 
         return sdk_method
 
-    def _create_command_method_cqrs(self, command_bus, command_type: Type, method_info: MethodInfo) -> Callable:
+    def _create_command_method_cqrs(
+        self, command_bus, command_type: Type, method_info: MethodInfo
+    ) -> Callable:
         """Create SDK method for command handler using direct CQRS bus."""
 
         async def sdk_method(**kwargs):
@@ -251,8 +265,14 @@ class SDKMethodDiscovery:
     # Legacy methods (deprecated)
     def _create_query_method(self, service, query_type: Type, method_info: MethodInfo) -> Callable:
         """Create SDK method for query handler (deprecated)."""
-        raise NotImplementedError("Legacy method deprecated. Use _create_query_method_cqrs instead.")
+        raise NotImplementedError(
+            "Legacy method deprecated. Use _create_query_method_cqrs instead."
+        )
 
-    def _create_command_method(self, service, command_type: Type, method_info: MethodInfo) -> Callable:
+    def _create_command_method(
+        self, service, command_type: Type, method_info: MethodInfo
+    ) -> Callable:
         """Create SDK method for command handler (deprecated)."""
-        raise NotImplementedError("Legacy method deprecated. Use _create_command_method_cqrs instead.")
+        raise NotImplementedError(
+            "Legacy method deprecated. Use _create_command_method_cqrs instead."
+        )

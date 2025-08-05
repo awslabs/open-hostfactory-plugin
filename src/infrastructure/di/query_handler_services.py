@@ -166,7 +166,9 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
                 GetRequestSummaryHandler,
             )
 
-            query_bus.register(GetActiveMachineCountQuery, container.get(GetActiveMachineCountHandler))
+            query_bus.register(
+                GetActiveMachineCountQuery, container.get(GetActiveMachineCountHandler)
+            )
             query_bus.register(GetRequestSummaryQuery, container.get(GetRequestSummaryHandler))
             query_bus.register(GetMachineHealthQuery, container.get(GetMachineHealthHandler))
 

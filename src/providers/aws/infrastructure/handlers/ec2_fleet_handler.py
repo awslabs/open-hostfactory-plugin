@@ -141,15 +141,20 @@ class EC2FleetHandler(AWSHandler):
                 raise ValueError  # Will be caught by the except block below
         except ValueError:
             raise AWSValidationError(
-                f"Invalid EC2 fleet type: {aws_template.fleet_type}. " f"Must be one of: {', '.join(valid_types)}"
+                f"Invalid EC2 fleet type: {aws_template.fleet_type}. "
+                f"Must be one of: {', '.join(valid_types)}"
             )
 
         # Create launch template using the new manager
-        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
+        )
 
         # Store launch template info in request (if request has this method)
         if hasattr(request, "set_launch_template_info"):
-            request.set_launch_template_info(launch_template_result.template_id, launch_template_result.version)
+            request.set_launch_template_info(
+                launch_template_result.template_id, launch_template_result.version
+            )
 
         # Create fleet configuration
         fleet_config = self._create_fleet_config(
@@ -184,14 +189,18 @@ class EC2FleetHandler(AWSHandler):
 
             # Log the response structure at debug level if no instances were found
             if not instance_ids:
-                self._logger.debug(f"No instance IDs found in response. Response structure: {response}")
+                self._logger.debug(
+                    f"No instance IDs found in response. Response structure: {response}"
+                )
 
             request.metadata["instance_ids"] = instance_ids
             self._logger.debug(f"Stored instance IDs in request metadata: {instance_ids}")
 
         return fleet_id
 
-    def _format_instance_data(self, instance_details: List[Dict[str, Any]], resource_id: str) -> List[Dict[str, Any]]:
+    def _format_instance_data(
+        self, instance_details: List[Dict[str, Any]], resource_id: str
+    ) -> List[Dict[str, Any]]:
         """Format AWS instance details to standard structure."""
         return [
             {
@@ -258,7 +267,9 @@ class EC2FleetHandler(AWSHandler):
             # Add allocation strategy if specified
             if template.allocation_strategy:
                 fleet_config["SpotOptions"] = {
-                    "AllocationStrategy": self._get_allocation_strategy(template.allocation_strategy)
+                    "AllocationStrategy": self._get_allocation_strategy(
+                        template.allocation_strategy
+                    )
                 }
 
             # Add max spot price if specified
@@ -280,7 +291,9 @@ class EC2FleetHandler(AWSHandler):
             # Add allocation strategies if specified
             if template.allocation_strategy:
                 fleet_config["SpotOptions"] = {
-                    "AllocationStrategy": self._get_allocation_strategy(template.allocation_strategy)
+                    "AllocationStrategy": self._get_allocation_strategy(
+                        template.allocation_strategy
+                    )
                 }
 
             if template.allocation_strategy_on_demand:
@@ -496,7 +509,9 @@ class EC2FleetHandler(AWSHandler):
                         FleetId=request.resource_id,
                         TargetCapacitySpecification={"TotalTargetCapacity": new_capacity},
                     )
-                    self._logger.info(f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}")
+                    self._logger.info(
+                        f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}"
+                    )
 
                 # Use consolidated AWS operations utility for instance termination
                 self.aws_ops.terminate_instances_with_fallback(

@@ -70,8 +70,12 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
             # Validate template configuration
             validation_errors = template_port.validate_template_config(command.configuration)
             if validation_errors:
-                self.logger.warning(f"Template validation failed for { command.template_id}: {validation_errors}")
-                return TemplateCommandResponse(template_id=command.template_id, validation_errors=validation_errors)
+                self.logger.warning(
+                    f"Template validation failed for { command.template_id}: {validation_errors}"
+                )
+                return TemplateCommandResponse(
+                    template_id=command.template_id, validation_errors=validation_errors
+                )
 
             # Create template aggregate
             template = Template.create(
@@ -103,8 +107,12 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
             return TemplateCommandResponse(template_id=command.template_id)
 
         except BusinessRuleError as e:
-            self.logger.error(f"Business rule violation creating template {command.template_id}: {e}")
-            return TemplateCommandResponse(template_id=command.template_id, validation_errors=[str(e)])
+            self.logger.error(
+                f"Business rule violation creating template {command.template_id}: {e}"
+            )
+            return TemplateCommandResponse(
+                template_id=command.template_id, validation_errors=[str(e)]
+            )
         except Exception as e:
             self.logger.error(f"Failed to create template {command.template_id}: {e}")
             raise
@@ -251,7 +259,9 @@ class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCo
                 # This could be expanded to check for active requests using this
                 # template
                 if template.is_in_use():
-                    raise BusinessRuleError(f"Cannot delete template { command.template_id}: template is in use")
+                    raise BusinessRuleError(
+                        f"Cannot delete template { command.template_id}: template is in use"
+                    )
 
                 # Delete template
                 uow.templates.remove(template)
@@ -265,7 +275,9 @@ class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCo
             self.logger.error(f"Template not found for deletion: {command.template_id}")
             raise
         except BusinessRuleError:
-            self.logger.error(f"Cannot delete template {command.template_id}: business rule violation")
+            self.logger.error(
+                f"Cannot delete template {command.template_id}: business rule violation"
+            )
             raise
         except Exception as e:
             self.logger.error(f"Failed to delete template {command.template_id}: {e}")
@@ -319,14 +331,18 @@ class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, Templa
 
             # Log validation results
             if validation_errors:
-                self.logger.warning(f"Template validation failed for { command.template_id}: {validation_errors}")
+                self.logger.warning(
+                    f"Template validation failed for { command.template_id}: {validation_errors}"
+                )
             else:
                 self.logger.info(f"Template validation passed for {command.template_id}")
 
             # Publish validation event (could be useful for monitoring/auditing)
             # This would be handled by the domain event system
 
-            return TemplateCommandResponse(template_id=command.template_id, validation_errors=validation_errors)
+            return TemplateCommandResponse(
+                template_id=command.template_id, validation_errors=validation_errors
+            )
 
         except Exception as e:
             self.logger.error(f"Template validation failed for {command.template_id}: {e}")

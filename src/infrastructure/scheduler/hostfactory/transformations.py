@@ -67,14 +67,20 @@ class HostFactoryTransformations:
         # Transform subnet_ids
         if "subnet_ids" in mapped_data:
             original_value = mapped_data["subnet_ids"]
-            mapped_data["subnet_ids"] = HostFactoryTransformations.transform_subnet_id(original_value)
-            logger.debug(f"HostFactory: Transformed subnet_ids: {original_value} -> {mapped_data['subnet_ids']}")
+            mapped_data["subnet_ids"] = HostFactoryTransformations.transform_subnet_id(
+                original_value
+            )
+            logger.debug(
+                f"HostFactory: Transformed subnet_ids: {original_value} -> {mapped_data['subnet_ids']}"
+            )
 
         # Transform tags
         if "tags" in mapped_data:
             original_value = mapped_data["tags"]
             mapped_data["tags"] = HostFactoryTransformations.transform_instance_tags(original_value)
-            logger.debug(f"HostFactory: Transformed tags: {original_value} -> {mapped_data['tags']}")
+            logger.debug(
+                f"HostFactory: Transformed tags: {original_value} -> {mapped_data['tags']}"
+            )
 
         # Ensure instance type consistency
         mapped_data = HostFactoryTransformations.ensure_instance_type_consistency(mapped_data)

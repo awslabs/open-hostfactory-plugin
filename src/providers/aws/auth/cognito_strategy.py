@@ -44,7 +44,10 @@ class CognitoAuthStrategy(AuthPort):
         if jwks_url:
             self.jwks_url = jwks_url
         else:
-            self.jwks_url = f"https://cognito-idp.{region}.amazonaws.com/" f"{user_pool_id}/.well-known/jwks.json"
+            self.jwks_url = (
+                f"https://cognito-idp.{region}.amazonaws.com/"
+                f"{user_pool_id}/.well-known/jwks.json"
+            )
 
         # Initialize Cognito client
         try:
@@ -203,7 +206,9 @@ class CognitoAuthStrategy(AuthPort):
             # Cognito doesn't have a direct revoke endpoint for access tokens
             # You would typically revoke the refresh token or sign out the user
             # This is a simplified implementation
-            self._logger.info("Token revocation requested (Cognito access tokens expire automatically)")
+            self._logger.info(
+                "Token revocation requested (Cognito access tokens expire automatically)"
+            )
             return True
 
         except Exception as e:

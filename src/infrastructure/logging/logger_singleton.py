@@ -50,9 +50,7 @@ class LoggerSingleton:
             if name not in self._loggers:
                 # Import the logger module's get_logger function directly to avoid
                 # recursion
-                from src.infrastructure.logging.logger import (
-                    get_logger as logger_module_get_logger,
-                )
+                from src.infrastructure.logging.logger import get_logger as logger_module_get_logger
 
                 self._loggers[name] = logger_module_get_logger(name)
             return self._loggers[name]
@@ -151,7 +149,10 @@ def register_logger_with_container() -> None:
             registry = SingletonRegistry.get_instance()
             # Check if the singleton is already registered by checking if it exists in
             # the registry's _singletons dict
-            if LoggerSingleton not in registry._singletons or registry._singletons[LoggerSingleton] is None:
+            if (
+                LoggerSingleton not in registry._singletons
+                or registry._singletons[LoggerSingleton] is None
+            ):
                 registry.register(LoggerSingleton, logger_singleton)
         except ImportError:
             # If the registry module can't be imported yet, that's okay

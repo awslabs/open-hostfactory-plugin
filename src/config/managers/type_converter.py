@@ -170,7 +170,11 @@ class ConfigTypeConverter:
 
         def deep_update(base_dict: Dict[str, Any], update_dict: Dict[str, Any]):
             for key, value in update_dict.items():
-                if key in base_dict and isinstance(base_dict[key], dict) and isinstance(value, dict):
+                if (
+                    key in base_dict
+                    and isinstance(base_dict[key], dict)
+                    and isinstance(value, dict)
+                ):
                     deep_update(base_dict[key], value)
                 else:
                     base_dict[key] = value

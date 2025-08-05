@@ -170,7 +170,9 @@ class TemplatePersistenceService:
             self.logger.error(f"Failed to load templates from {file_path}: {e}")
             return []
 
-    async def _write_templates_to_file(self, file_path: Path, templates: list[Dict[str, Any]]) -> None:
+    async def _write_templates_to_file(
+        self, file_path: Path, templates: list[Dict[str, Any]]
+    ) -> None:
         """Write templates to a file using appropriate format."""
         try:
             import json

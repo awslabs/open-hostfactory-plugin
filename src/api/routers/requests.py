@@ -50,7 +50,9 @@ async def list_requests(
     - **status**: Filter by request status (pending, running, complete, failed)
     - **limit**: Limit number of results
     """
-    result = await handler.handle(status=status, limit=limit, context={"endpoint": "/requests", "method": "GET"})
+    result = await handler.handle(
+        status=status, limit=limit, context={"endpoint": "/requests", "method": "GET"}
+    )
 
     return JSONResponse(content=result)
 

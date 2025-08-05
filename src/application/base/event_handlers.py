@@ -155,7 +155,9 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
                 try:
                     await self.event_publisher.publish(cascading_event)
                     if self.logger:
-                        self.logger.debug(f"Published cascading event: { cascading_event.__class__.__name__}")
+                        self.logger.debug(
+                            f"Published cascading event: { cascading_event.__class__.__name__}"
+                        )
                 except Exception as e:
                     if self.logger:
                         self.logger.error(f"Failed to publish cascading event: {e}")
@@ -174,7 +176,9 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
         metrics["success_count"] += 1
         metrics["total_duration"] += duration
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        metrics["avg_duration"] = (
+            metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        )
 
     def _record_failure_metrics(self, event_type: str, duration: float, error: Exception) -> None:
         """Record failure metrics for monitoring."""
@@ -192,7 +196,9 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
         metrics["total_duration"] += duration
         metrics["last_error"] = str(error)
         total_count = metrics["success_count"] + metrics["failure_count"]
-        metrics["avg_duration"] = metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        metrics["avg_duration"] = (
+            metrics["total_duration"] / total_count if total_count > 0 else 0.0
+        )
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get handler performance metrics."""

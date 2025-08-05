@@ -95,7 +95,9 @@ class MachineConfiguration(ValueObject):
         return cls(
             instance_type=data["instanceType"],
             private_ip=IPAddress(value=data["privateIpAddress"]),
-            public_ip=(IPAddress(value=data["publicIpAddress"]) if "publicIpAddress" in data else None),
+            public_ip=(
+                IPAddress(value=data["publicIpAddress"]) if "publicIpAddress" in data else None
+            ),
             provider_api=data["providerApi"],
             resource_id=data["resourceId"],
             price_type=PriceType(data.get("priceType", "ondemand")),

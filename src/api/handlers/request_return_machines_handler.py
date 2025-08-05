@@ -19,7 +19,9 @@ from src.monitoring.metrics import MetricsCollector
 
 
 @injectable
-class RequestReturnMachinesRESTHandler(BaseAPIHandler[Dict[str, Any], RequestReturnMachinesResponse]):
+class RequestReturnMachinesRESTHandler(
+    BaseAPIHandler[Dict[str, Any], RequestReturnMachinesResponse]
+):
     """API handler for returning machines."""
 
     def __init__(
@@ -252,8 +254,12 @@ class RequestReturnMachinesRESTHandler(BaseAPIHandler[Dict[str, Any], RequestRet
             response.metadata["processing_duration"] = time.time() - context.start_time
 
         # Apply scheduler strategy for format conversion if needed
-        if self._scheduler_strategy and hasattr(self._scheduler_strategy, "format_return_request_response"):
-            formatted_response = await self._scheduler_strategy.format_return_request_response(response)
+        if self._scheduler_strategy and hasattr(
+            self._scheduler_strategy, "format_return_request_response"
+        ):
+            formatted_response = await self._scheduler_strategy.format_return_request_response(
+                response
+            )
             return formatted_response
 
         return response

@@ -119,9 +119,15 @@ def example_usage():
     registry.register("azure", azure_strategy_factory, azure_config_factory)
 
     # Register multiple instances of same provider type (multi choice mode)
-    registry.register_provider_instance("aws", "aws-primary", aws_strategy_factory, aws_config_factory)
-    registry.register_provider_instance("aws", "aws-secondary", aws_strategy_factory, aws_config_factory)
-    registry.register_provider_instance("azure", "azure-backup", azure_strategy_factory, azure_config_factory)
+    registry.register_provider_instance(
+        "aws", "aws-primary", aws_strategy_factory, aws_config_factory
+    )
+    registry.register_provider_instance(
+        "aws", "aws-secondary", aws_strategy_factory, aws_config_factory
+    )
+    registry.register_provider_instance(
+        "azure", "azure-backup", azure_strategy_factory, azure_config_factory
+    )
 
     # Create strategies by type
     registry.create_strategy("aws", aws_config)

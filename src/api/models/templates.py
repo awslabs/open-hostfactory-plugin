@@ -41,10 +41,18 @@ class Template(APIRequest):
         description="Names of machines provisioned from this template",
     )
     # Additional fields for provider-specific attributes
-    pgrp_name: Optional[str] = Field(default=None, alias="pgrpName", description="Placement group name")
-    on_demand_capacity: Optional[int] = Field(default=0, alias="onDemandCapacity", description="On-demand capacity")
-    vm_types: Optional[Dict[str, int]] = Field(default=None, alias="vmTypes", description="VM types with weights")
-    instance_tags: Optional[str] = Field(default=None, alias="instanceTags", description="Instance tags")
+    pgrp_name: Optional[str] = Field(
+        default=None, alias="pgrpName", description="Placement group name"
+    )
+    on_demand_capacity: Optional[int] = Field(
+        default=0, alias="onDemandCapacity", description="On-demand capacity"
+    )
+    vm_types: Optional[Dict[str, int]] = Field(
+        default=None, alias="vmTypes", description="VM types with weights"
+    )
+    instance_tags: Optional[str] = Field(
+        default=None, alias="instanceTags", description="Instance tags"
+    )
 
 
 class GetAvailableTemplatesRequest(APIRequest):

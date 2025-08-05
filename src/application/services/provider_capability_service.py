@@ -95,7 +95,9 @@ class ProviderCapabilityService:
         Returns:
             ValidationResult with detailed validation information
         """
-        self._logger.info(f"Validating template { template.template_id} against provider {provider_instance}")
+        self._logger.info(
+            f"Validating template { template.template_id} against provider {provider_instance}"
+        )
 
         result = ValidationResult(
             is_valid=True,
@@ -111,7 +113,9 @@ class ProviderCapabilityService:
             capabilities = self._get_provider_capabilities(provider_instance)
             if not capabilities:
                 result.is_valid = False
-                result.errors.append(f"Cannot retrieve capabilities for provider {provider_instance}")
+                result.errors.append(
+                    f"Cannot retrieve capabilities for provider {provider_instance}"
+                )
                 return result
 
             # Validate core requirements
@@ -161,7 +165,9 @@ class ProviderCapabilityService:
     def _get_default_capabilities(self, provider_instance: str) -> ProviderCapabilities:
         """Get default capabilities based on provider instance name."""
         # Extract provider type from instance name
-        provider_type = provider_instance.split("-")[0] if "-" in provider_instance else provider_instance
+        provider_type = (
+            provider_instance.split("-")[0] if "-" in provider_instance else provider_instance
+        )
 
         if provider_type == "aws":
             return ProviderCapabilities(
@@ -248,12 +254,16 @@ class ProviderCapabilityService:
 
         if price_type == "spot":
             if not api_caps.get("supports_spot", False):
-                result.errors.append(f"API '{template.provider_api}' does not support spot instances")
+                result.errors.append(
+                    f"API '{template.provider_api}' does not support spot instances"
+                )
             else:
                 result.supported_features.append("Pricing: Spot instances")
         elif price_type == "ondemand":
             if not api_caps.get("supports_on_demand", True):
-                result.errors.append(f"API '{ template.provider_api}' does not support on-demand instances")
+                result.errors.append(
+                    f"API '{ template.provider_api}' does not support on-demand instances"
+                )
             else:
                 result.supported_features.append("Pricing: On-demand instances")
 
@@ -302,9 +312,13 @@ class ProviderCapabilityService:
         max_instances = api_caps.get("max_instances", float("inf"))
 
         if template.max_instances > max_instances:
-            result.errors.append(f"Requested { template.max_instances} instances exceeds API limit of {max_instances}")
+            result.errors.append(
+                f"Requested { template.max_instances} instances exceeds API limit of {max_instances}"
+            )
         else:
-            result.supported_features.append(f"Instance count: {template.max_instances} (within limit)")
+            result.supported_features.append(
+                f"Instance count: {template.max_instances} (within limit)"
+            )
 
     def get_provider_api_capabilities(self, provider_instance: str, api: str) -> Dict[str, Any]:
         """Get detailed capabilities for specific provider API."""
@@ -323,7 +337,9 @@ class ProviderCapabilityService:
 
         return capabilities.get_feature("supported_apis", [])
 
-    def check_api_compatibility(self, template: Template, provider_instances: List[str]) -> Dict[str, ValidationResult]:
+    def check_api_compatibility(
+        self, template: Template, provider_instances: List[str]
+    ) -> Dict[str, ValidationResult]:
         """Check template compatibility across multiple provider instances."""
         results = {}
 

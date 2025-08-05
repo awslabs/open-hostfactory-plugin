@@ -93,8 +93,16 @@ def format_templates_table(templates: List[Dict]) -> str:
             attributes = template.get("attributes")
             if attributes and isinstance(attributes, dict):
                 # HF format - extract from attributes
-                cpus = attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
-                ram = attributes.get("nram", ["Numeric", "N/A"])[1] if attributes.get("nram") else "N/A"
+                cpus = (
+                    attributes.get("ncpus", ["Numeric", "N/A"])[1]
+                    if attributes.get("ncpus")
+                    else "N/A"
+                )
+                ram = (
+                    attributes.get("nram", ["Numeric", "N/A"])[1]
+                    if attributes.get("nram")
+                    else "N/A"
+                )
             else:
                 # Standard format - derive from instance_type
                 instance_type = template.get("instance_type") or template.get("instanceType", "N/A")
@@ -140,7 +148,9 @@ def _format_ascii_table(templates: List[Dict]) -> str:
         attributes = template.get("attributes")
         if attributes and isinstance(attributes, dict):
             # HF format - extract from attributes
-            cpus = attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
+            cpus = (
+                attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
+            )
             ram = attributes.get("nram", ["Numeric", "N/A"])[1] if attributes.get("nram") else "N/A"
         else:
             # Standard format - derive from instance_type
@@ -218,7 +228,9 @@ def format_templates_list(templates: List[Dict]) -> str:
         attributes = template.get("attributes")
         if attributes and isinstance(attributes, dict):
             # Extract info from HF attributes format
-            cpus = attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
+            cpus = (
+                attributes.get("ncpus", ["Numeric", "N/A"])[1] if attributes.get("ncpus") else "N/A"
+            )
             ram = attributes.get("nram", ["Numeric", "N/A"])[1] if attributes.get("nram") else "N/A"
             lines.append(f"  CPUs: {cpus}")
             lines.append(f"  RAM (MB): {ram}")
@@ -284,7 +296,9 @@ def format_machines_list(machines: List[Dict]) -> str:
             or machine.get("machine_id")
             or machine.get("machineId", "N/A")
         )
-        name = machine.get("name") or machine.get("machine_name") or machine.get("machineName", "N/A")
+        name = (
+            machine.get("name") or machine.get("machine_name") or machine.get("machineName", "N/A")
+        )
         status = machine.get("status") or machine.get("state", "N/A")
         instance_type = (
             machine.get("instance_type")
@@ -292,7 +306,11 @@ def format_machines_list(machines: List[Dict]) -> str:
             or machine.get("vm_type")
             or machine.get("vmType", "N/A")
         )
-        private_ip = machine.get("private_ip") or machine.get("privateIp") or machine.get("private_ip_address", "N/A")
+        private_ip = (
+            machine.get("private_ip")
+            or machine.get("privateIp")
+            or machine.get("private_ip_address", "N/A")
+        )
 
         lines.append(f"Machine: {machine_id}")
         lines.append(f"  Name: {name}")
@@ -321,7 +339,9 @@ def format_machines_table(machines: List[Dict]) -> str:
             or machine.get("machine_id")
             or machine.get("machineId", "N/A")
         )
-        name = machine.get("name") or machine.get("machine_name") or machine.get("machineName", "N/A")
+        name = (
+            machine.get("name") or machine.get("machine_name") or machine.get("machineName", "N/A")
+        )
         status = machine.get("status") or machine.get("state", "N/A")
         instance_type = (
             machine.get("instance_type")
@@ -329,7 +349,11 @@ def format_machines_table(machines: List[Dict]) -> str:
             or machine.get("vm_type")
             or machine.get("vmType", "N/A")
         )
-        private_ip = machine.get("private_ip") or machine.get("privateIp") or machine.get("private_ip_address", "N/A")
+        private_ip = (
+            machine.get("private_ip")
+            or machine.get("privateIp")
+            or machine.get("private_ip_address", "N/A")
+        )
 
         # Truncate long values for table display
         row = [
@@ -368,7 +392,9 @@ def format_requests_table(requests: List[Dict]) -> str:
             str(status)[:10],
             str(template_id)[:15],
             str(num_requested),
-            (str(created_at)[:19] if created_at != "N/A" else str(created_at)),  # Show date/time only
+            (
+                str(created_at)[:19] if created_at != "N/A" else str(created_at)
+            ),  # Show date/time only
         ]
         rows.append(row)
 

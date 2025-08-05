@@ -73,7 +73,9 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                     processed_templates.append(processed_template)
                 except Exception as e:
                     # Skip invalid templates but log the issue
-                    self._logger.warning(f"Skipping invalid template { template.get( 'id', 'unknown')}: {e}")
+                    self._logger.warning(
+                        f"Skipping invalid template { template.get( 'id', 'unknown')}: {e}"
+                    )
                     continue
 
             return processed_templates
@@ -130,10 +132,14 @@ class HostFactorySchedulerStrategy(SchedulerPort):
 
         # Set provider API using defaults service if available, otherwise fallback
         if self.template_defaults_service:
-            mapped["provider_api"] = self.template_defaults_service.resolve_provider_api_default(template)
+            mapped["provider_api"] = self.template_defaults_service.resolve_provider_api_default(
+                template
+            )
         else:
             # Fallback to template value or default
-            mapped["provider_api"] = template.get("providerApi", template.get("provider_api", "EC2Fleet"))
+            mapped["provider_api"] = template.get(
+                "providerApi", template.get("provider_api", "EC2Fleet")
+            )
 
         # Set name (use template_id if not provided)
         if "template_id" in mapped:
@@ -194,11 +200,17 @@ class HostFactorySchedulerStrategy(SchedulerPort):
             return {"requests": [{"requestId": getattr(args, "request_id", "")}]}
         elif operation == "requestReturnMachines":
             machine_ids = getattr(args, "machine_ids", [])
-            return {"machines": [{"name": machine_id, "machineId": machine_id} for machine_id in machine_ids]}
+            return {
+                "machines": [
+                    {"name": machine_id, "machineId": machine_id} for machine_id in machine_ids
+                ]
+            }
         else:
             raise ValueError(f"Unsupported HostFactory operation: {operation}")
 
-    def convert_domain_to_hostfactory_output(self, operation: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_domain_to_hostfactory_output(
+        self, operation: str, data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Convert domain objects to HostFactory JSON output format.
 
         This method handles the conversion from internal domain objects to the expected
@@ -276,7 +288,9 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 # Handle dict format (fallback)
                 machines = self._format_machines_for_hostfactory(data.get("machines", []))
                 status = self._map_domain_status_to_hostfactory(data.get("status", "unknown"))
-                message = self._generate_status_message(data.get("status", "unknown"), len(machines))
+                message = self._generate_status_message(
+                    data.get("status", "unknown"), len(machines)
+                )
 
                 return {
                     "requests": [
@@ -362,7 +376,9 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         CPU and RAM specifications based on instance type.
         """
         # Handle both snake_case and camelCase field names
-        instance_type = template_data.get("instance_type") or template_data.get("instanceType", "t2.micro")
+        instance_type = template_data.get("instance_type") or template_data.get(
+            "instanceType", "t2.micro"
+        )
 
         # CPU/RAM mapping for common instance types
         cpu_ram_mapping = {
@@ -516,13 +532,16 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 {
                     # Domain -> HostFactory field mapping using consistent serialization
                     "requestId": serialize_enum(request.request_id) or str(request.request_id),
-                    "requestType": serialize_enum(request.request_type) or str(request.request_type),
+                    "requestType": serialize_enum(request.request_type)
+                    or str(request.request_type),
                     "templateId": str(request.template_id),
                     "maxNumber": request.requested_count,
                     "numAllocated": request.successful_count,
                     "status": serialize_enum(request.status) or str(request.status),
                     "statusMessage": request.status_message,
-                    "instanceIds": [serialize_enum(inst_id) or str(inst_id) for inst_id in request.instance_ids],
+                    "instanceIds": [
+                        serialize_enum(inst_id) or str(inst_id) for inst_id in request.instance_ids
+                    ],
                     "createdAt": request.created_at,
                     "startedAt": request.started_at,
                     "completedAt": request.completed_at,
@@ -570,7 +589,9 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         workdir = self.get_working_directory()
         return os.path.join(workdir, "data")
 
-    def _format_machines_for_hostfactory(self, machines: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _format_machines_for_hostfactory(
+        self, machines: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
         """Format machine data to exact HostFactory format per hf_docs/input-output.md."""
         formatted_machines = []
 

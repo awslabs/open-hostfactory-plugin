@@ -152,7 +152,9 @@ class InfrastructureErrorResponse(BaseDTO):
         )
 
     @classmethod
-    def from_exception(cls, exception: Exception, context: Optional[str] = None) -> "InfrastructureErrorResponse":
+    def from_exception(
+        cls, exception: Exception, context: Optional[str] = None
+    ) -> "InfrastructureErrorResponse":
         """Create infrastructure error response from exception."""
         error_code, message, category, details = cls._exception_to_components(exception)
         http_status = cls._determine_http_status(category)
@@ -324,7 +326,9 @@ class ExceptionHandler:
         with self._lock:
             self._performance_stats["total_handled"] += 1
             exc_type = type(exception).__name__
-            self._performance_stats["by_type"][exc_type] = self._performance_stats["by_type"].get(exc_type, 0) + 1
+            self._performance_stats["by_type"][exc_type] = (
+                self._performance_stats["by_type"].get(exc_type, 0) + 1
+            )
 
         # Record metrics if available
         if self.metrics:
@@ -399,7 +403,9 @@ class ExceptionHandler:
 
     # DOMAIN EXCEPTION HANDLERS (PRESERVE)
 
-    def _preserve_domain_exception(self, exc: DomainException, context: ExceptionContext, **kwargs) -> DomainException:
+    def _preserve_domain_exception(
+        self, exc: DomainException, context: ExceptionContext, **kwargs
+    ) -> DomainException:
         """Preserve domain exception with rich logging."""
         self.logger.error(
             f"Domain error in {context.operation}",
@@ -652,7 +658,9 @@ class ExceptionHandler:
 
     # PYTHON BUILT-IN EXCEPTION HANDLERS (WRAP)
 
-    def _wrap_json_decode_error(self, exc: json.JSONDecodeError, context: str = None, **kwargs) -> InfrastructureError:
+    def _wrap_json_decode_error(
+        self, exc: json.JSONDecodeError, context: str = None, **kwargs
+    ) -> InfrastructureError:
         """Wrap JSON decode error into appropriate domain exception based on context."""
         # Handle both string context and ExceptionContext object
         if hasattr(context, "operation"):
@@ -707,7 +715,9 @@ class ExceptionHandler:
                 },
             )
 
-    def _wrap_connection_error(self, exc: ConnectionError, context: str = None, **kwargs) -> InfrastructureError:
+    def _wrap_connection_error(
+        self, exc: ConnectionError, context: str = None, **kwargs
+    ) -> InfrastructureError:
         """Wrap connection error into infrastructure exception."""
         return InfrastructureError(
             message=f"Connection failed: {str(exc)}",
@@ -721,7 +731,9 @@ class ExceptionHandler:
             },
         )
 
-    def _wrap_file_not_found_error(self, exc: FileNotFoundError, context: str = None, **kwargs) -> InfrastructureError:
+    def _wrap_file_not_found_error(
+        self, exc: FileNotFoundError, context: str = None, **kwargs
+    ) -> InfrastructureError:
         """Wrap file not found error into appropriate domain exception."""
         context_lower = (context or "").lower()
 
@@ -794,7 +806,9 @@ class ExceptionHandler:
             },
         )
 
-    def _wrap_attribute_error(self, exc: AttributeError, context: str = None, **kwargs) -> InfrastructureError:
+    def _wrap_attribute_error(
+        self, exc: AttributeError, context: str = None, **kwargs
+    ) -> InfrastructureError:
         """Wrap attribute error into infrastructure exception."""
         return InfrastructureError(
             message=f"Attribute error: {str(exc)}",
@@ -808,7 +822,9 @@ class ExceptionHandler:
             },
         )
 
-    def _handle_generic_exception(self, exc: Exception, context: str = None, **kwargs) -> InfrastructureError:
+    def _handle_generic_exception(
+        self, exc: Exception, context: str = None, **kwargs
+    ) -> InfrastructureError:
         """Handle any unrecognized exception by wrapping in InfrastructureError."""
         # Handle both string context and ExceptionContext object
         if hasattr(context, "operation"):
@@ -840,7 +856,9 @@ class ExceptionHandler:
             self.logger.error(f"Error in HTTP error handler: {str(e)}")
             return self._handle_unexpected_error_http(exception)
 
-    def _get_http_handler(self, exception_type: Type[Exception]) -> Callable[[Exception], ErrorResponse]:
+    def _get_http_handler(
+        self, exception_type: Type[Exception]
+    ) -> Callable[[Exception], ErrorResponse]:
         """Get the appropriate HTTP handler for an exception type."""
         # Check for exact match first
         if exception_type in self._http_handlers:
@@ -856,23 +874,25 @@ class ExceptionHandler:
 
     def _register_http_handlers(self) -> None:
         """Register HTTP error handlers."""
-        self._http_handlers: Dict[Type[Exception], Callable[[Exception], ErrorResponse]] = {  # Domain errors
-            ValidationError: self._handle_validation_error_http,
-            EntityNotFoundError: self._handle_not_found_error_http,
-            BusinessRuleViolationError: self._handle_business_rule_error_http,
-            # Request errors
-            RequestNotFoundError: self._handle_request_not_found_http,
-            RequestValidationError: self._handle_request_validation_http,
-            # Machine errors
-            MachineNotFoundError: self._handle_machine_not_found_http,
-            MachineValidationError: self._handle_machine_validation_http,
-            # Template errors
-            TemplateNotFoundError: self._handle_template_not_found_http,
-            TemplateValidationError: self._handle_template_validation_http,
-            # Infrastructure errors (will handle AWS errors through inheritance)
-            InfrastructureError: self._handle_infrastructure_error_http,
-            ConfigurationError: self._handle_configuration_error_http,
-        }
+        self._http_handlers: Dict[Type[Exception], Callable[[Exception], ErrorResponse]] = (
+            {  # Domain errors
+                ValidationError: self._handle_validation_error_http,
+                EntityNotFoundError: self._handle_not_found_error_http,
+                BusinessRuleViolationError: self._handle_business_rule_error_http,
+                # Request errors
+                RequestNotFoundError: self._handle_request_not_found_http,
+                RequestValidationError: self._handle_request_validation_http,
+                # Machine errors
+                MachineNotFoundError: self._handle_machine_not_found_http,
+                MachineValidationError: self._handle_machine_validation_http,
+                # Template errors
+                TemplateNotFoundError: self._handle_template_not_found_http,
+                TemplateValidationError: self._handle_template_validation_http,
+                # Infrastructure errors (will handle AWS errors through inheritance)
+                InfrastructureError: self._handle_infrastructure_error_http,
+                ConfigurationError: self._handle_configuration_error_http,
+            }
+        )
 
     # HTTP ERROR HANDLERS
 
@@ -896,7 +916,9 @@ class ExceptionHandler:
             http_status=HTTPStatus.NOT_FOUND,
         )
 
-    def _handle_business_rule_error_http(self, exception: BusinessRuleViolationError) -> ErrorResponse:
+    def _handle_business_rule_error_http(
+        self, exception: BusinessRuleViolationError
+    ) -> ErrorResponse:
         """Handle business rule violations for HTTP responses."""
         return ErrorResponse(
             error_code=ErrorCode.BUSINESS_RULE_VIOLATION,

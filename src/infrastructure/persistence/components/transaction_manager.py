@@ -85,7 +85,9 @@ class MemoryTransactionManager(TransactionManager):
                 operation()
 
             self.state = TransactionState.COMMITTED
-            self.logger.debug(f"Memory transaction committed with {len(self.operations)} operations")
+            self.logger.debug(
+                f"Memory transaction committed with {len(self.operations)} operations"
+            )
         except Exception as e:
             self.state = TransactionState.FAILED
             self.logger.error(f"Memory transaction commit failed: {e}")

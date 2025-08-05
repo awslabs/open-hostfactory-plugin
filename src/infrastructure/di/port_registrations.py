@@ -70,7 +70,9 @@ def register_port_adapters(container):
             provider_capability_service=c.get_optional(ProviderCapabilityService),
         )
 
-    container.register_singleton(TemplateConfigurationManager, create_template_configuration_manager)
+    container.register_singleton(
+        TemplateConfigurationManager, create_template_configuration_manager
+    )
 
     # Register template configuration port adapter
     from src.infrastructure.adapters.template_configuration_adapter import (
@@ -84,4 +86,6 @@ def register_port_adapters(container):
             logger=c.get(LoggingPort),
         ),
     )
-    container.register_singleton(TemplateConfigurationPort, lambda c: c.get(TemplateConfigurationAdapter))
+    container.register_singleton(
+        TemplateConfigurationPort, lambda c: c.get(TemplateConfigurationAdapter)
+    )

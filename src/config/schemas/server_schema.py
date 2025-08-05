@@ -17,19 +17,25 @@ class AuthConfig(BaseModel):
     )
 
     # Bearer token configuration
-    bearer_token: Optional[Dict[str, Any]] = Field(None, description="Bearer token strategy configuration")
+    bearer_token: Optional[Dict[str, Any]] = Field(
+        None, description="Bearer token strategy configuration"
+    )
 
     # AWS IAM configuration
     iam: Optional[Dict[str, Any]] = Field(None, description="AWS IAM strategy configuration")
 
     # AWS Cognito configuration
-    cognito: Optional[Dict[str, Any]] = Field(None, description="AWS Cognito strategy configuration")
+    cognito: Optional[Dict[str, Any]] = Field(
+        None, description="AWS Cognito strategy configuration"
+    )
 
     # OAuth configuration
     oauth: Optional[Dict[str, Any]] = Field(None, description="OAuth strategy configuration")
 
     # Provider-specific auth configurations
-    provider_auth: Optional[Dict[str, Any]] = Field(None, description="Provider-specific auth configuration")
+    provider_auth: Optional[Dict[str, Any]] = Field(
+        None, description="Provider-specific auth configuration"
+    )
 
 
 class CORSConfig(BaseModel):
@@ -37,7 +43,9 @@ class CORSConfig(BaseModel):
 
     enabled: bool = Field(True, description="Enable CORS")
     origins: List[str] = Field(["*"], description="Allowed origins")
-    methods: List[str] = Field(["GET", "POST", "PUT", "DELETE", "OPTIONS"], description="Allowed methods")
+    methods: List[str] = Field(
+        ["GET", "POST", "PUT", "DELETE", "OPTIONS"], description="Allowed methods"
+    )
     headers: List[str] = Field(["*"], description="Allowed headers")
     credentials: bool = Field(False, description="Allow credentials")
 

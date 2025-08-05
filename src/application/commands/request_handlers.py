@@ -73,7 +73,9 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             self.logger.error(error_msg)
             raise ValueError(error_msg)
 
-        self.logger.debug(f"Available provider strategies: { self._provider_context.available_strategies}")
+        self.logger.debug(
+            f"Available provider strategies: { self._provider_context.available_strategies}"
+        )
 
         # Initialize request variable
         request = None
@@ -92,7 +94,9 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                 raise EntityNotFoundError("Template", command.template_id)
 
             # Select provider based on template requirements
-            selection_result = self._provider_selection_service.select_provider_for_template(template)
+            selection_result = self._provider_selection_service.select_provider_for_template(
+                template
+            )
             self.logger.info(
                 f"Selected provider: { selection_result.provider_instance} ({ selection_result.selection_reason})"
             )
@@ -132,35 +136,45 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
 
             if is_dry_run:
                 # In dry-run mode, skip actual provisioning
-                self.logger.info(f"Skipping actual provisioning for request { request.request_id} (dry-run mode)")
+                self.logger.info(
+                    f"Skipping actual provisioning for request { request.request_id} (dry-run mode)"
+                )
                 from src.domain.request.value_objects import RequestStatus
 
-                request = request.update_status(RequestStatus.COMPLETED, "Request created successfully (dry-run)")
+                request = request.update_status(
+                    RequestStatus.COMPLETED, "Request created successfully (dry-run)"
+                )
             else:
                 # Execute actual provisioning using selected provider
                 try:
-                    provisioning_result = await self._execute_provisioning(template, request, selection_result)
+                    provisioning_result = await self._execute_provisioning(
+                        template, request, selection_result
+                    )
 
                     # Update request with provisioning results
                     if provisioning_result.get("success"):
                         # Store resource IDs in request - ensure we get the actual list
                         resource_ids = provisioning_result.get("resource_ids", [])
                         self.logger.info(f"Provisioning result: {provisioning_result}")
-                        self.logger.info(f"Extracted resource_ids: {resource_ids} (type: { type(resource_ids)})")
+                        self.logger.info(
+                            f"Extracted resource_ids: {resource_ids} (type: { type(resource_ids)})"
+                        )
 
                         # Store provider API information for later handler selection
                         if not hasattr(request, "metadata"):
                             request.metadata = {}
                         request.metadata["provider_api"] = template.provider_api or "RunInstances"
-                        request.metadata["handler_used"] = provisioning_result.get("provider_data", {}).get(
-                            "handler_used", "RunInstancesHandler"
-                        )
+                        request.metadata["handler_used"] = provisioning_result.get(
+                            "provider_data", {}
+                        ).get("handler_used", "RunInstancesHandler")
                         self.logger.info(f"Stored provider API: {request.metadata['provider_api']}")
 
                         # Ensure resource_ids is actually a list
                         if isinstance(resource_ids, list):
                             for resource_id in resource_ids:
-                                self.logger.info(f"Adding resource_id: {resource_id} (type: { type(resource_id)})")
+                                self.logger.info(
+                                    f"Adding resource_id: {resource_id} (type: { type(resource_id)})"
+                                )
                                 if isinstance(resource_id, str):
                                     request = request.add_resource_id(resource_id)
                                 else:
@@ -175,7 +189,9 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                         # Create machine aggregates for each instance
                         instance_data_list = provisioning_result.get("instances", [])
                         for instance_data in instance_data_list:
-                            machine = self._create_machine_aggregate(instance_data, request, template.template_id)
+                            machine = self._create_machine_aggregate(
+                                instance_data, request, template.template_id
+                            )
 
                             # Save machine using UnitOfWork
                             with self.uow_factory.create_unit_of_work() as uow:
@@ -223,14 +239,18 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                     from src.domain.request.value_objects import RequestStatus
 
                     error_message = str(provisioning_error)
-                    request = request.update_status(RequestStatus.FAILED, f"Provisioning failed: {error_message}")
+                    request = request.update_status(
+                        RequestStatus.FAILED, f"Provisioning failed: {error_message}"
+                    )
                     # Store detailed error in metadata for interface access
                     if not hasattr(request, "metadata"):
                         request.metadata = {}
                     request.metadata["error_message"] = error_message
                     request.metadata["error_type"] = type(provisioning_error).__name__
 
-                    self.logger.error(f"Provisioning failed for request { request.request_id}: {provisioning_error}")
+                    self.logger.error(
+                        f"Provisioning failed for request { request.request_id}: {provisioning_error}"
+                    )
 
         except Exception as provisioning_error:
             # Update request status to failed if request was created
@@ -242,7 +262,9 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                     RequestStatus.FAILED,
                     f"Provisioning failed: {str(provisioning_error)}",
                 )
-                self.logger.error(f"Provisioning failed for request { request.request_id}: {provisioning_error}")
+                self.logger.error(
+                    f"Provisioning failed for request { request.request_id}: {provisioning_error}"
+                )
 
                 # Save failed request for audit trail
                 with self.uow_factory.create_unit_of_work() as uow:
@@ -328,7 +350,9 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             # FIXED: Use correct strategy identifier format (aws-{instance_name})
             # The provider_instance from selection should match the registered
             # instance name
-            strategy_identifier = f"{selection_result.provider_type}-{selection_result.provider_instance}"
+            strategy_identifier = (
+                f"{selection_result.provider_type}-{selection_result.provider_instance}"
+            )
 
             # Log available strategies for debugging
             available_strategies = self._provider_context.available_strategies
@@ -348,13 +372,17 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                 resource_ids = result.data.get("resource_ids", [])
                 instances = result.data.get("instances", [])
 
-                self.logger.info(f"Extracted resource_ids: {resource_ids} (type: { type(resource_ids)})")
+                self.logger.info(
+                    f"Extracted resource_ids: {resource_ids} (type: { type(resource_ids)})"
+                )
                 self.logger.info(f"Extracted instances: {len(instances)} instances")
 
                 # Log each resource ID for debugging
                 if resource_ids:
                     for i, resource_id in enumerate(resource_ids):
-                        self.logger.info(f"Resource ID { i+ 1}: {resource_id} (type: { type(resource_id)})")
+                        self.logger.info(
+                            f"Resource ID { i+ 1}: {resource_id} (type: { type(resource_id)})"
+                        )
 
                 return {
                     "success": True,

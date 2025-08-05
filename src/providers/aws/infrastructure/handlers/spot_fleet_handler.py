@@ -128,15 +128,20 @@ class SpotFleetHandler(AWSHandler):
                 raise ValueError  # Will be caught by the except block below
         except (ValueError, AttributeError):
             raise AWSValidationError(
-                f"Invalid Spot fleet type: {aws_template.fleet_type}. " f"Must be one of: {', '.join(valid_types)}"
+                f"Invalid Spot fleet type: {aws_template.fleet_type}. "
+                f"Must be one of: {', '.join(valid_types)}"
             )
 
         # Create launch template using the new manager
-        launch_template_result = self.launch_template_manager.create_or_update_launch_template(aws_template, request)
+        launch_template_result = self.launch_template_manager.create_or_update_launch_template(
+            aws_template, request
+        )
 
         # Store launch template info in request (if request has this method)
         if hasattr(request, "set_launch_template_info"):
-            request.set_launch_template_info(launch_template_result.template_id, launch_template_result.version)
+            request.set_launch_template_info(
+                launch_template_result.template_id, launch_template_result.version
+            )
 
         # Create spot fleet configuration
         fleet_config = self._create_spot_fleet_config(
@@ -163,7 +168,9 @@ class SpotFleetHandler(AWSHandler):
         errors = []
 
         # Log the validation start
-        self._logger.debug(f"Starting Spot Fleet prerequisites validation for template: {aws_template.template_id}")
+        self._logger.debug(
+            f"Starting Spot Fleet prerequisites validation for template: {aws_template.template_id}"
+        )
 
         # First validate common prerequisites
         try:
@@ -178,13 +185,17 @@ class SpotFleetHandler(AWSHandler):
             # For service-linked roles, we only validate the format
             if "AWSServiceRoleForEC2SpotFleet" in aws_template.fleet_role:
                 if aws_template.fleet_role != "AWSServiceRoleForEC2SpotFleet":
-                    errors.append(f"Invalid Spot Fleet service-linked role format: {aws_template.fleet_role}")
+                    errors.append(
+                        f"Invalid Spot Fleet service-linked role format: {aws_template.fleet_role}"
+                    )
             else:
                 # For custom roles, validate with IAM
                 try:
                     role_name = aws_template.fleet_role.split("/")[-1]
                     # Create IAM client directly from session
-                    iam_client = self.aws_client.session.client("iam", config=self.aws_client.boto_config)
+                    iam_client = self.aws_client.session.client(
+                        "iam", config=self.aws_client.boto_config
+                    )
                     self._retry_with_backoff(iam_client.get_role, RoleName=role_name)
                 except Exception as e:
                     errors.append(f"Invalid custom fleet role: {str(e)}")
@@ -194,14 +205,18 @@ class SpotFleetHandler(AWSHandler):
             valid_options = ["spot", "ondemand", "heterogeneous"]
             if aws_template.price_type not in valid_options:
                 errors.append(
-                    f"Invalid price type: {aws_template.price_type}. " f"Must be one of: {', '.join(valid_options)}"
+                    f"Invalid price type: {aws_template.price_type}. "
+                    f"Must be one of: {', '.join(valid_options)}"
                 )
 
         # For heterogeneous price type, validate percent_on_demand
         if (
             hasattr(aws_template, "price_type")
             and aws_template.price_type == "heterogeneous"
-            and (not hasattr(aws_template, "percent_on_demand") or aws_template.percent_on_demand is None)
+            and (
+                not hasattr(aws_template, "percent_on_demand")
+                or aws_template.percent_on_demand is None
+            )
         ):
             errors.append("percent_on_demand is required for heterogeneous price type")
 
@@ -220,7 +235,9 @@ class SpotFleetHandler(AWSHandler):
             # Validate that instance_types_ondemand has valid instance types
             for instance_type, weight in aws_template.instance_types_ondemand.items():
                 if not isinstance(weight, int) or weight <= 0:
-                    errors.append(f"Weight for on-demand instance type {instance_type} must be a positive integer")
+                    errors.append(
+                        f"Weight for on-demand instance type {instance_type} must be a positive integer"
+                    )
 
         # Validate spot price if specified
         if hasattr(aws_template, "max_price") and aws_template.max_price is not None:
@@ -250,7 +267,8 @@ class SpotFleetHandler(AWSHandler):
         import re
 
         pattern = (
-            r"^arn:aws:iam::\d{12}:role/aws-service-role/" r"spotfleet\.amazonaws\.com/AWSServiceRoleForEC2SpotFleet$"
+            r"^arn:aws:iam::\d{12}:role/aws-service-role/"
+            r"spotfleet\.amazonaws\.com/AWSServiceRoleForEC2SpotFleet$"
         )
 
         if re.match(pattern, role_arn):
@@ -399,11 +417,15 @@ class SpotFleetHandler(AWSHandler):
                         "Priority": idx + len(template.instance_types) + 1,
                         # Force this to be on-demand by not specifying SpotPrice
                     }
-                    for idx, (instance_type, weight) in enumerate(template.instance_types_ondemand.items())
+                    for idx, (instance_type, weight) in enumerate(
+                        template.instance_types_ondemand.items()
+                    )
                 ]
 
                 # Combine both types of overrides
-                fleet_config["LaunchTemplateConfigs"][0]["Overrides"] = spot_overrides + ondemand_overrides
+                fleet_config["LaunchTemplateConfigs"][0]["Overrides"] = (
+                    spot_overrides + ondemand_overrides
+                )
 
                 # Log the combined overrides
                 self._logger.debug(
@@ -429,7 +451,11 @@ class SpotFleetHandler(AWSHandler):
                 fleet_config["LaunchTemplateConfigs"][0]["Overrides"] = []
 
             # For heterogeneous price type with on-demand instances
-            if template.price_type == "heterogeneous" and template.instance_types_ondemand and template.instance_types:
+            if (
+                template.price_type == "heterogeneous"
+                and template.instance_types_ondemand
+                and template.instance_types
+            ):
                 # Create spot instance overrides with subnets
                 spot_overrides = []
                 for subnet_id in template.subnet_ids:
@@ -446,7 +472,9 @@ class SpotFleetHandler(AWSHandler):
                 # Create on-demand instance overrides with subnets
                 ondemand_overrides = []
                 for subnet_id in template.subnet_ids:
-                    for idx, (instance_type, weight) in enumerate(template.instance_types_ondemand.items()):
+                    for idx, (instance_type, weight) in enumerate(
+                        template.instance_types_ondemand.items()
+                    ):
                         override = {
                             "SubnetId": subnet_id,
                             "InstanceType": instance_type,
@@ -457,7 +485,9 @@ class SpotFleetHandler(AWSHandler):
                         ondemand_overrides.append(override)
 
                 # Combine both types of overrides
-                fleet_config["LaunchTemplateConfigs"][0]["Overrides"] = spot_overrides + ondemand_overrides
+                fleet_config["LaunchTemplateConfigs"][0]["Overrides"] = (
+                    spot_overrides + ondemand_overrides
+                )
 
                 # Log the combined overrides
                 self._logger.debug(
@@ -636,7 +666,9 @@ class SpotFleetHandler(AWSHandler):
                         SpotFleetRequestId=request.resource_id,
                         TargetCapacity=new_capacity,
                     )
-                    self._logger.info(f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}")
+                    self._logger.info(
+                        f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}"
+                    )
 
                 # Use consolidated AWS operations utility for instance termination
                 self.aws_ops.terminate_instances_with_fallback(

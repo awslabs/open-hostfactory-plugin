@@ -113,9 +113,13 @@ class DependencyResolver:
             if isinstance(e, (DependencyResolutionError, CircularDependencyError)):
                 raise
             else:
-                raise InstantiationError(cls, f"Failed to create instance of {cls.__name__}: {str(e)}")
+                raise InstantiationError(
+                    cls, f"Failed to create instance of {cls.__name__}: {str(e)}"
+                )
 
-    def _create_from_registration(self, registration: DependencyRegistration, dependency_chain: Set[Type]) -> Any:
+    def _create_from_registration(
+        self, registration: DependencyRegistration, dependency_chain: Set[Type]
+    ) -> Any:
         """Create instance from registration."""
         if registration.instance is not None:
             return registration.instance
@@ -185,7 +189,9 @@ class DependencyResolver:
         except Exception as e:
             logger.warning(f"Failed to auto-register injectable class {cls.__name__}: {e}")
 
-    def _resolve_constructor_parameters(self, cls: Type, dependency_chain: Set[Type]) -> Dict[str, Any]:
+    def _resolve_constructor_parameters(
+        self, cls: Type, dependency_chain: Set[Type]
+    ) -> Dict[str, Any]:
         """Resolve constructor parameters for a class."""
         try:
             # Get constructor signature
@@ -261,7 +267,9 @@ class DependencyResolver:
                     f"Failed to resolve constructor parameters for { cls.__name__}: { str(e)}",
                 )
 
-    def _resolve_function_parameters(self, func: Callable, dependency_chain: Set[Type]) -> Dict[str, Any]:
+    def _resolve_function_parameters(
+        self, func: Callable, dependency_chain: Set[Type]
+    ) -> Dict[str, Any]:
         """Resolve function parameters for factory functions."""
         try:
             signature = inspect.signature(func)
@@ -311,7 +319,9 @@ class DependencyResolver:
             ):
                 raise
             else:
-                raise DependencyResolutionError(type(func), f"Failed to resolve factory parameters: {str(e)}")
+                raise DependencyResolutionError(
+                    type(func), f"Failed to resolve factory parameters: {str(e)}"
+                )
 
     def _resolve_string_annotation(self, annotation: str, context_class: Type) -> Type:
         """Resolve string type annotations to actual types."""

@@ -99,7 +99,10 @@ class Application:
             # Initialize provider context based on loading mode
             if not self._container.is_lazy_loading_enabled():
                 # Eager loading - initialize immediately
-                if hasattr(self._provider_context, "initialize") and not self._provider_context.initialize():
+                if (
+                    hasattr(self._provider_context, "initialize")
+                    and not self._provider_context.initialize()
+                ):
                     self.logger.warning("Provider context initialization returned False")
             else:
                 # Lazy loading - just mark as ready, don't trigger loading
@@ -114,7 +117,9 @@ class Application:
             self._log_final_provider_info()
 
             self._initialized = True
-            self.logger.info(f"Open HostFactory Plugin initialized successfully with {self.provider_type} provider")
+            self.logger.info(
+                f"Open HostFactory Plugin initialized successfully with {self.provider_type} provider"
+            )
             return True
 
         except Exception as e:
@@ -135,7 +140,9 @@ class Application:
 
                 if mode.value == "multi":
                     self.logger.info(f"Selection policy: {unified_config.selection_policy}")
-                    self.logger.info(f"Health check interval: {unified_config.health_check_interval}s")
+                    self.logger.info(
+                        f"Health check interval: {unified_config.health_check_interval}s"
+                    )
 
             elif hasattr(config_manager, "is_provider_strategy_enabled"):
                 if config_manager.is_provider_strategy_enabled():
@@ -240,7 +247,9 @@ class Application:
                 for strategy_name in available_strategies:
                     try:
                         health_status = self._provider_context.check_strategy_health(strategy_name)
-                        is_healthy = health_status and health_status.is_healthy if health_status else False
+                        is_healthy = (
+                            health_status and health_status.is_healthy if health_status else False
+                        )
                         provider_health[strategy_name] = is_healthy
                         if is_healthy:
                             healthy_providers += 1
@@ -325,7 +334,9 @@ async def main() -> None:
     try:
         async with await create_application(config_path) as app:
             # Use existing app.logger - no need to create new logger
-            app.logger.info(f"Application started successfully with {app.provider_type.upper()} provider")
+            app.logger.info(
+                f"Application started successfully with {app.provider_type.upper()} provider"
+            )
 
             # Get provider info
             provider_info = app.get_provider_info()

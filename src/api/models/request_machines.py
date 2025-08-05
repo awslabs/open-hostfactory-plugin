@@ -10,7 +10,9 @@ from src.api.models.base import APIRequest, APIResponse
 class MachineTemplate(APIRequest):
     """Machine template request model."""
 
-    template_id: str = Field(description="Unique ID that can identify this template in the cloud provider")
+    template_id: str = Field(
+        description="Unique ID that can identify this template in the cloud provider"
+    )
     machine_count: int = Field(
         description="Number of hosts of this template to be provisioned",
         gt=0,  # Greater than 0
@@ -39,7 +41,9 @@ class Machine(APIRequest):
     result: str = Field(description="Status of this request related to this machine")
     status: Optional[str] = Field(default=None, description="Status of machine")
     private_ip_address: str = Field(description="Private IP address of the machine")
-    public_ip_address: Optional[str] = Field(default=None, description="Public IP address of the machine")
+    public_ip_address: Optional[str] = Field(
+        default=None, description="Public IP address of the machine"
+    )
     launch_time: int = Field(description="Launch time of the machine in seconds (UTC format)")
     message: Optional[str] = Field(
         default=None,

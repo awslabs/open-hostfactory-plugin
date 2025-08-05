@@ -10,7 +10,9 @@ class AMIResolutionConfig(BaseModel):
 
     enabled: bool = Field(True, description="Enable AMI resolution from SSM parameters")
     fallback_on_failure: bool = Field(True, description="Return SSM parameter if resolution fails")
-    ssm_parameter_prefix: str = Field("/hostfactory/templates/", description="SSM parameter prefix for templates")
+    ssm_parameter_prefix: str = Field(
+        "/hostfactory/templates/", description="SSM parameter prefix for templates"
+    )
 
 
 class AWSTemplateExtensionConfig(BaseModel):
@@ -35,24 +37,36 @@ class AWSTemplateExtensionConfig(BaseModel):
 
     # AWS pricing and allocation defaults
     max_spot_price: Optional[float] = Field(None, description="Maximum price for Spot instances")
-    spot_fleet_request_expiry: int = Field(30, description="Time before unfulfilled requests are canceled (minutes)")
+    spot_fleet_request_expiry: int = Field(
+        30, description="Time before unfulfilled requests are canceled (minutes)"
+    )
     allocation_strategy: str = Field("capacityOptimized", description="Strategy for Spot instances")
-    allocation_strategy_on_demand: str = Field("lowestPrice", description="Strategy for On-Demand instances")
-    percent_on_demand: int = Field(0, description="Percentage of On-Demand capacity in heterogeneous")
+    allocation_strategy_on_demand: str = Field(
+        "lowestPrice", description="Strategy for On-Demand instances"
+    )
+    percent_on_demand: int = Field(
+        0, description="Percentage of On-Demand capacity in heterogeneous"
+    )
     pools_count: Optional[int] = Field(None, description="Number of Spot instance pools to use")
 
     # AWS storage configuration defaults
     volume_type: str = Field("gp3", description="Type of EBS volume")
     iops: Optional[int] = Field(None, description="I/O operations per second for io1/io2 volumes")
-    root_device_volume_size: Optional[int] = Field(None, description="Size of EBS root volume in GiB")
+    root_device_volume_size: Optional[int] = Field(
+        None, description="Size of EBS root volume in GiB"
+    )
 
     # AWS instance type configuration
     vm_type: Optional[str] = Field(None, description="EC2 instance type for ondemand")
     vm_types: Optional[Dict[str, int]] = Field(
         None, description="Map of instance types and weights for spot/heterogeneous"
     )
-    vm_types_on_demand: Optional[Dict[str, int]] = Field(None, description="On-Demand instance types for heterogeneous")
-    vm_types_priority: Optional[Dict[str, int]] = Field(None, description="Priority settings for instance types")
+    vm_types_on_demand: Optional[Dict[str, int]] = Field(
+        None, description="On-Demand instance types for heterogeneous"
+    )
+    vm_types_priority: Optional[Dict[str, int]] = Field(
+        None, description="Priority settings for instance types"
+    )
 
     # AWS network configuration defaults (moved from deprecated template schema fields)
     subnet_ids: Optional[List[str]] = Field(None, description="Default subnet IDs")
@@ -71,7 +85,9 @@ class AWSTemplateExtensionConfig(BaseModel):
     def validate_security_group_ids(cls, v: Optional[List[str]]) -> Optional[List[str]]:
         """Validate security group IDs."""
         if v is not None and not v:
-            raise ValueError("If security_group_ids is provided, at least one security group ID is required")
+            raise ValueError(
+                "If security_group_ids is provided, at least one security group ID is required"
+            )
         return v
 
     @field_validator("spot_fleet_request_expiry")

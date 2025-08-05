@@ -42,7 +42,9 @@ class ReturnMachinesRequest(BaseModel):
     description="Request new machines from a template",
 )
 @handle_rest_exceptions(endpoint="/api/v1/machines/request", method="POST")
-async def request_machines(request_data: RequestMachinesRequest, handler=REQUEST_MACHINES_HANDLER) -> JSONResponse:
+async def request_machines(
+    request_data: RequestMachinesRequest, handler=REQUEST_MACHINES_HANDLER
+) -> JSONResponse:
     """
     Request new machines from a template.
 
@@ -62,7 +64,9 @@ async def request_machines(request_data: RequestMachinesRequest, handler=REQUEST
 
 @router.post("/return", summary="Return Machines", description="Return machines to the provider")
 @handle_rest_exceptions(endpoint="/api/v1/machines/return", method="POST")
-async def return_machines(request_data: ReturnMachinesRequest, handler=RETURN_MACHINES_HANDLER) -> JSONResponse:
+async def return_machines(
+    request_data: ReturnMachinesRequest, handler=RETURN_MACHINES_HANDLER
+) -> JSONResponse:
     """
     Return machines to the provider.
 

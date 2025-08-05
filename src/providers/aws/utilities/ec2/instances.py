@@ -65,7 +65,9 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
             extra={"instance_id": instance_id, "error": str(e)},
         )
 
-        raise InfrastructureError("AWS.EC2", f"Unexpected error getting EC2 instance {instance_id}: {str(e)}")
+        raise InfrastructureError(
+            "AWS.EC2", f"Unexpected error getting EC2 instance {instance_id}: {str(e)}"
+        )
 
 
 def create_instance(
@@ -158,7 +160,9 @@ def create_instance(
             },
         )
 
-        raise InfrastructureError("AWS.EC2", f"Failed to create EC2 instance: {error_code} - {error_message}")
+        raise InfrastructureError(
+            "AWS.EC2", f"Failed to create EC2 instance: {error_code} - {error_message}"
+        )
 
     except Exception as e:
         logger.error(

@@ -32,7 +32,9 @@ class RequestId(ValueObject):
     def validate_request_id(cls, v: str) -> str:
         """Validate request ID format."""
         if not cls._is_valid_format(v):
-            raise ValueError(f"Invalid request ID format: {v}. Must be in format: req-uuid or ret-uuid")
+            raise ValueError(
+                f"Invalid request ID format: {v}. Must be in format: req-uuid or ret-uuid"
+            )
         return v
 
     def __str__(self) -> str:
@@ -166,7 +168,9 @@ class MachineReference(ValueObject):
         """Check if the machine has an error message."""
         return self.error_message is not None and self.error_message.strip() != ""
 
-    def update_status(self, new_status: str, result: str, error_message: Optional[str] = None) -> "MachineReference":
+    def update_status(
+        self, new_status: str, result: str, error_message: Optional[str] = None
+    ) -> "MachineReference":
         """
         Create a new MachineReference with updated status.
 

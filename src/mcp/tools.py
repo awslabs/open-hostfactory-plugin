@@ -81,7 +81,9 @@ class OpenHFPluginMCPTools:
             ValueError: If tools not initialized
         """
         if not self._initialized:
-            raise ValueError("MCP tools not initialized. Call initialize() or use as context manager.")
+            raise ValueError(
+                "MCP tools not initialized. Call initialize() or use as context manager."
+            )
 
         return self.discovery.get_tools_list()
 
@@ -101,7 +103,9 @@ class OpenHFPluginMCPTools:
             SDKError: If tool execution fails
         """
         if not self._initialized:
-            raise ValueError("MCP tools not initialized. Call initialize() or use as context manager.")
+            raise ValueError(
+                "MCP tools not initialized. Call initialize() or use as context manager."
+            )
 
         if name not in self.tools:
             available_tools = list(self.tools.keys())

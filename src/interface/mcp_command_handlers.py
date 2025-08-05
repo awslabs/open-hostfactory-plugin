@@ -32,7 +32,11 @@ async def handle_mcp_tools_list(args) -> Dict[str, Any]:
             filtered_tools = []
             for tool in tool_list:
                 tool_def = tools.get_tool_info(tool["name"])
-                if tool_def and tool_def.method_info and tool_def.method_info.handler_type == args.type:
+                if (
+                    tool_def
+                    and tool_def.method_info
+                    and tool_def.method_info.handler_type == args.type
+                ):
                     filtered_tools.append(tool)
             tool_list = filtered_tools
 
@@ -186,7 +190,9 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
 
     except Exception as e:
         validation_result["valid"] = False
-        validation_result["checks"].append({"check": "MCP Tools Initialization", "status": "FAIL", "details": str(e)})
+        validation_result["checks"].append(
+            {"check": "MCP Tools Initialization", "status": "FAIL", "details": str(e)}
+        )
 
     # Validate configuration file if provided
     if hasattr(args, "config") and args.config:
@@ -204,7 +210,9 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                 )
             except Exception as e:
                 validation_result["valid"] = False
-                validation_result["checks"].append({"check": "Configuration File", "status": "FAIL", "details": str(e)})
+                validation_result["checks"].append(
+                    {"check": "Configuration File", "status": "FAIL", "details": str(e)}
+                )
         else:
             validation_result["valid"] = False
             validation_result["checks"].append(

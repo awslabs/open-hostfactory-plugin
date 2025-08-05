@@ -116,7 +116,9 @@ def handle_domain_exceptions(context: str, additional_context: Optional[Dict[str
     return handle_exceptions(context=context, layer="domain", additional_context=additional_context)
 
 
-def handle_application_exceptions(context: str, additional_context: Optional[Dict[str, Any]] = None):
+def handle_application_exceptions(
+    context: str, additional_context: Optional[Dict[str, Any]] = None
+):
     """
     Specialized decorator for application layer exception handling.
 
@@ -132,10 +134,14 @@ def handle_application_exceptions(context: str, additional_context: Optional[Dic
         def request_machines(self, template_id: str, count: int):
             # Application logic
     """
-    return handle_exceptions(context=context, layer="application", additional_context=additional_context)
+    return handle_exceptions(
+        context=context, layer="application", additional_context=additional_context
+    )
 
 
-def handle_infrastructure_exceptions(context: str, additional_context: Optional[Dict[str, Any]] = None):
+def handle_infrastructure_exceptions(
+    context: str, additional_context: Optional[Dict[str, Any]] = None
+):
     """
     Specialized decorator for infrastructure layer exception handling.
 
@@ -151,10 +157,14 @@ def handle_infrastructure_exceptions(context: str, additional_context: Optional[
         def get_by_id(self, entity_id: str):
             # Infrastructure logic
     """
-    return handle_exceptions(context=context, layer="infrastructure", additional_context=additional_context)
+    return handle_exceptions(
+        context=context, layer="infrastructure", additional_context=additional_context
+    )
 
 
-def handle_provider_exceptions(context: str, provider: str, additional_context: Optional[Dict[str, Any]] = None):
+def handle_provider_exceptions(
+    context: str, provider: str, additional_context: Optional[Dict[str, Any]] = None
+):
     """
     Specialized decorator for provider-specific exception handling.
 
@@ -175,7 +185,9 @@ def handle_provider_exceptions(context: str, provider: str, additional_context: 
     if additional_context:
         provider_context.update(additional_context)
 
-    return handle_exceptions(context=context, layer="infrastructure", additional_context=provider_context)
+    return handle_exceptions(
+        context=context, layer="infrastructure", additional_context=provider_context
+    )
 
 
 def handle_interface_exceptions(
@@ -203,7 +215,9 @@ def handle_interface_exceptions(
     if additional_context:
         interface_context.update(additional_context)
 
-    return handle_exceptions(context=context, layer="interface", additional_context=interface_context)
+    return handle_exceptions(
+        context=context, layer="interface", additional_context=interface_context
+    )
 
 
 def _build_context_data(

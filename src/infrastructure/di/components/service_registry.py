@@ -62,14 +62,18 @@ class ServiceRegistry:
     def register_factory(self, cls: Type[T], factory: Callable[..., T]) -> None:
         """Register a factory for creating instances."""
         with self._lock:
-            registration = DependencyRegistration(dependency_type=cls, scope=DIScope.TRANSIENT, factory=factory)
+            registration = DependencyRegistration(
+                dependency_type=cls, scope=DIScope.TRANSIENT, factory=factory
+            )
             self._registrations[cls] = registration
             logger.debug(f"Registered factory for: {cls.__name__}")
 
     def register_instance(self, cls: Type[T], instance: T) -> None:
         """Register a specific instance."""
         with self._lock:
-            registration = DependencyRegistration(dependency_type=cls, scope=DIScope.SINGLETON, instance=instance)
+            registration = DependencyRegistration(
+                dependency_type=cls, scope=DIScope.SINGLETON, instance=instance
+            )
             self._registrations[cls] = registration
             self._singletons[cls] = instance
             logger.debug(f"Registered instance: {cls.__name__}")
@@ -99,7 +103,9 @@ class ServiceRegistry:
                 implementation_type=implementation_type,
             )
             self._registrations[interface_type] = registration
-            logger.debug(f"Registered type mapping: {interface_type.__name__} -> {implementation_type.__name__}")
+            logger.debug(
+                f"Registered type mapping: {interface_type.__name__} -> {implementation_type.__name__}"
+            )
 
     def register_injectable_class(self, cls: Type[T]) -> None:
         """Register a class as injectable (auto-registration)."""
@@ -165,7 +171,9 @@ class ServiceRegistry:
                 "singleton_instances": len(self._singletons),
                 "injectable_classes": len(self._injectable_classes),
                 "scope_types": {
-                    scope.value: sum(1 for reg in self._registrations.values() if reg.scope == scope)
+                    scope.value: sum(
+                        1 for reg in self._registrations.values() if reg.scope == scope
+                    )
                     for scope in DIScope
                 },
             }

@@ -11,7 +11,9 @@ from src.domain.template.extensions import TemplateExtensionRegistry
 class TemplateFactoryPort(Protocol):
     """Port for template factory following DIP."""
 
-    def create_template(self, template_data: Dict[str, Any], provider_type: Optional[str] = None) -> Template:
+    def create_template(
+        self, template_data: Dict[str, Any], provider_type: Optional[str] = None
+    ) -> Template:
         """Create appropriate template type based on provider."""
         ...
 
@@ -24,7 +26,9 @@ class BaseTemplateFactory(ABC):
     """Abstract base template factory."""
 
     @abstractmethod
-    def create_template(self, template_data: Dict[str, Any], provider_type: Optional[str] = None) -> Template:
+    def create_template(
+        self, template_data: Dict[str, Any], provider_type: Optional[str] = None
+    ) -> Template:
         """Create appropriate template type based on provider."""
 
     @abstractmethod
@@ -99,7 +103,9 @@ class TemplateFactory(BaseTemplateFactory):
         if self._logger:
             self._logger.debug(f"Registered template class for provider: {provider_type}")
 
-    def create_template(self, template_data: Dict[str, Any], provider_type: Optional[str] = None) -> Template:
+    def create_template(
+        self, template_data: Dict[str, Any], provider_type: Optional[str] = None
+    ) -> Template:
         """Create appropriate template type based on provider.
 
         Args:
@@ -229,7 +235,9 @@ class TemplateFactory(BaseTemplateFactory):
 
         # Apply extension defaults from registry
         if provider_type and self._extension_registry.has_extension(provider_type):
-            extension_defaults = self._extension_registry.get_extension_defaults(provider_type, extension_data)
+            extension_defaults = self._extension_registry.get_extension_defaults(
+                provider_type, extension_data
+            )
             # Extension defaults have lower priority than explicit template data
             merged_data = {**extension_defaults, **merged_data}
 

@@ -79,7 +79,9 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
         self.request_repository = RequestRepository(request_strategy)
         self.template_repository = TemplateRepository(template_strategy)
 
-        self._self._logger.debug(f"Initialized DynamoDBUnitOfWork with simplified repositories in region: {region}")
+        self._self._logger.debug(
+            f"Initialized DynamoDBUnitOfWork with simplified repositories in region: {region}"
+        )
 
     @property
     def machines(self):

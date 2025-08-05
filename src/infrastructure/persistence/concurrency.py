@@ -52,7 +52,9 @@ class OptimisticConcurrencyControl:
                         )
                         raise
 
-                    self.logger.debug(f"Concurrency error detected, retrying ({retries}/{self.max_retries}): {e}")
+                    self.logger.debug(
+                        f"Concurrency error detected, retrying ({retries}/{self.max_retries}): {e}"
+                    )
                     time.sleep(self.retry_delay)
 
         return wrapper
@@ -77,7 +79,9 @@ class OptimisticConcurrencyControl:
             ConcurrencyError: If entity version conflict
         """
         if entity_id in version_map and entity.version != version_map[entity_id]:
-            raise ConcurrencyError(entity_class_name, entity_id, version_map[entity_id], entity.version)
+            raise ConcurrencyError(
+                entity_class_name, entity_id, version_map[entity_id], entity.version
+            )
 
     def increment_version(self, entity: T, entity_id: str, version_map: Dict[str, int]) -> None:
         """

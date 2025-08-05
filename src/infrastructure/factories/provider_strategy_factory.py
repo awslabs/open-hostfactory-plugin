@@ -88,7 +88,9 @@ class ProviderStrategyFactory:
         active_providers = config.get_active_providers()
 
         if not active_providers:
-            raise ConfigurationError("Provider", "No active providers found for single provider mode")
+            raise ConfigurationError(
+                "Provider", "No active providers found for single provider mode"
+            )
 
         provider_config = active_providers[0]
         self._logger.info(f"Creating single provider context with provider: {provider_config.name}")
@@ -104,7 +106,9 @@ class ProviderStrategyFactory:
         context.set_default_selection_policy(SelectionPolicy.FIRST_AVAILABLE)
         self._configure_context_settings(context, config)
 
-        self._logger.info(f"Single provider context created successfully with provider: { provider_config.name}")
+        self._logger.info(
+            f"Single provider context created successfully with provider: { provider_config.name}"
+        )
         return context
 
     def _create_multi_provider_context(self, config: ProviderConfig) -> ProviderContext:
@@ -137,7 +141,9 @@ class ProviderStrategyFactory:
                 context.register_strategy(strategy, provider_config.name)
                 self._logger.debug(f"Registered provider strategy: {provider_config.name}")
             except Exception as e:
-                self._logger.error(f"Failed to create provider strategy { provider_config.name}: { str(e)}")
+                self._logger.error(
+                    f"Failed to create provider strategy { provider_config.name}: { str(e)}"
+                )
                 # Continue with other providers, but log the error
                 continue
 
@@ -149,11 +155,15 @@ class ProviderStrategyFactory:
         self._configure_context_settings(context, config)
 
         registered_strategies = context.get_available_strategies()
-        self._logger.info(f"Multi-provider context created with {len(registered_strategies)} strategies")
+        self._logger.info(
+            f"Multi-provider context created with {len(registered_strategies)} strategies"
+        )
 
         return context
 
-    def _create_provider_strategy(self, provider_config: ProviderInstanceConfig) -> ProviderStrategy:
+    def _create_provider_strategy(
+        self, provider_config: ProviderInstanceConfig
+    ) -> ProviderStrategy:
         """
         Create individual provider strategy using registry pattern.
 
@@ -178,8 +188,12 @@ class ProviderStrategyFactory:
 
             # Try to create from named instance first (preferred for multi-instance)
             if registry.is_provider_instance_registered(provider_config.name):
-                strategy = registry.create_strategy_from_instance(provider_config.name, provider_config)
-                self._logger.debug(f"Created provider strategy from instance: {provider_config.name}")
+                strategy = registry.create_strategy_from_instance(
+                    provider_config.name, provider_config
+                )
+                self._logger.debug(
+                    f"Created provider strategy from instance: {provider_config.name}"
+                )
             else:
                 # Fallback to provider type (backward compatibility)
                 strategy = registry.create_strategy(provider_config.type, provider_config)
@@ -192,7 +206,9 @@ class ProviderStrategyFactory:
             # Cache the strategy
             self._provider_cache[cache_key] = strategy
 
-            self._logger.debug(f"Created provider strategy: { provider_config.name} ({ provider_config.type})")
+            self._logger.debug(
+                f"Created provider strategy: { provider_config.name} ({ provider_config.type})"
+            )
             return strategy
 
         except UnsupportedProviderError as e:
@@ -319,12 +335,20 @@ class ProviderStrategyFactory:
                 validation_result["errors"].append("No valid provider configuration found")
             elif mode == ProviderMode.SINGLE:
                 if len(active_providers) == 0:
-                    validation_result["errors"].append("Single provider mode requires at least one active provider")
+                    validation_result["errors"].append(
+                        "Single provider mode requires at least one active provider"
+                    )
                 elif len(active_providers) > 1:
-                    validation_result["warnings"].append("Multiple active providers in single provider mode")
-            elif mode == ProviderMode.MULTI:  # noqa: SIM102 (false positive - proper if-elif structure)
+                    validation_result["warnings"].append(
+                        "Multiple active providers in single provider mode"
+                    )
+            elif (
+                mode == ProviderMode.MULTI
+            ):  # noqa: SIM102 (false positive - proper if-elif structure)
                 if len(active_providers) < 2:
-                    validation_result["errors"].append("Multi-provider mode requires at least 2 active providers")
+                    validation_result["errors"].append(
+                        "Multi-provider mode requires at least 2 active providers"
+                    )
 
             # Validate provider configurations
             for provider_config in active_providers:
@@ -332,7 +356,9 @@ class ProviderStrategyFactory:
                     # Test provider strategy creation
                     self._create_provider_strategy(provider_config)
                 except Exception as e:
-                    validation_result["errors"].append(f"Provider '{provider_config.name}' validation failed: {str(e)}")
+                    validation_result["errors"].append(
+                        f"Provider '{provider_config.name}' validation failed: {str(e)}"
+                    )
 
             # Set overall validation status
             validation_result["valid"] = len(validation_result["errors"]) == 0

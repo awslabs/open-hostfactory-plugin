@@ -154,7 +154,9 @@ class SQLEngineFactory:
 
             # Add SSL options if provided
             if config.ssl_ca:
-                engine_kwargs["connect_args"] = {"ssl": {"ca": config.ssl_ca, "check_hostname": config.ssl_verify}}
+                engine_kwargs["connect_args"] = {
+                    "ssl": {"ca": config.ssl_ca, "check_hostname": config.ssl_verify}
+                }
                 logger.debug(f"Using SSL with CA certificate: {config.ssl_ca}")
 
         else:

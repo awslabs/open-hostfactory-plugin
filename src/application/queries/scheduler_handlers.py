@@ -18,10 +18,14 @@ from src.application.queries.scheduler import (
 
 
 @query_handler(ListSchedulerStrategiesQuery)
-class ListSchedulerStrategiesHandler(BaseQueryHandler[ListSchedulerStrategiesQuery, SchedulerStrategyListResponse]):
+class ListSchedulerStrategiesHandler(
+    BaseQueryHandler[ListSchedulerStrategiesQuery, SchedulerStrategyListResponse]
+):
     """Handler for listing available scheduler strategies."""
 
-    async def execute_query(self, query: ListSchedulerStrategiesQuery) -> SchedulerStrategyListResponse:
+    async def execute_query(
+        self, query: ListSchedulerStrategiesQuery
+    ) -> SchedulerStrategyListResponse:
         """
         Execute scheduler strategies list query.
 
@@ -54,8 +58,16 @@ class ListSchedulerStrategiesHandler(BaseQueryHandler[ListSchedulerStrategiesQue
                 name=scheduler_type,
                 active=(scheduler_type == current_strategy if query.include_current else False),
                 registered=True,
-                description=(self._get_scheduler_description(scheduler_type) if query.include_details else None),
-                capabilities=(self._get_scheduler_capabilities(scheduler_type) if query.include_details else []),
+                description=(
+                    self._get_scheduler_description(scheduler_type)
+                    if query.include_details
+                    else None
+                ),
+                capabilities=(
+                    self._get_scheduler_capabilities(scheduler_type)
+                    if query.include_details
+                    else []
+                ),
             )
             strategies.append(strategy_info)
 
@@ -98,7 +110,9 @@ class GetSchedulerConfigurationHandler(
 ):
     """Handler for getting scheduler configuration."""
 
-    async def execute_query(self, query: GetSchedulerConfigurationQuery) -> SchedulerConfigurationResponse:
+    async def execute_query(
+        self, query: GetSchedulerConfigurationQuery
+    ) -> SchedulerConfigurationResponse:
         """
         Execute scheduler configuration query.
 
@@ -149,10 +163,14 @@ class GetSchedulerConfigurationHandler(
 
 
 @query_handler(ValidateSchedulerConfigurationQuery)
-class ValidateSchedulerConfigurationHandler(BaseQueryHandler[ValidateSchedulerConfigurationQuery, ValidationResultDTO]):
+class ValidateSchedulerConfigurationHandler(
+    BaseQueryHandler[ValidateSchedulerConfigurationQuery, ValidationResultDTO]
+):
     """Handler for validating scheduler configuration."""
 
-    async def execute_query(self, query: ValidateSchedulerConfigurationQuery) -> ValidationResultDTO:
+    async def execute_query(
+        self, query: ValidateSchedulerConfigurationQuery
+    ) -> ValidationResultDTO:
         """
         Execute scheduler configuration validation query.
 
@@ -207,4 +225,6 @@ class ValidateSchedulerConfigurationHandler(BaseQueryHandler[ValidateSchedulerCo
         except Exception as e:
             errors.append(f"Validation failed: {str(e)}")
 
-        return ValidationResultDTO(is_valid=len(errors) == 0, validation_errors=errors, warnings=warnings)
+        return ValidationResultDTO(
+            is_valid=len(errors) == 0, validation_errors=errors, warnings=warnings
+        )

@@ -31,7 +31,11 @@ class SystemStartedHandler(BaseLoggingEventHandler[DomainEvent]):
         version = getattr(event, "version", "unknown")
         startup_time = getattr(event, "startup_time", "unknown")
 
-        return f"System started successfully | " f"Version: {version} | " f"Startup time: {startup_time}s"
+        return (
+            f"System started successfully | "
+            f"Version: {version} | "
+            f"Startup time: {startup_time}s"
+        )
 
     def get_log_level(self, event: DomainEvent) -> str:
         """Get log level - info for system startup."""
@@ -86,7 +90,9 @@ class ConfigurationUpdatedHandler(BaseLoggingEventHandler[DomainEvent]):
 
         keys_str = ", ".join(changed_keys) if changed_keys else "unknown"
 
-        return f"Configuration updated | " f"Section: {config_section} | " f"Changed keys: {keys_str}"
+        return (
+            f"Configuration updated | " f"Section: {config_section} | " f"Changed keys: {keys_str}"
+        )
 
     def get_log_level(self, event: DomainEvent) -> str:
         """Get log level - info for configuration updates."""

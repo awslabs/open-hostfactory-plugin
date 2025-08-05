@@ -67,7 +67,9 @@ class IAMAuthStrategy(AuthPort):
             Authentication result based on IAM permissions
         """
         if not self.enabled:
-            return AuthResult(status=AuthStatus.FAILED, error_message="IAM authentication is disabled")
+            return AuthResult(
+                status=AuthStatus.FAILED, error_message="IAM authentication is disabled"
+            )
 
         try:
             # Get caller identity
@@ -101,7 +103,9 @@ class IAMAuthStrategy(AuthPort):
             return AuthResult(status=AuthStatus.FAILED, error_message="AWS credentials not found")
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
-            return AuthResult(status=AuthStatus.FAILED, error_message=f"AWS IAM error: {error_code}")
+            return AuthResult(
+                status=AuthStatus.FAILED, error_message=f"AWS IAM error: {error_code}"
+            )
         except Exception as e:
             self._logger.error(f"IAM authentication error: {e}")
             return AuthResult(status=AuthStatus.FAILED, error_message="IAM authentication failed")
@@ -138,7 +142,9 @@ class IAMAuthStrategy(AuthPort):
             Fresh authentication result
         """
         # AWS SDK handles credential refresh automatically
-        return await self.authenticate(AuthContext(method="GET", path="/refresh", headers={}, query_params={}))
+        return await self.authenticate(
+            AuthContext(method="GET", path="/refresh", headers={}, query_params={})
+        )
 
     async def revoke_token(self, token: str) -> bool:
         """

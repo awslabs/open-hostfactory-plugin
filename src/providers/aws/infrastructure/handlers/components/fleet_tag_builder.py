@@ -34,7 +34,9 @@ class FleetTagBuilder:
         ]
 
     @staticmethod
-    def build_fleet_tags(request: Request, template: Template, fleet_name: str) -> List[Dict[str, str]]:
+    def build_fleet_tags(
+        request: Request, template: Template, fleet_name: str
+    ) -> List[Dict[str, str]]:
         """Build tags specific to fleet resources.
 
         Args:
@@ -63,7 +65,9 @@ class FleetTagBuilder:
         return FleetTagBuilder.build_common_tags(request, template)
 
     @staticmethod
-    def add_template_tags(base_tags: List[Dict[str, str]], template: Template) -> List[Dict[str, str]]:
+    def add_template_tags(
+        base_tags: List[Dict[str, str]], template: Template
+    ) -> List[Dict[str, str]]:
         """Add template-specific tags to base tags.
 
         Args:

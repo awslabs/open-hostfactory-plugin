@@ -59,7 +59,9 @@ class HandlerDiscoveryService:
             perf_config = config_manager.get_typed(PerformanceConfig)
 
             self.cache_enabled = perf_config.caching.handler_discovery.enabled
-            self.cache_file = self._resolve_cache_path(config_manager) if self.cache_enabled else None
+            self.cache_file = (
+                self._resolve_cache_path(config_manager) if self.cache_enabled else None
+            )
 
         except Exception as e:
             logger.warning(f"Failed to get caching configuration: {e}")
@@ -97,7 +99,9 @@ class HandlerDiscoveryService:
         # Try to load from cache first
         cached_result = self._try_load_from_cache(base_package)
         if cached_result:
-            logger.info(f"Using cached handler discovery ({ cached_result['total_handlers']} handlers)")
+            logger.info(
+                f"Using cached handler discovery ({ cached_result['total_handlers']} handlers)"
+            )
             self._register_handlers_from_cache(cached_result["handlers"])
             return
 
@@ -160,7 +164,9 @@ class HandlerDiscoveryService:
                 # Register handler class for DI container to create instances with
                 # proper dependency injection
                 self.container.register_singleton(handler_class)
-                logger.debug(f"Registered query handler: { handler_class.__name__} for { query_type.__name__}")
+                logger.debug(
+                    f"Registered query handler: { handler_class.__name__} for { query_type.__name__}"
+                )
             except Exception as e:
                 logger.error(f"Failed to register query handler {handler_class.__name__}: {e}")
 
@@ -171,7 +177,9 @@ class HandlerDiscoveryService:
                 # Register handler class for DI container to create instances with
                 # proper dependency injection
                 self.container.register_singleton(handler_class)
-                logger.debug(f"Registered command handler: { handler_class.__name__} for { command_type.__name__}")
+                logger.debug(
+                    f"Registered command handler: { handler_class.__name__} for { command_type.__name__}"
+                )
             except Exception as e:
                 logger.error(f"Failed to register command handler {handler_class.__name__}: {e}")
 
@@ -206,7 +214,9 @@ class HandlerDiscoveryService:
             logger.debug(f"Failed to load cache: {e}")
             return None
 
-    def _save_to_cache(self, base_package: str, stats: Dict[str, Any], discovery_time: float) -> None:
+    def _save_to_cache(
+        self, base_package: str, stats: Dict[str, Any], discovery_time: float
+    ) -> None:
         """Save handler discovery results to cache."""
         if not self.cache_enabled or not self.cache_file:
             return
@@ -239,7 +249,9 @@ class HandlerDiscoveryService:
                 json.dump(cache_data, f, indent=2)
             os.rename(temp_file, self.cache_file)
 
-            logger.debug(f"Cached handler discovery results ({ stats.get( 'total_handlers', 0)} handlers)")
+            logger.debug(
+                f"Cached handler discovery results ({ stats.get( 'total_handlers', 0)} handlers)"
+            )
 
         except Exception as e:
             logger.debug(f"Failed to save cache: {e}")
@@ -291,7 +303,9 @@ class HandlerDiscoveryService:
                     return
 
             total_registered = len(query_handlers_data) + len(command_handlers_data)
-            logger.info(f"Handler registration from cache complete. Registered {total_registered} handlers")
+            logger.info(
+                f"Handler registration from cache complete. Registered {total_registered} handlers"
+            )
 
         except Exception as e:
             logger.warning(f"Failed to register handlers from cache: {e}")
@@ -332,8 +346,12 @@ class HandlerDiscoveryService:
                 serialized[handled_type.__name__] = {
                     "class_name": handler_class.__name__,
                     "module": handler_class.__module__,
-                    "query_type_name": (handled_type.__name__ if "Query" in handled_type.__name__ else None),
-                    "command_type_name": (handled_type.__name__ if "Command" in handled_type.__name__ else None),
+                    "query_type_name": (
+                        handled_type.__name__ if "Query" in handled_type.__name__ else None
+                    ),
+                    "command_type_name": (
+                        handled_type.__name__ if "Command" in handled_type.__name__ else None
+                    ),
                 }
             except Exception as e:
                 logger.debug(f"Failed to serialize handler {handler_class}: {e}")

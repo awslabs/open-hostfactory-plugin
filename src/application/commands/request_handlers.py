@@ -556,7 +556,7 @@ class UpdateRequestStatusHandler(BaseCommandHandler[UpdateRequestStatusCommand, 
 
             self.logger.info(f"Request status updated: {command.request_id} -> {command.status}")
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found for status update: {command.request_id}")
             raise
         except Exception as e:
@@ -605,7 +605,7 @@ class CancelRequestHandler(BaseCommandHandler[CancelRequestCommand, None]):
 
             self.logger.info(f"Request canceled: {command.request_id}")
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found for cancellation: {command.request_id}")
             raise
         except Exception as e:
@@ -654,7 +654,7 @@ class CompleteRequestHandler(BaseCommandHandler[CompleteRequestCommand, None]):
 
             self.logger.info(f"Request completed: {command.request_id}")
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found for completion: {command.request_id}")
             raise
         except Exception as e:

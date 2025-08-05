@@ -150,7 +150,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             )
             return request_dto
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found: {query.request_id}")
             raise
         except Exception as e:
@@ -547,7 +547,7 @@ class GetRequestStatusQueryHandler(BaseQueryHandler[GetRequestStatusQuery, str])
                 self.logger.info(f"Request {query.request_id} status: {status}")
                 return status
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found: {query.request_id}")
             raise
         except Exception as e:
@@ -711,7 +711,7 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
             self.logger.info(f"Retrieved template: {query.template_id}")
             return domain_template
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Template not found: {query.template_id}")
             raise
         except Exception as e:
@@ -891,7 +891,7 @@ class GetMachineHandler(BaseQueryHandler[GetMachineQuery, MachineDTO]):
                 self.logger.info(f"Retrieved machine: {query.machine_id}")
                 return machine_dto
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Machine not found: {query.machine_id}")
             raise
         except Exception as e:

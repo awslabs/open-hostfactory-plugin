@@ -184,7 +184,7 @@ class SDKMethodDiscovery:
                 original_class=handler_type,
             )
 
-        except Exception as e:
+        except Exception:
             # Fallback to basic method info
             return MethodInfo(
                 name=method_name,

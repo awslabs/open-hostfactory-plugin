@@ -284,7 +284,7 @@ class GetSystemStatusHandler(BaseQueryHandler[GetSystemStatusQuery, SystemStatus
             try:
                 from src.domain.base.ports import ConfigurationPort
 
-                config_manager = self.container.get(ConfigurationPort)
+                self.container.get(ConfigurationPort)
                 system_status["components"]["configuration"] = {
                     "status": "healthy",
                     "details": "Configuration manager operational",

@@ -87,7 +87,7 @@ class TestCommandHandlersComprehensive:
 
                         # Check for common handler attributes
                         common_attrs = ["handle", "repository", "logger", "event_publisher"]
-                        has_common_attr = any(hasattr(handler, attr) for attr in common_attrs)
+                        any(hasattr(handler, attr) for attr in common_attrs)
 
                 except Exception as e:
                     # Log but don't fail - some handlers might have complex dependencies

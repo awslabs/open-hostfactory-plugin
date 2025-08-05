@@ -81,7 +81,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         machine.update_status(command.status, command.metadata)
 
         # Save changes and get extracted events
-        events = await self._machine_repository.save(machine)
+        await self._machine_repository.save(machine)
 
         # Events will be published by the base handler
         return None  # No response needed for this command

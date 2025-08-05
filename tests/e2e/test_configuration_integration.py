@@ -101,7 +101,7 @@ class TestConfigurationIntegration:
 
         # Test configuration loading
         config_manager = ConfigurationManager(config_path)
-        provider_config = config_manager.get_provider_config()
+        config_manager.get_provider_config()
 
         # Test basic configuration access for multi-provider setup
         provider_data = config_manager.get("provider", {})
@@ -121,7 +121,7 @@ class TestConfigurationIntegration:
 
         # Test configuration loading
         config_manager = ConfigurationManager(config_path)
-        provider_config = config_manager.get_provider_config()
+        config_manager.get_provider_config()
 
         # Test legacy configuration access
         provider_data = config_manager.get("provider", {})
@@ -171,7 +171,7 @@ class TestConfigurationIntegration:
         config_manager = ConfigurationManager(config_path)
 
         # Test migration by checking configuration access
-        provider_config = config_manager.get_provider_config()
+        config_manager.get_provider_config()
 
         # Verify migration result through basic configuration access
         provider_data = config_manager.get("provider", {})

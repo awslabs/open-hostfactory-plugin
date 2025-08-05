@@ -274,7 +274,7 @@ class HandlerDiscoveryService:
                     # Import the handler class
                     module = importlib.import_module(handler_info["module"])
                     handler_class = getattr(module, handler_info["class_name"])
-                    query_type = getattr(module, handler_info["query_type_name"])
+                    getattr(module, handler_info["query_type_name"])
 
                     # Register with DI container
                     self.container.register_singleton(handler_class)
@@ -298,7 +298,7 @@ class HandlerDiscoveryService:
                     # Import the handler class
                     module = importlib.import_module(handler_info["module"])
                     handler_class = getattr(module, handler_info["class_name"])
-                    command_type = getattr(module, handler_info["command_type_name"])
+                    getattr(module, handler_info["command_type_name"])
 
                     # Register with DI container
                     self.container.register_singleton(handler_class)

@@ -261,7 +261,7 @@ class TestStrategyPattern:
 
         for config in configs:
             try:
-                strategy = factory.create_strategy(config)
+                factory.create_strategy(config)
                 # Some invalid configs might still create strategies
                 # Validation might happen at execution time
             except Exception:
@@ -277,7 +277,7 @@ class TestStrategyPattern:
             mock_instance = Mock()
             MockComposite.return_value = mock_instance
 
-            strategy = MockComposite()
+            MockComposite()
 
             # Mock a failing operation
             operation = ProviderOperation(operation_type="invalid_operation", parameters={})

@@ -21,7 +21,7 @@ class TestLazyLoadingPerformance:
     def test_startup_time_under_500ms(self):
         """Test that application starts in under 500ms (Phase 3 target)."""
         start_time = time.time()
-        app = Application()
+        Application()
         startup_time = (time.time() - start_time) * 1000
 
         assert startup_time < 500, f"Startup took {startup_time:.1f}ms, expected <500ms"
@@ -48,7 +48,7 @@ class TestLazyLoadingPerformance:
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
 
         # Create application with lazy loading
-        app = Application()
+        Application()
 
         after_creation_memory = process.memory_info().rss / 1024 / 1024  # MB
         memory_increase = after_creation_memory - initial_memory
@@ -68,7 +68,7 @@ class TestLazyLoadingPerformance:
 
         # Measure first query execution (triggers CQRS setup)
         start_time = time.time()
-        query_bus = app.get_query_bus()
+        app.get_query_bus()
         first_access_time = (time.time() - start_time) * 1000
 
         assert (
@@ -86,7 +86,7 @@ class TestLazyLoadingPerformance:
         # First access (triggers lazy loading)
         start_time = time.time()
         query_bus1 = app.get_query_bus()
-        first_time = (time.time() - start_time) * 1000
+        (time.time() - start_time) * 1000
 
         # Second access (should be cached)
         start_time = time.time()
@@ -238,7 +238,7 @@ class TestPerformanceRegression:
         # Take multiple measurements for accuracy
         for _ in range(5):
             start_time = time.time()
-            app = Application()
+            Application()
             startup_time = (time.time() - start_time) * 1000
             measurements.append(startup_time)
 

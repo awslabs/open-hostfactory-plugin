@@ -279,7 +279,7 @@ class TestCleanArchitecture:
             MockAppService.return_value = mock_instance
 
             # Application service should orchestrate domain operations
-            app_service = MockAppService()
+            MockAppService()
 
             # Mock expected methods for coordinating use cases
             mock_instance.get_templates = Mock(return_value={"templates": []})

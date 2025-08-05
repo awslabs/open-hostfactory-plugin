@@ -189,7 +189,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                             else:
                                 # If we're in sync context, run the coroutine
                                 loop.run_until_complete(event_bus.publish(event))
-                        except Exception as e:
+                        except Exception:
                             # Fallback to sync publish if available
                             if hasattr(event_bus, "publish"):
                                 try:

@@ -92,7 +92,7 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
         logger = container.get(LoggingPort)
 
         # Get provider context for strategy handlers
-        provider_context = container.get(ProviderContext)
+        container.get(ProviderContext)
 
         # Register machine command handlers
         from src.application.machine.commands import (

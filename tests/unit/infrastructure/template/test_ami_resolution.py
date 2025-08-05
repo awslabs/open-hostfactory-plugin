@@ -187,7 +187,7 @@ class TestResolvingTemplateConfigurationManager:
         self.mock_base_manager.get_template_by_id.return_value = mock_template
         self.mock_ami_resolver.resolve_with_fallback.return_value = "ami-resolved123"
 
-        result = self.resolving_manager.get_template_by_id("test-template")
+        self.resolving_manager.get_template_by_id("test-template")
 
         # Verify base manager was called
         self.mock_base_manager.get_template_by_id.assert_called_once_with("test-template")

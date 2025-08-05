@@ -157,7 +157,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         try:
             # First, try normal resolution
             return self._dependency_resolver.resolve(cls, parent_type, dependency_chain)
-        except (DependencyResolutionError, UnregisteredDependencyError) as e:
+        except (DependencyResolutionError, UnregisteredDependencyError):
             # If lazy loading is enabled, try on-demand registration
             if self._lazy_config.enabled and not self._service_registry.is_registered(cls):
                 self._register_on_demand(cls)

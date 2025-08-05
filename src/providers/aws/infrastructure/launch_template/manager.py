@@ -279,7 +279,7 @@ class AWSLaunchTemplateManager:
         self._logger.info(f"Creating launch template with resolved image_id: {image_id}")
 
         # Get instance name using the helper function
-        instance_name = get_instance_name(request.request_id)
+        get_instance_name(request.request_id)
 
         launch_template_data = {
             "ImageId": image_id,

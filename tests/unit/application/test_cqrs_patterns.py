@@ -83,7 +83,7 @@ class TestCommandQuerySeparation:
         mock_template_service.get_template_by_id.return_value = Mock()
 
         # Execute command
-        result = handler.handle(command)
+        handler.handle(command)
 
         # Should have called repository save method (state modification)
         mock_repository.save.assert_called_once()
@@ -103,7 +103,7 @@ class TestCommandQuerySeparation:
         mock_repository.find_by_id.return_value = mock_request
 
         query = GetRequestStatusQuery(request_id="test-request")
-        result = handler.handle(query)
+        handler.handle(query)
 
         # Should have called repository read method only
         mock_repository.find_by_id.assert_called_once()
@@ -275,7 +275,7 @@ class TestQueryBusImplementation:
         # Parameterized query
         query = GetMachinesByRequestQuery(request_id="test-request", status="RUNNING", limit=10)
 
-        result = query_bus.dispatch(query)
+        query_bus.dispatch(query)
 
         # Handler should receive the parameterized query
         handler.handle.assert_called_once_with(query)
@@ -297,7 +297,7 @@ class TestQueryBusImplementation:
             query_bus.add_transformer(GetRequestStatusQuery, transformer)
 
         query = GetRequestStatusQuery(request_id="test-request")
-        result = query_bus.dispatch(query)
+        query_bus.dispatch(query)
 
         # Should have applied transformation if supported
         if hasattr(query_bus, "add_transformer"):
@@ -466,7 +466,7 @@ class TestQueryHandlerImplementation:
         # Query with filters
         query = GetMachinesByRequestQuery(request_id="test-request", status="RUNNING")
 
-        result = handler.handle(query)
+        handler.handle(query)
 
         # Should apply filters
         mock_repository.find_by_request_and_status.assert_called_once_with(
@@ -550,7 +550,7 @@ class TestCQRSIntegration:
         query_bus.register_handler(GetRequestStatusQuery, handler)
 
         query = GetRequestStatusQuery(request_id="test-request")
-        result = query_bus.dispatch(query)
+        query_bus.dispatch(query)
 
         # Should use read model for optimized queries
         mock_read_repository.get_request_summary.assert_called()

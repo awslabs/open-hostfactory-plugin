@@ -204,7 +204,7 @@ class TestAWSProviderComprehensive:
 
                 # Test common strategy methods
                 common_methods = ["create_machines", "terminate_machines", "get_machine_status"]
-                has_strategy_method = any(hasattr(strategy, method) for method in common_methods)
+                any(hasattr(strategy, method) for method in common_methods)
 
         except ImportError:
             pytest.skip("AWSProviderStrategy not available")

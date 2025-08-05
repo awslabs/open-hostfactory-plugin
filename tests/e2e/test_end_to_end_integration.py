@@ -113,11 +113,11 @@ def test_provider_strategy_integration():
         print("   Testing provider strategy handler integration...")
 
         # Create mock dependencies
-        mock_aws_client = Mock()
+        Mock()
         mock_logger = Mock()
-        mock_aws_ops = Mock()
-        mock_launch_template_manager = Mock()
-        mock_config = Mock()
+        Mock()
+        Mock()
+        Mock()
 
         # Test that provider strategy can be instantiated
         try:
@@ -196,7 +196,7 @@ def test_launch_template_integration():
         mock_aws_client = Mock()
         mock_logger = Mock()
         mock_aws_ops = Mock()
-        mock_config = Mock()
+        Mock()
 
         # Test launch template manager instantiation
         try:
@@ -617,7 +617,7 @@ def test_full_end_to_end_flow():
         mock_aws_client = Mock()
         mock_logger = Mock()
         mock_aws_ops = Mock()
-        mock_config = Mock()
+        Mock()
 
         # Mock AWS client methods that will be called
         mock_aws_client.ec2_client = Mock()

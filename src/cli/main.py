@@ -732,7 +732,7 @@ async def main() -> None:
 
         # Configure logging - let the application's proper logging system handle
         # everything
-        log_level = getattr(logging, args.log_level.upper())
+        getattr(logging, args.log_level.upper())
 
         logger = get_logger(__name__)
 

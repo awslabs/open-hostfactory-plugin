@@ -23,7 +23,7 @@ async def handle_list_scheduler_strategies(args) -> Dict[str, Any]:
     """
     container = get_container()
     query_bus = container.get(QueryBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.queries.system import ListSchedulerStrategiesQuery
 

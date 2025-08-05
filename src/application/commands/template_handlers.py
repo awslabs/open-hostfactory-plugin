@@ -207,7 +207,7 @@ class UpdateTemplateHandler(BaseCommandHandler[UpdateTemplateCommand, TemplateCo
 
             return TemplateCommandResponse(template_id=command.template_id)
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Template not found for update: {command.template_id}")
             raise
         except Exception as e:
@@ -274,10 +274,10 @@ class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCo
 
             return TemplateCommandResponse(template_id=command.template_id)
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Template not found for deletion: {command.template_id}")
             raise
-        except BusinessRuleError as e:
+        except BusinessRuleError:
             self.logger.error(
                 f"Cannot delete template {command.template_id}: business rule violation"
             )

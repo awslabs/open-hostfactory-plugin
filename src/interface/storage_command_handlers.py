@@ -15,7 +15,7 @@ async def handle_list_storage_strategies(args) -> Dict[str, Any]:
     """Handle list storage strategies operations."""
     container = get_container()
     query_bus = container.get(QueryBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.queries.storage import ListStorageStrategiesQuery
 

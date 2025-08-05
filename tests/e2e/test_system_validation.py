@@ -576,8 +576,8 @@ class TestSystemValidation:
 
         # Perform multiple operations
         for _ in range(100):
-            provider_info = factory.get_provider_info()
-            validation_result = factory.validate_configuration()
+            factory.get_provider_info()
+            factory.validate_configuration()
 
         end_time = time.time()
         total_time = end_time - start_time

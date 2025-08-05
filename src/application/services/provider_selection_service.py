@@ -269,7 +269,7 @@ class ProviderSelectionService:
             return selected
 
         # If multiple instances with same priority, use weighted selection
-        total_weight = sum(instance.weight for instance in highest_priority_instances)
+        sum(instance.weight for instance in highest_priority_instances)
 
         # For now, select the one with highest weight among same priority
         # In production, this would maintain round-robin state

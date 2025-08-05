@@ -235,7 +235,7 @@ class TestEnhancedEndToEnd:
         }
 
         # Execute through handler
-        resource_id = self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
+        self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
 
         # Verify launch template was created with correct data
         create_lt_call = self.mock_aws_client.ec2_client.create_launch_template.call_args
@@ -356,7 +356,7 @@ class TestEnhancedEndToEnd:
         }
 
         # Execute
-        resource_id = self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
+        self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
 
         # Verify existing template was used (no create call)
         self.mock_aws_client.ec2_client.create_launch_template.assert_not_called()

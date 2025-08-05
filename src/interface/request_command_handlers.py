@@ -176,7 +176,7 @@ async def handle_get_return_requests(args: "argparse.Namespace") -> Dict[str, An
     """
     container = get_container()
     query_bus = container.get(QueryBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.dto.queries import ListReturnRequestsQuery
 
@@ -203,7 +203,7 @@ async def handle_request_return_machines(args: "argparse.Namespace") -> Dict[str
     """
     container = get_container()
     command_bus = container.get(CommandBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.dto.commands import CreateReturnRequestCommand
 

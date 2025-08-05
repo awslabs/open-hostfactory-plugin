@@ -108,7 +108,7 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
             )
 
             # Execute command through CQRS command bus
-            result = await self._command_bus.execute(command)
+            await self._command_bus.execute(command)
 
             # Create response
             response = RequestMachinesResponse(

@@ -445,7 +445,7 @@ def test_storage_strategy_stress():
                             # Simulate read from non-existent file
                             non_existent_file = os.path.join(temp_dir, "non_existent.json")
                             with open(non_existent_file, "r") as f:
-                                data = json.load(f)
+                                json.load(f)
                             actual_performance = "unexpected_success"
                         except FileNotFoundError:
                             # Expected failure - test graceful handling

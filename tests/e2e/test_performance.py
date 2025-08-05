@@ -129,7 +129,7 @@ class TestPerformance:
         start_time = time.time()
 
         for _ in range(100):  # 100 iterations
-            provider_info = factory.get_provider_info()
+            factory.get_provider_info()
 
         end_time = time.time()
         retrieval_time = end_time - start_time
@@ -286,7 +286,7 @@ class TestPerformance:
 
         # Load configuration and create factory
         config_manager = ConfigurationManager(config_path)
-        factory = ProviderStrategyFactory(config_manager, Mock())
+        ProviderStrategyFactory(config_manager, Mock())
 
         # Get memory usage after loading
         final_memory = process.memory_info().rss / 1024 / 1024  # MB
@@ -320,13 +320,13 @@ class TestPerformance:
 
         # Measure first access (cache miss)
         start_time = time.time()
-        info1 = factory.get_provider_info()
+        factory.get_provider_info()
         first_access_time = time.time() - start_time
 
         # Measure subsequent accesses (cache hits)
         start_time = time.time()
         for _ in range(100):
-            info = factory.get_provider_info()
+            factory.get_provider_info()
         subsequent_access_time = time.time() - start_time
         avg_cached_time = subsequent_access_time / 100
 
@@ -434,8 +434,8 @@ class TestPerformance:
         start_time = time.time()
 
         for _ in range(iterations):
-            provider_info = factory.get_provider_info()
-            validation_result = factory.validate_configuration()
+            factory.get_provider_info()
+            factory.validate_configuration()
 
         end_time = time.time()
         total_time = end_time - start_time

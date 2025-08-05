@@ -70,7 +70,7 @@ class QueryBus:
             handler = self.container.get(handler_class)
             return await handler.handle(query)
 
-        except KeyError as e:
+        except KeyError:
             # Try lazy CQRS setup if handler not found and lazy loading is enabled
             if self.container.is_lazy_loading_enabled():
                 self.logger.debug(
@@ -146,7 +146,7 @@ class CommandBus:
             handler = self.container.get(handler_class)
             return await handler.handle(command)
 
-        except KeyError as e:
+        except KeyError:
             # Try lazy CQRS setup if handler not found and lazy loading is enabled
             if self.container.is_lazy_loading_enabled():
                 self.logger.debug(

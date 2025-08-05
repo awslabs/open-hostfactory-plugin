@@ -124,7 +124,7 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
                 )
                 return summary
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found: {query.request_id}")
             raise
         except Exception as e:
@@ -221,7 +221,7 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                 )
                 return health_dto
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Machine not found: {query.machine_id}")
             raise
         except Exception as e:

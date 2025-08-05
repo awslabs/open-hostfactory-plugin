@@ -130,13 +130,13 @@ def example_usage():
     )
 
     # Create strategies by type
-    aws_strategy = registry.create_strategy("aws", aws_config)
+    registry.create_strategy("aws", aws_config)
 
     # Create strategies by instance (multiple instances simultaneously)
-    primary_aws = registry.create_strategy_from_instance("aws-primary", config1)
-    secondary_aws = registry.create_strategy_from_instance("aws-secondary", config2)
-    backup_azure = registry.create_strategy_from_instance("azure-backup", config3)
+    registry.create_strategy_from_instance("aws-primary", config1)
+    registry.create_strategy_from_instance("aws-secondary", config2)
+    registry.create_strategy_from_instance("azure-backup", config3)
 
     # Create additional components
-    aws_resolver = registry.create_resolver("aws")
-    aws_validator = registry.create_validator("aws")
+    registry.create_resolver("aws")
+    registry.create_validator("aws")

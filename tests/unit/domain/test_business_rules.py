@@ -567,7 +567,6 @@ class TestCrossAggregateBusinessRules:
 
         # Invalid return request with non-existent machines
         # This validation would happen in a domain service
-        non_existent_ids = ["i-999", "i-888"]
         with pytest.raises(RequestValidationError):
             # Domain service would validate machine existence
             pass  # Placeholder for domain service validation

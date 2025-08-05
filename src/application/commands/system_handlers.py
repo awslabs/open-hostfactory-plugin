@@ -57,7 +57,7 @@ class ReloadProviderConfigHandler(BaseCommandHandler[ReloadProviderConfigCommand
                 # Fallback: create new configuration manager instance using factory
                 from src.config.manager import get_config_manager
 
-                new_config_manager = get_config_manager(command.config_path)
+                get_config_manager(command.config_path)
 
             # Get updated provider information
             if hasattr(config_manager, "get_provider_config"):

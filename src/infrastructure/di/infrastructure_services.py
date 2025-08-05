@@ -62,7 +62,6 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
         # Try to get AWS provider configuration
         try:
             provider_config = config_manager.get_provider_config()
-            aws_provider_defaults = None
 
             # Look for AWS provider defaults
             if (

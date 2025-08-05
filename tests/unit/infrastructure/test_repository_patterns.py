@@ -455,7 +455,7 @@ class TestRepositoryPerformanceOptimization:
         # Related data should be loaded lazily
         if hasattr(request, "machines") and hasattr(request.machines, "__call__"):
             # Lazy loading - machines property is a callable
-            machines = request.machines()
+            request.machines()
 
             # Should trigger additional query
             mock_storage.find_machines_by_request.assert_called_once_with("req-123")
@@ -472,14 +472,14 @@ class TestRepositoryPerformanceOptimization:
         mock_storage.find_by_id.return_value = {"id": "req-123"}
 
         # First call - cache miss
-        result1 = request_repo.find_by_id("req-123")
+        request_repo.find_by_id("req-123")
 
         # Should query storage and cache result
         mock_storage.find_by_id.assert_called_once_with("req-123")
         mock_cache.set.assert_called_once()
 
         # Second call - cache hit
-        result2 = request_repo.find_by_id("req-123")
+        request_repo.find_by_id("req-123")
 
         # Should use cached result
         mock_cache.get.assert_called()

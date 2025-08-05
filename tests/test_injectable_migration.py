@@ -46,7 +46,7 @@ class MockConfigurationPort(ConfigurationPort):
         """Set configuration value."""
         parts = key.split(".")
         current = self._config
-        for i, part in enumerate(parts[:-1]):
+        for _i, part _in enumerate(parts[:-1]):
             if part not in current:
                 current[part] = {}
             current = current[part]

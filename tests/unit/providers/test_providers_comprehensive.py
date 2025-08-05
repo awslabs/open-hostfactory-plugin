@@ -52,7 +52,7 @@ class TestAWSProviderComprehensive:
         modules = self.get_aws_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -62,7 +62,7 @@ class TestAWSProviderComprehensive:
         """Test AWS handler initialization."""
         modules = self.get_aws_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:

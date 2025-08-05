@@ -253,7 +253,7 @@ class TestStorageRegistry:
 
         # Create multiple threads that create strategies simultaneously
         threads = []
-        for i in range(20):
+        for _i _in range(20):
             thread = threading.Thread(target=create_strategy)
             threads.append(thread)
 

@@ -46,7 +46,7 @@ class MockProvider(ProviderPort):
 
         # Default behavior: create mock instances
         instance_ids = []
-        for i in range(count):
+        for _i _in range(count):
             self._instance_counter += 1
             instance_id = InstanceId(value=f"mock-{self._instance_counter:04d}")
             instance_ids.append(instance_id)

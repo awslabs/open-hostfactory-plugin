@@ -51,7 +51,7 @@ class TestCommandHandlersComprehensive:
         modules = self.get_command_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -61,7 +61,7 @@ class TestCommandHandlersComprehensive:
         """Test command handler initialization."""
         modules = self.get_command_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -98,7 +98,7 @@ class TestCommandHandlersComprehensive:
         """Test command handler methods."""
         modules = self.get_command_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -172,7 +172,7 @@ class TestQueryHandlersComprehensive:
         modules = self.get_query_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -191,7 +191,7 @@ class TestQueryHandlersComprehensive:
         """Test query handler methods."""
         modules = self.get_query_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -281,7 +281,7 @@ class TestApplicationDTOsComprehensive:
         modules = self.get_dto_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_dto_classes(module)
             total_classes += len(classes)
 
@@ -291,7 +291,7 @@ class TestApplicationDTOsComprehensive:
         """Test DTO instantiation."""
         modules = self.get_dto_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_dto_classes(module)
 
             for class_name, dto_class in classes:
@@ -333,7 +333,7 @@ class TestApplicationDTOsComprehensive:
         """Test DTO serialization capabilities."""
         modules = self.get_dto_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_dto_classes(module)
 
             for class_name, dto_class in classes:
@@ -457,7 +457,7 @@ class TestApplicationEventsComprehensive:
         modules = self.get_event_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = []
             for name, obj in inspect.getmembers(module):
                 if (

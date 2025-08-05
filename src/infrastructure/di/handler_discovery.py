@@ -269,7 +269,7 @@ class HandlerDiscoveryService:
         try:
             # Import and register query handlers
             query_handlers_data = cached_handlers.get("query_handlers", {})
-            for query_type_name, handler_info in query_handlers_data.items():
+            for _query_type_name, handler_info in query_handlers_data.items():
                 try:
                     # Import the handler class
                     module = importlib.import_module(handler_info["module"])
@@ -293,7 +293,7 @@ class HandlerDiscoveryService:
 
             # Import and register command handlers
             command_handlers_data = cached_handlers.get("command_handlers", {})
-            for command_type_name, handler_info in command_handlers_data.items():
+            for _command_type_name, handler_info in command_handlers_data.items():
                 try:
                     # Import the handler class
                     module = importlib.import_module(handler_info["module"])

@@ -209,7 +209,7 @@ class TestPersistenceLayerComprehensive:
         modules = self.get_repository_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_repository_classes(module)
             total_classes += len(classes)
 
@@ -219,7 +219,7 @@ class TestPersistenceLayerComprehensive:
         """Test repository initialization."""
         modules = self.get_repository_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_repository_classes(module)
 
             for class_name, repo_class in classes:
@@ -255,7 +255,7 @@ class TestPersistenceLayerComprehensive:
         """Test repository methods."""
         modules = self.get_repository_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_repository_classes(module)
 
             for class_name, repo_class in classes:
@@ -516,7 +516,7 @@ class TestAdaptersComprehensive:
         modules = self.get_adapter_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_adapter_classes(module)
             total_classes += len(classes)
 
@@ -526,7 +526,7 @@ class TestAdaptersComprehensive:
         """Test adapter initialization."""
         modules = self.get_adapter_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_adapter_classes(module)
 
             for class_name, adapter_class in classes:
@@ -590,7 +590,7 @@ class TestFactoriesComprehensive:
         modules = self.get_factory_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = []
             for name, obj in inspect.getmembers(module):
                 if inspect.isclass(obj) and "Factory" in name and not name.startswith("Base"):

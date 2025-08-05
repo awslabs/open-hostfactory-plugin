@@ -332,8 +332,8 @@ class TestResourceExhaustionCornerCases:
                 try:
                     temp_file.close()
                     os.unlink(temp_file.name)
-                except:
-                    pass
+                except (OSError, IOError):
+                    pass  # Cleanup failure is acceptable in tests
 
     def test_disk_space_exhaustion_simulation(self):
         """Test handling of disk space exhaustion."""
@@ -361,8 +361,8 @@ class TestResourceExhaustionCornerCases:
                 if os.path.exists(large_file_path):
                     os.remove(large_file_path)
                 os.rmdir(temp_dir)
-            except:
-                pass
+            except (OSError, IOError):
+                pass  # Cleanup failure is acceptable in tests
 
 
 @pytest.mark.unit

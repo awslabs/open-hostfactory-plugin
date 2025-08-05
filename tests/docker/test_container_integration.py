@@ -248,7 +248,7 @@ class TestContainerIntegration:
         """Test container CLI command functionality."""
         try:
             # Test help command
-            result = subprocess.run(
+            subprocess.run(
                 ["docker", "run", "--rm", built_image, "cli", "--help"],
                 capture_output=True,
                 text=True,

@@ -538,22 +538,17 @@ class ConfigurationLoader:
             return value.lower() == "true"
 
         # Try to convert to integer
-        try:
+        from contextlib import suppress
+        with suppress(ValueError):
             return int(value)
-        except ValueError:
-            pass
 
         # Try to convert to float
-        try:
+        with suppress(ValueError):
             return float(value)
-        except ValueError:
-            pass
 
         # Try to convert to JSON
-        try:
+        with suppress(json.JSONDecodeError):
             return json.loads(value)
-        except json.JSONDecodeError:
-            pass
 
         # Return as string if no conversion possible
         return value

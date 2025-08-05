@@ -99,9 +99,8 @@ class Application:
             # Initialize provider context based on loading mode
             if not self._container.is_lazy_loading_enabled():
                 # Eager loading - initialize immediately
-                if hasattr(self._provider_context, "initialize"):
-                    if not self._provider_context.initialize():
-                        self.logger.warning("Provider context initialization returned False")
+                if hasattr(self._provider_context, "initialize") and not self._provider_context.initialize():
+                    self.logger.warning("Provider context initialization returned False")
             else:
                 # Lazy loading - just mark as ready, don't trigger loading
                 self.logger.info("Lazy loading enabled - providers will initialize on first use")

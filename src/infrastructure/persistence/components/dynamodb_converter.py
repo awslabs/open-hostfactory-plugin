@@ -196,11 +196,10 @@ class DynamoDBConverter(DataConverter):
         # Handle datetime strings
         if isinstance(value, str):
             # Try to parse as ISO datetime
-            try:
+            from contextlib import suppress
+            with suppress(ValueError, TypeError):
                 if "T" in value and ("Z" in value or "+" in value or value.endswith("00")):
                     return datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except (ValueError, TypeError):
-                pass
             return value
 
         # Handle lists

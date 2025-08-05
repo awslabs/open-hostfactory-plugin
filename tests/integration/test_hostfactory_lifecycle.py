@@ -177,7 +177,7 @@ class TestHostFactoryLifecycle:
         template_id = templates["templates"][0]["templateId"]
 
         request_ids = []
-        for _i _in range(3):
+        for _i in range(3):
             response = app_service.request_machines(template_id, 1)
             request_ids.append(response["requestId"])
 

@@ -220,7 +220,7 @@ class TestConcurrencyCornerCases:
 
         # Create multiple threads trying to update status
         threads = []
-        for _i _in range(5):
+        for _i in range(5):
             thread = threading.Thread(target=update_status)
             threads.append(thread)
 
@@ -314,7 +314,7 @@ class TestResourceExhaustionCornerCases:
 
         try:
             # Create many temporary files
-            for _i _in range(100):
+            for _i in range(100):
                 temp_file = tempfile.NamedTemporaryFile(delete=False)
                 temp_files.append(temp_file)
 
@@ -424,7 +424,7 @@ class TestNetworkFailureCornerCases:
         success_count = 0
         failure_count = 0
 
-        for _i _in range(10):
+        for _i in range(10):
             try:
                 result = mock_service.call_api("test")
                 success_count += 1
@@ -576,7 +576,7 @@ class TestTimeoutCornerCases:
             return resource
 
         # Create resources
-        for _i _in range(5):
+        for _i in range(5):
             create_resource()
 
         # Simulate timeout and cleanup

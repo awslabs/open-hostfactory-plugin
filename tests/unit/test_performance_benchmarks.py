@@ -75,7 +75,7 @@ class TestPerformanceBenchmarks:
         iterations = 100
         times = []
 
-        for _i _in range(iterations):
+        for _i in range(iterations):
             start_time = time.perf_counter()
 
             # Simulate template loading operation
@@ -467,7 +467,7 @@ class TestScalabilityLimits:
 
         # Create maximum threads
         threads = []
-        for _i _in range(max_threads):
+        for _i in range(max_threads):
             thread = threading.Thread(target=create_request_thread)
             threads.append(thread)
 

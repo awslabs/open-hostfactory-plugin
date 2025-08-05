@@ -24,7 +24,7 @@ exclude =
     src/infrastructure/registry/enhanced_provider_registry_example.py,
     src/infrastructure/registry/enhanced_storage_registry_example.py
 per-file-ignores =
-    tests/*:F821
+    tests/*:F821,F841
     __init__.py:F401,F403,F405,F821
     src/infrastructure/utilities/common/file_utils.py:F403,F405,F821
     src/infrastructure/utilities/common/collections/__init__.py:F403,F405,F821

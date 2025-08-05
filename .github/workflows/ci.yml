@@ -55,6 +55,12 @@ jobs:
       run: |
         python -m flake8 src/ tests/
     
+    - name: Run complexity analysis
+      run: |
+        python -m radon cc src/ --min B --show-complexity
+        python -m radon mi src/ --min B
+      continue-on-error: true  # Don't fail CI on complexity warnings
+    
     - name: Run mypy (type checking)
       run: |
         python -m mypy src/

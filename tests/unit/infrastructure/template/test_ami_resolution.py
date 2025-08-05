@@ -18,16 +18,16 @@ pytestmark = pytest.mark.skip("AMI resolution functionality is disabled - moved 
 @pytest.mark.unit
 class TestRuntimeAMICache:
     """Placeholder test class - all tests skipped."""
-    
+
     def test_placeholder(self):
         """Placeholder test."""
         pass
 
 
-@pytest.mark.unit  
+@pytest.mark.unit
 class TestCachingAMIResolver:
     """Placeholder test class - all tests skipped."""
-    
+
     def test_placeholder(self):
         """Placeholder test."""
         pass
@@ -36,7 +36,7 @@ class TestCachingAMIResolver:
 @pytest.mark.unit
 class TestResolvingTemplateConfigurationManager:
     """Placeholder test class - all tests skipped."""
-    
+
     def test_placeholder(self):
         """Placeholder test."""
         pass

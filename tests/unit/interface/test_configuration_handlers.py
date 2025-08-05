@@ -11,18 +11,22 @@ from src.interface.command_handlers import (
     handle_validate_provider_config,
 )
 
+
 # Mock classes for handlers that don't exist yet
 class GetProviderConfigCLIHandler:
     def __init__(self, *args, **kwargs):
         pass
 
+
 class ValidateProviderConfigCLIHandler:
     def __init__(self, *args, **kwargs):
         pass
 
+
 class ReloadProviderConfigCLIHandler:
     def __init__(self, *args, **kwargs):
         pass
+
 
 class MigrateProviderConfigCLIHandler:
     def __init__(self, *args, **kwargs):

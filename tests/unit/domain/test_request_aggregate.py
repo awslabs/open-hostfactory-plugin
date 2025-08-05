@@ -21,20 +21,25 @@ from src.domain.request.value_objects import (
 # Try to import optional classes - create mocks if not available
 try:
     from src.domain.request.value_objects import Priority
+
     PRIORITY_AVAILABLE = True
 except ImportError:
     PRIORITY_AVAILABLE = False
+
     class Priority:
         def __init__(self, value):
             if not isinstance(value, (int, str)):
                 raise ValueError("Invalid priority")
             self.value = value
 
+
 try:
     from src.domain.request.request_metadata import MachineCount
+
     MACHINE_COUNT_AVAILABLE = True
 except ImportError:
     MACHINE_COUNT_AVAILABLE = False
+
     class MachineCount:
         def __init__(self, value):
             if not isinstance(value, int) or value < 0:

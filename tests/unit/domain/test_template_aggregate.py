@@ -15,9 +15,11 @@ from src.domain.template.value_objects import TemplateId
 # Try to import optional classes - create mocks if not available
 try:
     from src.domain.template.value_objects import TemplateName
+
     TEMPLATE_NAME_AVAILABLE = True
 except ImportError:
     TEMPLATE_NAME_AVAILABLE = False
+
     class TemplateName:
         def __init__(self, value):
             if not isinstance(value, str) or len(value.strip()) == 0:

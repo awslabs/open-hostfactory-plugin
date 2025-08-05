@@ -81,7 +81,7 @@ class AWSLaunchTemplateManager:
 
         except ClientError as e:
             error_msg = f"Failed to create/update launch template: {
-    e.response['Error']['Message']}"
+                e.response['Error']['Message']}"
             self._logger.error(error_msg)
             raise InfrastructureError(error_msg)
         except Exception as e:

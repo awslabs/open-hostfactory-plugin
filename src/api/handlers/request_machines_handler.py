@@ -89,9 +89,9 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
         if self.logger:
             self.logger.info(
                 f"Processing request machines - Template: {
-        request.template_id}, Count: {
-            request.max_number} - Correlation ID: {
-                context.correlation_id}"
+                    request.template_id}, Count: {
+                    request.max_number} - Correlation ID: {
+                    context.correlation_id}"
             )
 
         try:

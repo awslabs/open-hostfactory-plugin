@@ -494,9 +494,9 @@ class CompositeProviderStrategy(ProviderStrategy):
         if failure_rate > self._config.failure_threshold:
             return ProviderResult.error_result(
                 f"Too many strategies failed: {
-        len(failed_results)}/{
-            len(execution_results)} (threshold: {
-                self._config.failure_threshold})",
+                    len(failed_results)}/{
+                    len(execution_results)} (threshold: {
+                    self._config.failure_threshold})",
                 "FAILURE_THRESHOLD_EXCEEDED",
                 {
                     "failed_strategies": [r.strategy_type for r in failed_results],
@@ -508,8 +508,8 @@ class CompositeProviderStrategy(ProviderStrategy):
         if len(successful_results) < self._config.min_success_count:
             return ProviderResult.error_result(
                 f"Insufficient successful strategies: {
-        len(successful_results)}/{
-            self._config.min_success_count} required",
+                    len(successful_results)}/{
+                    self._config.min_success_count} required",
                 "INSUFFICIENT_SUCCESS",
                 {
                     "successful_strategies": [r.strategy_type for r in successful_results],
@@ -677,7 +677,7 @@ class CompositeProviderStrategy(ProviderStrategy):
         """Return string representation for debugging."""
         strategy_types = list(self._strategies.keys())
         return f"CompositeProviderStrategy(strategies={strategy_types}, mode={
-    self._config.mode.value})"
+            self._config.mode.value})"
 
     def __repr__(self) -> str:
         """Detailed representation for debugging."""

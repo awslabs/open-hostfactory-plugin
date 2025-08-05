@@ -359,7 +359,7 @@ class AWSProviderStrategy(ProviderStrategy):
 
             self._logger.info(
                 f"Handler returned resource_ids: {resource_ids}, instances: {
-        len(instances)}"
+                    len(instances)}"
             )
 
             return ProviderResult.success_result(
@@ -877,8 +877,8 @@ class AWSProviderStrategy(ProviderStrategy):
     def __str__(self) -> str:
         """Return string representation for debugging."""
         return f"AWSProviderStrategy(region={
-    self._aws_config.region}, initialized={
-        self._initialized})"
+            self._aws_config.region}, initialized={
+            self._initialized})"
 
     def __repr__(self) -> str:
         """Return detailed representation for debugging."""

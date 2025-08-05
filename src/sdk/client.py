@@ -263,4 +263,4 @@ class OpenHFPluginSDK:
         status = "initialized" if self._initialized else "not initialized"
         method_count = len(self._methods) if self._initialized else 0
         return f"OpenHFPluginSDK(provider='{
-    self._config.provider}', status='{status}', methods={method_count})"
+            self._config.provider}', status='{status}', methods={method_count})"

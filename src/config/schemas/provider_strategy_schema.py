@@ -257,7 +257,7 @@ class ProviderConfig(BaseModel):
             if self.active_provider not in provider_names:
                 raise ValueError(
                     f"Active provider '{
-        self.active_provider}' not found in providers list"
+                        self.active_provider}' not found in providers list"
                 )
 
         # Validate unique provider names

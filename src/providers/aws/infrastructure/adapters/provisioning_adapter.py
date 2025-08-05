@@ -83,8 +83,8 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
         """
         self._logger.info(
             f"Provisioning resources for request {
-        request.request_id} using template {
-            template.template_id}"
+                request.request_id} using template {
+                template.template_id}"
         )
 
         # Check if dry-run mode is requested
@@ -214,7 +214,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             status = handler.check_hosts_status(request)
             self._logger.info(
                 f"Successfully checked status of resources for request {
-        request.request_id}"
+                    request.request_id}"
             )
             return status
         except AWSEntityNotFoundError as e:

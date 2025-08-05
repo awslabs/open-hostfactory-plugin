@@ -40,7 +40,7 @@ class ReloadProviderConfigHandler(BaseCommandHandler[ReloadProviderConfigCommand
         """Execute provider configuration reload command."""
         self.logger.info(
             f"Reloading provider configuration from: {
-        command.config_path or 'default location'}"
+                command.config_path or 'default location'}"
         )
 
         try:

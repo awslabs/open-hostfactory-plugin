@@ -99,7 +99,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
 
         logger.info(
             f"DI Container initialized (lazy_loading={
-        'enabled' if self._lazy_config.enabled else 'disabled'})"
+                'enabled' if self._lazy_config.enabled else 'disabled'})"
         )
 
     def is_registered(self, cls: Type) -> bool:

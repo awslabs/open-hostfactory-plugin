@@ -23,7 +23,7 @@ def handle_aws_client_operation(event: DomainEvent) -> None:
     # Use list and join for better performance
     message_parts = [
         f"AWS operation: {
-        fields['service']}.{
+            fields['service']}.{
             fields['operation']} | Success: {
                 fields['success']}"
     ]

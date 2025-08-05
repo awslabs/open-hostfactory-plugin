@@ -197,7 +197,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                                 except Exception as sync_error:
                                     logger.error(
                                         f"Failed to publish event {
-        event.__class__.__name__} via sync fallback: {sync_error}"
+                                            event.__class__.__name__} via sync fallback: {sync_error}"
                                     )
                                     # Event publishing failed completely - this is
                                     # serious for domain consistency
@@ -218,8 +218,8 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
 
                 self.logger.debug(
                     f"Published {
-        len(events)} events for {
-            self.entity_class.__name__} {entity_id}",
+                        len(events)} events for {
+                        self.entity_class.__name__} {entity_id}",
                     extra={"entity_id": entity_id},
                 )
         except PydanticValidationError as e:
@@ -458,8 +458,8 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
 
                 self.logger.debug(
                     f"Saved batch of {
-        len(entity_batch)} {
-            self.entity_class.__name__} entities"
+                        len(entity_batch)} {
+                        self.entity_class.__name__} entities"
                 )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
@@ -495,8 +495,8 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
 
         self.logger.debug(
             f"Deleted batch of {
-        len(entity_id_strs)} {
-            self.entity_class.__name__} entities"
+                len(entity_id_strs)} {
+                self.entity_class.__name__} entities"
         )
 
     def clear_cache(self) -> None:

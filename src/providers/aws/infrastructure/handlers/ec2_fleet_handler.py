@@ -428,11 +428,11 @@ class EC2FleetHandler(AWSHandler):
             # Log fleet status
             self._logger.debug(
                 f"Fleet status: {
-        fleet.get('Status')}, "
+                    fleet.get('Status')}, "
                 f"Target capacity: {
-            fleet.get(
-                'TargetCapacitySpecification',
-                {}).get('TotalTargetCapacity')}, "
+                    fleet.get(
+                        'TargetCapacitySpecification',
+                        {}).get('TotalTargetCapacity')}, "
                 f"Fulfilled capacity: {
                     fleet.get(
                         'FulfilledCapacity',
@@ -518,7 +518,7 @@ class EC2FleetHandler(AWSHandler):
                     )
                     self._logger.info(
                         f"Reduced maintain fleet {
-        request.resource_id} capacity to {new_capacity}"
+                            request.resource_id} capacity to {new_capacity}"
                     )
 
                 # Use consolidated AWS operations utility for instance termination

@@ -488,7 +488,7 @@ class AWSRequestAdapter(RequestAdapterPort):
                 return {
                     "status": "error",
                     "message": f"Unsupported provider API for cancellation: {
-        request.provider_api}",
+                        request.provider_api}",
                 }
 
         except Exception as e:

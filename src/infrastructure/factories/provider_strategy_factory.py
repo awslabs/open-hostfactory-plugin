@@ -108,7 +108,7 @@ class ProviderStrategyFactory:
 
         self._logger.info(
             f"Single provider context created successfully with provider: {
-        provider_config.name}"
+                provider_config.name}"
         )
         return context
 
@@ -144,8 +144,8 @@ class ProviderStrategyFactory:
             except Exception as e:
                 self._logger.error(
                     f"Failed to create provider strategy {
-        provider_config.name}: {
-            str(e)}"
+                        provider_config.name}: {
+                        str(e)}"
                 )
                 # Continue with other providers, but log the error
                 continue
@@ -211,8 +211,8 @@ class ProviderStrategyFactory:
 
             self._logger.debug(
                 f"Created provider strategy: {
-        provider_config.name} ({
-            provider_config.type})"
+                    provider_config.name} ({
+                    provider_config.type})"
             )
             return strategy
 
@@ -225,9 +225,9 @@ class ProviderStrategyFactory:
         except Exception as e:
             raise ProviderCreationError(
                 f"Failed to create {
-        provider_config.type} provider '{
-            provider_config.name}': {
-                str(e)}"
+                    provider_config.type} provider '{
+                    provider_config.name}': {
+                    str(e)}"
             ) from e
 
     def _parse_selection_policy(self, policy_name: str) -> SelectionPolicy:

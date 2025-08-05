@@ -95,7 +95,7 @@ class BaseInfrastructureHandler(
             if self.logger:
                 self.logger.info(
                     f"Infrastructure request processed successfully: {request_type} ({
-        duration:.3f}s)"
+                        duration:.3f}s)"
                 )
 
             return response

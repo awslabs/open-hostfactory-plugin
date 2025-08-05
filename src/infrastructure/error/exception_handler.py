@@ -673,8 +673,8 @@ class ExceptionHandler:
         if "config" in context_lower or "template" in context_lower:
             return ConfigurationError(
                 message=f"Invalid JSON format in {
-    context_str or 'configuration'}: {
-        exc.msg}",
+                    context_str or 'configuration'}: {
+                    exc.msg}",
                 details={
                     "original_error": str(exc),
                     "line_number": exc.lineno,

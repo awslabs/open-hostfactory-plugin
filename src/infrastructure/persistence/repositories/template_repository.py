@@ -222,8 +222,8 @@ class TemplateRepositoryImpl(TemplateRepositoryInterface):
 
             self.logger.debug(
                 f"Saved template {
-        template.template_id} and extracted {
-            len(events)} events"
+                    template.template_id} and extracted {
+                    len(events)} events"
             )
             return events
 

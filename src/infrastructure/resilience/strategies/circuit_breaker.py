@@ -132,7 +132,7 @@ class CircuitBreakerStrategy(RetryStrategy):
             if attempt < 1:  # Only allow one retry attempt in half-open
                 logger.info(
                     f"Circuit breaker HALF_OPEN for {
-        self.service_name} - allowing test request",
+                        self.service_name} - allowing test request",
                     extra={
                         "service_name": self.service_name,
                         "state": state.value,
@@ -143,7 +143,7 @@ class CircuitBreakerStrategy(RetryStrategy):
             else:
                 logger.warning(
                     f"Circuit breaker HALF_OPEN for {
-        self.service_name} - test failed, opening circuit",
+                        self.service_name} - test failed, opening circuit",
                     extra={
                         "service_name": self.service_name,
                         "state": state.value,
@@ -208,7 +208,7 @@ class CircuitBreakerStrategy(RetryStrategy):
 
             logger.info(
                 f"Circuit breaker CLOSED for {
-        self.service_name} after successful recovery",
+                    self.service_name} after successful recovery",
                 extra={
                     "service_name": self.service_name,
                     "state": CircuitState.CLOSED.value,
@@ -232,8 +232,8 @@ class CircuitBreakerStrategy(RetryStrategy):
 
             logger.error(
                 f"Circuit breaker OPENED for {
-        self.service_name} after {
-            circuit_state['failure_count']} failures",
+                    self.service_name} after {
+                    circuit_state['failure_count']} failures",
                 extra={
                     "service_name": self.service_name,
                     "state": CircuitState.OPEN.value,
@@ -259,7 +259,7 @@ class CircuitBreakerStrategy(RetryStrategy):
 
                 logger.info(
                     f"Circuit breaker transitioning to HALF_OPEN for {
-        self.service_name}",
+                        self.service_name}",
                     extra={
                         "service_name": self.service_name,
                         "state": CircuitState.HALF_OPEN.value,
@@ -281,7 +281,7 @@ class CircuitBreakerStrategy(RetryStrategy):
 
                 logger.warning(
                     f"Circuit breaker timeout in HALF_OPEN, returning to OPEN for {
-        self.service_name}",
+                        self.service_name}",
                     extra={
                         "service_name": self.service_name,
                         "state": CircuitState.OPEN.value,

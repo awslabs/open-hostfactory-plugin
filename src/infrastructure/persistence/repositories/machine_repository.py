@@ -150,8 +150,8 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
 
             self.logger.debug(
                 f"Saved machine {
-        machine.instance_id} and extracted {
-            len(events)} events"
+                    machine.instance_id} and extracted {
+                    len(events)} events"
             )
             return events
 

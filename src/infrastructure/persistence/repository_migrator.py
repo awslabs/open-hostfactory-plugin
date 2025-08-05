@@ -275,7 +275,7 @@ class RepositoryMigrator:
                         )
                     self.logger.debug(
                         f"Backed up {
-        len(items)} items from {collection} to {backup_file}"
+                            len(items)} items from {collection} to {backup_file}"
                     )
             except Exception as e:
                 self.logger.warning(f"Failed to backup {collection}: {str(e)}")
@@ -353,11 +353,11 @@ class RepositoryMigrator:
                                     except Exception as conversion_error:
                                         self.logger.error(
                                             f"Failed to convert item {item_id} to entity: {
-        str(conversion_error)}"
+                                                str(conversion_error)}"
                                         )
                                         raise ValueError(
                                             f"Entity conversion failed: {
-        str(conversion_error)}"
+                                                str(conversion_error)}"
                                         )
                                 else:
                                     # Try to determine the entity class from the
@@ -385,11 +385,11 @@ class RepositoryMigrator:
                                         except Exception as conversion_error:
                                             self.logger.error(
                                                 f"Failed to create entity from item {item_id}: {
-        str(conversion_error)}"
+                                                    str(conversion_error)}"
                                             )
                                             raise ValueError(
                                                 f"Entity creation failed: {
-        str(conversion_error)}"
+                                                    str(conversion_error)}"
                                             )
                                     else:
                                         # Fallback to direct save, which might fail

@@ -172,7 +172,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
             except Exception as e:
                 self.logger.error(
                     f"Failed to check existence of {
-        self.entity_type} entity {entity_id}: {e}"
+                        self.entity_type} entity {entity_id}: {e}"
                 )
                 return False
 
@@ -197,8 +197,8 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
                 self.logger.debug(
                     f"Found {
-        len(matching_entities)} {
-            self.entity_type} entities matching criteria"
+                        len(matching_entities)} {
+                        self.entity_type} entities matching criteria"
                 )
                 return matching_entities
 

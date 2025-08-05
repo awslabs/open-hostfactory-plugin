@@ -61,8 +61,8 @@ class BaseResourceManager(ResourceManagerPort, ABC):
         if self.logger:
             self.logger.info(
                 f"Starting resource provisioning: {
-        specification.name} ({
-            specification.resource_type.value})"
+                    specification.name} ({
+                    specification.resource_type.value})"
             )
 
         try:
@@ -82,8 +82,8 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             if self.logger:
                 self.logger.info(
                     f"Resource provisioned successfully: {
-        allocation.resource_id} in {
-            duration:.3f}s"
+                        allocation.resource_id} in {
+                        duration:.3f}s"
                 )
 
             self._record_metric(operation_id, duration, "success")
@@ -94,9 +94,9 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             if self.logger:
                 self.logger.error(
                     f"Resource provisioning failed: {
-        specification.name} in {
-            duration:.3f}s - {
-                str(e)}"
+                        specification.name} in {
+                        duration:.3f}s - {
+                        str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))
@@ -129,8 +129,8 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             if self.logger:
                 self.logger.info(
                     f"Resource deprovisioned successfully: {
-        allocation.resource_id} in {
-            duration:.3f}s"
+                        allocation.resource_id} in {
+                        duration:.3f}s"
                 )
 
             self._record_metric(operation_id, duration, "success")
@@ -140,9 +140,9 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             if self.logger:
                 self.logger.error(
                     f"Resource deprovisioning failed: {
-        allocation.resource_id} in {
-            duration:.3f}s - {
-                str(e)}"
+                        allocation.resource_id} in {
+                        duration:.3f}s - {
+                        str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))

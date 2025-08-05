@@ -49,7 +49,7 @@ class OptimisticConcurrencyControl:
                     if retries > self.max_retries:
                         self.logger.warning(
                             f"Maximum retries ({
-        self.max_retries}) exceeded for concurrency error: {e}"
+                                self.max_retries}) exceeded for concurrency error: {e}"
                         )
                         raise
 

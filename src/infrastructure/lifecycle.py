@@ -104,8 +104,8 @@ class LifecycleManager:
             except Exception as e:
                 self._logger.error(
                     f"Error initializing component {
-        component.__class__.__name__}: {
-            str(e)}"
+                        component.__class__.__name__}: {
+                        str(e)}"
                 )
                 import traceback
 
@@ -126,8 +126,8 @@ class LifecycleManager:
             except Exception as e:
                 self._logger.error(
                     f"Error shutting down component {
-        component.__class__.__name__}: {
-            str(e)}"
+                        component.__class__.__name__}: {
+                        str(e)}"
                 )
                 import traceback
 

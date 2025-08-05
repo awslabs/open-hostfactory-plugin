@@ -74,7 +74,7 @@ class QueryBus:
             if self.container.is_lazy_loading_enabled():
                 self.logger.debug(
                     f"Handler not found for query {
-        type(query).__name__}, triggering lazy CQRS setup"
+                        type(query).__name__}, triggering lazy CQRS setup"
                 )
                 self._trigger_lazy_cqrs_setup()
 
@@ -86,7 +86,7 @@ class QueryBus:
                 except KeyError:
                     self.logger.error(
                         f"No handler registered for query: {
-        type(query).__name__} (even after lazy setup)"
+                            type(query).__name__} (even after lazy setup)"
                     )
                     raise
             else:
@@ -150,7 +150,7 @@ class CommandBus:
             if self.container.is_lazy_loading_enabled():
                 self.logger.debug(
                     f"Handler not found for command {
-        type(command).__name__}, triggering lazy CQRS setup"
+                        type(command).__name__}, triggering lazy CQRS setup"
                 )
                 self._trigger_lazy_cqrs_setup()
 
@@ -162,7 +162,7 @@ class CommandBus:
                 except KeyError:
                     self.logger.error(
                         f"No handler registered for command: {
-        type(command).__name__} (even after lazy setup)"
+                            type(command).__name__} (even after lazy setup)"
                     )
                     raise
             else:

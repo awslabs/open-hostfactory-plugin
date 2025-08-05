@@ -129,8 +129,8 @@ class SQLQueryBuilder(QueryManager):
         # 1. Validating table_name and column names against a whitelist pattern
         # 2. Using parameterized queries for all values with :param syntax
         query = f"INSERT INTO {
-    self.table_name} ({
-        ', '.join(columns)}) VALUES ({
+            self.table_name} ({
+            ', '.join(columns)}) VALUES ({
             ', '.join(placeholders)})"  # nosec B608
 
         self.logger.debug(f"Built INSERT query for {self.table_name}")
@@ -197,8 +197,8 @@ class SQLQueryBuilder(QueryManager):
 
         set_clauses = [f"{col} = :{col}" for col in filtered_data.keys()]
         query = f"UPDATE {
-    self.table_name} SET {
-        ', '.join(set_clauses)} WHERE {id_column} = :entity_id"  # nosec B608
+            self.table_name} SET {
+            ', '.join(set_clauses)} WHERE {id_column} = :entity_id"  # nosec B608
 
         # Add entity_id to parameters
         parameters = filtered_data.copy()
@@ -221,7 +221,7 @@ class SQLQueryBuilder(QueryManager):
         self._validate_identifier(id_column)
 
         query = f"DELETE FROM {
-    self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
+            self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
 
         self.logger.debug(f"Built DELETE query for {self.table_name}")
         return query, id_column
@@ -237,7 +237,7 @@ class SQLQueryBuilder(QueryManager):
             Tuple of (query, parameter_name)
         """
         query = f"SELECT 1 FROM {
-    self.table_name} WHERE {id_column} = :{id_column} LIMIT 1"  # nosec B608
+            self.table_name} WHERE {id_column} = :{id_column} LIMIT 1"  # nosec B608
 
         self.logger.debug(f"Built EXISTS query for {self.table_name}")
         return query, id_column
@@ -340,8 +340,8 @@ class SQLQueryBuilder(QueryManager):
 
         placeholders = [f":{col}" for col in filtered_columns]
         query = f"INSERT INTO {
-    self.table_name} ({
-        ', '.join(filtered_columns)}) VALUES ({
+            self.table_name} ({
+            ', '.join(filtered_columns)}) VALUES ({
             ', '.join(placeholders)})"  # nosec B608
 
         # Filter all data items
@@ -352,7 +352,7 @@ class SQLQueryBuilder(QueryManager):
 
         self.logger.debug(
             f"Built batch INSERT query for {
-        self.table_name} with {
-            len(data_list)} items"
+                self.table_name} with {
+                len(data_list)} items"
         )
         return query, filtered_data_list

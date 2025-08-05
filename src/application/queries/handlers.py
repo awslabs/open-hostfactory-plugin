@@ -72,15 +72,15 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             machines = await self._get_machines_from_storage(query.request_id)
             self.logger.info(
                 f"DEBUG: Found {
-        len(machines)} machines in storage for request {
-            query.request_id}"
+                    len(machines)} machines in storage for request {
+                    query.request_id}"
             )
 
             # Step 4: Update machine status if needed
             if not machines and request.resource_ids:
                 self.logger.info(
                     f"DEBUG: No machines in storage but have resource IDs {
-        request.resource_ids}, checking provider"
+                        request.resource_ids}, checking provider"
                 )
                 # No machines in storage but we have resource IDs - check provider and
                 # create machines
@@ -93,7 +93,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             else:
                 self.logger.info(
                     f"DEBUG: No machines and no resource IDs for request {
-        query.request_id}"
+                        query.request_id}"
                 )
 
             # Step 5: Convert to DTO with machine data
@@ -144,8 +144,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
             self.logger.info(
                 f"Retrieved request with {
-        len(machines_data)} machines: {
-            query.request_id}"
+                    len(machines_data)} machines: {
+                    query.request_id}"
             )
             return request_dto
 
@@ -199,12 +199,12 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
             # Execute operation using provider context with correct strategy identifier
             strategy_identifier = f"{
-    request.provider_type}-{
-        request.provider_type}-{
-            request.provider_instance or 'default'}"
+                request.provider_type}-{
+                request.provider_type}-{
+                request.provider_instance or 'default'}"
             self.logger.info(
                 f"Using provider strategy: {strategy_identifier} for request {
-        request.request_id}"
+                    request.request_id}"
             )
             self.logger.info(f"Operation parameters: {operation.parameters}")
 
@@ -212,15 +212,15 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
             self.logger.info(
                 f"Provider strategy result: success={
-        result.success}, data_keys={
-            list(
-                result.data.keys()) if result.data else 'None'}"
+                    result.success}, data_keys={
+                    list(
+                        result.data.keys()) if result.data else 'None'}"
             )
 
             if not result.success:
                 self.logger.warning(
                     f"Failed to discover instances from resources: {
-        result.error_message}"
+                        result.error_message}"
                 )
                 return []
 
@@ -252,8 +252,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
                 self.logger.info(
                     f"Created and saved {
-        len(machines)} machines for request {
-            request.request_id}"
+                        len(machines)} machines for request {
+                        request.request_id}"
                 )
 
             return machines
@@ -303,9 +303,9 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             # Use the correct strategy identifier format:
             # provider_type-provider_type-instance
             strategy_identifier = f"{
-    request.provider_type}-{
-        request.provider_type}-{
-            request.provider_instance or 'default'}"
+                request.provider_type}-{
+                request.provider_type}-{
+                request.provider_instance or 'default'}"
             result = provider_context.execute_with_strategy(strategy_identifier, operation)
 
             if not result.success:
@@ -829,7 +829,7 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
             if validation_errors:
                 self.logger.warning(
                     f"Template validation failed for {
-        query.template_id}: {validation_errors}"
+                        query.template_id}: {validation_errors}"
                 )
             else:
                 self.logger.info(f"Template validation passed for {query.template_id}")

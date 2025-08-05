@@ -184,15 +184,15 @@ async def create_template(template_data: TemplateCreateRequest) -> JSONResponse:
             raise HTTPException(
                 status_code=400,
                 detail=f"Template validation failed: {
-        ', '.join(
-            response.validation_errors)}",
+                    ', '.join(
+                        response.validation_errors)}",
             )
 
         return JSONResponse(
             status_code=201,
             content={
                 "message": f"Template {
-            template_dict['template_id']} created successfully",
+                    template_dict['template_id']} created successfully",
                 "template_id": template_dict["template_id"],
                 "timestamp": None,
             },
@@ -241,8 +241,8 @@ async def update_template(template_id: str, template_data: TemplateUpdateRequest
             raise HTTPException(
                 status_code=400,
                 detail=f"Template validation failed: {
-        ', '.join(
-            response.validation_errors)}",
+                    ', '.join(
+                        response.validation_errors)}",
             )
 
         return JSONResponse(
@@ -283,8 +283,8 @@ async def delete_template(template_id: str) -> JSONResponse:
             raise HTTPException(
                 status_code=400,
                 detail=f"Template deletion failed: {
-        ', '.join(
-            response.validation_errors)}",
+                    ', '.join(
+                        response.validation_errors)}",
             )
 
         return JSONResponse(

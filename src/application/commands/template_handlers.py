@@ -71,7 +71,7 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
             if validation_errors:
                 self.logger.warning(
                     f"Template validation failed for {
-        command.template_id}: {validation_errors}"
+                        command.template_id}: {validation_errors}"
                 )
                 return TemplateCommandResponse(
                     template_id=command.template_id, validation_errors=validation_errors
@@ -168,7 +168,7 @@ class UpdateTemplateHandler(BaseCommandHandler[UpdateTemplateCommand, TemplateCo
                 if validation_errors:
                     self.logger.warning(
                         f"Template update validation failed for {
-        command.template_id}: {validation_errors}"
+                            command.template_id}: {validation_errors}"
                     )
                     return TemplateCommandResponse(
                         template_id=command.template_id,
@@ -262,7 +262,7 @@ class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCo
                 if template.is_in_use():
                     raise BusinessRuleError(
                         f"Cannot delete template {
-        command.template_id}: template is in use"
+                            command.template_id}: template is in use"
                     )
 
                 # Delete template
@@ -335,7 +335,7 @@ class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, Templa
             if validation_errors:
                 self.logger.warning(
                     f"Template validation failed for {
-        command.template_id}: {validation_errors}"
+                        command.template_id}: {validation_errors}"
                 )
             else:
                 self.logger.info(f"Template validation passed for {command.template_id}")

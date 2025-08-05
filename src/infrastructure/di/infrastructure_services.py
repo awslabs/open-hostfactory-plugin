@@ -121,7 +121,7 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
                         except Exception as e:
                             logger.debug(
                                 f"Could not parse extensions for provider {
-        provider.name}: {e}"
+                                    provider.name}: {e}"
                             )
 
             # Default: register with default AWS extension config

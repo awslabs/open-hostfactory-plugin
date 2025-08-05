@@ -156,7 +156,7 @@ def _resolve_dependency(
             if _is_primitive_type(inner_type):
                 logger.debug(
                     f"Skipping primitive type resolution for {param_name}: {
-        inner_type.__name__} in {class_name}"
+                        inner_type.__name__} in {class_name}"
                 )
                 return param.default if param.default != inspect.Parameter.empty else None
 
@@ -165,7 +165,7 @@ def _resolve_dependency(
             except Exception as e:
                 logger.debug(
                     f"Could not resolve optional dependency {param_name}: {
-        inner_type.__name__} for {class_name}: {e}"
+                        inner_type.__name__} for {class_name}: {e}"
                 )
                 return param.default if param.default != inspect.Parameter.empty else None
 
@@ -173,7 +173,7 @@ def _resolve_dependency(
         if _is_primitive_type(annotation):
             logger.debug(
                 f"Skipping primitive type resolution for {param_name}: {
-        annotation.__name__} in {class_name}"
+                    annotation.__name__} in {class_name}"
             )
             return param.default if param.default != inspect.Parameter.empty else None
 
@@ -183,7 +183,7 @@ def _resolve_dependency(
         except Exception as e:
             logger.debug(
                 f"Could not resolve dependency {param_name}: {
-        annotation.__name__} for {class_name}: {e}"
+                    annotation.__name__} for {class_name}: {e}"
             )
             return None
 

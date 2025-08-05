@@ -93,8 +93,8 @@ class ResourceQuota(ValueObject):
 
     def __str__(self) -> str:
         return f"{
-    self.resource_type}: {
-        self.used}/{
+            self.resource_type}: {
+            self.used}/{
             self.limit} ({
                 self.utilization_percentage:.1f}%)"
 

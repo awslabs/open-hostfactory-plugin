@@ -194,7 +194,7 @@ class AWSMachineAdapter:
             if not status["InstanceStatuses"]:
                 self._logger.warning(
                     f"No status information available for instance: {
-        machine.machine_id}"
+                        machine.machine_id}"
                 )
                 health_checks["system"] = {
                     "status": False,
@@ -226,7 +226,7 @@ class AWSMachineAdapter:
 
             self._logger.debug(
                 f"Health check completed for {
-        machine.machine_id}: system={system_status}, instance={instance_health}"
+                    machine.machine_id}: system={system_status}, instance={instance_health}"
             )
             return health_checks
 
@@ -312,7 +312,7 @@ class AWSMachineAdapter:
                         if volume["State"] == "in-use":
                             self._logger.debug(
                                 f"Detaching volume {volume_id} from {
-        machine.machine_id}"
+                                    machine.machine_id}"
                             )
 
                             def detach_volume():
@@ -366,7 +366,7 @@ class AWSMachineAdapter:
                             attachment_id = nic["Attachment"]["AttachmentId"]
                             self._logger.debug(
                                 f"Detaching network interface {nic_id} from {
-        machine.machine_id}"
+                                    machine.machine_id}"
                             )
 
                             def detach_network_interface():
@@ -404,8 +404,8 @@ class AWSMachineAdapter:
             except AWSError as e:
                 self._logger.error(
                     f"Error processing network interfaces for {
-        machine.machine_id}: {
-            str(e)}"
+                        machine.machine_id}: {
+                        str(e)}"
                 )
                 # Continue with other resources even if network interfaces fail
 

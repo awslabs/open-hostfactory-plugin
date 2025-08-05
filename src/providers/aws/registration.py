@@ -256,8 +256,8 @@ def register_aws_provider_with_di(provider_instance, container) -> bool:
     except Exception as e:
         logger.error(
             f"Failed to register AWS provider instance '{
-        provider_instance.name}': {
-            str(e)}"
+                provider_instance.name}': {
+                str(e)}"
         )
         return False
 

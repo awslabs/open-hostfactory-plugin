@@ -202,7 +202,7 @@ class ValidateSchedulerConfigurationHandler(
             if scheduler_name not in registered_types:
                 errors.append(
                     f"Scheduler '{scheduler_name}' is not registered. Available: {
-        ', '.join(registered_types)}"
+                        ', '.join(registered_types)}"
                 )
 
             # Try to create scheduler strategy

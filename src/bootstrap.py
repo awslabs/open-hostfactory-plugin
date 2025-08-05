@@ -116,7 +116,7 @@ class Application:
             self._initialized = True
             self.logger.info(
                 f"Open HostFactory Plugin initialized successfully with {
-        self.provider_type} provider"
+                    self.provider_type} provider"
             )
             return True
 
@@ -140,7 +140,7 @@ class Application:
                     self.logger.info(f"Selection policy: {unified_config.selection_policy}")
                     self.logger.info(
                         f"Health check interval: {
-        unified_config.health_check_interval}s"
+                            unified_config.health_check_interval}s"
                     )
 
             elif hasattr(config_manager, "is_provider_strategy_enabled"):
@@ -335,7 +335,7 @@ async def main() -> None:
             # Use existing app.logger - no need to create new logger
             app.logger.info(
                 f"Application started successfully with {
-        app.provider_type.upper()} provider"
+                    app.provider_type.upper()} provider"
             )
 
             # Get provider info

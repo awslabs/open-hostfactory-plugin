@@ -228,8 +228,8 @@ async def handle_create_template(args: argparse.Namespace) -> Dict[str, Any]:
             return {
                 "success": False,
                 "error": f"Template validation failed: {
-        ', '.join(
-            response.validation_errors)}",
+                    ', '.join(
+                        response.validation_errors)}",
                 "template_id": template_id,
             }
 
@@ -299,8 +299,8 @@ async def handle_update_template(args: argparse.Namespace) -> Dict[str, Any]:
             return {
                 "success": False,
                 "error": f"Template validation failed: {
-        ', '.join(
-            response.validation_errors)}",
+                    ', '.join(
+                        response.validation_errors)}",
                 "template_id": template_id,
             }
 
@@ -358,8 +358,8 @@ async def handle_delete_template(args: argparse.Namespace) -> Dict[str, Any]:
             return {
                 "success": False,
                 "error": f"Template deletion failed: {
-        ', '.join(
-            response.validation_errors)}",
+                    ', '.join(
+                        response.validation_errors)}",
                 "template_id": template_id,
             }
 

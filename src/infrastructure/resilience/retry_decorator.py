@@ -97,9 +97,9 @@ def retry(
                     if attempt > 0:
                         logger.info(
                             f"Operation succeeded after {
-        attempt +
-        1} attempts: {
-            func.__name__}"
+                                attempt +
+                                1} attempts: {
+                                func.__name__}"
                         )
 
                     return result
@@ -112,7 +112,7 @@ def retry(
                         if attempt >= max_attempts:
                             logger.error(
                                 f"Max retry attempts ({max_attempts}) exceeded for {
-        func.__name__}: {e}"
+                                    func.__name__}: {e}"
                             )
                             raise MaxRetriesExceededError(attempt + 1, e)
                         else:

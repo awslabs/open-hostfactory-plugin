@@ -198,7 +198,7 @@ class OpenHFPluginMCPTools:
                     "data": str(result),
                     "tool": tool_name,
                     "note": f"Result converted to string (type: {
-        type(result).__name__})",
+                        type(result).__name__})",
                 }
 
         except Exception as e:

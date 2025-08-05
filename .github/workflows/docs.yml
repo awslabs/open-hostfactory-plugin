@@ -36,15 +36,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-docs-${{ hashFiles('**/requirements-dev.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-docs-
-            ${{ runner.os }}-pip-
-
       - name: Install uv
         uses: astral-sh/setup-uv@v1
         with:

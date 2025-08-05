@@ -16,9 +16,15 @@ from src.domain.base.domain_interfaces import UnitOfWork
 from src.domain.base.ports import LoggingPort
 
 # Import repository interfaces
-from src.domain.machine.repository import MachineRepository as MachineRepositoryInterface
-from src.domain.request.repository import RequestRepository as RequestRepositoryInterface
-from src.domain.template.repository import TemplateRepository as TemplateRepositoryInterface
+from src.domain.machine.repository import (
+    MachineRepository as MachineRepositoryInterface,
+)
+from src.domain.request.repository import (
+    RequestRepository as RequestRepositoryInterface,
+)
+from src.domain.template.repository import (
+    TemplateRepository as TemplateRepositoryInterface,
+)
 from src.infrastructure.registry.storage_registry import get_storage_registry
 
 

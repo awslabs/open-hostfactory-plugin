@@ -6,7 +6,9 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from src.domain.base.domain_interfaces import Repository
-from src.domain.template.repository import TemplateRepository as TemplateRepositoryInterface
+from src.domain.template.repository import (
+    TemplateRepository as TemplateRepositoryInterface,
+)
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
 

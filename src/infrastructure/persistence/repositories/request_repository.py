@@ -14,7 +14,9 @@ from src.domain.base.events import (
 )
 from src.domain.base.value_objects import InstanceId  # Add InstanceId import
 from src.domain.request.aggregate import Request
-from src.domain.request.repository import RequestRepository as RequestRepositoryInterface
+from src.domain.request.repository import (
+    RequestRepository as RequestRepositoryInterface,
+)
 from src.domain.request.value_objects import RequestId, RequestStatus, RequestType
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.logging.logger import get_logger

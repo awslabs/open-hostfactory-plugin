@@ -50,7 +50,9 @@ class LoggerSingleton:
             if name not in self._loggers:
                 # Import the logger module's get_logger function directly to avoid
                 # recursion
-                from src.infrastructure.logging.logger import get_logger as logger_module_get_logger
+                from src.infrastructure.logging.logger import (
+                    get_logger as logger_module_get_logger,
+                )
 
                 self._loggers[name] = logger_module_get_logger(name)
             return self._loggers[name]

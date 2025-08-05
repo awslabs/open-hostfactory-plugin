@@ -20,6 +20,7 @@ import argparse
 import configparser
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import List, Tuple
 
@@ -32,50 +33,73 @@ class CIChecker:
         self.fix = fix
         self.failed_checks = []
         self.project_root = Path(__file__).parent.parent.parent
+        self.temp_file = None
+        self.output_lines = []
+        
+    def log(self, message: str):
+        """Log message to both console and temp file."""
+        print(message)
+        self.output_lines.append(message)
+        
+    def write_temp_file(self):
+        """Write all output to temporary file."""
+        if not self.temp_file:
+            self.temp_file = tempfile.NamedTemporaryFile(
+                mode='w', 
+                suffix='.txt', 
+                prefix='ci_check_', 
+                delete=False
+            )
+        
+        self.temp_file.write('\n'.join(self.output_lines))
+        self.temp_file.flush()
+        return self.temp_file.name
         
     def run_command(self, cmd: List[str], description: str, allow_failure: bool = False) -> bool:
         """Run a command and return success status."""
         if self.verbose:
-            print(f"Running: {' '.join(cmd)}")
+            self.log(f"Running: {' '.join(cmd)}")
             
         try:
             result = subprocess.run(
                 cmd,
                 cwd=self.project_root,
-                capture_output=not self.verbose,
+                capture_output=True,
                 text=True,
                 check=True
             )
-            print(f"PASS: {description}")
+            self.log(f"PASS: {description}")
+            if self.verbose and result.stdout:
+                self.log(f"Output: {result.stdout}")
             return True
         except subprocess.CalledProcessError as e:
             if allow_failure:
-                print(f"WARN: {description} (allowed to fail)")
+                self.log(f"WARN: {description} (allowed to fail)")
                 if self.verbose and e.stdout:
-                    print(f"Output: {e.stdout}")
+                    self.log(f"Output: {e.stdout}")
                 if self.verbose and e.stderr:
-                    print(f"Error: {e.stderr}")
+                    self.log(f"Error: {e.stderr}")
                 return True
             else:
-                print(f"FAIL: {description}")
+                self.log(f"FAIL: {description}")
                 if e.stdout:
-                    print(f"Output: {e.stdout}")
+                    self.log(f"Output: {e.stdout}")
                 if e.stderr:
-                    print(f"Error: {e.stderr}")
+                    self.log(f"Error: {e.stderr}")
                 self.failed_checks.append(description)
                 return False
         except FileNotFoundError:
-            print(f"FAIL: {description} (command not found)")
+            self.log(f"FAIL: {description} (command not found)")
             self.failed_checks.append(f"{description} (command not found)")
             return False
     
     def check_mypy_config(self) -> bool:
         """Check mypy.ini configuration for common issues."""
-        print("Checking mypy.ini configuration...")
+        self.log("Checking mypy.ini configuration...")
         
         mypy_ini = self.project_root / "mypy.ini"
         if not mypy_ini.exists():
-            print("FAIL: mypy.ini not found")
+            self.log("FAIL: mypy.ini not found")
             self.failed_checks.append("mypy.ini not found")
             return False
             
@@ -95,13 +119,13 @@ class CIChecker:
                         version_tuple = (major, minor)
                         
                         if version_tuple < (3, 9):
-                            print(f"FAIL: Python version {python_version} is too old (need 3.9+)")
+                            self.log(f"FAIL: Python version {python_version} is too old (need 3.9+)")
                             self.failed_checks.append(f"Python version {python_version} too old")
                             return False
                     else:
                         raise ValueError("Invalid version format")
                 except (ValueError, IndexError):
-                    print(f"FAIL: Invalid Python version format: {python_version}")
+                    self.log(f"FAIL: Invalid Python version format: {python_version}")
                     self.failed_checks.append(f"Invalid Python version format: {python_version}")
                     return False
                     
@@ -113,37 +137,37 @@ class CIChecker:
                     allowed_flags = {'ignore_missing_imports', 'follow_imports', 'disallow_untyped_defs'}
                     for key in section.keys():
                         if key not in allowed_flags:
-                            print(f"FAIL: Invalid per-module flag in {section_name}: {key}")
+                            self.log(f"FAIL: Invalid per-module flag in {section_name}: {key}")
                             self.failed_checks.append(f"Invalid per-module flag: {section_name}.{key}")
                             return False
                             
-            print("PASS: mypy.ini configuration")
+            self.log("PASS: mypy.ini configuration")
             return True
             
         except Exception as e:
-            print(f"FAIL: mypy.ini configuration error: {e}")
+            self.log(f"FAIL: mypy.ini configuration error: {e}")
             self.failed_checks.append(f"mypy.ini error: {e}")
             return False
     
     def check_python_version_consistency(self) -> bool:
         """Check Python version consistency across configuration files."""
-        print("Checking Python version consistency...")
+        self.log("Checking Python version consistency...")
         
         # Check pyproject.toml
         pyproject_toml = self.project_root / "pyproject.toml"
         if pyproject_toml.exists():
             content = pyproject_toml.read_text()
             if 'python_version = "3.8"' in content:
-                print("FAIL: pyproject.toml still has Python 3.8 (need 3.11+)")
+                self.log("FAIL: pyproject.toml still has Python 3.8 (need 3.11+)")
                 self.failed_checks.append("pyproject.toml Python version too old")
                 return False
                 
-        print("PASS: Python version consistency")
+        self.log("PASS: Python version consistency")
         return True
     
     def check_syntax_errors(self) -> bool:
         """Check for Python syntax errors in key files."""
-        print("Checking Python syntax...")
+        self.log("Checking Python syntax...")
         
         # Files that commonly have syntax issues
         problem_files = [
@@ -166,7 +190,7 @@ class CIChecker:
     
     def run_formatting_checks(self) -> bool:
         """Run code formatting checks (Black, isort)."""
-        print("\n=== Code Formatting Checks ===")
+        self.log("\n=== Code Formatting Checks ===")
         
         all_passed = True
         
@@ -190,7 +214,7 @@ class CIChecker:
     
     def run_linting_checks(self) -> bool:
         """Run linting checks (flake8, mypy, pylint)."""
-        print("\n=== Linting Checks ===")
+        self.log("\n=== Linting Checks ===")
         
         all_passed = True
         
@@ -279,9 +303,9 @@ class CIChecker:
     
     def run_all_checks(self, quick: bool = False) -> bool:
         """Run all CI checks."""
-        print("=== Comprehensive CI Testing ===")
-        print("Running the same checks as GitHub Actions CI pipeline...")
-        print()
+        self.log("=== Comprehensive CI Testing ===")
+        self.log("Running the same checks as GitHub Actions CI pipeline...")
+        self.log("")
         
         # Configuration checks
         config_passed = (
@@ -291,7 +315,7 @@ class CIChecker:
         )
         
         if not config_passed:
-            print("\nConfiguration checks failed. Fix these before running other checks.")
+            self.log("\nConfiguration checks failed. Fix these before running other checks.")
             return False
         
         # Code quality checks
@@ -309,18 +333,26 @@ class CIChecker:
             tests_passed = True  # Skip tests in quick mode
         
         # Summary
-        print("\n=== CI Check Summary ===")
+        self.log("\n=== CI Check Summary ===")
         if self.failed_checks:
-            print("FAILED CHECKS:")
+            self.log("FAILED CHECKS:")
             for check in self.failed_checks:
-                print(f"  - {check}")
-            print()
-            print("Fix these issues before pushing to avoid CI failures.")
+                self.log(f"  - {check}")
+            self.log("")
+            self.log("Fix these issues before pushing to avoid CI failures.")
+            
+            # Write temp file and show location
+            temp_file_path = self.write_temp_file()
+            self.log(f"\nDetailed output written to: {temp_file_path}")
             return False
         else:
-            print("All critical CI checks passed!")
+            self.log("All critical CI checks passed!")
             if self.fix:
-                print("Formatting issues have been automatically fixed.")
+                self.log("Formatting issues have been automatically fixed.")
+            
+            # Write temp file for reference
+            temp_file_path = self.write_temp_file()
+            self.log(f"\nFull output written to: {temp_file_path}")
             return True
 
 
@@ -329,11 +361,21 @@ def main():
     parser.add_argument("--quick", action="store_true", help="Run only fast checks")
     parser.add_argument("--fix", action="store_true", help="Fix formatting issues automatically")
     parser.add_argument("--verbose", action="store_true", help="Show detailed output")
+    parser.add_argument("--output-file", help="Write output to specific file instead of temp file")
     
     args = parser.parse_args()
     
     checker = CIChecker(verbose=args.verbose, fix=args.fix)
+    
+    # Override temp file if specified
+    if args.output_file:
+        checker.temp_file = open(args.output_file, 'w')
+    
     success = checker.run_all_checks(quick=args.quick)
+    
+    # Clean up temp file if we created it
+    if checker.temp_file and not args.output_file:
+        checker.temp_file.close()
     
     sys.exit(0 if success else 1)
 

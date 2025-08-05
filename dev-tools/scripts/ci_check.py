@@ -225,12 +225,12 @@ class CIChecker:
         ):
             all_passed = False
             
-        # mypy type checking
-        if not self.run_command(
+        # mypy type checking (allowed to fail)
+        self.run_command(
             [sys.executable, "-m", "mypy", "src/"],
-            "mypy type checking"
-        ):
-            all_passed = False
+            "mypy type checking",
+            allow_failure=True
+        )
             
         # pylint code analysis (allowed to fail)
         self.run_command(

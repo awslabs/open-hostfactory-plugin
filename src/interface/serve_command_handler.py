@@ -48,9 +48,7 @@ async def handle_serve_api(args) -> Dict[str, Any]:
 
         logger.info(f"Starting REST API server on {server_config.host}:{server_config.port}")
         logger.info(
-            f"Workers: {
-                server_config.workers}, Reload: {reload}, Log Level: {
-                server_config.log_level}"
+            f"Workers: {server_config.workers}, Reload: {reload}, Log Level: {server_config.log_level}"
         )
 
         # Create and configure the FastAPI app

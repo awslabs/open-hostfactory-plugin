@@ -151,8 +151,7 @@ class BaseHandler(ABC):
 
                         if self.logger:
                             self.logger.info(
-                                f"Completed operation: {operation_id} in {
-                                    duration:.3f}s"
+                                f"Completed operation: {operation_id} in { duration:.3f}s"
                             )
 
                         return result
@@ -386,8 +385,7 @@ class BaseProviderHandler(BaseHandler):
                 duration = time.time() - start_time
                 if self.logger:
                     self.logger.info(
-                        f"Completed provider operation: {operation_id} in {
-                            duration:.3f}s"
+                        f"Completed provider operation: {operation_id} in { duration:.3f}s"
                     )
 
                 return result
@@ -403,10 +401,7 @@ class BaseProviderHandler(BaseHandler):
                 else:
                     if self.logger:
                         self.logger.warning(
-                            f"Provider operation failed (attempt {
-                                attempt +
-                                1}): {
-                                str(e)}"
+                            f"Provider operation failed (attempt { attempt + 1}): { str(e)}"
                         )
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
 

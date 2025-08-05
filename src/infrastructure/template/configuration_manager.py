@@ -340,9 +340,7 @@ class TemplateConfigurationManager:
                 resolved_templates.append(resolved_template)
 
             self.logger.info(
-                f"Batch resolved {
-                    len(resolved_amis)} unique SSM parameters for {
-                    len(template_dicts)} templates"
+                f"Batch resolved { len(resolved_amis)} unique SSM parameters for { len(template_dicts)} templates"
             )
             return resolved_templates
 
@@ -590,14 +588,12 @@ class TemplateConfigurationManager:
             result["supported_features"].extend(capability_result.supported_features)
 
             self.logger.debug(
-                f"Provider capability validation completed for template {
-                    template.template_id}"
+                f"Provider capability validation completed for template { template.template_id}"
             )
 
         except Exception as e:
             self.logger.warning(
-                f"Provider capability validation failed for template {
-                    template.template_id}: {e}"
+                f"Provider capability validation failed for template { template.template_id}: {e}"
             )
             result["warnings"].append(f"Could not validate provider capabilities: {str(e)}")
 

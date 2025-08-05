@@ -142,8 +142,7 @@ class EventBus:
 
         if self.logger:
             self.logger.debug(
-                f"Publishing event {event_type} (ID: {event_id}) to {
-                    len(handlers)} handlers"
+                f"Publishing event {event_type} (ID: {event_id}) to { len(handlers)} handlers"
             )
 
         # Execute all handlers concurrently
@@ -165,8 +164,7 @@ class EventBus:
                 if self.logger:
                     handler_name = handlers[i].__class__.__name__
                     self.logger.error(
-                        f"Handler {handler_name} failed for event {event_type}: {
-                            str(result)}"
+                        f"Handler {handler_name} failed for event {event_type}: { str(result)}"
                     )
             else:
                 success_count += 1

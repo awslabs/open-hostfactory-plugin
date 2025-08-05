@@ -38,8 +38,7 @@ class TemplateSerializer:
     def to_dict(self, template: Template) -> Dict[str, Any]:
         """Convert Template aggregate to dictionary with complete field support."""
         try:
-            return {
-                # Core template fields
+            return {  # Core template fields
                 "template_id": template.template_id,
                 "name": template.name,
                 "description": template.description,
@@ -222,9 +221,7 @@ class TemplateRepositoryImpl(TemplateRepositoryInterface):
             template.clear_domain_events()
 
             self.logger.debug(
-                f"Saved template {
-                    template.template_id} and extracted {
-                    len(events)} events"
+                f"Saved template { template.template_id} and extracted { len(events)} events"
             )
             return events
 

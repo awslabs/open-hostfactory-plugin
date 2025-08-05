@@ -220,10 +220,7 @@ class Template(BaseModel):
 
     def __str__(self) -> str:
         """Return string representation of template."""
-        return f"Template(id={
-            self.template_id}, provider={
-            self.provider_api}, instances={
-            self.max_instances})"
+        return f"Template(id={self.template_id}, provider={self.provider_api}, instances={self.max_instances})"
 
     def __repr__(self) -> str:
         """Detailed string representation of template."""

@@ -100,8 +100,7 @@ class HandlerDiscoveryService:
         cached_result = self._try_load_from_cache(base_package)
         if cached_result:
             logger.info(
-                f"Using cached handler discovery ({
-                    cached_result['total_handlers']} handlers)"
+                f"Using cached handler discovery ({ cached_result['total_handlers']} handlers)"
             )
             self._register_handlers_from_cache(cached_result["handlers"])
             return
@@ -166,9 +165,7 @@ class HandlerDiscoveryService:
                 # proper dependency injection
                 self.container.register_singleton(handler_class)
                 logger.debug(
-                    f"Registered query handler: {
-                        handler_class.__name__} for {
-                        query_type.__name__}"
+                    f"Registered query handler: { handler_class.__name__} for { query_type.__name__}"
                 )
             except Exception as e:
                 logger.error(f"Failed to register query handler {handler_class.__name__}: {e}")
@@ -181,9 +178,7 @@ class HandlerDiscoveryService:
                 # proper dependency injection
                 self.container.register_singleton(handler_class)
                 logger.debug(
-                    f"Registered command handler: {
-                        handler_class.__name__} for {
-                        command_type.__name__}"
+                    f"Registered command handler: { handler_class.__name__} for { command_type.__name__}"
                 )
             except Exception as e:
                 logger.error(f"Failed to register command handler {handler_class.__name__}: {e}")
@@ -255,10 +250,7 @@ class HandlerDiscoveryService:
             os.rename(temp_file, self.cache_file)
 
             logger.debug(
-                f"Cached handler discovery results ({
-                    stats.get(
-                        'total_handlers',
-                        0)} handlers)"
+                f"Cached handler discovery results ({ stats.get( 'total_handlers', 0)} handlers)"
             )
 
         except Exception as e:
@@ -283,10 +275,7 @@ class HandlerDiscoveryService:
 
                 except Exception as e:
                     logger.warning(
-                        f"Failed to register cached query handler {
-                            handler_info.get(
-                                'class_name',
-                                'unknown')}: {e}"
+                        f"Failed to register cached query handler { handler_info.get( 'class_name', 'unknown')}: {e}"
                     )
                     # Fall back to full discovery if cache loading fails
                     self._fallback_to_full_discovery()
@@ -307,9 +296,7 @@ class HandlerDiscoveryService:
 
                 except Exception as e:
                     logger.warning(
-                        f"Failed to register cached command handler {
-                            handler_info.get(
-                                'class_name', 'unknown')}: {e}"
+                        f"Failed to register cached command handler { handler_info.get( 'class_name', 'unknown')}: {e}"
                     )
                     # Fall back to full discovery if cache loading fails
                     self._fallback_to_full_discovery()

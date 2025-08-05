@@ -150,9 +150,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
             machine.clear_domain_events()
 
             self.logger.debug(
-                f"Saved machine {
-                    machine.instance_id} and extracted {
-                    len(events)} events"
+                f"Saved machine { machine.instance_id} and extracted { len(events)} events"
             )
             return events
 

@@ -156,8 +156,7 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
                     await self.event_publisher.publish(cascading_event)
                     if self.logger:
                         self.logger.debug(
-                            f"Published cascading event: {
-                                cascading_event.__class__.__name__}"
+                            f"Published cascading event: { cascading_event.__class__.__name__}"
                         )
                 except Exception as e:
                     if self.logger:

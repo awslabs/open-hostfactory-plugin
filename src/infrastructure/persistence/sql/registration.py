@@ -69,12 +69,7 @@ def _build_connection_string(sql_config: Any) -> str:
     if db_type == "sqlite":
         return f"sqlite:///{sql_config.name}"
     elif db_type == "postgresql":
-        return f"postgresql://{
-            sql_config.username}:{
-            sql_config.password}@{
-            sql_config.host}:{
-                sql_config.port}/{
-                    sql_config.name}"
+        return f"postgresql://{sql_config.username}:{sql_config.password}@{sql_config.host}:{sql_config.port}/{sql_config.name}"
     elif db_type == "mysql":
         return f"mysql://{sql_config.username}:{sql_config.password}@{sql_config.host}:{sql_config.port}/{sql_config.name}"
     elif db_type == "aurora":

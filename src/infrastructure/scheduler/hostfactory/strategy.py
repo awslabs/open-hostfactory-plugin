@@ -74,9 +74,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 except Exception as e:
                     # Skip invalid templates but log the issue
                     self._logger.warning(
-                        f"Skipping invalid template {
-                            template.get(
-                                'id', 'unknown')}: {e}"
+                        f"Skipping invalid template { template.get( 'id', 'unknown')}: {e}"
                     )
                     continue
 
@@ -161,8 +159,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         mapped["version"] = template.get("version")
 
         self._logger.debug(
-            f"Mapped template fields: {
-                len(field_mappings)} HostFactory mappings applied for {provider_type} provider"
+            f"Mapped template fields: { len(field_mappings)} HostFactory mappings applied for {provider_type} provider"
         )
 
         return mapped

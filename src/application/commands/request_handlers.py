@@ -74,8 +74,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             raise ValueError(error_msg)
 
         self.logger.debug(
-            f"Available provider strategies: {
-                self._provider_context.available_strategies}"
+            f"Available provider strategies: { self._provider_context.available_strategies}"
         )
 
         # Initialize request variable
@@ -99,9 +98,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                 template
             )
             self.logger.info(
-                f"Selected provider: {
-                    selection_result.provider_instance} ({
-                    selection_result.selection_reason})"
+                f"Selected provider: { selection_result.provider_instance} ({ selection_result.selection_reason})"
             )
 
             # Validate template compatibility with selected provider
@@ -110,10 +107,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             )
 
             if not validation_result.is_valid:
-                error_msg = f"Template incompatible with provider {
-                    selection_result.provider_instance}: {
-                    '; '.join(
-                        validation_result.errors)}"
+                error_msg = f"Template incompatible with provider {selection_result.provider_instance}: {'; '.join(validation_result.errors)}"
                 self.logger.error(error_msg)
                 raise ValueError(error_msg)
 
@@ -143,8 +137,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             if is_dry_run:
                 # In dry-run mode, skip actual provisioning
                 self.logger.info(
-                    f"Skipping actual provisioning for request {
-                        request.request_id} (dry-run mode)"
+                    f"Skipping actual provisioning for request { request.request_id} (dry-run mode)"
                 )
                 from src.domain.request.value_objects import RequestStatus
 
@@ -164,8 +157,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                         resource_ids = provisioning_result.get("resource_ids", [])
                         self.logger.info(f"Provisioning result: {provisioning_result}")
                         self.logger.info(
-                            f"Extracted resource_ids: {resource_ids} (type: {
-                                type(resource_ids)})"
+                            f"Extracted resource_ids: {resource_ids} (type: { type(resource_ids)})"
                         )
 
                         # Store provider API information for later handler selection
@@ -181,20 +173,17 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                         if isinstance(resource_ids, list):
                             for resource_id in resource_ids:
                                 self.logger.info(
-                                    f"Adding resource_id: {resource_id} (type: {
-                                        type(resource_id)})"
+                                    f"Adding resource_id: {resource_id} (type: { type(resource_id)})"
                                 )
                                 if isinstance(resource_id, str):
                                     request = request.add_resource_id(resource_id)
                                 else:
                                     self.logger.error(
-                                        f"Expected string resource_id, got: {
-                                            type(resource_id)} - {resource_id}"
+                                        f"Expected string resource_id, got: { type(resource_id)} - {resource_id}"
                                     )
                         else:
                             self.logger.error(
-                                f"Expected list for resource_ids, got: {
-                                    type(resource_ids)} - {resource_ids}"
+                                f"Expected list for resource_ids, got: { type(resource_ids)} - {resource_ids}"
                             )
 
                         # Create machine aggregates for each instance
@@ -260,8 +249,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                     request.metadata["error_type"] = type(provisioning_error).__name__
 
                     self.logger.error(
-                        f"Provisioning failed for request {
-                            request.request_id}: {provisioning_error}"
+                        f"Provisioning failed for request { request.request_id}: {provisioning_error}"
                     )
 
         except Exception as provisioning_error:
@@ -275,8 +263,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                     f"Provisioning failed: {str(provisioning_error)}",
                 )
                 self.logger.error(
-                    f"Provisioning failed for request {
-                        request.request_id}: {provisioning_error}"
+                    f"Provisioning failed for request { request.request_id}: {provisioning_error}"
                 )
 
                 # Save failed request for audit trail
@@ -386,8 +373,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                 instances = result.data.get("instances", [])
 
                 self.logger.info(
-                    f"Extracted resource_ids: {resource_ids} (type: {
-                        type(resource_ids)})"
+                    f"Extracted resource_ids: {resource_ids} (type: { type(resource_ids)})"
                 )
                 self.logger.info(f"Extracted instances: {len(instances)} instances")
 
@@ -395,10 +381,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                 if resource_ids:
                     for i, resource_id in enumerate(resource_ids):
                         self.logger.info(
-                            f"Resource ID {
-                                i+
-                                1}: {resource_id} (type: {
-                                type(resource_id)})"
+                            f"Resource ID { i+ 1}: {resource_id} (type: { type(resource_id)})"
                         )
 
                 return {

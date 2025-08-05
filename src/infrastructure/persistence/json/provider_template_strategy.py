@@ -148,9 +148,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                                 )
 
                     self.logger.info(
-                        f"Loaded {
-                            len(file_data) if isinstance(
-                                file_data, (list, dict)) else 0} templates from {file_path}"
+                        f"Loaded { len(file_data) if isinstance( file_data, (list, dict)) else 0} templates from {file_path}"
                     )
 
             except Exception as e:

@@ -155,8 +155,7 @@ def _resolve_dependency(
             # Don't try to resolve primitive types from DI container
             if _is_primitive_type(inner_type):
                 logger.debug(
-                    f"Skipping primitive type resolution for {param_name}: {
-                        inner_type.__name__} in {class_name}"
+                    f"Skipping primitive type resolution for {param_name}: { inner_type.__name__} in {class_name}"
                 )
                 return param.default if param.default != inspect.Parameter.empty else None
 
@@ -164,16 +163,14 @@ def _resolve_dependency(
                 return container.get(inner_type)
             except Exception as e:
                 logger.debug(
-                    f"Could not resolve optional dependency {param_name}: {
-                        inner_type.__name__} for {class_name}: {e}"
+                    f"Could not resolve optional dependency {param_name}: { inner_type.__name__} for {class_name}: {e}"
                 )
                 return param.default if param.default != inspect.Parameter.empty else None
 
         # Don't try to resolve primitive types from DI container
         if _is_primitive_type(annotation):
             logger.debug(
-                f"Skipping primitive type resolution for {param_name}: {
-                    annotation.__name__} in {class_name}"
+                f"Skipping primitive type resolution for {param_name}: { annotation.__name__} in {class_name}"
             )
             return param.default if param.default != inspect.Parameter.empty else None
 
@@ -182,8 +179,7 @@ def _resolve_dependency(
             return container.get(annotation)
         except Exception as e:
             logger.debug(
-                f"Could not resolve dependency {param_name}: {
-                    annotation.__name__} for {class_name}: {e}"
+                f"Could not resolve dependency {param_name}: { annotation.__name__} for {class_name}: {e}"
             )
             return None
 
@@ -233,7 +229,7 @@ def get_injectable_info(cls: Type) -> Dict[str, Any]:
                     "type": annotation,
                     "optional": _is_optional_type(annotation),
                     "has_default": param.default != inspect.Parameter.empty,
-                    "default": (
+                    "default}": (
                         param.default if param.default != inspect.Parameter.empty else None
                     ),
                 }

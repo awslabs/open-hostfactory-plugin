@@ -134,9 +134,7 @@ class DependencyResolver:
             except Exception as e:
                 raise FactoryError(
                     registration.dependency_type,
-                    f"Factory failed for {
-                        registration.dependency_type.__name__}: {
-                        str(e)}",
+                    f"Factory failed for { registration.dependency_type.__name__}: { str(e)}",
                 )
 
         if registration.implementation_type is not None:
@@ -266,9 +264,7 @@ class DependencyResolver:
             else:
                 raise DependencyResolutionError(
                     cls,
-                    f"Failed to resolve constructor parameters for {
-                        cls.__name__}: {
-                        str(e)}",
+                    f"Failed to resolve constructor parameters for { cls.__name__}: { str(e)}",
                 )
 
     def _resolve_function_parameters(

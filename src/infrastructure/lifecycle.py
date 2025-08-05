@@ -103,9 +103,7 @@ class LifecycleManager:
                 self._logger.debug(f"Initialized component: {component.__class__.__name__}")
             except Exception as e:
                 self._logger.error(
-                    f"Error initializing component {
-                        component.__class__.__name__}: {
-                        str(e)}"
+                    f"Error initializing component { component.__class__.__name__}: { str(e)}"
                 )
                 import traceback
 
@@ -125,9 +123,7 @@ class LifecycleManager:
                 self._logger.debug(f"Shut down component: {component.__class__.__name__}")
             except Exception as e:
                 self._logger.error(
-                    f"Error shutting down component {
-                        component.__class__.__name__}: {
-                        str(e)}"
+                    f"Error shutting down component { component.__class__.__name__}: { str(e)}"
                 )
                 import traceback
 

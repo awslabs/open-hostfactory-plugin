@@ -152,8 +152,7 @@ class ProviderSelectionService:
         return ProviderSelectionResult(
             provider_type=provider_type,
             provider_instance=selected_instance.name,
-            selection_reason=f"Load balanced across {
-                len(instances)} {provider_type} instances",
+            selection_reason=f"Load balanced across { len(instances)} {provider_type} instances",
             confidence=0.9,
             alternatives=[inst.name for inst in instances if inst.name != selected_instance.name],
         )
@@ -261,10 +260,8 @@ class ProviderSelectionService:
         if len(highest_priority_instances) == 1:
             selected = highest_priority_instances[0]
             self._logger.debug(
-                f"Selected provider {
-                    selected.name} (priority {
-                    selected.priority}, weight {
-                    selected.weight})"
+                f"Selected provider { selected.name} (priority {
+                    selected.priority}, weight { selected.weight})"
             )
             return selected
 
@@ -275,11 +272,9 @@ class ProviderSelectionService:
         # In production, this would maintain round-robin state
         selected = max(highest_priority_instances, key=lambda x: x.weight)
         self._logger.debug(
-            f"Selected provider {
-                selected.name} (priority {
+            f"Selected provider { selected.name} (priority {
                 selected.priority}, weight {
-                selected.weight}) from {
-                    len(highest_priority_instances)} candidates"
+                selected.weight}) from { len(highest_priority_instances)} candidates"
         )
         return selected
 

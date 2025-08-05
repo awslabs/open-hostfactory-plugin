@@ -53,9 +53,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
             self.logger.info(f"Found only templates.json: {self.file_path}")
         else:
             self.logger.warning(
-                f"No template files found at {
-                    self.file_path} or {
-                    self.legacy_file_path}"
+                f"No template files found at { self.file_path} or { self.legacy_file_path}"
             )
 
     def find_by_id(self, entity_id: str) -> Optional[Dict[str, Any]]:

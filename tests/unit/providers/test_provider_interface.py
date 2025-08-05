@@ -1,6 +1,5 @@
 """Generic provider interface compliance tests."""
 
-
 import pytest
 
 from src.domain.base.value_objects import InstanceId

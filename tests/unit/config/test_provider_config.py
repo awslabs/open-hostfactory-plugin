@@ -1,6 +1,5 @@
 """Unit tests for provider configuration."""
 
-
 import pytest
 
 from src.config.schemas.provider_strategy_schema import (

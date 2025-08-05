@@ -394,4 +394,5 @@ class AWSLaunchTemplateManager:
         # Generate a deterministic client token based on the request ID, template ID, and image ID
         # This ensures idempotency - identical requests will return the same result
         token_input = f"{request.request_id}:{aws_template.template_id}:{aws_template.image_id}"
-        return hashlib.sha256(token_input.encode()).hexdigest()[:32]  # Truncate to 32 chars
+        # Truncate to 32 chars
+        return hashlib.sha256(token_input.encode()).hexdigest()[:32]

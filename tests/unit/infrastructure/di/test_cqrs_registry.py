@@ -2,7 +2,6 @@
 
 import threading
 
-
 from src.infrastructure.di.components.cqrs_registry import CQRSHandlerRegistry
 
 

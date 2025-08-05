@@ -40,7 +40,8 @@ class Request(AggregateRoot):
     provider_api: Optional[str] = None  # Provider API/service used
 
     # Resource tracking (what was created)
-    resource_ids: List[str] = Field(default_factory=list)  # Provider resource identifiers
+    # Provider resource identifiers
+    resource_ids: List[str] = Field(default_factory=list)
 
     # Request state
     status: RequestStatus = Field(default=RequestStatus.PENDING)

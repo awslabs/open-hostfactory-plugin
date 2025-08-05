@@ -35,7 +35,6 @@ class MockHandler:
     """Mock handler class for testing."""
 
 
-
 class TestSDKMethodDiscovery:
     """Test cases for SDKMethodDiscovery following existing test patterns."""
 

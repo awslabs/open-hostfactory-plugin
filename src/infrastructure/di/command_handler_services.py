@@ -4,17 +4,17 @@ All command handlers are now automatically discovered and registered via
 @command_handler decorators through the Handler Discovery System.
 """
 
-from src.infrastructure.di.container import DIContainer
-from src.infrastructure.di.buses import CommandBus
-from src.domain.base.ports import LoggingPort
-from src.providers.base.strategy.provider_context import ProviderContext
 from src.application.commands.machine_handlers import (
-    UpdateMachineStatusHandler,
-    ConvertMachineStatusCommandHandler,
-    ConvertBatchMachineStatusCommandHandler,
-    ValidateProviderStateCommandHandler,
     CleanupMachineResourcesHandler,
+    ConvertBatchMachineStatusCommandHandler,
+    ConvertMachineStatusCommandHandler,
+    UpdateMachineStatusHandler,
+    ValidateProviderStateCommandHandler,
 )
+from src.domain.base.ports import LoggingPort
+from src.infrastructure.di.buses import CommandBus
+from src.infrastructure.di.container import DIContainer
+from src.providers.base.strategy.provider_context import ProviderContext
 
 
 def register_command_handler_services(container: DIContainer) -> None:
@@ -118,9 +118,7 @@ def register_command_handlers_with_bus(container: DIContainer) -> None:
             container.get(ValidateProviderStateCommandHandler),
         )
 
-        command_bus.register(
-            UpdateMachineStatusCommand, container.get(UpdateMachineStatusHandler)
-        )
+        command_bus.register(UpdateMachineStatusCommand, container.get(UpdateMachineStatusHandler))
 
         command_bus.register(
             CleanupMachineResourcesCommand,

@@ -21,10 +21,8 @@ class MockPort:
     """Mock port interface."""
 
 
-
 class MockService:
     """Mock service interface."""
-
 
 
 class MockAdapter(MockPort):

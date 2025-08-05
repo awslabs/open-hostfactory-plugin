@@ -11,7 +11,7 @@ Architecture Principles:
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.config.manager import ConfigurationManager
 from src.domain.base.dependency_injection import injectable
@@ -29,8 +29,12 @@ from .services.template_persistence_service import TemplatePersistenceService
 from .template_cache_service import TemplateCacheService, create_template_cache_service
 
 if TYPE_CHECKING:
-    from src.application.services.provider_capability_service import ProviderCapabilityService
-    from src.application.services.template_defaults_service import TemplateDefaultsService
+    from src.application.services.provider_capability_service import (
+        ProviderCapabilityService,
+    )
+    from src.application.services.template_defaults_service import (
+        TemplateDefaultsService,
+    )
 
 
 class TemplateConfigurationError(DomainException):

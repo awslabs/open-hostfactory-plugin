@@ -613,7 +613,8 @@ class TestConfigurationIntegration:
             {
                 "provider": {
                     "type": "aws",
-                    "aws": {"region": "", "max_retries": -1},  # Empty region  # Invalid retry count
+                    # Empty region  # Invalid retry count
+                    "aws": {"region": "", "max_retries": -1},
                 }
             },
             {"logging": {"level": "INVALID_LEVEL"}},  # Invalid log level

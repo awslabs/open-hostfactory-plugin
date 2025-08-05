@@ -1,7 +1,5 @@
 """Unit tests for provider strategy commands."""
 
-
-
 from src.application.provider.commands import (
     ExecuteProviderOperationCommand,
     RegisterProviderStrategyCommand,

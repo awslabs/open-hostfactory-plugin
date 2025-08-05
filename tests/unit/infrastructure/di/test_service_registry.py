@@ -2,7 +2,6 @@
 
 import threading
 
-
 from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
 from src.infrastructure.di.components.service_registry import ServiceRegistry
 

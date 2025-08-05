@@ -363,7 +363,8 @@ class AWSConfiguration(ValueObject):
 
     handler_type: ProviderApi
     fleet_type: Optional[AWSFleetType] = None
-    allocation_strategy: Optional[AllocationStrategy] = None  # Use core enum, not wrapper
+    # Use core enum, not wrapper
+    allocation_strategy: Optional[AllocationStrategy] = None
     price_type: Optional[PriceType] = None
     subnet_ids: List[AWSSubnetId] = []
     security_group_ids: List[AWSSecurityGroupId] = []

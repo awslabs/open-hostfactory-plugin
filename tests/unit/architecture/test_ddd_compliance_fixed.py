@@ -8,7 +8,6 @@ This module validates that the codebase properly implements DDD patterns includi
 - Domain event lifecycle management
 """
 
-
 import pytest
 
 from src.domain.base.exceptions import DomainException

@@ -1,6 +1,5 @@
 """Tests for AWS template fleet_type default assignment."""
 
-
 import pytest
 
 from src.providers.aws.domain.template.aggregate import AWSTemplate

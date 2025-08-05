@@ -5,7 +5,6 @@ import os
 import tempfile
 from unittest.mock import patch
 
-
 from src.bootstrap import Application
 from src.config.manager import ConfigurationManager
 

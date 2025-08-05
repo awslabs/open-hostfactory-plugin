@@ -32,7 +32,8 @@ class ConvertMachineStatusCommand(BaseCommand):
 class ConvertBatchMachineStatusCommand(BaseCommand):
     """Command to convert multiple provider states to domain statuses."""
 
-    provider_states: List[Dict[str, str]]  # List of {'state': str, 'provider_type': str}
+    # List of {'state': str, 'provider_type': str}
+    provider_states: List[Dict[str, str]]
     metadata: Dict[str, Any] = {}
 
 

@@ -4,9 +4,9 @@ All query handlers are now automatically discovered and registered via
 @query_handler decorators through the Handler Discovery System.
 """
 
-from src.infrastructure.di.container import DIContainer
-from src.infrastructure.di.buses import QueryBus
 from src.domain.base.ports import LoggingPort
+from src.infrastructure.di.buses import QueryBus
+from src.infrastructure.di.container import DIContainer
 
 
 def register_query_handler_services(container: DIContainer) -> None:

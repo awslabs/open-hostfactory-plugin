@@ -241,7 +241,8 @@ class OpenHFPluginMCPServer:
 
             tool_def = {
                 "name": tool_name,
-                "description": description.strip().split("\n")[0],  # First line of docstring
+                # First line of docstring
+                "description": description.strip().split("\n")[0],
                 "inputSchema": {
                     "type": "object",
                     "properties": self._get_tool_schema(tool_name),

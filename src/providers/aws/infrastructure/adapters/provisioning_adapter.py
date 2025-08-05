@@ -5,7 +5,7 @@ This module provides an adapter for AWS-specific resource provisioning operation
 It implements the ResourceProvisioningPort interface from the domain layer.
 """
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.exceptions import EntityNotFoundError

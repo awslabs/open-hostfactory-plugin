@@ -1,6 +1,5 @@
 """Host Factory lifecycle integration tests."""
 
-
 import pytest
 
 from tests.fixtures.mock_provider import create_mock_provider
@@ -11,7 +10,8 @@ from tests.fixtures.provider_scenarios import (
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("provider_type", ["mock"])  # Add "aws" when testing with real AWS
+# Add "aws" when testing with real AWS
+@pytest.mark.parametrize("provider_type", ["mock"])
 class TestHostFactoryLifecycle:
     """Test complete Host Factory workflow with any provider."""
 

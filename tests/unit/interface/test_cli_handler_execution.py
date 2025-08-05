@@ -3,7 +3,6 @@
 import argparse
 from unittest.mock import AsyncMock, MagicMock, patch
 
-
 from src.domain.base.ports import SchedulerPort
 from src.infrastructure.di.buses import QueryBus
 from src.infrastructure.di.container import DIContainer

@@ -68,7 +68,8 @@ class BaseRegistry(ABC):
             return
 
         self.mode = mode
-        self._type_registrations: Dict[str, BaseRegistration] = {}  # Type-based registrations
+        # Type-based registrations
+        self._type_registrations: Dict[str, BaseRegistration] = {}
         self._instance_registrations: Dict[str, BaseRegistration] = (
             {}
         )  # Instance-based registrations (multi-choice only)

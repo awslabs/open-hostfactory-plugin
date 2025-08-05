@@ -1,6 +1,5 @@
 """Unit tests for provider strategy queries."""
 
-
 from src.application.provider.queries import (
     GetProviderCapabilitiesQuery,
     GetProviderHealthQuery,

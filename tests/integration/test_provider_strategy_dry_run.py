@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, Mock, patch
 
-
 from src.providers.aws.configuration.config import AWSProviderConfig
 from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 from src.providers.base.strategy import (

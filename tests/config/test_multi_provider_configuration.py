@@ -1,6 +1,5 @@
 """Tests for multi-provider configuration resolution."""
 
-
 import pytest
 
 from src.config.managers.type_converter import ConfigTypeConverter

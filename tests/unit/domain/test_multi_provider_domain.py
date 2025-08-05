@@ -1,6 +1,5 @@
 """Tests for multi-provider domain model updates."""
 
-
 import pytest
 
 from src.domain.request.aggregate import Request

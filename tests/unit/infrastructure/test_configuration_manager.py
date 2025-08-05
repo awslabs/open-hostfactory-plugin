@@ -199,7 +199,8 @@ class TestConfigurationManager:
         # Merge with override
         override_config = {
             "aws": {"region": "us-west-2"},  # Override existing value
-            "logging": {"level": "DEBUG", "file_path": "logs/app.log"},  # Override and add
+            # Override and add
+            "logging": {"level": "DEBUG", "file_path": "logs/app.log"},
         }
         manager.merge(override_config, override=True)
 
@@ -486,7 +487,8 @@ class TestConfigurationManagerEdgeCases:
                 for _ in range(100):
                     value = config_manager.get("aws.region")
                     results.append(value)
-                    time.sleep(0.001)  # Small delay to increase chance of race conditions
+                    # Small delay to increase chance of race conditions
+                    time.sleep(0.001)
             except Exception as e:
                 errors.append(e)
 

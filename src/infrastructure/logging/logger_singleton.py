@@ -125,7 +125,6 @@ def get_logger_singleton() -> LoggerSingleton:
     return _logger_singleton_instance
 
 
-
 def register_logger_with_container() -> None:
     """
     Register the logger singleton with the DI container.

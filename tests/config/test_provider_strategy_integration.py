@@ -1,6 +1,5 @@
 """Integration tests for provider strategy system."""
 
-
 import pytest
 
 from src.config.managers.type_converter import ConfigTypeConverter

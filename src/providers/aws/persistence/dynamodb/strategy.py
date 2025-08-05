@@ -67,7 +67,8 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
         try:
             if not self.client_manager.table_exists(self.table_name):
                 # Create table with basic schema
-                key_schema = [{"AttributeName": "id", "KeyType": "HASH"}]  # Partition key
+                # Partition key
+                key_schema = [{"AttributeName": "id", "KeyType": "HASH"}]
 
                 attribute_definitions = [{"AttributeName": "id", "AttributeType": "S"}]  # String
 

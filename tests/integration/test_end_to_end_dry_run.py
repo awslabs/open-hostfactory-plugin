@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, Mock, patch
 
-
 from src.application.commands.request_handlers import CreateMachineRequestHandler
 from src.application.dto.commands import CreateRequestCommand
 from src.infrastructure.mocking.dry_run_context import dry_run_context

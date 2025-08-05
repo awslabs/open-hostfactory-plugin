@@ -1,6 +1,5 @@
 """Test suite for getRequestStatus functionality."""
 
-
 import pytest
 
 from src.config.manager import ConfigurationManager

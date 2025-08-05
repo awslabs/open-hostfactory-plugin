@@ -27,6 +27,7 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
     def __init__(
         self,
         aws_client,
+        logger,
         region: str,
         profile: Optional[str] = None,
         machine_table: str = "machines",

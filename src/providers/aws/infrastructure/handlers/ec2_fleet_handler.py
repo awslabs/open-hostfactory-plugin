@@ -408,7 +408,7 @@ class EC2FleetHandler(AWSHandler):
             if not fleet_type_value:
                 raise AWSValidationError("Fleet type is required")
 
-            fleet_type = FleetType(fleet_type_value.lower())
+            fleet_type = AWSFleetType(fleet_type_value.lower())
 
             # Get fleet information with pagination and retry
             fleet_list = self._retry_with_backoff(
@@ -441,7 +441,7 @@ class EC2FleetHandler(AWSHandler):
 
             # Get instance IDs based on fleet type
             instance_ids = []
-            if fleet_type == FleetType.INSTANT:
+            if fleet_type == AWSFleetType.INSTANT:
                 # For instant fleets, get instance IDs from metadata
                 instance_ids = request.metadata.get("instance_ids", [])
             else:

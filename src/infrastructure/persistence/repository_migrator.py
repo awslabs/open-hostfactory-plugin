@@ -12,6 +12,8 @@ from src.domain.template.repository import (
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
 
+logger = get_logger()
+
 
 class RepositoryMigrator:
     """
@@ -142,9 +144,9 @@ class RepositoryMigrator:
                     "template", "awsprov_templates.json"
                 )
 
-                logger.info(f"Repository migrator using centralized resolution for template files:")
-                logger.info(f"  templates.json: {templates_path}")
-                logger.info(f"  awsprov_templates.json: {legacy_templates_path}")
+                get_logger().info(f"Repository migrator using centralized resolution for template files:")
+                get_logger().info(f"  templates.json: {templates_path}")
+                get_logger().info(f"  awsprov_templates.json: {legacy_templates_path}")
 
                 # Create a new template repository
                 template_repo = JSONTemplateRepository(templates_path, legacy_templates_path)

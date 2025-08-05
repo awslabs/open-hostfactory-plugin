@@ -13,6 +13,9 @@ from src.infrastructure.logging.logger import get_logger
 # Lazy import to avoid circular dependency
 # from src.infrastructure.utilities.common.serialization import process_value_objects
 
+# Lazy import to avoid circular dependency
+# from src.infrastructure.utilities.common.serialization import process_value_objects
+
 T = TypeVar("T")  # Entity type
 
 
@@ -195,7 +198,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                                 try:
                                     event_bus.publish(event)
                                 except Exception as sync_error:
-                                    logger.error(
+                                    self.logger.error(
                                         f"Failed to publish event {
                                             event.__class__.__name__} via sync fallback: {sync_error}"
                                     )

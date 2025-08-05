@@ -43,6 +43,8 @@ class DynamoDBConverter(DataConverter):
     def prepare_for_query(self, criteria: Dict[str, Any]) -> Any:
         """Prepare domain criteria for DynamoDB query (implements DataConverter interface)."""
         return self.build_filter_expression(criteria)
+
+    def to_dynamodb_item(self, entity_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert domain data to DynamoDB item.
         

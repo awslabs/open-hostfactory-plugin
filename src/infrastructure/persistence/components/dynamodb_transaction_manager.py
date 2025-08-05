@@ -147,11 +147,20 @@ class DynamoDBTransactionManager(TransactionManager):
             dynamodb_client = self.client_manager.get_client()
 
             response = dynamodb_client.transact_write_items(TransactItems=self.transaction_items)
-
-            self.state = TransactionState.COMMITTED
-            self.logger.debug(
-                f"DynamoDB transaction committed with {len(self.transaction_items)} operations"
-            )
+            
+            # Validate response and log transaction details
+            if response.get('ResponseMetadata', {}).get('HTTPStatusCode') == 200:
+                self.state = TransactionState.COMMITTED
+                self.logger.debug(
+                    f"DynamoDB transaction committed successfully with {len(self.transaction_items)} operations",
+                    extra={"request_id": response.get('ResponseMetadata', {}).get('RequestId')}
+                )
+            else:
+                self.state = TransactionState.FAILED
+                self.logger.error(
+                    f"DynamoDB transaction failed with status: {response.get('ResponseMetadata', {}).get('HTTPStatusCode')}",
+                    extra={"response": response}
+                )
 
         except ClientError as e:
             self.state = TransactionState.FAILED

@@ -16,7 +16,7 @@ _ohfp_completion() {
 
     local resources="templates machines requests providers storage system config"
     local global_opts="--config --log-level --format --output --quiet --verbose --dry-run --completion --version --help"
-    
+
     # Handle global options with values
     case $prev in
         --log-level)

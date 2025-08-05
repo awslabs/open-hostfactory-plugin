@@ -47,11 +47,11 @@ class DynamoDBConverter(DataConverter):
     def to_dynamodb_item(self, entity_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert domain data to DynamoDB item.
-        
+
         Args:
             entity_id: Entity identifier
             data: Domain data dictionary
-            
+
         Returns:
             DynamoDB-compatible item
         """

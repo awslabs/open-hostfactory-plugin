@@ -9,12 +9,10 @@ This test suite ensures that all the logging issues we fixed remain fixed:
 5. No template preloading during bootstrap
 """
 
-import asyncio
 import logging
 import re
-from io import StringIO
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from typing import List
+from unittest.mock import Mock, patch
 
 import pytest
 

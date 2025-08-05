@@ -8,7 +8,6 @@ and ensure we're creating valid domain objects correctly.
 
 import os
 import sys
-from typing import Any, Dict
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -203,7 +202,6 @@ def test_base_handler_validation():
             AWSFleetType,
             ProviderApi,
         )
-        from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 
         print("   Testing base handler validation...")
 

@@ -1,19 +1,13 @@
 """Comprehensive tests for CQRS pattern implementation."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 # Import CQRS components with correct paths
 try:
-    from src.application.commands.request_handlers import CreateMachineRequestHandler
     from src.application.dto.commands import CreateRequestCommand
-    from src.application.dto.queries import GetTemplateQuery
-    from src.application.interfaces.command_handler import CommandHandler
-    from src.application.interfaces.command_query import Command, Query
-    from src.application.interfaces.query_handler import QueryHandler
     from src.infrastructure.di.buses import CommandBus, QueryBus
 
     IMPORTS_AVAILABLE = True

@@ -1,8 +1,7 @@
 """Tests for config-driven provider registration."""
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
-import pytest
 
 from src.config.schemas.provider_strategy_schema import (
     ProviderConfig,

@@ -1,6 +1,5 @@
 """Tests for Dockerfile and container build process."""
 
-import json
 import subprocess
 import time
 from pathlib import Path

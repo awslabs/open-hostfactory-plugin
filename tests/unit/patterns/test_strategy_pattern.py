@@ -8,8 +8,7 @@ This module validates the Strategy pattern implementation including:
 - Load balancing strategies
 """
 
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 

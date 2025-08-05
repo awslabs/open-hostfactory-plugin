@@ -1,12 +1,10 @@
 """Generic provider interface compliance tests."""
 
-from typing import Any, Dict, List
-from unittest.mock import Mock
 
 import pytest
 
 from src.domain.base.value_objects import InstanceId
-from src.infrastructure.interfaces.provider import ProviderConfig, ProviderPort
+from src.infrastructure.interfaces.provider import ProviderConfig
 from tests.fixtures.mock_provider import MockProvider, create_mock_provider
 
 

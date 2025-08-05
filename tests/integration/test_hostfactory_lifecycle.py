@@ -1,15 +1,8 @@
 """Host Factory lifecycle integration tests."""
 
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 import pytest
 
-from src.application.commands.request_handlers import CreateMachineRequestHandler
-from src.application.services.provider_capability_service import (
-    ProviderCapabilityService,
-)
-from src.application.services.provider_selection_service import ProviderSelectionService
 from tests.fixtures.mock_provider import create_mock_provider
 from tests.fixtures.provider_scenarios import (
     HostFactoryFormatValidator,
@@ -228,7 +221,6 @@ class TestHostFactoryLifecycle:
     def _create_app_service_with_provider(self, provider_type: str, provider):
         """Create application service with mock provider."""
         from src.bootstrap import Application
-        from src.infrastructure.di.buses import CommandBus, QueryBus
 
         # Create mock application with provider
         app = Application()

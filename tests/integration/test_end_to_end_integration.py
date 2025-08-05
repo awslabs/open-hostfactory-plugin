@@ -9,8 +9,8 @@ with launch template management, provider tracking, and machine creation.
 import os
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from typing import List
+from unittest.mock import Mock
 
 import pytest
 
@@ -19,7 +19,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 from src.domain.machine.aggregate import Machine
 from src.domain.request.aggregate import Request, RequestStatus
-from src.domain.template.aggregate import Template
 from src.infrastructure.persistence.repositories.machine_repository import (
     MachineRepositoryImpl,
 )
@@ -38,7 +37,6 @@ from src.providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
     LaunchTemplateResult,
 )
-from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
 
 class TestEnhancedEndToEnd:

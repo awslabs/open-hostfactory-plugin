@@ -1,14 +1,12 @@
 """Unit tests for MCP tools following existing test patterns."""
 
-from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.mcp.discovery import MCPToolDefinition, MCPToolDiscovery
+from src.mcp.discovery import MCPToolDiscovery
 from src.mcp.tools import OpenHFPluginMCPTools
 from src.sdk.client import OpenHFPluginSDK
-from src.sdk.exceptions import SDKError
 
 
 class TestOpenHFPluginMCPTools:

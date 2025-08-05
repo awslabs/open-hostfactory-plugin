@@ -22,15 +22,10 @@ This test suite covers advanced edge cases and stress scenarios for:
 
 import json
 import os
-import shutil
 import sys
 import tempfile
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))

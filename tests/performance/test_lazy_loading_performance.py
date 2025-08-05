@@ -206,7 +206,6 @@ class TestLazyLoadingPerformance:
     def test_concurrent_access_performance(self):
         """Test performance under concurrent access."""
         import concurrent.futures
-        import threading
 
         def create_and_access_app():
             app = Application()

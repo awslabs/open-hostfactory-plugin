@@ -20,12 +20,9 @@ Test Categories:
 5. Performance Metrics Integration Tests
 """
 
-import asyncio
 import os
 import sys
-from datetime import datetime
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import Mock
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -109,7 +106,6 @@ def test_end_to_end_integration():
 def test_provider_strategy_integration():
     """Test that provider strategy properly integrates with consolidated handlers."""
     try:
-        from src.domain.request.aggregate import Request
         from src.providers.aws.domain.template.aggregate import AWSTemplate
         from src.providers.aws.domain.template.value_objects import ProviderApi
         from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy

@@ -8,17 +8,10 @@ matches our expectations and doesn't contain any of the issues we fixed.
 import os
 import re
 import subprocess
-from typing import Dict, List
 
-import boto3
 import pytest
-from moto import mock_aws
 
 # Use existing test fixtures
-from tests.fixtures.environment.mock_env_vars import (
-    complete_test_environment,
-    mock_aws_credentials,
-)
 
 
 class TestLoggingIntegration:

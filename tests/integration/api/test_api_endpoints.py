@@ -1,6 +1,6 @@
 """Integration tests for API endpoints."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -166,7 +166,6 @@ class TestAPIEndpoints:
 
         # The global exception handler should be registered
         # We can't easily test it without causing actual errors
-        pass
 
     def test_api_versioning(self, client):
         """Test API versioning in URLs."""

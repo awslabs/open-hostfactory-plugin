@@ -10,12 +10,8 @@ This test validates all corner cases and edge scenarios for:
 5. Template field variations and validation
 """
 
-import json
 import os
 import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -107,12 +103,8 @@ def test_launch_template_edge_cases():
 
         # Import required classes
         try:
-            from src.domain.request.aggregate import Request
             from src.providers.aws.domain.template.aggregate import AWSTemplate
             from src.providers.aws.domain.template.value_objects import ProviderApi
-            from src.providers.aws.infrastructure.launch_template.manager import (
-                AWSLaunchTemplateManager,
-            )
         except ImportError as e:
             print(f"   Could not import required classes: {e}")
             return False

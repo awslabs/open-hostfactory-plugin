@@ -1,8 +1,6 @@
 """Unit tests for provider strategy commands."""
 
-from unittest.mock import Mock, patch
 
-import pytest
 
 from src.application.provider.commands import (
     ExecuteProviderOperationCommand,

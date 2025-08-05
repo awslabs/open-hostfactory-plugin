@@ -8,10 +8,9 @@ This module validates that the codebase properly implements Clean Architecture p
 """
 
 import ast
-import importlib
 import os
 from pathlib import Path
-from typing import List, Set
+from typing import List
 from unittest.mock import Mock, patch
 
 import pytest
@@ -232,7 +231,6 @@ class TestCleanArchitecture:
         from src.infrastructure.ports.cloud_resource_manager_port import (
             CloudResourceManagerPort,
         )
-        from src.infrastructure.ports.logger_port import LoggerPort
 
         assert inspect.isabstract(CloudResourceManagerPort) or hasattr(
             CloudResourceManagerPort, "__abstractmethods__"

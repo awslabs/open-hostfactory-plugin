@@ -1,13 +1,10 @@
 """Unit tests for Template aggregate."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 import pytest
 
-from src.domain.base.events.domain_events import DomainEvent
-from src.domain.base.value_objects import InstanceType, Tags
+from src.domain.base.value_objects import InstanceType
 from src.domain.template.aggregate import Template
 from src.domain.template.exceptions import (
     TemplateNotFoundError,

@@ -4,7 +4,7 @@ This module tests the complete field mapping flow from HostFactory JSON
 through the scheduler strategy to the AWS template creation.
 """
 
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 

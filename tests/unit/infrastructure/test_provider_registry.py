@@ -216,7 +216,6 @@ class TestProviderRegistry:
     def test_thread_safety(self):
         """Test thread-safe registration."""
         import threading
-        import time
 
         results = []
         errors = []

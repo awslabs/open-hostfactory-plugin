@@ -1,6 +1,5 @@
 """Unit tests for provider strategy queries."""
 
-import pytest
 
 from src.application.provider.queries import (
     GetProviderCapabilitiesQuery,

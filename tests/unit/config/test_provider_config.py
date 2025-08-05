@@ -1,6 +1,5 @@
 """Unit tests for provider configuration."""
 
-from typing import Any, Dict
 
 import pytest
 

@@ -1,25 +1,17 @@
 """Comprehensive tests for repository pattern implementations."""
 
-import json
 import os
 import tempfile
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
 # Import repository components
 try:
-    from src.domain.base.events.domain_events import DomainEvent
-    from src.domain.machine.aggregate import Machine
     from src.domain.request.aggregate import Request
-    from src.domain.request.value_objects import RequestId, RequestStatus
-    from src.domain.template.aggregate import Template
+    from src.domain.request.value_objects import RequestStatus
     from src.infrastructure.persistence.base.base_repository import BaseRepository
     from src.infrastructure.persistence.components.json_storage import JSONStorage
-    from src.infrastructure.persistence.components.sql_storage import SQLStorage
     from src.infrastructure.persistence.repositories.machine_repository import (
         MachineRepository,
     )

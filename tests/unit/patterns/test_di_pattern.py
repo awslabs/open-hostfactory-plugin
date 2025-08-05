@@ -10,8 +10,6 @@ This module validates the DI pattern implementation including:
 
 import threading
 import time
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -21,11 +19,10 @@ from src.domain.base.dependency_injection import (
     is_injectable,
     singleton,
 )
-from src.domain.base.di_contracts import DILifecycle, DIScope
+from src.domain.base.di_contracts import DIScope
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.di.exceptions import (
     CircularDependencyError,
-    DependencyResolutionError,
     InstantiationError,
     UnregisteredDependencyError,
 )

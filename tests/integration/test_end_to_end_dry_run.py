@@ -1,9 +1,7 @@
 """End-to-end integration tests for dry-run functionality."""
 
-from typing import Any, Dict
 from unittest.mock import MagicMock, Mock, patch
 
-import pytest
 
 from src.application.commands.request_handlers import CreateMachineRequestHandler
 from src.application.dto.commands import CreateRequestCommand

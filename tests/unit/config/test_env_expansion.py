@@ -3,7 +3,6 @@
 import os
 from unittest.mock import patch
 
-import pytest
 
 from src.config.utils.env_expansion import expand_config_env_vars, expand_env_vars
 

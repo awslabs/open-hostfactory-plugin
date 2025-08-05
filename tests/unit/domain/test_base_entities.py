@@ -1,8 +1,6 @@
 """Unit tests for base domain entities."""
 
 from datetime import datetime, timezone
-from typing import Any, Optional
-from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError as PydanticValidationError

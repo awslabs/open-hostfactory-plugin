@@ -1,8 +1,6 @@
 """Comprehensive tests for AWS handler implementations."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import boto3
 import pytest
@@ -10,7 +8,6 @@ from moto import mock_aws
 
 # Import AWS components
 try:
-    from src.providers.aws.configuration.config import AWSConfig
     from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
     from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import (
         EC2FleetHandler,

@@ -6,24 +6,20 @@ import sys
 import tempfile
 import threading
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
 
 # Import components for testing
 try:
-    from src.application.service import ApplicationService
-    from src.domain.base.value_objects import InstanceId, InstanceType, Tags
-    from src.domain.machine.aggregate import Machine
+    from src.domain.base.value_objects import InstanceId
     from src.domain.request.aggregate import Request
     from src.domain.request.exceptions import (
         InvalidRequestStateError,
         RequestValidationError,
     )
-    from src.domain.request.value_objects import RequestStatus, RequestType
-    from src.domain.template.aggregate import Template
+    from src.domain.request.value_objects import RequestStatus
     from src.infrastructure.persistence.repositories.request_repository import (
         RequestRepository,
     )

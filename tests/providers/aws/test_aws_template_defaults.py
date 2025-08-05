@@ -1,6 +1,5 @@
 """Tests for AWS template fleet_type default assignment."""
 
-from unittest.mock import Mock, patch
 
 import pytest
 

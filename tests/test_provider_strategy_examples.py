@@ -6,10 +6,7 @@ including new provider creation, runtime switching, load balancing, and fallback
 """
 
 import time
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
 
-import pytest
 
 from src.providers.base.strategy import (
     CompositeProviderStrategy,
@@ -22,14 +19,11 @@ from src.providers.base.strategy import (
     LoadBalancingConfig,
     LoadBalancingProviderStrategy,
     ProviderCapabilities,
-    ProviderContext,
     ProviderHealthStatus,
     ProviderOperation,
     ProviderOperationType,
     ProviderResult,
     ProviderStrategy,
-    SelectionCriteria,
-    SelectionPolicy,
     create_provider_context,
 )
 

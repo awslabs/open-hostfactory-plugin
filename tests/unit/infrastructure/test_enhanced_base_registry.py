@@ -5,7 +5,6 @@ from unittest.mock import Mock
 import pytest
 
 from src.infrastructure.registry.enhanced_base_registry import (
-    BaseRegistration,
     EnhancedBaseRegistry,
     RegistryMode,
 )

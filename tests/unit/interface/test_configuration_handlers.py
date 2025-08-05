@@ -1,7 +1,6 @@
 """Unit tests for configuration management CLI handlers."""
 
 from argparse import Namespace
-from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import pytest

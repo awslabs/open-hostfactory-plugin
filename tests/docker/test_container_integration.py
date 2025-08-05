@@ -1,6 +1,5 @@
 """Integration tests for Docker container functionality."""
 
-import json
 import subprocess
 import time
 from pathlib import Path

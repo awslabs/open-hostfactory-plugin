@@ -79,7 +79,6 @@ def test_request_repository_enhancements():
 
     try:
         from src.domain.request.aggregate import Request
-        from src.domain.request.request_types import RequestStatus
         from src.domain.request.value_objects import RequestId, RequestType
         from src.infrastructure.persistence.repositories.request_repository import (
             RequestSerializer,
@@ -142,7 +141,6 @@ def test_machine_repository_enhancements():
     try:
         from src.domain.base.value_objects import InstanceId, InstanceType, Tags
         from src.domain.machine.aggregate import Machine
-        from src.domain.machine.machine_status import MachineStatus
         from src.infrastructure.persistence.repositories.machine_repository import (
             MachineSerializer,
         )

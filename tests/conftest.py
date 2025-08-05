@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -494,7 +494,6 @@ def setup_test_environment(complete_test_environment):
     """
     # The complete_test_environment fixture handles all the setup
     # This fixture just ensures it's applied to all tests
-    pass
 
 
 # Re-export fixtures from mock_env_vars for convenience

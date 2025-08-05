@@ -1,6 +1,5 @@
 """Integration tests for ProviderContext with real provider strategies."""
 
-from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import pytest

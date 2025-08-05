@@ -1,6 +1,5 @@
 """Unit tests for SDK method discovery following existing test patterns."""
 
-from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -34,7 +33,6 @@ MockCommand.__name__ = "CreateRequestCommand"
 class MockHandler:
     """Mock handler class for testing."""
 
-    pass
 
 
 class TestSDKMethodDiscovery:

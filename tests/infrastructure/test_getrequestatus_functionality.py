@@ -1,7 +1,5 @@
 """Test suite for getRequestStatus functionality."""
 
-import json
-from unittest.mock import Mock, patch
 
 import pytest
 

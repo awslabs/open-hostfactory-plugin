@@ -2,15 +2,13 @@
 
 import time
 from threading import Event, Thread
-from typing import Any, Dict
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 
 from src.domain.base.ports import LoggingPort
 from src.providers.base.strategy.provider_context import (
     ProviderContext,
-    StrategyMetrics,
 )
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
@@ -388,7 +386,6 @@ class TestProviderContextEdgeCases:
     def test_memory_usage_with_many_operations(self, provider_context):
         """Test memory usage doesn't grow unbounded with many operations."""
         import gc
-        import sys
 
         strategy = FlakyProviderStrategy("memory-test", failure_rate=0.0)
         provider_context.register_strategy(strategy)

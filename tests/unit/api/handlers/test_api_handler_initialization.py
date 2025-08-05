@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from src.api.handlers.get_available_templates_handler import (
     GetAvailableTemplatesRESTHandler,

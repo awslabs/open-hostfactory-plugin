@@ -5,8 +5,6 @@ from unittest.mock import Mock
 import pytest
 
 from src.infrastructure.registry.base_registry import (
-    BaseRegistration,
-    BaseRegistry,
     RegistryMode,
 )
 from src.infrastructure.registry.provider_registry import (

@@ -8,8 +8,7 @@ that was moved out of the base handler to fix architectural violations.
 
 import os
 import sys
-from typing import Any, Dict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import pytest
 

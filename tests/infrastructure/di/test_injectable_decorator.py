@@ -20,13 +20,11 @@ from src.infrastructure.di.decorators import (
 class MockPort:
     """Mock port interface."""
 
-    pass
 
 
 class MockService:
     """Mock service interface."""
 
-    pass
 
 
 class MockAdapter(MockPort):

@@ -1,12 +1,11 @@
 """Unit tests for scheduler query handlers."""
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from src.application.dto.system import (
     SchedulerConfigurationResponse,
-    SchedulerStrategyDTO,
     SchedulerStrategyListResponse,
     ValidationResultDTO,
 )

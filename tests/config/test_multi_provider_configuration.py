@@ -1,6 +1,5 @@
 """Tests for multi-provider configuration resolution."""
 
-from unittest.mock import Mock, patch
 
 import pytest
 

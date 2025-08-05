@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from src.domain.base.ports import SchedulerPort
 from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy

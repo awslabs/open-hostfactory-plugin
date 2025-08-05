@@ -8,8 +8,7 @@ This module validates that the codebase properly implements CQRS patterns includ
 """
 
 import inspect
-from typing import get_type_hints
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -21,7 +20,6 @@ try:
         UpdateRequestStatusCommand,
     )
     from src.application.dto.queries import GetTemplateQuery, ListTemplatesQuery
-    from src.application.interfaces.command_handler import CommandHandler
     from src.infrastructure.di.container import DIContainer
 
     COMPONENTS_AVAILABLE = True

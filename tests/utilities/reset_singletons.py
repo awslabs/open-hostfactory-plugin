@@ -1,8 +1,7 @@
 """Utilities for resetting singletons during testing."""
 
 import importlib
-import sys
-from typing import Any, Optional, Type, cast
+from typing import Any, Type
 
 
 # Define a fallback registry class
@@ -20,7 +19,6 @@ class _FallbackRegistry:
 
     def reset(self, singleton_class=None):
         """Reset one or all singleton instances."""
-        pass
 
 
 # Import the singleton registry

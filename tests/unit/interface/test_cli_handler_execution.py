@@ -3,10 +3,9 @@
 import argparse
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 
 from src.domain.base.ports import SchedulerPort
-from src.infrastructure.di.buses import CommandBus, QueryBus
+from src.infrastructure.di.buses import QueryBus
 from src.infrastructure.di.container import DIContainer
 from src.interface.request_command_handlers import handle_get_request_status
 from src.interface.scheduler_command_handlers import handle_list_scheduler_strategies

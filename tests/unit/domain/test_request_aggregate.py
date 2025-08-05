@@ -1,13 +1,9 @@
 """Unit tests for Request aggregate."""
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 import pytest
 
-from src.domain.base.events.domain_events import DomainEvent
-from src.domain.base.value_objects import Tags
 from src.domain.request.aggregate import Request
 from src.domain.request.exceptions import (
     InvalidRequestStateError,

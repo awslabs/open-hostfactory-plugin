@@ -21,8 +21,7 @@ Test Categories:
 import inspect
 import os
 import sys
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -463,7 +462,6 @@ def test_performance_metrics():
 def test_import_consistency():
     """Test that all handlers have consistent imports."""
     try:
-        import ast
         import os
 
         print("   Checking import consistency...")

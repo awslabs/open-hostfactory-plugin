@@ -1,6 +1,5 @@
 """Unit tests for SDK client following existing test patterns."""
 
-from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest

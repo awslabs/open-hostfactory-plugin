@@ -1,14 +1,11 @@
 """Integration tests for OCP compliance implementation."""
 
-from dataclasses import dataclass
-from typing import Any, Dict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
 from src.config.schemas.provider_strategy_schema import ProviderInstanceConfig
 from src.infrastructure.registry.provider_registry import (
-    ProviderRegistry,
     get_provider_registry,
 )
 
@@ -237,7 +234,6 @@ class TestOCPComplianceIntegration:
 
     def test_no_hard_coded_conditionals(self):
         """Test that no hard-coded provider conditionals exist in key files."""
-        import ast
         import os
 
         # Files that should not have hard-coded provider conditionals

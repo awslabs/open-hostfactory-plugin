@@ -1,7 +1,6 @@
 """Integration tests for bootstrap with configuration-driven providers."""
 
-from typing import Any, Dict
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 

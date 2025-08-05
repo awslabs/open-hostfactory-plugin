@@ -5,7 +5,7 @@ This test suite verifies that the migration from MachineStatusConversionService
 to CQRS handlers maintains the same functionality.
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 

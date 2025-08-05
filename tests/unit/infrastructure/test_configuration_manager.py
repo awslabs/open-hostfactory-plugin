@@ -2,16 +2,14 @@
 
 import json
 import os
-import tempfile
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import patch
 
 import pytest
 
 from src.config.manager import ConfigurationManager
 from src.config.schemas.app_schema import AppConfig
-from src.domain.base.exceptions import ConfigurationError
 
 
 @pytest.mark.unit

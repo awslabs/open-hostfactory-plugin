@@ -539,6 +539,7 @@ class ConfigurationLoader:
 
         # Try to convert to integer
         from contextlib import suppress
+
         with suppress(ValueError):
             return int(value)
 

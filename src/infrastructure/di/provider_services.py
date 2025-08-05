@@ -349,13 +349,15 @@ def _create_lazy_provider_context(
         # Register each active provider immediately
         registered_count = 0
         for provider_instance in provider_config.providers:
-            if provider_instance.enabled and _register_provider_to_context(provider_instance, provider_context, container):
+            if provider_instance.enabled and _register_provider_to_context(
+                provider_instance, provider_context, container
+            ):
                 registered_count += 1
                 logger.info(
-                        f"Registered provider: {
+                    f"Registered provider: {
                             provider_instance.name} (type: {
                             provider_instance.type})"
-                    )
+                )
 
         if registered_count > 0:
             logger.info(f"Successfully registered {registered_count} provider(s)")

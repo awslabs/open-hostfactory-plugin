@@ -147,7 +147,7 @@ class DynamoDBTransactionManager(TransactionManager):
             dynamodb_client = self.client_manager.get_client()
 
             response = dynamodb_client.transact_write_items(TransactItems=self.transaction_items)
-            
+
             # Validate response and log transaction details
             if response.get('ResponseMetadata', {}).get('HTTPStatusCode') == 200:
                 self.state = TransactionState.COMMITTED

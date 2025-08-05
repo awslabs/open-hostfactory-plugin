@@ -50,6 +50,19 @@ from src.infrastructure.utilities.common.collections.validation import (
     is_disjoint,
 )
 
+# Utility aliases for backward compatibility
+def filter_dict(dictionary, predicate):
+    """Filter dictionary by predicate - alias for compatibility."""
+    return {k: v for k, v in dictionary.items() if predicate(k, v)}
+
+def transform_list(collection, transform_func):
+    """Transform list elements - alias for compatibility."""
+    return [transform_func(item) for item in collection]
+
+def validate_collection(collection, validator_func):
+    """Validate collection elements - alias for compatibility."""
+    return all_match(collection, validator_func)
+
 # Export commonly used functions
 __all__ = [
     # Validation functions

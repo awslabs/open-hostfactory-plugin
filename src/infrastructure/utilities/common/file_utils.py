@@ -5,8 +5,55 @@ This module now imports from the organized file utilities package.
 All functions maintain backward compatibility.
 """
 
-# Import all functions from the new organized structure
-from src.infrastructure.utilities.file import *
+# Import only the functions that are actually used/exported
+from src.infrastructure.utilities.file import (
+    # YAML operations
+    read_yaml_file,
+    write_yaml_file,
+    # JSON operations
+    read_json_file,
+    write_json_file,
+    # Text operations
+    read_text_file,
+    write_text_file,
+    append_text_file,
+    # Binary operations
+    read_binary_file,
+    write_binary_file,
+    get_file_hash,
+    is_binary_file,
+    is_text_file,
+    # Directory operations
+    ensure_directory_exists,
+    ensure_parent_directory_exists,
+    directory_exists,
+    delete_directory,
+    list_files,
+    list_directories,
+    find_files,
+    create_temp_directory,
+    # File operations
+    file_exists,
+    get_file_size,
+    delete_file,
+    copy_file,
+    move_file,
+    rename_file,
+    touch_file,
+    create_temp_file,
+    with_temp_file,
+    # Path operations
+    get_file_extension,
+    get_file_name,
+    get_file_name_without_extension,
+    get_directory_name,
+    get_absolute_path,
+    get_relative_path,
+    join_paths,
+    normalize_path,
+    # Utility functions
+    get_file_utils_logger,
+)
 
 
 # Maintain backward compatibility with any legacy imports

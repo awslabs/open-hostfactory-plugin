@@ -146,7 +146,6 @@ class FallbackProviderStrategy(ProviderStrategy):
             raise ValueError("At least one fallback strategy is required")
 
         # Create a dummy config for the parent class
-        from src.infrastructure.interfaces.provider import BaseProviderConfig
 
         dummy_config = ProviderConfig(provider_type="fallback")
         super().__init__(dummy_config)
@@ -261,7 +260,9 @@ class FallbackProviderStrategy(ProviderStrategy):
                         f"Fallback strategy {i+1} already initialized: {strategy.provider_type}"
                     )
             except Exception as e:
-                self._self._logger.error(f"Error initializing fallback strategy {i+1}: {e}")
+                self._self._logger.error(
+                    f"Error initializing fallback strategy {i+1}: {e}"
+                )
 
         # Consider initialization successful if at least one strategy works
         self._initialized = success_count > 0
@@ -324,14 +325,18 @@ class FallbackProviderStrategy(ProviderStrategy):
 
         except Exception as e:
             total_time_ms = (time.time() - start_time) * 1000
-            self._self._logger.error(f"Fallback operation {operation.operation_type} failed: {e}")
+            self._self._logger.error(
+                f"Fallback operation {operation.operation_type} failed: {e}"
+            )
             return ProviderResult.error_result(
                 f"Fallback operation failed: {str(e)}",
                 "FALLBACK_EXECUTION_ERROR",
                 {"total_execution_time_ms": total_time_ms},
             )
 
-    def _execute_with_circuit_breaker(self, operation: ProviderOperation) -> ProviderResult:
+    def _execute_with_circuit_breaker(
+        self, operation: ProviderOperation
+    ) -> ProviderResult:
         """Execute operation using circuit breaker pattern."""
         with self._lock:
             current_time = time.time()
@@ -367,7 +372,10 @@ class FallbackProviderStrategy(ProviderStrategy):
                 else:
                     # Failure - record and potentially open circuit
                     self._circuit_state.record_failure()
-                    if self._circuit_state.failure_count >= self._config.circuit_breaker_threshold:
+                    if (
+                        self._circuit_state.failure_count
+                        >= self._config.circuit_breaker_threshold
+                    ):
                         self._circuit_state.state = CircuitState.OPEN
                         self._self._logger.warning(
                             f"Circuit breaker opened after {self._circuit_state.failure_count} failures"
@@ -379,13 +387,20 @@ class FallbackProviderStrategy(ProviderStrategy):
             except Exception as e:
                 # Exception - record failure and try fallback
                 self._circuit_state.record_failure()
-                if self._circuit_state.failure_count >= self._config.circuit_breaker_threshold:
+                if (
+                    self._circuit_state.failure_count
+                    >= self._config.circuit_breaker_threshold
+                ):
                     self._circuit_state.state = CircuitState.OPEN
-                    self._self._logger.warning(f"Circuit breaker opened after exception: {e}")
+                    self._self._logger.warning(
+                        f"Circuit breaker opened after exception: {e}"
+                    )
 
                 return self._execute_fallback_chain(operation)
 
-    def _execute_with_retry_fallback(self, operation: ProviderOperation) -> ProviderResult:
+    def _execute_with_retry_fallback(
+        self, operation: ProviderOperation
+    ) -> ProviderResult:
         """Execute operation with retry then fallback."""
         last_error = None
 
@@ -434,13 +449,17 @@ class FallbackProviderStrategy(ProviderStrategy):
                     return self._execute_fallback_chain(operation)
             except Exception as e:
                 self._primary_healthy = False
-                self._self._logger.warning(f"Primary strategy failed, marking unhealthy: {e}")
+                self._self._logger.warning(
+                    f"Primary strategy failed, marking unhealthy: {e}"
+                )
                 return self._execute_fallback_chain(operation)
         else:
             # Primary is unhealthy, use fallback directly
             return self._execute_fallback_chain(operation)
 
-    def _execute_immediate_fallback(self, operation: ProviderOperation) -> ProviderResult:
+    def _execute_immediate_fallback(
+        self, operation: ProviderOperation
+    ) -> ProviderResult:
         """Execute operation with immediate fallback on any failure."""
         try:
             result = self._primary_strategy.execute_operation(operation)
@@ -472,7 +491,9 @@ class FallbackProviderStrategy(ProviderStrategy):
                     return result
                 else:
                     last_error = result.error_message
-                    self._self._logger.debug(f"Fallback strategy {i+1} failed: {last_error}")
+                    self._self._logger.debug(
+                        f"Fallback strategy {i+1} failed: {last_error}"
+                    )
 
             except Exception as e:
                 last_error = str(e)
@@ -495,12 +516,19 @@ class FallbackProviderStrategy(ProviderStrategy):
         # Provide minimal functionality based on operation type
         if operation.operation_type == ProviderOperationType.HEALTH_CHECK:
             return ProviderResult.success_result(
-                {"is_healthy": False, "status": "degraded", "message": "All providers failed"},
+                {
+                    "is_healthy": False,
+                    "status": "degraded",
+                    "message": "All providers failed",
+                },
                 {"degraded": True, "last_error": last_error},
             )
         elif operation.operation_type == ProviderOperationType.GET_AVAILABLE_TEMPLATES:
             return ProviderResult.success_result(
-                {"templates": [], "message": "No templates available - all providers failed"},
+                {
+                    "templates": [],
+                    "message": "No templates available - all providers failed",
+                },
                 {"degraded": True, "last_error": last_error},
             )
         else:
@@ -513,14 +541,19 @@ class FallbackProviderStrategy(ProviderStrategy):
     def _update_health_status(self):
         """Update health status of primary strategy if needed."""
         current_time = time.time()
-        if current_time - self._last_health_check >= self._config.health_check_interval_seconds:
+        if (
+            current_time - self._last_health_check
+            >= self._config.health_check_interval_seconds
+        ):
             try:
                 health = self._primary_strategy.check_health()
                 self._primary_healthy = health.is_healthy
                 self._last_health_check = current_time
 
                 if not self._primary_healthy:
-                    self._self._logger.debug(f"Primary strategy unhealthy: {health.status_message}")
+                    self._self._logger.debug(
+                        f"Primary strategy unhealthy: {health.status_message}"
+                    )
 
             except Exception as e:
                 self._primary_healthy = False
@@ -555,12 +588,16 @@ class FallbackProviderStrategy(ProviderStrategy):
                 fallback_info.append(
                     {
                         "provider_type": strategy.provider_type,
-                        "operations": [op.value for op in capabilities.supported_operations],
+                        "operations": [
+                            op.value for op in capabilities.supported_operations
+                        ],
                         "features": capabilities.features,
                     }
                 )
             except Exception as e:
-                self._self._logger.warning(f"Error getting fallback {i+1} capabilities: {e}")
+                self._self._logger.warning(
+                    f"Error getting fallback {i+1} capabilities: {e}"
+                )
 
         # Add fallback-specific features
         combined_features.update(
@@ -663,7 +700,9 @@ class FallbackProviderStrategy(ProviderStrategy):
                         f"Cleaned up fallback strategy {i+1}: {strategy.provider_type}"
                     )
                 except Exception as e:
-                    self._self._logger.warning(f"Error cleaning up fallback strategy {i+1}: {e}")
+                    self._self._logger.warning(
+                        f"Error cleaning up fallback strategy {i+1}: {e}"
+                    )
 
             self._initialized = False
 
@@ -671,11 +710,11 @@ class FallbackProviderStrategy(ProviderStrategy):
             self._self._logger.warning(f"Error during fallback strategy cleanup: {e}")
 
     def __str__(self) -> str:
-        """String representation for debugging."""
+        """Return string representation for debugging."""
         return f"FallbackProviderStrategy(primary={self._primary_strategy.provider_type}, fallbacks={len(self._fallback_strategies)}, mode={self._config.mode.value})"
 
     def __repr__(self) -> str:
-        """Detailed representation for debugging."""
+        """Return detailed representation for debugging."""
         fallback_types = [s.provider_type for s in self._fallback_strategies]
         return (
             f"FallbackProviderStrategy("

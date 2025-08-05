@@ -6,8 +6,6 @@ application service and CQRS infrastructure with automatic
 handler discovery for zero code duplication.
 """
 
-import asyncio
-from contextlib import asynccontextmanager
 from typing import Any, Callable, Dict, List, Optional
 
 from src.bootstrap import Application
@@ -261,7 +259,7 @@ class OpenHFPluginSDK:
         }
 
     def __repr__(self) -> str:
-        """String representation of SDK instance."""
+        """Return string representation of SDK instance."""
         status = "initialized" if self._initialized else "not initialized"
         method_count = len(self._methods) if self._initialized else 0
         return f"OpenHFPluginSDK(provider='{self._config.provider}', status='{status}', methods={method_count})"

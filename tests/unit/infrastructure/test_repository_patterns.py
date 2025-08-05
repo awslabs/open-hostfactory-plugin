@@ -453,7 +453,7 @@ class TestRepositoryPerformanceOptimization:
         request = request_repo.find_by_id("req-123")
 
         # Related data should be loaded lazily
-        if hasattr(request, "machines") and hasattr(request.machines, "__call__"):
+        if hasattr(request, "machines") and callable(request.machines):
             # Lazy loading - machines property is a callable
             request.machines()
 

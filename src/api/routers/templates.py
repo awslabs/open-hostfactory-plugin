@@ -183,9 +183,7 @@ async def create_template(template_data: TemplateCreateRequest) -> JSONResponse:
         if response and response.validation_errors:
             raise HTTPException(
                 status_code=400,
-                detail=f"Template validation failed: {
-                    ', '.join(
-                        response.validation_errors)}",
+                detail=f"Template validation failed: {', '.join(response.validation_errors)}",
             )
 
         return JSONResponse(

@@ -50,7 +50,7 @@ class TestCleanArchitecture:
 
         for layer_path in layer_paths:
             if os.path.exists(layer_path):
-                for root, dirs, files in os.walk(layer_path):
+                for root, _dirs, files in os.walk(layer_path):
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
@@ -135,7 +135,7 @@ class TestCleanArchitecture:
 
         for app_path in app_paths:
             if os.path.exists(app_path):
-                for root, dirs, files in os.walk(app_path):
+                for root, _dirs, files in os.walk(app_path):
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)

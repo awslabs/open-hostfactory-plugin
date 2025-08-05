@@ -339,7 +339,7 @@ class HandlerDiscoveryService:
             package_path = base_package.replace(".", "/")
 
             # Walk through all Python files in the package
-            for root, dirs, files in os.walk(package_path):
+            for root, _dirs, files in os.walk(package_path):
                 for file in files:
                     if file.endswith(".py"):
                         filepath = os.path.join(root, file)

@@ -214,7 +214,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                     entity.clear_domain_events()
                     # Update cache with the entity that has events cleared
                     self._cache[entity_id] = entity
-                elif hasattr(entity, "clear_events") and callable(getattr(entity, "clear_events")):
+                elif hasattr(entity, "clear_events") and callable(entity.clear_events):
                     # Backward compatibility
                     updated_entity = entity.clear_events()
                     self._cache[entity_id] = updated_entity

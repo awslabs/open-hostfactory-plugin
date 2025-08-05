@@ -64,7 +64,7 @@ class TestStrategyPattern:
             try:
                 strategy = strategy_class()
                 assert hasattr(strategy, "execute")
-                assert callable(getattr(strategy, "execute"))
+                assert callable(strategy.execute)
             except TypeError:
                 # Strategy may require constructor parameters - this is acceptable
                 pass

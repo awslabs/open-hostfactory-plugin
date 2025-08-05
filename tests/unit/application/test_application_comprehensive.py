@@ -120,7 +120,7 @@ class TestCommandHandlersComprehensive:
                     if handler:
                         # Test handle method if it exists
                         if hasattr(handler, "handle"):
-                            handle_method = getattr(handler, "handle")
+                            handle_method = handler.handle
                             if inspect.iscoroutinefunction(handle_method):
                                 try:
                                     # Mock dependencies
@@ -213,7 +213,7 @@ class TestQueryHandlersComprehensive:
                     if handler:
                         # Test handle method if it exists
                         if hasattr(handler, "handle"):
-                            handle_method = getattr(handler, "handle")
+                            handle_method = handler.handle
                             if inspect.iscoroutinefunction(handle_method):
                                 try:
                                     # Mock dependencies

@@ -206,9 +206,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 result = func(request)
 
                 # Convert result to dictionary if needed
-                if hasattr(result, "to_dict") and callable(getattr(result, "to_dict")):
-                    to_dict_method = getattr(result, "to_dict")
-                    return to_dict_method()
+                if hasattr(result, "to_dict") and callable(result.to_dict):
+                    return result.to_dict()
                 elif isinstance(result, dict):
                     return result
                 else:

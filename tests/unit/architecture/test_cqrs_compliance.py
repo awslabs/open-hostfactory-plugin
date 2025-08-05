@@ -63,7 +63,7 @@ class TestCQRSCompliance:
 
         # Should have handle method
         assert hasattr(handler, "handle")
-        assert callable(getattr(handler, "handle"))
+        assert callable(handler.handle)
 
         # Handle method should accept command parameter
         sig = inspect.signature(handler.handle)

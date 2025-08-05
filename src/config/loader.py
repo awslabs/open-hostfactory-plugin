@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, TypeVar
 
-from src.config import AppConfig, validate_config
+from src.config.schemas import AppConfig, validate_config
 from src.domain.base.exceptions import ConfigurationError
 
 T = TypeVar("T")

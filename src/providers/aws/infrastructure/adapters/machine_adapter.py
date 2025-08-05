@@ -315,8 +315,8 @@ class AWSMachineAdapter:
                                     machine.machine_id}"
                             )
 
-                            def detach_volume(vol_id=volume_id):
-                                return self._aws_client.ec2_client.detach_volume(VolumeId=vol_id)
+                            def detach_volume(volume_id=volume_id):
+                                return self._aws_client.ec2_client.detach_volume(VolumeId=volume_id)
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2", "detach_volume", detach_volume
@@ -369,9 +369,9 @@ class AWSMachineAdapter:
                                     machine.machine_id}"
                             )
 
-                            def detach_network_interface(attach_id=attachment_id):
+                            def detach_network_interface(attachment_id=attachment_id):
                                 return self._aws_client.ec2_client.detach_network_interface(
-                                    AttachmentId=attach_id
+                                    AttachmentId=attachment_id
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(

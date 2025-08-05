@@ -453,9 +453,7 @@ class ConfigurationLoader:
                 # Always use workdir for SQLite, regardless of host value
                 sql_strategy["name"] = os.path.join(workdir, "database.db")
                 get_config_logger().debug(
-                    f"Set SQLite database path to {
-                        os.path.join(
-                            workdir, 'database.db')}"
+                    f"Set SQLite database path to {os.path.join(workdir, 'database.db')}"
                 )
 
         # Set up config paths based on HF_PROVIDER_CONFDIR
@@ -511,15 +509,13 @@ class ConfigurationLoader:
                     ami_resolution_fallback
                 )
                 get_config_logger().debug(
-                    f"Set ami_resolution.fallback_on_failure to {
-                        ami_resolution_config['fallback_on_failure']}"
+                    f"Set ami_resolution.fallback_on_failure to {ami_resolution_config['fallback_on_failure']}"
                 )
 
             if ami_resolution_cache_file is not None:
                 ami_resolution_config["persistent_cache_file"] = ami_resolution_cache_file
                 get_config_logger().debug(
-                    f"Set ami_resolution.persistent_cache_file to {
-                        ami_resolution_config['persistent_cache_file']}"
+                    f"Set ami_resolution.persistent_cache_file to {ami_resolution_config['persistent_cache_file']}"
                 )
 
     @classmethod

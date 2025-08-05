@@ -205,8 +205,7 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                     {
                         "check": "Configuration File",
                         "status": "PASS",
-                        "details": f"Valid JSON configuration with {
-                            len(config_data)} keys",
+                        "details": f"Valid JSON configuration with {len(config_data)} keys",
                     }
                 )
             except Exception as e:

@@ -60,8 +60,7 @@ def create_fastapi_app(server_config: ServerConfig) -> FastAPI:
         if auth_strategy:
             app.add_middleware(AuthMiddleware, auth_port=auth_strategy, require_auth=True)
             logger.info(
-                f"Authentication middleware enabled with strategy: {
-                    auth_strategy.get_strategy_name()}"
+                f"Authentication middleware enabled with strategy: {auth_strategy.get_strategy_name()}"
             )
         else:
             logger.warning("Authentication enabled but strategy creation failed")

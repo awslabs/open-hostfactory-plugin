@@ -20,19 +20,23 @@ from src.infrastructure.utilities.common.file_utils import (
     write_json_file,
 )
 from src.infrastructure.utilities.common.resource_naming import (
-    generate_resource_name,
-    validate_resource_name,
+    get_resource_prefix,
+    get_launch_template_name,
+    get_instance_name,
+    get_fleet_name,
+    get_asg_name,
+    get_tag_name,
 )
 from src.infrastructure.utilities.common.serialization import (
-    deserialize_datetime,
-    serialize_datetime,
     serialize_enum,
+    deserialize_enum,
+    process_value_objects,
 )
 from src.infrastructure.utilities.common.string_utils import (
-    camel_to_snake,
-    sanitize_string,
-    snake_to_camel,
-    truncate_string,
+    to_snake_case as camel_to_snake,
+    to_camel_case as snake_to_camel,
+    mask_sensitive_data as sanitize_string,
+    truncate as truncate_string,
 )
 from src.infrastructure.utilities.factories.api_handler_factory import APIHandlerFactory
 
@@ -60,12 +64,21 @@ __all__ = [
     "transform_list",
     "validate_collection",
     # Resource naming
-    "generate_resource_name",
-    "validate_resource_name",
+    "get_resource_prefix",
+    "get_launch_template_name",
+    "get_instance_name", 
+    "get_fleet_name",
+    "get_asg_name",
+    "get_tag_name",
     # Serialization
-    "serialize_datetime",
-    "deserialize_datetime",
     "serialize_enum",
+    "deserialize_enum",
+    "process_value_objects",
+    # String utilities (aliases)
+    "camel_to_snake",
+    "snake_to_camel",
+    "sanitize_string", 
+    "truncate_string",
     # Factories (legacy ProviderFactory removed)
     "RepositoryFactory",
     "UnitOfWorkFactory",

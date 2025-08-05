@@ -149,7 +149,7 @@ class ConfigurationLoader:
             )
             if file_config:
                 cls._merge_config(config, file_config)
-                get_config_logger().info(f"Loaded user configuration")
+                get_config_logger().info("Loaded user configuration")
             else:
                 get_config_logger().warning(f"User configuration file not found: {config_path}")
 
@@ -183,7 +183,7 @@ class ConfigurationLoader:
             return config
         else:
             get_config_logger().warning(
-                f"Failed to load default configuration from any location. "
+                "Failed to load default configuration from any location. "
                 "Using empty configuration."
             )
             return {}

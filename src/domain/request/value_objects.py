@@ -34,5 +34,4 @@ __all__ = [
     "RequestTag",
     "RequestConfiguration",
     "LaunchTemplateInfo",
-    "RequestEvent",
 ]

@@ -331,7 +331,7 @@ class RunInstancesHandler(AWSHandler):
                         # Moto doesn't support reservation-id filter, fall back to
                         # describe all instances
                         self._logger.info(
-                            f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
+                            "Reservation-id filter not supported (likely moto), falling back to describe all instances"
                         )
                         return self._find_instances_by_tags_fallback(resource_ids)
                     else:
@@ -341,7 +341,7 @@ class RunInstancesHandler(AWSHandler):
                         # Moto doesn't support reservation-id filter, fall back to
                         # describe all instances
                         self._logger.info(
-                            f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
+                            "Reservation-id filter not supported (likely moto), falling back to describe all instances"
                         )
                         return self._find_instances_by_tags_fallback(resource_ids)
                     else:

@@ -129,7 +129,7 @@ class ProviderSelectionService:
         return ProviderSelectionResult(
             provider_type=provider_instance.type,
             provider_instance=provider_name,
-            selection_reason=f"Explicitly specified in template",
+            selection_reason="Explicitly specified in template",
             confidence=1.0,
         )
 

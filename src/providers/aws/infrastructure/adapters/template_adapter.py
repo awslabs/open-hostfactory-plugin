@@ -245,7 +245,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
         """Get templates filtered by provider API."""
         return await self._template_config_manager.get_templates_by_provider(provider_api)
 
-    async def validate_template(self, template: TemplateDTO) -> Dict[str, Any]:
+    async def validate_template_dto(self, template: TemplateDTO) -> Dict[str, Any]:
         """Validate a template configuration."""
         return await self._template_config_manager.validate_template(template)
 

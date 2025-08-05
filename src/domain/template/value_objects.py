@@ -1,7 +1,7 @@
 """Template value objects - provider-agnostic domain logic."""
 
 # Import core domain value objects
-from typing import Any, Dict
+from typing import Any, Dict, List, Protocol
 
 from src.domain.base.value_objects import ResourceId
 
@@ -13,10 +13,6 @@ class TemplateId(ResourceId):
     """Template identifier."""
 
     resource_type = "Template"
-
-
-"""Template domain value objects and contracts."""
-from typing import Any, List, Protocol
 
 
 # Provider-agnostic contracts (Protocols)

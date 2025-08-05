@@ -44,7 +44,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
             and self.legacy_file_path
             and os.path.exists(self.legacy_file_path)
         ):
-            self.logger.info(f"Found both template files, will merge contents")
+            self.logger.info("Found both template files, will merge contents")
             self.logger.debug(f"Templates file: {self.file_path}")
             self.logger.debug(f"Legacy templates file: {self.legacy_file_path}")
         elif self.legacy_file_path and os.path.exists(self.legacy_file_path):

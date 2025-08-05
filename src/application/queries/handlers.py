@@ -754,8 +754,6 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
                 domain_templates = []
                 for dto in template_dtos:
                     try:
-                        from src.domain.template.aggregate import Template
-
                         # Extract fields from configuration with defaults
                         config = dto.configuration or {}
 

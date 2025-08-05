@@ -90,14 +90,6 @@ class UnitOfWork(Protocol):
         """Exit the unit of work context."""
         ...
 
-    def commit(self) -> None:
-        """Commit the transaction."""
-        ...
-
-    def rollback(self) -> None:
-        """Rollback the transaction."""
-        ...
-
     def register_new(self, entity: Entity) -> None:
         """Register a new entity."""
         ...

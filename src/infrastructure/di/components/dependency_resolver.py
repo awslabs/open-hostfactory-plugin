@@ -369,7 +369,7 @@ class DependencyResolver:
                         if obj is not None:
                             return obj
                     raise NameError(f"Cannot resolve annotation: {annotation}")
-            except:
+            except Exception:
                 # Last resort: try to import from common locations
                 for module_name in [
                     "typing",

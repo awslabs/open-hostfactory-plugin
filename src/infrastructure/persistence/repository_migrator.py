@@ -144,7 +144,7 @@ class RepositoryMigrator:
                     "template", "awsprov_templates.json"
                 )
 
-                get_logger().info(f"Repository migrator using centralized resolution for template files:")
+                get_logger().info("Repository migrator using centralized resolution for template files:")
                 get_logger().info(f"  templates.json: {templates_path}")
                 get_logger().info(f"  awsprov_templates.json: {legacy_templates_path}")
 

@@ -168,7 +168,7 @@ class BearerTokenStrategy(AuthPort):
         Returns:
             True if token was revoked
         """
-        self.logger.info(f"Token revocation requested (not implemented)")
+        self.logger.info("Token revocation requested (not implemented)")
         return True
 
     def get_strategy_name(self) -> str:

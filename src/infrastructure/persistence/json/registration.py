@@ -82,7 +82,7 @@ def create_json_unit_of_work(config: Any) -> Any:
             container = get_container()
             scheduler_strategy = container.get(SchedulerPort)
             base_path = scheduler_strategy.get_storage_base_path()
-        except:
+        except Exception:
             # Fallback to configuration if scheduler not available
             storage_config = config.get_typed(StorageConfig)
             json_config = storage_config.json_strategy

@@ -106,7 +106,7 @@ class TemplateSerializer:
                     processed_data = self.defaults_service.resolve_template_defaults(
                         data, provider_instance_name="aws-default"
                     )
-                    self.logger.debug(f"Applied configuration defaults to template data")
+                    self.logger.debug("Applied configuration defaults to template data")
                 except Exception as e:
                     self.logger.warning(f"Failed to apply defaults, using original data: {e}")
                     processed_data = data

@@ -92,7 +92,7 @@ jobs:
   generate-sbom:
     name: Generate SBOM
     runs-on: ubuntu-latest
-    needs: [build, publish]
+    needs: [publish]
     if: github.event_name == 'release' || github.event.inputs.environment == 'pypi'
     
     permissions:

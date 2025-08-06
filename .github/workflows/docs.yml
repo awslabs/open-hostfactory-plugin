@@ -50,8 +50,10 @@ jobs:
       - name: Build documentation
         working-directory: docs
         run: |
-          mkdocs build --strict
-          ls -la site/  # Verify build output exists
+          mike deploy --update-aliases latest
+          mike set-default latest
+          mike list
+          ls -la site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

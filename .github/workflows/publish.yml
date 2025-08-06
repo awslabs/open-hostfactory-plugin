@@ -131,40 +131,40 @@ jobs:
           cyclonedx-py --format spdxjson -o python-sbom-spdx.json
         else
           # Fallback: create a simple SPDX-like JSON structure
-          python -c "
+          python -c '
 import json
 import pkg_resources
 from datetime import datetime
 
 # Create basic SPDX structure
 spdx_doc = {
-    'spdxVersion': 'SPDX-2.3',
-    'dataLicense': 'CC0-1.0',
-    'SPDXID': 'SPDXRef-DOCUMENT',
-    'name': 'open-hostfactory-plugin',
-    'documentNamespace': 'https://github.com/awslabs/open-hostfactory-plugin',
-    'creationInfo': {
-        'created': datetime.utcnow().isoformat() + 'Z',
-        'creators': ['Tool: cyclonedx-python-fallback']
+    "spdxVersion": "SPDX-2.3",
+    "dataLicense": "CC0-1.0",
+    "SPDXID": "SPDXRef-DOCUMENT",
+    "name": "open-hostfactory-plugin",
+    "documentNamespace": "https://github.com/awslabs/open-hostfactory-plugin",
+    "creationInfo": {
+        "created": datetime.utcnow().isoformat() + "Z",
+        "creators": ["Tool: cyclonedx-python-fallback"]
     },
-    'packages': []
+    "packages": []
 }
 
 # Add packages
 for dist in pkg_resources.working_set:
     package = {
-        'SPDXID': f'SPDXRef-Package-{dist.project_name}',
-        'name': dist.project_name,
-        'version': dist.version,
-        'downloadLocation': 'NOASSERTION',
-        'filesAnalyzed': False,
-        'copyrightText': 'NOASSERTION'
+        "SPDXID": f"SPDXRef-Package-{dist.project_name}",
+        "name": dist.project_name,
+        "version": dist.version,
+        "downloadLocation": "NOASSERTION",
+        "filesAnalyzed": False,
+        "copyrightText": "NOASSERTION"
     }
-    spdx_doc['packages'].append(package)
+    spdx_doc["packages"].append(package)
 
-with open('python-sbom-spdx.json', 'w') as f:
+with open("python-sbom-spdx.json", "w") as f:
     json.dump(spdx_doc, f, indent=2)
-"
+'
         fi
 
     - name: Upload SBOM artifacts

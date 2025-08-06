@@ -121,20 +121,17 @@ jobs:
       continue-on-error: true
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (Fast)
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ env.PYTHON_VERSION }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v1
@@ -166,14 +163,13 @@ jobs:
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: unit-test-results-${{ matrix.python-version }}
+        name: unit-test-results
         path: |
           junit-unit.xml
           coverage-unit.xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
-      if: matrix.python-version == '3.11'
       with:
         file: coverage-unit.xml
         flags: unit

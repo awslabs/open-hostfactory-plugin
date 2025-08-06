@@ -1,22 +1,15 @@
 name: Test Matrix
 
 on:
+  schedule:
+    # Run nightly comprehensive testing at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
   push:
-    branches: [ main, develop ]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
-      - 'pytest.ini'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'requirements*.txt'
-      - 'pyproject.toml'
-      - 'pytest.ini'
+    branches: [main]
+    tags: ['v*']
+    # Only run on main branch and releases for comprehensive testing
 
 env:
   AWS_DEFAULT_REGION: us-east-1

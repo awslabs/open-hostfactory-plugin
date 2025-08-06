@@ -27,6 +27,70 @@ env:
   IMAGE_NAME: awslabs/open-hostfactory-plugin
 
 jobs:
+  # Security Scan Jobs (granular with tool names)
+  security-bandit:
+    name: Bandit (Security Scan)
+    runs-on: ubuntu-latest
+    
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "requirements*.txt"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -r requirements.txt -r requirements-dev.txt
+    
+    - name: Run Bandit security scan
+      run: make ci-security-bandit
+      continue-on-error: true
+
+  security-safety:
+    name: Safety (Dependency Scan)
+    runs-on: ubuntu-latest
+    
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "requirements*.txt"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -r requirements.txt -r requirements-dev.txt
+    
+    - name: Run Safety dependency scan
+      run: make ci-security-safety
+      continue-on-error: true
   security-scan:
     name: Security Analysis
     runs-on: ubuntu-latest

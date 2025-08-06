@@ -18,8 +18,9 @@ env:
   TESTING: true
 
 jobs:
-  lint-and-security:
-    name: Code Quality & Security
+  # Code Quality Jobs (granular with tool names)
+  lint-black:
+    name: Black (Code Formatting)
     runs-on: ubuntu-latest
     
     steps:
@@ -37,19 +38,16 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "pyproject.toml"
     
-    - name: Install dependencies with uv (faster)
+    - name: Install dependencies with uv
       run: |
-        # Use uv for faster dependency installation in CI
         uv pip install --system -e ".[dev]"
     
-    - name: Run code quality checks
-      run: |
-        make ci-quality
-      # TODO: Remove continue-on-error once code quality issues are fixed
+    - name: Run Black formatting check
+      run: make ci-quality-black
       continue-on-error: true
 
-  architecture-compliance:
-    name: Architecture Compliance
+  lint-isort:
+    name: isort (Import Sorting)
     runs-on: ubuntu-latest
     
     steps:
@@ -65,20 +63,210 @@ jobs:
       uses: astral-sh/setup-uv@v1
       with:
         enable-cache: true
-        cache-dependency-glob: "requirements*.txt"
+        cache-dependency-glob: "pyproject.toml"
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        uv pip install --system -e ".[dev]"
     
-    - name: Run Architecture Quality Checks
+    - name: Run isort import check
+      run: make ci-quality-isort
+      continue-on-error: true
+
+  lint-flake8:
+    name: flake8 (Style Guide)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
       run: |
-        make ci-architecture
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run flake8 style check
+      run: make ci-quality-flake8
+      continue-on-error: true
+
+  lint-mypy:
+    name: mypy (Type Checking)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run mypy type check
+      run: make ci-quality-mypy
+      continue-on-error: true
+
+  lint-pylint:
+    name: pylint (Code Analysis)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run pylint analysis
+      run: make ci-quality-pylint
+      continue-on-error: true
+
+  # Architecture Quality Jobs (granular with descriptive names)
+  arch-cqrs:
+    name: CQRS Pattern Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run CQRS pattern validation
+      run: make ci-arch-cqrs
+      continue-on-error: true
+
+  arch-clean:
+    name: Clean Architecture Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run Clean Architecture validation
+      run: make ci-arch-clean
+      continue-on-error: true
+
+  arch-imports:
+    name: Import Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run import validation
+      run: make ci-arch-imports
+      continue-on-error: true
+
+  arch-file-sizes:
+    name: File Size Compliance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        enable-cache: true
+        cache-dependency-glob: "pyproject.toml"
+    
+    - name: Install dependencies with uv
+      run: |
+        uv pip install --system -e ".[dev]"
+    
+    - name: Run file size checks
+      run: make ci-arch-file-sizes
       continue-on-error: true
 
   unit-tests:
     name: Unit Tests (Fast)
     runs-on: ubuntu-latest
+    needs: [lint-black, lint-isort, lint-flake8]  # Can start after basic linting
     
     steps:
     - name: Checkout code
@@ -124,7 +312,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: [lint-and-security]
+    needs: [unit-tests]
     
     steps:
     - name: Checkout code

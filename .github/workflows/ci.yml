@@ -116,8 +116,8 @@ jobs:
       run: |
         echo "Running architecture compliance checks..."
         python scripts/check_file_sizes.py --warn-only || true
-        python scripts/validate_cqrs.py --warn-only || true
-        python scripts/check_architecture.py --warn-only || true
+        python dev-tools/scripts/validate_cqrs.py --warn-only || true
+        python dev-tools/scripts/check_architecture.py --warn-only || true
       continue-on-error: true
 
   unit-tests:

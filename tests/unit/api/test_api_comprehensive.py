@@ -2,8 +2,7 @@
 
 import importlib
 import inspect
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -51,7 +50,7 @@ class TestAPIHandlersComprehensive:
         modules = self.get_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -61,7 +60,7 @@ class TestAPIHandlersComprehensive:
         """Test handler initialization."""
         modules = self.get_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -95,7 +94,7 @@ class TestAPIHandlersComprehensive:
         """Test handler methods exist and are callable."""
         modules = self.get_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -163,10 +162,10 @@ class TestAPIHandlersComprehensive:
         """Test handler dependency injection."""
         modules = self.get_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
-            for class_name, handler_class in classes:
+            for _class_name, handler_class in classes:
                 # Check constructor signature
                 sig = inspect.signature(handler_class.__init__)
                 params = list(sig.parameters.keys())[1:]  # Skip 'self'
@@ -226,7 +225,7 @@ class TestAPIModelsComprehensive:
         modules = self.get_model_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_model_classes(module)
             total_classes += len(classes)
 
@@ -236,7 +235,7 @@ class TestAPIModelsComprehensive:
         """Test model instantiation."""
         modules = self.get_model_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_model_classes(module)
 
             for class_name, model_class in classes:
@@ -275,7 +274,7 @@ class TestAPIModelsComprehensive:
         """Test model serialization capabilities."""
         modules = self.get_model_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_model_classes(module)
 
             for class_name, model_class in classes:
@@ -337,7 +336,7 @@ class TestAPIRoutersComprehensive:
         """Test that routers have defined routes."""
         modules = self.get_router_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             # Look for router objects
             routers = []
             for name, obj in inspect.getmembers(module):
@@ -345,7 +344,7 @@ class TestAPIRoutersComprehensive:
                     routers.append((name, obj))
 
             if routers:
-                for router_name, router in routers:
+                for _router_name, router in routers:
                     assert hasattr(router, "routes")
                     routes = router.routes
                     assert len(routes) >= 0  # Router might have no routes yet
@@ -354,7 +353,7 @@ class TestAPIRoutersComprehensive:
         """Test router FastAPI integration."""
         modules = self.get_router_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             # Look for router objects
             for name, obj in inspect.getmembers(module):
                 if hasattr(obj, "routes") and hasattr(obj, "include_router"):

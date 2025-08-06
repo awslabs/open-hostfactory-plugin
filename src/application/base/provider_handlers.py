@@ -8,13 +8,10 @@ patterns as other base handlers while enabling multi-provider extensibility.
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, Generic, Optional, TypeVar
 
 from src.application.interfaces.provider_handler import ProviderHandler
 from src.domain.base.ports import ErrorHandlingPort, LoggingPort
-from src.domain.request.aggregate import Request
-from src.domain.template.aggregate import Template
 
 TRequest = TypeVar("TRequest")
 TResponse = TypeVar("TResponse")
@@ -175,7 +172,6 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
         Raises:
             Any exception that occurs during request processing
         """
-        pass
 
     def _record_success_metrics(self, request_type: str, duration: float) -> None:
         """Record success metrics for monitoring."""
@@ -268,7 +264,6 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
             request: AWS request to validate
             context: Provider context
         """
-        pass
 
     async def execute_provider_request(
         self, request: TRequest, context: ProviderContext
@@ -337,7 +332,6 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
         Returns:
             AWS response
         """
-        pass
 
     def should_retry(self, exception: Exception) -> bool:
         """

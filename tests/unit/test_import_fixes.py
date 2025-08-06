@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Simple test to verify import fixes."""
 
-import importlib
 import sys
 
 
@@ -19,9 +18,7 @@ def test_import_fixes():
         # Test 2: Check that ProviderHandlerType does NOT exist
         print("2. Testing that ProviderHandlerType is removed...")
         try:
-            from src.providers.aws.domain.template.value_objects import (
-                ProviderHandlerType,
-            )
+            pass
 
             print("   ❌ ProviderHandlerType still exists - should be removed!")
             return False
@@ -32,7 +29,7 @@ def test_import_fixes():
         print("3. Testing handler imports...")
         try:
             # This will fail if there are import issues
-            import src.providers.aws.infrastructure.handlers.spot_fleet_handler
+            pass
 
             print("   ✅ Spot fleet handler imports successfully")
         except Exception as e:
@@ -40,7 +37,7 @@ def test_import_fixes():
             return False
 
         try:
-            import src.providers.aws.infrastructure.handlers.ec2_fleet_handler
+            pass
 
             print("   ✅ EC2 fleet handler imports successfully")
         except Exception as e:

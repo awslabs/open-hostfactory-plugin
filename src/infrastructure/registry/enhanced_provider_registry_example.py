@@ -1,6 +1,6 @@
 """Example: ProviderRegistry using EnhancedBaseRegistry (MULTI_CHOICE mode)."""
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from .enhanced_base_registry import BaseRegistration, EnhancedBaseRegistry, RegistryMode
 
@@ -16,6 +16,7 @@ class ProviderRegistration(BaseRegistration):
         resolver_factory: Callable = None,
         validator_factory: Callable = None,
     ):
+        """Initialize the instance."""
         super().__init__(
             type_name,
             strategy_factory,
@@ -109,7 +110,11 @@ def example_usage():
 
     # Register provider types
     registry.register(
-        "aws", aws_strategy_factory, aws_config_factory, aws_resolver_factory, aws_validator_factory
+        "aws",
+        aws_strategy_factory,
+        aws_config_factory,
+        aws_resolver_factory,
+        aws_validator_factory,
     )
     registry.register("azure", azure_strategy_factory, azure_config_factory)
 
@@ -125,13 +130,13 @@ def example_usage():
     )
 
     # Create strategies by type
-    aws_strategy = registry.create_strategy("aws", aws_config)
+    registry.create_strategy("aws", aws_config)
 
     # Create strategies by instance (multiple instances simultaneously)
-    primary_aws = registry.create_strategy_from_instance("aws-primary", config1)
-    secondary_aws = registry.create_strategy_from_instance("aws-secondary", config2)
-    backup_azure = registry.create_strategy_from_instance("azure-backup", config3)
+    registry.create_strategy_from_instance("aws-primary", config1)
+    registry.create_strategy_from_instance("aws-secondary", config2)
+    registry.create_strategy_from_instance("azure-backup", config3)
 
     # Create additional components
-    aws_resolver = registry.create_resolver("aws")
-    aws_validator = registry.create_validator("aws")
+    registry.create_resolver("aws")
+    registry.create_validator("aws")

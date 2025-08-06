@@ -314,7 +314,8 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
         try:
             # Restore from snapshot
             if self._transaction_snapshot:
-                # Subclasses should override this method to implement snapshot restoration
+                # Subclasses should override this method to implement snapshot
+                # restoration
                 pass
 
             self._transaction_snapshot = None

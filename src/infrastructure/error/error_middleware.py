@@ -18,6 +18,7 @@ class ErrorMiddleware:
     """Middleware for consistent error handling."""
 
     def __init__(self, error_handler: Optional[ExceptionHandler] = None):
+        """Initialize the instance."""
         self._error_handler = error_handler or get_exception_handler()
 
     def wrap_handler(self, handler_func: Callable) -> Callable:
@@ -114,7 +115,7 @@ class ErrorMiddleware:
 
 def with_error_handling(error_handler: Optional[ExceptionHandler] = None):
     """
-    Decorator for adding error handling to functions.
+    Add error handling to functions.
 
     Args:
         error_handler: Optional error handler instance
@@ -141,7 +142,7 @@ def with_error_handling(error_handler: Optional[ExceptionHandler] = None):
 
 def with_api_error_handling(error_handler: Optional[ExceptionHandler] = None):
     """
-    Decorator for adding API-specific error handling to functions.
+    Add API-specific error handling to functions.
 
     Args:
         error_handler: Optional error handler instance

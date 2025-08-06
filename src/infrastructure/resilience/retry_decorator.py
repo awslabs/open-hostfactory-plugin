@@ -96,7 +96,7 @@ def retry(
                     # Log successful retry if this wasn't the first attempt
                     if attempt > 0:
                         logger.info(
-                            f"Operation succeeded after {attempt + 1} attempts: {func.__name__}"
+                            f"Operation succeeded after { attempt + 1} attempts: { func.__name__}"
                         )
 
                     return result
@@ -108,7 +108,7 @@ def retry(
                     if not retry_strategy.should_retry(attempt, e):
                         if attempt >= max_attempts:
                             logger.error(
-                                f"Max retry attempts ({max_attempts}) exceeded for {func.__name__}: {e}"
+                                f"Max retry attempts ({max_attempts}) exceeded for { func.__name__}: {e}"
                             )
                             raise MaxRetriesExceededError(attempt + 1, e)
                         else:
@@ -147,11 +147,22 @@ def get_retry_config_for_service(service: str) -> dict:
         Dictionary with retry configuration parameters
     """
     service_configs = {
-        "ec2": {"max_attempts": 3, "base_delay": 1.0, "max_delay": 30.0, "jitter": True},
-        "dynamodb": {"max_attempts": 5, "base_delay": 0.5, "max_delay": 20.0, "jitter": True},
+        "ec2": {
+            "max_attempts": 3,
+            "base_delay": 1.0,
+            "max_delay": 30.0,
+            "jitter": True,
+        },
+        "dynamodb": {
+            "max_attempts": 5,
+            "base_delay": 0.5,
+            "max_delay": 20.0,
+            "jitter": True,
+        },
         "s3": {"max_attempts": 4, "base_delay": 0.5, "max_delay": 15.0, "jitter": True},
     }
 
     return service_configs.get(
-        service, {"max_attempts": 3, "base_delay": 1.0, "max_delay": 60.0, "jitter": True}
+        service,
+        {"max_attempts": 3, "base_delay": 1.0, "max_delay": 60.0, "jitter": True},
     )

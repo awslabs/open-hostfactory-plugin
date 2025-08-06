@@ -1,6 +1,6 @@
 """Example: StorageRegistry using EnhancedBaseRegistry (SINGLE_CHOICE mode)."""
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable
 
 from .enhanced_base_registry import BaseRegistration, EnhancedBaseRegistry, RegistryMode
 
@@ -15,8 +15,12 @@ class StorageRegistration(BaseRegistration):
         config_factory: Callable,
         unit_of_work_factory: Callable = None,
     ):
+        """Initialize the instance."""
         super().__init__(
-            type_name, strategy_factory, config_factory, unit_of_work_factory=unit_of_work_factory
+            type_name,
+            strategy_factory,
+            config_factory,
+            unit_of_work_factory=unit_of_work_factory,
         )
         self.unit_of_work_factory = unit_of_work_factory
 
@@ -76,8 +80,8 @@ def example_usage():
     registry.register("sql", sql_strategy_factory, sql_config_factory, sql_uow_factory)
 
     # Create strategy (single choice - only one at a time)
-    storage_strategy = registry.create_strategy("json", config)
-    unit_of_work = registry.create_unit_of_work("json")
+    registry.create_strategy("json", config)
+    registry.create_unit_of_work("json")
 
     # Cannot register instances (single choice mode)
     # registry.register_instance("json", "json-primary", ...) # Would raise ValueError

@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.domain.base.ports import SchedulerPort
 from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy
 from src.infrastructure.scheduler.hostfactory.strategy import (
@@ -80,7 +78,7 @@ class TestFormatConversionConsistency:
         assert len(symphony_result["templates"]) == len(self.sample_templates)
 
         # Check that both strategies include the same fields
-        for i, template in enumerate(self.sample_templates):
+        for i, _template in enumerate(self.sample_templates):
             default_template = default_result["templates"][i]
             symphony_template = symphony_result["templates"][i]
 

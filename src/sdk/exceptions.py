@@ -12,6 +12,7 @@ class SDKError(Exception):
     """Base exception for all SDK-related errors."""
 
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+        """Initialize the instance."""
         super().__init__(message)
         self.message = message
         self.details = details or {}
@@ -39,7 +40,10 @@ class ProviderError(SDKError):
     """Raised when provider initialization or operations fail."""
 
     def __init__(
-        self, message: str, provider: Optional[str] = None, details: Optional[Dict[str, Any]] = None
+        self,
+        message: str,
+        provider: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None,
     ):
         super().__init__(message, details)
         self.provider = provider

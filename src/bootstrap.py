@@ -17,6 +17,7 @@ class Application:
     """DI-based application context manager with registration pattern."""
 
     def __init__(self, config_path: Optional[str] = None) -> None:
+        """Initialize the instance."""
         self.config_path = config_path
         self._initialized = False
 
@@ -84,7 +85,8 @@ class Application:
             # Ensure container is available (lazy)
             self._ensure_container()
 
-            # Register all services AFTER container creation but BEFORE service resolution
+            # Register all services AFTER container creation but BEFORE service
+            # resolution
             from src.infrastructure.di.services import register_all_services
 
             register_all_services(self._container)
@@ -97,9 +99,11 @@ class Application:
             # Initialize provider context based on loading mode
             if not self._container.is_lazy_loading_enabled():
                 # Eager loading - initialize immediately
-                if hasattr(self._provider_context, "initialize"):
-                    if not self._provider_context.initialize():
-                        self.logger.warning("Provider context initialization returned False")
+                if (
+                    hasattr(self._provider_context, "initialize")
+                    and not self._provider_context.initialize()
+                ):
+                    self.logger.warning("Provider context initialization returned False")
             else:
                 # Lazy loading - just mark as ready, don't trigger loading
                 self.logger.info("Lazy loading enabled - providers will initialize on first use")
@@ -317,7 +321,7 @@ async def create_application(config_path: Optional[str] = None) -> Application:
 
 
 async def main() -> None:
-    """Main entry point for provider-aware application."""
+    """Serve as main entry point for provider-aware application."""
     import os
     import sys
 

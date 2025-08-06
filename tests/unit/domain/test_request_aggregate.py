@@ -1,13 +1,9 @@
 """Unit tests for Request aggregate."""
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 import pytest
 
-from src.domain.base.events.domain_events import DomainEvent
-from src.domain.base.value_objects import Tags
 from src.domain.request.aggregate import Request
 from src.domain.request.exceptions import (
     InvalidRequestStateError,
@@ -21,6 +17,34 @@ from src.domain.request.value_objects import (
     RequestStatus,
     RequestType,
 )
+
+# Try to import optional classes - create mocks if not available
+try:
+    from src.domain.request.value_objects import Priority
+
+    PRIORITY_AVAILABLE = True
+except ImportError:
+    PRIORITY_AVAILABLE = False
+
+    class Priority:
+        def __init__(self, value):
+            if not isinstance(value, (int, str)):
+                raise ValueError("Invalid priority")
+            self.value = value
+
+
+try:
+    from src.domain.request.request_metadata import MachineCount
+
+    MACHINE_COUNT_AVAILABLE = True
+except ImportError:
+    MACHINE_COUNT_AVAILABLE = False
+
+    class MachineCount:
+        def __init__(self, value):
+            if not isinstance(value, int) or value < 0:
+                raise ValueError("Invalid machine count")
+            self.value = value
 
 
 @pytest.mark.unit

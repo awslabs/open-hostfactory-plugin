@@ -21,7 +21,10 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
     """JSON storage strategy for templates with legacy format support."""
 
     def __init__(
-        self, file_path: str, legacy_file_path: Optional[str] = None, create_dirs: bool = True
+        self,
+        file_path: str,
+        legacy_file_path: Optional[str] = None,
+        create_dirs: bool = True,
     ):
         """
         Initialize with both main and legacy file paths.
@@ -41,7 +44,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
             and self.legacy_file_path
             and os.path.exists(self.legacy_file_path)
         ):
-            self.logger.info(f"Found both template files, will merge contents")
+            self.logger.info("Found both template files, will merge contents")
             self.logger.debug(f"Templates file: {self.file_path}")
             self.logger.debug(f"Legacy templates file: {self.legacy_file_path}")
         elif self.legacy_file_path and os.path.exists(self.legacy_file_path):
@@ -50,7 +53,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
             self.logger.info(f"Found only templates.json: {self.file_path}")
         else:
             self.logger.warning(
-                f"No template files found at {self.file_path} or {self.legacy_file_path}"
+                f"No template files found at { self.file_path} or { self.legacy_file_path}"
             )
 
     def find_by_id(self, entity_id: str) -> Optional[Dict[str, Any]]:
@@ -149,7 +152,9 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
         # Choose strategy based on configuration
         if use_provider_strategy:
             strategy = ProviderTemplateStrategy(
-                base_file_path=templates_file_path, config_manager=config_manager, create_dirs=True
+                base_file_path=templates_file_path,
+                config_manager=config_manager,
+                create_dirs=True,
             )
             self.logger.info("Using provider-specific template loading strategy")
         else:
@@ -348,7 +353,9 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
 
 
 # Register the repository in the singleton registry
-def get_template_repository(config_manager: ConfigurationManager = None) -> TemplateJSONRepository:
+def get_template_repository(
+    config_manager: ConfigurationManager = None,
+) -> TemplateJSONRepository:
     """
     Get template repository instance.
 

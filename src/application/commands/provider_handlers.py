@@ -44,6 +44,7 @@ class SelectProviderStrategyHandler(
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
     ):
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
 
@@ -60,7 +61,8 @@ class SelectProviderStrategyHandler(
         try:
             # Use existing provider context to select strategy
             selector = SelectorFactory.create_selector(
-                SelectionPolicy.CAPABILITY_BASED, self.logger  # Use capability-based selection
+                SelectionPolicy.CAPABILITY_BASED,
+                self.logger,  # Use capability-based selection
             )
 
             # Get available strategies from context

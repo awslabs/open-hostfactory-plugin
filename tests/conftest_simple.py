@@ -5,8 +5,7 @@ This avoids the complex DI system that has circular import issues.
 
 import os
 import sys
-from typing import Any, Dict, Optional
-from unittest.mock import MagicMock, Mock
+from unittest.mock import MagicMock
 
 import pytest
 

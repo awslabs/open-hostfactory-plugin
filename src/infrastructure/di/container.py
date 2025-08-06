@@ -8,26 +8,12 @@ from contextlib import contextmanager
 from typing import Any, Dict, Iterator, List, Optional, Set, Type, TypeVar
 
 from src.domain.base.dependency_injection import (
-    DependencyInjectionPort,
-    InjectableMetadata,
-    get_injectable_metadata,
     is_injectable,
-    is_singleton,
-)
-from src.domain.base.di_contracts import (
-    CircularDependencyError as DomainCircularDependencyError,
 )
 from src.domain.base.di_contracts import (
     CQRSHandlerRegistrationPort,
     DependencyRegistration,
-    DependencyRegistrationError,
-)
-from src.domain.base.di_contracts import (
-    DependencyResolutionError as DomainDependencyResolutionError,
-)
-from src.domain.base.di_contracts import (
     DIContainerPort,
-    DILifecycle,
     DIScope,
 )
 from src.domain.base.ports import ContainerPort
@@ -112,7 +98,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         self._on_demand_registrations: Dict[Type, Any] = {}
 
         logger.info(
-            f"DI Container initialized (lazy_loading={'enabled' if self._lazy_config.enabled else 'disabled'})"
+            f"DI Container initialized (lazy_loading={ 'enabled' if self._lazy_config.enabled else 'disabled'})"
         )
 
     def is_registered(self, cls: Type) -> bool:
@@ -143,7 +129,10 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         self._service_registry.register(registration)
 
     def register_type(
-        self, interface_type: Type[T], implementation_type: Type[T], registration_type=None
+        self,
+        interface_type: Type[T],
+        implementation_type: Type[T],
+        registration_type=None,
     ) -> None:
         """Register an interface to implementation mapping."""
         scope = registration_type or DIScope.TRANSIENT
@@ -167,7 +156,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         try:
             # First, try normal resolution
             return self._dependency_resolver.resolve(cls, parent_type, dependency_chain)
-        except (DependencyResolutionError, UnregisteredDependencyError) as e:
+        except (DependencyResolutionError, UnregisteredDependencyError):
             # If lazy loading is enabled, try on-demand registration
             if self._lazy_config.enabled and not self._service_registry.is_registered(cls):
                 self._register_on_demand(cls)
@@ -219,7 +208,8 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         handler_type = self._cqrs_registry.get_command_handler_type(command_type)
         if handler_type is None:
             raise DependencyResolutionError(
-                command_type, f"No command handler registered for {command_type.__name__}"
+                command_type,
+                f"No command handler registered for {command_type.__name__}",
             )
         return self.get(handler_type)
 
@@ -352,7 +342,7 @@ def _create_configured_container() -> DIContainer:
 
 
 def _setup_cqrs_infrastructure(container: DIContainer) -> None:
-    """Setup CQRS infrastructure: handler discovery and buses."""
+    """Set up CQRS infrastructure: handler discovery and buses."""
     try:
         from src.domain.base.ports import LoggingPort
         from src.infrastructure.di.buses import BusFactory

@@ -10,7 +10,8 @@ class LoggingConfig(BaseModel):
 
     level: str = Field("INFO", description="Logging level")
     format: str = Field(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s", description="Logging format"
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        description="Logging format",
     )
     file_path: Optional[str] = Field(None, description="Log file path")
     max_size: int = Field(10 * 1024 * 1024, description="Maximum log file size in bytes")

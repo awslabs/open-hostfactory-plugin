@@ -68,7 +68,10 @@ class DataIntegrityError(PersistenceError):
     """Exception for data integrity errors."""
 
     def __init__(
-        self, message: str, entity_type: Optional[str] = None, entity_id: Optional[str] = None
+        self,
+        message: str,
+        entity_type: Optional[str] = None,
+        entity_id: Optional[str] = None,
     ) -> None:
         """
         Initialize data integrity error.

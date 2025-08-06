@@ -1,7 +1,6 @@
 """Unit tests for MCP discovery following existing test patterns."""
 
-from typing import Any, Dict
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 

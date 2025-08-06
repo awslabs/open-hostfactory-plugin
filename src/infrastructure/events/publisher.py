@@ -38,7 +38,8 @@ class ConfigurableEventPublisher(EventPublisher):
                 self._publish_to_queue(event)
         except Exception as e:
             self._logger.error(f"Failed to publish event {event.event_type}: {e}")
-            # Don't re-raise - event publishing failure shouldn't break business operations
+            # Don't re-raise - event publishing failure shouldn't break business
+            # operations
 
     def register_handler(self, event_type: str, handler: Callable[[DomainEvent], None]) -> None:
         """Register event handler for specific event type."""

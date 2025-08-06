@@ -40,9 +40,8 @@ from src.infrastructure.di.container import get_container
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
 from src.infrastructure.resilience import CircuitBreakerOpenError
-from src.infrastructure.utilities.common.serialization import serialize_enum
 from src.providers.aws.domain.template.aggregate import AWSTemplate
-from src.providers.aws.domain.template.value_objects import AWSFleetType, ProviderApi
+from src.providers.aws.domain.template.value_objects import AWSFleetType
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSEntityNotFoundError,
     AWSInfrastructureError,
@@ -112,10 +111,15 @@ class EC2FleetHandler(AWSHandler):
                 },
             }
         except Exception as e:
-            return {"success": False, "resource_ids": [], "instances": [], "error_message": str(e)}
+            return {
+                "success": False,
+                "resource_ids": [],
+                "instances": [],
+                "error_message": str(e),
+            }
 
     def _create_fleet_internal(self, request: Request, aws_template: AWSTemplate) -> str:
-        """Internal method for EC2 Fleet creation with pure business logic."""
+        """Create EC2 Fleet with pure business logic."""
         # Validate prerequisites
         self._validate_prerequisites(aws_template)
 
@@ -163,7 +167,9 @@ class EC2FleetHandler(AWSHandler):
         # Create the fleet with circuit breaker for critical operation
         try:
             response = self._retry_with_backoff(
-                self.aws_client.ec2_client.create_fleet, operation_type="critical", **fleet_config
+                self.aws_client.ec2_client.create_fleet,
+                operation_type="critical",
+                **fleet_config,
             )
         except CircuitBreakerOpenError as e:
             self._logger.error(f"Circuit breaker OPEN for EC2 Fleet creation: {str(e)}")
@@ -272,7 +278,8 @@ class EC2FleetHandler(AWSHandler):
                     fleet_config["SpotOptions"] = {}
                 fleet_config["SpotOptions"]["MaxTotalPrice"] = str(template.max_spot_price)
         elif price_type == "heterogeneous":
-            # For heterogeneous fleets, we need to specify both on-demand and spot capacities
+            # For heterogeneous fleets, we need to specify both on-demand and spot
+            # capacities
             percent_on_demand = template.percent_on_demand or 0
             on_demand_count = int(request.requested_count * percent_on_demand / 100)
             spot_count = request.requested_count - on_demand_count
@@ -314,7 +321,10 @@ class EC2FleetHandler(AWSHandler):
             if price_type == "heterogeneous" and template.instance_types_ondemand:
                 on_demand_overrides = []
                 for instance_type, weight in template.instance_types_ondemand.items():
-                    override = {"InstanceType": instance_type, "WeightedCapacity": weight}
+                    override = {
+                        "InstanceType": instance_type,
+                        "WeightedCapacity": weight,
+                    }
                     on_demand_overrides.append(override)
 
                 # Add on-demand overrides to the existing overrides
@@ -339,7 +349,10 @@ class EC2FleetHandler(AWSHandler):
 
                     # Add on-demand instance types for heterogeneous fleets
                     if price_type == "heterogeneous" and template.instance_types_ondemand:
-                        for instance_type, weight in template.instance_types_ondemand.items():
+                        for (
+                            instance_type,
+                            weight,
+                        ) in template.instance_types_ondemand.items():
                             override = {
                                 "SubnetId": subnet_id,
                                 "InstanceType": instance_type,
@@ -395,7 +408,7 @@ class EC2FleetHandler(AWSHandler):
             if not fleet_type_value:
                 raise AWSValidationError("Fleet type is required")
 
-            fleet_type = FleetType(fleet_type_value.lower())
+            fleet_type = AWSFleetType(fleet_type_value.lower())
 
             # Get fleet information with pagination and retry
             fleet_list = self._retry_with_backoff(
@@ -421,11 +434,12 @@ class EC2FleetHandler(AWSHandler):
 
             # Get instance IDs based on fleet type
             instance_ids = []
-            if fleet_type == FleetType.INSTANT:
+            if fleet_type == AWSFleetType.INSTANT:
                 # For instant fleets, get instance IDs from metadata
                 instance_ids = request.metadata.get("instance_ids", [])
             else:
-                # For request/maintain fleets, describe fleet instances with pagination and retry
+                # For request/maintain fleets, describe fleet instances with pagination
+                # and retry
                 active_instances = self._retry_with_backoff(
                     lambda: self._paginate(
                         self.aws_client.ec2_client.describe_fleet_instances,

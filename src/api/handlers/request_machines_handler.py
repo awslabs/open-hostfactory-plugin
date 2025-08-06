@@ -1,15 +1,13 @@
 """API handler for requesting machines."""
 
-import json
 import time
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from src.api.models import RequestMachinesModel
 from src.api.validation import RequestValidator, ValidationException
 from src.application.base.infrastructure_handlers import BaseAPIHandler
 from src.application.dto.commands import CreateRequestCommand
-from src.application.dto.queries import ListTemplatesQuery
 from src.application.request.dto import RequestMachinesResponse
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import ErrorHandlingPort, LoggingPort
@@ -90,7 +88,8 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
         """
         if self.logger:
             self.logger.info(
-                f"Processing request machines - Template: {request.template_id}, Count: {request.max_number} - Correlation ID: {context.correlation_id}"
+                f"Processing request machines - Template: {request.template_id}, "
+                f"Count: {request.max_number} - Correlation ID: {context.correlation_id}"
             )
 
         try:
@@ -107,7 +106,7 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
             )
 
             # Execute command through CQRS command bus
-            result = await self._command_bus.execute(command)
+            await self._command_bus.execute(command)
 
             # Create response
             response = RequestMachinesResponse(

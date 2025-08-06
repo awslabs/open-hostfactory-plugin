@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Generator, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -53,7 +53,9 @@ try:
     from src.domain.template.aggregate import Template
     from src.infrastructure.di.buses import CommandBus, QueryBus
     from src.infrastructure.di.container import DIContainer
-    from src.infrastructure.template.template_service import TemplateService
+    from src.infrastructure.template.services.template_persistence_service import (
+        TemplatePersistenceService,
+    )
     from src.providers.aws.configuration.config import AWSConfig
 
     IMPORTS_AVAILABLE = True
@@ -258,22 +260,6 @@ def aws_config() -> AWSConfig:
 
 
 @pytest.fixture
-def mock_aws_credentials():
-    """Mock AWS credentials."""
-    with patch.dict(
-        os.environ,
-        {
-            "AWS_ACCESS_KEY_ID": "testing",
-            "AWS_SECRET_ACCESS_KEY": "testing",
-            "AWS_SECURITY_TOKEN": "testing",
-            "AWS_SESSION_TOKEN": "testing",
-            "AWS_DEFAULT_REGION": "us-east-1",
-        },
-    ):
-        yield
-
-
-@pytest.fixture
 def aws_mocks():
     """Set up comprehensive AWS service mocks."""
     if MOTO_AVAILABLE:
@@ -285,19 +271,19 @@ def aws_mocks():
 
 
 @pytest.fixture
-def ec2_client(mock_aws_credentials, aws_mocks):
+def ec2_client(aws_mocks):
     """Create a mocked EC2 client."""
     return boto3.client("ec2", region_name="us-east-1")
 
 
 @pytest.fixture
-def autoscaling_client(mock_aws_credentials, aws_mocks):
+def autoscaling_client(aws_mocks):
     """Create a mocked Auto Scaling client."""
     return boto3.client("autoscaling", region_name="us-east-1")
 
 
 @pytest.fixture
-def ssm_client(mock_aws_credentials, aws_mocks):
+def ssm_client(aws_mocks):
     """Create a mocked SSM client."""
     return boto3.client("ssm", region_name="us-east-1")
 
@@ -402,7 +388,7 @@ def sample_machine() -> Machine:
 @pytest.fixture
 def mock_template_service() -> Mock:
     """Create a mock template service."""
-    service = Mock(spec=TemplateService)
+    service = Mock(spec=TemplatePersistenceService)
     service.get_available_templates.return_value = []
     service.get_template_by_id.return_value = None
     service.get_templates_by_provider.return_value = []
@@ -479,48 +465,6 @@ def di_container() -> DIContainer:
     return container
 
 
-@pytest.fixture(autouse=True)
-def setup_test_environment(complete_test_environment):
-    """
-    Automatically set up test environment for all tests.
-
-    This fixture runs automatically for every test and ensures:
-    - HF_PROVIDER environment variables are set to test values
-    - AWS credentials are mocked to prevent real AWS calls
-    - Test configuration files are available
-
-    Args:
-        complete_test_environment: Combined HF and AWS environment fixture
-    """
-    # The complete_test_environment fixture handles all the setup
-    # This fixture just ensures it's applied to all tests
-    pass
-
-
-# Re-export fixtures from mock_env_vars for convenience
-__all__ = [
-    "mock_hf_environment",
-    "mock_hf_environment_with_fixtures",
-    "mock_aws_credentials",
-    "complete_test_environment",
-    "create_test_config_dict",
-    "create_test_templates_dict",
-]
-
-
-@pytest.fixture
-def mock_logger():
-    """Create a mock logger."""
-    logger = Mock()
-    logger.info = Mock()
-    logger.debug = Mock()
-    logger.warning = Mock()
-    logger.error = Mock()
-    logger.critical = Mock()
-    return logger
-
-
-# Parametrized fixtures for different test scenarios
 @pytest.fixture(params=["json", "sql", "memory"])
 def repository_type(request):
     """Parametrized fixture for different repository types."""

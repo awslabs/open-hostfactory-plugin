@@ -82,7 +82,8 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
         # Fallback to default scheduler
         register_active_scheduler_only("default")
 
-    # 4. Register provider services immediately (Phase 3 fix for provider context errors)
+    # 4. Register provider services immediately (Phase 3 fix for provider
+    # context errors)
     register_provider_services(container)
 
     # 5. Register lazy factories for non-essential services
@@ -154,7 +155,8 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
     # Provider services are now registered immediately in lazy mode
     # No need for lazy provider registration
 
-    # Register infrastructure services as lazy - triggered by first infrastructure service access
+    # Register infrastructure services as lazy - triggered by first
+    # infrastructure service access
     def register_infrastructure_lazy(c):
         register_infrastructure_services(c)
         # Also setup CQRS if not already done (infrastructure services may need buses)

@@ -4,8 +4,10 @@ Event Handler Decorators - CQRS-aligned event handler registration.
 Following the same pattern as CommandHandler and QueryHandler decorators.
 """
 
-from functools import wraps
-from typing import Any, Callable, Dict, Type
+from typing import TYPE_CHECKING, Dict, Type
+
+if TYPE_CHECKING:
+    from src.application.events.base.event_handler import EventHandler
 
 
 class EventHandlerRegistry:
@@ -16,7 +18,7 @@ class EventHandlerRegistry:
     @classmethod
     def register(cls, event_type: str):
         """
-        Decorator to register event handlers.
+        Register event handlers.
 
         CQRS event handlers use ONLY this decorator - Handler Discovery System
         automatically registers them in the DI container. Do NOT use @injectable
@@ -65,7 +67,7 @@ class EventHandlerRegistry:
 # Convenient decorator alias following CQRS naming convention
 def event_handler(event_type: str):
     """
-    Decorator to register event handlers - CQRS style.
+    Register event handlers - CQRS style.
 
     This follows the same pattern as @command_handler and @query_handler
     decorators used elsewhere in the CQRS architecture.

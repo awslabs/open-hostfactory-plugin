@@ -362,7 +362,7 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
 
 def create_aws_validation_adapter(logger: LoggingPort) -> AWSValidationAdapter:
     """
-    Factory function to create AWS validation adapter with configuration.
+    Create AWS validation adapter with configuration.
 
     Args:
         logger: Logger for validation operations

@@ -71,11 +71,19 @@ class StatusValuesConfig(BaseModel):
         description="Machine status values",
     )
     machine_result: Dict[str, str] = Field(
-        default_factory=lambda: {"executing": "executing", "succeed": "succeed", "fail": "fail"},
+        default_factory=lambda: {
+            "executing": "executing",
+            "succeed": "succeed",
+            "fail": "fail",
+        },
         description="Machine result values",
     )
     circuit_breaker: Dict[str, str] = Field(
-        default_factory=lambda: {"closed": "closed", "open": "open", "half_open": "half_open"},
+        default_factory=lambda: {
+            "closed": "closed",
+            "open": "open",
+            "half_open": "half_open",
+        },
         description="Circuit breaker state values",
     )
 

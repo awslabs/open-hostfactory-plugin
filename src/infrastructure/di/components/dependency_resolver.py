@@ -3,6 +3,8 @@
 import inspect
 import logging
 import threading
+import typing
+from contextlib import suppress
 from typing import (
     Any,
     Callable,
@@ -11,7 +13,6 @@ from typing import (
     Set,
     Type,
     TypeVar,
-    Union,
     get_type_hints,
 )
 
@@ -34,6 +35,7 @@ class DependencyResolver:
     """Handles dependency resolution and instance creation."""
 
     def __init__(self, service_registry, cqrs_registry):
+        """Initialize the instance."""
         self._service_registry = service_registry
         self._cqrs_registry = cqrs_registry
         self._lock = threading.RLock()
@@ -125,13 +127,14 @@ class DependencyResolver:
         if registration.factory is not None:
             try:
                 # Call factory with container - this is the working pattern from the monolithic version
-                # Factory functions expect the container as their parameter: lambda c: SomeClass(c.get(...))
+                # Factory functions expect the container as their parameter: lambda c:
+                # SomeClass(c.get(...))
                 container = self._get_container_instance()
                 return registration.factory(container)
             except Exception as e:
                 raise FactoryError(
                     registration.dependency_type,
-                    f"Factory failed for {registration.dependency_type.__name__}: {str(e)}",
+                    f"Factory failed for { registration.dependency_type.__name__}: { str(e)}",
                 )
 
         if registration.implementation_type is not None:
@@ -202,8 +205,12 @@ class DependencyResolver:
                 if param_name == "self":
                     continue
 
-                # Skip *args and **kwargs parameters - they can't be resolved as dependencies
-                if param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+                # Skip *args and **kwargs parameters - they can't be resolved as
+                # dependencies
+                if param.kind in (
+                    inspect.Parameter.VAR_POSITIONAL,
+                    inspect.Parameter.VAR_KEYWORD,
+                ):
                     continue
 
                 # Get parameter type
@@ -239,22 +246,25 @@ class DependencyResolver:
                     parameters[param_name] = self.resolve(param_type, cls, dependency_chain)
                 else:
                     # Optional parameter - try to resolve, use default if not available
-                    try:
+                    with suppress(DependencyResolutionError, UnregisteredDependencyError):
                         parameters[param_name] = self.resolve(param_type, cls, dependency_chain)
-                    except (DependencyResolutionError, UnregisteredDependencyError):
-                        # Use default value
-                        pass
 
             return parameters
 
         except Exception as e:
             if isinstance(
-                e, (DependencyResolutionError, CircularDependencyError, UntypedParameterError)
+                e,
+                (
+                    DependencyResolutionError,
+                    CircularDependencyError,
+                    UntypedParameterError,
+                ),
             ):
                 raise
             else:
                 raise DependencyResolutionError(
-                    cls, f"Failed to resolve constructor parameters for {cls.__name__}: {str(e)}"
+                    cls,
+                    f"Failed to resolve constructor parameters for { cls.__name__}: { str(e)}",
                 )
 
     def _resolve_function_parameters(
@@ -293,17 +303,19 @@ class DependencyResolver:
                     parameters[param_name] = self.resolve(param_type, None, dependency_chain)
                 else:
                     # Optional parameter
-                    try:
+                    with suppress(DependencyResolutionError, UnregisteredDependencyError):
                         parameters[param_name] = self.resolve(param_type, None, dependency_chain)
-                    except (DependencyResolutionError, UnregisteredDependencyError):
-                        # Use default value
-                        pass
 
             return parameters
 
         except Exception as e:
             if isinstance(
-                e, (DependencyResolutionError, CircularDependencyError, UntypedParameterError)
+                e,
+                (
+                    DependencyResolutionError,
+                    CircularDependencyError,
+                    UntypedParameterError,
+                ),
             ):
                 raise
             else:
@@ -348,7 +360,7 @@ class DependencyResolver:
                         if obj is not None:
                             return obj
                     raise NameError(f"Cannot resolve annotation: {annotation}")
-            except:
+            except Exception:
                 # Last resort: try to import from common locations
                 for module_name in [
                     "typing",
@@ -367,7 +379,8 @@ class DependencyResolver:
 
         except Exception as e:
             raise DependencyResolutionError(
-                context_class, f"Failed to resolve string annotation '{annotation}': {str(e)}"
+                context_class,
+                f"Failed to resolve string annotation '{annotation}': {str(e)}",
             )
 
     def _is_primitive_type(self, param_type: Type) -> bool:

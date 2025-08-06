@@ -1,7 +1,5 @@
 """Port adapter registrations for dependency injection."""
 
-import os
-
 # Import configuration manager
 from src.config.manager import ConfigurationManager, get_config_manager
 from src.domain.base.ports import (
@@ -17,7 +15,6 @@ from src.infrastructure.adapters.error_handling_adapter import ErrorHandlingAdap
 from src.infrastructure.adapters.factories.container_adapter_factory import (
     ContainerAdapterFactory,
 )
-from src.infrastructure.adapters.logging_adapter import LoggingAdapter
 from src.infrastructure.template.configuration_manager import (
     TemplateConfigurationManager,
 )
@@ -43,7 +40,8 @@ def register_port_adapters(container):
 
     config_manager = get_config_manager()
     container.register_instance(
-        BaseUnitOfWorkFactory, UnitOfWorkFactory(config_manager, LoggingAdapter("unit_of_work"))
+        BaseUnitOfWorkFactory,
+        UnitOfWorkFactory(config_manager, LoggingAdapter("unit_of_work")),
     )
 
     # Register logging port adapter
@@ -56,7 +54,8 @@ def register_port_adapters(container):
     container.register_singleton(ErrorHandlingAdapter, lambda c: ErrorHandlingAdapter())
     container.register_singleton(ErrorHandlingPort, lambda c: c.get(ErrorHandlingAdapter))
 
-    # Register template configuration manager with manual factory (handles optional dependencies)
+    # Register template configuration manager with manual factory (handles
+    # optional dependencies)
     def create_template_configuration_manager(c):
         # Import here to avoid circular imports
         from src.application.services.provider_capability_service import (
@@ -83,7 +82,8 @@ def register_port_adapters(container):
     container.register_singleton(
         TemplateConfigurationAdapter,
         lambda c: TemplateConfigurationAdapter(
-            template_manager=c.get(TemplateConfigurationManager), logger=c.get(LoggingPort)
+            template_manager=c.get(TemplateConfigurationManager),
+            logger=c.get(LoggingPort),
         ),
     )
     container.register_singleton(

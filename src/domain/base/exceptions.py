@@ -12,6 +12,7 @@ class DomainException(Exception):
         error_code: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize the instance."""
         super().__init__(message)
         self.message = message
         self.error_code = error_code or self.__class__.__name__
@@ -36,7 +37,9 @@ class EntityNotFoundError(DomainException):
     def __init__(self, entity_type: str, entity_id: str):
         message = f"{entity_type} with ID '{entity_id}' not found"
         super().__init__(
-            message, "ENTITY_NOT_FOUND", {"entity_type": entity_type, "entity_id": entity_id}
+            message,
+            "ENTITY_NOT_FOUND",
+            {"entity_type": entity_type, "entity_id": entity_id},
         )
 
 

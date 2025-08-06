@@ -1,7 +1,5 @@
 """Integration tests for AWS dry-run functionality."""
 
-import threading
-from typing import List
 from unittest.mock import Mock, patch
 
 import pytest

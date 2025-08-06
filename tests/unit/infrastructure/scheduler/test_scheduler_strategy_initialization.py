@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports import LoggingPort, SchedulerPort
 from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy

@@ -1,7 +1,6 @@
 """Tests for Docker Compose configurations."""
 
 import subprocess
-import time
 from pathlib import Path
 
 import pytest

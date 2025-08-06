@@ -64,7 +64,7 @@ class PerformanceMonitor:
 
 
 def performance_monitor(operation_name: Optional[str] = None):
-    """Decorator for monitoring function performance."""
+    """Monitor function performance."""
 
     def decorator(func: Callable) -> Callable:
         name = operation_name or f"{func.__module__}.{func.__name__}"
@@ -87,14 +87,16 @@ def performance_monitor(operation_name: Optional[str] = None):
                 finally:
                     duration = time.perf_counter() - start_time
                     if duration > 1.0:  # Log slow operations
-                        # Try to get logger from global monitor, fallback to print if none available
+                        # Try to get logger from global monitor, fallback to print if
+                        # none available
                         global_monitor = get_global_monitor()
                         if global_monitor and global_monitor.logger:
                             global_monitor.logger.warning(
                                 f"Slow operation: {name} took {duration:.2f}s"
                             )
                         # If no logger available, we have to use print as last resort
-                        # This should only happen during early bootstrap before DI is ready
+                        # This should only happen during early bootstrap before DI is
+                        # ready
 
         return wrapper
 

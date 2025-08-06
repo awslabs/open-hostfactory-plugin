@@ -96,7 +96,6 @@ class ActionEventHandler(EventHandler):
         Returns:
             Result of the action (can be any type)
         """
-        pass
 
     async def handle_action_result(self, event: DomainEvent, result: Any) -> None:
         """

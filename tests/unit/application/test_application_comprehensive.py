@@ -2,8 +2,7 @@
 
 import importlib
 import inspect
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -52,7 +51,7 @@ class TestCommandHandlersComprehensive:
         modules = self.get_command_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -62,7 +61,7 @@ class TestCommandHandlersComprehensive:
         """Test command handler initialization."""
         modules = self.get_command_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -88,7 +87,7 @@ class TestCommandHandlersComprehensive:
 
                         # Check for common handler attributes
                         common_attrs = ["handle", "repository", "logger", "event_publisher"]
-                        has_common_attr = any(hasattr(handler, attr) for attr in common_attrs)
+                        any(hasattr(handler, attr) for attr in common_attrs)
 
                 except Exception as e:
                     # Log but don't fail - some handlers might have complex dependencies
@@ -99,7 +98,7 @@ class TestCommandHandlersComprehensive:
         """Test command handler methods."""
         modules = self.get_command_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -121,7 +120,7 @@ class TestCommandHandlersComprehensive:
                     if handler:
                         # Test handle method if it exists
                         if hasattr(handler, "handle"):
-                            handle_method = getattr(handler, "handle")
+                            handle_method = handler.handle
                             if inspect.iscoroutinefunction(handle_method):
                                 try:
                                     # Mock dependencies
@@ -173,7 +172,7 @@ class TestQueryHandlersComprehensive:
         modules = self.get_query_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -192,7 +191,7 @@ class TestQueryHandlersComprehensive:
         """Test query handler methods."""
         modules = self.get_query_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -214,7 +213,7 @@ class TestQueryHandlersComprehensive:
                     if handler:
                         # Test handle method if it exists
                         if hasattr(handler, "handle"):
-                            handle_method = getattr(handler, "handle")
+                            handle_method = handler.handle
                             if inspect.iscoroutinefunction(handle_method):
                                 try:
                                     # Mock dependencies
@@ -282,7 +281,7 @@ class TestApplicationDTOsComprehensive:
         modules = self.get_dto_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_dto_classes(module)
             total_classes += len(classes)
 
@@ -292,7 +291,7 @@ class TestApplicationDTOsComprehensive:
         """Test DTO instantiation."""
         modules = self.get_dto_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_dto_classes(module)
 
             for class_name, dto_class in classes:
@@ -334,7 +333,7 @@ class TestApplicationDTOsComprehensive:
         """Test DTO serialization capabilities."""
         modules = self.get_dto_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_dto_classes(module)
 
             for class_name, dto_class in classes:
@@ -458,7 +457,7 @@ class TestApplicationEventsComprehensive:
         modules = self.get_event_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = []
             for name, obj in inspect.getmembers(module):
                 if (

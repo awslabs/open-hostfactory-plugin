@@ -43,13 +43,15 @@ class DynamoDBConverter(DataConverter):
     def prepare_for_query(self, criteria: Dict[str, Any]) -> Any:
         """Prepare domain criteria for DynamoDB query (implements DataConverter interface)."""
         return self.build_filter_expression(criteria)
+
+    def to_dynamodb_item(self, entity_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert domain data to DynamoDB item.
-        
+
         Args:
             entity_id: Entity identifier
             data: Domain data dictionary
-            
+
         Returns:
             DynamoDB-compatible item
         """
@@ -194,11 +196,11 @@ class DynamoDBConverter(DataConverter):
         # Handle datetime strings
         if isinstance(value, str):
             # Try to parse as ISO datetime
-            try:
+            from contextlib import suppress
+
+            with suppress(ValueError, TypeError):
                 if "T" in value and ("Z" in value or "+" in value or value.endswith("00")):
                     return datetime.fromisoformat(value.replace("Z", "+00:00"))
-            except (ValueError, TypeError):
-                pass
             return value
 
         # Handle lists

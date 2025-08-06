@@ -142,6 +142,7 @@ class ProviderStrategySelectedEvent(DomainEvent):
     confidence_score: Optional[float] = None
 
     def model_post_init(self, __context) -> None:
+        """Initialize aggregate information after model creation."""
         # Set aggregate info based on strategy
         if not self.aggregate_id:
             object.__setattr__(self, "aggregate_id", f"strategy_{self.strategy_name}")
@@ -161,6 +162,7 @@ class ProviderOperationExecutedEvent(DomainEvent):
     error_code: Optional[str] = None
 
     def model_post_init(self, __context) -> None:
+        """Initialize aggregate information after model creation."""
         # Set aggregate info based on operation
         if not self.aggregate_id:
             object.__setattr__(
@@ -182,6 +184,7 @@ class ProviderHealthChangedEvent(DomainEvent):
     source: str = "system"
 
     def model_post_init(self, __context) -> None:
+        """Initialize aggregate information after model creation."""
         # Set aggregate info based on provider
         if not self.aggregate_id:
             object.__setattr__(self, "aggregate_id", f"health_{self.provider_name}")
@@ -199,6 +202,7 @@ class ProviderStrategyRegisteredEvent(DomainEvent):
     priority: int = 0
 
     def model_post_init(self, __context) -> None:
+        """Initialize aggregate information after model creation."""
         # Set aggregate info based on registration
         if not self.aggregate_id:
             object.__setattr__(self, "aggregate_id", f"registration_{self.strategy_name}")

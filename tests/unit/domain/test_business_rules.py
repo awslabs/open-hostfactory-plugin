@@ -1,15 +1,12 @@
 """Comprehensive tests for business rule validation across all domain aggregates."""
 
-import uuid
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
+from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import pytest
 
 # Import domain components
 try:
-    from src.domain.base.value_objects import InstanceId, InstanceType, Tags
     from src.domain.machine.aggregate import Machine
     from src.domain.machine.exceptions import (
         InvalidMachineStateError,
@@ -21,13 +18,11 @@ try:
         InvalidRequestStateError,
         RequestValidationError,
     )
-    from src.domain.request.value_objects import RequestStatus, RequestType
+    from src.domain.request.value_objects import RequestStatus
     from src.domain.template.aggregate import Template
     from src.domain.template.exceptions import (
-        TemplateNotFoundError,
         TemplateValidationError,
     )
-    from src.domain.template.value_objects import TemplateId
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:
@@ -572,7 +567,6 @@ class TestCrossAggregateBusinessRules:
 
         # Invalid return request with non-existent machines
         # This validation would happen in a domain service
-        non_existent_ids = ["i-999", "i-888"]
         with pytest.raises(RequestValidationError):
             # Domain service would validate machine existence
             pass  # Placeholder for domain service validation

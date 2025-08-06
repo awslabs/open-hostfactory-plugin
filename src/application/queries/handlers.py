@@ -22,7 +22,6 @@ from src.application.dto.system import ValidationDTO
 from src.domain.base import UnitOfWorkFactory
 
 # Exception handling through BaseQueryHandler (Clean Architecture compliant)
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.exceptions import EntityNotFoundError
 from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
 from src.domain.template.aggregate import Template
@@ -42,6 +41,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
         error_handler: ErrorHandlingPort,
         container: ContainerPort,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
         self._container = container
@@ -80,7 +80,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 self.logger.info(
                     f"DEBUG: No machines in storage but have resource IDs {request.resource_ids}, checking provider"
                 )
-                # No machines in storage but we have resource IDs - check provider and create machines
+                # No machines in storage but we have resource IDs - check provider and
+                # create machines
                 machines = await self._check_provider_and_create_machines(request)
                 self.logger.info(f"DEBUG: Provider check returned {len(machines)} machines")
             elif machines:
@@ -143,7 +144,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             )
             return request_dto
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found: {query.request_id}")
             raise
         except Exception as e:
@@ -171,7 +172,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 self.logger.error("Provider context not available")
                 return []
 
-            # Create operation for resource-to-instance discovery using stored provider API
+            # Create operation for resource-to-instance discovery using stored
+            # provider API
             from src.providers.base.strategy import (
                 ProviderOperation,
                 ProviderOperationType,
@@ -275,12 +277,16 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
             operation = ProviderOperation(
                 operation_type=ProviderOperationType.GET_INSTANCE_STATUS,
-                parameters={"instance_ids": instance_ids, "template_id": request.template_id},
+                parameters={
+                    "instance_ids": instance_ids,
+                    "template_id": request.template_id,
+                },
                 context={"correlation_id": str(request.request_id)},
             )
 
             # Execute operation using provider context
-            # Use the correct strategy identifier format: provider_type-provider_type-instance
+            # Use the correct strategy identifier format:
+            # provider_type-provider_type-instance
             strategy_identifier = f"{request.provider_type}-{request.provider_type}-{request.provider_instance or 'default'}"
             result = provider_context.execute_with_strategy(strategy_identifier, operation)
 
@@ -288,7 +294,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
                 self.logger.warning(f"Failed to check resource status: {result.error_message}")
                 return machines
 
-            # Extract domain machine entities from result (provider strategy already converted AWS data)
+            # Extract domain machine entities from result (provider strategy already
+            # converted AWS data)
             domain_machines = result.data.get("machines", [])
 
             # Update machine status if changed
@@ -309,7 +316,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
                     new_status = MachineStatus(domain_machine["status"])
 
-                    # Check if we need to update the machine (status or network info changed)
+                    # Check if we need to update the machine (status or network info
+                    # changed)
                     needs_update = (
                         machine.status != new_status
                         or machine.private_ip != domain_machine.get("private_ip")
@@ -413,7 +421,6 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
         """Create machine aggregate from AWS instance data."""
         from src.domain.base.value_objects import InstanceId
         from src.domain.machine.aggregate import Machine
-        from src.domain.machine.value_objects import MachineStatus
 
         return Machine(
             instance_id=InstanceId(value=aws_instance["InstanceId"]),
@@ -464,7 +471,9 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
             config_manager = self._container.get(ConfigurationManager)
             cache_service = RequestCacheService(
-                uow_factory=self.uow_factory, config_manager=config_manager, logger=self.logger
+                uow_factory=self.uow_factory,
+                config_manager=config_manager,
+                logger=self.logger,
             )
             return cache_service
         except Exception as e:
@@ -493,7 +502,10 @@ class GetRequestStatusQueryHandler(BaseQueryHandler[GetRequestStatusQuery, str])
     """Handler for getting request status."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
@@ -516,7 +528,7 @@ class GetRequestStatusQueryHandler(BaseQueryHandler[GetRequestStatusQuery, str])
                 self.logger.info(f"Request {query.request_id} status: {status}")
                 return status
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found: {query.request_id}")
             raise
         except Exception as e:
@@ -529,7 +541,10 @@ class ListActiveRequestsHandler(BaseQueryHandler[ListActiveRequestsQuery, List[R
     """Handler for listing active requests."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
@@ -578,7 +593,10 @@ class ListReturnRequestsHandler(BaseQueryHandler[ListReturnRequestsQuery, List[R
     """Handler for listing return requests."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
@@ -621,7 +639,10 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
     """Handler for getting template details."""
 
     def __init__(
-        self, logger: LoggingPort, error_handler: ErrorHandlingPort, container: ContainerPort
+        self,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
+        container: ContainerPort,
     ):
         super().__init__(logger, error_handler)
         self._container = container
@@ -644,7 +665,8 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
             if not template_dto:
                 raise EntityNotFoundError("Template", query.template_id)
 
-            # Convert TemplateDTO to Template domain object (same logic as ListTemplatesHandler)
+            # Convert TemplateDTO to Template domain object (same logic as
+            # ListTemplatesHandler)
             config = template_dto.configuration or {}
 
             template_data = {
@@ -670,7 +692,7 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
             self.logger.info(f"Retrieved template: {query.template_id}")
             return domain_template
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Template not found: {query.template_id}")
             raise
         except Exception as e:
@@ -683,7 +705,10 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
     """Handler for listing templates."""
 
     def __init__(
-        self, logger: LoggingPort, error_handler: ErrorHandlingPort, container: ContainerPort
+        self,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
+        container: ContainerPort,
     ):
         super().__init__(logger, error_handler)
         self._container = container
@@ -710,8 +735,6 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
                 domain_templates = []
                 for dto in template_dtos:
                     try:
-                        from src.domain.template.aggregate import Template
-
                         # Extract fields from configuration with defaults
                         config = dto.configuration or {}
 
@@ -759,7 +782,10 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
     """Handler for validating template configuration."""
 
     def __init__(
-        self, logger: LoggingPort, container: ContainerPort, error_handler: ErrorHandlingPort
+        self,
+        logger: LoggingPort,
+        container: ContainerPort,
+        error_handler: ErrorHandlingPort,
     ):
         super().__init__(logger, error_handler)
         self.container = container
@@ -809,7 +835,10 @@ class GetMachineHandler(BaseQueryHandler[GetMachineQuery, MachineDTO]):
     """Handler for getting machine details."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
@@ -840,7 +869,7 @@ class GetMachineHandler(BaseQueryHandler[GetMachineQuery, MachineDTO]):
                 self.logger.info(f"Retrieved machine: {query.machine_id}")
                 return machine_dto
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Machine not found: {query.machine_id}")
             raise
         except Exception as e:
@@ -853,7 +882,10 @@ class ListMachinesHandler(BaseQueryHandler[ListMachinesQuery, List[MachineDTO]])
     """Handler for listing machines."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
@@ -882,7 +914,7 @@ class ListMachinesHandler(BaseQueryHandler[ListMachinesQuery, List[MachineDTO]])
                         machine_id=str(machine.machine_id),
                         provider_id=machine.provider_id,
                         template_id=machine.template_id,
-                        request_id=str(machine.request_id) if machine.request_id else None,
+                        request_id=(str(machine.request_id) if machine.request_id else None),
                         status=machine.status.value,
                         instance_type=machine.instance_type,
                         created_at=machine.created_at,

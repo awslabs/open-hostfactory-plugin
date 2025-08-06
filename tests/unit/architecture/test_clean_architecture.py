@@ -8,10 +8,9 @@ This module validates that the codebase properly implements Clean Architecture p
 """
 
 import ast
-import importlib
 import os
 from pathlib import Path
-from typing import List, Set
+from typing import List
 from unittest.mock import Mock, patch
 
 import pytest
@@ -51,7 +50,7 @@ class TestCleanArchitecture:
 
         for layer_path in layer_paths:
             if os.path.exists(layer_path):
-                for root, dirs, files in os.walk(layer_path):
+                for root, _dirs, files in os.walk(layer_path):
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
@@ -136,7 +135,7 @@ class TestCleanArchitecture:
 
         for app_path in app_paths:
             if os.path.exists(app_path):
-                for root, dirs, files in os.walk(app_path):
+                for root, _dirs, files in os.walk(app_path):
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
@@ -232,7 +231,6 @@ class TestCleanArchitecture:
         from src.infrastructure.ports.cloud_resource_manager_port import (
             CloudResourceManagerPort,
         )
-        from src.infrastructure.ports.logger_port import LoggerPort
 
         assert inspect.isabstract(CloudResourceManagerPort) or hasattr(
             CloudResourceManagerPort, "__abstractmethods__"
@@ -281,7 +279,7 @@ class TestCleanArchitecture:
             MockAppService.return_value = mock_instance
 
             # Application service should orchestrate domain operations
-            app_service = MockAppService()
+            MockAppService()
 
             # Mock expected methods for coordinating use cases
             mock_instance.get_templates = Mock(return_value={"templates": []})

@@ -1,6 +1,6 @@
 """Default scheduler strategy using native domain fields - no conversion needed."""
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import Any, Dict, List
 
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports.logging_port import LoggingPort
@@ -22,6 +22,7 @@ class DefaultSchedulerStrategy(SchedulerPort):
     """
 
     def __init__(self, config_manager: ConfigurationManager, logger: "LoggingPort"):
+        """Initialize the instance."""
         self.config_manager = config_manager
         self._logger = logger
 

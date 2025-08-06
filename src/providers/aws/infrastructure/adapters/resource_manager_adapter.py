@@ -13,7 +13,6 @@ from src.domain.base.ports import ConfigurationPort, LoggingPort
 from src.domain.base.resource_manager import (
     ResourceAllocation,
     ResourceId,
-    ResourceManagerPort,
     ResourceSpecification,
     ResourceType,
 )
@@ -21,7 +20,6 @@ from src.infrastructure.ports.cloud_resource_manager_port import (
     CloudResourceManagerPort,
 )
 from src.providers.aws.exceptions.aws_exceptions import (
-    AuthorizationError,
     InfrastructureError,
 )
 from src.providers.aws.infrastructure.aws_client import AWSClient

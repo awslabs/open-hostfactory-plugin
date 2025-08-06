@@ -20,12 +20,9 @@ Test Categories:
 5. Performance Metrics Integration Tests
 """
 
-import asyncio
 import os
 import sys
-from datetime import datetime
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import Mock
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -109,7 +106,6 @@ def test_end_to_end_integration():
 def test_provider_strategy_integration():
     """Test that provider strategy properly integrates with consolidated handlers."""
     try:
-        from src.domain.request.aggregate import Request
         from src.providers.aws.domain.template.aggregate import AWSTemplate
         from src.providers.aws.domain.template.value_objects import ProviderApi
         from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
@@ -117,11 +113,11 @@ def test_provider_strategy_integration():
         print("   Testing provider strategy handler integration...")
 
         # Create mock dependencies
-        mock_aws_client = Mock()
+        Mock()
         mock_logger = Mock()
-        mock_aws_ops = Mock()
-        mock_launch_template_manager = Mock()
-        mock_config = Mock()
+        Mock()
+        Mock()
+        Mock()
 
         # Test that provider strategy can be instantiated
         try:
@@ -147,7 +143,7 @@ def test_provider_strategy_integration():
         for api in provider_apis:
             try:
                 # Create test AWS template
-                aws_template = AWSTemplate(
+                _ = AWSTemplate(
                     template_id=f"test-{api.value}",
                     provider_api=api,
                     vm_type="t2.micro",
@@ -200,7 +196,7 @@ def test_launch_template_integration():
         mock_aws_client = Mock()
         mock_logger = Mock()
         mock_aws_ops = Mock()
-        mock_config = Mock()
+        Mock()
 
         # Test launch template manager instantiation
         try:
@@ -246,7 +242,7 @@ def test_launch_template_integration():
             # Create test data
             from src.providers.aws.domain.template.value_objects import ProviderApi
 
-            aws_template = AWSTemplate(
+            _ = AWSTemplate(
                 template_id="test-template",
                 vm_type="t2.micro",
                 image_id="ami-12345",
@@ -256,7 +252,7 @@ def test_launch_template_integration():
 
             from src.domain.request.value_objects import RequestType
 
-            request = Request.create_new_request(
+            _ = Request.create_new_request(
                 request_type=RequestType.ACQUIRE,
                 template_id="test-template",
                 machine_count=1,
@@ -373,7 +369,7 @@ def test_domain_model_flow():
         print("   Testing domain model flow...")
 
         # Create test AWSTemplate
-        aws_template = AWSTemplate(
+        _ = AWSTemplate(
             template_id="test-template",
             provider_api=ProviderApi.SPOT_FLEET,
             vm_type="t2.micro",
@@ -385,7 +381,7 @@ def test_domain_model_flow():
         # Create test Request
         from src.domain.request.value_objects import RequestType
 
-        request = Request.create_new_request(
+        _ = Request.create_new_request(
             request_type=RequestType.ACQUIRE,
             template_id="test-template",
             machine_count=2,
@@ -595,7 +591,7 @@ def test_full_end_to_end_flow():
         # Create test data
         from src.providers.aws.domain.template.value_objects import AWSFleetType
 
-        aws_template = AWSTemplate(
+        _ = AWSTemplate(
             template_id="e2e-test-template",
             provider_api=ProviderApi.SPOT_FLEET,
             vm_type="t2.micro",
@@ -608,7 +604,7 @@ def test_full_end_to_end_flow():
 
         from src.domain.request.value_objects import RequestType
 
-        request = Request.create_new_request(
+        _ = Request.create_new_request(
             request_type=RequestType.ACQUIRE,
             template_id="e2e-test-template",
             machine_count=1,
@@ -621,7 +617,7 @@ def test_full_end_to_end_flow():
         mock_aws_client = Mock()
         mock_logger = Mock()
         mock_aws_ops = Mock()
-        mock_config = Mock()
+        Mock()
 
         # Mock AWS client methods that will be called
         mock_aws_client.ec2_client = Mock()

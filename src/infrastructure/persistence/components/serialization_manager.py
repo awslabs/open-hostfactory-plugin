@@ -26,6 +26,7 @@ class JSONSerializer(SerializationManager):
     """JSON serialization manager with enum support."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
 
     def serialize(self, data: Dict[str, Any]) -> str:
@@ -83,7 +84,7 @@ class JSONSerializer(SerializationManager):
                     (
                         self._prepare_for_serialization(item)
                         if isinstance(item, dict)
-                        else self.serialize_enum(item) if isinstance(item, Enum) else item
+                        else (self.serialize_enum(item) if isinstance(item, Enum) else item)
                     )
                     for item in value
                 ]
@@ -145,7 +146,7 @@ class BinarySerializer(SerializationManager):
             raise
 
     def _json_serializer(self, obj):
-        """Custom JSON serializer for objects not serializable by default json code."""
+        """Serialize objects not serializable by default json code."""
         if hasattr(obj, "__dict__"):
             return obj.__dict__
         elif hasattr(obj, "isoformat"):

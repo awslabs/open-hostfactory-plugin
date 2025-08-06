@@ -6,25 +6,19 @@ with all types of exceptions while preserving domain semantics.
 """
 
 import json
-from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import pytest
 
 # Import all exception types for testing
 from src.domain.base.exceptions import (
-    BusinessRuleViolationError,
     ConfigurationError,
-    DomainException,
-    EntityNotFoundError,
     InfrastructureError,
     ValidationError,
 )
-from src.domain.machine.exceptions import MachineNotFoundError, MachineValidationError
-from src.domain.request.exceptions import RequestNotFoundError, RequestValidationError
+from src.domain.request.exceptions import RequestValidationError
 from src.domain.template.exceptions import (
     TemplateNotFoundError,
-    TemplateValidationError,
 )
 from src.infrastructure.error.decorators import (
     handle_application_exceptions,
@@ -40,11 +34,8 @@ from src.infrastructure.error.exception_handler import (
     reset_exception_handler,
 )
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSError,
     LaunchError,
     NetworkError,
-    RateLimitError,
-    TerminationError,
 )
 
 
@@ -436,7 +427,6 @@ class TestPerformanceAndThreadSafety:
     def test_thread_safety(self):
         """Test that exception handler is thread-safe."""
         import threading
-        import time
 
         handler = ExceptionHandler()
         results = []

@@ -5,7 +5,6 @@ Automatically discovers SDK methods and creates MCP tool definitions
 with proper JSON schemas for AI assistant integration.
 """
 
-import inspect
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -33,6 +32,7 @@ class MCPToolDiscovery:
     """
 
     def __init__(self):
+        """Initialize the instance."""
         self._tool_definitions: Dict[str, MCPToolDefinition] = {}
 
     def discover_mcp_tools(self, sdk: OpenHFPluginSDK) -> Dict[str, MCPToolDefinition]:
@@ -188,7 +188,11 @@ class MCPToolDiscovery:
                 "items": {"type": "string"},  # Default to string items
             }
         elif "Dict" in str(param_type) or "dict" in str(param_type):
-            return {"type": "object", "description": description, "additionalProperties": True}
+            return {
+                "type": "object",
+                "description": description,
+                "additionalProperties": True,
+            }
         else:
             # Default to string for unknown types
             return {"type": "string", "description": description}

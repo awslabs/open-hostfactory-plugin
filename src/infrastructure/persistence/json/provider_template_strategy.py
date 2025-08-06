@@ -2,8 +2,7 @@
 
 import json
 import os
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from src.config.managers.configuration_manager import ConfigurationManager
 from src.infrastructure.logging.logger import get_logger
@@ -25,7 +24,10 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
     """
 
     def __init__(
-        self, base_file_path: str, config_manager: ConfigurationManager, create_dirs: bool = True
+        self,
+        base_file_path: str,
+        config_manager: ConfigurationManager,
+        create_dirs: bool = True,
     ):
         """
         Initialize provider template strategy.
@@ -146,7 +148,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                                 )
 
                     self.logger.info(
-                        f"Loaded {len(file_data) if isinstance(file_data, (list, dict)) else 0} templates from {file_path}"
+                        f"Loaded { len(file_data) if isinstance( file_data, (list, dict)) else 0} templates from {file_path}"
                     )
 
             except Exception as e:

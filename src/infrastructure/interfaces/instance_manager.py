@@ -99,10 +99,6 @@ class InstanceManagerPort(Protocol):
         """Start stopped cloud instances (if supported by provider)."""
         ...
 
-    def get_instance_status(self, instance_ids: List[InstanceId]) -> Dict[InstanceId, str]:
-        """Get the status of cloud instances."""
-        ...
-
     def get_instance_details(self, instance_ids: List[InstanceId]) -> List[Dict[str, Any]]:
         """Get detailed information about cloud instances."""
         ...

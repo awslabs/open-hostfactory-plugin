@@ -47,12 +47,15 @@ class HostFactoryTransformations:
         If instance_types is provided but instance_type is not,
         set instance_type to the first instance type from instance_types.
         """
-        if "instance_types" in mapped_data and mapped_data["instance_types"]:
-            if "instance_type" not in mapped_data or not mapped_data["instance_type"]:
-                # Set primary instance_type from first instance_types entry
-                instance_types = mapped_data["instance_types"]
-                if isinstance(instance_types, dict) and instance_types:
-                    mapped_data["instance_type"] = list(instance_types.keys())[0]
+        if (
+            "instance_types" in mapped_data
+            and mapped_data["instance_types"]
+            and ("instance_type" not in mapped_data or not mapped_data["instance_type"])
+        ):
+            # Set primary instance_type from first instance_types entry
+            instance_types = mapped_data["instance_types"]
+            if isinstance(instance_types, dict) and instance_types:
+                mapped_data["instance_type"] = list(instance_types.keys())[0]
 
         return mapped_data
 

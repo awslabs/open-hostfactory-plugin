@@ -1,7 +1,6 @@
 """API handler for returning machines."""
 
 import time
-import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.application.base.infrastructure_handlers import BaseAPIHandler, RequestContext
@@ -13,7 +12,6 @@ from src.application.dto.responses import (
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.machine.exceptions import MachineNotFoundError
 
 # Exception handling infrastructure
 from src.infrastructure.error.decorators import handle_interface_exceptions
@@ -122,7 +120,8 @@ class RequestReturnMachinesRESTHandler(
             if clean:
                 if self.logger:
                     self.logger.info(
-                        "Cleaning up all resources", extra={"correlation_id": correlation_id}
+                        "Cleaning up all resources",
+                        extra={"correlation_id": correlation_id},
                     )
 
                 # Create response DTO
@@ -140,14 +139,18 @@ class RequestReturnMachinesRESTHandler(
 
                 # Create return request for all machines using CQRS command
                 command = CreateReturnRequestCommand(
-                    machine_ids=[], metadata=metadata  # Empty list indicates all machines
+                    machine_ids=[],
+                    metadata=metadata,  # Empty list indicates all machines
                 )
                 request_id = await self._command_bus.execute(command)
 
                 if self.logger:
                     self.logger.info(
                         f"Created return request for all machines with ID: {request_id}",
-                        extra={"request_id": request_id, "correlation_id": correlation_id},
+                        extra={
+                            "request_id": request_id,
+                            "correlation_id": correlation_id,
+                        },
                     )
 
                 # Create response DTO

@@ -2,8 +2,7 @@
 
 import time
 from threading import Thread
-from typing import Any, Dict
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -26,6 +25,7 @@ class MockProviderStrategy(ProviderStrategy):
     """Mock provider strategy for testing."""
 
     def __init__(self, provider_type: str, supports_operations=None, health_status=None):
+        """Initialize the instance."""
         self._provider_type = provider_type
         self._supports_operations = supports_operations or [ProviderOperationType.CREATE_INSTANCES]
         self._health_status = health_status or ProviderHealthStatus.healthy()

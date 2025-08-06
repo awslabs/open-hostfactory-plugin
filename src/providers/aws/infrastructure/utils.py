@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 def paginate(client_method: Callable, result_key: str, **kwargs) -> List[Dict[str, Any]]:
     """
-    Utility function to handle paginated responses from Boto3 client methods.
+    Handle paginated responses from Boto3 client methods.
 
     :param client_method: The Boto3 client method to call (e.g., ec2_client.describe_instances).
     :param result_key: The key in the response that contains the desired results (e.g., "Reservations").

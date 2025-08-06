@@ -61,7 +61,6 @@ def test_configuration_manager():
 
 def test_domain_entities():
     """Test that domain entities can be imported and used."""
-    from src.domain.base.entity import Entity
     from src.domain.base.value_objects import InstanceId, ResourceId
 
     # Test value objects with correct Pydantic syntax
@@ -74,7 +73,6 @@ def test_domain_entities():
 
 def test_template_domain():
     """Test template domain functionality."""
-    from src.domain.template.aggregate import Template
     from src.domain.template.value_objects import TemplateId
 
     template_id = TemplateId(value="test-template")
@@ -83,7 +81,6 @@ def test_template_domain():
 
 def test_request_domain():
     """Test request domain functionality."""
-    from src.domain.request.aggregate import Request
     from src.domain.request.value_objects import RequestId
 
     request_id = RequestId(value="req-12345678-1234-1234-1234-123456789012")
@@ -92,7 +89,6 @@ def test_request_domain():
 
 def test_machine_domain():
     """Test machine domain functionality."""
-    from src.domain.machine.aggregate import Machine
     from src.domain.machine.value_objects import MachineId
 
     machine_id = MachineId(value="i-1234567890abcdef0")

@@ -1,8 +1,6 @@
 """Unit tests for DependencyResolver component."""
 
 import threading
-from typing import Optional, Set, Type
-from unittest.mock import MagicMock, Mock
 
 import pytest
 

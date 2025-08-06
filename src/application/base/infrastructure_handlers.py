@@ -6,11 +6,9 @@ patterns as BaseCommandHandler, BaseQueryHandler, and BaseEventHandler, ensuring
 consistency across all handler types in the CQRS system.
 """
 
-import asyncio
 import time
 import uuid
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, Callable, Dict, Generic, Optional, TypeVar
 
 from src.application.interfaces.infrastructure_handler import InfrastructureHandler
@@ -96,7 +94,7 @@ class BaseInfrastructureHandler(
 
             if self.logger:
                 self.logger.info(
-                    f"Infrastructure request processed successfully: {request_type} ({duration:.3f}s)"
+                    f"Infrastructure request processed successfully: {request_type} ({ duration:.3f}s)"
                 )
 
             return response
@@ -161,7 +159,6 @@ class BaseInfrastructureHandler(
         Raises:
             Any exception that occurs during request processing
         """
-        pass
 
     def _record_success_metrics(self, request_type: str, duration: float) -> None:
         """Record success metrics for monitoring."""
@@ -246,7 +243,6 @@ class BaseAPIHandler(BaseInfrastructureHandler[TRequest, TResponse]):
             request: API request to validate
             context: Request context
         """
-        pass
 
     async def execute_request(self, request: TRequest, context: RequestContext) -> TResponse:
         """
@@ -282,7 +278,6 @@ class BaseAPIHandler(BaseInfrastructureHandler[TRequest, TResponse]):
         Returns:
             API response
         """
-        pass
 
     async def apply_middleware(self, request: TRequest, context: RequestContext) -> TRequest:
         """

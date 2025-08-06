@@ -109,6 +109,7 @@ class AWSConfigManager:
     """Manager for AWS configuration."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._naming_config = _aws_naming_config
 
     def get_typed(self, config_type):
@@ -135,4 +136,3 @@ def get_aws_config_manager() -> AWSConfigManager:
 
 
 # Import AWSProviderConfig for compatibility
-from .config import AWSProviderConfig

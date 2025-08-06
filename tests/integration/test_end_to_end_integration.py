@@ -9,8 +9,8 @@ with launch template management, provider tracking, and machine creation.
 import os
 import sys
 from datetime import datetime
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from typing import List
+from unittest.mock import Mock
 
 import pytest
 
@@ -19,7 +19,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 from src.domain.machine.aggregate import Machine
 from src.domain.request.aggregate import Request, RequestStatus
-from src.domain.template.aggregate import Template
 from src.infrastructure.persistence.repositories.machine_repository import (
     MachineRepositoryImpl,
 )
@@ -38,7 +37,6 @@ from src.providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
     LaunchTemplateResult,
 )
-from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
 
 class TestEnhancedEndToEnd:
@@ -109,7 +107,7 @@ class TestEnhancedEndToEnd:
     def test_complete_spot_fleet_flow(self):
         """Test complete flow with Spot Fleet handler."""
         # Mock launch template creation
-        lt_result = LaunchTemplateResult(
+        _ = LaunchTemplateResult(
             template_id="lt-123456",
             template_name="integration-test-template-req-integration-123",
             version="1",
@@ -237,7 +235,7 @@ class TestEnhancedEndToEnd:
         }
 
         # Execute through handler
-        resource_id = self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
+        self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
 
         # Verify launch template was created with correct data
         create_lt_call = self.mock_aws_client.ec2_client.create_launch_template.call_args
@@ -358,7 +356,7 @@ class TestEnhancedEndToEnd:
         }
 
         # Execute
-        resource_id = self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
+        self.spot_fleet_handler.acquire_hosts(self.request, self.aws_template)
 
         # Verify existing template was used (no create call)
         self.mock_aws_client.ec2_client.create_launch_template.assert_not_called()

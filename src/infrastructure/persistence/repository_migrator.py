@@ -12,6 +12,8 @@ from src.domain.template.repository import (
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
 
+logger = get_logger()
+
 
 class RepositoryMigrator:
     """
@@ -39,7 +41,11 @@ class RepositoryMigrator:
         self.config_manager = self.container.get(ConfigurationManager)
 
     def migrate(
-        self, source_type: str, target_type: str, batch_size: int = 100, create_backup: bool = True
+        self,
+        source_type: str,
+        target_type: str,
+        batch_size: int = 100,
+        create_backup: bool = True,
     ) -> Dict[str, Any]:
         """
         Migrate data between repository types.
@@ -54,7 +60,10 @@ class RepositoryMigrator:
             Migration statistics
         """
         if source_type == target_type:
-            return {"status": "skipped", "reason": "Source and target types are the same"}
+            return {
+                "status": "skipped",
+                "reason": "Source and target types are the same",
+            }
 
         stats = {
             "started_at": datetime.utcnow().isoformat(),
@@ -81,7 +90,10 @@ class RepositoryMigrator:
             # Perform migration
             for collection in self.collections:
                 collection_stats = self._migrate_collection(
-                    collection, source_repos[collection], target_repos[collection], batch_size
+                    collection,
+                    source_repos[collection],
+                    target_repos[collection],
+                    batch_size,
                 )
                 stats["collections"][collection] = collection_stats
                 stats["total_migrated"] += collection_stats["migrated"]
@@ -125,15 +137,18 @@ class RepositoryMigrator:
                 # Get configuration manager
                 config_manager = get_config_manager()
 
-                # Use centralized file resolution for consistent HF_PROVIDER_CONFDIR support
+                # Use centralized file resolution for consistent HF_PROVIDER_CONFDIR
+                # support
                 templates_path = config_manager.resolve_file("template", "templates.json")
                 legacy_templates_path = config_manager.resolve_file(
                     "template", "awsprov_templates.json"
                 )
 
-                logger.info(f"Repository migrator using centralized resolution for template files:")
-                logger.info(f"  templates.json: {templates_path}")
-                logger.info(f"  awsprov_templates.json: {legacy_templates_path}")
+                get_logger().info(
+                    "Repository migrator using centralized resolution for template files:"
+                )
+                get_logger().info(f"  templates.json: {templates_path}")
+                get_logger().info(f"  awsprov_templates.json: {legacy_templates_path}")
 
                 # Create a new template repository
                 template_repo = JSONTemplateRepository(templates_path, legacy_templates_path)
@@ -263,7 +278,7 @@ class RepositoryMigrator:
                             indent=2,
                         )
                     self.logger.debug(
-                        f"Backed up {len(items)} items from {collection} to {backup_file}"
+                        f"Backed up { len(items)} items from {collection} to {backup_file}"
                     )
             except Exception as e:
                 self.logger.warning(f"Failed to backup {collection}: {str(e)}")
@@ -289,7 +304,13 @@ class RepositoryMigrator:
         Returns:
             Collection migration statistics
         """
-        stats = {"total_items": 0, "migrated": 0, "failed": 0, "batches": 0, "errors": []}
+        stats = {
+            "total_items": 0,
+            "migrated": 0,
+            "failed": 0,
+            "batches": 0,
+            "errors": [],
+        }
 
         try:
             items = source_repo.find_all()
@@ -318,7 +339,8 @@ class RepositoryMigrator:
                             # Item is already an entity, just save it
                             target_repo.save(item)
                         else:
-                            # Item is a dictionary, we need to convert it to an entity first
+                            # Item is a dictionary, we need to convert it to an entity
+                            # first
                             try:
                                 # Check if the repository is a StrategyBasedRepository
                                 from src.infrastructure.persistence.base.repository import (
@@ -326,28 +348,32 @@ class RepositoryMigrator:
                                 )
 
                                 if isinstance(target_repo, StrategyBasedRepository):
-                                    # Use the _from_dict method to convert dictionary to entity
+                                    # Use the _from_dict method to convert dictionary to
+                                    # entity
                                     try:
                                         entity = target_repo._from_dict(item)
                                         target_repo.save(entity)
                                     except Exception as conversion_error:
                                         self.logger.error(
-                                            f"Failed to convert item {item_id} to entity: {str(conversion_error)}"
+                                            f"Failed to convert item {item_id} to entity: { str(conversion_error)}"
                                         )
                                         raise ValueError(
-                                            f"Entity conversion failed: {str(conversion_error)}"
+                                            f"Entity conversion failed: { str(conversion_error)}"
                                         )
                                 else:
-                                    # Try to determine the entity class from the repository
+                                    # Try to determine the entity class from the
+                                    # repository
                                     entity_class = None
-                                    # Use getattr with a default value to safely access the attribute
+                                    # Use getattr with a default value to safely access
+                                    # the attribute
                                     entity_class = getattr(target_repo, "entity_class", None)
 
                                     if entity_class:
                                         # Try to create entity using the entity class
                                         try:
                                             if hasattr(entity_class, "model_validate"):
-                                                # Use Pydantic's model_validate if available
+                                                # Use Pydantic's model_validate if
+                                                # available
                                                 entity = entity_class.model_validate(item)
                                             elif hasattr(entity_class, "from_dict"):
                                                 # Use from_dict if available
@@ -359,10 +385,10 @@ class RepositoryMigrator:
                                             target_repo.save(entity)
                                         except Exception as conversion_error:
                                             self.logger.error(
-                                                f"Failed to create entity from item {item_id}: {str(conversion_error)}"
+                                                f"Failed to create entity from item {item_id}: { str(conversion_error)}"
                                             )
                                             raise ValueError(
-                                                f"Entity creation failed: {str(conversion_error)}"
+                                                f"Entity creation failed: { str(conversion_error)}"
                                             )
                                     else:
                                         # Fallback to direct save, which might fail

@@ -205,7 +205,8 @@ class ProviderConfig(BaseModel):
     )
     health_check_interval: int = Field(300, description="Global health check interval in seconds")
     circuit_breaker: CircuitBreakerConfig = Field(
-        default_factory=CircuitBreakerConfig, description="Circuit breaker configuration"
+        default_factory=CircuitBreakerConfig,
+        description="Circuit breaker configuration",
     )
 
     # Provider defaults and instances

@@ -218,7 +218,11 @@ class CircuitBreakerConfig(BaseCircuitBreakerConfig):
     # Retryable exceptions by service
     retryable_exceptions: Dict[str, List[str]] = Field(
         default_factory=lambda: {
-            "ec2": ["RequestLimitExceeded", "InsufficientInstanceCapacity", "InternalError"],
+            "ec2": [
+                "RequestLimitExceeded",
+                "InsufficientInstanceCapacity",
+                "InternalError",
+            ],
             "dynamodb": [
                 "ProvisionedThroughputExceededException",
                 "ThrottlingException",

@@ -6,20 +6,15 @@ command and query handlers, ensuring proper integration between
 application services, domain aggregates, and infrastructure.
 """
 
-import time
-import uuid
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
 from src.application.commands.request_handlers import (
     CreateMachineRequestHandler,
-    CreateReturnRequestHandler,
 )
 from src.application.dto.commands import (
     CreateRequestCommand,
-    CreateReturnRequestCommand,
 )
 from src.application.services.provider_capability_service import (
     ProviderCapabilityService,
@@ -371,7 +366,6 @@ class TestCQRSArchitectureIntegration:
         assert hasattr(create_request_handler, "validate_command")
 
         # Verify proper typing
-        from src.application.dto.commands import CreateRequestCommand
 
         assert create_request_handler.__class__.__annotations__
 

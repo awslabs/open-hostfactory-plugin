@@ -1,12 +1,10 @@
 """Tests for template defaults hierarchical resolution."""
 
-from typing import Any, Dict
 from unittest.mock import MagicMock, Mock
 
 import pytest
 
 from src.application.services.template_defaults_service import TemplateDefaultsService
-from src.config.manager import ConfigurationManager
 from src.domain.base.ports.logging_port import LoggingPort
 
 
@@ -381,4 +379,3 @@ class TestTemplateDefaultsEndToEnd:
         # This would be a more comprehensive test that sets up
         # real configuration files and tests the entire flow
         # For now, we'll keep it as a placeholder for future implementation
-        pass

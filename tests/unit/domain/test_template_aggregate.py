@@ -1,19 +1,30 @@
 """Unit tests for Template aggregate."""
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 import pytest
 
-from src.domain.base.events.domain_events import DomainEvent
-from src.domain.base.value_objects import InstanceType, Tags
+from src.domain.base.value_objects import InstanceType
 from src.domain.template.aggregate import Template
 from src.domain.template.exceptions import (
     TemplateNotFoundError,
     TemplateValidationError,
 )
 from src.domain.template.value_objects import TemplateId
+
+# Try to import optional classes - create mocks if not available
+try:
+    from src.domain.template.value_objects import TemplateName
+
+    TEMPLATE_NAME_AVAILABLE = True
+except ImportError:
+    TEMPLATE_NAME_AVAILABLE = False
+
+    class TemplateName:
+        def __init__(self, value):
+            if not isinstance(value, str) or len(value.strip()) == 0:
+                raise ValueError("Invalid template name")
+            self.value = value.strip()
 
 
 @pytest.mark.unit

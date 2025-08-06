@@ -4,7 +4,7 @@ import logging
 import threading
 from typing import Any, Callable, Dict, Optional, Set, Type, TypeVar
 
-from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope
+from src.domain.base.di_contracts import DependencyRegistration, DIScope
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
@@ -14,6 +14,7 @@ class ServiceRegistry:
     """Manages service registration for dependency injection."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._registrations: Dict[Type, DependencyRegistration] = {}
         self._singletons: Dict[Type, Any] = {}
         self._lock = threading.RLock()
@@ -35,17 +36,23 @@ class ServiceRegistry:
             if instance_or_factory is None:
                 # Register class itself as singleton
                 registration = DependencyRegistration(
-                    dependency_type=cls, scope=DIScope.SINGLETON, implementation_type=cls
+                    dependency_type=cls,
+                    scope=DIScope.SINGLETON,
+                    implementation_type=cls,
                 )
             elif callable(instance_or_factory) and not isinstance(instance_or_factory, type):
                 # Register factory function
                 registration = DependencyRegistration(
-                    dependency_type=cls, scope=DIScope.SINGLETON, factory=instance_or_factory
+                    dependency_type=cls,
+                    scope=DIScope.SINGLETON,
+                    factory=instance_or_factory,
                 )
             else:
                 # Register instance
                 registration = DependencyRegistration(
-                    dependency_type=cls, scope=DIScope.SINGLETON, instance=instance_or_factory
+                    dependency_type=cls,
+                    scope=DIScope.SINGLETON,
+                    instance=instance_or_factory,
                 )
                 self._singletons[cls] = instance_or_factory
 
@@ -91,7 +98,9 @@ class ServiceRegistry:
         """Register an interface to implementation mapping."""
         with self._lock:
             registration = DependencyRegistration(
-                dependency_type=interface_type, scope=scope, implementation_type=implementation_type
+                dependency_type=interface_type,
+                scope=scope,
+                implementation_type=implementation_type,
             )
             self._registrations[interface_type] = registration
             logger.debug(
@@ -106,7 +115,9 @@ class ServiceRegistry:
             # Auto-register if not already registered
             if not self.is_registered(cls):
                 registration = DependencyRegistration(
-                    dependency_type=cls, scope=DIScope.TRANSIENT, implementation_type=cls
+                    dependency_type=cls,
+                    scope=DIScope.TRANSIENT,
+                    implementation_type=cls,
                 )
                 self._registrations[cls] = registration
 

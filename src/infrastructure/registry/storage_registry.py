@@ -11,8 +11,6 @@ from .base_registry import BaseRegistration, BaseRegistry, RegistryMode
 class UnsupportedStorageError(Exception):
     """Exception raised when an unsupported storage type is requested."""
 
-    pass
-
 
 class StorageFactoryInterface(ABC):
     """Interface for storage factory functions."""
@@ -20,12 +18,10 @@ class StorageFactoryInterface(ABC):
     @abstractmethod
     def create_strategy(self, config: Any) -> Any:
         """Create a storage strategy."""
-        pass
 
     @abstractmethod
     def create_config(self, data: Dict[str, Any]) -> Any:
         """Create a storage configuration."""
-        pass
 
 
 class StorageRegistration(BaseRegistration):
@@ -38,8 +34,12 @@ class StorageRegistration(BaseRegistration):
         config_factory: Callable,
         unit_of_work_factory: Optional[Callable] = None,
     ):
+        """Initialize the instance."""
         super().__init__(
-            type_name, strategy_factory, config_factory, unit_of_work_factory=unit_of_work_factory
+            type_name,
+            strategy_factory,
+            config_factory,
+            unit_of_work_factory=unit_of_work_factory,
         )
         self.unit_of_work_factory = unit_of_work_factory
 

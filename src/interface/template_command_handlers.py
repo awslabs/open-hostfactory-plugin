@@ -21,7 +21,6 @@ from src.application.template.commands import (
     CreateTemplateCommand,
     DeleteTemplateCommand,
     UpdateTemplateCommand,
-    ValidateTemplateCommand,
 )
 from src.domain.base.ports.scheduler_port import SchedulerPort
 from src.infrastructure.di.buses import CommandBus, QueryBus
@@ -46,7 +45,11 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
         query_bus = container.get(QueryBus)
 
         if not query_bus:
-            return {"success": False, "error": "QueryBus not available", "templates": []}
+            return {
+                "success": False,
+                "error": "QueryBus not available",
+                "templates": [],
+            }
 
         # Extract parameters from args or input_data (HostFactory compatibility)
         provider_api = None
@@ -67,7 +70,9 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
 
         # Create and execute query through CQRS bus
         query = ListTemplatesQuery(
-            provider_api=provider_api, active_only=active_only, include_configuration=include_config
+            provider_api=provider_api,
+            active_only=active_only,
+            include_configuration=include_config,
         )
 
         templates = await query_bus.execute(query)
@@ -95,7 +100,11 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to list templates: {str(e)}", "templates": []}
+        return {
+            "success": False,
+            "error": f"Failed to list templates: {str(e)}",
+            "templates": [],
+        }
 
 
 @handle_interface_exceptions(context="get_template", interface_type="cli")
@@ -116,12 +125,20 @@ async def handle_get_template(args: argparse.Namespace) -> Dict[str, Any]:
         query_bus = container.get(QueryBus)
 
         if not query_bus:
-            return {"success": False, "error": "QueryBus not available", "template": None}
+            return {
+                "success": False,
+                "error": "QueryBus not available",
+                "template": None,
+            }
 
         # Extract parameters from args
         template_id = getattr(args, "template_id", None)
         if not template_id:
-            return {"success": False, "error": "Template ID is required", "template": None}
+            return {
+                "success": False,
+                "error": "Template ID is required",
+                "template": None,
+            }
 
         # Create and execute query through CQRS bus
         query = GetTemplateQuery(template_id=template_id)
@@ -130,14 +147,20 @@ async def handle_get_template(args: argparse.Namespace) -> Dict[str, Any]:
         if template:
             return {
                 "success": True,
-                "template": template.model_dump() if hasattr(template, "model_dump") else template,
+                "template": (
+                    template.model_dump() if hasattr(template, "model_dump") else template
+                ),
                 "message": f"Retrieved template {template_id} successfully",
             }
         else:
             return {"success": False, "error": "Template not found", "template": None}
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to get template: {str(e)}", "template": None}
+        return {
+            "success": False,
+            "error": f"Failed to get template: {str(e)}",
+            "template": None,
+        }
 
 
 @handle_interface_exceptions(context="create_template", interface_type="cli")
@@ -363,7 +386,11 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
         command_bus = container.get(CommandBus)
 
         if not query_bus or not command_bus:
-            return {"success": False, "error": "CQRS buses not available", "valid": False}
+            return {
+                "success": False,
+                "error": "CQRS buses not available",
+                "valid": False,
+            }
 
         # Extract template data from args or file
         template_config = {}
@@ -441,7 +468,11 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to validate template: {str(e)}", "valid": False}
+        return {
+            "success": False,
+            "error": f"Failed to validate template: {str(e)}",
+            "valid": False,
+        }
 
 
 @handle_interface_exceptions(context="refresh_templates", interface_type="cli")

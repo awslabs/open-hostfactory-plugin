@@ -97,7 +97,8 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
 
             if self.logger:
                 self.logger.info(
-                    f"Successfully retrieved {len(templates)} templates - Correlation ID: {context.correlation_id}"
+                    f"Successfully retrieved {len(templates)} templates - "
+                    f"Correlation ID: {context.correlation_id}"
                 )
 
             # Record metrics if available

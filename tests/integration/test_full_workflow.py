@@ -1,21 +1,15 @@
 """Integration tests for full application workflow."""
 
 import json
-import tempfile
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
-from src.application.dto.commands import CreateRequestCommand
-from src.application.dto.queries import GetRequestStatusQuery, ListTemplatesQuery
+from src.application.dto.queries import ListTemplatesQuery
 from src.bootstrap import Application
 from src.config.manager import ConfigurationManager
-from src.domain.base.value_objects import InstanceId, InstanceType
-from src.domain.machine.aggregate import Machine
-from src.domain.request.aggregate import Request
+from src.domain.base.value_objects import InstanceType
 from src.domain.template.aggregate import Template
 from src.infrastructure.di.buses import CommandBus, QueryBus
 
@@ -469,7 +463,6 @@ class TestEndToEndScenarios:
     def test_concurrent_operations_scenario(self, test_config_file: Path, aws_mocks):
         """Test concurrent operations scenario."""
         import threading
-        import time
 
         app = Application(config_path=str(test_config_file))
         app.initialize()

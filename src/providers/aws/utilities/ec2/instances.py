@@ -55,7 +55,8 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
         )
 
         raise InfrastructureError(
-            "AWS.EC2", f"Failed to get EC2 instance {instance_id}: {error_code} - {error_message}"
+            "AWS.EC2",
+            f"Failed to get EC2 instance {instance_id}: {error_code} - {error_message}",
         )
 
     except Exception as e:
@@ -105,7 +106,12 @@ def create_instance(
         ec2_client = aws_client.ec2_client
 
         # Build parameters
-        params = {"ImageId": image_id, "InstanceType": instance_type, "MinCount": 1, "MaxCount": 1}
+        params = {
+            "ImageId": image_id,
+            "InstanceType": instance_type,
+            "MinCount": 1,
+            "MaxCount": 1,
+        }
 
         if key_name:
             params["KeyName"] = key_name
@@ -161,7 +167,11 @@ def create_instance(
     except Exception as e:
         logger.error(
             f"Unexpected error creating EC2 instance: {str(e)}",
-            extra={"image_id": image_id, "instance_type": instance_type, "error": str(e)},
+            extra={
+                "image_id": image_id,
+                "instance_type": instance_type,
+                "error": str(e),
+            },
         )
 
         raise InfrastructureError("AWS.EC2", f"Unexpected error creating EC2 instance: {str(e)}")
@@ -219,7 +229,8 @@ def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, An
         )
 
         raise InfrastructureError(
-            "AWS.EC2", f"Unexpected error terminating EC2 instance {instance_id}: {str(e)}"
+            "AWS.EC2",
+            f"Unexpected error terminating EC2 instance {instance_id}: {str(e)}",
         )
 
 

@@ -17,7 +17,6 @@ from src.infrastructure.template.configuration_manager import (
     TemplateConfigurationManager,
 )
 from src.infrastructure.template.dtos import TemplateDTO
-from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.providers.aws.exceptions.aws_exceptions import AWSValidationError
 from src.providers.aws.infrastructure.aws_client import AWSClient
 
@@ -246,7 +245,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
         """Get templates filtered by provider API."""
         return await self._template_config_manager.get_templates_by_provider(provider_api)
 
-    async def validate_template(self, template: TemplateDTO) -> Dict[str, Any]:
+    async def validate_template_dto(self, template: TemplateDTO) -> Dict[str, Any]:
         """Validate a template configuration."""
         return await self._template_config_manager.validate_template(template)
 
@@ -489,7 +488,7 @@ def create_aws_template_adapter(
     aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort
 ) -> AWSTemplateAdapter:
     """
-    Factory function to create AWS template adapter.
+    Create AWS template adapter.
 
     Args:
         aws_client: AWS client instance

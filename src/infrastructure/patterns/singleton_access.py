@@ -10,7 +10,7 @@ T = TypeVar("T")
 
 def get_singleton(singleton_class: Type[T], *args: Any, **kwargs: Any) -> T:
     """
-    Standard way to get singleton instances.
+    Get singleton instances.
 
     This function provides a consistent way to access singleton instances
     throughout the application. It uses the SingletonRegistry to ensure

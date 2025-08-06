@@ -4,7 +4,10 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from src.config.schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+    from src.config.schemas.provider_strategy_schema import (
+        ProviderConfig,
+        ProviderInstanceConfig,
+    )
 
 from src.config.schemas.provider_strategy_schema import ProviderMode
 from src.domain.base.exceptions import ConfigurationError
@@ -16,6 +19,7 @@ class ProviderConfigManager:
     """Manages provider-specific configuration."""
 
     def __init__(self, raw_config: Dict[str, Any]):
+        """Initialize the instance."""
         self._raw_config = raw_config
 
     def get_storage_strategy(self) -> str:

@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional
 
+from src.infrastructure.interfaces.provider import BaseProviderConfig
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
     ProviderHealthStatus,
@@ -122,9 +123,8 @@ class CompositeProviderStrategy(ProviderStrategy):
             raise ValueError("At least one strategy is required for composition")
 
         # Create a dummy config for the parent class
-        from src.infrastructure.interfaces.provider import BaseProviderConfig
 
-        dummy_config = ProviderConfig(provider_type="composite")
+        dummy_config = BaseProviderConfig(provider_type="composite")
         super().__init__(dummy_config)
 
         self._strategies = {strategy.provider_type: strategy for strategy in strategies}
@@ -416,7 +416,8 @@ class CompositeProviderStrategy(ProviderStrategy):
     ) -> List[StrategyExecutionResult]:
         """Execute operation using load balancing."""
         # For now, select strategy based on weights and execute on single strategy
-        # In a more advanced implementation, this could distribute load across multiple strategies
+        # In a more advanced implementation, this could distribute load across
+        # multiple strategies
         selected_strategy_type = self._select_strategy_by_weight(strategies)
         selected_strategy = strategies[selected_strategy_type]
 
@@ -448,7 +449,10 @@ class CompositeProviderStrategy(ProviderStrategy):
         return next(iter(strategies.keys()))
 
     def _execute_single_strategy(
-        self, strategy_type: str, strategy: ProviderStrategy, operation: ProviderOperation
+        self,
+        strategy_type: str,
+        strategy: ProviderStrategy,
+        operation: ProviderOperation,
     ) -> StrategyExecutionResult:
         """Execute operation on a single strategy."""
         start_time = time.time()
@@ -477,7 +481,9 @@ class CompositeProviderStrategy(ProviderStrategy):
             )
 
     def _aggregate_results(
-        self, execution_results: List[StrategyExecutionResult], operation: ProviderOperation
+        self,
+        execution_results: List[StrategyExecutionResult],
+        operation: ProviderOperation,
     ) -> ProviderResult:
         """Aggregate results from multiple strategy executions."""
         successful_results = [r for r in execution_results if r.success]
@@ -533,7 +539,10 @@ class CompositeProviderStrategy(ProviderStrategy):
 
         # Combine all data
         merged_data = {}
-        all_metadata = {"aggregation_policy": "merge_all", "contributing_strategies": []}
+        all_metadata = {
+            "aggregation_policy": "merge_all",
+            "contributing_strategies": [],
+        }
 
         for result in results:
             all_metadata["contributing_strategies"].append(result.strategy_type)
@@ -660,7 +669,7 @@ class CompositeProviderStrategy(ProviderStrategy):
             self._self._logger.warning(f"Error during composite strategy cleanup: {e}")
 
     def __str__(self) -> str:
-        """String representation for debugging."""
+        """Return string representation for debugging."""
         strategy_types = list(self._strategies.keys())
         return f"CompositeProviderStrategy(strategies={strategy_types}, mode={self._config.mode.value})"
 

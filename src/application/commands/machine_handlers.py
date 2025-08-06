@@ -58,6 +58,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
     ):
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._machine_repository = machine_repository
 
@@ -80,7 +81,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         machine.update_status(command.status, command.metadata)
 
         # Save changes and get extracted events
-        events = await self._machine_repository.save(machine)
+        await self._machine_repository.save(machine)
 
         # Events will be published by the base handler
         return None  # No response needed for this command
@@ -151,7 +152,8 @@ class ConvertMachineStatusCommandHandler(
 
         # Create provider operation for status conversion
         operation = ProviderOperation(
-            operation_type=ProviderOperationType.HEALTH_CHECK,  # Using health check as proxy for status mapping
+            # Using health check as proxy for status mapping
+            operation_type=ProviderOperationType.HEALTH_CHECK,
             parameters={"provider_state": provider_state, "conversion_request": True},
         )
 
@@ -227,7 +229,10 @@ class ConvertBatchMachineStatusCommandHandler(
             statuses.append(result.status)
 
         return ConvertBatchMachineStatusResponse(
-            success=True, statuses=statuses, count=len(statuses), metadata=command.metadata
+            success=True,
+            statuses=statuses,
+            count=len(statuses),
+            metadata=command.metadata,
         )
 
 
@@ -270,7 +275,10 @@ class ValidateProviderStateCommandHandler(
 
             # Use the converter to validate
             converter = ConvertMachineStatusCommandHandler(
-                self._provider_context, self.logger, self.event_publisher, self.error_handler
+                self._provider_context,
+                self.logger,
+                self.event_publisher,
+                self.error_handler,
             )
             result = await converter.execute_command(convert_command)
 

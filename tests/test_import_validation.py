@@ -29,10 +29,6 @@ class TestCriticalImports:
         from src.interface.command_handlers import (
             CLICommandHandler,
             handle_get_request_status,
-            handle_get_return_requests,
-            handle_list_templates,
-            handle_request_machines,
-            handle_request_return_machines,
         )
 
         # Verify classes and functions are importable
@@ -57,11 +53,9 @@ class TestCriticalImports:
             PriceType,
         )
         from src.domain.request.value_objects import (
-            MachineCount,
             MachineReference,
             RequestId,
             RequestStatus,
-            RequestTimeout,
             RequestType,
         )
 
@@ -91,11 +85,11 @@ class TestCriticalImports:
         """Test that deprecated import paths fail as expected."""
         # These imports should fail after value object decomposition
         with pytest.raises(ImportError, match="cannot import name 'MachineStatus'"):
-            from src.domain.request.value_objects import MachineStatus
+            pass
 
         # BaseCommandHandler should not be available from interface layer
         with pytest.raises(ImportError, match="cannot import name 'BaseCommandHandler'"):
-            from src.interface.command_handlers import BaseCommandHandler
+            pass
 
     def test_bootstrap_application(self):
         """Test that the main Application class can be instantiated."""

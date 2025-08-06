@@ -3,7 +3,6 @@
 from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
-    from src.config.manager import ConfigurationManager
     from src.domain.base.ports.scheduler_port import SchedulerPort
     from src.infrastructure.di.container import DIContainer
     from src.infrastructure.registry.scheduler_registry import SchedulerRegistry

@@ -6,7 +6,6 @@ expose all registered command and query handlers as SDK methods.
 Follows the same patterns as the infrastructure handler discovery.
 """
 
-import inspect
 import re
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional, Type, get_type_hints
@@ -41,6 +40,7 @@ class SDKMethodDiscovery:
     """
 
     def __init__(self):
+        """Initialize the instance."""
         self._method_info_cache: Dict[str, MethodInfo] = {}
 
     async def discover_cqrs_methods(self, query_bus, command_bus) -> Dict[str, Callable]:
@@ -140,11 +140,16 @@ class SDKMethodDiscovery:
         """Convert CamelCase to snake_case."""
         # Insert underscore before uppercase letters that follow lowercase letters
         s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-        # Insert underscore before uppercase letters that follow lowercase letters or digits
+        # Insert underscore before uppercase letters that follow lowercase letters
+        # or digits
         return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
     def _create_method_info(
-        self, method_name: str, handler_type: Type, handler_class: Type, operation_type: str
+        self,
+        method_name: str,
+        handler_type: Type,
+        handler_class: Type,
+        operation_type: str,
     ) -> MethodInfo:
         """Create method information from handler type."""
         try:
@@ -179,7 +184,7 @@ class SDKMethodDiscovery:
                 original_class=handler_type,
             )
 
-        except Exception as e:
+        except Exception:
             # Fallback to basic method info
             return MethodInfo(
                 name=method_name,

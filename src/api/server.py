@@ -1,9 +1,6 @@
 """FastAPI server factory and application setup."""
 
-import logging
-from typing import Optional
-
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
@@ -112,7 +109,11 @@ def create_fastapi_app(server_config: ServerConfig) -> FastAPI:
     @app.get("/health", tags=["System"])
     async def health_check():
         """Health check endpoint."""
-        return {"status": "healthy", "service": "open-hostfactory-plugin", "version": "1.0.0"}
+        return {
+            "status": "healthy",
+            "service": "open-hostfactory-plugin",
+            "version": "1.0.0",
+        }
 
     # Add info endpoint
     @app.get("/info", tags=["System"])
@@ -123,7 +124,7 @@ def create_fastapi_app(server_config: ServerConfig) -> FastAPI:
             "version": "1.0.0",
             "description": "REST API for Open Host Factory Plugin",
             "auth_enabled": server_config.auth.enabled,
-            "auth_strategy": server_config.auth.strategy if server_config.auth.enabled else None,
+            "auth_strategy": (server_config.auth.strategy if server_config.auth.enabled else None),
         }
 
     # Register API routers

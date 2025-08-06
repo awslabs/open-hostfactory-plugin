@@ -12,7 +12,8 @@ class AuthConfig(BaseModel):
 
     enabled: bool = Field(False, description="Enable authentication")
     strategy: str = Field(
-        "none", description="Authentication strategy (none, bearer_token, iam, cognito, oauth)"
+        "none",
+        description="Authentication strategy (none, bearer_token, iam, cognito, oauth)",
     )
 
     # Bearer token configuration

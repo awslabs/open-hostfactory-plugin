@@ -131,7 +131,7 @@ class CircuitBreakerStrategy(RetryStrategy):
             # Allow limited retries in half-open state
             if attempt < 1:  # Only allow one retry attempt in half-open
                 logger.info(
-                    f"Circuit breaker HALF_OPEN for {self.service_name} - allowing test request",
+                    f"Circuit breaker HALF_OPEN for { self.service_name} - allowing test request",
                     extra={
                         "service_name": self.service_name,
                         "state": state.value,
@@ -141,7 +141,7 @@ class CircuitBreakerStrategy(RetryStrategy):
                 return True
             else:
                 logger.warning(
-                    f"Circuit breaker HALF_OPEN for {self.service_name} - test failed, opening circuit",
+                    f"Circuit breaker HALF_OPEN for { self.service_name} - test failed, opening circuit",
                     extra={
                         "service_name": self.service_name,
                         "state": state.value,
@@ -205,8 +205,11 @@ class CircuitBreakerStrategy(RetryStrategy):
             circuit_state["half_open_start_time"] = None
 
             logger.info(
-                f"Circuit breaker CLOSED for {self.service_name} after successful recovery",
-                extra={"service_name": self.service_name, "state": CircuitState.CLOSED.value},
+                f"Circuit breaker CLOSED for { self.service_name} after successful recovery",
+                extra={
+                    "service_name": self.service_name,
+                    "state": CircuitState.CLOSED.value,
+                },
             )
 
     def _record_failure(self, current_time: float) -> None:
@@ -225,7 +228,7 @@ class CircuitBreakerStrategy(RetryStrategy):
             circuit_state["state"] = CircuitState.OPEN
 
             logger.error(
-                f"Circuit breaker OPENED for {self.service_name} after {circuit_state['failure_count']} failures",
+                f"Circuit breaker OPENED for { self.service_name} after { circuit_state['failure_count']} failures",
                 extra={
                     "service_name": self.service_name,
                     "state": CircuitState.OPEN.value,
@@ -250,7 +253,7 @@ class CircuitBreakerStrategy(RetryStrategy):
                 circuit_state["half_open_start_time"] = current_time
 
                 logger.info(
-                    f"Circuit breaker transitioning to HALF_OPEN for {self.service_name}",
+                    f"Circuit breaker transitioning to HALF_OPEN for { self.service_name}",
                     extra={
                         "service_name": self.service_name,
                         "state": CircuitState.HALF_OPEN.value,
@@ -260,7 +263,9 @@ class CircuitBreakerStrategy(RetryStrategy):
 
                 return CircuitState.HALF_OPEN
 
-        elif current_state == CircuitState.HALF_OPEN:
+        elif (
+            current_state == CircuitState.HALF_OPEN
+        ):  # noqa: SIM102 (false positive - proper if-elif structure)
             # Check if we should timeout back to open
             if (
                 circuit_state["half_open_start_time"]
@@ -271,7 +276,7 @@ class CircuitBreakerStrategy(RetryStrategy):
                 circuit_state["half_open_start_time"] = None
 
                 logger.warning(
-                    f"Circuit breaker timeout in HALF_OPEN, returning to OPEN for {self.service_name}",
+                    f"Circuit breaker timeout in HALF_OPEN, returning to OPEN for { self.service_name}",
                     extra={
                         "service_name": self.service_name,
                         "state": CircuitState.OPEN.value,
@@ -319,7 +324,6 @@ class CircuitBreakerStrategy(RetryStrategy):
         Returns:
             Delay in seconds
         """
-        import random
 
         # Exponential backoff: base_delay * (2 ^ attempt)
         delay = self.base_delay * (2**attempt)

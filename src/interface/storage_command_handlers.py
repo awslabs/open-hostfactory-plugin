@@ -15,7 +15,7 @@ async def handle_list_storage_strategies(args) -> Dict[str, Any]:
     """Handle list storage strategies operations."""
     container = get_container()
     query_bus = container.get(QueryBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.queries.storage import ListStorageStrategiesQuery
 
@@ -70,7 +70,10 @@ async def handle_validate_storage_config(args) -> Dict[str, Any]:
     query = ValidateStorageConfigQuery()
     validation = await query_bus.execute(query)
 
-    return {"validation": validation, "message": "Storage configuration validated successfully"}
+    return {
+        "validation": validation,
+        "message": "Storage configuration validated successfully",
+    }
 
 
 @handle_interface_exceptions(context="test_storage", interface_type="cli")

@@ -3,7 +3,6 @@
 from src.domain.base.ports import LoggingPort
 from src.domain.machine.repository import MachineRepository
 from src.domain.request.repository import RequestRepository
-from src.domain.template.image_resolver import ImageResolver
 from src.domain.template.repository import TemplateRepository
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
@@ -63,7 +62,6 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
         # Try to get AWS provider configuration
         try:
             provider_config = config_manager.get_provider_config()
-            aws_provider_defaults = None
 
             # Look for AWS provider defaults
             if (
@@ -105,13 +103,15 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
                             )
                             if instance_extension_config.ami_resolution.enabled:
                                 container.register_singleton(CachingAMIResolver)
-                                # Register interface to resolve to concrete implementation
+                                # Register interface to resolve to concrete
+                                # implementation
                                 from src.domain.base.ports.template_resolver_port import (
                                     TemplateResolverPort,
                                 )
 
                                 container.register_singleton(
-                                    TemplateResolverPort, lambda c: c.get(CachingAMIResolver)
+                                    TemplateResolverPort,
+                                    lambda c: c.get(CachingAMIResolver),
                                 )
                                 logger.info(
                                     f"AMI resolver registered - enabled in AWS provider instance: {provider.name}"
@@ -119,7 +119,7 @@ def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
                                 return
                         except Exception as e:
                             logger.debug(
-                                f"Could not parse extensions for provider {provider.name}: {e}"
+                                f"Could not parse extensions for provider { provider.name}: {e}"
                             )
 
             # Default: register with default AWS extension config
@@ -180,17 +180,19 @@ def _register_repository_services(container: DIContainer) -> None:
 
     # Register repositories
     container.register_singleton(
-        RequestRepository, lambda c: c.get(RepositoryFactory).create_request_repository()
+        RequestRepository,
+        lambda c: c.get(RepositoryFactory).create_request_repository(),
     )
 
     container.register_singleton(
-        MachineRepository, lambda c: c.get(RepositoryFactory).create_machine_repository()
+        MachineRepository,
+        lambda c: c.get(RepositoryFactory).create_machine_repository(),
     )
 
     def create_template_configuration_manager(
         container: DIContainer,
     ) -> TemplateConfigurationManager:
-        """Factory function for TemplateConfigurationManager."""
+        """Create TemplateConfigurationManager."""
         from src.config.manager import ConfigurationManager
         from src.domain.base.ports.scheduler_port import SchedulerPort
 
@@ -204,7 +206,7 @@ def _register_repository_services(container: DIContainer) -> None:
         )
 
     def create_template_repository(container: DIContainer) -> TemplateRepository:
-        """Factory function for TemplateRepository."""
+        """Create TemplateRepository."""
         return create_template_repository_impl(
             template_manager=container.get(TemplateConfigurationManager),
             logger=container.get(LoggingPort),

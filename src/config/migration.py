@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from .schemas.provider_strategy_schema import ProviderConfig, ProviderInstanceConfig
+from .schemas.provider_strategy_schema import ProviderConfig
 
 
 class ConfigurationMigrator:
@@ -61,7 +61,11 @@ class ConfigurationMigrator:
             "active_provider": "aws-default",  # Single provider mode
             "selection_policy": "FIRST_AVAILABLE",
             "health_check_interval": 300,
-            "circuit_breaker": {"enabled": True, "failure_threshold": 5, "recovery_timeout": 60},
+            "circuit_breaker": {
+                "enabled": True,
+                "failure_threshold": 5,
+                "recovery_timeout": 60,
+            },
             "providers": [
                 {
                     "name": "aws-default",
@@ -145,7 +149,12 @@ class ConfigurationMigrator:
                 "weight": 100 // len(regions),  # Distribute weight evenly
                 "config": provider_config,
                 "capabilities": self._infer_aws_capabilities(provider_config),
-                "health_check": {"enabled": True, "interval": 300, "timeout": 30, "retry_count": 3},
+                "health_check": {
+                    "enabled": True,
+                    "interval": 300,
+                    "timeout": 30,
+                    "retry_count": 3,
+                },
             }
             providers.append(provider)
 
@@ -199,10 +208,12 @@ class ConfigurationMigrator:
                 # Check essential AWS configuration is preserved
                 essential_fields = ["region", "profile"]
                 for field in essential_fields:
-                    if field in original_aws_config:
-                        if migrated_aws_config.get(field) != original_aws_config[field]:
-                            self._logger.error(f"AWS {field} not preserved in migration")
-                            return False
+                    if (
+                        field in original_aws_config
+                        and migrated_aws_config.get(field) != original_aws_config[field]
+                    ):
+                        self._logger.error(f"AWS {field} not preserved in migration")
+                        return False
 
             self._logger.info("Migration validation successful")
             return True

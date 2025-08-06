@@ -1,13 +1,10 @@
 """Core MCP Server implementation for Open Host Factory Plugin."""
 
-import asyncio
 import json
-import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
-from src.infrastructure.error.decorators import handle_interface_exceptions
 from src.infrastructure.logging.logger import get_logger
 
 
@@ -199,7 +196,8 @@ class OpenHFPluginMCPServer:
                 result = await self._handle_prompts_get(params)
             else:
                 return MCPMessage(
-                    id=message.id, error={"code": -32601, "message": f"Method not found: {method}"}
+                    id=message.id,
+                    error={"code": -32601, "message": f"Method not found: {method}"},
                 )
 
             return MCPMessage(id=message.id, result=result)
@@ -207,7 +205,8 @@ class OpenHFPluginMCPServer:
         except Exception as e:
             self.logger.error(f"Error handling method {method}: {e}")
             return MCPMessage(
-                id=message.id, error={"code": -32603, "message": f"Internal error: {str(e)}"}
+                id=message.id,
+                error={"code": -32603, "message": f"Internal error: {str(e)}"},
             )
 
     async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -242,7 +241,8 @@ class OpenHFPluginMCPServer:
 
             tool_def = {
                 "name": tool_name,
-                "description": description.strip().split("\n")[0],  # First line of docstring
+                # First line of docstring
+                "description": description.strip().split("\n")[0],
                 "inputSchema": {
                     "type": "object",
                     "properties": self._get_tool_schema(tool_name),
@@ -377,7 +377,10 @@ class OpenHFPluginMCPServer:
         elif "request" in tool_name:
             return {"request_id": common_props["request_id"]}
         elif "machine" in tool_name:
-            return {"template_id": common_props["template_id"], "count": common_props["count"]}
+            return {
+                "template_id": common_props["template_id"],
+                "count": common_props["count"],
+            }
         else:
             return {"provider": common_props["provider"]}
 

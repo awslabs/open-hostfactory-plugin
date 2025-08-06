@@ -9,7 +9,7 @@ from .file_manager import FileManager
 
 # Generic components (truly reusable across storage types)
 from .lock_manager import LockManager, ReaderWriterLock
-from .resource_manager import DataConverter, QueryManager, StorageResourceManager
+from .resource_manager import DataConverter, QueryManager
 from .serialization_manager import JSONSerializer, SerializationManager
 
 # SQL-specific components (clearly prefixed)

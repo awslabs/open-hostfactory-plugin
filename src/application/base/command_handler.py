@@ -9,9 +9,7 @@ Architecture:
 - CLICommandHandler: For CLI interface handlers
 """
 
-import asyncio
-from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Any, Dict, Optional, TypeVar
 
 # Import the CQRS interface
 from src.application.interfaces.command_handler import CommandHandler

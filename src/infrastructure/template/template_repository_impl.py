@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, List, Optional
 
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.template.aggregate import Template
 from src.domain.template.repository import TemplateRepository

@@ -30,7 +30,10 @@ def get_api_examples() -> Dict[str, Any]:
                             "securityGroupIds": ["sg-12345678"],
                             "subnetId": "subnet-12345678",
                             "userData": "#!/bin/bash\necho 'Hello World'",
-                            "tags": {"Environment": "development", "Project": "hostfactory"},
+                            "tags": {
+                                "Environment": "development",
+                                "Project": "hostfactory",
+                            },
                         }
                     ],
                     "total": 1,
@@ -77,7 +80,10 @@ def get_api_examples() -> Dict[str, Any]:
                 "machineCount": 3,
                 "additionalData": {
                     "subnetId": "subnet-87654321",
-                    "tags": {"RequestedBy": "user@company.com", "Purpose": "load-testing"},
+                    "tags": {
+                        "RequestedBy": "user@company.com",
+                        "Purpose": "load-testing",
+                    },
                 },
             },
         },
@@ -223,7 +229,10 @@ def get_api_examples() -> Dict[str, Any]:
                 "error": {
                     "code": "NOT_FOUND",
                     "message": "Resource not found",
-                    "details": {"resource": "template", "identifier": "non-existent-template"},
+                    "details": {
+                        "resource": "template",
+                        "identifier": "non-existent-template",
+                    },
                 },
                 "timestamp": "2025-01-07T10:30:00Z",
                 "requestId": "req-error-12348",

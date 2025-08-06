@@ -1,25 +1,17 @@
 """Comprehensive tests for repository pattern implementations."""
 
-import json
 import os
 import tempfile
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
 # Import repository components
 try:
-    from src.domain.base.events.domain_events import DomainEvent
-    from src.domain.machine.aggregate import Machine
     from src.domain.request.aggregate import Request
-    from src.domain.request.value_objects import RequestId, RequestStatus
-    from src.domain.template.aggregate import Template
+    from src.domain.request.value_objects import RequestStatus
     from src.infrastructure.persistence.base.base_repository import BaseRepository
     from src.infrastructure.persistence.components.json_storage import JSONStorage
-    from src.infrastructure.persistence.components.sql_storage import SQLStorage
     from src.infrastructure.persistence.repositories.machine_repository import (
         MachineRepository,
     )
@@ -461,9 +453,9 @@ class TestRepositoryPerformanceOptimization:
         request = request_repo.find_by_id("req-123")
 
         # Related data should be loaded lazily
-        if hasattr(request, "machines") and hasattr(request.machines, "__call__"):
+        if hasattr(request, "machines") and callable(request.machines):
             # Lazy loading - machines property is a callable
-            machines = request.machines()
+            request.machines()
 
             # Should trigger additional query
             mock_storage.find_machines_by_request.assert_called_once_with("req-123")
@@ -480,14 +472,14 @@ class TestRepositoryPerformanceOptimization:
         mock_storage.find_by_id.return_value = {"id": "req-123"}
 
         # First call - cache miss
-        result1 = request_repo.find_by_id("req-123")
+        request_repo.find_by_id("req-123")
 
         # Should query storage and cache result
         mock_storage.find_by_id.assert_called_once_with("req-123")
         mock_cache.set.assert_called_once()
 
         # Second call - cache hit
-        result2 = request_repo.find_by_id("req-123")
+        request_repo.find_by_id("req-123")
 
         # Should use cached result
         mock_cache.get.assert_called()

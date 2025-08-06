@@ -1,8 +1,7 @@
 """API handler for checking request status."""
 
 import time
-import uuid
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from src.api.models import RequestStatusModel
 from src.api.validation import RequestValidator, ValidationException

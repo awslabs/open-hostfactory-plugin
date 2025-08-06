@@ -1,34 +1,20 @@
 """Comprehensive integration workflow tests."""
 
-import asyncio
 import json
 import os
 import tempfile
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from datetime import datetime, timezone
+from unittest.mock import Mock, patch
 
 import pytest
 
 # Import components for integration testing
 try:
     from src.application.service import ApplicationService
-    from src.domain.machine.aggregate import Machine
     from src.domain.request.aggregate import Request
-    from src.domain.request.value_objects import RequestStatus, RequestType
-    from src.domain.template.aggregate import Template
-    from src.infrastructure.persistence.repositories.machine_repository import (
-        MachineRepository,
-    )
     from src.infrastructure.persistence.repositories.request_repository import (
         RequestRepository,
-    )
-    from src.infrastructure.persistence.repositories.template_repository import (
-        TemplateRepository,
-    )
-    from src.providers.aws.strategy.aws_provider_strategy import (
-        AWSProviderStrategy as AWSProvider,
     )
 
     IMPORTS_AVAILABLE = True
@@ -627,7 +613,8 @@ class TestConfigurationIntegration:
             {
                 "provider": {
                     "type": "aws",
-                    "aws": {"region": "", "max_retries": -1},  # Empty region  # Invalid retry count
+                    # Empty region  # Invalid retry count
+                    "aws": {"region": "", "max_retries": -1},
                 }
             },
             {"logging": {"level": "INVALID_LEVEL"}},  # Invalid log level

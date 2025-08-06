@@ -104,7 +104,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
     def with_logging_middleware(self, func: Callable[[T], R]) -> Callable[[T], R]:
         """
-        Decorator for logging requests and collecting metrics.
+        Log requests and collect metrics.
 
         Args:
             func: Function to decorate
@@ -189,7 +189,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
         self, func: Callable[[T], R]
     ) -> Callable[[T], Dict[str, Any]]:
         """
-        Decorator for standardized error handling.
+        Provide standardized error handling.
 
         This decorator ensures that all errors are handled consistently and
         converted to a standardized API response format.
@@ -206,9 +206,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 result = func(request)
 
                 # Convert result to dictionary if needed
-                if hasattr(result, "to_dict") and callable(getattr(result, "to_dict")):
-                    to_dict_method = getattr(result, "to_dict")
-                    return to_dict_method()
+                if hasattr(result, "to_dict") and callable(result.to_dict):
+                    return result.to_dict()
                 elif isinstance(result, dict):
                     return result
                 else:
@@ -224,11 +223,15 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 return {
                     "error": "ValidationError",
                     "message": error_message,
-                    "details": {"error_type": "ValueError", "error_message": error_message},
+                    "details": {
+                        "error_type": "ValueError",
+                        "error_message": error_message,
+                    },
                 }
 
             except DomainException as e:
-                # Handle all application-specific errors (DomainException and subclasses)
+                # Handle all application-specific errors (DomainException and
+                # subclasses)
                 error_dict = (
                     e.to_dict()
                     if hasattr(e, "to_dict")
@@ -243,19 +246,26 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 # Log the error with appropriate level based on error type
                 if isinstance(e, ValidationError):
                     self.logger.warning(
-                        f"Validation error: {str(e)}", extra={"error_details": error_dict}
+                        f"Validation error: {str(e)}",
+                        extra={"error_details": error_dict},
                     )
                 elif isinstance(e, EntityNotFoundError):
                     self.logger.info(
-                        f"Not found error: {str(e)}", extra={"error_details": error_dict}
+                        f"Not found error: {str(e)}",
+                        extra={"error_details": error_dict},
                     )
                 else:
                     self.logger.error(
-                        f"Application error: {str(e)}", extra={"error_details": error_dict}
+                        f"Application error: {str(e)}",
+                        extra={"error_details": error_dict},
                     )
 
                 # Return standardized error response
-                return {"error": e.__class__.__name__, "message": str(e), "details": error_dict}
+                return {
+                    "error": e.__class__.__name__,
+                    "message": str(e),
+                    "details": error_dict,
+                }
 
             except Exception as e:
                 # Handle unexpected errors
@@ -265,7 +275,10 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 return {
                     "error": "InternalError",
                     "message": "An unexpected error occurred",
-                    "details": {"error_type": e.__class__.__name__, "error_message": str(e)},
+                    "details": {
+                        "error_type": e.__class__.__name__,
+                        "error_message": str(e),
+                    },
                 }
 
         return wrapper
@@ -274,7 +287,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
         self, service_name: str = "api", max_attempts: int = 3, base_delay: float = 1.0
     ) -> Callable[[Callable[[T], R]], Callable[[T], R]]:
         """
-        Decorator for applying retry pattern to API calls.
+        Apply retry pattern to API calls.
 
         This decorator provides resilience for API calls by retrying failed operations
         with exponential backoff.
@@ -306,7 +319,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
         self, schema: Dict[str, Any], func: Callable[[T], R]
     ) -> Callable[[T], R]:
         """
-        Decorator for input validation.
+        Validate input.
 
         Args:
             schema: JSON Schema for input validation

@@ -2,8 +2,6 @@ import re
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy import text
-
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.persistence.components.resource_manager import QueryManager
 
@@ -60,7 +58,10 @@ class SQLQueryBuilder(QueryManager):
         return self.build_create_table()
 
     def build_read_query(
-        self, entity_id: Optional[str] = None, criteria: Optional[Dict[str, Any]] = None, **kwargs
+        self,
+        entity_id: Optional[str] = None,
+        criteria: Optional[Dict[str, Any]] = None,
+        **kwargs,
     ) -> Tuple[str, Dict[str, Any]]:
         """Build SELECT query (implements QueryManager interface)."""
         if entity_id:
@@ -213,7 +214,7 @@ class SQLQueryBuilder(QueryManager):
         # Validate id_column
         self._validate_identifier(id_column)
 
-        query = f"DELETE FROM {self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
+        query = f"DELETE FROM { self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
 
         self.logger.debug(f"Built DELETE query for {self.table_name}")
         return query, id_column
@@ -228,7 +229,7 @@ class SQLQueryBuilder(QueryManager):
         Returns:
             Tuple of (query, parameter_name)
         """
-        query = f"SELECT 1 FROM {self.table_name} WHERE {id_column} = :{id_column} LIMIT 1"  # nosec B608
+        query = f"SELECT 1 FROM { self.table_name} WHERE {id_column} = :{id_column} LIMIT 1"  # nosec B608
 
         self.logger.debug(f"Built EXISTS query for {self.table_name}")
         return query, id_column
@@ -338,6 +339,6 @@ class SQLQueryBuilder(QueryManager):
             filtered_data_list.append(filtered_data)
 
         self.logger.debug(
-            f"Built batch INSERT query for {self.table_name} with {len(data_list)} items"
+            f"Built batch INSERT query for { self.table_name} with { len(data_list)} items"
         )
         return query, filtered_data_list

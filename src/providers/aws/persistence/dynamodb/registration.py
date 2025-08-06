@@ -6,7 +6,7 @@ enabling the storage registry pattern for DynamoDB persistence.
 CLEAN ARCHITECTURE: Only handles storage strategies, no repository knowledge.
 """
 
-from typing import TYPE_CHECKING, Any, Callable, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 # Use TYPE_CHECKING to avoid direct infrastructure import
 if TYPE_CHECKING:

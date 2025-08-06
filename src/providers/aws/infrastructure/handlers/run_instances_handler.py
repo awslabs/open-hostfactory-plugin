@@ -39,9 +39,7 @@ from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
 from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSEntityNotFoundError,
     AWSInfrastructureError,
-    AWSValidationError,
 )
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.infrastructure.launch_template.manager import (
@@ -76,7 +74,12 @@ class RunInstancesHandler(AWSHandler):
         """
         # Use unified base class initialization
         super().__init__(
-            aws_client, logger, aws_ops, launch_template_manager, request_adapter, error_handler
+            aws_client,
+            logger,
+            aws_ops,
+            launch_template_manager,
+            request_adapter,
+            error_handler,
         )
 
     @handle_infrastructure_exceptions(context="run_instances_creation")
@@ -104,10 +107,15 @@ class RunInstancesHandler(AWSHandler):
                 "provider_data": {"resource_type": "run_instances"},
             }
         except Exception as e:
-            return {"success": False, "resource_ids": [], "instances": [], "error_message": str(e)}
+            return {
+                "success": False,
+                "resource_ids": [],
+                "instances": [],
+                "error_message": str(e),
+            }
 
     def _create_instances_internal(self, request: Request, aws_template: AWSTemplate) -> str:
-        """Internal method for RunInstances creation with pure business logic."""
+        """Create RunInstances with pure business logic."""
         # Validate prerequisites
         self._validate_prerequisites(aws_template)
 
@@ -132,7 +140,9 @@ class RunInstancesHandler(AWSHandler):
 
         # Execute RunInstances API call with circuit breaker for critical operation
         response = self._retry_with_backoff(
-            self.aws_client.ec2_client.run_instances, operation_type="critical", **run_params
+            self.aws_client.ec2_client.run_instances,
+            operation_type="critical",
+            **run_params,
         )
 
         # Extract reservation ID and instance IDs from response
@@ -203,7 +213,8 @@ class RunInstancesHandler(AWSHandler):
         # Handle networking overrides based on launch template source
         if aws_template.launch_template_id:
             # Using existing launch template - need to check what it contains
-            # For now, assume we can override (this should be enhanced to inspect the LT)
+            # For now, assume we can override (this should be enhanced to inspect the
+            # LT)
             if aws_template.subnet_id:
                 params["SubnetId"] = aws_template.subnet_id
             elif aws_template.subnet_ids and len(aws_template.subnet_ids) == 1:
@@ -257,7 +268,8 @@ class RunInstancesHandler(AWSHandler):
             instance_ids = request.metadata.get("instance_ids", [])
 
             if not instance_ids:
-                # If no instance IDs in metadata, try to find instances using resource IDs (reservation IDs)
+                # If no instance IDs in metadata, try to find instances using resource
+                # IDs (reservation IDs)
                 if hasattr(request, "resource_ids") and request.resource_ids:
                     self._logger.info(
                         f"No instance IDs in metadata, searching by resource IDs: {request.resource_ids}"
@@ -283,7 +295,8 @@ class RunInstancesHandler(AWSHandler):
 
             for resource_id in resource_ids:
                 # For RunInstances, resource_id is the reservation ID
-                # Try to use describe_instances with Filters to find instances by reservation ID
+                # Try to use describe_instances with Filters to find instances by
+                # reservation ID
                 try:
                     response = self.aws_client.ec2_client.describe_instances(
                         Filters=[{"Name": "reservation-id", "Values": [resource_id]}]
@@ -312,18 +325,20 @@ class RunInstancesHandler(AWSHandler):
                         self._logger.warning(f"Reservation ID {resource_id} not found")
                         continue
                     elif "Filter dicts have not been implemented" in str(e):
-                        # Moto doesn't support reservation-id filter, fall back to describe all instances
+                        # Moto doesn't support reservation-id filter, fall back to
+                        # describe all instances
                         self._logger.info(
-                            f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
+                            "Reservation-id filter not supported (likely moto), falling back to describe all instances"
                         )
                         return self._find_instances_by_tags_fallback(resource_ids)
                     else:
                         raise
                 except Exception as e:
                     if "Filter dicts have not been implemented" in str(e):
-                        # Moto doesn't support reservation-id filter, fall back to describe all instances
+                        # Moto doesn't support reservation-id filter, fall back to
+                        # describe all instances
                         self._logger.info(
-                            f"Reservation-id filter not supported (likely moto), falling back to describe all instances"
+                            "Reservation-id filter not supported (likely moto), falling back to describe all instances"
                         )
                         return self._find_instances_by_tags_fallback(resource_ids)
                     else:
@@ -395,7 +410,8 @@ class RunInstancesHandler(AWSHandler):
 
         except Exception as e:
             self._logger.error(f"FALLBACK: Fallback method failed to find instances: {e}")
-            # Return empty list rather than raising exception to allow graceful degradation
+            # Return empty list rather than raising exception to allow graceful
+            # degradation
             return []
 
     def release_hosts(self, request: Request) -> None:

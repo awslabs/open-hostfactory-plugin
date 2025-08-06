@@ -6,10 +6,7 @@ AWSHandler and BaseAWSHandler patterns while maintaining clean architecture prin
 and proper integration with our DI/CQRS system.
 """
 
-import asyncio
-import time
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 from botocore.exceptions import ClientError
@@ -17,7 +14,6 @@ from botocore.exceptions import ClientError
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 from src.domain.request.aggregate import Request
-from src.domain.template.aggregate import Template
 from src.infrastructure.resilience import retry
 from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.exceptions.aws_exceptions import (
@@ -186,7 +182,9 @@ class AWSHandler(ABC):
         service_name = self._get_service_name()
 
         # Determine retry strategy based on operation type
-        strategy_config = self._get_retry_strategy_config(operation_type, service_name)
+        strategy_config = self._get_retry_strategy_config(
+            operation_type, service_name, operation_name
+        )
 
         # Create retry decorator with appropriate strategy
         @retry(**strategy_config)
@@ -220,13 +218,16 @@ class AWSHandler(ABC):
         """Get service name from handler class name."""
         return self.__class__.__name__.replace("Handler", "").lower()
 
-    def _get_retry_strategy_config(self, operation_type: str, service_name: str) -> Dict[str, Any]:
+    def _get_retry_strategy_config(
+        self, operation_type: str, service_name: str, operation_name: str = None
+    ) -> Dict[str, Any]:
         """
         Get retry strategy configuration based on operation type.
 
         Args:
             operation_type: Type of operation (critical, standard, read_only)
             service_name: AWS service name
+            operation_name: Specific operation name for auto-detection
 
         Returns:
             Dictionary with retry configuration
@@ -243,6 +244,15 @@ class AWSHandler(ABC):
             "update_auto_scaling_group",
             "delete_auto_scaling_group",
         }
+
+        # Auto-detect critical operations if not explicitly specified
+        if (
+            operation_type == "standard"
+            and operation_name
+            and operation_name in critical_operations
+        ):
+            operation_type = "critical"
+            self.logger.debug(f"Auto-detected critical operation: {operation_name}")
 
         if operation_type == "critical":
             # Use circuit breaker for critical operations
@@ -383,7 +393,8 @@ class AWSHandler(ABC):
         if template.instance_type and template.instance_types:
             errors["instanceType"] = "Cannot specify both instance_type and instance_types"
 
-        # Validate subnet(s) - subnet_id is a property of subnet_ids, so only check subnet_ids
+        # Validate subnet(s) - subnet_id is a property of subnet_ids, so only
+        # check subnet_ids
         if not template.subnet_ids:
             errors["subnet"] = "At least one subnet must be specified in subnet_ids"
 

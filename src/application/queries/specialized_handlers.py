@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
 from src.application.dto.queries import (
@@ -15,12 +12,11 @@ from src.application.dto.queries import (
 from src.application.dto.responses import MachineHealthDTO, RequestSummaryDTO
 from src.domain.base import UnitOfWorkFactory
 from src.domain.base.exceptions import EntityNotFoundError
-from src.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
+from src.domain.base.ports import ErrorHandlingPort, LoggingPort
 
 # Exception handling infrastructure
 from src.domain.machine.value_objects import MachineStatus
 from src.infrastructure.ports.resource_provisioning_port import ResourceProvisioningPort
-from src.infrastructure.utilities.factories.repository_factory import UnitOfWork
 
 
 @query_handler(GetActiveMachineCountQuery)
@@ -28,7 +24,10 @@ class GetActiveMachineCountHandler(BaseQueryHandler[GetActiveMachineCountQuery, 
     """Handler for getting count of active machines."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get active machine count handler.
@@ -70,7 +69,10 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
     """Handler for getting request summary information."""
 
     def __init__(
-        self, uow_factory: UnitOfWorkFactory, logger: LoggingPort, error_handler: ErrorHandlingPort
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
     ):
         """
         Initialize get request summary handler.
@@ -121,7 +123,7 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
                 )
                 return summary
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Request not found: {query.request_id}")
             raise
         except Exception as e:
@@ -180,7 +182,10 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                         # Fallback: derive health from machine status
                         if machine.status == MachineStatus.RUNNING:
                             health_status = "healthy"
-                        elif machine.status in [MachineStatus.FAILED, MachineStatus.TERMINATED]:
+                        elif machine.status in [
+                            MachineStatus.FAILED,
+                            MachineStatus.TERMINATED,
+                        ]:
                             health_status = "unhealthy"
                         else:
                             health_status = "unknown"
@@ -214,7 +219,7 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
                 )
                 return health_dto
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Machine not found: {query.machine_id}")
             raise
         except Exception as e:

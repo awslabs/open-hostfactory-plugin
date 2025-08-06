@@ -12,12 +12,10 @@ class TemplateExtension(ABC):
     @abstractmethod
     def to_template_defaults(self) -> Dict[str, Any]:
         """Convert extension to template defaults format."""
-        pass
 
     @abstractmethod
     def get_provider_type(self) -> str:
         """Get the provider type this extension supports."""
-        pass
 
 
 class TemplateExtensionRegistry:
@@ -56,7 +54,7 @@ class TemplateExtensionRegistry:
         """
         if not isinstance(extension_instance, TemplateExtension):
             raise ValueError(
-                f"Extension instance must implement TemplateExtension, got {type(extension_instance)}"
+                f"Extension instance must implement TemplateExtension, got { type(extension_instance)}"
             )
 
         cls._extension_instances[provider_type] = extension_instance
@@ -160,17 +158,17 @@ class TemplateExtensionRegistry:
 
 # Convenience functions for common operations
 def register_provider_extension(provider_type: str, extension_class: Type[BaseModel]) -> None:
-    """Convenience function to register a provider extension."""
+    """Register a provider extension."""
     TemplateExtensionRegistry.register_extension(provider_type, extension_class)
 
 
 def get_provider_extension_defaults(
     provider_type: str, config_data: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    """Convenience function to get provider extension defaults."""
+    """Get provider extension defaults."""
     return TemplateExtensionRegistry.get_extension_defaults(provider_type, config_data)
 
 
 def has_provider_extension(provider_type: str) -> bool:
-    """Convenience function to check if provider has extensions."""
+    """Check if provider has extensions."""
     return TemplateExtensionRegistry.has_extension(provider_type)

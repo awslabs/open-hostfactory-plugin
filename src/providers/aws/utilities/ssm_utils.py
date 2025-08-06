@@ -7,7 +7,6 @@ This module contains utility functions for working with AWS SSM Parameter Store.
 import re
 from typing import Any, Dict, List, Optional, Union
 
-import boto3
 from botocore.exceptions import ClientError
 
 from src.domain.base.exceptions import InfrastructureError
@@ -106,7 +105,8 @@ def resolve_ssm_parameter(parameter_path: str, aws_client: Any = None) -> str:
         )
 
         raise InfrastructureError(
-            "AWS.SSM", f"Failed to resolve SSM parameter {path}: {error_code} - {error_message}"
+            "AWS.SSM",
+            f"Failed to resolve SSM parameter {path}: {error_code} - {error_message}",
         )
 
     except Exception as e:
@@ -254,7 +254,11 @@ def get_ssm_parameters_by_path(
 
         logger.error(
             f"Failed to get SSM parameters by path {path}: {error_code} - {error_message}",
-            extra={"path": path, "error_code": error_code, "error_message": error_message},
+            extra={
+                "path": path,
+                "error_code": error_code,
+                "error_message": error_message,
+            },
         )
 
         raise InfrastructureError(
@@ -274,42 +278,3 @@ def _get_parameters_by_path(ssm_client: Any, path: str, recursive: bool = True) 
             parameters[param["Name"]] = param["Value"]
 
     return parameters
-
-
-def _get_parameters_by_path(ssm_client: Any, path: str, recursive: bool = True) -> Dict[str, str]:
-    """
-    Get all SSM parameters under a path.
-
-    Args:
-        ssm_client: SSM client
-        path: Path to get parameters from
-        recursive: Whether to get parameters recursively
-
-    Returns:
-        Dictionary of parameter names to values
-    """
-    result = {}
-    next_token = None
-
-    while True:
-        # Build request parameters
-        params = {"Path": path, "Recursive": recursive, "WithDecryption": True, "MaxResults": 10}
-
-        if next_token:
-            params["NextToken"] = next_token
-
-        # Get parameters
-        response = ssm_client.get_parameters_by_path(**params)
-
-        # Process parameters
-        for parameter in response.get("Parameters", []):
-            name = parameter["Name"]
-            value = parameter["Value"]
-            result[name] = value
-
-        # Check if there are more parameters
-        next_token = response.get("NextToken")
-        if not next_token:
-            break
-
-    return result

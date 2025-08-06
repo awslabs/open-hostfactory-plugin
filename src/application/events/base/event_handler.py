@@ -9,7 +9,6 @@ of concerns and DRY compliance.
 import asyncio
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, Dict, Optional
 
 # Import types - using string imports to avoid circular dependencies
@@ -99,23 +98,23 @@ class EventHandler(ABC):
         Args:
             event: The domain event to process
         """
-        pass
 
     async def _pre_process(self, event: DomainEvent) -> None:
         """
-        Common pre-processing logic.
+        Perform common pre-processing logic.
 
         Override in subclasses for specific pre-processing needs.
 
         Args:
-            event: The domain event being processed
+            event: The domain event to pre-process
         """
         if self.logger:
             self.logger.debug(f"Processing event: {event.event_type}")
 
+    @abstractmethod
     async def _post_process(self, event: DomainEvent) -> None:
         """
-        Common post-processing logic.
+        Perform common post-processing logic.
 
         Override in subclasses for specific post-processing needs.
         This is where cross-cutting concerns like metrics collection,
@@ -125,7 +124,6 @@ class EventHandler(ABC):
             event: The domain event that was processed
         """
         # Future: Add metrics collection, audit logging, etc.
-        pass
 
     async def _process_with_retry(self, event: DomainEvent) -> None:
         """

@@ -8,8 +8,6 @@ Tests the complete refactored architecture including:
 - Service orchestration
 """
 
-import asyncio
-from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -135,7 +133,8 @@ class TestRefactoredTemplateSystem:
         assert templates[0].template_id == "test-template-1"
 
         # Test cache hit
-        templates_cached = cache.get_or_load(lambda: [])  # Empty loader should not be called
+        # Empty loader should not be called
+        templates_cached = cache.get_or_load(lambda: [])
         assert len(templates_cached) == 1
         assert templates_cached[0].template_id == "test-template-1"
 

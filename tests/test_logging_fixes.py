@@ -9,12 +9,10 @@ This test suite ensures that all the logging issues we fixed remain fixed:
 5. No template preloading during bootstrap
 """
 
-import asyncio
 import logging
 import re
-from io import StringIO
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from typing import List
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -32,6 +30,7 @@ class LogCapture:
     """Helper class to capture and analyze log messages."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.log_records: List[logging.LogRecord] = []
         self.handler = None
 
@@ -230,7 +229,7 @@ class TestLoggingFixes:
         """Test that bootstrap doesn't preload templates unnecessarily."""
         with LogCapture() as log_capture:
             # Create application instance
-            app = Application()
+            _ = Application()
 
             # Verify that template preloading is controlled and not excessive
             # The _preload_templates method may exist but should not be called during init
@@ -391,7 +390,7 @@ class TestLoggingFixes:
                 }.get(cls.__name__ if hasattr(cls, "__name__") else str(cls), Mock())
 
                 # Create application
-                app = Application()
+                _ = Application()
 
                 # Initialize application
                 success = await app.initialize()

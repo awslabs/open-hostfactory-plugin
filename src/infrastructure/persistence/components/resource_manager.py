@@ -18,6 +18,7 @@ class StorageResourceManager(ABC):
     """
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
         self._initialized = False
 
@@ -29,7 +30,6 @@ class StorageResourceManager(ABC):
         Should set up connections, clients, or other resources needed
         for the specific storage technology.
         """
-        pass
 
     @abstractmethod
     def cleanup(self) -> None:
@@ -38,7 +38,6 @@ class StorageResourceManager(ABC):
 
         Should close connections, release file handles, etc.
         """
-        pass
 
     @abstractmethod
     def get_resource(self, resource_name: str) -> Any:
@@ -51,7 +50,6 @@ class StorageResourceManager(ABC):
         Returns:
             The requested resource (connection, client, etc.)
         """
-        pass
 
     @abstractmethod
     def is_healthy(self) -> bool:
@@ -61,7 +59,6 @@ class StorageResourceManager(ABC):
         Returns:
             True if all managed resources are healthy, False otherwise
         """
-        pass
 
     def get_status(self) -> Dict[str, Any]:
         """
@@ -99,7 +96,6 @@ class QueryManager(ABC):
         Returns:
             Query string in the appropriate format for the storage technology
         """
-        pass
 
     @abstractmethod
     def execute_query(self, query: str, parameters: Dict[str, Any] = None) -> Any:
@@ -113,7 +109,6 @@ class QueryManager(ABC):
         Returns:
             Query results in appropriate format
         """
-        pass
 
     @abstractmethod
     def validate_query(self, query: str) -> bool:
@@ -126,7 +121,6 @@ class QueryManager(ABC):
         Returns:
             True if query is valid, False otherwise
         """
-        pass
 
 
 class DataConverter(ABC):
@@ -148,7 +142,6 @@ class DataConverter(ABC):
         Returns:
             Data in storage-specific format
         """
-        pass
 
     @abstractmethod
     def from_storage_format(self, data: Any) -> Any:
@@ -161,7 +154,6 @@ class DataConverter(ABC):
         Returns:
             Data in domain/application format
         """
-        pass
 
 
 # Backward compatibility alias

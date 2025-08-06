@@ -165,6 +165,7 @@ class ResourceManagerDomainService(ABC):
     """
 
     def __init__(self, resource_manager: ResourceManagerPort):
+        """Initialize the instance."""
         self.resource_manager = resource_manager
 
     @abstractmethod
@@ -177,7 +178,6 @@ class ResourceManagerDomainService(ABC):
         This operation ensures that either all resources are provisioned
         successfully or none are (atomic operation).
         """
-        pass
 
     @abstractmethod
     async def migrate_resources(
@@ -189,4 +189,3 @@ class ResourceManagerDomainService(ABC):
         Complex operation that involves provisioning in target region,
         data migration, and cleanup of source resources.
         """
-        pass

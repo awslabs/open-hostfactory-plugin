@@ -11,15 +11,15 @@ class ErrorHandlingPort(ABC):
 
     @abstractmethod
     def handle_exceptions(self, func: Callable[..., T]) -> Callable[..., T]:
-        """Decorator for handling exceptions in application methods."""
+        """Handle exceptions in application methods."""
 
     @abstractmethod
     def log_errors(self, func: Callable[..., T]) -> Callable[..., T]:
-        """Decorator for logging errors."""
+        """Log errors."""
 
     @abstractmethod
     def retry_on_failure(self, max_retries: int = 3, delay: float = 1.0) -> Callable:
-        """Decorator for retrying operations on failure."""
+        """Retry operations on failure."""
 
     @abstractmethod
     def handle_domain_exceptions(self, exception: Exception) -> Optional[str]:

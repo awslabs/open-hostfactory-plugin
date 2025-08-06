@@ -260,7 +260,10 @@ class RequestReturnMachinesResponse(BaseDTO):
         Returns:
             Dictionary with requestId and message fields
         """
-        return {"requestId": self.request_id if self.request_id else "", "message": self.message}
+        return {
+            "requestId": self.request_id if self.request_id else "",
+            "message": self.message,
+        }
 
 
 class CleanupResourcesResponse(BaseDTO):

@@ -96,9 +96,8 @@ class FileManager:
 
         try:
             # Atomic move (rename) on most filesystems
-            if os.name == "nt":  # Windows
-                if self.file_path.exists():
-                    self.file_path.unlink()
+            if os.name == "nt" and self.file_path.exists():  # Windows
+                self.file_path.unlink()
             temp_path.replace(self.file_path)
 
         except Exception as e:

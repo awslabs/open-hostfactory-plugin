@@ -76,7 +76,8 @@ class IAMAuthStrategy(AuthPort):
             identity = await self._get_caller_identity()
             if not identity:
                 return AuthResult(
-                    status=AuthStatus.FAILED, error_message="Unable to verify AWS credentials"
+                    status=AuthStatus.FAILED,
+                    error_message="Unable to verify AWS credentials",
                 )
 
             # Check IAM permissions

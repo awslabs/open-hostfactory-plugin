@@ -238,7 +238,10 @@ def create_composite_strategy(
 
 
 def create_fallback_strategy(
-    primary: ProviderStrategy, fallbacks: list, config: FallbackConfig = None, logger=None
+    primary: ProviderStrategy,
+    fallbacks: list,
+    config: FallbackConfig = None,
+    logger=None,
 ) -> FallbackProviderStrategy:
     """
     Create a fallback provider strategy.
@@ -256,7 +259,10 @@ def create_fallback_strategy(
 
 
 def create_load_balancing_strategy(
-    strategies: list, weights: dict = None, config: LoadBalancingConfig = None, logger=None
+    strategies: list,
+    weights: dict = None,
+    config: LoadBalancingConfig = None,
+    logger=None,
 ) -> LoadBalancingProviderStrategy:
     """
     Create a load balancing provider strategy.

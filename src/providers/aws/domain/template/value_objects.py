@@ -18,7 +18,6 @@ from src.domain.base.value_objects import (
 )
 
 # Import domain protocols
-from src.domain.template.value_objects import FleetTypePort, ProviderHandlerTypePort
 
 
 class ResourceId(ResourceId):
@@ -29,6 +28,7 @@ class ResourceId(ResourceId):
     @field_validator("value")
     @classmethod
     def validate_format(cls, v: str) -> str:
+        """Validate AWS resource ID format."""
         # Get pattern from AWS configuration
         from src.providers.aws.configuration.config import get_aws_config_manager
         from src.providers.aws.configuration.validator import AWSNamingConfig
@@ -101,6 +101,7 @@ class AWSInstanceType(InstanceType):
     @field_validator("value")
     @classmethod
     def validate_instance_type(cls, v: str) -> str:
+        """Validate AWS instance type format."""
         # Get pattern from AWS configuration
         from src.providers.aws.configuration.config import get_aws_config_manager
         from src.providers.aws.configuration.validator import AWSNamingConfig
@@ -129,6 +130,7 @@ class AWSTags(Tags):
     @field_validator("tags")
     @classmethod
     def validate_aws_tags(cls, v: Dict[str, str]) -> Dict[str, str]:
+        """Validate AWS tags format and constraints."""
         # Get AWS tag validation rules from configuration
         from src.providers.aws.configuration.config import get_aws_config_manager
         from src.providers.aws.configuration.validator import AWSNamingConfig
@@ -171,6 +173,7 @@ class AWSARN(ARN):
     @field_validator("value")
     @classmethod
     def validate_arn(cls, v: str) -> str:
+        """Validate AWS ARN format."""
         # Get pattern from AWS configuration
         from src.providers.aws.configuration.config import get_aws_config_manager
         from src.providers.aws.configuration.validator import AWSNamingConfig
@@ -283,7 +286,11 @@ class AWSFleetType(str, Enum):
             pass
 
         # Fallback to hardcoded values for safety
-        fallback_values = {"instant": "instant", "request": "request", "maintain": "maintain"}
+        fallback_values = {
+            "instant": "instant",
+            "request": "request",
+            "maintain": "maintain",
+        }
 
         if value in fallback_values:
             new_member = object.__new__(cls)
@@ -303,10 +310,12 @@ class AWSAllocationStrategy:
     """AWS-specific allocation strategy wrapper with AWS API formatting."""
 
     def __init__(self, strategy: AllocationStrategy):
+        """Initialize the instance."""
         self._strategy = strategy
 
     @property
     def value(self) -> str:
+        """Get the strategy value."""
         return self._strategy.value
 
     @classmethod
@@ -352,7 +361,8 @@ class AWSConfiguration(ValueObject):
 
     handler_type: ProviderApi
     fleet_type: Optional[AWSFleetType] = None
-    allocation_strategy: Optional[AllocationStrategy] = None  # Use core enum, not wrapper
+    # Use core enum, not wrapper
+    allocation_strategy: Optional[AllocationStrategy] = None
     price_type: Optional[PriceType] = None
     subnet_ids: List[AWSSubnetId] = []
     security_group_ids: List[AWSSecurityGroupId] = []

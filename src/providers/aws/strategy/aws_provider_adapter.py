@@ -99,13 +99,12 @@ class AWSResourceValidator:
             return False
 
         # Validate version if provided
-        if template.version:
+        if template.version and template.version not in ["$Latest", "$Default"]:
             # AWS launch template versions can be numbers or $Latest or $Default
-            if template.version not in ["$Latest", "$Default"]:
-                try:
-                    int(template.version)
-                except ValueError:
-                    return False
+            try:
+                int(template.version)
+            except ValueError:
+                return False
 
         return True
 
@@ -115,6 +114,7 @@ class AWSProviderAdapter:
     """AWS provider adapter implementation."""
 
     def __init__(self, logger: LoggingPort):
+        """Initialize the instance."""
         self._state_mapper = AWSStateMapper()
         self._resource_validator = AWSResourceValidator()
         self._logger = logger

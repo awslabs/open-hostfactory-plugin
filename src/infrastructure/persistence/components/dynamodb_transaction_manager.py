@@ -38,7 +38,10 @@ class DynamoDBTransactionManager(TransactionManager):
         self.logger.debug("DynamoDB transaction begun")
 
     def add_put_item(
-        self, table_name: str, item: Dict[str, Any], condition_expression: Optional[str] = None
+        self,
+        table_name: str,
+        item: Dict[str, Any],
+        condition_expression: Optional[str] = None,
     ) -> None:
         """
         Add put item operation to transaction.
@@ -102,7 +105,10 @@ class DynamoDBTransactionManager(TransactionManager):
         self.logger.debug(f"Added update item to transaction for table {table_name}")
 
     def add_delete_item(
-        self, table_name: str, key: Dict[str, Any], condition_expression: Optional[str] = None
+        self,
+        table_name: str,
+        key: Dict[str, Any],
+        condition_expression: Optional[str] = None,
     ) -> None:
         """
         Add delete item operation to transaction.
@@ -142,10 +148,19 @@ class DynamoDBTransactionManager(TransactionManager):
 
             response = dynamodb_client.transact_write_items(TransactItems=self.transaction_items)
 
-            self.state = TransactionState.COMMITTED
-            self.logger.debug(
-                f"DynamoDB transaction committed with {len(self.transaction_items)} operations"
-            )
+            # Validate response and log transaction details
+            if response.get("ResponseMetadata", {}).get("HTTPStatusCode") == 200:
+                self.state = TransactionState.COMMITTED
+                self.logger.debug(
+                    f"DynamoDB transaction committed successfully with {len(self.transaction_items)} operations",
+                    extra={"request_id": response.get("ResponseMetadata", {}).get("RequestId")},
+                )
+            else:
+                self.state = TransactionState.FAILED
+                self.logger.error(
+                    f"DynamoDB transaction failed with status: {response.get('ResponseMetadata', {}).get('HTTPStatusCode')}",
+                    extra={"response": response},
+                )
 
         except ClientError as e:
             self.state = TransactionState.FAILED

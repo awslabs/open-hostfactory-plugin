@@ -9,7 +9,6 @@ management are working correctly.
 import json
 import os
 import sys
-from typing import Any, Dict
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))

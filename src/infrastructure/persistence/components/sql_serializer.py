@@ -122,7 +122,7 @@ class SQLSerializer(DataConverter):
             for key, value in row.items():
                 deserialized[key] = self._deserialize_value(value)
 
-            self.logger.debug(f"Deserialized row data")
+            self.logger.debug("Deserialized row data")
             return deserialized
 
         except Exception as e:

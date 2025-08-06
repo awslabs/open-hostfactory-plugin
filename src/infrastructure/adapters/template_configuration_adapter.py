@@ -89,7 +89,12 @@ class TemplateConfigurationAdapter(TemplateConfigurationPort):
         provider_api = config.get("provider_api", "")
 
         # Map provider APIs to provider types
-        if provider_api in ["EC2Fleet", "SpotFleet", "RunInstances", "AutoScalingGroup"]:
+        if provider_api in [
+            "EC2Fleet",
+            "SpotFleet",
+            "RunInstances",
+            "AutoScalingGroup",
+        ]:
             return "aws"
 
         # Check for AWS-specific fields
@@ -150,7 +155,7 @@ def create_template_configuration_adapter(
     template_manager: TemplateConfigurationManager, logger: Optional[LoggingPort] = None
 ) -> TemplateConfigurationAdapter:
     """
-    Factory function to create TemplateConfigurationAdapter.
+    Create TemplateConfigurationAdapter.
 
     Args:
         template_manager: Template configuration manager

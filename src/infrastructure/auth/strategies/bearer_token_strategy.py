@@ -1,7 +1,7 @@
 """Bearer token authentication strategy."""
 
 import time
-from typing import Any, Dict, List, Optional
+from typing import List
 
 import jwt
 
@@ -49,7 +49,8 @@ class BearerTokenStrategy(AuthPort):
 
         if not auth_header.startswith("Bearer "):
             return AuthResult(
-                status=AuthStatus.FAILED, error_message="Missing or invalid Authorization header"
+                status=AuthStatus.FAILED,
+                error_message="Missing or invalid Authorization header",
             )
 
         token = auth_header[7:]  # Remove "Bearer " prefix
@@ -147,7 +148,8 @@ class BearerTokenStrategy(AuthPort):
 
         except jwt.InvalidTokenError as e:
             return AuthResult(
-                status=AuthStatus.INVALID, error_message=f"Invalid refresh token: {str(e)}"
+                status=AuthStatus.INVALID,
+                error_message=f"Invalid refresh token: {str(e)}",
             )
         except Exception as e:
             self.logger.error(f"Token refresh error: {e}")
@@ -166,7 +168,7 @@ class BearerTokenStrategy(AuthPort):
         Returns:
             True if token was revoked
         """
-        self.logger.info(f"Token revocation requested (not implemented)")
+        self.logger.info("Token revocation requested (not implemented)")
         return True
 
     def get_strategy_name(self) -> str:

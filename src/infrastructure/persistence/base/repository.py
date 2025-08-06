@@ -13,6 +13,9 @@ from src.infrastructure.logging.logger import get_logger
 # Lazy import to avoid circular dependency
 # from src.infrastructure.utilities.common.serialization import process_value_objects
 
+# Lazy import to avoid circular dependency
+# from src.infrastructure.utilities.common.serialization import process_value_objects
+
 T = TypeVar("T")  # Entity type
 
 
@@ -63,7 +66,8 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             Dictionary representation of entity
         """
         if hasattr(entity, "model_dump"):
-            # Use Pydantic's serialization but process the result to handle value objects
+            # Use Pydantic's serialization but process the result to handle value
+            # objects
             data = entity.model_dump()
             # Lazy import to avoid circular dependency
             from src.infrastructure.utilities.common.serialization import (
@@ -162,7 +166,8 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
             self._version_map[entity_id] = entity_version + 1
 
             self.logger.debug(
-                f"Saved {self.entity_class.__name__} {entity_id}", extra={"entity_id": entity_id}
+                f"Saved {self.entity_class.__name__} {entity_id}",
+                extra={"entity_id": entity_id},
             )
 
             # Publish events after successful save
@@ -187,16 +192,17 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                             else:
                                 # If we're in sync context, run the coroutine
                                 loop.run_until_complete(event_bus.publish(event))
-                        except Exception as e:
+                        except Exception:
                             # Fallback to sync publish if available
                             if hasattr(event_bus, "publish"):
                                 try:
                                     event_bus.publish(event)
                                 except Exception as sync_error:
-                                    logger.error(
-                                        f"Failed to publish event {event.__class__.__name__} via sync fallback: {sync_error}"
+                                    self.logger.error(
+                                        f"Failed to publish event { event.__class__.__name__} via sync fallback: {sync_error}"
                                     )
-                                    # Event publishing failed completely - this is serious for domain consistency
+                                    # Event publishing failed completely - this is
+                                    # serious for domain consistency
                 else:
                     # Legacy publisher (sync)
                     for event in events:
@@ -207,13 +213,13 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                     entity.clear_domain_events()
                     # Update cache with the entity that has events cleared
                     self._cache[entity_id] = entity
-                elif hasattr(entity, "clear_events") and callable(getattr(entity, "clear_events")):
+                elif hasattr(entity, "clear_events") and callable(entity.clear_events):
                     # Backward compatibility
                     updated_entity = entity.clear_events()
                     self._cache[entity_id] = updated_entity
 
                 self.logger.debug(
-                    f"Published {len(events)} events for {self.entity_class.__name__} {entity_id}",
+                    f"Published { len(events)} events for { self.entity_class.__name__} {entity_id}",
                     extra={"entity_id": entity_id},
                 )
         except PydanticValidationError as e:
@@ -451,7 +457,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 self.storage_strategy.save_batch(entity_batch)
 
                 self.logger.debug(
-                    f"Saved batch of {len(entity_batch)} {self.entity_class.__name__} entities"
+                    f"Saved batch of { len(entity_batch)} { self.entity_class.__name__} entities"
                 )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
@@ -486,7 +492,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 del self._version_map[entity_id_str]
 
         self.logger.debug(
-            f"Deleted batch of {len(entity_id_strs)} {self.entity_class.__name__} entities"
+            f"Deleted batch of { len(entity_id_strs)} { self.entity_class.__name__} entities"
         )
 
     def clear_cache(self) -> None:

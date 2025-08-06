@@ -22,6 +22,7 @@ PyYAML>=6.0.0,<7.0.0  # Fix compatibility issues with PyYAML 5.4.1
 # Linting and Type Checking
 black>=23.3.0,<25.0.0
 isort>=5.12.0,<6.0.0
+autopep8>=2.3.0,<3.0.0
 mypy>=1.3.0,<2.0.0
 pylint>=2.17.3,<4.0.0
 flake8>=6.1.0,<8.0.0

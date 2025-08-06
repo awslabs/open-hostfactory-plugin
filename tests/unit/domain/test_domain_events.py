@@ -1,24 +1,24 @@
 """Comprehensive tests for domain events system."""
 
-import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
+from datetime import datetime
 
 import pytest
 
 # Import domain events and aggregates
 try:
+    from src.domain.base.events import (
+        RequestCompletedEvent,
+        RequestCreatedEvent,
+        RequestStatusChangedEvent,
+    )
     from src.domain.base.events.base_events import BaseEvent
     from src.domain.base.events.domain_events import DomainEvent
-    from src.domain.machine.aggregate import Machine
     from src.domain.request.aggregate import Request
     from src.domain.request.value_objects import RequestStatus, RequestType
 
     # from src.domain.request.events import (  # TODO: Verify if this exists
     #     RequestCreatedEvent, RequestStatusChangedEvent, RequestCompletedEvent
     # )
-    from src.domain.template.aggregate import Template
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

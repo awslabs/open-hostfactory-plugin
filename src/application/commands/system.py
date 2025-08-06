@@ -1,6 +1,6 @@
 """System-level commands for administrative operations."""
 
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from src.application.dto.base import BaseCommand
 

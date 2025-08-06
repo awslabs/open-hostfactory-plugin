@@ -60,7 +60,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         if self.logger:
             self.logger.info(
-                f"Starting resource provisioning: {specification.name} ({specification.resource_type.value})"
+                f"Starting resource provisioning: { specification.name} ({ specification.resource_type.value})"
             )
 
         try:
@@ -79,7 +79,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.info(
-                    f"Resource provisioned successfully: {allocation.resource_id} in {duration:.3f}s"
+                    f"Resource provisioned successfully: { allocation.resource_id} in { duration:.3f}s"
                 )
 
             self._record_metric(operation_id, duration, "success")
@@ -89,7 +89,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.error(
-                    f"Resource provisioning failed: {specification.name} in {duration:.3f}s - {str(e)}"
+                    f"Resource provisioning failed: { specification.name} in {duration:.3f}s - { str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))
@@ -121,7 +121,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.info(
-                    f"Resource deprovisioned successfully: {allocation.resource_id} in {duration:.3f}s"
+                    f"Resource deprovisioned successfully: { allocation.resource_id} in { duration:.3f}s"
                 )
 
             self._record_metric(operation_id, duration, "success")
@@ -130,7 +130,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.error(
-                    f"Resource deprovisioning failed: {allocation.resource_id} in {duration:.3f}s - {str(e)}"
+                    f"Resource deprovisioning failed: { allocation.resource_id} in {duration:.3f}s - { str(e)}"
                 )
 
             self._record_metric(operation_id, duration, "error", str(e))
@@ -267,7 +267,6 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         Must be implemented by concrete resource managers.
         """
-        pass
 
     @abstractmethod
     async def execute_deprovisioning(self, allocation: ResourceAllocation) -> None:
@@ -276,7 +275,6 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         Must be implemented by concrete resource managers.
         """
-        pass
 
     @abstractmethod
     async def fetch_resource_status(self, resource_id: ResourceId) -> ResourceAllocation:
@@ -285,7 +283,6 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         Must be implemented by concrete resource managers.
         """
-        pass
 
     @abstractmethod
     async def fetch_resource_list(
@@ -296,7 +293,6 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         Must be implemented by concrete resource managers.
         """
-        pass
 
     @abstractmethod
     async def fetch_resource_quota(
@@ -307,7 +303,6 @@ class BaseResourceManager(ResourceManagerPort, ABC):
 
         Must be implemented by concrete resource managers.
         """
-        pass
 
     # Private helper methods
 

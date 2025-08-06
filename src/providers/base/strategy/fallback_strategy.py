@@ -14,6 +14,7 @@ from enum import Enum
 from threading import Lock
 from typing import Any, Dict, List, Optional
 
+from src.infrastructure.interfaces.provider import BaseProviderConfig
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
     ProviderHealthStatus,
@@ -146,9 +147,8 @@ class FallbackProviderStrategy(ProviderStrategy):
             raise ValueError("At least one fallback strategy is required")
 
         # Create a dummy config for the parent class
-        from src.infrastructure.interfaces.provider import BaseProviderConfig
 
-        dummy_config = ProviderConfig(provider_type="fallback")
+        dummy_config = BaseProviderConfig(provider_type="fallback")
         super().__init__(dummy_config)
 
         self._primary_strategy = primary_strategy
@@ -495,12 +495,19 @@ class FallbackProviderStrategy(ProviderStrategy):
         # Provide minimal functionality based on operation type
         if operation.operation_type == ProviderOperationType.HEALTH_CHECK:
             return ProviderResult.success_result(
-                {"is_healthy": False, "status": "degraded", "message": "All providers failed"},
+                {
+                    "is_healthy": False,
+                    "status": "degraded",
+                    "message": "All providers failed",
+                },
                 {"degraded": True, "last_error": last_error},
             )
         elif operation.operation_type == ProviderOperationType.GET_AVAILABLE_TEMPLATES:
             return ProviderResult.success_result(
-                {"templates": [], "message": "No templates available - all providers failed"},
+                {
+                    "templates": [],
+                    "message": "No templates available - all providers failed",
+                },
                 {"degraded": True, "last_error": last_error},
             )
         else:
@@ -671,11 +678,11 @@ class FallbackProviderStrategy(ProviderStrategy):
             self._self._logger.warning(f"Error during fallback strategy cleanup: {e}")
 
     def __str__(self) -> str:
-        """String representation for debugging."""
+        """Return string representation for debugging."""
         return f"FallbackProviderStrategy(primary={self._primary_strategy.provider_type}, fallbacks={len(self._fallback_strategies)}, mode={self._config.mode.value})"
 
     def __repr__(self) -> str:
-        """Detailed representation for debugging."""
+        """Return detailed representation for debugging."""
         fallback_types = [s.provider_type for s in self._fallback_strategies]
         return (
             f"FallbackProviderStrategy("

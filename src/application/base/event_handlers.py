@@ -6,10 +6,8 @@ as BaseCommandHandler and BaseQueryHandler, ensuring consistency across all hand
 types in the CQRS system.
 """
 
-import asyncio
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime
 from typing import Any, Dict, Generic, Optional, TypeVar
 
 from src.application.interfaces.event_handler import EventHandler
@@ -144,7 +142,6 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
         Raises:
             Any exception that occurs during event processing
         """
-        pass
 
     async def publish_cascading_events(self, events: list[DomainEvent]) -> None:
         """
@@ -159,7 +156,7 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
                     await self.event_publisher.publish(cascading_event)
                     if self.logger:
                         self.logger.debug(
-                            f"Published cascading event: {cascading_event.__class__.__name__}"
+                            f"Published cascading event: { cascading_event.__class__.__name__}"
                         )
                 except Exception as e:
                     if self.logger:
@@ -257,7 +254,6 @@ class BaseLoggingEventHandler(BaseEventHandler[TEvent]):
         Returns:
             Formatted log message
         """
-        pass
 
     def get_log_level(self, event: TEvent) -> str:
         """

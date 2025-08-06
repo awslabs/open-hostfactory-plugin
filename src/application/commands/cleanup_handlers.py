@@ -30,6 +30,7 @@ class CleanupOldRequestsHandler(BaseCommandHandler[CleanupOldRequestsCommand, Di
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._request_repository = request_repository
         self._uow_factory = uow_factory
@@ -81,7 +82,7 @@ class CleanupOldRequestsHandler(BaseCommandHandler[CleanupOldRequestsCommand, Di
                     resource_id="multiple",
                     provider="system",
                     resource_count=cleaned_count,
-                    cleanup_reason=f"Cleanup requests older than {command.older_than_days} days",
+                    cleanup_reason=f"Cleanup requests older than { command.older_than_days} days",
                 )
                 self.event_publisher.publish(cleanup_event)
 
@@ -135,7 +136,7 @@ class CleanupAllResourcesHandler(BaseCommandHandler[CleanupAllResourcesCommand, 
 
                 old_machines = uow.machines.find_old_machines(
                     cutoff_date=cutoff_date,
-                    statuses=["terminated", "failed"] if not command.include_pending else None,
+                    statuses=(["terminated", "failed"] if not command.include_pending else None),
                 )
 
                 if command.dry_run:
@@ -181,7 +182,7 @@ class CleanupAllResourcesHandler(BaseCommandHandler[CleanupAllResourcesCommand, 
                     resource_id="all",
                     provider="system",
                     resource_count=requests_cleaned + machines_cleaned,
-                    cleanup_reason=f"Cleanup all resources older than {command.older_than_days} days",
+                    cleanup_reason=f"Cleanup all resources older than { command.older_than_days} days",
                 )
                 self.event_publisher.publish(cleanup_event)
 

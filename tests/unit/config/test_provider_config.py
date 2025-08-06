@@ -1,7 +1,5 @@
 """Unit tests for provider configuration."""
 
-from typing import Any, Dict
-
 import pytest
 
 from src.config.schemas.provider_strategy_schema import (

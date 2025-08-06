@@ -17,6 +17,7 @@ class MockProvider(ProviderPort):
     """Mock provider for testing generic functionality."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._provider_type = "mock"
         self._initialized = False
         self._responses = {}
@@ -45,7 +46,7 @@ class MockProvider(ProviderPort):
 
         # Default behavior: create mock instances
         instance_ids = []
-        for i in range(count):
+        for _i in range(count):
             self._instance_counter += 1
             instance_id = InstanceId(value=f"mock-{self._instance_counter:04d}")
             instance_ids.append(instance_id)

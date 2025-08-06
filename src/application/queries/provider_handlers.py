@@ -12,7 +12,6 @@ from src.application.decorators import query_handler
 from src.application.dto.system import (
     ProviderCapabilitiesDTO,
     ProviderHealthDTO,
-    ProviderMetricsDTO,
     ProviderStrategyConfigDTO,
 )
 from src.application.provider.queries import (

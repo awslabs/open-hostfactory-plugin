@@ -1,6 +1,6 @@
 """Dependency injection exceptions."""
 
-from typing import Any, Optional, Type
+from typing import Optional, Type
 
 
 class DIError(Exception):

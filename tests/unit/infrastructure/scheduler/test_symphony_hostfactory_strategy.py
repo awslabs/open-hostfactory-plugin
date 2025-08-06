@@ -1,9 +1,6 @@
 """Tests for Symphony HostFactory scheduler strategy."""
 
-from datetime import datetime
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import Mock
 
 from src.domain.template.aggregate import Template
 from src.infrastructure.scheduler.hostfactory.strategy import (

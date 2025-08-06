@@ -4,12 +4,6 @@ from typing import Any, Dict, List
 
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
-from src.infrastructure.interfaces.instance_manager import (
-    Instance,
-    InstanceSpec,
-    InstanceState,
-    InstanceStatusResponse,
-)
 from src.providers.aws.configuration.config import AWSProviderConfig
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.dry_run_adapter import aws_dry_run_context
@@ -31,7 +25,8 @@ class AWSInstanceManager:
             try:
                 ec2_client = self._aws_client.ec2_client
 
-                # Use only internal domain field names (scheduler strategy handles translation)
+                # Use only internal domain field names (scheduler strategy handles
+                # translation)
                 instance_type = template_config.get("instance_type", "t2.micro")
                 image_id = template_config.get("image_id", "ami-0b3e7dd7b2a99b08d")
 

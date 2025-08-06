@@ -1,7 +1,6 @@
 """Tests for ProviderSelectionService."""
 
-from typing import List
-from unittest.mock import MagicMock, Mock
+from unittest.mock import Mock
 
 import pytest
 

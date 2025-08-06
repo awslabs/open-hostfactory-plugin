@@ -4,7 +4,7 @@ import os
 from typing import TYPE_CHECKING, Any, Dict, List
 
 if TYPE_CHECKING:
-    import argparse
+    pass
 
 from src.config.manager import ConfigurationManager
 from src.domain.base.ports.logging_port import LoggingPort
@@ -13,7 +13,6 @@ from src.domain.machine.aggregate import Machine
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
 from src.infrastructure.utilities.common.serialization import (
-    process_value_objects,
     serialize_enum,
 )
 
@@ -30,6 +29,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         logger: LoggingPort,
         template_defaults_service=None,
     ):
+        """Initialize the instance."""
         self.config_manager = config_manager
         self._logger = logger
         self.template_defaults_service = template_defaults_service
@@ -74,7 +74,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 except Exception as e:
                     # Skip invalid templates but log the issue
                     self._logger.warning(
-                        f"Skipping invalid template {template.get('id', 'unknown')}: {e}"
+                        f"Skipping invalid template { template.get( 'id', 'unknown')}: {e}"
                     )
                     continue
 
@@ -159,7 +159,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         mapped["version"] = template.get("version")
 
         self._logger.debug(
-            f"Mapped template fields: {len(field_mappings)} HostFactory mappings applied for {provider_type} provider"
+            f"Mapped template fields: { len(field_mappings)} HostFactory mappings applied for {provider_type} provider"
         )
 
         return mapped
@@ -231,7 +231,10 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                     hf_template = self._convert_template_to_hostfactory(template)
                     templates.append(hf_template)
 
-                return {"templates": templates, "message": "Get available templates success."}
+                return {
+                    "templates": templates,
+                    "message": "Get available templates success.",
+                }
             else:
                 return {"templates": [], "message": "No templates found."}
 

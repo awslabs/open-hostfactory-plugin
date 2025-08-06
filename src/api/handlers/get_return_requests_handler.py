@@ -1,7 +1,6 @@
 """API handler for getting return requests."""
 
 import time
-import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -122,14 +121,15 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
             if cached_result:
                 if self.logger:
                     self.logger.debug(
-                        "Returning cached result", extra={"correlation_id": correlation_id}
+                        "Returning cached result",
+                        extra={"correlation_id": correlation_id},
                     )
                 return ReturnRequestResponse.from_dict(cached_result)
 
             # Get return requests using CQRS query
             query = ListRequestsQuery(
-                status="return_requested", limit=100  # Filter for return requests
-            )
+                status="return_requested", limit=100
+            )  # Filter for return requests
             return_requests = await self._query_bus.execute(query)
 
             # Apply filters if provided
@@ -144,7 +144,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
                         req.machines[0].name if hasattr(req, "machines") and req.machines else None
                     ),
                     "gracePeriod": await self._calculate_grace_period(req),
-                    "status": req.status.value if hasattr(req.status, "value") else req.status,
+                    "status": (req.status.value if hasattr(req.status, "value") else req.status),
                     "requestId": str(req.request_id),
                     "createdAt": (
                         req.created_at.isoformat()
@@ -161,7 +161,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
                                 if hasattr(req, "machines")
                                 else []
                             ),
-                            "metadata": req.metadata if hasattr(req, "metadata") else {},
+                            "metadata": (req.metadata if hasattr(req, "metadata") else {}),
                             "events": (
                                 [e.to_dict() if hasattr(e, "to_dict") else e for e in req.events]
                                 if hasattr(req, "events")
@@ -191,7 +191,10 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
                 self._metrics.record_success(
                     "get_return_requests",
                     start_time,
-                    {"request_count": len(formatted_requests), "correlation_id": correlation_id},
+                    {
+                        "request_count": len(formatted_requests),
+                        "correlation_id": correlation_id,
+                    },
                 )
 
             return response

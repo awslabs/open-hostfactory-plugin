@@ -1,7 +1,6 @@
 """Base handler implementation."""
 
 import time
-from abc import ABC
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, TypeVar
 
@@ -11,7 +10,7 @@ T = TypeVar("T")
 R = TypeVar("R")
 
 
-class BaseHandler(ABC):
+class BaseHandler:
     """
     Base class for all handlers.
 
@@ -64,7 +63,7 @@ class BaseHandler(ABC):
 
     def with_logging(self, func: Callable[..., T]) -> Callable[..., T]:
         """
-        Decorator for adding logging to methods.
+        Add logging to methods.
 
         Args:
             func: Function to decorate
@@ -89,7 +88,7 @@ class BaseHandler(ABC):
 
     def with_metrics(self, func: Callable[..., T], name: Optional[str] = None) -> Callable[..., T]:
         """
-        Decorator for adding metrics to methods.
+        Add metrics to methods.
 
         Args:
             func: Function to decorate
@@ -122,7 +121,7 @@ class BaseHandler(ABC):
         error_map: Optional[Dict[type, Callable[[Exception], Any]]] = None,
     ) -> Callable[..., T]:
         """
-        Decorator for standardized error handling.
+        Provide standardized error handling.
 
         Args:
             func: Function to decorate

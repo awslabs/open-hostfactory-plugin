@@ -16,6 +16,7 @@ class MockConfigurationPort(ConfigurationPort):
     """Mock implementation of ConfigurationPort for testing."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._config = {
             "provider": {"type": "aws", "aws": {"region": "us-east-1", "profile": "default"}},
             "naming": {"prefix": "test"},
@@ -45,7 +46,7 @@ class MockConfigurationPort(ConfigurationPort):
         """Set configuration value."""
         parts = key.split(".")
         current = self._config
-        for i, part in enumerate(parts[:-1]):
+        for _i, part in enumerate(parts[:-1]):
             if part not in current:
                 current[part] = {}
             current = current[part]

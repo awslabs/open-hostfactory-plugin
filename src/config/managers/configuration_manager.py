@@ -8,7 +8,7 @@ import time
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type, TypeVar
 
 # Import config classes for runtime use
-from src.config import AppConfig
+from src.config.schemas import AppConfig
 from src.domain.base.exceptions import ConfigurationError
 
 from .cache_manager import ConfigCacheManager
@@ -273,7 +273,6 @@ class ConfigurationManager:
             Resolved file path
         """
         import os
-        from pathlib import Path
 
         # 1. If explicit path provided and contains directory, use it directly
         if explicit_path and os.path.dirname(explicit_path):

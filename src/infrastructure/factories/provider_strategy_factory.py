@@ -4,16 +4,13 @@ This factory creates provider strategies and contexts based on unified configura
 integrating the existing provider strategy ecosystem with the CQRS architecture.
 """
 
-import time
-from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from src.config.schemas.provider_strategy_schema import (
     ProviderConfig,
     ProviderInstanceConfig,
     ProviderMode,
 )
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.exceptions import ConfigurationError
 from src.domain.base.ports import ConfigurationPort, LoggingPort
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
@@ -31,8 +28,6 @@ from src.providers.base.strategy import (
 
 class ProviderCreationError(Exception):
     """Exception raised when provider creation fails."""
-
-    pass
 
 
 class ProviderStrategyFactory:
@@ -112,7 +107,7 @@ class ProviderStrategyFactory:
         self._configure_context_settings(context, config)
 
         self._logger.info(
-            f"Single provider context created successfully with provider: {provider_config.name}"
+            f"Single provider context created successfully with provider: { provider_config.name}"
         )
         return context
 
@@ -130,7 +125,8 @@ class ProviderStrategyFactory:
 
         if len(active_providers) < 2:
             raise ConfigurationError(
-                "Provider", "At least 2 active providers required for multi-provider mode"
+                "Provider",
+                "At least 2 active providers required for multi-provider mode",
             )
 
         self._logger.info(f"Creating multi-provider context with {len(active_providers)} providers")
@@ -146,7 +142,7 @@ class ProviderStrategyFactory:
                 self._logger.debug(f"Registered provider strategy: {provider_config.name}")
             except Exception as e:
                 self._logger.error(
-                    f"Failed to create provider strategy {provider_config.name}: {str(e)}"
+                    f"Failed to create provider strategy { provider_config.name}: { str(e)}"
                 )
                 # Continue with other providers, but log the error
                 continue
@@ -211,7 +207,7 @@ class ProviderStrategyFactory:
             self._provider_cache[cache_key] = strategy
 
             self._logger.debug(
-                f"Created provider strategy: {provider_config.name} ({provider_config.type})"
+                f"Created provider strategy: { provider_config.name} ({ provider_config.type})"
             )
             return strategy
 
@@ -346,7 +342,9 @@ class ProviderStrategyFactory:
                     validation_result["warnings"].append(
                         "Multiple active providers in single provider mode"
                     )
-            elif mode == ProviderMode.MULTI:
+            elif (
+                mode == ProviderMode.MULTI
+            ):  # noqa: SIM102 (false positive - proper if-elif structure)
                 if len(active_providers) < 2:
                     validation_result["errors"].append(
                         "Multi-provider mode requires at least 2 active providers"

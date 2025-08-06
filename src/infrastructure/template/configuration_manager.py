@@ -11,7 +11,7 @@ Architecture Principles:
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.config.manager import ConfigurationManager
 from src.domain.base.dependency_injection import injectable
@@ -28,23 +28,25 @@ from .dtos import TemplateDTO
 from .services.template_persistence_service import TemplatePersistenceService
 from .template_cache_service import TemplateCacheService, create_template_cache_service
 
+if TYPE_CHECKING:
+    from src.application.services.provider_capability_service import (
+        ProviderCapabilityService,
+    )
+    from src.application.services.template_defaults_service import (
+        TemplateDefaultsService,
+    )
+
 
 class TemplateConfigurationError(DomainException):
     """Base exception for template configuration errors."""
-
-    pass
 
 
 class TemplateNotFoundError(EntityNotFoundError):
     """Exception raised when a template is not found."""
 
-    pass
-
 
 class TemplateValidationError(ValidationError):
     """Exception raised when template validation fails."""
-
-    pass
 
 
 @injectable
@@ -192,7 +194,8 @@ class TemplateConfigurationManager:
             template_id=template_id,
             name=template_with_defaults.get("name", template_id),
             provider_api=template_with_defaults.get("provider_api", "EC2Fleet"),
-            configuration=template_with_defaults,  # Full configuration with defaults and AMI resolution
+            configuration=template_with_defaults,
+            # Full configuration with defaults and AMI resolution
             created_at=template_with_defaults.get("created_at"),
             updated_at=template_with_defaults.get("updated_at"),
             version=template_with_defaults.get("version"),
@@ -337,7 +340,7 @@ class TemplateConfigurationManager:
                 resolved_templates.append(resolved_template)
 
             self.logger.info(
-                f"Batch resolved {len(resolved_amis)} unique SSM parameters for {len(template_dicts)} templates"
+                f"Batch resolved { len(resolved_amis)} unique SSM parameters for { len(template_dicts)} templates"
             )
             return resolved_templates
 
@@ -407,7 +410,7 @@ class TemplateConfigurationManager:
         return await self.load_templates()
 
     def get_all_templates_sync(self) -> List[TemplateDTO]:
-        """Synchronous version of get_all_templates for adapter compatibility."""
+        """Get all templates synchronously for adapter compatibility."""
         import asyncio
 
         try:
@@ -462,7 +465,7 @@ class TemplateConfigurationManager:
             raise
 
     def get_template(self, template_id: str) -> Optional[TemplateDTO]:
-        """Synchronous version of get_template_by_id for compatibility."""
+        """Get template by ID synchronously for compatibility."""
         import asyncio
 
         try:
@@ -585,12 +588,12 @@ class TemplateConfigurationManager:
             result["supported_features"].extend(capability_result.supported_features)
 
             self.logger.debug(
-                f"Provider capability validation completed for template {template.template_id}"
+                f"Provider capability validation completed for template { template.template_id}"
             )
 
         except Exception as e:
             self.logger.warning(
-                f"Provider capability validation failed for template {template.template_id}: {e}"
+                f"Provider capability validation failed for template { template.template_id}: {e}"
             )
             result["warnings"].append(f"Could not validate provider capabilities: {str(e)}")
 
@@ -602,14 +605,18 @@ class TemplateConfigurationManager:
 
 # Factory function for dependency injection
 def create_template_configuration_manager(
-    config_manager: ConfigurationManager, scheduler_strategy: SchedulerPort, logger: LoggingPort
+    config_manager: ConfigurationManager,
+    scheduler_strategy: SchedulerPort,
+    logger: LoggingPort,
 ) -> TemplateConfigurationManager:
     """
-    Factory function to create TemplateConfigurationManager.
+    Create TemplateConfigurationManager.
 
     This function provides a clean way to create the manager with
     proper dependency injection.
     """
     return TemplateConfigurationManager(
-        config_manager=config_manager, scheduler_strategy=scheduler_strategy, logger=logger
+        config_manager=config_manager,
+        scheduler_strategy=scheduler_strategy,
+        logger=logger,
     )

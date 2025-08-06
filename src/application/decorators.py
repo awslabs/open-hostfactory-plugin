@@ -54,7 +54,7 @@ creates duplicate registrations and architectural confusion.
 
 from __future__ import annotations
 
-from typing import Dict, Set, Type, TypeVar
+from typing import Dict, Type, TypeVar
 
 from src.application.interfaces.command_query import (
     Command,

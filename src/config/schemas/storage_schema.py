@@ -101,7 +101,8 @@ class BackoffConfig(BaseModel):
     """Backoff strategy configuration."""
 
     strategy_type: str = Field(
-        "exponential", description="Backoff strategy type (constant, exponential, linear)"
+        "exponential",
+        description="Backoff strategy type (constant, exponential, linear)",
     )
     max_retries: int = Field(3, description="Maximum number of retries")
     base_delay: float = Field(1.0, description="Base delay in seconds")

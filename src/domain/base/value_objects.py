@@ -45,7 +45,7 @@ class ResourceId(ValueObject):
         return v.strip()
 
     def __str__(self) -> str:
-        """String representation of resource ID.
+        """Return string representation of resource ID.
 
         Returns:
             Resource ID value as string
@@ -111,6 +111,7 @@ class IPAddress(ValueObject):
     @field_validator("value")
     @classmethod
     def validate_ip(cls, v: str) -> str:
+        """Validate IP address format."""
         try:
             ipaddress.ip_address(v)
             return v
@@ -132,6 +133,7 @@ class InstanceType(ValueObject):
     @field_validator("value")
     @classmethod
     def validate_instance_type(cls, v: str) -> str:
+        """Validate instance type format."""
         if not v or not isinstance(v, str):
             raise ValueError("Instance type must be a non-empty string")
         stripped = v.strip()
@@ -193,6 +195,7 @@ class ARN(ValueObject):
     @field_validator("value")
     @classmethod
     def validate_arn_format(cls, v: str) -> str:
+        """Validate ARN format."""
         # Basic resource identifier format validation
         # Provider-specific validation should be done in provider layers
         if not v or len(v.strip()) == 0:

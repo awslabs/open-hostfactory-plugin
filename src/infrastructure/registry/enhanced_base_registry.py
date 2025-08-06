@@ -3,7 +3,7 @@
 import threading
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 
 class RegistryMode(Enum):
@@ -68,7 +68,8 @@ class EnhancedBaseRegistry(ABC):
             return
 
         self.mode = mode
-        self._type_registrations: Dict[str, BaseRegistration] = {}  # Type-based registrations
+        # Type-based registrations
+        self._type_registrations: Dict[str, BaseRegistration] = {}
         self._instance_registrations: Dict[str, BaseRegistration] = (
             {}
         )  # Instance-based registrations (multi-choice only)
@@ -81,15 +82,17 @@ class EnhancedBaseRegistry(ABC):
 
     @abstractmethod
     def register(
-        self, type_name: str, strategy_factory: Callable, config_factory: Callable, **kwargs
+        self,
+        type_name: str,
+        strategy_factory: Callable,
+        config_factory: Callable,
+        **kwargs,
     ):
         """Register a strategy factory."""
-        pass
 
     @abstractmethod
     def create_strategy(self, type_name: str, config: Any) -> Any:
         """Create a strategy instance."""
-        pass
 
     def register_type(
         self,

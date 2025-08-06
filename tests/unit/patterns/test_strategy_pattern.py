@@ -8,8 +8,7 @@ This module validates the Strategy pattern implementation including:
 - Load balancing strategies
 """
 
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -65,7 +64,7 @@ class TestStrategyPattern:
             try:
                 strategy = strategy_class()
                 assert hasattr(strategy, "execute")
-                assert callable(getattr(strategy, "execute"))
+                assert callable(strategy.execute)
             except TypeError:
                 # Strategy may require constructor parameters - this is acceptable
                 pass
@@ -262,7 +261,7 @@ class TestStrategyPattern:
 
         for config in configs:
             try:
-                strategy = factory.create_strategy(config)
+                factory.create_strategy(config)
                 # Some invalid configs might still create strategies
                 # Validation might happen at execution time
             except Exception:
@@ -278,7 +277,7 @@ class TestStrategyPattern:
             mock_instance = Mock()
             MockComposite.return_value = mock_instance
 
-            strategy = MockComposite()
+            MockComposite()
 
             # Mock a failing operation
             operation = ProviderOperation(operation_type="invalid_operation", parameters={})

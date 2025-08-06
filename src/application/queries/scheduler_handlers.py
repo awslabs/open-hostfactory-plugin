@@ -1,6 +1,6 @@
 """Scheduler query handlers for administrative operations."""
 
-from typing import Any, Dict, List
+from typing import List
 
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
@@ -56,7 +56,7 @@ class ListSchedulerStrategiesHandler(
         for scheduler_type in scheduler_types:
             strategy_info = SchedulerStrategyDTO(
                 name=scheduler_type,
-                active=scheduler_type == current_strategy if query.include_current else False,
+                active=(scheduler_type == current_strategy if query.include_current else False),
                 registered=True,
                 description=(
                     self._get_scheduler_description(scheduler_type)
@@ -72,7 +72,9 @@ class ListSchedulerStrategiesHandler(
             strategies.append(strategy_info)
 
         return SchedulerStrategyListResponse(
-            strategies=strategies, current_strategy=current_strategy, total_count=len(strategies)
+            strategies=strategies,
+            current_strategy=current_strategy,
+            total_count=len(strategies),
         )
 
     def _get_scheduler_description(self, scheduler_type: str) -> str:
@@ -87,8 +89,16 @@ class ListSchedulerStrategiesHandler(
     def _get_scheduler_capabilities(self, scheduler_type: str) -> List[str]:
         """Get capabilities for scheduler type."""
         capabilities = {
-            "default": ["native_domain_format", "direct_serialization", "minimal_conversion"],
-            "hostfactory": ["field_mapping", "format_conversion", "legacy_compatibility"],
+            "default": [
+                "native_domain_format",
+                "direct_serialization",
+                "minimal_conversion",
+            ],
+            "hostfactory": [
+                "field_mapping",
+                "format_conversion",
+                "legacy_compatibility",
+            ],
             "hf": ["field_mapping", "format_conversion", "legacy_compatibility"],
         }
         return capabilities.get(scheduler_type, [])

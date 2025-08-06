@@ -1,6 +1,5 @@
 """Integration tests for ProviderContext with real provider strategies."""
 
-from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import pytest
@@ -227,7 +226,7 @@ class TestProviderContextIntegration:
             operation_type=ProviderOperationType.CREATE_INSTANCES, parameters={"count": 1}
         )
 
-        for i, strategy in enumerate(strategies):
+        for i, _strategy in enumerate(strategies):
             for _ in range(i + 1):  # Execute 1, 2, 3 operations respectively
                 provider_context.execute_with_strategy(f"provider-{i}", operation)
 

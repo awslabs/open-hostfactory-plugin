@@ -18,7 +18,10 @@ async def handle_provider_health(args) -> Dict[str, Any]:
     query = GetSystemStatusQuery()
     health_status = await query_bus.execute(query)
 
-    return {"health": health_status, "message": "Provider health retrieved successfully"}
+    return {
+        "health": health_status,
+        "message": "Provider health retrieved successfully",
+    }
 
 
 @handle_interface_exceptions(context="list_providers", interface_type="cli")
@@ -34,7 +37,11 @@ async def handle_list_providers(args) -> Dict[str, Any]:
         provider_config = config_manager.get_provider_config()
 
         if not provider_config:
-            return {"providers": [], "count": 0, "message": "No provider configuration found"}
+            return {
+                "providers": [],
+                "count": 0,
+                "message": "No provider configuration found",
+            }
 
         # Get active providers from configuration
         active_providers = provider_config.get_active_providers()
@@ -86,7 +93,10 @@ async def handle_provider_config(args) -> Dict[str, Any]:
     query = GetProviderConfigQuery()
     config = await query_bus.execute(query)
 
-    return {"config": config, "message": "Provider configuration retrieved successfully"}
+    return {
+        "config": config,
+        "message": "Provider configuration retrieved successfully",
+    }
 
 
 @handle_interface_exceptions(context="validate_provider_config", interface_type="cli")

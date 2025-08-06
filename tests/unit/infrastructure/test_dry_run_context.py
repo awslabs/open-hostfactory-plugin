@@ -1,7 +1,6 @@
 """Unit tests for dry-run context manager."""
 
 import threading
-from unittest.mock import patch
 
 import pytest
 

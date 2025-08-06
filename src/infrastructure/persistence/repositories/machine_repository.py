@@ -18,6 +18,7 @@ class MachineSerializer:
     """Handles Machine aggregate serialization/deserialization."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
 
     def to_dict(self, machine: Machine) -> Dict[str, Any]:
@@ -41,7 +42,7 @@ class MachineSerializer:
                 "status": machine.status.value,
                 "status_reason": machine.status_reason,
                 # Lifecycle timestamps
-                "launch_time": machine.launch_time.isoformat() if machine.launch_time else None,
+                "launch_time": (machine.launch_time.isoformat() if machine.launch_time else None),
                 "termination_time": (
                     machine.termination_time.isoformat() if machine.termination_time else None
                 ),
@@ -53,8 +54,8 @@ class MachineSerializer:
                 # Versioning
                 "version": machine.version,
                 # Base entity fields
-                "created_at": machine.created_at.isoformat() if machine.created_at else None,
-                "updated_at": machine.updated_at.isoformat() if machine.updated_at else None,
+                "created_at": (machine.created_at.isoformat() if machine.created_at else None),
+                "updated_at": (machine.updated_at.isoformat() if machine.updated_at else None),
                 # Schema version for migration support
                 "schema_version": "2.0.0",
             }
@@ -149,7 +150,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
             machine.clear_domain_events()
 
             self.logger.debug(
-                f"Saved machine {machine.instance_id} and extracted {len(events)} events"
+                f"Saved machine { machine.instance_id} and extracted { len(events)} events"
             )
             return events
 

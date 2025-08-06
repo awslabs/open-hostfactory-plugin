@@ -8,8 +8,7 @@ This module validates that the codebase properly implements CQRS patterns includ
 """
 
 import inspect
-from typing import get_type_hints
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -21,7 +20,6 @@ try:
         UpdateRequestStatusCommand,
     )
     from src.application.dto.queries import GetTemplateQuery, ListTemplatesQuery
-    from src.application.interfaces.command_handler import CommandHandler
     from src.infrastructure.di.container import DIContainer
 
     COMPONENTS_AVAILABLE = True
@@ -51,7 +49,7 @@ class TestCQRSCompliance:
         assert hasattr(query, "template_id")
 
         # Verify command and query are different types
-        assert type(command) != type(query)
+        assert not isinstance(command, type(query)) and not isinstance(query, type(command))
 
     def test_command_handler_interface(self):
         """Test that command handlers implement proper interface."""
@@ -65,7 +63,7 @@ class TestCQRSCompliance:
 
         # Should have handle method
         assert hasattr(handler, "handle")
-        assert callable(getattr(handler, "handle"))
+        assert callable(handler.handle)
 
         # Handle method should accept command parameter
         sig = inspect.signature(handler.handle)

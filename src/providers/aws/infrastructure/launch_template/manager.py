@@ -7,7 +7,7 @@ moving AWS-specific logic out of the base handler to maintain clean architecture
 
 import hashlib
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from botocore.exceptions import ClientError
 
@@ -145,7 +145,11 @@ class AWSLaunchTemplateManager:
             if e.response["Error"]["Code"] == "InvalidLaunchTemplateName.NotFoundException":
                 # Template doesn't exist, create it
                 return self._create_new_launch_template(
-                    launch_template_name, launch_template_data, client_token, request, aws_template
+                    launch_template_name,
+                    launch_template_data,
+                    client_token,
+                    request,
+                    aws_template,
                 )
             else:
                 # Some other error
@@ -274,7 +278,7 @@ class AWSLaunchTemplateManager:
         self._logger.info(f"Creating launch template with resolved image_id: {image_id}")
 
         # Get instance name using the helper function
-        instance_name = get_instance_name(request.request_id)
+        get_instance_name(request.request_id)
 
         launch_template_data = {
             "ImageId": image_id,
@@ -389,4 +393,5 @@ class AWSLaunchTemplateManager:
         # Generate a deterministic client token based on the request ID, template ID, and image ID
         # This ensures idempotency - identical requests will return the same result
         token_input = f"{request.request_id}:{aws_template.template_id}:{aws_template.image_id}"
-        return hashlib.sha256(token_input.encode()).hexdigest()[:32]  # Truncate to 32 chars
+        # Truncate to 32 chars
+        return hashlib.sha256(token_input.encode()).hexdigest()[:32]

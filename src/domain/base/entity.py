@@ -13,7 +13,9 @@ class Entity(BaseModel, ABC):
     """Base class for all domain entities."""
 
     model_config = ConfigDict(
-        frozen=False, validate_assignment=True, arbitrary_types_allowed=True  # Entities are mutable
+        frozen=False,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,  # Entities are mutable
     )
 
     id: Optional[Any] = None  # Entity identifier (can be any type)
@@ -35,6 +37,7 @@ class AggregateRoot(Entity):
     """Base class for aggregate roots."""
 
     def __init__(self, **data):
+        """Initialize the instance."""
         super().__init__(**data)
         self._domain_events: List[Any] = []
 

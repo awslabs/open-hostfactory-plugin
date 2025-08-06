@@ -8,17 +8,10 @@ This module validates that the codebase properly implements DDD patterns includi
 - Domain event lifecycle management
 """
 
-import inspect
-from typing import get_type_hints
-from unittest.mock import Mock, patch
-
 import pytest
 
-from src.domain.base.entity import AggregateRoot, Entity
 from src.domain.base.exceptions import DomainException
 from src.domain.base.value_objects import InstanceId, ResourceId, ResourceQuota
-from src.domain.machine.aggregate import Machine
-from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
 
 

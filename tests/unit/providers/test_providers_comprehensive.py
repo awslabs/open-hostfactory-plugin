@@ -2,8 +2,7 @@
 
 import importlib
 import inspect
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
@@ -53,7 +52,7 @@ class TestAWSProviderComprehensive:
         modules = self.get_aws_handler_modules()
         total_classes = 0
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
             total_classes += len(classes)
 
@@ -63,7 +62,7 @@ class TestAWSProviderComprehensive:
         """Test AWS handler initialization."""
         modules = self.get_aws_handler_modules()
 
-        for module_name, module in modules:
+        for _module_name, module in modules:
             classes = self.get_handler_classes(module)
 
             for class_name, handler_class in classes:
@@ -205,7 +204,7 @@ class TestAWSProviderComprehensive:
 
                 # Test common strategy methods
                 common_methods = ["create_machines", "terminate_machines", "get_machine_status"]
-                has_strategy_method = any(hasattr(strategy, method) for method in common_methods)
+                any(hasattr(strategy, method) for method in common_methods)
 
         except ImportError:
             pytest.skip("AWSProviderStrategy not available")

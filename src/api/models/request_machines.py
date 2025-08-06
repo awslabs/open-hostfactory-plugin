@@ -14,7 +14,8 @@ class MachineTemplate(APIRequest):
         description="Unique ID that can identify this template in the cloud provider"
     )
     machine_count: int = Field(
-        description="Number of hosts of this template to be provisioned", gt=0  # Greater than 0
+        description="Number of hosts of this template to be provisioned",
+        gt=0,  # Greater than 0
     )
 
     @field_validator("machine_count")
@@ -45,7 +46,8 @@ class Machine(APIRequest):
     )
     launch_time: int = Field(description="Launch time of the machine in seconds (UTC format)")
     message: Optional[str] = Field(
-        default=None, description="Additional message for the request status of this machine"
+        default=None,
+        description="Additional message for the request status of this machine",
     )
 
 

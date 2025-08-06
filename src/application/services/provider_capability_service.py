@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.template.aggregate import Template
 from src.infrastructure.registry.provider_registry import ProviderRegistry
@@ -97,7 +96,7 @@ class ProviderCapabilityService:
             ValidationResult with detailed validation information
         """
         self._logger.info(
-            f"Validating template {template.template_id} against provider {provider_instance}"
+            f"Validating template { template.template_id} against provider {provider_instance}"
         )
 
         result = ValidationResult(
@@ -139,7 +138,7 @@ class ProviderCapabilityService:
             result.is_valid = len(result.errors) == 0
 
             self._logger.info(
-                f"Validation result for {template.template_id}: {'VALID' if result.is_valid else 'INVALID'}"
+                f"Validation result for { template.template_id}: { 'VALID' if result.is_valid else 'INVALID'}"
             )
 
         except Exception as e:
@@ -220,7 +219,10 @@ class ProviderCapabilityService:
             )
 
     def _validate_api_support(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate that provider supports the required API."""
         if not template.provider_api:
@@ -230,13 +232,16 @@ class ProviderCapabilityService:
         supported_apis = capabilities.get_feature("supported_apis", [])
         if template.provider_api not in supported_apis:
             result.errors.append(
-                f"Provider does not support API '{template.provider_api}'. Supported APIs: {supported_apis}"
+                f"Provider does not support API '{ template.provider_api}'. Supported APIs: {supported_apis}"
             )
         else:
             result.supported_features.append(f"API: {template.provider_api}")
 
     def _validate_pricing_model(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate pricing model support (spot/on-demand)."""
         if not template.provider_api:
@@ -257,13 +262,16 @@ class ProviderCapabilityService:
         elif price_type == "ondemand":
             if not api_caps.get("supports_on_demand", True):
                 result.errors.append(
-                    f"API '{template.provider_api}' does not support on-demand instances"
+                    f"API '{ template.provider_api}' does not support on-demand instances"
                 )
             else:
                 result.supported_features.append("Pricing: On-demand instances")
 
     def _validate_fleet_type_support(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate fleet type support."""
         if not template.provider_api:
@@ -284,13 +292,16 @@ class ProviderCapabilityService:
 
         if supported_fleet_types and fleet_type not in supported_fleet_types:
             result.errors.append(
-                f"API '{template.provider_api}' does not support fleet type '{fleet_type}'. Supported types: {supported_fleet_types}"
+                f"API '{ template.provider_api}' does not support fleet type '{fleet_type}'. Supported types: {supported_fleet_types}"
             )
         elif supported_fleet_types:
             result.supported_features.append(f"Fleet type: {fleet_type}")
 
     def _validate_instance_limits(
-        self, template: Template, capabilities: ProviderCapabilities, result: ValidationResult
+        self,
+        template: Template,
+        capabilities: ProviderCapabilities,
+        result: ValidationResult,
     ):
         """Validate instance count limits."""
         if not template.provider_api:
@@ -302,7 +313,7 @@ class ProviderCapabilityService:
 
         if template.max_instances > max_instances:
             result.errors.append(
-                f"Requested {template.max_instances} instances exceeds API limit of {max_instances}"
+                f"Requested { template.max_instances} instances exceeds API limit of {max_instances}"
             )
         else:
             result.supported_features.append(

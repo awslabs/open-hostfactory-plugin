@@ -1,7 +1,5 @@
 """Template command handlers for CQRS pattern."""
 
-from typing import Any, Dict, Optional
-
 from src.application.base.handlers import BaseCommandHandler
 from src.application.decorators import command_handler
 from src.application.template.commands import (
@@ -42,6 +40,7 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
     ) -> None:
+        """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._uow_factory = uow_factory
         self._container = container
@@ -72,7 +71,7 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateCo
             validation_errors = template_port.validate_template_config(command.configuration)
             if validation_errors:
                 self.logger.warning(
-                    f"Template validation failed for {command.template_id}: {validation_errors}"
+                    f"Template validation failed for { command.template_id}: {validation_errors}"
                 )
                 return TemplateCommandResponse(
                     template_id=command.template_id, validation_errors=validation_errors
@@ -168,10 +167,11 @@ class UpdateTemplateHandler(BaseCommandHandler[UpdateTemplateCommand, TemplateCo
                 validation_errors = template_port.validate_template_config(command.configuration)
                 if validation_errors:
                     self.logger.warning(
-                        f"Template update validation failed for {command.template_id}: {validation_errors}"
+                        f"Template update validation failed for { command.template_id}: {validation_errors}"
                     )
                     return TemplateCommandResponse(
-                        template_id=command.template_id, validation_errors=validation_errors
+                        template_id=command.template_id,
+                        validation_errors=validation_errors,
                     )
 
             # Update template through repository
@@ -205,7 +205,7 @@ class UpdateTemplateHandler(BaseCommandHandler[UpdateTemplateCommand, TemplateCo
 
             return TemplateCommandResponse(template_id=command.template_id)
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Template not found for update: {command.template_id}")
             raise
         except Exception as e:
@@ -256,10 +256,11 @@ class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCo
                     raise EntityNotFoundError("Template", command.template_id)
 
                 # Check if template is in use (business rule)
-                # This could be expanded to check for active requests using this template
+                # This could be expanded to check for active requests using this
+                # template
                 if template.is_in_use():
                     raise BusinessRuleError(
-                        f"Cannot delete template {command.template_id}: template is in use"
+                        f"Cannot delete template { command.template_id}: template is in use"
                     )
 
                 # Delete template
@@ -270,10 +271,10 @@ class DeleteTemplateHandler(BaseCommandHandler[DeleteTemplateCommand, TemplateCo
 
             return TemplateCommandResponse(template_id=command.template_id)
 
-        except EntityNotFoundError as e:
+        except EntityNotFoundError:
             self.logger.error(f"Template not found for deletion: {command.template_id}")
             raise
-        except BusinessRuleError as e:
+        except BusinessRuleError:
             self.logger.error(
                 f"Cannot delete template {command.template_id}: business rule violation"
             )
@@ -331,7 +332,7 @@ class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, Templa
             # Log validation results
             if validation_errors:
                 self.logger.warning(
-                    f"Template validation failed for {command.template_id}: {validation_errors}"
+                    f"Template validation failed for { command.template_id}: {validation_errors}"
                 )
             else:
                 self.logger.info(f"Template validation passed for {command.template_id}")
@@ -346,5 +347,6 @@ class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, Templa
         except Exception as e:
             self.logger.error(f"Template validation failed for {command.template_id}: {e}")
             return TemplateCommandResponse(
-                template_id=command.template_id, validation_errors=[f"Validation error: {str(e)}"]
+                template_id=command.template_id,
+                validation_errors=[f"Validation error: {str(e)}"],
             )

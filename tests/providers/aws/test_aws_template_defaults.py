@@ -1,7 +1,5 @@
 """Tests for AWS template fleet_type default assignment."""
 
-from unittest.mock import Mock, patch
-
 import pytest
 
 from src.providers.aws.domain.template.aggregate import AWSTemplate

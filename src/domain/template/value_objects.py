@@ -1,8 +1,7 @@
 """Template value objects - provider-agnostic domain logic."""
 
 # Import core domain value objects
-from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, List, Protocol
 
 from src.domain.base.value_objects import ResourceId
 
@@ -14,11 +13,6 @@ class TemplateId(ResourceId):
     """Template identifier."""
 
     resource_type = "Template"
-
-
-"""Template domain value objects and contracts."""
-from enum import Enum
-from typing import Any, List, Optional, Protocol
 
 
 # Provider-agnostic contracts (Protocols)
@@ -55,6 +49,7 @@ class ProviderConfiguration:
     """Provider-agnostic configuration container."""
 
     def __init__(self, config_data: Dict[str, Any]):
+        """Initialize the instance."""
         self.config_data = config_data
 
     def get(self, key: str, default: Any = None) -> Any:

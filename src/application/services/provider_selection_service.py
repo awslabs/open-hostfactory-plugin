@@ -6,18 +6,16 @@ based on template requirements, following DDD and Clean Architecture principles.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from src.config.managers.configuration_manager import ConfigurationManager
 from src.config.schemas.provider_strategy_schema import (
-    ProviderConfig,
     ProviderInstanceConfig,
 )
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.template.aggregate import Template
 from src.infrastructure.registry.provider_registry import ProviderRegistry
-from src.providers.base.strategy.provider_strategy import ProviderStrategy
 
 
 @dataclass
@@ -131,7 +129,7 @@ class ProviderSelectionService:
         return ProviderSelectionResult(
             provider_type=provider_instance.type,
             provider_instance=provider_name,
-            selection_reason=f"Explicitly specified in template",
+            selection_reason="Explicitly specified in template",
             confidence=1.0,
         )
 
@@ -154,7 +152,7 @@ class ProviderSelectionService:
         return ProviderSelectionResult(
             provider_type=provider_type,
             provider_instance=selected_instance.name,
-            selection_reason=f"Load balanced across {len(instances)} {provider_type} instances",
+            selection_reason=f"Load balanced across { len(instances)} {provider_type} instances",
             confidence=0.9,
             alternatives=[inst.name for inst in instances if inst.name != selected_instance.name],
         )
@@ -262,18 +260,18 @@ class ProviderSelectionService:
         if len(highest_priority_instances) == 1:
             selected = highest_priority_instances[0]
             self._logger.debug(
-                f"Selected provider {selected.name} (priority {selected.priority}, weight {selected.weight})"
+                f"Selected provider { selected.name} (priority {selected.priority}, weight { selected.weight})"
             )
             return selected
 
         # If multiple instances with same priority, use weighted selection
-        total_weight = sum(instance.weight for instance in highest_priority_instances)
+        sum(instance.weight for instance in highest_priority_instances)
 
         # For now, select the one with highest weight among same priority
         # In production, this would maintain round-robin state
         selected = max(highest_priority_instances, key=lambda x: x.weight)
         self._logger.debug(
-            f"Selected provider {selected.name} (priority {selected.priority}, weight {selected.weight}) from {len(highest_priority_instances)} candidates"
+            f"Selected provider { selected.name} (priority {selected.priority}, weight {selected.weight}) from { len(highest_priority_instances)} candidates"
         )
         return selected
 

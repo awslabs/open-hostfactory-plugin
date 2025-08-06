@@ -68,7 +68,8 @@ class CognitoAuthStrategy(AuthPort):
         """
         if not self.enabled:
             return AuthResult(
-                status=AuthStatus.FAILED, error_message="Cognito authentication is disabled"
+                status=AuthStatus.FAILED,
+                error_message="Cognito authentication is disabled",
             )
 
         # Extract Bearer token from Authorization header
@@ -76,7 +77,8 @@ class CognitoAuthStrategy(AuthPort):
 
         if not auth_header.startswith("Bearer "):
             return AuthResult(
-                status=AuthStatus.FAILED, error_message="Missing or invalid Authorization header"
+                status=AuthStatus.FAILED,
+                error_message="Missing or invalid Authorization header",
             )
 
         token = auth_header[7:]  # Remove "Bearer " prefix
@@ -104,7 +106,8 @@ class CognitoAuthStrategy(AuthPort):
             public_key = await self._get_public_key(kid)
             if not public_key:
                 return AuthResult(
-                    status=AuthStatus.INVALID, error_message="Unable to verify token signature"
+                    status=AuthStatus.INVALID,
+                    error_message="Unable to verify token signature",
                 )
 
             # Verify and decode token
@@ -182,7 +185,8 @@ class CognitoAuthStrategy(AuthPort):
         except ClientError as e:
             error_code = e.response.get("Error", {}).get("Code", "Unknown")
             return AuthResult(
-                status=AuthStatus.FAILED, error_message=f"Cognito refresh error: {error_code}"
+                status=AuthStatus.FAILED,
+                error_message=f"Cognito refresh error: {error_code}",
             )
         except Exception as e:
             self._logger.error(f"Token refresh error: {e}")

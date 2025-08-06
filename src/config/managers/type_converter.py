@@ -1,7 +1,7 @@
 """Configuration type conversion utilities."""
 
 import logging
-from typing import Any, Dict, List, Optional, Type, TypeVar, cast
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 from src.domain.base.exceptions import ConfigurationError
 
@@ -13,6 +13,7 @@ class ConfigTypeConverter:
     """Handles type conversion for configuration values."""
 
     def __init__(self, raw_config: Dict[str, Any]):
+        """Initialize the instance."""
         self._raw_config = raw_config
 
     def get(self, key: str, default: Any = None) -> Any:

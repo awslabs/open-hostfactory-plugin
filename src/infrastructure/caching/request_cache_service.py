@@ -18,6 +18,7 @@ class RequestCacheService:
         config_manager: ConfigurationManager,
         logger: LoggingPort,
     ):
+        """Initialize the instance."""
         self.uow_factory = uow_factory
         self.config_manager = config_manager
         self.logger = logger

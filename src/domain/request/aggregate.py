@@ -17,7 +17,7 @@ from src.domain.request.value_objects import RequestId, RequestType
 
 
 class Request(AggregateRoot):
-    """Request aggregate root with both snake_case and camelCase support via aliases."""
+    """Request aggregate root."""
 
     model_config = ConfigDict(
         frozen=False,
@@ -40,7 +40,8 @@ class Request(AggregateRoot):
     provider_api: Optional[str] = None  # Provider API/service used
 
     # Resource tracking (what was created)
-    resource_ids: List[str] = Field(default_factory=list)  # Provider resource identifiers
+    # Provider resource identifiers
+    resource_ids: List[str] = Field(default_factory=list)
 
     # Request state
     status: RequestStatus = Field(default=RequestStatus.PENDING)
@@ -70,6 +71,7 @@ class Request(AggregateRoot):
     version: int = Field(default=0)
 
     def __init__(self, **data):
+        """Initialize the instance."""
         # Set default ID if not provided
         if "id" not in data:
             data["id"] = data.get("request_id", f"request-{datetime.utcnow().isoformat()}")
@@ -154,7 +156,11 @@ class Request(AggregateRoot):
 
     def cancel(self, reason: str) -> "Request":
         """Cancel the request."""
-        if self.status in [RequestStatus.COMPLETED, RequestStatus.FAILED, RequestStatus.CANCELLED]:
+        if self.status in [
+            RequestStatus.COMPLETED,
+            RequestStatus.FAILED,
+            RequestStatus.CANCELLED,
+        ]:
             raise ValueError(f"Cannot cancel request in status: {self.status}")
 
         data = self.model_dump()
@@ -307,7 +313,7 @@ class Request(AggregateRoot):
         metadata: Optional[Dict[str, Any]] = None,
     ) -> "Request":
         """
-        Factory method to create a new request with proper domain event generation.
+        Create a new request with proper domain event generation.
 
         Args:
             request_type: Type of request (CREATE, TERMINATE, etc.)
@@ -357,10 +363,12 @@ class Request(AggregateRoot):
 
     @classmethod
     def create_return_request(
-        cls, machine_refs: List[Dict[str, Any]], metadata: Optional[Dict[str, Any]] = None
+        cls,
+        machine_refs: List[Dict[str, Any]],
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> "Request":
         """
-        Factory method to create a return/terminate request.
+        Create a return/terminate request.
 
         Args:
             machine_refs: List of machine references to return
@@ -488,7 +496,11 @@ class Request(AggregateRoot):
         data["status_message"] = message
         data["version"] = self.version + 1
 
-        if status in [RequestStatus.COMPLETED, RequestStatus.FAILED, RequestStatus.CANCELLED]:
+        if status in [
+            RequestStatus.COMPLETED,
+            RequestStatus.FAILED,
+            RequestStatus.CANCELLED,
+        ]:
             data["completed_at"] = datetime.utcnow()
 
         return Request.model_validate(data)

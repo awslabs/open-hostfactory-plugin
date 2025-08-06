@@ -38,7 +38,7 @@ from src.domain.request.aggregate import Request
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
 from src.providers.aws.domain.template.aggregate import AWSTemplate
-from src.providers.aws.domain.template.value_objects import AWSFleetType, ProviderApi
+from src.providers.aws.domain.template.value_objects import AWSFleetType
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSEntityNotFoundError,
     AWSInfrastructureError,
@@ -100,10 +100,15 @@ class SpotFleetHandler(AWSHandler):
                 },
             }
         except Exception as e:
-            return {"success": False, "resource_ids": [], "instances": [], "error_message": str(e)}
+            return {
+                "success": False,
+                "resource_ids": [],
+                "instances": [],
+                "error_message": str(e),
+            }
 
     def _create_spot_fleet_internal(self, request: Request, aws_template: AWSTemplate) -> str:
-        """Internal method for Spot Fleet creation with pure business logic."""
+        """Create Spot Fleet with pure business logic."""
         # Validate Spot Fleet specific prerequisites
         self._validate_spot_prerequisites(aws_template)
 
@@ -215,7 +220,8 @@ class SpotFleetHandler(AWSHandler):
         ):
             errors.append("percent_on_demand is required for heterogeneous price type")
 
-        # For heterogeneous price type with vm_types_on_demand, validate the configuration
+        # For heterogeneous price type with vm_types_on_demand, validate the
+        # configuration
         if (
             hasattr(aws_template, "price_type")
             and aws_template.price_type == "heterogeneous"
@@ -398,7 +404,7 @@ class SpotFleetHandler(AWSHandler):
                         "InstanceType": instance_type,
                         "WeightedCapacity": weight,
                         "Priority": idx + 1,
-                        "SpotPrice": str(template.max_price) if template.max_price else None,
+                        "SpotPrice": (str(template.max_price) if template.max_price else None),
                     }
                     for idx, (instance_type, weight) in enumerate(template.instance_types.items())
                 ]
@@ -434,7 +440,7 @@ class SpotFleetHandler(AWSHandler):
                         "InstanceType": instance_type,
                         "WeightedCapacity": weight,
                         "Priority": idx + 1,
-                        "SpotPrice": str(template.max_price) if template.max_price else None,
+                        "SpotPrice": (str(template.max_price) if template.max_price else None),
                     }
                     for idx, (instance_type, weight) in enumerate(template.instance_types.items())
                 ]
@@ -459,7 +465,7 @@ class SpotFleetHandler(AWSHandler):
                             "InstanceType": instance_type,
                             "WeightedCapacity": weight,
                             "Priority": idx + 1,
-                            "SpotPrice": str(template.max_price) if template.max_price else None,
+                            "SpotPrice": (str(template.max_price) if template.max_price else None),
                         }
                         spot_overrides.append(override)
 

@@ -1,6 +1,5 @@
 """Authentication middleware for FastAPI."""
 
-import logging
 from typing import List
 
 from fastapi import HTTPException, Request, Response, status
@@ -14,7 +13,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Authentication middleware for FastAPI requests."""
 
     def __init__(
-        self, app, auth_port: AuthPort, excluded_paths: List[str] = None, require_auth: bool = True
+        self,
+        app,
+        auth_port: AuthPort,
+        excluded_paths: List[str] = None,
+        require_auth: bool = True,
     ):
         """
         Initialize authentication middleware.
@@ -196,7 +199,8 @@ class AuthDependency:
 
         if not auth_result:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required",
             )
 
         if not auth_result.is_authenticated:
@@ -218,7 +222,8 @@ class AuthDependency:
             if not auth_result.has_role(role):
                 self.logger.warning(f"User {auth_result.user_id} missing role: {role}")
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN, detail=f"Missing required role: {role}"
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Missing required role: {role}",
                 )
 
         return auth_result

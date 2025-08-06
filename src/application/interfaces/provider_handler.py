@@ -40,4 +40,3 @@ class ProviderHandler(Generic[TRequest, TResponse], ABC):
             ProviderError: If provider operation fails
             InfrastructureError: If infrastructure operation fails
         """
-        pass

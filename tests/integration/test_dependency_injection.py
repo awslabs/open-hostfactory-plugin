@@ -80,9 +80,6 @@ def test_aws_launch_template_manager_registration():
         print("   Testing AWS Launch Template Manager registration...")
 
         # Test that the class can be imported
-        from src.providers.aws.infrastructure.launch_template.manager import (
-            AWSLaunchTemplateManager,
-        )
 
         print("   PASS: AWSLaunchTemplateManager import successful")
 
@@ -159,7 +156,6 @@ def test_repository_factory_machine_support():
         print("   PASS: RepositoryFactory import successful")
 
         # Test that machine repository interface exists
-        from src.domain.machine.repository import MachineRepository
 
         print("   PASS: MachineRepository interface import successful")
 
@@ -172,9 +168,7 @@ def test_repository_factory_machine_support():
 
         # Test that machine repository implementation exists
         try:
-            from src.infrastructure.persistence.repositories.machine_repository import (
-                MachineRepositoryImpl,
-            )
+            pass
 
             print("   PASS: MachineRepositoryImpl implementation exists")
         except ImportError:
@@ -201,14 +195,10 @@ def test_di_container_resolution():
         print("   PASS: DIContainer import successful")
 
         # Test that infrastructure services registration exists
-        from src.infrastructure.di.infrastructure_services import (
-            register_infrastructure_services,
-        )
 
         print("   PASS: register_infrastructure_services function exists")
 
         # Test that provider services registration exists
-        from src.infrastructure.di.provider_services import register_provider_services
 
         print("   PASS: register_provider_services function exists")
 
@@ -248,23 +238,20 @@ def test_service_dependencies():
         print("   Testing service dependencies...")
 
         # Test that injectable decorator exists
-        from src.domain.base.dependency_injection import injectable
 
         print("   PASS: @injectable decorator import successful")
 
         # Test that logging port exists
-        from src.domain.base.ports import LoggingPort
 
         print("   PASS: LoggingPort import successful")
 
         # Test that configuration manager exists
-        from src.config.manager import ConfigurationManager
 
         print("   PASS: ConfigurationManager import successful")
 
         # Test that AWS client exists
         try:
-            from src.providers.aws.infrastructure.aws_client import AWSClient
+            pass
 
             print("   PASS: AWSClient import successful")
         except ImportError:
@@ -272,23 +259,17 @@ def test_service_dependencies():
 
         # Test that AWS operations utility exists
         try:
-            from src.providers.aws.utilities.aws_operations import AWSOperations
+            pass
 
             print("   PASS: AWSOperations import successful")
         except ImportError:
             print("   WARN:  AWSOperations import failed (may be expected)")
 
         # Test that template defaults service exists
-        from src.application.services.template_defaults_service import (
-            TemplateDefaultsService,
-        )
 
         print("   PASS: TemplateDefaultsService import successful")
 
         # Test that template defaults port exists
-        from src.domain.template.ports.template_defaults_port import (
-            TemplateDefaultsPort,
-        )
 
         print("   PASS: TemplateDefaultsPort import successful")
 

@@ -1,15 +1,7 @@
 """Host Factory lifecycle integration tests."""
 
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
-
 import pytest
 
-from src.application.commands.request_handlers import CreateMachineRequestHandler
-from src.application.services.provider_capability_service import (
-    ProviderCapabilityService,
-)
-from src.application.services.provider_selection_service import ProviderSelectionService
 from tests.fixtures.mock_provider import create_mock_provider
 from tests.fixtures.provider_scenarios import (
     HostFactoryFormatValidator,
@@ -18,7 +10,8 @@ from tests.fixtures.provider_scenarios import (
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("provider_type", ["mock"])  # Add "aws" when testing with real AWS
+# Add "aws" when testing with real AWS
+@pytest.mark.parametrize("provider_type", ["mock"])
 class TestHostFactoryLifecycle:
     """Test complete Host Factory workflow with any provider."""
 
@@ -184,7 +177,7 @@ class TestHostFactoryLifecycle:
         template_id = templates["templates"][0]["templateId"]
 
         request_ids = []
-        for i in range(3):
+        for _i in range(3):
             response = app_service.request_machines(template_id, 1)
             request_ids.append(response["requestId"])
 
@@ -205,14 +198,14 @@ class TestHostFactoryLifecycle:
         # Test invalid template ID
         try:
             app_service.request_machines("non-existent-template", 1)
-            assert False, "Should have raised an exception"
+            raise AssertionError(), "Should have raised an exception"
         except Exception as e:
             assert "template" in str(e).lower() or "not found" in str(e).lower()
 
         # Test invalid request ID
         try:
             app_service.get_request_status("non-existent-request")
-            assert False, "Should have raised an exception"
+            raise AssertionError(), "Should have raised an exception"
         except Exception as e:
             assert "request" in str(e).lower() or "not found" in str(e).lower()
 
@@ -228,7 +221,6 @@ class TestHostFactoryLifecycle:
     def _create_app_service_with_provider(self, provider_type: str, provider):
         """Create application service with mock provider."""
         from src.bootstrap import Application
-        from src.infrastructure.di.buses import CommandBus, QueryBus
 
         # Create mock application with provider
         app = Application()

@@ -47,6 +47,7 @@ class DependencyRegistration:
         dependencies: Optional[List[Type]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize the instance."""
         self.dependency_type = dependency_type
         self.implementation_type = implementation_type or dependency_type
         self.instance = instance
@@ -89,7 +90,6 @@ class DIContainerPort(ABC):
         Args:
             registration: Complete registration information
         """
-        pass
 
     @abstractmethod
     def register_type(
@@ -106,7 +106,6 @@ class DIContainerPort(ABC):
             implementation_type: The concrete implementation
             scope: The dependency scope
         """
-        pass
 
     @abstractmethod
     def register_instance(self, dependency_type: Type[T], instance: T) -> None:
@@ -117,11 +116,13 @@ class DIContainerPort(ABC):
             dependency_type: The type to register
             instance: The instance to register
         """
-        pass
 
     @abstractmethod
     def register_factory(
-        self, dependency_type: Type[T], factory: Callable[[], T], scope: DIScope = DIScope.TRANSIENT
+        self,
+        dependency_type: Type[T],
+        factory: Callable[[], T],
+        scope: DIScope = DIScope.TRANSIENT,
     ) -> None:
         """
         Register a factory function.
@@ -131,11 +132,12 @@ class DIContainerPort(ABC):
             factory: Factory function that creates instances
             scope: The dependency scope
         """
-        pass
 
     @abstractmethod
     def register_singleton(
-        self, dependency_type: Type[T], implementation_or_factory: Union[Type[T], Callable[[], T]]
+        self,
+        dependency_type: Type[T],
+        implementation_or_factory: Union[Type[T], Callable[[], T]],
     ) -> None:
         """
         Register a singleton dependency.
@@ -144,7 +146,6 @@ class DIContainerPort(ABC):
             dependency_type: The type to register
             implementation_or_factory: Implementation type or factory function
         """
-        pass
 
     @abstractmethod
     def get(self, dependency_type: Type[T]) -> T:
@@ -160,7 +161,6 @@ class DIContainerPort(ABC):
         Raises:
             DependencyResolutionError: If dependency cannot be resolved
         """
-        pass
 
     @abstractmethod
     def get_optional(self, dependency_type: Type[T]) -> Optional[T]:
@@ -173,7 +173,6 @@ class DIContainerPort(ABC):
         Returns:
             Instance of the requested type or None if not registered
         """
-        pass
 
     @abstractmethod
     def get_all(self, dependency_type: Type[T]) -> List[T]:
@@ -186,7 +185,6 @@ class DIContainerPort(ABC):
         Returns:
             List of all registered instances of the type
         """
-        pass
 
     @abstractmethod
     def is_registered(self, dependency_type: Type[T]) -> bool:
@@ -199,7 +197,6 @@ class DIContainerPort(ABC):
         Returns:
             True if registered, False otherwise
         """
-        pass
 
     @abstractmethod
     def unregister(self, dependency_type: Type[T]) -> bool:
@@ -212,12 +209,10 @@ class DIContainerPort(ABC):
         Returns:
             True if unregistered, False if not found
         """
-        pass
 
     @abstractmethod
     def clear(self) -> None:
         """Clear all registrations."""
-        pass
 
     @abstractmethod
     def get_registrations(self) -> Dict[Type, DependencyRegistration]:
@@ -227,7 +222,6 @@ class DIContainerPort(ABC):
         Returns:
             Dictionary mapping types to their registrations
         """
-        pass
 
 
 class DIServiceLocatorPort(ABC):
@@ -249,7 +243,6 @@ class DIServiceLocatorPort(ABC):
         Returns:
             Instance of the service
         """
-        pass
 
     @abstractmethod
     def locate_optional(self, service_type: Type[T]) -> Optional[T]:
@@ -262,7 +255,6 @@ class DIServiceLocatorPort(ABC):
         Returns:
             Instance of the service or None if not found
         """
-        pass
 
 
 class DIConfigurationPort(ABC):
@@ -281,7 +273,6 @@ class DIConfigurationPort(ABC):
         Args:
             enabled: Whether to enable auto-registration
         """
-        pass
 
     @abstractmethod
     def configure_circular_dependency_detection(self, enabled: bool) -> None:
@@ -291,7 +282,6 @@ class DIConfigurationPort(ABC):
         Args:
             enabled: Whether to enable detection
         """
-        pass
 
     @abstractmethod
     def configure_lazy_loading(self, enabled: bool) -> None:
@@ -301,7 +291,6 @@ class DIConfigurationPort(ABC):
         Args:
             enabled: Whether to enable lazy loading
         """
-        pass
 
     @abstractmethod
     def add_assembly_scan_path(self, path: str) -> None:
@@ -311,7 +300,6 @@ class DIConfigurationPort(ABC):
         Args:
             path: Module path to scan
         """
-        pass
 
 
 class DIEventPort(ABC):
@@ -332,7 +320,6 @@ class DIEventPort(ABC):
         Args:
             callback: Function to call when dependency is registered
         """
-        pass
 
     @abstractmethod
     def on_dependency_resolved(self, callback: Callable[[Type, Any], None]) -> None:
@@ -342,7 +329,6 @@ class DIEventPort(ABC):
         Args:
             callback: Function to call when dependency is resolved
         """
-        pass
 
     @abstractmethod
     def on_dependency_creation_failed(self, callback: Callable[[Type, Exception], None]) -> None:
@@ -352,7 +338,6 @@ class DIEventPort(ABC):
         Args:
             callback: Function to call when dependency creation fails
         """
-        pass
 
 
 class CompositeDIPort(DIContainerPort, DIServiceLocatorPort, DIConfigurationPort, DIEventPort):
@@ -363,8 +348,6 @@ class CompositeDIPort(DIContainerPort, DIServiceLocatorPort, DIConfigurationPort
     allowing infrastructure implementations to provide full functionality
     while maintaining clean separation of concerns.
     """
-
-    pass
 
 
 # CQRS-Specific Contracts
@@ -387,7 +370,6 @@ class CQRSHandlerRegistrationPort(ABC):
             command_type: The command type
             handler_type: The handler implementation type
         """
-        pass
 
     @abstractmethod
     def register_query_handler(self, query_type: Type, handler_type: Type) -> None:
@@ -398,7 +380,6 @@ class CQRSHandlerRegistrationPort(ABC):
             query_type: The query type
             handler_type: The handler implementation type
         """
-        pass
 
     @abstractmethod
     def register_event_handler(self, event_type: Type, handler_type: Type) -> None:
@@ -409,7 +390,6 @@ class CQRSHandlerRegistrationPort(ABC):
             event_type: The event type
             handler_type: The handler implementation type
         """
-        pass
 
     @abstractmethod
     def get_command_handler(self, command_type: Type) -> Any:
@@ -422,7 +402,6 @@ class CQRSHandlerRegistrationPort(ABC):
         Returns:
             Handler instance
         """
-        pass
 
     @abstractmethod
     def get_query_handler(self, query_type: Type) -> Any:
@@ -435,7 +414,6 @@ class CQRSHandlerRegistrationPort(ABC):
         Returns:
             Handler instance
         """
-        pass
 
     @abstractmethod
     def get_event_handlers(self, event_type: Type) -> List[Any]:
@@ -448,7 +426,6 @@ class CQRSHandlerRegistrationPort(ABC):
         Returns:
             List of handler instances
         """
-        pass
 
 
 # Exception Classes
@@ -484,5 +461,3 @@ class DependencyRegistrationError(Exception):
 
 class DIConfigurationError(Exception):
     """Raised when DI container configuration is invalid."""
-
-    pass

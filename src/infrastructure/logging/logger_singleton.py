@@ -6,7 +6,7 @@ import logging
 import threading
 from typing import Any, Dict, Optional
 
-from src.infrastructure.logging.logger import ContextLogger, get_logger, with_context
+from src.infrastructure.logging.logger import ContextLogger, with_context
 from src.infrastructure.patterns.singleton_registry import SingletonRegistry
 
 # Global singleton instance - initialized early to avoid circular imports
@@ -48,7 +48,8 @@ class LoggerSingleton:
         """
         with self._lock:
             if name not in self._loggers:
-                # Import the logger module's get_logger function directly to avoid recursion
+                # Import the logger module's get_logger function directly to avoid
+                # recursion
                 from src.infrastructure.logging.logger import (
                     get_logger as logger_module_get_logger,
                 )
@@ -124,34 +125,6 @@ def get_logger_singleton() -> LoggerSingleton:
     return _logger_singleton_instance
 
 
-def get_logger(name: str) -> ContextLogger:
-    """
-    Get a logger by name.
-
-    This is a convenience function that gets a logger from the singleton.
-
-    Args:
-        name: Logger name
-
-    Returns:
-        Logger instance
-    """
-    # Import the logger module's get_logger function directly to avoid recursion
-    from src.infrastructure.logging.logger import get_logger as logger_module_get_logger
-
-    # Get the singleton instance
-    singleton = get_logger_singleton()
-
-    # Check if the logger is already cached in the singleton
-    with singleton._lock:
-        if name not in singleton._loggers:
-            # Create a new logger using the logger module's function
-            singleton._loggers[name] = logger_module_get_logger(name)
-
-        # Return the cached logger
-        return singleton._loggers[name]
-
-
 def register_logger_with_container() -> None:
     """
     Register the logger singleton with the DI container.
@@ -176,7 +149,8 @@ def register_logger_with_container() -> None:
             from src.infrastructure.patterns.singleton_registry import SingletonRegistry
 
             registry = SingletonRegistry.get_instance()
-            # Check if the singleton is already registered by checking if it exists in the registry's _singletons dict
+            # Check if the singleton is already registered by checking if it exists in
+            # the registry's _singletons dict
             if (
                 LoggerSingleton not in registry._singletons
                 or registry._singletons[LoggerSingleton] is None

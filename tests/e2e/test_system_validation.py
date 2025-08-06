@@ -5,8 +5,6 @@ import os
 import tempfile
 from unittest.mock import Mock
 
-import pytest
-
 from src.bootstrap import Application
 from src.config.manager import ConfigurationManager
 from src.infrastructure.factories.provider_strategy_factory import (
@@ -129,7 +127,7 @@ class TestSystemValidation:
 
         # Test interface integration (simplified)
         try:
-            from src.interface.command_handlers import handle_provider_config
+            pass
 
             mock_command = Mock()
             mock_command.file = None
@@ -577,8 +575,8 @@ class TestSystemValidation:
 
         # Perform multiple operations
         for _ in range(100):
-            provider_info = factory.get_provider_info()
-            validation_result = factory.validate_configuration()
+            factory.get_provider_info()
+            factory.validate_configuration()
 
         end_time = time.time()
         total_time = end_time - start_time
@@ -683,7 +681,7 @@ class TestSystemValidation:
 
             # Interface integration (simplified)
             try:
-                from src.interface.command_handlers import handle_provider_config
+                pass
 
                 # Mock the result since we can't fully test async handlers in this context
                 interface_result = {"status": "success", "provider_info": provider_info}

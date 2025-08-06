@@ -1,7 +1,7 @@
 """Integration tests for authentication flows."""
 
 import asyncio
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -138,7 +138,6 @@ class TestAuthenticationFlows:
     async def test_auth_context_creation(self):
         """Test authentication context creation from requests."""
         from src.api.middleware.auth_middleware import AuthMiddleware
-        from src.infrastructure.ports.auth import AuthContext
 
         # Create mock request
         class MockRequest:

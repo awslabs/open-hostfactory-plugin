@@ -170,6 +170,7 @@ class IPAddressRange(ValueObject):
     @field_validator("cidr")
     @classmethod
     def validate_cidr(cls, v: str) -> str:
+        """Validate CIDR format."""
         # Validate CIDR format (e.g., 10.0.0.0/16)
         if not cls._is_valid_cidr(v):
             raise ValueError(f"Invalid CIDR format: {v}")
@@ -300,8 +301,14 @@ class HealthCheckResult(ValueObject):
     def to_dict(self) -> Dict[str, Any]:
         """Convert health check result to dictionary."""
         return {
-            "system": {"status": self.system_status, "details": self.system_details or {}},
-            "instance": {"status": self.instance_status, "details": self.instance_details or {}},
+            "system": {
+                "status": self.system_status,
+                "details": self.system_details or {},
+            },
+            "instance": {
+                "status": self.instance_status,
+                "details": self.instance_details or {},
+            },
             "timestamp": self.timestamp.isoformat(),
         }
 
@@ -365,4 +372,7 @@ class ResourceTag(ValueObject):
             List of default resource tags
         """
         # Basic default tags without configuration dependency
-        return [cls(key="Environment", value="default"), cls(key="ManagedBy", value="HostFactory")]
+        return [
+            cls(key="Environment", value="default"),
+            cls(key="ManagedBy", value="HostFactory"),
+        ]

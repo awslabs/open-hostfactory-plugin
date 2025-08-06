@@ -186,7 +186,7 @@ class AWSOperations:
     def _paginate_method(
         self, client_method: Callable, result_key: str, **kwargs
     ) -> List[Dict[str, Any]]:
-        """Helper method to access handler's pagination functionality."""
+        """Access handler's pagination functionality."""
         # This will be set by the handler when initializing AWSOperations
         if hasattr(self, "_paginate_func"):
             return self._paginate_func(client_method, result_key, **kwargs)
@@ -200,7 +200,11 @@ class AWSOperations:
         self._paginate_func = paginate_func
 
     def log_operation_start(
-        self, operation: str, resource_type: str, resource_id: Optional[str] = None, **context
+        self,
+        operation: str,
+        resource_type: str,
+        resource_id: Optional[str] = None,
+        **context,
     ):
         """Standardized operation start logging."""
         if resource_id:
@@ -343,7 +347,11 @@ class AWSOperations:
             return []
 
     def execute_with_standard_error_handling(
-        self, operation: Callable, operation_name: str, context: str = "AWS operation", **kwargs
+        self,
+        operation: Callable,
+        operation_name: str,
+        context: str = "AWS operation",
+        **kwargs,
     ) -> Any:
         """
         Execute AWS operation with standardized error handling.
@@ -405,7 +413,11 @@ class AWSOperations:
         )
 
         # Map AWS error codes to domain exceptions
-        if error_code in ["InvalidParameterValue", "InvalidParameter", "ValidationException"]:
+        if error_code in [
+            "InvalidParameterValue",
+            "InvalidParameter",
+            "ValidationException",
+        ]:
             return AWSValidationError(f"{operation_name} failed: {error_message}")
         elif error_code in [
             "ResourceNotFound",
@@ -413,7 +425,11 @@ class AWSOperations:
             "InvalidInstanceID.NotFound",
         ]:
             return AWSEntityNotFoundError(f"{operation_name} failed: {error_message}")
-        elif error_code in ["Throttling", "RequestLimitExceeded", "TooManyRequestsException"]:
+        elif error_code in [
+            "Throttling",
+            "RequestLimitExceeded",
+            "TooManyRequestsException",
+        ]:
             return AWSRateLimitError(f"{operation_name} failed: {error_message}")
         elif error_code in ["UnauthorizedOperation", "AccessDenied", "Forbidden"]:
             return AWSPermissionError(f"{operation_name} failed: {error_message}")

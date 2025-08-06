@@ -11,7 +11,7 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 from functools import wraps
-from typing import Any, Callable, Dict, Generic, Optional, TypeVar
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from src.application.dto.base import BaseCommand, BaseResponse
 from src.application.interfaces.command_handler import CommandHandler
@@ -77,13 +77,17 @@ class BaseHandler(ABC):
                 if self.logger:
                     self.logger.log_domain_event(
                         "error",
-                        {"context": context, "error": str(e), "handler": self.__class__.__name__},
+                        {
+                            "context": context,
+                            "error": str(e),
+                            "handler": self.__class__.__name__,
+                        },
                     )
                 raise
 
     def with_monitoring(self, operation: str) -> Callable:
         """
-        Decorator for adding monitoring to handler operations.
+        Add monitoring to handler operations.
 
         Provides consistent logging, timing, and error handling
         across all handler operations.
@@ -147,7 +151,7 @@ class BaseHandler(ABC):
 
                         if self.logger:
                             self.logger.info(
-                                f"Completed operation: {operation_id} in {duration:.3f}s"
+                                f"Completed operation: {operation_id} in { duration:.3f}s"
                             )
 
                         return result
@@ -196,6 +200,7 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
         event_publisher: Optional[EventPublisherPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
     ):
+        """Initialize the instance."""
         super().__init__(logger, error_handler)
         self.event_publisher = event_publisher
 
@@ -253,7 +258,6 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
 
         Must be implemented by concrete command handlers.
         """
-        pass
 
     async def publish_events(self, events: list[DomainEvent]) -> None:
         """Publish domain events after successful command execution."""
@@ -343,7 +347,6 @@ class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
         Must be implemented by concrete query handlers.
         Now async for consistency with command handlers.
         """
-        pass
 
 
 class BaseProviderHandler(BaseHandler):
@@ -382,7 +385,7 @@ class BaseProviderHandler(BaseHandler):
                 duration = time.time() - start_time
                 if self.logger:
                     self.logger.info(
-                        f"Completed provider operation: {operation_id} in {duration:.3f}s"
+                        f"Completed provider operation: {operation_id} in { duration:.3f}s"
                     )
 
                 return result
@@ -398,7 +401,7 @@ class BaseProviderHandler(BaseHandler):
                 else:
                     if self.logger:
                         self.logger.warning(
-                            f"Provider operation failed (attempt {attempt + 1}): {str(e)}"
+                            f"Provider operation failed (attempt { attempt + 1}): { str(e)}"
                         )
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
 
@@ -409,4 +412,3 @@ class BaseProviderHandler(BaseHandler):
 
         Must be implemented by concrete provider handlers.
         """
-        pass

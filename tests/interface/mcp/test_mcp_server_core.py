@@ -1,14 +1,12 @@
 """Tests for MCP server core functionality."""
 
-import asyncio
 import json
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 from src.interface.mcp.server.core import (
     MCPMessage,
-    MCPMessageType,
     OpenHFPluginMCPServer,
 )
 

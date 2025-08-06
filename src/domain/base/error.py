@@ -30,13 +30,19 @@ class DomainError:
         """Create a new DomainError with additional detail."""
         new_details = {**self.details, key: value}
         return DomainError(
-            code=self.code, message=self.message, details=new_details, category=self.category
+            code=self.code,
+            message=self.message,
+            details=new_details,
+            category=self.category,
         )
 
     def with_category(self, category: str) -> "DomainError":
         """Create a new DomainError with different category."""
         return DomainError(
-            code=self.code, message=self.message, details=self.details, category=category
+            code=self.code,
+            message=self.message,
+            details=self.details,
+            category=category,
         )
 
 
@@ -54,5 +60,8 @@ class ErrorContext:
     def create(cls, operation: str, layer: str, request_id: Optional[str] = None) -> "ErrorContext":
         """Create error context with current timestamp."""
         return cls(
-            timestamp=datetime.utcnow(), operation=operation, layer=layer, request_id=request_id
+            timestamp=datetime.utcnow(),
+            operation=operation,
+            layer=layer,
+            request_id=request_id,
         )

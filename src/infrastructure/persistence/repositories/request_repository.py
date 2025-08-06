@@ -27,6 +27,7 @@ class RequestSerializer:
     """Handles Request aggregate serialization/deserialization."""
 
     def __init__(self):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
 
     def to_dict(self, request: Request) -> Dict[str, Any]:
@@ -58,8 +59,10 @@ class RequestSerializer:
                 "provider_data": request.provider_data or {},
                 # Timestamps
                 "created_at": request.created_at.isoformat(),
-                "started_at": request.started_at.isoformat() if request.started_at else None,
-                "completed_at": request.completed_at.isoformat() if request.completed_at else None,
+                "started_at": (request.started_at.isoformat() if request.started_at else None),
+                "completed_at": (
+                    request.completed_at.isoformat() if request.completed_at else None
+                ),
                 # Versioning
                 "version": request.version,
                 # Legacy fields for backward compatibility

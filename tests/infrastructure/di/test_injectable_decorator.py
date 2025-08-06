@@ -20,19 +20,16 @@ from src.infrastructure.di.decorators import (
 class MockPort:
     """Mock port interface."""
 
-    pass
-
 
 class MockService:
     """Mock service interface."""
-
-    pass
 
 
 class MockAdapter(MockPort):
     """Mock adapter implementation."""
 
     def __init__(self, name: str = "test"):
+        """Initialize the instance."""
         self.name = name
 
 

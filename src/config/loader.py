@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, TypeVar
 
-from src.config import AppConfig, validate_config
+from src.config.schemas import AppConfig, validate_config
 from src.domain.base.exceptions import ConfigurationError
 
 T = TypeVar("T")
@@ -67,7 +67,10 @@ class ConfigurationLoader:
         "AWS_CONNECTION_TIMEOUT_MS": ("aws", "connection_timeout_ms"),
         "AWS_REQUEST_RETRY_ATTEMPTS": ("aws", "request_retry_attempts"),
         "AWS_INSTANCE_PENDING_TIMEOUT_SEC": ("aws", "instance_pending_timeout_sec"),
-        "AWS_DESCRIBE_REQUEST_RETRY_ATTEMPTS": ("aws", "describe_request_retry_attempts"),
+        "AWS_DESCRIBE_REQUEST_RETRY_ATTEMPTS": (
+            "aws",
+            "describe_request_retry_attempts",
+        ),
         "AWS_DESCRIBE_REQUEST_INTERVAL": ("aws", "describe_request_interval"),
         # Logging configuration
         "LOG_LEVEL": ("logging", "level"),
@@ -127,7 +130,8 @@ class ConfigurationLoader:
         # Start with default configuration (lowest precedence)
         config = cls._load_default_config()
 
-        # Load main config.json with proper precedence (HF_PROVIDER_CONFDIR first, then config/)
+        # Load main config.json with proper precedence (HF_PROVIDER_CONFDIR first,
+        # then config/)
         main_config = cls._load_config_file("conf", "config.json", required=False)
         if main_config:
             cls._merge_config(config, main_config)
@@ -145,7 +149,7 @@ class ConfigurationLoader:
             )
             if file_config:
                 cls._merge_config(config, file_config)
-                get_config_logger().info(f"Loaded user configuration")
+                get_config_logger().info("Loaded user configuration")
             else:
                 get_config_logger().warning(f"User configuration file not found: {config_path}")
 
@@ -179,7 +183,7 @@ class ConfigurationLoader:
             return config
         else:
             get_config_logger().warning(
-                f"Failed to load default configuration from any location. "
+                "Failed to load default configuration from any location. "
                 "Using empty configuration."
             )
             return {}
@@ -363,7 +367,8 @@ class ConfigurationLoader:
         fallback_path = os.path.join(project_root, default_dir, filename)
 
         # Always return the fallback path, even if file doesn't exist
-        # This allows the caller to decide whether to create the file or handle the missing file
+        # This allows the caller to decide whether to create the file or handle
+        # the missing file
         get_config_logger().debug(f"Using fallback path: {fallback_path}")
         return fallback_path
 
@@ -454,7 +459,8 @@ class ConfigurationLoader:
         # Set up config paths based on HF_PROVIDER_CONFDIR
         if confdir:
             # Template paths are now handled by unified file resolution
-            # No need to override them here since the template loading will use resolve_file()
+            # No need to override them here since the template loading will use
+            # resolve_file()
             get_config_logger().debug(
                 f"HF_PROVIDER_CONFDIR set to: {confdir} (template paths will be resolved dynamically)"
             )
@@ -528,22 +534,18 @@ class ConfigurationLoader:
             return value.lower() == "true"
 
         # Try to convert to integer
-        try:
+        from contextlib import suppress
+
+        with suppress(ValueError):
             return int(value)
-        except ValueError:
-            pass
 
         # Try to convert to float
-        try:
+        with suppress(ValueError):
             return float(value)
-        except ValueError:
-            pass
 
         # Try to convert to JSON
-        try:
+        with suppress(json.JSONDecodeError):
             return json.loads(value)
-        except json.JSONDecodeError:
-            pass
 
         # Return as string if no conversion possible
         return value

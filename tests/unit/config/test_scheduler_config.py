@@ -3,8 +3,6 @@
 import os
 from unittest.mock import patch
 
-import pytest
-
 from src.config.schemas.app_schema import AppConfig
 from src.config.schemas.scheduler_schema import SchedulerConfig
 

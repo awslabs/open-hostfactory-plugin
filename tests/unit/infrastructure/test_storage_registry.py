@@ -1,7 +1,7 @@
 """Unit tests for Storage Registry (Corrected Architecture)."""
 
 import threading
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
@@ -253,7 +253,7 @@ class TestStorageRegistry:
 
         # Create multiple threads that create strategies simultaneously
         threads = []
-        for i in range(20):
+        for _i in range(20):
             thread = threading.Thread(target=create_strategy)
             threads.append(thread)
 

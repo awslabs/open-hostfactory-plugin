@@ -225,7 +225,11 @@ class AWSProviderStrategy(ProviderStrategy):
 
             # Update metadata with execution info
             result.metadata.update(
-                {"execution_time_ms": execution_time_ms, "provider": "aws", "dry_run": is_dry_run}
+                {
+                    "execution_time_ms": execution_time_ms,
+                    "provider": "aws",
+                    "dry_run": is_dry_run,
+                }
             )
 
             return result
@@ -236,12 +240,16 @@ class AWSProviderStrategy(ProviderStrategy):
             return ProviderResult.error_result(
                 f"AWS operation failed: {str(e)}",
                 "OPERATION_FAILED",
-                {"execution_time_ms": execution_time_ms, "provider": "aws", "dry_run": is_dry_run},
+                {
+                    "execution_time_ms": execution_time_ms,
+                    "provider": "aws",
+                    "dry_run": is_dry_run,
+                },
             )
 
     def _execute_operation_internal(self, operation: ProviderOperation) -> ProviderResult:
         """
-        Internal method to execute operations - separated for dry-run context wrapping.
+        Execute operations - separated for dry-run context wrapping.
 
         Args:
             operation: The operation to execute
@@ -266,7 +274,8 @@ class AWSProviderStrategy(ProviderStrategy):
             return self._handle_health_check(operation)
         else:
             return ProviderResult.error_result(
-                f"Unsupported operation: {operation.operation_type}", "UNSUPPORTED_OPERATION"
+                f"Unsupported operation: {operation.operation_type}",
+                "UNSUPPORTED_OPERATION",
             )
 
     def _handle_create_instances(self, operation: ProviderOperation) -> ProviderResult:
@@ -318,7 +327,8 @@ class AWSProviderStrategy(ProviderStrategy):
             from src.domain.request.aggregate import Request
             from src.domain.request.value_objects import RequestType
 
-            # Use the domain aggregate's factory method - it handles RequestId generation properly
+            # Use the domain aggregate's factory method - it handles RequestId
+            # generation properly
             request = Request.create_new_request(
                 request_type=RequestType.ACQUIRE,
                 template_id=aws_template.template_id,
@@ -459,7 +469,8 @@ class AWSProviderStrategy(ProviderStrategy):
 
             if not template_config:
                 return ProviderResult.error_result(
-                    "Template configuration is required for validation", "MISSING_TEMPLATE_CONFIG"
+                    "Template configuration is required for validation",
+                    "MISSING_TEMPLATE_CONFIG",
                 )
 
             # Perform AWS-specific template validation
@@ -499,7 +510,8 @@ class AWSProviderStrategy(ProviderStrategy):
 
             if not resource_ids:
                 return ProviderResult.error_result(
-                    "Resource IDs are required for instance discovery", "MISSING_RESOURCE_IDS"
+                    "Resource IDs are required for instance discovery",
+                    "MISSING_RESOURCE_IDS",
                 )
 
             # Get the appropriate handler based on provider_api
@@ -518,7 +530,7 @@ class AWSProviderStrategy(ProviderStrategy):
 
             # Create a minimal request object for the handler
             from src.domain.request.aggregate import Request
-            from src.domain.request.value_objects import RequestId, RequestType
+            from src.domain.request.value_objects import RequestType
 
             # Create request with the resource IDs
             request = Request.create_new_request(
@@ -532,14 +544,18 @@ class AWSProviderStrategy(ProviderStrategy):
             # Set the resource IDs in the request
             request.resource_ids = resource_ids
 
-            # Use the handler's check_hosts_status method for resource-to-instance discovery
+            # Use the handler's check_hosts_status method for resource-to-instance
+            # discovery
             instance_details = handler.check_hosts_status(request)
 
             if not instance_details:
                 self._logger.info(f"No instances found for resources: {resource_ids}")
                 return ProviderResult.success_result(
                     {"instances": []},
-                    {"operation": "describe_resource_instances", "resource_ids": resource_ids},
+                    {
+                        "operation": "describe_resource_instances",
+                        "resource_ids": resource_ids,
+                    },
                 )
 
             # Format instance details for consistent output
@@ -617,7 +633,13 @@ class AWSProviderStrategy(ProviderStrategy):
                 "tags_support": True,
                 "monitoring": True,
                 "regions": ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"],
-                "instance_types": ["t3.micro", "t3.small", "t3.medium", "m5.large", "c5.large"],
+                "instance_types": [
+                    "t3.micro",
+                    "t3.small",
+                    "t3.medium",
+                    "m5.large",
+                    "c5.large",
+                ],
                 "max_instances_per_request": 1000,
                 "supports_windows": True,
                 "supports_linux": True,
@@ -852,11 +874,11 @@ class AWSProviderStrategy(ProviderStrategy):
             self._logger.warning(f"Error during AWS provider cleanup: {e}")
 
     def __str__(self) -> str:
-        """String representation for debugging."""
+        """Return string representation for debugging."""
         return f"AWSProviderStrategy(region={self._aws_config.region}, initialized={self._initialized})"
 
     def __repr__(self) -> str:
-        """Detailed representation for debugging."""
+        """Return detailed representation for debugging."""
         return (
             f"AWSProviderStrategy("
             f"region={self._aws_config.region}, "

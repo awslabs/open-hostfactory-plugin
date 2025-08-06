@@ -5,12 +5,9 @@ Provides MCP tools that can be directly integrated into AI assistants
 without requiring a separate server process.
 """
 
-import asyncio
-import json
 from typing import Any, Dict, List, Optional
 
 from src.sdk.client import OpenHFPluginSDK
-from src.sdk.exceptions import SDKError
 
 from .discovery import MCPToolDefinition, MCPToolDiscovery
 
@@ -246,7 +243,7 @@ class OpenHFPluginMCPTools:
         }
 
     def __repr__(self) -> str:
-        """String representation of MCP tools instance."""
+        """Return string representation of MCP tools instance."""
         status = "initialized" if self._initialized else "not initialized"
         tool_count = len(self.tools) if self._initialized else 0
         return f"OpenHFPluginMCPTools(status='{status}', tools={tool_count})"

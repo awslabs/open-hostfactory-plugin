@@ -99,7 +99,10 @@ class HealthCheck:
         except Exception as e:
             logger.error(f"Health check {name} failed: {e}")
             return HealthStatus(
-                name=name, status="unhealthy", details={"error": str(e)}, dependencies=[]
+                name=name,
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=[],
             )
 
     def run_all_checks(self) -> Dict[str, HealthStatus]:
@@ -205,7 +208,10 @@ class HealthCheck:
             )
         except Exception as e:
             return HealthStatus(
-                name="system", status="unhealthy", details={"error": str(e)}, dependencies=["os"]
+                name="system",
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=["os"],
             )
 
     def _check_disk_health(self) -> HealthStatus:
@@ -241,7 +247,10 @@ class HealthCheck:
             )
         except Exception as e:
             return HealthStatus(
-                name="disk", status="unhealthy", details={"error": str(e)}, dependencies=["os"]
+                name="disk",
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=["os"],
             )
 
     def _check_aws_health(self) -> HealthStatus:
@@ -270,7 +279,10 @@ class HealthCheck:
             )
         except Exception as e:
             return HealthStatus(
-                name="aws", status="unhealthy", details={"error": str(e)}, dependencies=["aws"]
+                name="aws",
+                status="unhealthy",
+                details={"error": str(e)},
+                dependencies=["aws"],
             )
 
     def _check_ec2_health(self) -> HealthStatus:

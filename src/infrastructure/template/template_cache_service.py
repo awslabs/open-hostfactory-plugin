@@ -7,7 +7,7 @@ from typing import Callable, List, Optional
 
 from src.domain.base.ports import LoggingPort
 
-from .dtos import TemplateCacheEntryDTO, TemplateDTO
+from .dtos import TemplateDTO
 
 
 class TemplateCacheService(ABC):
@@ -56,23 +56,22 @@ class NoOpTemplateCacheService(TemplateCacheService):
         self._logger = logger
 
     def get_or_load(self, loader_func: Callable[[], List[TemplateDTO]]) -> List[TemplateDTO]:
-        """Always load fresh data, no caching."""
+        """Load fresh data, no caching."""
         self._logger.debug("NoOpTemplateCacheService: Loading fresh templates")
         return loader_func()
 
     def get_all(self) -> Optional[List[TemplateDTO]]:
-        """Always returns None as nothing is cached."""
+        """Return None as nothing is cached."""
         return None
 
     def put(self, key: str, template: TemplateDTO) -> None:
         """No-op for putting templates in cache."""
-        pass
 
     def invalidate(self) -> None:
         """No-op for invalidation."""
 
     def is_cached(self) -> bool:
-        """Always returns False as nothing is cached."""
+        """Return False as nothing is cached."""
         return False
 
 
@@ -181,7 +180,10 @@ class AutoRefreshTemplateCacheService(TTLTemplateCacheService):
     """
 
     def __init__(
-        self, ttl_seconds: int = 300, auto_refresh: bool = False, logger: LoggingPort = None
+        self,
+        ttl_seconds: int = 300,
+        auto_refresh: bool = False,
+        logger: LoggingPort = None,
     ):
         """
         Initialize auto-refresh cache service.
@@ -251,7 +253,7 @@ def create_template_cache_service(
     cache_type: str = "noop", logger: LoggingPort = None, **kwargs
 ) -> TemplateCacheService:
     """
-    Factory function to create template cache service.
+    Create template cache service.
 
     Args:
         cache_type: Type of cache ("noop", "ttl", "auto_refresh")

@@ -1,7 +1,5 @@
 """Storage query handlers for administrative operations."""
 
-from typing import Any, Dict, List
-
 from src.application.base.handlers import BaseQueryHandler
 from src.application.decorators import query_handler
 from src.application.dto.system import (
@@ -49,7 +47,7 @@ class ListStorageStrategiesHandler(
         for storage_type in storage_types:
             strategy_info = {
                 "name": storage_type,
-                "active": storage_type == current_strategy if query.include_current else False,
+                "active": (storage_type == current_strategy if query.include_current else False),
                 "registered": True,
             }
 
@@ -69,7 +67,9 @@ class ListStorageStrategiesHandler(
             strategies.append(strategy_info)
 
         return StorageStrategyListResponse(
-            strategies=strategies, current_strategy=current_strategy, total_count=len(strategies)
+            strategies=strategies,
+            current_strategy=current_strategy,
+            total_count=len(strategies),
         )
 
 
@@ -93,7 +93,7 @@ class GetStorageHealthHandler(BaseQueryHandler[GetStorageHealthQuery, StorageHea
             strategy_name=query.strategy_name or "current",
             healthy=True,
             status="operational",
-            details={} if not query.detailed else {"connections": "active", "latency": "low"},
+            details=({} if not query.detailed else {"connections": "active", "latency": "low"}),
         )
 
 
@@ -119,5 +119,5 @@ class GetStorageMetricsHandler(BaseQueryHandler[GetStorageMetricsQuery, StorageM
             operations_count=0,
             average_latency=0.0,
             error_rate=0.0,
-            details={} if not query.include_operations else {"read_ops": 0, "write_ops": 0},
+            details=({} if not query.include_operations else {"read_ops": 0, "write_ops": 0}),
         )

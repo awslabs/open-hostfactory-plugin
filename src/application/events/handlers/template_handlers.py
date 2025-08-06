@@ -5,8 +5,6 @@ These handlers replace the duplicated code in consolidated_event_handlers.py
 with a clean, maintainable architecture following DDD/SOLID/DRY principles.
 """
 
-from typing import Optional
-
 # Import the new base classes and decorator
 from src.application.base.event_handlers import BaseLoggingEventHandler
 from src.application.events.decorators import event_handler
@@ -60,7 +58,12 @@ class TemplateUpdatedHandler(BaseLoggingEventHandler):
         """Format template updated message."""
         fields = self.extract_fields(
             event,
-            {"template_name": "unknown", "changes": [], "updated_by": "system", "version": None},
+            {
+                "template_name": "unknown",
+                "changes": [],
+                "updated_by": "system",
+                "version": None,
+            },
         )
 
         message = f"Template updated: {fields['template_name']} | " f"By: {fields['updated_by']}"

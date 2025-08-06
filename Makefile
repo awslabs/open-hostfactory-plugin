@@ -143,7 +143,10 @@ lint: dev-install quality-check  ## Run all linting checks including quality che
 	@echo "Running pylint (code analysis)..."
 	$(BIN)/pylint $(PACKAGE)
 
-format: dev-install  ## Format code (Black + isort)
+format: dev-install  ## Format code (Black + isort + autopep8 + whitespace cleanup)
+	@echo "Cleaning up whitespace in blank lines..."
+	@find $(PACKAGE) $(TESTS) -name "*.py" -exec sed -i '' 's/^[[:space:]]*$$//' {} \;
+	$(BIN)/autopep8 --in-place --max-line-length=88 --select=E501 --recursive $(PACKAGE) $(TESTS)
 	$(BIN)/black $(PACKAGE) $(TESTS)
 	$(BIN)/isort $(PACKAGE) $(TESTS)
 
@@ -383,10 +386,26 @@ build-test: build  ## Build and test package installation
 	./dev-tools/package/test-install.sh
 
 # CI/CD targets
-ci: dev-install lint security test-all test-report  ## Run full CI pipeline
-	@echo "CI pipeline completed successfully!"
+ci-check: dev-install  ## Run comprehensive CI checks (matches GitHub Actions exactly)
+	@echo "Running comprehensive CI checks that match GitHub Actions pipeline..."
+	$(PYTHON) dev-tools/scripts/ci_check.py
 
-ci-quick: dev-install lint test-quick  ## Run quick CI pipeline
+ci-check-quick: dev-install  ## Run quick CI checks (fast checks only)
+	@echo "Running quick CI checks..."
+	$(PYTHON) dev-tools/scripts/ci_check.py --quick
+
+ci-check-fix: dev-install  ## Run CI checks with automatic formatting fixes
+	@echo "Running CI checks with automatic fixes..."
+	$(PYTHON) dev-tools/scripts/ci_check.py --fix
+
+ci-check-verbose: dev-install  ## Run CI checks with verbose output
+	@echo "Running CI checks with verbose output..."
+	$(PYTHON) dev-tools/scripts/ci_check.py --verbose
+
+ci: ci-check test-all  ## Run full CI pipeline (comprehensive checks + all tests)
+	@echo "Full CI pipeline completed successfully!"
+
+ci-quick: ci-check-quick  ## Run quick CI pipeline (fast checks only)
 	@echo "Quick CI pipeline completed successfully!"
 
 # Cleanup targets

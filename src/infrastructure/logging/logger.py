@@ -16,6 +16,7 @@ class JsonFormatter(logging.Formatter):
     """Format log records as JSON."""
 
     def __init__(self, **kwargs: Any) -> None:
+        """Initialize the instance."""
         super().__init__()
         self.default_fields = kwargs
 
@@ -31,7 +32,7 @@ class JsonFormatter(logging.Formatter):
         except Exception as e:
             # Can't use logger here to avoid recursion
             # Just use full path and continue
-            logger.warning(
+            print(
                 f"Warning: Error formatting log path: {e}"
             )  # Simple console output for logging system errors
 
@@ -167,7 +168,9 @@ def setup_logging(config: LoggingConfig) -> None:
 
         # Create rotating file handler
         file_handler = logging.handlers.RotatingFileHandler(
-            filename=str(log_path), maxBytes=config.max_size, backupCount=config.backup_count
+            filename=str(log_path),
+            maxBytes=config.max_size,
+            backupCount=config.backup_count,
         )
         file_handler.setFormatter(json_formatter)
         root_logger.addHandler(file_handler)

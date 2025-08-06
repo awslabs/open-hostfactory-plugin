@@ -100,7 +100,9 @@ class InfrastructureErrorResponse(BaseDTO):
         }
 
     @staticmethod
-    def _exception_to_components(exception: Exception) -> tuple[str, str, str, Dict[str, Any]]:
+    def _exception_to_components(
+        exception: Exception,
+    ) -> tuple[str, str, str, Dict[str, Any]]:
         """Convert exception to error components."""
         if isinstance(exception, ValidationError):
             return (

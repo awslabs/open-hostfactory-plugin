@@ -10,8 +10,6 @@ This module handles presentation formatting for the CLI, including:
 
 from typing import Any, Dict, List
 
-from src.domain.request.value_objects import RequestStatus
-
 
 def format_output(data: Any, format_type: str) -> str:
     """Format data according to the specified format type."""
@@ -82,7 +80,8 @@ def format_templates_table(templates: List[Dict]) -> str:
         table.add_column("RAM (MB)", style="yellow", justify="right", width=10)
         table.add_column("Max Inst", style="red", justify="right", width=8)
 
-        # Add rows - use direct field access since Pydantic provides consistent field names
+        # Add rows - use direct field access since Pydantic provides consistent
+        # field names
         for template in templates:
             # Handle both snake_case and camelCase field names (from Pydantic aliases)
             template_id = template.get("template_id") or template.get("templateId", "N/A")
@@ -393,7 +392,9 @@ def format_requests_table(requests: List[Dict]) -> str:
             str(status)[:10],
             str(template_id)[:15],
             str(num_requested),
-            str(created_at)[:19] if created_at != "N/A" else str(created_at),  # Show date/time only
+            (
+                str(created_at)[:19] if created_at != "N/A" else str(created_at)
+            ),  # Show date/time only
         ]
         rows.append(row)
 

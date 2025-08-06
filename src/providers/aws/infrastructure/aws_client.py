@@ -16,7 +16,7 @@ from src.providers.aws.exceptions.aws_exceptions import (
 )
 
 if TYPE_CHECKING:
-    from src.config.manager import ConfigurationManager
+    pass
 
 # Type variable for generic function return type
 T = TypeVar("T")
@@ -46,7 +46,10 @@ class AWSClient:
         # Configure retry settings
         self.boto_config = Config(
             region_name=self.region_name,
-            retries={"max_attempts": self.config.get("AWS_MAX_RETRIES", 3), "mode": "adaptive"},
+            retries={
+                "max_attempts": self.config.get("AWS_MAX_RETRIES", 3),
+                "mode": "adaptive",
+            },
             connect_timeout=self.config.get("AWS_CONNECT_TIMEOUT", 5),
             read_timeout=self.config.get("AWS_READ_TIMEOUT", 10),
         )

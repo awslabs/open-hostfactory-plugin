@@ -12,6 +12,7 @@ class ConfigCacheManager:
     """Manages configuration caching and reloading."""
 
     def __init__(self):
+        """Initialize the instance."""
         self._config_cache: Dict[Type, Any] = {}
         self._cache_lock = threading.RLock()
         self._last_reload_time: Optional[float] = None

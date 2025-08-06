@@ -10,12 +10,8 @@ This test validates all corner cases and edge scenarios for:
 5. Template field variations and validation
 """
 
-import json
 import os
 import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -107,12 +103,8 @@ def test_launch_template_edge_cases():
 
         # Import required classes
         try:
-            from src.domain.request.aggregate import Request
             from src.providers.aws.domain.template.aggregate import AWSTemplate
             from src.providers.aws.domain.template.value_objects import ProviderApi
-            from src.providers.aws.infrastructure.launch_template.manager import (
-                AWSLaunchTemplateManager,
-            )
         except ImportError as e:
             print(f"   Could not import required classes: {e}")
             return False
@@ -206,7 +198,7 @@ def test_launch_template_edge_cases():
                 # Validate template creation
                 try:
                     aws_template = AWSTemplate.model_validate(template_data)
-                    print(f"       Template created successfully")
+                    print("       Template created successfully")
                 except Exception as e:
                     if case["expected_behavior"] == "validation_error":
                         print(f"       Expected validation error: {e}")
@@ -724,9 +716,9 @@ def test_request_machine_flows():
                 # Check machine relationships
                 machine_request_ids = [m["request_id"] for m in machines]
                 if all(rid == request_id for rid in machine_request_ids):
-                    print(f"       PASS: All machines linked to correct request")
+                    print("       PASS: All machines linked to correct request")
                 else:
-                    print(f"       FAIL: Machine request ID mismatch")
+                    print("       FAIL: Machine request ID mismatch")
                     continue
 
                 # Determine actual relationship
@@ -919,7 +911,7 @@ def test_error_handling_scenarios():
 
                 # Simulate error handling logic
                 if error_type == "throttling":
-                    actual_behavior = "retry_with_backoff"
+                    actual_behavior = "retry_with_backof"
                 elif error_type == "invalid_resource":
                     actual_behavior = "fail_fast"
                 elif error_type == "capacity_error":

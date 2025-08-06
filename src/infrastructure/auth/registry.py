@@ -1,7 +1,7 @@
 """Authentication strategy registry."""
 
 import threading
-from typing import Any, Callable, Dict, Type
+from typing import Callable, Dict
 
 from src.infrastructure.logging.logger import get_logger
 from src.infrastructure.ports.auth import AuthPort

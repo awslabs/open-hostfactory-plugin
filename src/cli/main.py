@@ -9,12 +9,10 @@ This module provides the main CLI interface including:
 
 import argparse
 import asyncio
-import inspect
 import logging
 import os
 import sys
-import warnings
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from src.cli.completion import generate_bash_completion, generate_zsh_completion
 from src.cli.formatters import format_output
@@ -42,7 +40,7 @@ Examples:
   %(prog)s templates list --format table     # Display as table
   %(prog)s machines request template-id 5    # Request 5 machines
   %(prog)s requests list --status pending    # List pending requests
-  
+
 For more information, visit: https://github.com/aws-samples/open-hostfactory-plugin
         """,
     )
@@ -56,13 +54,18 @@ For more information, visit: https://github.com/aws-samples/open-hostfactory-plu
         help="Set logging level",
     )
     parser.add_argument(
-        "--format", choices=["json", "yaml", "table", "list"], default="json", help="Output format"
+        "--format",
+        choices=["json", "yaml", "table", "list"],
+        default="json",
+        help="Output format",
     )
     parser.add_argument("--output", help="Output file (default: stdout)")
     parser.add_argument("--quiet", action="store_true", help="Suppress non-essential output")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be done without executing"
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without executing",
     )
     parser.add_argument(
         "--scheduler",
@@ -213,7 +216,9 @@ For more information, visit: https://github.com/aws-samples/open-hostfactory-plu
     # Requests list
     requests_list = requests_subparsers.add_parser("list", help="List all requests")
     requests_list.add_argument(
-        "--status", choices=[s.value for s in RequestStatus], help="Filter by request status"
+        "--status",
+        choices=[s.value for s in RequestStatus],
+        help="Filter by request status",
     )
     requests_list.add_argument("--template-id", help="Filter by template ID")
     requests_list.add_argument(
@@ -428,7 +433,10 @@ For more information, visit: https://github.com/aws-samples/open-hostfactory-plu
     # MCP tools list
     mcp_tools_list = mcp_tools_sub.add_parser("list", help="List available MCP tools")
     mcp_tools_list.add_argument(
-        "--format", choices=["json", "yaml", "table"], default="table", help="Output format"
+        "--format",
+        choices=["json", "yaml", "table"],
+        default="table",
+        help="Output format",
     )
     mcp_tools_list.add_argument(
         "--type", choices=["command", "query"], help="Filter tools by handler type"
@@ -440,21 +448,30 @@ For more information, visit: https://github.com/aws-samples/open-hostfactory-plu
     mcp_tools_call.add_argument("--args", help="Tool arguments as JSON string")
     mcp_tools_call.add_argument("--file", help="Tool arguments from JSON file")
     mcp_tools_call.add_argument(
-        "--format", choices=["json", "yaml", "table"], default="json", help="Output format"
+        "--format",
+        choices=["json", "yaml", "table"],
+        default="json",
+        help="Output format",
     )
 
     # MCP tools info
     mcp_tools_info = mcp_tools_sub.add_parser("info", help="Get information about MCP tool")
     mcp_tools_info.add_argument("tool_name", help="Name of tool to get info for")
     mcp_tools_info.add_argument(
-        "--format", choices=["json", "yaml", "table"], default="table", help="Output format"
+        "--format",
+        choices=["json", "yaml", "table"],
+        default="table",
+        help="Output format",
     )
 
     # MCP validate
     mcp_validate = mcp_subparsers.add_parser("validate", help="Validate MCP configuration")
     mcp_validate.add_argument("--config", help="MCP configuration file to validate")
     mcp_validate.add_argument(
-        "--format", choices=["json", "yaml", "table"], default="table", help="Output format"
+        "--format",
+        choices=["json", "yaml", "table"],
+        default="table",
+        help="Output format",
     )
 
     # MCP serve
@@ -462,7 +479,9 @@ For more information, visit: https://github.com/aws-samples/open-hostfactory-plu
     mcp_serve.add_argument("--port", type=int, default=3000, help="Server port (default: 3000)")
     mcp_serve.add_argument("--host", default="localhost", help="Server host (default: localhost)")
     mcp_serve.add_argument(
-        "--stdio", action="store_true", help="Run in stdio mode for direct MCP client communication"
+        "--stdio",
+        action="store_true",
+        help="Run in stdio mode for direct MCP client communication",
     )
     mcp_serve.add_argument(
         "--log-level",
@@ -651,7 +670,7 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
 
 async def main() -> None:
-    """Main CLI entry point."""
+    """Serve as main CLI entry point."""
     try:
         # Check if no arguments provided (except program name)
         if len(sys.argv) == 1:
@@ -711,8 +730,9 @@ async def main() -> None:
                 print(generate_zsh_completion())
             return
 
-        # Configure logging - let the application's proper logging system handle everything
-        log_level = getattr(logging, args.log_level.upper())
+        # Configure logging - let the application's proper logging system handle
+        # everything
+        getattr(logging, args.log_level.upper())
 
         logger = get_logger(__name__)
 
@@ -780,6 +800,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    import asyncio
-
     asyncio.run(main())

@@ -187,7 +187,8 @@ class AWSMachineAdapter:
                 else:
                     self._logger.error(f"AWS error during health check: {str(e)}")
                     raise AWSError(
-                        f"AWS error during health check: {str(e)}", error_code=error_code
+                        f"AWS error during health check: {str(e)}",
+                        error_code=error_code,
                     )
 
             if not status["InstanceStatuses"]:
@@ -292,7 +293,10 @@ class AWSMachineAdapter:
                     """Get EBS volumes attached to the EC2 instance."""
                     return self._aws_client.ec2_client.describe_volumes(
                         Filters=[
-                            {"Name": "attachment.instance-id", "Value": [str(machine.machine_id)]}
+                            {
+                                "Name": "attachment.instance-id",
+                                "Value": [str(machine.machine_id)],
+                            }
                         ]
                     )
 
@@ -308,7 +312,7 @@ class AWSMachineAdapter:
                                 f"Detaching volume {volume_id} from {machine.machine_id}"
                             )
 
-                            def detach_volume():
+                            def detach_volume(volume_id=volume_id):
                                 return self._aws_client.ec2_client.detach_volume(VolumeId=volume_id)
 
                             self._aws_client.execute_with_circuit_breaker(
@@ -317,8 +321,8 @@ class AWSMachineAdapter:
 
                             self._logger.debug(f"Deleting volume {volume_id}")
 
-                            def delete_volume():
-                                return self._aws_client.ec2_client.delete_volume(VolumeId=volume_id)
+                            def delete_volume(vol_id=volume_id):
+                                return self._aws_client.ec2_client.delete_volume(VolumeId=vol_id)
 
                             self._aws_client.execute_with_circuit_breaker(
                                 "ec2", "delete_volume", delete_volume
@@ -341,7 +345,10 @@ class AWSMachineAdapter:
                     """Get network interfaces attached to the EC2 instance."""
                     return self._aws_client.ec2_client.describe_network_interfaces(
                         Filters=[
-                            {"Name": "attachment.instance-id", "Value": [str(machine.machine_id)]}
+                            {
+                                "Name": "attachment.instance-id",
+                                "Value": [str(machine.machine_id)],
+                            }
                         ]
                     )
 
@@ -358,24 +365,28 @@ class AWSMachineAdapter:
                                 f"Detaching network interface {nic_id} from {machine.machine_id}"
                             )
 
-                            def detach_network_interface():
+                            def detach_network_interface(attachment_id=attachment_id):
                                 return self._aws_client.ec2_client.detach_network_interface(
                                     AttachmentId=attachment_id
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(
-                                "ec2", "detach_network_interface", detach_network_interface
+                                "ec2",
+                                "detach_network_interface",
+                                detach_network_interface,
                             )
 
                             self._logger.debug(f"Deleting network interface {nic_id}")
 
-                            def delete_network_interface():
+                            def delete_network_interface(network_id=nic_id):
                                 return self._aws_client.ec2_client.delete_network_interface(
-                                    NetworkInterfaceId=nic_id
+                                    NetworkInterfaceId=network_id
                                 )
 
                             self._aws_client.execute_with_circuit_breaker(
-                                "ec2", "delete_network_interface", delete_network_interface
+                                "ec2",
+                                "delete_network_interface",
+                                delete_network_interface,
                             )
 
                             cleanup_results["network_interfaces"]["success"].append(nic_id)
@@ -458,7 +469,8 @@ class AWSMachineAdapter:
                 else:
                     self._logger.error(f"AWS error getting machine details: {str(e)}")
                     raise AWSError(
-                        f"AWS error getting machine details: {str(e)}", error_code=error_code
+                        f"AWS error getting machine details: {str(e)}",
+                        error_code=error_code,
                     )
 
             # Build details object

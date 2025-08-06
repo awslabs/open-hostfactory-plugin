@@ -3,7 +3,6 @@
 from typing import Optional
 
 from src.domain.base.dependency_injection import injectable
-from src.domain.base.ports import LoggingPort
 from src.infrastructure.persistence.base.unit_of_work import BaseUnitOfWork
 
 # Import new simplified repositories
@@ -28,6 +27,7 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
     def __init__(
         self,
         aws_client,
+        logger,
         region: str,
         profile: Optional[str] = None,
         machine_table: str = "machines",
@@ -54,15 +54,24 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
 
         # Create storage strategies for each repository
         machine_strategy = DynamoDBStorageStrategy(
-            aws_client=aws_client, region=region, table_name=machine_table, profile=profile
+            aws_client=aws_client,
+            region=region,
+            table_name=machine_table,
+            profile=profile,
         )
 
         request_strategy = DynamoDBStorageStrategy(
-            aws_client=aws_client, region=region, table_name=request_table, profile=profile
+            aws_client=aws_client,
+            region=region,
+            table_name=request_table,
+            profile=profile,
         )
 
         template_strategy = DynamoDBStorageStrategy(
-            aws_client=aws_client, region=region, table_name=template_table, profile=profile
+            aws_client=aws_client,
+            region=region,
+            table_name=template_table,
+            profile=profile,
         )
 
         # Create repositories using simplified implementations

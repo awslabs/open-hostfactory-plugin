@@ -91,10 +91,15 @@ class ASGHandler(AWSHandler):
                 "provider_data": {"resource_type": "asg"},
             }
         except Exception as e:
-            return {"success": False, "resource_ids": [], "instances": [], "error_message": str(e)}
+            return {
+                "success": False,
+                "resource_ids": [],
+                "instances": [],
+                "error_message": str(e),
+            }
 
     def _create_asg_internal(self, request: Request, aws_template: AWSTemplate) -> str:
-        """Internal method for ASG creation with pure business logic."""
+        """Create ASG with pure business logic."""
         # Validate ASG specific prerequisites
         self._validate_asg_prerequisites(aws_template)
 
@@ -309,8 +314,16 @@ class ASGHandler(AWSHandler):
             "HealthCheckType": getattr(aws_template, "health_check_type", "EC2"),
             "HealthCheckGracePeriod": getattr(aws_template, "health_check_grace_period", 300),
             "Tags": [
-                {"Key": "Name", "Value": f"hf-{request.request_id}", "PropagateAtLaunch": True},
-                {"Key": "RequestId", "Value": str(request.request_id), "PropagateAtLaunch": True},
+                {
+                    "Key": "Name",
+                    "Value": f"hf-{request.request_id}",
+                    "PropagateAtLaunch": True,
+                },
+                {
+                    "Key": "RequestId",
+                    "Value": str(request.request_id),
+                    "PropagateAtLaunch": True,
+                },
                 {
                     "Key": "TemplateId",
                     "Value": str(aws_template.template_id),
@@ -426,8 +439,16 @@ class ASGHandler(AWSHandler):
         """Add tags to the ASG."""
         try:
             tags = [
-                {"Key": "Name", "Value": f"hf-{request.request_id}", "PropagateAtLaunch": True},
-                {"Key": "RequestId", "Value": str(request.request_id), "PropagateAtLaunch": True},
+                {
+                    "Key": "Name",
+                    "Value": f"hf-{request.request_id}",
+                    "PropagateAtLaunch": True,
+                },
+                {
+                    "Key": "RequestId",
+                    "Value": str(request.request_id),
+                    "PropagateAtLaunch": True,
+                },
                 {
                     "Key": "TemplateId",
                     "Value": str(aws_template.template_id),

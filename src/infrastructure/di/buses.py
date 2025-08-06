@@ -44,6 +44,7 @@ class QueryBus:
     """
 
     def __init__(self, container: DIContainer, logger: LoggingPort):
+        """Initialize the instance."""
         self.container = container
         self.logger = logger
 
@@ -69,11 +70,11 @@ class QueryBus:
             handler = self.container.get(handler_class)
             return await handler.handle(query)
 
-        except KeyError as e:
+        except KeyError:
             # Try lazy CQRS setup if handler not found and lazy loading is enabled
             if self.container.is_lazy_loading_enabled():
                 self.logger.debug(
-                    f"Handler not found for query {type(query).__name__}, triggering lazy CQRS setup"
+                    f"Handler not found for query { type(query).__name__}, triggering lazy CQRS setup"
                 )
                 self._trigger_lazy_cqrs_setup()
 
@@ -84,7 +85,7 @@ class QueryBus:
                     return await handler.handle(query)
                 except KeyError:
                     self.logger.error(
-                        f"No handler registered for query: {type(query).__name__} (even after lazy setup)"
+                        f"No handler registered for query: { type(query).__name__} (even after lazy setup)"
                     )
                     raise
             else:
@@ -143,11 +144,11 @@ class CommandBus:
             handler = self.container.get(handler_class)
             return await handler.handle(command)
 
-        except KeyError as e:
+        except KeyError:
             # Try lazy CQRS setup if handler not found and lazy loading is enabled
             if self.container.is_lazy_loading_enabled():
                 self.logger.debug(
-                    f"Handler not found for command {type(command).__name__}, triggering lazy CQRS setup"
+                    f"Handler not found for command { type(command).__name__}, triggering lazy CQRS setup"
                 )
                 self._trigger_lazy_cqrs_setup()
 
@@ -158,7 +159,7 @@ class CommandBus:
                     return await handler.handle(command)
                 except KeyError:
                     self.logger.error(
-                        f"No handler registered for command: {type(command).__name__} (even after lazy setup)"
+                        f"No handler registered for command: { type(command).__name__} (even after lazy setup)"
                     )
                     raise
             else:

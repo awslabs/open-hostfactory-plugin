@@ -5,7 +5,7 @@ functionality while providing performance improvements.
 """
 
 import asyncio
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -240,7 +240,7 @@ class TestLazyLoadingPerformanceIntegration:
         import time
 
         start_time = time.time()
-        app = Application()
+        Application()
         creation_time = (time.time() - start_time) * 1000
 
         # Creation should be very fast (lazy loading)
@@ -254,7 +254,7 @@ class TestLazyLoadingPerformanceIntegration:
         await app.initialize()
 
         start_time = time.time()
-        query_bus = app.get_query_bus()
+        app.get_query_bus()
         first_access_time = (time.time() - start_time) * 1000
 
         # First access should be reasonable (triggers lazy loading)
@@ -274,7 +274,7 @@ class TestLazyLoadingPerformanceIntegration:
 
         # Second access (should be cached)
         start_time = time.time()
-        query_bus = app.get_query_bus()
+        app.get_query_bus()
         cached_access_time = (time.time() - start_time) * 1000
 
         # Cached access should be very fast

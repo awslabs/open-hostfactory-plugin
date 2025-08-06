@@ -4,6 +4,8 @@ All query handlers are now automatically discovered and registered via
 @query_handler decorators through the Handler Discovery System.
 """
 
+from src.domain.base.ports import LoggingPort
+from src.infrastructure.di.buses import QueryBus
 from src.infrastructure.di.container import DIContainer
 
 
@@ -31,7 +33,6 @@ def _register_template_query_handlers(container: DIContainer) -> None:
 
     # All template query handlers are now automatically discovered and registered
     # via @query_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_request_query_handlers(container: DIContainer) -> None:
@@ -39,7 +40,6 @@ def _register_request_query_handlers(container: DIContainer) -> None:
 
     # All request query handlers are now automatically discovered and registered
     # via @query_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_machine_query_handlers(container: DIContainer) -> None:
@@ -47,7 +47,6 @@ def _register_machine_query_handlers(container: DIContainer) -> None:
 
     # All machine query handlers are now automatically discovered and registered
     # via @query_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_system_query_handlers(container: DIContainer) -> None:
@@ -55,7 +54,6 @@ def _register_system_query_handlers(container: DIContainer) -> None:
 
     # All system query handlers are now automatically discovered and registered
     # via @query_handler decorators through the Handler Discovery System
-    pass
 
 
 def _register_specialized_query_handlers(container: DIContainer) -> None:
@@ -63,7 +61,6 @@ def _register_specialized_query_handlers(container: DIContainer) -> None:
 
     # All specialized query handlers are now automatically discovered and registered
     # via @query_handler decorators through the Handler Discovery System
-    pass
 
 
 def register_query_handlers_with_bus(container: DIContainer) -> None:
@@ -147,7 +144,8 @@ def register_query_handlers_with_bus(container: DIContainer) -> None:
 
             query_bus.register(GetProviderConfigQuery, container.get(GetProviderConfigHandler))
             query_bus.register(
-                ValidateProviderConfigQuery, container.get(ValidateProviderConfigHandler)
+                ValidateProviderConfigQuery,
+                container.get(ValidateProviderConfigHandler),
             )
             query_bus.register(GetSystemStatusQuery, container.get(GetSystemStatusHandler))
             query_bus.register(GetProviderMetricsQuery, container.get(GetProviderMetricsHandler))

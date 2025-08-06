@@ -8,9 +8,8 @@ provider strategies while handling strategy selection, switching, and lifecycle.
 import time
 from dataclasses import dataclass
 from threading import Lock
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.providers.base.strategy.provider_strategy import (
     ProviderCapabilities,
@@ -104,7 +103,8 @@ class ProviderContext:
         if not self._current_strategy:
             return None
 
-        # Find the full strategy identifier (e.g., "aws-aws-primary" instead of just "aws")
+        # Find the full strategy identifier (e.g., "aws-aws-primary" instead of
+        # just "aws")
         for strategy_id, strategy in self._strategies.items():
             if strategy == self._current_strategy:
                 return strategy_id
@@ -413,7 +413,8 @@ class ProviderContext:
             if not self._current_strategy:
                 return None
             strategy = self._current_strategy
-            # Use the current strategy type property which returns the correct identifier
+            # Use the current strategy type property which returns the correct
+            # identifier
             strategy_type = self.current_strategy_type
         else:
             strategy = self._strategies.get(strategy_type)
@@ -451,7 +452,8 @@ class ProviderContext:
         if strategy_type is None:
             if not self._current_strategy:
                 return None
-            # Use the current strategy type property which returns the correct identifier
+            # Use the current strategy type property which returns the correct
+            # identifier
             strategy_type = self.current_strategy_type
 
         return self._strategy_metrics.get(strategy_type)

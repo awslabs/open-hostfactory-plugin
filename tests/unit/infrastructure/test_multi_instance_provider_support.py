@@ -1,6 +1,6 @@
 """Tests for multi-instance provider support."""
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -9,7 +9,6 @@ from src.config.schemas.provider_strategy_schema import (
     ProviderInstanceConfig,
 )
 from src.infrastructure.registry.provider_registry import (
-    ProviderRegistration,
     ProviderRegistry,
 )
 

@@ -5,7 +5,7 @@ This module provides an adapter for AWS-specific resource provisioning operation
 It implements the ResourceProvisioningPort interface from the domain layer.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.exceptions import EntityNotFoundError
@@ -16,7 +16,6 @@ from src.infrastructure.ports.resource_provisioning_port import ResourceProvisio
 from src.infrastructure.template.configuration_manager import (
     TemplateConfigurationManager,
 )
-from src.providers.aws.domain.template.value_objects import ProviderApi
 from src.providers.aws.exceptions.aws_exceptions import (
     AWSEntityNotFoundError,
     AWSValidationError,
@@ -26,6 +25,9 @@ from src.providers.aws.exceptions.aws_exceptions import (
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
+
+if TYPE_CHECKING:
+    from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
 
 @injectable
@@ -318,7 +320,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                     "resource_id": resource_id,
                     "resource_type": "ec2_fleet",
                     "state": fleet["FleetState"],
-                    "status": "active" if fleet["FleetState"] == "active" else "inactive",
+                    "status": ("active" if fleet["FleetState"] == "active" else "inactive"),
                     "target_capacity": fleet["TargetCapacitySpecification"]["TotalTargetCapacity"],
                     "fulfilled_capacity": fleet.get("FulfilledCapacity", 0),
                     "details": fleet,

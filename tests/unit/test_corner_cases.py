@@ -6,24 +6,20 @@ import sys
 import tempfile
 import threading
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
 
 import pytest
 
 # Import components for testing
 try:
-    from src.application.service import ApplicationService
-    from src.domain.base.value_objects import InstanceId, InstanceType, Tags
-    from src.domain.machine.aggregate import Machine
+    from src.domain.base.value_objects import InstanceId
     from src.domain.request.aggregate import Request
     from src.domain.request.exceptions import (
         InvalidRequestStateError,
         RequestValidationError,
     )
-    from src.domain.request.value_objects import RequestStatus, RequestType
-    from src.domain.template.aggregate import Template
+    from src.domain.request.value_objects import RequestStatus
     from src.infrastructure.persistence.repositories.request_repository import (
         RequestRepository,
     )
@@ -224,7 +220,7 @@ class TestConcurrencyCornerCases:
 
         # Create multiple threads trying to update status
         threads = []
-        for i in range(5):
+        for _i in range(5):
             thread = threading.Thread(target=update_status)
             threads.append(thread)
 
@@ -318,7 +314,7 @@ class TestResourceExhaustionCornerCases:
 
         try:
             # Create many temporary files
-            for i in range(100):
+            for _i in range(100):
                 temp_file = tempfile.NamedTemporaryFile(delete=False)
                 temp_files.append(temp_file)
 
@@ -336,8 +332,8 @@ class TestResourceExhaustionCornerCases:
                 try:
                     temp_file.close()
                     os.unlink(temp_file.name)
-                except:
-                    pass
+                except (OSError, IOError):
+                    pass  # Cleanup failure is acceptable in tests
 
     def test_disk_space_exhaustion_simulation(self):
         """Test handling of disk space exhaustion."""
@@ -365,8 +361,8 @@ class TestResourceExhaustionCornerCases:
                 if os.path.exists(large_file_path):
                     os.remove(large_file_path)
                 os.rmdir(temp_dir)
-            except:
-                pass
+            except (OSError, IOError):
+                pass  # Cleanup failure is acceptable in tests
 
 
 @pytest.mark.unit
@@ -382,7 +378,7 @@ class TestNetworkFailureCornerCases:
         # Application should handle timeout gracefully
         try:
             result = mock_service.call_api("test_endpoint")
-            assert False, "Should have raised TimeoutError"
+            raise AssertionError(), "Should have raised TimeoutError"
         except TimeoutError as e:
             assert "timed out" in str(e).lower()
 
@@ -393,7 +389,7 @@ class TestNetworkFailureCornerCases:
 
         try:
             mock_service.connect()
-            assert False, "Should have raised ConnectionRefusedError"
+            raise AssertionError(), "Should have raised ConnectionRefusedError"
         except ConnectionRefusedError as e:
             assert "refused" in str(e).lower()
 
@@ -428,7 +424,7 @@ class TestNetworkFailureCornerCases:
         success_count = 0
         failure_count = 0
 
-        for i in range(10):
+        for _i in range(10):
             try:
                 result = mock_service.call_api("test")
                 success_count += 1
@@ -580,7 +576,7 @@ class TestTimeoutCornerCases:
             return resource
 
         # Create resources
-        for i in range(5):
+        for _i in range(5):
             create_resource()
 
         # Simulate timeout and cleanup

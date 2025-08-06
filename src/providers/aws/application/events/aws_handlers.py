@@ -40,7 +40,12 @@ def handle_aws_rate_limit(event: DomainEvent) -> None:
 
     fields = system_handler.extract_fields(
         event,
-        {"service": "unknown", "operation": "unknown", "retry_after": None, "request_id": None},
+        {
+            "service": "unknown",
+            "operation": "unknown",
+            "retry_after": None,
+            "request_id": None,
+        },
     )
 
     # Use list and join for better performance

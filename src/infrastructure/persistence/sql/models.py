@@ -70,7 +70,8 @@ class MachineModel(Base, JsonSerializableMixin):
     price_type = Column(String(50), nullable=True)
     cloud_host_id = Column(String(255), nullable=True)
     # Using model_metadata instead of metadata to avoid conflict with SQLAlchemy's reserved keyword
-    # The domain model uses metadata, but SQLAlchemy reserves this name in the Declarative API
+    # The domain model uses metadata, but SQLAlchemy reserves this name in the
+    # Declarative API
     model_metadata = Column("model_metadata", JSON, nullable=True)
     health_checks = Column(JSON, nullable=True)
     request_id = Column(String(36), ForeignKey("requests.request_id"), nullable=False)

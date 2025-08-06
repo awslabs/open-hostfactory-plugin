@@ -17,6 +17,7 @@ class TemplateSerializer:
     """Handles Template aggregate serialization/deserialization."""
 
     def __init__(self, defaults_service=None):
+        """Initialize the instance."""
         self.logger = get_logger(__name__)
         self.defaults_service = defaults_service
 
@@ -37,8 +38,7 @@ class TemplateSerializer:
     def to_dict(self, template: Template) -> Dict[str, Any]:
         """Convert Template aggregate to dictionary with complete field support."""
         try:
-            return {
-                # Core template fields
+            return {  # Core template fields
                 "template_id": template.template_id,
                 "name": template.name,
                 "description": template.description,
@@ -83,8 +83,8 @@ class TemplateSerializer:
                 "key_name": template.key_name,
                 # Status and timestamps
                 "is_active": template.is_active,
-                "created_at": template.created_at.isoformat() if template.created_at else None,
-                "updated_at": template.updated_at.isoformat() if template.updated_at else None,
+                "created_at": (template.created_at.isoformat() if template.created_at else None),
+                "updated_at": (template.updated_at.isoformat() if template.updated_at else None),
                 # Schema version for migration support
                 "schema_version": "2.0.0",
             }
@@ -105,7 +105,7 @@ class TemplateSerializer:
                     processed_data = self.defaults_service.resolve_template_defaults(
                         data, provider_instance_name="aws-default"
                     )
-                    self.logger.debug(f"Applied configuration defaults to template data")
+                    self.logger.debug("Applied configuration defaults to template data")
                 except Exception as e:
                     self.logger.warning(f"Failed to apply defaults, using original data: {e}")
                     processed_data = data
@@ -221,7 +221,7 @@ class TemplateRepositoryImpl(TemplateRepositoryInterface):
             template.clear_domain_events()
 
             self.logger.debug(
-                f"Saved template {template.template_id} and extracted {len(events)} events"
+                f"Saved template { template.template_id} and extracted { len(events)} events"
             )
             return events
 

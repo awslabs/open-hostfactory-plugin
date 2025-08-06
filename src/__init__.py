@@ -27,7 +27,7 @@ __package_name__ = "open-hostfactory-plugin"
 """
 Usage:
     The plugin is typically used through the command-line interface:
-    
+
     >>> python run.py getAvailableTemplates
     >>> python run.py requestMachines --data '{"template_id": "basic", "machine_count": 2}'
 

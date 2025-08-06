@@ -2,7 +2,6 @@
 
 import logging
 import os
-from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -12,6 +11,7 @@ class ConfigPathResolver:
     """Handles path resolution for configuration directories and files."""
 
     def __init__(self, base_config_path: Optional[str] = None):
+        """Initialize the instance."""
         self._base_config_path = base_config_path
 
     def resolve_path(

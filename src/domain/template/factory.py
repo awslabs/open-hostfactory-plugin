@@ -30,12 +30,10 @@ class BaseTemplateFactory(ABC):
         self, template_data: Dict[str, Any], provider_type: Optional[str] = None
     ) -> Template:
         """Create appropriate template type based on provider."""
-        pass
 
     @abstractmethod
     def supports_provider(self, provider_type: str) -> bool:
         """Check if factory supports a provider type."""
-        pass
 
 
 class TemplateFactory(BaseTemplateFactory):

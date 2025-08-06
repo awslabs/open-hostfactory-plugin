@@ -53,6 +53,7 @@ class AWSTemplate(CoreTemplate):
     # No need to redefine them here - this was causing the field access issues
 
     def __init__(self, **data):
+        """Initialize the instance."""
         # Set provider_type to AWS
         data["provider_type"] = "aws"
         super().__init__(**data)
@@ -68,15 +69,17 @@ class AWSTemplate(CoreTemplate):
             raise ValueError("At least one subnet_id is required for AWS templates")
 
         # Auto-assign default fleet_type if not provided
-        if not self.fleet_type and self.provider_api:
-            if self.provider_api in [ProviderApi.EC2_FLEET, ProviderApi.SPOT_FLEET]:
-                # Use simple default without configuration dependency
-                object.__setattr__(self, "fleet_type", AWSFleetType.REQUEST)
+        if (
+            not self.fleet_type
+            and self.provider_api
+            and self.provider_api in [ProviderApi.EC2_FLEET, ProviderApi.SPOT_FLEET]
+        ):
+            # Use simple default without configuration dependency
+            object.__setattr__(self, "fleet_type", AWSFleetType.REQUEST)
 
         # Validate spot configuration
-        if self.percent_on_demand is not None:
-            if not (0 <= self.percent_on_demand <= 100):
-                raise ValueError("percent_on_demand must be between 0 and 100")
+        if self.percent_on_demand is not None and not (0 <= self.percent_on_demand <= 100):
+            raise ValueError("percent_on_demand must be between 0 and 100")
 
         # Validate launch template version format
         if self.launch_template_version is not None:
@@ -172,7 +175,9 @@ class AWSTemplate(CoreTemplate):
         aws_data = {
             **core_data,
             "provider_api": ProviderApi(data.get("provider_api")),
-            "fleet_type": AWSFleetType(data.get("fleet_type")) if data.get("fleet_type") else None,
+            "fleet_type": (
+                AWSFleetType(data.get("fleet_type")) if data.get("fleet_type") else None
+            ),
             "fleet_role": data.get("fleet_role"),
             "key_name": data.get("key_name"),
             "user_data": data.get("user_data"),

@@ -80,7 +80,8 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
         input_data = args.input_data
         # Support both HostFactory format and direct format
         if "template" in input_data:
-            # HostFactory nested format: {"template": {"templateId": "...", "machineCount": ...}}
+            # HostFactory nested format: {"template": {"templateId": "...",
+            # "machineCount": ...}}
             template_data = input_data["template"]
             template_id = template_data.get("templateId") or template_data.get("template_id")
             machine_count = template_data.get("machineCount") or template_data.get("machine_count")
@@ -94,10 +95,16 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
         machine_count = getattr(args, "machine_count", None)
 
     if not template_id:
-        return {"error": "Template ID is required", "message": "Template ID must be provided"}
+        return {
+            "error": "Template ID is required",
+            "message": "Template ID must be provided",
+        }
 
     if not machine_count:
-        return {"error": "Machine count is required", "message": "Machine count must be provided"}
+        return {
+            "error": "Machine count is required",
+            "message": "Machine count must be provided",
+        }
 
     # Check if dry-run is active and add to metadata
     metadata = getattr(args, "metadata", {})
@@ -150,7 +157,10 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
                 "requestMachines", request_id
             )
         else:
-            return {"requestId": str(request_id), "message": "Request VM success from AWS."}
+            return {
+                "requestId": str(request_id),
+                "message": "Request VM success from AWS.",
+            }
 
 
 @handle_interface_exceptions(context="get_return_requests", interface_type="cli")
@@ -166,7 +176,7 @@ async def handle_get_return_requests(args: "argparse.Namespace") -> Dict[str, An
     """
     container = get_container()
     query_bus = container.get(QueryBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.dto.queries import ListReturnRequestsQuery
 
@@ -193,12 +203,13 @@ async def handle_request_return_machines(args: "argparse.Namespace") -> Dict[str
     """
     container = get_container()
     command_bus = container.get(CommandBus)
-    scheduler_strategy = container.get(SchedulerPort)
+    container.get(SchedulerPort)
 
     from src.application.dto.commands import CreateReturnRequestCommand
 
     command = CreateReturnRequestCommand(
-        request_id=getattr(args, "request_id", None), machine_ids=getattr(args, "machine_ids", [])
+        request_id=getattr(args, "request_id", None),
+        machine_ids=getattr(args, "machine_ids", []),
     )
     result = await command_bus.execute(command)
 

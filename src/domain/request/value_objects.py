@@ -11,7 +11,6 @@ from .request_metadata import (
     LaunchTemplateInfo,
     MachineCount,
     RequestConfiguration,
-    RequestHistoryEvent,
     RequestTag,
     RequestTimeout,
 )
@@ -35,5 +34,4 @@ __all__ = [
     "RequestTag",
     "RequestConfiguration",
     "LaunchTemplateInfo",
-    "RequestEvent",
 ]

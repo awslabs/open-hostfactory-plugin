@@ -8,7 +8,6 @@ and ensure we're creating valid domain objects correctly.
 
 import os
 import sys
-from typing import Any, Dict
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath("."))
@@ -203,7 +202,6 @@ def test_base_handler_validation():
             AWSFleetType,
             ProviderApi,
         )
-        from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 
         print("   Testing base handler validation...")
 
@@ -252,7 +250,7 @@ def test_base_handler_validation():
                 print(f"   📋 Validation errors: {e.errors}")
 
             # Let's also check what fields the template actually has
-            print(f"   📋 Template fields:")
+            print("   📋 Template fields:")
             for field_name in dir(template):
                 if not field_name.startswith("_") and not callable(getattr(template, field_name)):
                     value = getattr(template, field_name)

@@ -3,19 +3,13 @@
 import base64
 import hashlib
 import json
-import os
 import re
 import secrets
-import tempfile
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
 
 import pytest
 
 # Import components for security testing
 try:
-    from src.application.service import ApplicationService
-    from src.domain.base.value_objects import InstanceId, Tags
     from src.domain.request.aggregate import Request
     from src.domain.request.exceptions import RequestValidationError
     from src.domain.template.aggregate import Template

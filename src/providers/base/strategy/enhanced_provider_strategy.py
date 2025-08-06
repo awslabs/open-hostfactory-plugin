@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from .provider_strategy import ProviderCapabilities as BaseProviderCapabilities
 from .provider_strategy import ProviderStrategy
@@ -97,7 +97,6 @@ class EnhancedProviderStrategy(ProviderStrategy, ABC):
     @abstractmethod
     def get_enhanced_capabilities(self) -> EnhancedProviderCapabilities:
         """Get enhanced provider capabilities with API support."""
-        pass
 
     def get_capabilities(self) -> BaseProviderCapabilities:
         """Get base capabilities (for backward compatibility)."""
@@ -130,6 +129,7 @@ class ProviderTemplateValidator:
     """Utility class for validating templates against provider capabilities."""
 
     def __init__(self, providers: Dict[str, EnhancedProviderStrategy]):
+        """Initialize the instance."""
         self.providers = providers
 
     def find_compatible_providers(
@@ -146,7 +146,11 @@ class ProviderTemplateValidator:
         for provider_name, provider in self.providers.items():
             validation = provider.validate_template(template_provider_api, max_instances)
             results.append(
-                {"provider": provider_name, "provider_type": provider.provider_type, **validation}
+                {
+                    "provider": provider_name,
+                    "provider_type": provider.provider_type,
+                    **validation,
+                }
             )
 
         return results

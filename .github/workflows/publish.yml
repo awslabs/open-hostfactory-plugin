@@ -130,8 +130,8 @@ jobs:
         if cyclonedx-py --help | grep -q "spdxjson"; then
           cyclonedx-py --format spdxjson -o python-sbom-spdx.json
         else
-          # Fallback: create a simple SPDX-like JSON structure
-          python -c '
+          # Fallback: create a simple SPDX-like JSON structure using a temporary script
+          cat > generate_spdx.py << 'EOF'
 import json
 import pkg_resources
 from datetime import datetime
@@ -164,7 +164,9 @@ for dist in pkg_resources.working_set:
 
 with open("python-sbom-spdx.json", "w") as f:
     json.dump(spdx_doc, f, indent=2)
-'
+EOF
+          python generate_spdx.py
+          rm generate_spdx.py
         fi
 
     - name: Upload SBOM artifacts

@@ -146,8 +146,7 @@ class SQLQueryBuilder(QueryManager):
         # Validate identifier
         self._validate_identifier(id_column)
 
-        # nosec B608
-        query = f"SELECT * FROM {self.table_name} WHERE {id_column} = :{id_column}"
+        query = f"SELECT * FROM {self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
 
         self.logger.debug(f"Built SELECT by ID query for {self.table_name}")
         return query, id_column
@@ -286,8 +285,7 @@ class SQLQueryBuilder(QueryManager):
                 where_clauses.append(f"{column} = :{param_name}")
                 parameters[param_name] = value
 
-        # nosec B608
-        query = f"SELECT * FROM {self.table_name} WHERE {' AND '.join(where_clauses)}"
+        query = f"SELECT * FROM {self.table_name} WHERE {' AND '.join(where_clauses)}"  # nosec B608
 
         self.logger.debug(f"Built SELECT with criteria query for {self.table_name}")
         return query, parameters

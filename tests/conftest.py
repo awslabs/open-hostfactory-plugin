@@ -53,7 +53,9 @@ try:
     from src.domain.template.aggregate import Template
     from src.infrastructure.di.buses import CommandBus, QueryBus
     from src.infrastructure.di.container import DIContainer
-    from src.infrastructure.template.template_service import TemplateService
+    from src.infrastructure.template.services.template_persistence_service import (
+        TemplatePersistenceService,
+    )
     from src.providers.aws.configuration.config import AWSConfig
 
     IMPORTS_AVAILABLE = True
@@ -258,7 +260,6 @@ def aws_config() -> AWSConfig:
 
 
 @pytest.fixture
-@pytest.fixture
 def aws_mocks():
     """Set up comprehensive AWS service mocks."""
     if MOTO_AVAILABLE:
@@ -387,7 +388,7 @@ def sample_machine() -> Machine:
 @pytest.fixture
 def mock_template_service() -> Mock:
     """Create a mock template service."""
-    service = Mock(spec=TemplateService)
+    service = Mock(spec=TemplatePersistenceService)
     service.get_available_templates.return_value = []
     service.get_template_by_id.return_value = None
     service.get_templates_by_provider.return_value = []
@@ -464,8 +465,6 @@ def di_container() -> DIContainer:
     return container
 
 
-@pytest.fixture(autouse=True)
-@pytest.fixture
 @pytest.fixture(params=["json", "sql", "memory"])
 def repository_type(request):
     """Parametrized fixture for different repository types."""

@@ -25,11 +25,15 @@ log_error() {
 }
 
 # Configuration
-IMAGE_NAME="ohfp-api"
+IMAGE_NAME="${IMAGE_NAME:-open-hostfactory-plugin}"  # Will be overridden by Makefile with $(CONTAINER_IMAGE)
 REGISTRY="${REGISTRY:-}"
 VERSION="${VERSION:-$(git describe --tags --always --dirty 2>/dev/null || echo 'latest')}"
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 VCS_REF=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')
+
+# Python version support (from Makefile environment variables)
+PYTHON_VERSION="${PYTHON_VERSION:-3.13}"  # Single Python version from Makefile
+MULTI_PYTHON="${MULTI_PYTHON:-false}"     # Flag for multi-Python builds
 
 # Build arguments
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"

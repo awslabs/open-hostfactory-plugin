@@ -568,29 +568,67 @@ validate-config: install  ## Validate configuration
 
 # Docker targets
 docker-build:  ## Build Docker image
-	docker build -t $(PROJECT):latest .
+	REGISTRY=$(CONTAINER_REGISTRY) \
+	VERSION=$(VERSION) \
+	IMAGE_NAME=$(CONTAINER_IMAGE) \
+	./dev-tools/scripts/container-build.sh
 
 docker-run:  ## Run Docker container
 	docker run -p 8000:8000 $(PROJECT):latest
 
 docker-compose-up:  ## Start with docker-compose
-	docker-compose up -d
+	docker-compose -f deployment/docker/docker-compose.yml up -d
 
 docker-compose-down:  ## Stop docker-compose
-	docker-compose down
+	docker-compose -f deployment/docker/docker-compose.yml down
 
 # Container build targets (multi-Python support)
 container-build-multi: dev-install  ## Build container images for all Python versions
-	./dev-tools/container/build-multi.sh $(VERSION) "$(PYTHON_VERSIONS)" $(DEFAULT_PYTHON) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+	@for py_ver in $(PYTHON_VERSIONS); do \
+		echo "Building container for Python $$py_ver..."; \
+		REGISTRY=$(CONTAINER_REGISTRY) \
+		VERSION=$(VERSION) \
+		IMAGE_NAME=$(CONTAINER_IMAGE) \
+		PYTHON_VERSION=$$py_ver \
+		MULTI_PYTHON=true \
+		./dev-tools/scripts/container-build.sh; \
+	done
+	@echo "Tagging default Python $(DEFAULT_PYTHON) as latest..."
+	@docker tag $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$(DEFAULT_PYTHON) $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
 
 container-build-single: dev-install  ## Build container image for single Python version (usage: make container-build-single PYTHON_VERSION=3.11)
-	./dev-tools/container/build-single.sh $(VERSION) $(PYTHON_VERSION) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+	@if [ -z "$(PYTHON_VERSION)" ]; then \
+		echo "Error: PYTHON_VERSION is required. Usage: make container-build-single PYTHON_VERSION=3.11"; \
+		exit 1; \
+	fi
+	REGISTRY=$(CONTAINER_REGISTRY) \
+	VERSION=$(VERSION) \
+	IMAGE_NAME=$(CONTAINER_IMAGE) \
+	PYTHON_VERSION=$(PYTHON_VERSION) \
+	./dev-tools/scripts/container-build.sh
 
 container-push-multi: container-build-multi  ## Push all container images to registry
-	./dev-tools/container/push-multi.sh $(VERSION) "$(PYTHON_VERSIONS)" $(DEFAULT_PYTHON) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+	@for py_ver in $(PYTHON_VERSIONS); do \
+		echo "Pushing $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver"; \
+		docker push $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver; \
+	done
+	@echo "Pushing $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)"
+	@docker push $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
 
 container-show-version:  ## Show current version and tags that would be created
-	./dev-tools/container/show-version.sh $(VERSION) "$(PYTHON_VERSIONS)" $(DEFAULT_PYTHON) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+	@echo "Package & Version Information"
+	@echo "============================="
+	@echo "Package Name: $(CONTAINER_IMAGE)"
+	@echo "Version: $(VERSION)"
+	@echo "Registry: $(CONTAINER_REGISTRY)"
+	@echo "Python Versions: $(PYTHON_VERSIONS)"
+	@echo "Default Python: $(DEFAULT_PYTHON)"
+	@echo ""
+	@echo "Container tags that would be created:"
+	@for py_ver in $(PYTHON_VERSIONS); do \
+		echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver"; \
+	done
+	@echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION) (default: Python $(DEFAULT_PYTHON))"
 
 # Configuration management targets
 show-package-info:  ## Show current package and version metadata

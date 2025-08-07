@@ -38,9 +38,7 @@ from src.domain.request.aggregate import Request
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.ports.request_adapter_port import RequestAdapterPort
 from src.providers.aws.domain.template.aggregate import AWSTemplate
-from src.providers.aws.exceptions.aws_exceptions import (
-    AWSInfrastructureError,
-)
+from src.providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,

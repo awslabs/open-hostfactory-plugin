@@ -1,11 +1,7 @@
 """Core service registrations for dependency injection."""
 
 from src.config.manager import ConfigurationManager
-from src.domain.base.ports import (
-    EventPublisherPort,
-    LoggingPort,
-    SchedulerPort,
-)
+from src.domain.base.ports import EventPublisherPort, LoggingPort, SchedulerPort
 from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.registry.scheduler_registry import get_scheduler_registry

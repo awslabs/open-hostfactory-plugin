@@ -8,9 +8,7 @@ from src.config.schemas.provider_strategy_schema import (
     ProviderConfig,
     ProviderInstanceConfig,
 )
-from src.infrastructure.registry.provider_registry import (
-    ProviderRegistry,
-)
+from src.infrastructure.registry.provider_registry import ProviderRegistry
 
 
 class TestMultiInstanceProviderSupport:

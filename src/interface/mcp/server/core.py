@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Optional, Union
 
-from src.infrastructure.logging.logger import get_logger
 from src._package import PACKAGE_NAME
 from src._version import __version__
+from src.infrastructure.logging.logger import get_logger
 
 
 class MCPMessageType(Enum):

@@ -12,9 +12,7 @@ from src.domain.base.ports.scheduler_port import SchedulerPort
 from src.domain.machine.aggregate import Machine
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
-from src.infrastructure.utilities.common.serialization import (
-    serialize_enum,
-)
+from src.infrastructure.utilities.common.serialization import serialize_enum
 
 from .field_mappings import HostFactoryFieldMappings
 from .transformations import HostFactoryTransformations

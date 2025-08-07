@@ -5,9 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from src.config.schemas.provider_strategy_schema import ProviderInstanceConfig
-from src.infrastructure.registry.provider_registry import (
-    get_provider_registry,
-)
+from src.infrastructure.registry.provider_registry import get_provider_registry
 
 
 @pytest.mark.integration

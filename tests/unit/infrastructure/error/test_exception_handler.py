@@ -17,9 +17,7 @@ from src.domain.base.exceptions import (
     ValidationError,
 )
 from src.domain.request.exceptions import RequestValidationError
-from src.domain.template.exceptions import (
-    TemplateNotFoundError,
-)
+from src.domain.template.exceptions import TemplateNotFoundError
 from src.infrastructure.error.decorators import (
     handle_application_exceptions,
     handle_domain_exceptions,
@@ -33,10 +31,7 @@ from src.infrastructure.error.exception_handler import (
     get_exception_handler,
     reset_exception_handler,
 )
-from src.providers.aws.exceptions.aws_exceptions import (
-    LaunchError,
-    NetworkError,
-)
+from src.providers.aws.exceptions.aws_exceptions import LaunchError, NetworkError
 
 
 class TestExceptionContext:

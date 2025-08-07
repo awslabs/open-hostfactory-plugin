@@ -11,10 +11,7 @@ from src.domain.machine.exceptions import (
     MachineNotFoundError,
     MachineValidationError,
 )
-from src.domain.machine.value_objects import (
-    MachineId,
-    MachineStatus,
-)
+from src.domain.machine.value_objects import MachineId, MachineStatus
 
 # Try to import optional classes - skip tests if not available
 try:

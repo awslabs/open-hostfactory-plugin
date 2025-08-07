@@ -193,7 +193,9 @@ jobs:
         path: ./
         base: main
         head: HEAD
-        extra_args: --debug --only-verified  dependency-review:
+        extra_args: --debug --only-verified
+
+  dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'

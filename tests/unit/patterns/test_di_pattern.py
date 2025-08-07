@@ -225,8 +225,7 @@ class TestDIPattern:
         def create_complex_service():
             return ComplexService({"setting": "value"})
 
-        container.register_factory(
-            ComplexService, create_complex_service, DIScope.SINGLETON)
+        container.register_factory(ComplexService, create_complex_service, DIScope.SINGLETON)
 
         # Resolve using factory
         service = container.resolve(ComplexService)
@@ -419,7 +418,7 @@ class TestDIPattern:
 
         try:
             container.register(TestService, TestService, "invalid_scope")
-            raise AssertionError(), "Should have raised validation error"
+            raise AssertionError("Should have raised validation error")
         except (ValueError, TypeError):
             # Expected validation error
             pass

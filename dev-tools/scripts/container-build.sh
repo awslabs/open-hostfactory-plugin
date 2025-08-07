@@ -46,6 +46,8 @@ print_build_info() {
     echo "  Image Name: ${IMAGE_NAME}"
     echo "  Registry: ${REGISTRY:-<none>}"
     echo "  Version: ${VERSION}"
+    echo "  Python Version: ${PYTHON_VERSION}"
+    echo "  Multi-Python Build: ${MULTI_PYTHON}"
     echo "  Build Date: ${BUILD_DATE}"
     echo "  VCS Ref: ${VCS_REF}"
     echo "  Platforms: ${PLATFORMS}"
@@ -99,15 +101,27 @@ setup_builder() {
 build_image() {
     log_info "Building Docker image..."
     
-    # Prepare tags
+    # Prepare tags with Python version support
     local tags=()
+    local version_tag="${VERSION}"
+    
+    # Add Python version to tag if specified
+    if [[ -n "${PYTHON_VERSION}" && "${MULTI_PYTHON}" == "true" ]]; then
+        version_tag="${VERSION}-python${PYTHON_VERSION}"
+    fi
     
     if [[ -n "${REGISTRY}" ]]; then
-        tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:${VERSION}")
-        tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:latest")
+        tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:${version_tag}")
+        # Only add latest tag if not multi-Python build
+        if [[ "${MULTI_PYTHON}" != "true" ]]; then
+            tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:latest")
+        fi
     else
-        tags+=("-t" "${IMAGE_NAME}:${VERSION}")
-        tags+=("-t" "${IMAGE_NAME}:latest")
+        tags+=("-t" "${IMAGE_NAME}:${version_tag}")
+        # Only add latest tag if not multi-Python build
+        if [[ "${MULTI_PYTHON}" != "true" ]]; then
+            tags+=("-t" "${IMAGE_NAME}:latest")
+        fi
     fi
     
     # Prepare build arguments
@@ -115,6 +129,7 @@ build_image() {
         "--build-arg" "BUILD_DATE=${BUILD_DATE}"
         "--build-arg" "VERSION=${VERSION}"
         "--build-arg" "VCS_REF=${VCS_REF}"
+        "--build-arg" "PYTHON_VERSION=${PYTHON_VERSION}"
     )
     
     # Prepare cache arguments

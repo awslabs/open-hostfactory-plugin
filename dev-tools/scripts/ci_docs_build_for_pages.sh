@@ -13,7 +13,7 @@ rm -rf site
 # Use mkdocs build directly for GitHub Pages
 if command -v uv >/dev/null 2>&1; then
     echo "Using UV-managed mkdocs..."
-    cd .. && uv run mkdocs build --strict --config-file docs/mkdocs.yml
+    cd .. && uv run python -m mkdocs build --strict --config-file docs/mkdocs.yml
 elif command -v ../.venv/bin/mkdocs >/dev/null 2>&1; then
     echo "Using venv mkdocs..."
     ../.venv/bin/mkdocs build --strict

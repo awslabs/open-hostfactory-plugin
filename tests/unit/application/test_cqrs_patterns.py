@@ -18,7 +18,9 @@ try:
     from src.application.dto.queries import (
         ListTemplatesQuery,  # Use this instead of GetAvailableTemplatesQuery
     )
-    from src.application.dto.queries import GetRequestStatusQuery
+    from src.application.dto.queries import (
+        GetRequestStatusQuery,
+    )
     from src.application.queries.handlers import (
         GetMachineHandler,  # Use this instead of GetMachinesByRequestHandler
     )

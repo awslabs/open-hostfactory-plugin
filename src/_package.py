@@ -23,7 +23,7 @@ def _get_repo_name():
         # Handle HTTPS URLs (https://github.com/org/repo)
         else:
             return url.split("/")[-1]
-    except:
+    except (subprocess.CalledProcessError, OSError, AttributeError):
         # Fallback to directory name
         return Path.cwd().name
 
@@ -51,7 +51,7 @@ def _get_repo_org():
                 url = url[:-4]
             parts = url.split("/")
             return parts[-2]  # Organization name
-    except:
+    except (subprocess.CalledProcessError, OSError, AttributeError, IndexError):
         pass
     return "awslabs"  # Default fallback
 

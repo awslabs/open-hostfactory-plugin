@@ -351,9 +351,6 @@ docs-check-gitlab:  ## Check GitLab Pages deployment status
 	@echo "INFO: GitLab Project: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin"
 	@echo "INFO: CI/CD Pipelines: https://gitlab.aws.dev/aws-gfs-acceleration/open-hostfactory-plugin/-/pipelines"
 
-docs-clean:  ## Clean documentation build files
-	rm -rf $(DOCS_BUILD_DIR)
-
 # Version management targets
 version-bump-patch:  ## Bump patch version (0.1.0 -> 0.1.1)
 	./dev-tools/package/version-bump.sh patch
@@ -375,40 +372,89 @@ build-test: build  ## Build and test package installation
 	./dev-tools/package/test-install.sh
 
 # CI/CD targets
-ci-quality: dev-install  ## Run code quality checks (matches ci.yml lint-and-security job)
-	@echo "Running code quality checks..."
+# Individual code quality targets (with tool names)
+ci-quality-black: dev-install  ## Run Black code formatting check
+	@echo "Running Black formatting check..."
 	$(PYTHON) -m black --check src/ tests/
+
+ci-quality-isort: dev-install  ## Run isort import sorting check
+	@echo "Running isort import check..."
 	$(PYTHON) -m isort --check-only src/ tests/
+
+ci-quality-flake8: dev-install  ## Run flake8 style guide check
+	@echo "Running flake8 style check..."
 	$(PYTHON) -m flake8 src/ tests/
+
+ci-quality-mypy: dev-install  ## Run mypy type checking
+	@echo "Running mypy type check..."
 	$(PYTHON) -m mypy src/
+
+ci-quality-pylint: dev-install  ## Run pylint code analysis
+	@echo "Running pylint analysis..."
 	$(PYTHON) -m pylint src/
 
-ci-security: dev-install  ## Run security scans (matches security.yml workflow)
-	@echo "Running security scans..."
-	$(PYTHON) -m bandit -r src/
-	$(PYTHON) -m safety check
+ci-quality-radon: dev-install  ## Run radon complexity analysis
+	@echo "Running radon complexity analysis..."
+	$(PYTHON) -m radon cc src/ --min B --show-complexity
+	$(PYTHON) -m radon mi src/ --min B
 
-ci-security-codeql: dev-install  ## Run CodeQL analysis locally (matches security.yml codeql-analysis job)
-	@echo "CodeQL analysis requires GitHub Actions environment"
-	@echo "Run 'gh workflow run security.yml' to trigger CodeQL analysis"
+# Composite target (for local convenience)
+ci-quality: ci-quality-black ci-quality-isort ci-quality-flake8 ci-quality-mypy ci-quality-pylint ci-quality-radon  ## Run all code quality checks
 
-ci-security-container: dev-install  ## Run container security scans (matches security.yml container-security job)
-	@echo "Running container security scans..."
-	@if command -v docker >/dev/null 2>&1; then \
-		docker build -t security-scan:latest .; \
-		echo "Container built successfully for security scanning"; \
-	else \
-		echo "Docker not available - container security requires Docker"; \
-	fi
-
-ci-architecture: dev-install  ## Run architecture compliance checks (matches ci.yml architecture-compliance job)
-	@echo "Running architecture compliance checks..."
+# Individual architecture quality targets (with tool names)
+ci-arch-cqrs: dev-install  ## Run CQRS pattern validation
+	@echo "Running CQRS pattern validation..."
 	$(PYTHON) dev-tools/scripts/validate_cqrs.py
+
+ci-arch-clean: dev-install  ## Run Clean Architecture dependency validation
+	@echo "Running Clean Architecture validation..."
 	$(PYTHON) dev-tools/scripts/check_architecture.py
 
-ci-imports: dev-install  ## Run import validation (matches CI import checks)
+ci-arch-imports: dev-install  ## Run import validation
 	@echo "Running import validation..."
 	$(PYTHON) dev-tools/scripts/validate_imports.py
+
+ci-arch-file-sizes: dev-install  ## Check file size compliance
+	@echo "Running file size checks..."
+	$(PYTHON) scripts/check_file_sizes.py --warn-only
+
+# Composite target
+ci-architecture: ci-arch-cqrs ci-arch-clean ci-arch-imports ci-arch-file-sizes  ## Run all architecture checks
+
+# Individual security targets (with tool names)
+ci-security-bandit: dev-install  ## Run Bandit security scan
+	@echo "Running Bandit security scan..."
+	$(PYTHON) -m bandit -r src/
+
+ci-security-safety: dev-install  ## Run Safety dependency scan
+	@echo "Running Safety dependency scan..."
+	$(PYTHON) -m safety check
+
+ci-security-trivy: dev-install  ## Run Trivy container scan
+	@echo "Running Trivy container scan..."
+	@if command -v docker >/dev/null 2>&1; then \
+		docker build -t security-scan:latest .; \
+		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+			-v $(PWD):/workspace aquasec/trivy:latest image security-scan:latest; \
+	else \
+		echo "Docker not available - Trivy requires Docker"; \
+	fi
+
+ci-security-hadolint: dev-install  ## Run Hadolint Dockerfile scan
+	@echo "Running Hadolint Dockerfile scan..."
+	@if command -v hadolint >/dev/null 2>&1; then \
+		hadolint Dockerfile; \
+	else \
+		echo "Hadolint not available - install with: brew install hadolint"; \
+	fi
+
+# Composite target
+ci-security: ci-security-bandit ci-security-safety  ## Run all security scans
+
+ci-build-sbom: dev-install  ## Generate SBOM files (matches publish.yml workflow)
+	@echo "Generating SBOM files for CI..."
+	@echo "This matches the GitHub Actions publish.yml workflow exactly"
+	$(MAKE) sbom-generate
 
 ci-tests-unit: dev-install  ## Run unit tests only (matches ci.yml unit-tests job)
 	@echo "Running unit tests..."

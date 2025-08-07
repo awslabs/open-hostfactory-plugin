@@ -43,7 +43,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run Black formatting check
       run: make ci-quality-black
@@ -72,7 +72,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run isort import check
       run: make ci-quality-isort
@@ -101,7 +101,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run flake8 style check
       run: make ci-quality-flake8
@@ -130,7 +130,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run mypy type check
       run: make ci-quality-mypy
@@ -160,7 +160,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run pylint analysis
       run: make ci-quality-pylint
@@ -191,7 +191,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run CQRS pattern validation
       run: make ci-arch-cqrs
@@ -221,7 +221,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run Clean Architecture validation
       run: make ci-arch-clean
@@ -251,7 +251,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run import validation
       run: make ci-arch-imports
@@ -281,7 +281,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run file size checks
       run: make ci-arch-file-sizes

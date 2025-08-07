@@ -147,6 +147,33 @@ jobs:
       with:
         sarif_file: semgrep.sarif
 
+  security-trivy-fs:
+    name: Trivy (Filesystem Scan)
+    runs-on: ubuntu-latest
+    
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy filesystem vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-fs-results.sarif'
+    
+    - name: Upload Trivy filesystem scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-fs-results.sarif'
+
   security-trufflehog:
     name: TruffleHog (Secrets Scan)
     runs-on: ubuntu-latest

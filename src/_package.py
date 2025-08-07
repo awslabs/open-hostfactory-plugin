@@ -3,59 +3,62 @@
 import os
 from pathlib import Path
 
+
 def _get_repo_name():
     """Get repository name from git remote or directory name."""
     try:
         import subprocess
+
         result = subprocess.run(
-            ['git', 'remote', 'get-url', 'origin'],
-            capture_output=True, text=True, check=True
+            ["git", "remote", "get-url", "origin"], capture_output=True, text=True, check=True
         )
         # Extract repo name from URL
         url = result.stdout.strip()
-        if url.endswith('.git'):
+        if url.endswith(".git"):
             url = url[:-4]
-        
+
         # Handle SSH URLs (git@github.com:org/repo)
-        if url.startswith('git@'):
-            return url.split('/')[-1]
+        if url.startswith("git@"):
+            return url.split("/")[-1]
         # Handle HTTPS URLs (https://github.com/org/repo)
         else:
-            return url.split('/')[-1]
+            return url.split("/")[-1]
     except:
         # Fallback to directory name
         return Path.cwd().name
+
 
 def _get_repo_org():
     """Get repository organization from git remote."""
     try:
         import subprocess
+
         result = subprocess.run(
-            ['git', 'remote', 'get-url', 'origin'],
-            capture_output=True, text=True, check=True
+            ["git", "remote", "get-url", "origin"], capture_output=True, text=True, check=True
         )
         url = result.stdout.strip()
-        
+
         # Handle SSH URLs (git@github.com:org/repo)
-        if url.startswith('git@github.com:'):
+        if url.startswith("git@github.com:"):
             # Remove git@github.com: prefix and .git suffix
-            path = url.replace('git@github.com:', '')
-            if path.endswith('.git'):
+            path = url.replace("git@github.com:", "")
+            if path.endswith(".git"):
                 path = path[:-4]
-            return path.split('/')[0]
+            return path.split("/")[0]
         # Handle HTTPS URLs (https://github.com/org/repo)
-        elif 'github.com' in url:
-            if url.endswith('.git'):
+        elif "github.com" in url:
+            if url.endswith(".git"):
                 url = url[:-4]
-            parts = url.split('/')
+            parts = url.split("/")
             return parts[-2]  # Organization name
     except:
         pass
     return "awslabs"  # Default fallback
 
+
 # Package metadata
 PACKAGE_NAME = _get_repo_name()
-PACKAGE_NAME_PYTHON = PACKAGE_NAME.replace('-', '_')
+PACKAGE_NAME_PYTHON = PACKAGE_NAME.replace("-", "_")
 PACKAGE_NAME_SHORT = "ohfp"  # CLI command name
 
 # Repository metadata

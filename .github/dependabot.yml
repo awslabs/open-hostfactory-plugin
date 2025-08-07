@@ -54,7 +54,9 @@ updates:
         patterns:
           - "*"
         update-types:
-          - "security"
+          - "patch"
+          - "minor"
+          - "major"
     
     # Ignore problematic updates
     ignore:
@@ -69,7 +71,7 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "first monday"
+      day: "monday"
       time: "06:00"
       timezone: "America/New_York"
     labels:
@@ -89,7 +91,7 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "first monday"
+      day: "monday"
       time: "06:00"
       timezone: "America/New_York"
     labels:

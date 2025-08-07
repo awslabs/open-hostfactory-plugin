@@ -77,7 +77,7 @@ dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development
 # CI installation targets
 ci-install: generate-pyproject  ## Install dependencies for CI (UV frozen)
 	@echo "Installing with UV (frozen mode)..."
-	uv sync --frozen
+	uv sync --frozen --all-extras
 
 ci-install-pip: generate-pyproject  ## Install dependencies for CI (pip alternative)
 	@echo "Generating requirements from uv.lock..."

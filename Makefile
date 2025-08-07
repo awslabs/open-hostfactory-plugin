@@ -53,20 +53,15 @@ help:  ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # Installation targets
-install: $(VENV)/bin/activate  ## Install production dependencies (smart: uv if available, else pip)
-	@if command -v uv >/dev/null 2>&1; then \
-		echo "INFO: Using uv for faster installation..."; \
-		uv pip install -r requirements.txt; \
-	else \
-		echo "INFO: Using pip (uv not available)..."; \
-		$(BIN)/pip install -r requirements.txt; \
-	fi
+install: $(VENV)/bin/activate  ## Install production dependencies (UV-first)
+	@echo "Installing production dependencies with UV..."
+	uv sync --no-dev
 
-install-pip: $(VENV)/bin/activate  ## Install production dependencies (force pip)
+install-pip: $(VENV)/bin/activate  ## Install production dependencies (pip alternative)
+	@echo "Generating production requirements from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	@echo "Installing with pip..."
 	$(BIN)/pip install -r requirements.txt
-
-install-uv: $(VENV)/bin/activate  ## Install production dependencies (force uv)
-	uv pip install -r requirements.txt
 
 dev-install: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (UV-first)
 	@echo "Installing with UV..."
@@ -96,7 +91,7 @@ requirements-generate:  ## Generate requirements files from uv.lock
 	@echo "Generating requirements files from uv.lock..."
 	uv export --no-dev --no-header --output-file requirements.txt
 	uv export --no-header --output-file requirements-dev.txt
-	@echo "✅ Generated requirements.txt and requirements-dev.txt"
+	@echo "Generated requirements.txt and requirements-dev.txt"
 
 # Dependency management
 deps-update:  ## Update dependencies and regenerate lock file
@@ -121,18 +116,14 @@ deps-add-dev:  ## Add new dev dependency (usage: make deps-add-dev PACKAGE=packa
 clean-requirements:  ## Remove generated requirements files
 	rm -f requirements.txt requirements-dev.txt
 
-dev-install-uv: dev-install  ## Alias for dev-install (backward compatibility)
-
-$(VENV)/bin/activate: requirements.txt
+$(VENV)/bin/activate: uv.lock
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
 	@if command -v uv >/dev/null 2>&1; then \
 		echo "INFO: Using uv for virtual environment setup..."; \
 		uv pip install --upgrade pip; \
-		uv pip install -r requirements.txt; \
 	else \
 		echo "INFO: Using pip for virtual environment setup..."; \
 		$(BIN)/pip install --upgrade pip; \
-		$(BIN)/pip install -r requirements.txt; \
 	fi
 	touch $(VENV)/bin/activate
 

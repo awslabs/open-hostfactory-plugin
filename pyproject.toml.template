@@ -143,10 +143,6 @@ Documentation = "{{DOCS_URL}}"      # From src._package.DOCS_URL
 Repository = "{{REPO_URL}}"         # From src._package.REPO_URL
 "Bug Reports" = "{{REPO_ISSUES_URL}}"  # From src._package.REPO_ISSUES_URL
 
-[tool.setuptools.dynamic]
-name = {attr = "src._package.PACKAGE_NAME"}
-version = {attr = "src._version.__version__"}
-
 [tool.setuptools]
 package-dir = {"" = "src"}
 

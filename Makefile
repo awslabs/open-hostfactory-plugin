@@ -64,8 +64,8 @@ install-pip: $(VENV)/bin/activate  ## Install production dependencies (pip alter
 	$(BIN)/pip install -r requirements.txt
 
 dev-install: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (UV-first)
-	@echo "Installing with UV..."
-	uv sync
+	@echo "Installing with UV (dev + ci dependencies)..."
+	uv sync --group ci --group dev
 
 dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (pip alternative)
 	@echo "Generating requirements from uv.lock..."
@@ -76,13 +76,14 @@ dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development
 
 # CI installation targets
 ci-install: generate-pyproject  ## Install dependencies for CI (UV frozen)
-	@echo "Installing with UV (frozen mode)..."
-	uv sync --frozen --all-extras
+	@echo "Installing with UV (frozen mode - CI dependencies)..."
+	uv sync --frozen --group ci
 
 ci-install-pip: generate-pyproject  ## Install dependencies for CI (pip alternative)
 	@echo "Generating requirements from uv.lock..."
 	uv export --no-dev --no-header --output-file requirements.txt
-	uv export --no-header --output-file requirements-dev.txt
+	uv export --group ci --no-header --output-file requirements-ci.txt
+	pip install -e ".[ci]"
 	@echo "Installing with pip..."
 	pip install -r requirements-dev.txt
 

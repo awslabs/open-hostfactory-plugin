@@ -303,7 +303,7 @@ jobs:
           coverage-unit.xml
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
         file: coverage-unit.xml
         flags: unit
@@ -349,7 +349,7 @@ jobs:
           coverage-integration.xml
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
         file: coverage-integration.xml
         flags: integration
@@ -521,7 +521,7 @@ jobs:
           htmlcov/
     
     - name: Upload final coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       if: always()
       with:
         file: coverage-combined.xml

@@ -312,7 +312,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv sync --frozen
+        make ci-install
     
     - name: Run unit tests
       run: |
@@ -361,7 +361,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv sync --frozen
+        make ci-install
 
     - name: Run integration tests
       run: |
@@ -410,7 +410,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv sync --frozen
+        make ci-install
 
     - name: Run end-to-end tests
       run: |
@@ -450,7 +450,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv sync --frozen
+        make ci-install
 
     - name: Run performance tests
       run: |
@@ -491,7 +491,7 @@ jobs:
     - name: Install build dependencies with uv
       run: |
         uv pip install --system build wheel setuptools
-        uv pip install --system -r requirements.txt
+        make ci-install
 
     - name: Build package
       run: |
@@ -531,7 +531,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv sync --frozen
+        make ci-install
     
     - name: Download all test results
       uses: actions/download-artifact@v5

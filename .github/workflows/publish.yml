@@ -121,7 +121,7 @@ jobs:
 
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
 
     - name: Generate SBOM files
       run: |

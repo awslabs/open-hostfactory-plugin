@@ -54,7 +54,7 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run Bandit security scan
       run: make ci-security-bandit
@@ -86,7 +86,7 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run Safety dependency scan
       run: make ci-security-safety
@@ -117,7 +117,7 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Install security scanning tools
       run: |
@@ -283,7 +283,7 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt
+        make ci-install
     
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

@@ -7,8 +7,23 @@ PYTHON := python3
 VENV := .venv
 BIN := $(VENV)/bin
 
+# Python version settings (centralized for all build/test operations)
+PYTHON_VERSIONS := 3.9 3.10 3.11 3.12 3.13
+DEFAULT_PYTHON := 3.13
+
+# Get package metadata dynamically (single source of truth)
+PACKAGE_NAME := $(shell python -c "from src._package import PACKAGE_NAME; print(PACKAGE_NAME)" 2>/dev/null || echo "open-hostfactory-plugin")
+PACKAGE_NAME_SHORT := $(shell python -c "from src._package import PACKAGE_NAME_SHORT; print(PACKAGE_NAME_SHORT)" 2>/dev/null || echo "ohfp")
+REPO_ORG := $(shell python -c "from src._package import REPO_ORG; print(REPO_ORG)" 2>/dev/null || echo "awslabs")
+CONTAINER_REGISTRY := $(shell python -c "from src._package import CONTAINER_REGISTRY; print(CONTAINER_REGISTRY)" 2>/dev/null || echo "ghcr.io/awslabs")
+CONTAINER_IMAGE := $(shell python -c "from src._package import CONTAINER_IMAGE; print(CONTAINER_IMAGE)" 2>/dev/null || echo "open-hostfactory-plugin")
+DOCS_URL := $(shell python -c "from src._package import DOCS_URL; print(DOCS_URL)" 2>/dev/null || echo "https://awslabs.github.io/open-hostfactory-plugin")
+
+# Get version dynamically (single source of truth)
+VERSION := $(shell python -c "from src._version import __version__; print(__version__)" 2>/dev/null || echo "0.1.0")
+
 # Project settings
-PROJECT := open-hostfactory-plugin
+PROJECT := $(PACKAGE_NAME)
 PACKAGE := src
 TESTS := tests
 CONFIG := config/config.json
@@ -564,13 +579,36 @@ docker-compose-up:  ## Start with docker-compose
 docker-compose-down:  ## Stop docker-compose
 	docker-compose down
 
+# Container build targets (multi-Python support)
+container-build-multi: dev-install  ## Build container images for all Python versions
+	./dev-tools/container/build-multi.sh $(VERSION) "$(PYTHON_VERSIONS)" $(DEFAULT_PYTHON) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+
+container-build-single: dev-install  ## Build container image for single Python version (usage: make container-build-single PYTHON_VERSION=3.11)
+	./dev-tools/container/build-single.sh $(VERSION) $(PYTHON_VERSION) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+
+container-push-multi: container-build-multi  ## Push all container images to registry
+	./dev-tools/container/push-multi.sh $(VERSION) "$(PYTHON_VERSIONS)" $(DEFAULT_PYTHON) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+
+container-show-version:  ## Show current version and tags that would be created
+	./dev-tools/container/show-version.sh $(VERSION) "$(PYTHON_VERSIONS)" $(DEFAULT_PYTHON) $(CONTAINER_REGISTRY) $(CONTAINER_IMAGE)
+
+# Configuration management targets
+show-package-info:  ## Show current package and version metadata
+	@echo "Package Information:"
+	@echo "  Name: $(PACKAGE_NAME)"
+	@echo "  Version: $(VERSION)"
+	@echo "  CLI Command: $(PACKAGE_NAME_SHORT)"
+	@echo "  Repository: $(REPO_ORG)/$(PACKAGE_NAME)"
+	@echo "  Container Registry: $(CONTAINER_REGISTRY)"
+	@echo "  Documentation: $(DOCS_URL)"
+
 # Quick development workflow
 dev: dev-install format lint test-quick  ## Quick development workflow (format, lint, test)
 	@echo "Development workflow completed successfully!"
 
 # Show project status
 status:  ## Show project status and useful commands
-	@echo "=== Open Host Factory Plugin Status ==="
+	@echo "=== $(PACKAGE_NAME) v$(VERSION) Status ==="
 	@echo ""
 	@echo "Project Structure:"
 	@echo "  Source code:     $(PACKAGE)/"
@@ -578,7 +616,13 @@ status:  ## Show project status and useful commands
 	@echo "  Documentation:  $(DOCS_DIR)/"
 	@echo "  Dev tools:      dev-tools/"
 	@echo ""
-	@echo "INFO: Quick Commands:"
+	@echo "Package Information:"
+	@echo "  Name:           $(PACKAGE_NAME)"
+	@echo "  Version:        $(VERSION)"
+	@echo "  CLI Command:    $(PACKAGE_NAME_SHORT)"
+	@echo "  Repository:     $(REPO_ORG)/$(PACKAGE_NAME)"
+	@echo ""
+	@echo "Quick Commands:"
 	@echo "  make dev-setup     - Set up development environment"
 	@echo "  make test          - Run tests"
 	@echo "  make docs          - Build documentation"
@@ -587,16 +631,20 @@ status:  ## Show project status and useful commands
 	@echo ""
 	@echo "Documentation:"
 	@echo "  Local docs:     make docs-serve (versioned)"
-	@echo "  Build docs:     make docs-build"
-	@echo "  GitHub Pages:   https://awslabs.github.io/open-hostfactory-plugin"
+	@echo "  GitHub Pages:   $(DOCS_URL)"
 	@echo "  Deploy docs:    make docs-deploy (local) or make ci-docs-deploy (CI)"
 	@echo "  List versions:  make docs-list-versions"
 	@echo "  Deploy version: make docs-deploy-version VERSION=1.0.0"
 	@echo ""
-	@echo "INFO: Version Management:"
+	@echo "Version Management:"
 	@echo "  Patch version:  make version-bump-patch"
 	@echo "  Minor version:  make version-bump-minor"
 	@echo "  Major version:  make version-bump-major"
+	@echo ""
+	@echo "Container Management:"
+	@echo "  Show info:      make container-show-version"
+	@echo "  Build single:   make container-build-single PYTHON_VERSION=3.11"
+	@echo "  Build all:      make container-build-multi"
 
 # UV-specific targets for performance optimization
 uv-lock: ## Generate uv lock file for reproducible builds

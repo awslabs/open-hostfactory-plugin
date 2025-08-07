@@ -1,6 +1,9 @@
 # Generated files
 pyproject.toml
 
+# Working directories
+work/
+
 # Security and analysis reports
 bandit-report.json
 bandit-report.sarif

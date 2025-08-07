@@ -11,6 +11,10 @@ BIN := $(VENV)/bin
 PYTHON_VERSIONS := 3.9 3.10 3.11 3.12 3.13
 DEFAULT_PYTHON := 3.13
 
+# Generate pyproject.toml from template with centralized configuration
+generate-pyproject:  ## Generate pyproject.toml from template using centralized config
+	./dev-tools/scripts/generate-pyproject.py
+
 # Get package metadata dynamically (single source of truth)
 PACKAGE_NAME := $(shell python -c "from src._package import PACKAGE_NAME; print(PACKAGE_NAME)" 2>/dev/null || echo "open-hostfactory-plugin")
 PACKAGE_NAME_SHORT := $(shell python -c "from src._package import PACKAGE_NAME_SHORT; print(PACKAGE_NAME_SHORT)" 2>/dev/null || echo "ohfp")
@@ -64,7 +68,7 @@ install-pip: $(VENV)/bin/activate  ## Install production dependencies (force pip
 install-uv: $(VENV)/bin/activate  ## Install production dependencies (force uv)
 	uv pip install -r requirements.txt
 
-dev-install: $(VENV)/bin/activate  ## Install development dependencies (smart: uv if available, else pip)
+dev-install: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (smart: uv if available, else pip)
 	@if command -v uv >/dev/null 2>&1; then \
 		echo "INFO: Using uv for faster development setup..."; \
 		uv pip install -e ".[dev]"; \
@@ -73,10 +77,10 @@ dev-install: $(VENV)/bin/activate  ## Install development dependencies (smart: u
 		./dev-tools/package/install-dev.sh; \
 	fi
 
-dev-install-pip: $(VENV)/bin/activate  ## Install development dependencies (force pip)
+dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (force pip)
 	./dev-tools/package/install-dev.sh
 
-dev-install-uv: $(VENV)/bin/activate  ## Install development dependencies (force uv)
+dev-install-uv: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (force uv)
 	uv pip install -e ".[dev]"
 
 $(VENV)/bin/activate: requirements.txt
@@ -96,47 +100,47 @@ $(VENV)/bin/activate: requirements.txt
 test: test-quick  ## Run quick test suite (alias for test-quick)
 
 test-unit: dev-install  ## Run unit tests only
-	$(PYTHON) dev-tools/testing/run_tests.py --unit
+	./dev-tools/testing/run_tests.py --unit
 
 test-integration: dev-install  ## Run integration tests only
-	$(PYTHON) dev-tools/testing/run_tests.py --integration
+	./dev-tools/testing/run_tests.py --integration
 
 test-e2e: dev-install  ## Run end-to-end tests only
-	$(PYTHON) dev-tools/testing/run_tests.py --e2e
+	./dev-tools/testing/run_tests.py --e2e
 
 test-all: dev-install  ## Run all tests
-	$(PYTHON) dev-tools/testing/run_tests.py
+	./dev-tools/testing/run_tests.py
 
 test-parallel: dev-install  ## Run tests in parallel
-	$(PYTHON) dev-tools/testing/run_tests.py --parallel
+	./dev-tools/testing/run_tests.py --parallel
 
 test-quick: dev-install  ## Run quick test suite (unit + fast integration)
-	$(PYTHON) dev-tools/testing/run_tests.py --unit --fast
+	./dev-tools/testing/run_tests.py --unit --fast
 
 test-performance: dev-install  ## Run performance tests
-	$(PYTHON) dev-tools/testing/run_tests.py --markers slow
+	./dev-tools/testing/run_tests.py --markers slow
 
 test-aws: dev-install  ## Run AWS-specific tests
-	$(PYTHON) dev-tools/testing/run_tests.py --markers aws
+	./dev-tools/testing/run_tests.py --markers aws
 
 test-cov: dev-install  ## Run tests with coverage report
-	$(PYTHON) dev-tools/testing/run_tests.py --coverage
+	./dev-tools/testing/run_tests.py --coverage
 
 test-html: dev-install  ## Run tests with HTML coverage report
-	$(PYTHON) dev-tools/testing/run_tests.py --html-coverage
+	./dev-tools/testing/run_tests.py --html-coverage
 	@echo "Coverage report generated in htmlcov/index.html"
 
 test-report: dev-install  ## Generate comprehensive test report
-	$(PYTHON) dev-tools/testing/run_tests.py --coverage --html-coverage
+	./dev-tools/testing/run_tests.py --coverage --html-coverage
 
 # Code quality targets
 quality-check: dev-install  ## Run professional quality checks
 	@echo "Running professional quality checks..."
-	$(PYTHON) dev-tools/scripts/quality_check.py --strict
+	./dev-tools/scripts/quality_check.py --strict
 
 quality-check-fix: dev-install  ## Run quality checks with auto-fix
 	@echo "Running professional quality checks with auto-fix..."
-	$(PYTHON) dev-tools/scripts/quality_check.py --fix
+	./dev-tools/scripts/quality_check.py --fix
 
 quality-check-files: dev-install  ## Run quality checks on specific files (usage: make quality-check-files FILES="file1.py file2.py")
 	@if [ -z "$(FILES)" ]; then \
@@ -144,7 +148,7 @@ quality-check-files: dev-install  ## Run quality checks on specific files (usage
 		exit 1; \
 	fi
 	@echo "Running professional quality checks on specified files..."
-	$(PYTHON) dev-tools/scripts/quality_check.py --strict --files $(FILES)
+	./dev-tools/scripts/quality_check.py --strict --files $(FILES)
 
 lint: dev-install quality-check  ## Run all linting checks including quality checks
 	@echo "Running Black (code formatting)..."
@@ -217,11 +221,11 @@ sbom-generate: dev-install ## Generate Software Bill of Materials (SBOM)
 
 security-scan: dev-install  ## Run comprehensive security scan using dev-tools
 	@echo "Running comprehensive security scan..."
-	$(PYTHON) dev-tools/security/security_scan.py
+	./dev-tools/security/security_scan.py
 
 security-validate-sarif: dev-install  ## Validate SARIF files
 	@echo "Validating SARIF files..."
-	$(PYTHON) dev-tools/security/validate_sarif.py *.sarif
+	./dev-tools/security/validate_sarif.py *.sarif
 
 security-report: security-full sbom-generate  ## Generate comprehensive security report
 	@echo "## Security Report Generated" > security-report.md
@@ -239,12 +243,12 @@ security-report: security-full sbom-generate  ## Generate comprehensive security
 # Architecture Quality Gates
 architecture-check: dev-install  ## Run architecture compliance checks
 	@echo "Running architecture quality checks..."
-	$(PYTHON) dev-tools/scripts/validate_cqrs.py --warn-only
-	$(PYTHON) dev-tools/scripts/check_architecture.py --warn-only
+	./dev-tools/scripts/validate_cqrs.py --warn-only
+	./dev-tools/scripts/check_architecture.py --warn-only
 
 architecture-report: dev-install  ## Generate detailed architecture report
 	@echo "Generating architecture dependency report..."
-	$(PYTHON) dev-tools/scripts/check_architecture.py --report
+	./dev-tools/scripts/check_architecture.py --report
 
 # Architecture Documentation Generation
 quality-gates: lint test architecture-check  ## Run all quality gates
@@ -256,9 +260,9 @@ quality-full: lint test architecture-check docs-build  ## Run quality gates and 
 # Completion targets
 generate-completions:     ## Generate completion scripts (bash and zsh)
 	@echo "Generating bash completion..."
-	$(PYTHON) src/run.py --completion bash > dev-tools/completions/bash/ohfp-completion.bash
+	$(PYTHON) src/run.py --completion bash > dev-tools/completions/bash/$(PACKAGE_NAME_SHORT)-completion.bash
 	@echo "Generating zsh completion..."
-	$(PYTHON) src/run.py --completion zsh > dev-tools/completions/zsh/_ohfp
+	$(PYTHON) src/run.py --completion zsh > dev-tools/completions/zsh/_$(PACKAGE_NAME_SHORT)
 	@echo "SUCCESS: Completion scripts generated in dev-tools/completions/"
 
 install-completions:      ## Install completions for current user
@@ -353,7 +357,7 @@ version-bump:  ## Show version bump help
 	./dev-tools/package/version-bump.sh
 
 # Build targets (using dev-tools)
-build: clean dev-install  ## Build package
+build: generate-pyproject clean dev-install  ## Build package
 	./dev-tools/package/build.sh
 
 build-test: build  ## Build and test package installation
@@ -392,25 +396,25 @@ ci-quality: ci-quality-black ci-quality-isort ci-quality-flake8 ci-quality-mypy 
 # Individual architecture quality targets (with tool names)
 ci-arch-cqrs: dev-install  ## Run CQRS pattern validation
 	@echo "Running CQRS pattern validation..."
-	$(PYTHON) dev-tools/scripts/validate_cqrs.py
+	./dev-tools/scripts/validate_cqrs.py
 
 ci-arch-clean: dev-install  ## Run Clean Architecture dependency validation
 	@echo "Running Clean Architecture validation..."
-	$(PYTHON) dev-tools/scripts/check_architecture.py
+	./dev-tools/scripts/check_architecture.py
 
 ci-arch-imports: dev-install  ## Run import validation
 	@echo "Running import validation..."
-	$(PYTHON) dev-tools/scripts/validate_imports.py
+	./dev-tools/scripts/validate_imports.py
 
 ci-arch-file-sizes: dev-install  ## Check file size compliance
 	@echo "Running file size checks..."
-	$(PYTHON) dev-tools/scripts/check_file_sizes.py --warn-only
+	./dev-tools/scripts/check_file_sizes.py --warn-only
 
 file-sizes: dev-install  ## Check file sizes (developer-friendly alias)
-	$(PYTHON) dev-tools/scripts/check_file_sizes.py --warn-only
+	./dev-tools/scripts/check_file_sizes.py --warn-only
 
 file-sizes-report: dev-install  ## Generate detailed file size report
-	$(PYTHON) dev-tools/scripts/check_file_sizes.py --report
+	./dev-tools/scripts/check_file_sizes.py --report
 
 # Composite target
 ci-architecture: ci-arch-cqrs ci-arch-clean ci-arch-imports ci-arch-file-sizes  ## Run all architecture checks
@@ -489,7 +493,7 @@ ci-check-fix: dev-install  ## Run CI checks with automatic formatting fixes
 
 ci-check-verbose: dev-install  ## Run CI checks with verbose output
 	@echo "Running CI checks with verbose output..."
-	$(PYTHON) dev-tools/scripts/ci_check.py --verbose
+	./dev-tools/scripts/ci_check.py --verbose
 
 ci: ci-check ci-tests-integration ci-tests-e2e  ## Run full CI pipeline (comprehensive checks + all tests)
 	@echo "Full CI pipeline completed successfully!"
@@ -518,6 +522,7 @@ clean:  ## Clean up build artifacts
 	rm -f $(COVERAGE_REPORT)
 	rm -f test-results.xml
 	rm -f bandit-report.json
+	rm -f pyproject.toml
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -name "*.pyc" -delete 2>/dev/null || true
 

@@ -3,8 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "open-hostfactory-plugin"
-version = "0.1.0"
+# Values updated to use centralized configuration
+name = "{{PACKAGE_NAME}}"           # From src._package.PACKAGE_NAME
+version = "{{VERSION}}"             # From src._version.__version__
 description = "Open Host Factory Plugin for IBM Spectrum Symphony"
 readme = "README.md"
 license = "Apache-2.0"
@@ -30,15 +31,16 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: System :: Clustering",
     "Topic :: System :: Distributed Computing",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "boto3>=1.26.0",
     "botocore>=1.29.0",
@@ -129,15 +131,21 @@ docs = [
     "mike>=1.1.0",
 ]
 
+# Entry points using centralized package names
 [project.scripts]
-ohfp = "run:cli_main"
-open-hostfactory-plugin = "run:cli_main"
+{{PACKAGE_NAME_SHORT}} = "run:cli_main"     # From src._package.PACKAGE_NAME_SHORT
+{{PACKAGE_NAME}} = "run:cli_main"           # From src._package.PACKAGE_NAME
 
+# URLs using centralized repository detection  
 [project.urls]
-Homepage = "https://github.com/aws-samples/open-hostfactory-plugin"
-Documentation = "https://open-hostfactory-plugin.readthedocs.io/"
-Repository = "https://github.com/aws-samples/open-hostfactory-plugin"
-"Bug Reports" = "https://github.com/aws-samples/open-hostfactory-plugin/issues"
+Homepage = "{{REPO_URL}}"           # From src._package.REPO_URL
+Documentation = "{{DOCS_URL}}"      # From src._package.DOCS_URL  
+Repository = "{{REPO_URL}}"         # From src._package.REPO_URL
+"Bug Reports" = "{{REPO_ISSUES_URL}}"  # From src._package.REPO_ISSUES_URL
+
+[tool.setuptools.dynamic]
+name = {attr = "src._package.PACKAGE_NAME"}
+version = {attr = "src._version.__version__"}
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -322,10 +322,10 @@ docs-build: dev-install  ## Build documentation locally with mike (no push)
 	cd $(DOCS_DIR) && ../$(BIN)/mike deploy --update-aliases latest
 	@echo "Documentation built with mike versioning"
 
-ci-docs-build: dev-install  ## Build documentation for CI PR testing (matches docs.yml PR builds)
+ci-docs-build:  ## Build documentation for CI PR testing (matches docs.yml PR builds)
 	@dev-tools/scripts/ci_docs_build.sh
 
-ci-docs-build-for-pages: dev-install  ## Build documentation for GitHub Pages deployment (no push)
+ci-docs-build-for-pages:  ## Build documentation for GitHub Pages deployment (no push)
 	@dev-tools/scripts/ci_docs_build_for_pages.sh
 
 docs-serve: dev-install  ## Serve versioned documentation locally with live reload
@@ -343,7 +343,7 @@ docs-deploy: dev-install  ## Deploy documentation locally (for testing deploymen
 	cd $(DOCS_DIR) && ../$(BIN)/mike deploy --update-aliases latest
 	@echo "Documentation deployed locally. Use 'git push origin gh-pages' to publish."
 
-ci-docs-deploy: dev-install  ## Deploy documentation to GitHub Pages (matches docs.yml main branch)
+ci-docs-deploy:  ## Deploy documentation to GitHub Pages (matches docs.yml main branch)
 	@dev-tools/scripts/ci_docs_deploy.sh
 
 docs-deploy-version: dev-install  ## Deploy specific version (usage: make docs-deploy-version VERSION=1.0.0)
@@ -396,27 +396,27 @@ build-test: build  ## Build and test package installation
 
 # CI/CD targets
 # Individual code quality targets (with tool names)
-ci-quality-black: dev-install  ## Run Black code formatting check
+ci-quality-black:  ## Run Black code formatting check
 	@echo "Running Black formatting check..."
 	$(PYTHON) -m black --check src/ tests/
 
-ci-quality-isort: dev-install  ## Run isort import sorting check
+ci-quality-isort:  ## Run isort import sorting check
 	@echo "Running isort import check..."
 	$(PYTHON) -m isort --check-only src/ tests/
 
-ci-quality-flake8: dev-install  ## Run flake8 style guide check
+ci-quality-flake8:  ## Run flake8 style guide check
 	@echo "Running flake8 style check..."
 	$(PYTHON) -m flake8 src/ tests/
 
-ci-quality-mypy: dev-install  ## Run mypy type checking
+ci-quality-mypy:  ## Run mypy type checking
 	@echo "Running mypy type check..."
 	$(PYTHON) -m mypy src/
 
-ci-quality-pylint: dev-install  ## Run pylint code analysis
+ci-quality-pylint:  ## Run pylint code analysis
 	@echo "Running pylint analysis..."
 	$(PYTHON) -m pylint src/
 
-ci-quality-radon: dev-install  ## Run radon complexity analysis
+ci-quality-radon:  ## Run radon complexity analysis
 	@echo "Running radon complexity analysis..."
 	$(PYTHON) -m radon cc src/ --min B --show-complexity
 	$(PYTHON) -m radon mi src/ --min B
@@ -425,19 +425,19 @@ ci-quality-radon: dev-install  ## Run radon complexity analysis
 ci-quality: ci-quality-black ci-quality-isort ci-quality-flake8 ci-quality-mypy ci-quality-pylint ci-quality-radon  ## Run all code quality checks
 
 # Individual architecture quality targets (with tool names)
-ci-arch-cqrs: dev-install  ## Run CQRS pattern validation
+ci-arch-cqrs:  ## Run CQRS pattern validation
 	@echo "Running CQRS pattern validation..."
 	./dev-tools/scripts/validate_cqrs.py
 
-ci-arch-clean: dev-install  ## Run Clean Architecture dependency validation
+ci-arch-clean:  ## Run Clean Architecture dependency validation
 	@echo "Running Clean Architecture validation..."
 	./dev-tools/scripts/check_architecture.py
 
-ci-arch-imports: dev-install  ## Run import validation
+ci-arch-imports:  ## Run import validation
 	@echo "Running import validation..."
 	./dev-tools/scripts/validate_imports.py
 
-ci-arch-file-sizes: dev-install  ## Check file size compliance
+ci-arch-file-sizes:  ## Check file size compliance
 	@echo "Running file size checks..."
 	./dev-tools/scripts/check_file_sizes.py --warn-only
 
@@ -451,15 +451,15 @@ file-sizes-report: dev-install  ## Generate detailed file size report
 ci-architecture: ci-arch-cqrs ci-arch-clean ci-arch-imports ci-arch-file-sizes  ## Run all architecture checks
 
 # Individual security targets (with tool names)
-ci-security-bandit: dev-install  ## Run Bandit security scan
+ci-security-bandit:  ## Run Bandit security scan
 	@echo "Running Bandit security scan..."
 	$(PYTHON) -m bandit -r src/
 
-ci-security-safety: dev-install  ## Run Safety dependency scan
+ci-security-safety:  ## Run Safety dependency scan
 	@echo "Running Safety dependency scan..."
 	$(PYTHON) -m safety check
 
-ci-security-trivy: dev-install  ## Run Trivy container scan
+ci-security-trivy:  ## Run Trivy container scan
 	@echo "Running Trivy container scan..."
 	@if command -v docker >/dev/null 2>&1; then \
 		docker build -t security-scan:latest .; \
@@ -469,7 +469,7 @@ ci-security-trivy: dev-install  ## Run Trivy container scan
 		echo "Docker not available - Trivy requires Docker"; \
 	fi
 
-ci-security-hadolint: dev-install  ## Run Hadolint Dockerfile scan
+ci-security-hadolint:  ## Run Hadolint Dockerfile scan
 	@echo "Running Hadolint Dockerfile scan..."
 	@if command -v hadolint >/dev/null 2>&1; then \
 		hadolint Dockerfile; \
@@ -480,49 +480,49 @@ ci-security-hadolint: dev-install  ## Run Hadolint Dockerfile scan
 # Composite target
 ci-security: ci-security-bandit ci-security-safety  ## Run all security scans
 
-ci-build-sbom: dev-install  ## Generate SBOM files (matches publish.yml workflow)
+ci-build-sbom:  ## Generate SBOM files (matches publish.yml workflow)
 	@echo "Generating SBOM files for CI..."
 	@echo "This matches the GitHub Actions publish.yml workflow exactly"
 	$(MAKE) sbom-generate
 
-ci-tests-unit: dev-install  ## Run unit tests only (matches ci.yml unit-tests job)
+ci-tests-unit:  ## Run unit tests only (matches ci.yml unit-tests job)
 	@echo "Running unit tests..."
 	$(PYTHON) -m pytest tests/unit/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-unit.xml --junitxml=junit-unit.xml
 
-ci-tests-integration: dev-install  ## Run integration tests only (matches ci.yml integration-tests job)
+ci-tests-integration:  ## Run integration tests only (matches ci.yml integration-tests job)
 	@echo "Running integration tests..."
 	$(PYTHON) -m pytest tests/integration/ $(PYTEST_ARGS) --junitxml=junit-integration.xml
 
-ci-tests-e2e: dev-install  ## Run end-to-end tests only (matches ci.yml e2e-tests job)
+ci-tests-e2e:  ## Run end-to-end tests only (matches ci.yml e2e-tests job)
 	@echo "Running end-to-end tests..."
 	$(PYTHON) -m pytest tests/e2e/ $(PYTEST_ARGS) --junitxml=junit-e2e.xml
 
-ci-tests-matrix: dev-install  ## Run comprehensive test matrix (matches test-matrix.yml workflow)
+ci-tests-matrix:  ## Run comprehensive test matrix (matches test-matrix.yml workflow)
 	@echo "Running comprehensive test matrix..."
 	$(PYTHON) -m pytest tests/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-matrix.xml --junitxml=junit-matrix.xml
 
-ci-tests-performance: dev-install  ## Run performance tests only (matches ci.yml performance-tests job)
+ci-tests-performance:  ## Run performance tests only (matches ci.yml performance-tests job)
 	@echo "Running performance tests..."
 	$(PYTHON) -m pytest tests/performance/ $(PYTEST_ARGS) --junitxml=junit-performance.xml
 
-ci-check: dev-install  ## Run comprehensive CI checks (matches GitHub Actions exactly)
+ci-check:  ## Run comprehensive CI checks (matches GitHub Actions exactly)
 	@echo "Running comprehensive CI checks that match GitHub Actions pipeline..."
 	$(MAKE) ci-quality
 	$(MAKE) ci-architecture
 	$(MAKE) ci-tests-unit
 
-ci-check-quick: dev-install  ## Run quick CI checks (fast checks only)
+ci-check-quick:  ## Run quick CI checks (fast checks only)
 	@echo "Running quick CI checks..."
 	$(MAKE) ci-quality
 	$(MAKE) ci-architecture
 
-ci-check-fix: dev-install  ## Run CI checks with automatic formatting fixes
+ci-check-fix:  ## Run CI checks with automatic formatting fixes
 	@echo "Running CI checks with automatic fixes..."
 	$(PYTHON) -m black src/ tests/
 	$(PYTHON) -m isort src/ tests/
 	$(MAKE) ci-quality
 
-ci-check-verbose: dev-install  ## Run CI checks with verbose output
+ci-check-verbose:  ## Run CI checks with verbose output
 	@echo "Running CI checks with verbose output..."
 	./dev-tools/scripts/ci_check.py --verbose
 

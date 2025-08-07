@@ -1,0 +1,81 @@
+name: Dependency Maintenance
+
+on:
+  schedule:
+    # Monthly lock file maintenance on first Monday at 6 AM
+    - cron: '0 6 1 * 1'
+  workflow_dispatch:
+    # Allow manual triggering
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  update-lock-file:
+    name: Update Lock File
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      
+      - name: Generate pyproject.toml
+        run: |
+          python dev-tools/scripts/generate-pyproject.py
+      
+      - name: Update lock file
+        run: |
+          uv lock --upgrade
+      
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet uv.lock; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): update lock file maintenance"
+          title: "Monthly dependency lock file maintenance"
+          body: |
+            ## Monthly Lock File Maintenance
+            
+            This automated PR updates the `uv.lock` file with the latest compatible versions
+            of all dependencies while respecting the version constraints in `pyproject.toml`.
+            
+            ### Changes
+            - Updated `uv.lock` with latest compatible dependency versions
+            - All version constraints from `pyproject.toml` are respected
+            - No breaking changes should be introduced
+            
+            ### Testing
+            - [ ] All CI checks pass
+            - [ ] Manual testing completed (if needed)
+            
+            This PR is automatically created monthly to keep dependencies up-to-date
+            while maintaining stability through our defined version constraints.
+          branch: dependency-maintenance
+          labels: |
+            dependencies
+            maintenance
+          assignees: flamurg
+          reviewers: flamurg

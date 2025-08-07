@@ -68,20 +68,60 @@ install-pip: $(VENV)/bin/activate  ## Install production dependencies (force pip
 install-uv: $(VENV)/bin/activate  ## Install production dependencies (force uv)
 	uv pip install -r requirements.txt
 
-dev-install: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (smart: uv if available, else pip)
-	@if command -v uv >/dev/null 2>&1; then \
-		echo "INFO: Using uv for faster development setup..."; \
-		uv pip install -e ".[dev]"; \
-	else \
-		echo "INFO: Using pip (uv not available)..."; \
-		./dev-tools/package/install-dev.sh; \
+dev-install: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (UV-first)
+	@echo "Installing with UV..."
+	uv sync
+
+dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (pip alternative)
+	@echo "Generating requirements from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	uv export --no-header --output-file requirements-dev.txt
+	@echo "Installing with pip..."
+	pip install -r requirements-dev.txt
+
+# CI installation targets
+ci-install: generate-pyproject  ## Install dependencies for CI (UV frozen)
+	@echo "Installing with UV (frozen mode)..."
+	uv sync --frozen
+
+ci-install-pip: generate-pyproject  ## Install dependencies for CI (pip alternative)
+	@echo "Generating requirements from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	uv export --no-header --output-file requirements-dev.txt
+	@echo "Installing with pip..."
+	pip install -r requirements-dev.txt
+
+# Requirements generation
+requirements-generate:  ## Generate requirements files from uv.lock
+	@echo "Generating requirements files from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	uv export --no-header --output-file requirements-dev.txt
+	@echo "✅ Generated requirements.txt and requirements-dev.txt"
+
+# Dependency management
+deps-update:  ## Update dependencies and regenerate lock file
+	@echo "Updating dependencies..."
+	uv lock --upgrade
+
+deps-add:  ## Add new dependency (usage: make deps-add PACKAGE=package-name)
+	@if [ -z "$(PACKAGE)" ]; then \
+		echo "Error: PACKAGE is required. Usage: make deps-add PACKAGE=package-name"; \
+		exit 1; \
 	fi
+	uv add $(PACKAGE)
 
-dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (force pip)
-	./dev-tools/package/install-dev.sh
+deps-add-dev:  ## Add new dev dependency (usage: make deps-add-dev PACKAGE=package-name)
+	@if [ -z "$(PACKAGE)" ]; then \
+		echo "Error: PACKAGE is required. Usage: make deps-add-dev PACKAGE=package-name"; \
+		exit 1; \
+	fi
+	uv add --dev $(PACKAGE)
 
-dev-install-uv: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (force uv)
-	uv pip install -e ".[dev]"
+# Cleanup
+clean-requirements:  ## Remove generated requirements files
+	rm -f requirements.txt requirements-dev.txt
+
+dev-install-uv: dev-install  ## Alias for dev-install (backward compatibility)
 
 $(VENV)/bin/activate: requirements.txt
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)

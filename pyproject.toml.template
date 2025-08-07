@@ -64,51 +64,77 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.3",
-    "pytest-cov>=4.1.0",
-    "pytest-env>=1.1.1",
-    "pytest-mock>=3.12.0",
-    "pytest-asyncio>=0.21.1",
-    "pytest-timeout>=2.2.0",
-    "pytest-xdist>=3.3.1",
-    "pytest-html>=4.1.1",
-    "pytest-benchmark>=5.1.0",
-    "coverage>=7.3.2",
-    "moto[all]>=4.2.7",
-    "boto3-stubs[essential]>=1.34.0",
-    "responses>=0.24.0",
-    "requests-mock>=1.11.0",
-    "black>=23.3.0",
-    "isort>=5.12.0",
-    "mypy>=1.3.0",
-    "pylint>=2.17.3",
-    "flake8>=6.1.0",
-    "flake8-docstrings>=1.7.0",
-    "flake8-bugbear>=23.3.12",
-    "flake8-comprehensions>=3.14.0",
-    "flake8-simplify>=0.21.0",
-    "radon>=6.0.1",
-    "mccabe>=0.7.0",
-    "bandit>=1.7.5",
-    "safety>=2.3.5",
-    "types-boto3>=1.0.2",
-    "types-requests>=2.31.0",
-    "types-PyYAML>=6.0.12",
-    "types-python-dateutil>=2.8.19",
-    "pre-commit>=3.3.3",
-    "debugpy>=1.8.0",
-    "ipython>=8.12.2",
-    "ipdb>=0.13.13",
-    "pip-tools>=7.3.0",
-    "bump2version>=1.0.1",
-    "memory-profiler>=0.61.0",
-    "line-profiler>=4.1.1",
-    "py-spy>=0.3.14",
-    # docker-compose removed - use system docker-compose instead
-    # This resolves python-dotenv version conflict
-    "aws-sam-cli>=1.95.0",
-    "cfn-lint>=0.80.3",
-    "autoflake>=2.0.0",
+    # Testing Framework
+    "pytest>=7.4.3,<9.0.0",
+    "pytest-cov>=4.1.0,<7.0.0",
+    "pytest-env>=1.1.1,<2.0.0",
+    "pytest-mock>=3.12.0,<4.0.0",
+    "pytest-asyncio>=0.21.1,<2.0.0",
+    "pytest-timeout>=2.2.0,<3.0.0",
+    "pytest-xdist>=3.3.1,<4.0.0",
+    "pytest-html>=4.1.1,<5.0.0",
+    "pytest-benchmark>=5.1.0,<6.0.0",
+    "coverage>=7.3.2,<8.0.0",
+    
+    # AWS Testing
+    "moto[all]>=4.2.7,<6.0.0",
+    "boto3-stubs[essential]>=1.34.0,<2.0.0",
+    
+    # Test Data and Mocking
+    "responses>=0.24.0,<1.0.0",
+    "requests-mock>=1.11.0,<2.0.0",
+    "PyYAML>=6.0.0,<7.0.0",
+    
+    # Linting and Type Checking
+    "black>=23.3.0,<26.0.0",
+    "isort==6.0.1",  # Pin exact version for consistency
+    "autopep8>=2.3.0,<3.0.0",
+    "mypy>=1.3.0,<2.0.0",
+    "pylint>=2.17.3,<4.0.0",
+    "flake8>=6.1.0,<8.0.0",
+    "flake8-docstrings>=1.7.0,<2.0.0",
+    "flake8-bugbear>=23.3.12,<25.0.0",
+    "flake8-comprehensions>=3.14.0,<4.0.0",
+    "flake8-simplify>=0.21.0,<1.0.0",
+    "bandit>=1.7.5,<2.0.0",
+    "safety>=2.3.5,<4.0.0",
+    "types-boto3>=1.0.2,<2.0.0",
+    "types-requests>=2.31.0,<3.0.0",
+    "types-PyYAML>=6.0.12,<7.0.0",
+    "types-python-dateutil>=2.8.19,<3.0.0",
+    
+    # Security Scanning
+    "pip-audit>=2.6.1,<3.0.0",
+    "semgrep>=1.45.0,<2.0.0",
+    "cyclonedx-bom>=4.0.0,<8.0.0",
+    "spdx-tools>=0.8.0,<1.0.0",
+    "bandit-sarif-formatter>=1.1.1,<2.0.0",
+    
+    # MkDocs Documentation
+    "mkdocs>=1.5.0,<2.0.0",
+    "mkdocs-material>=9.1.0,<10.0.0",
+    "mkdocstrings>=0.22.0,<1.0.0",
+    "mkdocstrings-python>=1.1.0,<2.0.0",
+    "mkdocs-gen-files>=0.5.0,<1.0.0",
+    "mkdocs-literate-nav>=0.6.0,<1.0.0",
+    "mkdocs-section-index>=0.3.0,<1.0.0",
+    "mike>=1.1.0,<3.0.0",
+    
+    # Development Tools
+    "pre-commit>=3.3.3,<5.0.0",
+    "debugpy>=1.8.0,<2.0.0",
+    "ipython>=8.12.2,<9.0.0",
+    "ipdb>=0.13.13,<1.0.0",
+    "pip-tools>=7.3.0,<8.0.0",
+    "bump2version>=1.0.1,<2.0.0",
+    
+    # Monitoring and Profiling
+    "memory-profiler>=0.61.0,<1.0.0",
+    "line-profiler>=4.1.1,<6.0.0",
+    "py-spy>=0.3.14,<1.0.0",
+    
+    # Import organization and cleanup tools
+    "autoflake>=2.0.0,<3.0.0",
 ]
 test = [
     "pytest>=7.4.3",

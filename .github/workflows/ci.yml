@@ -312,7 +312,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        uv sync --frozen
     
     - name: Run unit tests
       run: |
@@ -361,7 +361,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        uv sync --frozen
 
     - name: Run integration tests
       run: |
@@ -410,7 +410,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        uv sync --frozen
 
     - name: Run end-to-end tests
       run: |
@@ -450,7 +450,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        uv sync --frozen
 
     - name: Run performance tests
       run: |
@@ -485,6 +485,9 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install build dependencies with uv
       run: |
         uv pip install --system build wheel setuptools
@@ -528,7 +531,7 @@ jobs:
         python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        uv sync --frozen
     
     - name: Download all test results
       uses: actions/download-artifact@v5

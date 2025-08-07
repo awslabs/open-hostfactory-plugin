@@ -1,6 +1,13 @@
 # Generated files
 pyproject.toml
 
+# Generated requirements files (generated on-demand from uv.lock)
+requirements.txt
+requirements-dev.txt
+
+# Keep the lock file (source of truth)
+!uv.lock
+
 # Working directories
 work/
 

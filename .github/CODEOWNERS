@@ -1,0 +1,21 @@
+# Global code owners for the Open Host Factory Plugin
+# These users will be automatically requested for review when PRs are opened
+
+# Default owners for everything in the repo
+* @flamurg @fgogolli @kirillsc @canonicalname
+
+# Specific ownership for critical files
+/.github/ @flamurg @fgogolli @kirillsc @canonicalname
+/pyproject.toml @flamurg @fgogolli @kirillsc @canonicalname
+/Makefile @flamurg @fgogolli @kirillsc @canonicalname
+/src/_version.py @flamurg @fgogolli @kirillsc @canonicalname
+/src/_package.py @flamurg @fgogolli @kirillsc @canonicalname
+
+# Documentation
+/docs/ @flamurg @fgogolli @kirillsc @canonicalname
+/README.md @flamurg @fgogolli @kirillsc @canonicalname
+
+# Security and CI/CD
+/.github/workflows/ @flamurg @fgogolli @kirillsc @canonicalname
+/.github/dependabot.yml @flamurg @fgogolli @kirillsc @canonicalname
+/dev-tools/security/ @flamurg @fgogolli @kirillsc @canonicalname

@@ -36,8 +36,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -63,8 +66,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -90,8 +96,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -117,8 +126,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -144,8 +156,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -172,8 +187,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -199,8 +217,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -226,8 +247,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -253,8 +277,11 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -e ".[dev]"
@@ -283,6 +310,9 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -r requirements.txt -r requirements-dev.txt
@@ -329,6 +359,9 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -r requirements.txt -r requirements-dev.txt
@@ -375,6 +408,9 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -r requirements.txt -r requirements-dev.txt
@@ -412,6 +448,9 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -r requirements.txt -r requirements-dev.txt
@@ -487,6 +526,9 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
         uv pip install --system -r requirements.txt -r requirements-dev.txt

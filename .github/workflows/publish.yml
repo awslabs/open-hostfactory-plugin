@@ -50,6 +50,10 @@ jobs:
       run: |
         uv pip install --system build twine
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
+    
     - name: Build package
       run: |
         python -m build --clean

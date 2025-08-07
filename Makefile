@@ -46,6 +46,12 @@ PYTEST_MAXFAIL := --maxfail=5
 DOCS_DIR := docs
 DOCS_BUILD_DIR := $(DOCS_DIR)/site
 
+# Centralized tool execution function
+# Usage: $(call run-tool,tool-name,arguments)
+define run-tool
+	@dev-tools/scripts/run_tool.sh $(1) $(2)
+endef
+
 help:  ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
@@ -399,28 +405,28 @@ build-test: build  ## Build and test package installation
 # Individual code quality targets (with tool names)
 ci-quality-black:  ## Run Black code formatting check
 	@echo "Running Black formatting check..."
-	$(PYTHON) -m black --check src/ tests/
+	$(call run-tool,black,--check src/ tests/)
 
 ci-quality-isort:  ## Run isort import sorting check
 	@echo "Running isort import check..."
-	$(PYTHON) -m isort --check-only src/ tests/
+	$(call run-tool,isort,--check-only src/ tests/)
 
 ci-quality-flake8:  ## Run flake8 style guide check
 	@echo "Running flake8 style check..."
-	$(PYTHON) -m flake8 src/ tests/
+	$(call run-tool,flake8,src/ tests/)
 
 ci-quality-mypy:  ## Run mypy type checking
 	@echo "Running mypy type check..."
-	$(PYTHON) -m mypy src/
+	$(call run-tool,mypy,src/)
 
 ci-quality-pylint:  ## Run pylint code analysis
 	@echo "Running pylint analysis..."
-	$(PYTHON) -m pylint src/
+	$(call run-tool,pylint,src/)
 
 ci-quality-radon:  ## Run radon complexity analysis
 	@echo "Running radon complexity analysis..."
-	$(PYTHON) -m radon cc src/ --min B --show-complexity
-	$(PYTHON) -m radon mi src/ --min B
+	$(call run-tool,radon,cc src/ --min B --show-complexity)
+	$(call run-tool,radon,mi src/ --min B)
 
 # Composite target (for local convenience)
 ci-quality: ci-quality-black ci-quality-isort ci-quality-flake8 ci-quality-mypy ci-quality-pylint ci-quality-radon  ## Run all code quality checks
@@ -454,11 +460,11 @@ ci-architecture: ci-arch-cqrs ci-arch-clean ci-arch-imports ci-arch-file-sizes  
 # Individual security targets (with tool names)
 ci-security-bandit:  ## Run Bandit security scan
 	@echo "Running Bandit security scan..."
-	$(PYTHON) -m bandit -r src/
+	$(call run-tool,bandit,-r src/)
 
 ci-security-safety:  ## Run Safety dependency scan
 	@echo "Running Safety dependency scan..."
-	$(PYTHON) -m safety check
+	$(call run-tool,safety,check)
 
 ci-security-trivy:  ## Run Trivy container scan
 	@echo "Running Trivy container scan..."
@@ -488,23 +494,23 @@ ci-build-sbom:  ## Generate SBOM files (matches publish.yml workflow)
 
 ci-tests-unit:  ## Run unit tests only (matches ci.yml unit-tests job)
 	@echo "Running unit tests..."
-	$(PYTHON) -m pytest tests/unit/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-unit.xml --junitxml=junit-unit.xml
+	$(call run-tool,pytest,tests/unit/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-unit.xml --junitxml=junit-unit.xml)
 
 ci-tests-integration:  ## Run integration tests only (matches ci.yml integration-tests job)
 	@echo "Running integration tests..."
-	$(PYTHON) -m pytest tests/integration/ $(PYTEST_ARGS) --junitxml=junit-integration.xml
+	$(call run-tool,pytest,tests/integration/ $(PYTEST_ARGS) --junitxml=junit-integration.xml)
 
 ci-tests-e2e:  ## Run end-to-end tests only (matches ci.yml e2e-tests job)
 	@echo "Running end-to-end tests..."
-	$(PYTHON) -m pytest tests/e2e/ $(PYTEST_ARGS) --junitxml=junit-e2e.xml
+	$(call run-tool,pytest,tests/e2e/ $(PYTEST_ARGS) --junitxml=junit-e2e.xml)
 
 ci-tests-matrix:  ## Run comprehensive test matrix (matches test-matrix.yml workflow)
 	@echo "Running comprehensive test matrix..."
-	$(PYTHON) -m pytest tests/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-matrix.xml --junitxml=junit-matrix.xml
+	$(call run-tool,pytest,tests/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-matrix.xml --junitxml=junit-matrix.xml)
 
 ci-tests-performance:  ## Run performance tests only (matches ci.yml performance-tests job)
 	@echo "Running performance tests..."
-	$(PYTHON) -m pytest tests/performance/ $(PYTEST_ARGS) --junitxml=junit-performance.xml
+	$(call run-tool,pytest,tests/performance/ $(PYTEST_ARGS) --junitxml=junit-performance.xml)
 
 ci-check:  ## Run comprehensive CI checks (matches GitHub Actions exactly)
 	@echo "Running comprehensive CI checks that match GitHub Actions pipeline..."
@@ -519,8 +525,8 @@ ci-check-quick:  ## Run quick CI checks (fast checks only)
 
 ci-check-fix:  ## Run CI checks with automatic formatting fixes
 	@echo "Running CI checks with automatic fixes..."
-	$(PYTHON) -m black src/ tests/
-	$(PYTHON) -m isort src/ tests/
+	$(call run-tool,black,src/ tests/)
+	$(call run-tool,isort,src/ tests/)
 	$(MAKE) ci-quality
 
 ci-check-verbose:  ## Run CI checks with verbose output

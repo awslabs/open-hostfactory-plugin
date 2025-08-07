@@ -36,15 +36,17 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run Black formatting check
       run: make ci-quality-black
-      continue-on-error: true
 
   lint-isort:
     name: isort (Import Sorting)
@@ -63,15 +65,17 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run isort import check
       run: make ci-quality-isort
-      continue-on-error: true
 
   lint-flake8:
     name: flake8 (Style Guide)
@@ -90,15 +94,17 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run flake8 style check
       run: make ci-quality-flake8
-      continue-on-error: true
 
   lint-mypy:
     name: mypy (Type Checking)
@@ -117,11 +123,14 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run mypy type check
       run: make ci-quality-mypy
@@ -144,11 +153,14 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run pylint analysis
       run: make ci-quality-pylint
@@ -172,11 +184,14 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run CQRS pattern validation
       run: make ci-arch-cqrs
@@ -199,11 +214,14 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run Clean Architecture validation
       run: make ci-arch-clean
@@ -226,11 +244,14 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run import validation
       run: make ci-arch-imports
@@ -253,11 +274,14 @@ jobs:
       uses: astral-sh/setup-uv@v6
       with:
         enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -e ".[dev]"
+        make ci-install
     
     - name: Run file size checks
       run: make ci-arch-file-sizes
@@ -283,9 +307,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run unit tests
       run: |
@@ -329,9 +356,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
 
     - name: Run integration tests
       run: |
@@ -375,9 +405,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
 
     - name: Run end-to-end tests
       run: |
@@ -412,9 +445,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
 
     - name: Run performance tests
       run: |
@@ -449,10 +485,13 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install build dependencies with uv
       run: |
         uv pip install --system build wheel setuptools
-        uv pip install --system -r requirements.txt
+        make ci-install
 
     - name: Build package
       run: |
@@ -487,9 +526,12 @@ jobs:
         enable-cache: true
         cache-dependency-glob: "requirements*.txt"
     
+    - name: Generate pyproject.toml
+      run: |
+        python dev-tools/scripts/generate-pyproject.py
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Download all test results
       uses: actions/download-artifact@v5

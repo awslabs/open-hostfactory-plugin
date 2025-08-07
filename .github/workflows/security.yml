@@ -54,7 +54,7 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run Bandit security scan
       run: make ci-security-bandit
@@ -86,13 +86,13 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run Safety dependency scan
       run: make ci-security-safety
       continue-on-error: true
-  security-scan:
-    name: Security Analysis
+  security-hadolint:
+    name: Hadolint (Dockerfile Scan)
     runs-on: ubuntu-latest
     
     permissions:
@@ -104,61 +104,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Run Hadolint Dockerfile scan
+      uses: hadolint/hadolint-action@v3.1.0
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-    
-    - name: Install uv
-      uses: astral-sh/setup-uv@v6
-      with:
-        enable-cache: true
-        cache-dependency-glob: "requirements*.txt"
-    
-    - name: Install dependencies with uv
-      run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
-    
-    - name: Install security scanning tools
-      run: |
-        # Install Trivy for container scanning
-        sudo apt-get update
-        sudo apt-get install wget apt-transport-https gnupg lsb-release
-        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
-        sudo apt-get install trivy
-        
-        # Install Hadolint for Dockerfile scanning
-        wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-        chmod +x hadolint
-        sudo mv hadolint /usr/local/bin/
-    
-    - name: Run security scan
-      run: |
-        make ci-security
-      continue-on-error: true
-    
-    - name: Upload Bandit SARIF results
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: bandit-report.sarif
+        dockerfile: Dockerfile
+        format: sarif
+        output-file: hadolint-results.sarif
+        no-fail: true
     
     - name: Upload Hadolint SARIF results
       uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: hadolint-results.sarif
+
+  security-semgrep:
+    name: Semgrep (Static Analysis)
+    runs-on: ubuntu-latest
     
-    - name: Run Safety dependency vulnerability check
-      run: |
-        # Try new format first, fallback to old format
-        python -m safety check --format json --output safety-report.json 2>/dev/null || \
-        python -m safety check --json > safety-report.json 2>/dev/null || \
-        echo '{"vulnerabilities": []}' > safety-report.json
-        python -m safety check
-      continue-on-error: true
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Run Semgrep security analysis
       uses: returntocorp/semgrep-action@v1
@@ -175,6 +146,46 @@ jobs:
       if: always()
       with:
         sarif_file: semgrep.sarif
+
+  security-trivy-fs:
+    name: Trivy (Filesystem Scan)
+    runs-on: ubuntu-latest
+    
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy filesystem vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-fs-results.sarif'
+    
+    - name: Upload Trivy filesystem scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-fs-results.sarif'
+
+  security-trufflehog:
+    name: TruffleHog (Secrets Scan)
+    runs-on: ubuntu-latest
+    
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Check for secrets with TruffleHog
       uses: trufflesecurity/trufflehog@main
@@ -183,43 +194,6 @@ jobs:
         base: main
         head: HEAD
         extra_args: --debug --only-verified
-      continue-on-error: true
-    
-    - name: Upload security reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: security-reports
-        path: |
-          bandit-report.json
-          bandit-report.sarif
-          hadolint-results.sarif
-          safety-report.json
-          security-report.json
-          security-report.md
-          python-sbom-cyclonedx.json
-          bandit-results.sarif
-          safety-report.json
-          semgrep.sarif
-    
-    - name: Security summary
-      if: always()
-      run: |
-        echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f bandit-report.json ]; then
-          BANDIT_ISSUES=$(jq '.results | length' bandit-report.json 2>/dev/null || echo "0")
-          echo "- Bandit security issues: $BANDIT_ISSUES" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        if [ -f safety-report.json ]; then
-          SAFETY_ISSUES=$(jq '.vulnerabilities | length' safety-report.json 2>/dev/null || echo "0")
-          echo "- Safety vulnerability issues: $SAFETY_ISSUES" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Check the Security tab for detailed SARIF results." >> $GITHUB_STEP_SUMMARY
 
   dependency-review:
     name: Dependency Review
@@ -283,7 +257,7 @@ jobs:
     
     - name: Install dependencies with uv
       run: |
-        uv pip install --system -r requirements.txt
+        make ci-install
     
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

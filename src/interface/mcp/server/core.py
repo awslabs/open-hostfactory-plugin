@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Optional, Union
 
+from src._package import PACKAGE_NAME
+from src._version import __version__
 from src.infrastructure.logging.logger import get_logger
 
 
@@ -222,8 +224,8 @@ class OpenHFPluginMCPServer:
                 "prompts": {"listChanged": True},
             },
             "serverInfo": {
-                "name": "open-hostfactory-plugin",
-                "version": "1.0.0",
+                "name": PACKAGE_NAME,
+                "version": __version__,
                 "description": "MCP server for Open Host Factory Plugin - Cloud infrastructure provisioning",
             },
         }

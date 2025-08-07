@@ -46,12 +46,12 @@ jobs:
     - name: Install dependencies with uv (Unix)
       if: runner.os != 'Windows'
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Install dependencies with uv (Windows)
       if: runner.os == 'Windows'
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run unit tests
       run: |
@@ -96,12 +96,12 @@ jobs:
     - name: Install dependencies with uv (Unix)
       if: runner.os != 'Windows'
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Install dependencies with uv (Windows)
       if: runner.os == 'Windows'
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run integration tests
       run: |
@@ -146,12 +146,12 @@ jobs:
     - name: Install dependencies with uv (Unix)
       if: runner.os != 'Windows'
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Install dependencies with uv (Windows)
       if: runner.os == 'Windows'
       run: |
-        uv pip install --system -r requirements.txt -r requirements-dev.txt
+        make ci-install
     
     - name: Run e2e tests
       run: |

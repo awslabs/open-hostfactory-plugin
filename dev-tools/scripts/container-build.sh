@@ -25,11 +25,15 @@ log_error() {
 }
 
 # Configuration
-IMAGE_NAME="ohfp-api"
+IMAGE_NAME="${IMAGE_NAME:-open-hostfactory-plugin}"  # Will be overridden by Makefile with $(CONTAINER_IMAGE)
 REGISTRY="${REGISTRY:-}"
 VERSION="${VERSION:-$(git describe --tags --always --dirty 2>/dev/null || echo 'latest')}"
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 VCS_REF=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')
+
+# Python version support (from Makefile environment variables)
+PYTHON_VERSION="${PYTHON_VERSION:-3.13}"  # Single Python version from Makefile
+MULTI_PYTHON="${MULTI_PYTHON:-false}"     # Flag for multi-Python builds
 
 # Build arguments
 PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"
@@ -42,6 +46,8 @@ print_build_info() {
     echo "  Image Name: ${IMAGE_NAME}"
     echo "  Registry: ${REGISTRY:-<none>}"
     echo "  Version: ${VERSION}"
+    echo "  Python Version: ${PYTHON_VERSION}"
+    echo "  Multi-Python Build: ${MULTI_PYTHON}"
     echo "  Build Date: ${BUILD_DATE}"
     echo "  VCS Ref: ${VCS_REF}"
     echo "  Platforms: ${PLATFORMS}"
@@ -95,15 +101,27 @@ setup_builder() {
 build_image() {
     log_info "Building Docker image..."
     
-    # Prepare tags
+    # Prepare tags with Python version support
     local tags=()
+    local version_tag="${VERSION}"
+    
+    # Add Python version to tag if specified
+    if [[ -n "${PYTHON_VERSION}" && "${MULTI_PYTHON}" == "true" ]]; then
+        version_tag="${VERSION}-python${PYTHON_VERSION}"
+    fi
     
     if [[ -n "${REGISTRY}" ]]; then
-        tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:${VERSION}")
-        tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:latest")
+        tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:${version_tag}")
+        # Only add latest tag if not multi-Python build
+        if [[ "${MULTI_PYTHON}" != "true" ]]; then
+            tags+=("-t" "${REGISTRY}/${IMAGE_NAME}:latest")
+        fi
     else
-        tags+=("-t" "${IMAGE_NAME}:${VERSION}")
-        tags+=("-t" "${IMAGE_NAME}:latest")
+        tags+=("-t" "${IMAGE_NAME}:${version_tag}")
+        # Only add latest tag if not multi-Python build
+        if [[ "${MULTI_PYTHON}" != "true" ]]; then
+            tags+=("-t" "${IMAGE_NAME}:latest")
+        fi
     fi
     
     # Prepare build arguments
@@ -111,6 +129,7 @@ build_image() {
         "--build-arg" "BUILD_DATE=${BUILD_DATE}"
         "--build-arg" "VERSION=${VERSION}"
         "--build-arg" "VCS_REF=${VCS_REF}"
+        "--build-arg" "PYTHON_VERSION=${PYTHON_VERSION}"
     )
     
     # Prepare cache arguments

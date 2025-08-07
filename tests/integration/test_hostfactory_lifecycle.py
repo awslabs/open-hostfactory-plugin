@@ -198,14 +198,14 @@ class TestHostFactoryLifecycle:
         # Test invalid template ID
         try:
             app_service.request_machines("non-existent-template", 1)
-            raise AssertionError(), "Should have raised an exception"
+            raise AssertionError("Should have raised an exception")
         except Exception as e:
             assert "template" in str(e).lower() or "not found" in str(e).lower()
 
         # Test invalid request ID
         try:
             app_service.get_request_status("non-existent-request")
-            raise AssertionError(), "Should have raised an exception"
+            raise AssertionError("Should have raised an exception")
         except Exception as e:
             assert "request" in str(e).lower() or "not found" in str(e).lower()
 

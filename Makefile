@@ -7,8 +7,27 @@ PYTHON := python3
 VENV := .venv
 BIN := $(VENV)/bin
 
+# Python version settings (centralized for all build/test operations)
+PYTHON_VERSIONS := 3.9 3.10 3.11 3.12 3.13
+DEFAULT_PYTHON := 3.13
+
+# Generate pyproject.toml from template with centralized configuration
+generate-pyproject:  ## Generate pyproject.toml from template using centralized config
+	./dev-tools/scripts/generate-pyproject.py
+
+# Get package metadata dynamically (single source of truth)
+PACKAGE_NAME := $(shell python -c "from src._package import PACKAGE_NAME; print(PACKAGE_NAME)" 2>/dev/null || echo "open-hostfactory-plugin")
+PACKAGE_NAME_SHORT := $(shell python -c "from src._package import PACKAGE_NAME_SHORT; print(PACKAGE_NAME_SHORT)" 2>/dev/null || echo "ohfp")
+REPO_ORG := $(shell python -c "from src._package import REPO_ORG; print(REPO_ORG)" 2>/dev/null || echo "awslabs")
+CONTAINER_REGISTRY := $(shell python -c "from src._package import CONTAINER_REGISTRY; print(CONTAINER_REGISTRY)" 2>/dev/null || echo "ghcr.io/awslabs")
+CONTAINER_IMAGE := $(shell python -c "from src._package import CONTAINER_IMAGE; print(CONTAINER_IMAGE)" 2>/dev/null || echo "open-hostfactory-plugin")
+DOCS_URL := $(shell python -c "from src._package import DOCS_URL; print(DOCS_URL)" 2>/dev/null || echo "https://awslabs.github.io/open-hostfactory-plugin")
+
+# Get version dynamically (single source of truth)
+VERSION := $(shell python -c "from src._version import __version__; print(__version__)" 2>/dev/null || echo "0.1.0")
+
 # Project settings
-PROJECT := open-hostfactory-plugin
+PROJECT := $(PACKAGE_NAME)
 PACKAGE := src
 TESTS := tests
 CONFIG := config/config.json
@@ -27,6 +46,12 @@ PYTEST_MAXFAIL := --maxfail=5
 DOCS_DIR := docs
 DOCS_BUILD_DIR := $(DOCS_DIR)/site
 
+# Centralized tool execution function
+# Usage: $(call run-tool,tool-name,arguments)
+define run-tool
+	@dev-tools/scripts/run_tool.sh $(1) $(2)
+endef
+
 help:  ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
@@ -34,46 +59,78 @@ help:  ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 # Installation targets
-install: $(VENV)/bin/activate  ## Install production dependencies (smart: uv if available, else pip)
-	@if command -v uv >/dev/null 2>&1; then \
-		echo "INFO: Using uv for faster installation..."; \
-		uv pip install -r requirements.txt; \
-	else \
-		echo "INFO: Using pip (uv not available)..."; \
-		$(BIN)/pip install -r requirements.txt; \
-	fi
+install: $(VENV)/bin/activate  ## Install production dependencies (UV-first)
+	@echo "Installing production dependencies with UV..."
+	uv sync --no-dev
 
-install-pip: $(VENV)/bin/activate  ## Install production dependencies (force pip)
+install-pip: $(VENV)/bin/activate  ## Install production dependencies (pip alternative)
+	@echo "Generating production requirements from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	@echo "Installing with pip..."
 	$(BIN)/pip install -r requirements.txt
 
-install-uv: $(VENV)/bin/activate  ## Install production dependencies (force uv)
-	uv pip install -r requirements.txt
+dev-install: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (UV-first)
+	@echo "Installing with UV (dev + ci dependencies)..."
+	uv sync --group ci --group dev
 
-dev-install: $(VENV)/bin/activate  ## Install development dependencies (smart: uv if available, else pip)
-	@if command -v uv >/dev/null 2>&1; then \
-		echo "INFO: Using uv for faster development setup..."; \
-		uv pip install -e ".[dev]"; \
-	else \
-		echo "INFO: Using pip (uv not available)..."; \
-		./dev-tools/package/install-dev.sh; \
+dev-install-pip: generate-pyproject $(VENV)/bin/activate  ## Install development dependencies (pip alternative)
+	@echo "Generating requirements from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	uv export --no-header --output-file requirements-dev.txt
+	@echo "Installing with pip..."
+	pip install -r requirements-dev.txt
+
+# CI installation targets
+ci-install: generate-pyproject  ## Install dependencies for CI (UV frozen)
+	@echo "Installing with UV (frozen mode - CI dependencies)..."
+	uv sync --frozen --group ci
+
+ci-install-pip: generate-pyproject  ## Install dependencies for CI (pip alternative)
+	@echo "Generating requirements from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	uv export --group ci --no-header --output-file requirements-ci.txt
+	pip install -e ".[ci]"
+	@echo "Installing with pip..."
+	pip install -r requirements-dev.txt
+
+# Requirements generation
+requirements-generate:  ## Generate requirements files from uv.lock
+	@echo "Generating requirements files from uv.lock..."
+	uv export --no-dev --no-header --output-file requirements.txt
+	uv export --no-header --output-file requirements-dev.txt
+	@echo "Generated requirements.txt and requirements-dev.txt"
+
+# Dependency management
+deps-update:  ## Update dependencies and regenerate lock file
+	@echo "Updating dependencies..."
+	uv lock --upgrade
+
+deps-add:  ## Add new dependency (usage: make deps-add PACKAGE=package-name)
+	@if [ -z "$(PACKAGE)" ]; then \
+		echo "Error: PACKAGE is required. Usage: make deps-add PACKAGE=package-name"; \
+		exit 1; \
 	fi
+	uv add $(PACKAGE)
 
-dev-install-pip: $(VENV)/bin/activate  ## Install development dependencies (force pip)
-	./dev-tools/package/install-dev.sh
+deps-add-dev:  ## Add new dev dependency (usage: make deps-add-dev PACKAGE=package-name)
+	@if [ -z "$(PACKAGE)" ]; then \
+		echo "Error: PACKAGE is required. Usage: make deps-add-dev PACKAGE=package-name"; \
+		exit 1; \
+	fi
+	uv add --dev $(PACKAGE)
 
-dev-install-uv: $(VENV)/bin/activate  ## Install development dependencies (force uv)
-	uv pip install -e ".[dev]"
+# Cleanup
+clean-requirements:  ## Remove generated requirements files
+	rm -f requirements.txt requirements-dev.txt
 
-$(VENV)/bin/activate: requirements.txt
+$(VENV)/bin/activate: uv.lock
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
 	@if command -v uv >/dev/null 2>&1; then \
 		echo "INFO: Using uv for virtual environment setup..."; \
 		uv pip install --upgrade pip; \
-		uv pip install -r requirements.txt; \
 	else \
 		echo "INFO: Using pip for virtual environment setup..."; \
 		$(BIN)/pip install --upgrade pip; \
-		$(BIN)/pip install -r requirements.txt; \
 	fi
 	touch $(VENV)/bin/activate
 
@@ -81,47 +138,47 @@ $(VENV)/bin/activate: requirements.txt
 test: test-quick  ## Run quick test suite (alias for test-quick)
 
 test-unit: dev-install  ## Run unit tests only
-	$(PYTHON) dev-tools/testing/run_tests.py --unit
+	./dev-tools/testing/run_tests.py --unit
 
 test-integration: dev-install  ## Run integration tests only
-	$(PYTHON) dev-tools/testing/run_tests.py --integration
+	./dev-tools/testing/run_tests.py --integration
 
 test-e2e: dev-install  ## Run end-to-end tests only
-	$(PYTHON) dev-tools/testing/run_tests.py --e2e
+	./dev-tools/testing/run_tests.py --e2e
 
 test-all: dev-install  ## Run all tests
-	$(PYTHON) dev-tools/testing/run_tests.py
+	./dev-tools/testing/run_tests.py
 
 test-parallel: dev-install  ## Run tests in parallel
-	$(PYTHON) dev-tools/testing/run_tests.py --parallel
+	./dev-tools/testing/run_tests.py --parallel
 
 test-quick: dev-install  ## Run quick test suite (unit + fast integration)
-	$(PYTHON) dev-tools/testing/run_tests.py --unit --fast
+	./dev-tools/testing/run_tests.py --unit --fast
 
 test-performance: dev-install  ## Run performance tests
-	$(PYTHON) dev-tools/testing/run_tests.py --markers slow
+	./dev-tools/testing/run_tests.py --markers slow
 
 test-aws: dev-install  ## Run AWS-specific tests
-	$(PYTHON) dev-tools/testing/run_tests.py --markers aws
+	./dev-tools/testing/run_tests.py --markers aws
 
 test-cov: dev-install  ## Run tests with coverage report
-	$(PYTHON) dev-tools/testing/run_tests.py --coverage
+	./dev-tools/testing/run_tests.py --coverage
 
 test-html: dev-install  ## Run tests with HTML coverage report
-	$(PYTHON) dev-tools/testing/run_tests.py --html-coverage
+	./dev-tools/testing/run_tests.py --html-coverage
 	@echo "Coverage report generated in htmlcov/index.html"
 
 test-report: dev-install  ## Generate comprehensive test report
-	$(PYTHON) dev-tools/testing/run_tests.py --coverage --html-coverage
+	./dev-tools/testing/run_tests.py --coverage --html-coverage
 
 # Code quality targets
 quality-check: dev-install  ## Run professional quality checks
 	@echo "Running professional quality checks..."
-	$(PYTHON) dev-tools/scripts/quality_check.py --strict
+	./dev-tools/scripts/quality_check.py --strict
 
 quality-check-fix: dev-install  ## Run quality checks with auto-fix
 	@echo "Running professional quality checks with auto-fix..."
-	$(PYTHON) dev-tools/scripts/quality_check.py --fix
+	./dev-tools/scripts/quality_check.py --fix
 
 quality-check-files: dev-install  ## Run quality checks on specific files (usage: make quality-check-files FILES="file1.py file2.py")
 	@if [ -z "$(FILES)" ]; then \
@@ -129,7 +186,7 @@ quality-check-files: dev-install  ## Run quality checks on specific files (usage
 		exit 1; \
 	fi
 	@echo "Running professional quality checks on specified files..."
-	$(PYTHON) dev-tools/scripts/quality_check.py --strict --files $(FILES)
+	./dev-tools/scripts/quality_check.py --strict --files $(FILES)
 
 lint: dev-install quality-check  ## Run all linting checks including quality checks
 	@echo "Running Black (code formatting)..."
@@ -202,11 +259,11 @@ sbom-generate: dev-install ## Generate Software Bill of Materials (SBOM)
 
 security-scan: dev-install  ## Run comprehensive security scan using dev-tools
 	@echo "Running comprehensive security scan..."
-	$(PYTHON) dev-tools/security/security_scan.py
+	./dev-tools/security/security_scan.py
 
 security-validate-sarif: dev-install  ## Validate SARIF files
 	@echo "Validating SARIF files..."
-	$(PYTHON) dev-tools/security/validate_sarif.py *.sarif
+	./dev-tools/security/validate_sarif.py *.sarif
 
 security-report: security-full sbom-generate  ## Generate comprehensive security report
 	@echo "## Security Report Generated" > security-report.md
@@ -224,12 +281,12 @@ security-report: security-full sbom-generate  ## Generate comprehensive security
 # Architecture Quality Gates
 architecture-check: dev-install  ## Run architecture compliance checks
 	@echo "Running architecture quality checks..."
-	$(PYTHON) dev-tools/scripts/validate_cqrs.py --warn-only
-	$(PYTHON) dev-tools/scripts/check_architecture.py --warn-only
+	./dev-tools/scripts/validate_cqrs.py --warn-only
+	./dev-tools/scripts/check_architecture.py --warn-only
 
 architecture-report: dev-install  ## Generate detailed architecture report
 	@echo "Generating architecture dependency report..."
-	$(PYTHON) dev-tools/scripts/check_architecture.py --report
+	./dev-tools/scripts/check_architecture.py --report
 
 # Architecture Documentation Generation
 quality-gates: lint test architecture-check  ## Run all quality gates
@@ -241,9 +298,9 @@ quality-full: lint test architecture-check docs-build  ## Run quality gates and 
 # Completion targets
 generate-completions:     ## Generate completion scripts (bash and zsh)
 	@echo "Generating bash completion..."
-	$(PYTHON) src/run.py --completion bash > dev-tools/completions/bash/ohfp-completion.bash
+	$(PYTHON) src/run.py --completion bash > dev-tools/completions/bash/$(PACKAGE_NAME_SHORT)-completion.bash
 	@echo "Generating zsh completion..."
-	$(PYTHON) src/run.py --completion zsh > dev-tools/completions/zsh/_ohfp
+	$(PYTHON) src/run.py --completion zsh > dev-tools/completions/zsh/_$(PACKAGE_NAME_SHORT)
 	@echo "SUCCESS: Completion scripts generated in dev-tools/completions/"
 
 install-completions:      ## Install completions for current user
@@ -272,10 +329,10 @@ docs-build: dev-install  ## Build documentation locally with mike (no push)
 	cd $(DOCS_DIR) && ../$(BIN)/mike deploy --update-aliases latest
 	@echo "Documentation built with mike versioning"
 
-ci-docs-build: dev-install  ## Build documentation for CI PR testing (matches docs.yml PR builds)
+ci-docs-build:  ## Build documentation for CI PR testing (matches docs.yml PR builds)
 	@dev-tools/scripts/ci_docs_build.sh
 
-ci-docs-build-for-pages: dev-install  ## Build documentation for GitHub Pages deployment (no push)
+ci-docs-build-for-pages:  ## Build documentation for GitHub Pages deployment (no push)
 	@dev-tools/scripts/ci_docs_build_for_pages.sh
 
 docs-serve: dev-install  ## Serve versioned documentation locally with live reload
@@ -293,7 +350,7 @@ docs-deploy: dev-install  ## Deploy documentation locally (for testing deploymen
 	cd $(DOCS_DIR) && ../$(BIN)/mike deploy --update-aliases latest
 	@echo "Documentation deployed locally. Use 'git push origin gh-pages' to publish."
 
-ci-docs-deploy: dev-install  ## Deploy documentation to GitHub Pages (matches docs.yml main branch)
+ci-docs-deploy:  ## Deploy documentation to GitHub Pages (matches docs.yml main branch)
 	@dev-tools/scripts/ci_docs_deploy.sh
 
 docs-deploy-version: dev-install  ## Deploy specific version (usage: make docs-deploy-version VERSION=1.0.0)
@@ -338,7 +395,7 @@ version-bump:  ## Show version bump help
 	./dev-tools/package/version-bump.sh
 
 # Build targets (using dev-tools)
-build: clean dev-install  ## Build package
+build: generate-pyproject clean dev-install  ## Build package
 	./dev-tools/package/build.sh
 
 build-test: build  ## Build and test package installation
@@ -346,70 +403,70 @@ build-test: build  ## Build and test package installation
 
 # CI/CD targets
 # Individual code quality targets (with tool names)
-ci-quality-black: dev-install  ## Run Black code formatting check
+ci-quality-black:  ## Run Black code formatting check
 	@echo "Running Black formatting check..."
-	$(PYTHON) -m black --check src/ tests/
+	$(call run-tool,black,--check src/ tests/)
 
-ci-quality-isort: dev-install  ## Run isort import sorting check
+ci-quality-isort:  ## Run isort import sorting check
 	@echo "Running isort import check..."
-	$(PYTHON) -m isort --check-only src/ tests/
+	$(call run-tool,isort,--check-only src/ tests/)
 
-ci-quality-flake8: dev-install  ## Run flake8 style guide check
+ci-quality-flake8:  ## Run flake8 style guide check
 	@echo "Running flake8 style check..."
-	$(PYTHON) -m flake8 src/ tests/
+	$(call run-tool,flake8,src/ tests/)
 
-ci-quality-mypy: dev-install  ## Run mypy type checking
+ci-quality-mypy:  ## Run mypy type checking
 	@echo "Running mypy type check..."
-	$(PYTHON) -m mypy src/
+	$(call run-tool,mypy,src/)
 
-ci-quality-pylint: dev-install  ## Run pylint code analysis
+ci-quality-pylint:  ## Run pylint code analysis
 	@echo "Running pylint analysis..."
-	$(PYTHON) -m pylint src/
+	$(call run-tool,pylint,src/)
 
-ci-quality-radon: dev-install  ## Run radon complexity analysis
+ci-quality-radon:  ## Run radon complexity analysis
 	@echo "Running radon complexity analysis..."
-	$(PYTHON) -m radon cc src/ --min B --show-complexity
-	$(PYTHON) -m radon mi src/ --min B
+	$(call run-tool,radon,cc src/ --min B --show-complexity)
+	$(call run-tool,radon,mi src/ --min B)
 
 # Composite target (for local convenience)
 ci-quality: ci-quality-black ci-quality-isort ci-quality-flake8 ci-quality-mypy ci-quality-pylint ci-quality-radon  ## Run all code quality checks
 
 # Individual architecture quality targets (with tool names)
-ci-arch-cqrs: dev-install  ## Run CQRS pattern validation
+ci-arch-cqrs:  ## Run CQRS pattern validation
 	@echo "Running CQRS pattern validation..."
-	$(PYTHON) dev-tools/scripts/validate_cqrs.py
+	./dev-tools/scripts/validate_cqrs.py
 
-ci-arch-clean: dev-install  ## Run Clean Architecture dependency validation
+ci-arch-clean:  ## Run Clean Architecture dependency validation
 	@echo "Running Clean Architecture validation..."
-	$(PYTHON) dev-tools/scripts/check_architecture.py
+	./dev-tools/scripts/check_architecture.py
 
-ci-arch-imports: dev-install  ## Run import validation
+ci-arch-imports:  ## Run import validation
 	@echo "Running import validation..."
-	$(PYTHON) dev-tools/scripts/validate_imports.py
+	./dev-tools/scripts/validate_imports.py
 
-ci-arch-file-sizes: dev-install  ## Check file size compliance
+ci-arch-file-sizes:  ## Check file size compliance
 	@echo "Running file size checks..."
-	$(PYTHON) dev-tools/scripts/check_file_sizes.py --warn-only
+	./dev-tools/scripts/check_file_sizes.py --warn-only
 
 file-sizes: dev-install  ## Check file sizes (developer-friendly alias)
-	$(PYTHON) dev-tools/scripts/check_file_sizes.py --warn-only
+	./dev-tools/scripts/check_file_sizes.py --warn-only
 
 file-sizes-report: dev-install  ## Generate detailed file size report
-	$(PYTHON) dev-tools/scripts/check_file_sizes.py --report
+	./dev-tools/scripts/check_file_sizes.py --report
 
 # Composite target
 ci-architecture: ci-arch-cqrs ci-arch-clean ci-arch-imports ci-arch-file-sizes  ## Run all architecture checks
 
 # Individual security targets (with tool names)
-ci-security-bandit: dev-install  ## Run Bandit security scan
+ci-security-bandit:  ## Run Bandit security scan
 	@echo "Running Bandit security scan..."
-	$(PYTHON) -m bandit -r src/
+	$(call run-tool,bandit,-r src/)
 
-ci-security-safety: dev-install  ## Run Safety dependency scan
+ci-security-safety:  ## Run Safety dependency scan
 	@echo "Running Safety dependency scan..."
-	$(PYTHON) -m safety check
+	$(call run-tool,safety,check)
 
-ci-security-trivy: dev-install  ## Run Trivy container scan
+ci-security-trivy:  ## Run Trivy container scan
 	@echo "Running Trivy container scan..."
 	@if command -v docker >/dev/null 2>&1; then \
 		docker build -t security-scan:latest .; \
@@ -419,7 +476,7 @@ ci-security-trivy: dev-install  ## Run Trivy container scan
 		echo "Docker not available - Trivy requires Docker"; \
 	fi
 
-ci-security-hadolint: dev-install  ## Run Hadolint Dockerfile scan
+ci-security-hadolint:  ## Run Hadolint Dockerfile scan
 	@echo "Running Hadolint Dockerfile scan..."
 	@if command -v hadolint >/dev/null 2>&1; then \
 		hadolint Dockerfile; \
@@ -430,51 +487,51 @@ ci-security-hadolint: dev-install  ## Run Hadolint Dockerfile scan
 # Composite target
 ci-security: ci-security-bandit ci-security-safety  ## Run all security scans
 
-ci-build-sbom: dev-install  ## Generate SBOM files (matches publish.yml workflow)
+ci-build-sbom:  ## Generate SBOM files (matches publish.yml workflow)
 	@echo "Generating SBOM files for CI..."
 	@echo "This matches the GitHub Actions publish.yml workflow exactly"
 	$(MAKE) sbom-generate
 
-ci-tests-unit: dev-install  ## Run unit tests only (matches ci.yml unit-tests job)
+ci-tests-unit:  ## Run unit tests only (matches ci.yml unit-tests job)
 	@echo "Running unit tests..."
-	$(PYTHON) -m pytest tests/unit/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-unit.xml --junitxml=junit-unit.xml
+	$(call run-tool,pytest,tests/unit/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-unit.xml --junitxml=junit-unit.xml)
 
-ci-tests-integration: dev-install  ## Run integration tests only (matches ci.yml integration-tests job)
+ci-tests-integration:  ## Run integration tests only (matches ci.yml integration-tests job)
 	@echo "Running integration tests..."
-	$(PYTHON) -m pytest tests/integration/ $(PYTEST_ARGS) --junitxml=junit-integration.xml
+	$(call run-tool,pytest,tests/integration/ $(PYTEST_ARGS) --junitxml=junit-integration.xml)
 
-ci-tests-e2e: dev-install  ## Run end-to-end tests only (matches ci.yml e2e-tests job)
+ci-tests-e2e:  ## Run end-to-end tests only (matches ci.yml e2e-tests job)
 	@echo "Running end-to-end tests..."
-	$(PYTHON) -m pytest tests/e2e/ $(PYTEST_ARGS) --junitxml=junit-e2e.xml
+	$(call run-tool,pytest,tests/e2e/ $(PYTEST_ARGS) --junitxml=junit-e2e.xml)
 
-ci-tests-matrix: dev-install  ## Run comprehensive test matrix (matches test-matrix.yml workflow)
+ci-tests-matrix:  ## Run comprehensive test matrix (matches test-matrix.yml workflow)
 	@echo "Running comprehensive test matrix..."
-	$(PYTHON) -m pytest tests/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-matrix.xml --junitxml=junit-matrix.xml
+	$(call run-tool,pytest,tests/ $(PYTEST_ARGS) $(PYTEST_COV_ARGS) --cov-report=xml:coverage-matrix.xml --junitxml=junit-matrix.xml)
 
-ci-tests-performance: dev-install  ## Run performance tests only (matches ci.yml performance-tests job)
+ci-tests-performance:  ## Run performance tests only (matches ci.yml performance-tests job)
 	@echo "Running performance tests..."
-	$(PYTHON) -m pytest tests/performance/ $(PYTEST_ARGS) --junitxml=junit-performance.xml
+	$(call run-tool,pytest,tests/performance/ $(PYTEST_ARGS) --junitxml=junit-performance.xml)
 
-ci-check: dev-install  ## Run comprehensive CI checks (matches GitHub Actions exactly)
+ci-check:  ## Run comprehensive CI checks (matches GitHub Actions exactly)
 	@echo "Running comprehensive CI checks that match GitHub Actions pipeline..."
 	$(MAKE) ci-quality
 	$(MAKE) ci-architecture
 	$(MAKE) ci-tests-unit
 
-ci-check-quick: dev-install  ## Run quick CI checks (fast checks only)
+ci-check-quick:  ## Run quick CI checks (fast checks only)
 	@echo "Running quick CI checks..."
 	$(MAKE) ci-quality
 	$(MAKE) ci-architecture
 
-ci-check-fix: dev-install  ## Run CI checks with automatic formatting fixes
+ci-check-fix:  ## Run CI checks with automatic formatting fixes
 	@echo "Running CI checks with automatic fixes..."
-	$(PYTHON) -m black src/ tests/
-	$(PYTHON) -m isort src/ tests/
+	$(call run-tool,black,src/ tests/)
+	$(call run-tool,isort,src/ tests/)
 	$(MAKE) ci-quality
 
-ci-check-verbose: dev-install  ## Run CI checks with verbose output
+ci-check-verbose:  ## Run CI checks with verbose output
 	@echo "Running CI checks with verbose output..."
-	$(PYTHON) dev-tools/scripts/ci_check.py --verbose
+	./dev-tools/scripts/ci_check.py --verbose
 
 ci: ci-check ci-tests-integration ci-tests-e2e  ## Run full CI pipeline (comprehensive checks + all tests)
 	@echo "Full CI pipeline completed successfully!"
@@ -503,6 +560,7 @@ clean:  ## Clean up build artifacts
 	rm -f $(COVERAGE_REPORT)
 	rm -f test-results.xml
 	rm -f bandit-report.json
+	rm -f pyproject.toml
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -name "*.pyc" -delete 2>/dev/null || true
 
@@ -553,16 +611,77 @@ validate-config: install  ## Validate configuration
 
 # Docker targets
 docker-build:  ## Build Docker image
-	docker build -t $(PROJECT):latest .
+	REGISTRY=$(CONTAINER_REGISTRY) \
+	VERSION=$(VERSION) \
+	IMAGE_NAME=$(CONTAINER_IMAGE) \
+	./dev-tools/scripts/container-build.sh
 
 docker-run:  ## Run Docker container
 	docker run -p 8000:8000 $(PROJECT):latest
 
 docker-compose-up:  ## Start with docker-compose
-	docker-compose up -d
+	docker-compose -f deployment/docker/docker-compose.yml up -d
 
 docker-compose-down:  ## Stop docker-compose
-	docker-compose down
+	docker-compose -f deployment/docker/docker-compose.yml down
+
+# Container build targets (multi-Python support)
+container-build-multi: dev-install  ## Build container images for all Python versions
+	@for py_ver in $(PYTHON_VERSIONS); do \
+		echo "Building container for Python $$py_ver..."; \
+		REGISTRY=$(CONTAINER_REGISTRY) \
+		VERSION=$(VERSION) \
+		IMAGE_NAME=$(CONTAINER_IMAGE) \
+		PYTHON_VERSION=$$py_ver \
+		MULTI_PYTHON=true \
+		./dev-tools/scripts/container-build.sh; \
+	done
+	@echo "Tagging default Python $(DEFAULT_PYTHON) as latest..."
+	@docker tag $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$(DEFAULT_PYTHON) $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
+
+container-build-single: dev-install  ## Build container image for single Python version (usage: make container-build-single PYTHON_VERSION=3.11)
+	@if [ -z "$(PYTHON_VERSION)" ]; then \
+		echo "Error: PYTHON_VERSION is required. Usage: make container-build-single PYTHON_VERSION=3.11"; \
+		exit 1; \
+	fi
+	REGISTRY=$(CONTAINER_REGISTRY) \
+	VERSION=$(VERSION) \
+	IMAGE_NAME=$(CONTAINER_IMAGE) \
+	PYTHON_VERSION=$(PYTHON_VERSION) \
+	./dev-tools/scripts/container-build.sh
+
+container-push-multi: container-build-multi  ## Push all container images to registry
+	@for py_ver in $(PYTHON_VERSIONS); do \
+		echo "Pushing $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver"; \
+		docker push $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver; \
+	done
+	@echo "Pushing $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)"
+	@docker push $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
+
+container-show-version:  ## Show current version and tags that would be created
+	@echo "Package & Version Information"
+	@echo "============================="
+	@echo "Package Name: $(CONTAINER_IMAGE)"
+	@echo "Version: $(VERSION)"
+	@echo "Registry: $(CONTAINER_REGISTRY)"
+	@echo "Python Versions: $(PYTHON_VERSIONS)"
+	@echo "Default Python: $(DEFAULT_PYTHON)"
+	@echo ""
+	@echo "Container tags that would be created:"
+	@for py_ver in $(PYTHON_VERSIONS); do \
+		echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver"; \
+	done
+	@echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION) (default: Python $(DEFAULT_PYTHON))"
+
+# Configuration management targets
+show-package-info:  ## Show current package and version metadata
+	@echo "Package Information:"
+	@echo "  Name: $(PACKAGE_NAME)"
+	@echo "  Version: $(VERSION)"
+	@echo "  CLI Command: $(PACKAGE_NAME_SHORT)"
+	@echo "  Repository: $(REPO_ORG)/$(PACKAGE_NAME)"
+	@echo "  Container Registry: $(CONTAINER_REGISTRY)"
+	@echo "  Documentation: $(DOCS_URL)"
 
 # Quick development workflow
 dev: dev-install format lint test-quick  ## Quick development workflow (format, lint, test)
@@ -570,7 +689,7 @@ dev: dev-install format lint test-quick  ## Quick development workflow (format, 
 
 # Show project status
 status:  ## Show project status and useful commands
-	@echo "=== Open Host Factory Plugin Status ==="
+	@echo "=== $(PACKAGE_NAME) v$(VERSION) Status ==="
 	@echo ""
 	@echo "Project Structure:"
 	@echo "  Source code:     $(PACKAGE)/"
@@ -578,7 +697,13 @@ status:  ## Show project status and useful commands
 	@echo "  Documentation:  $(DOCS_DIR)/"
 	@echo "  Dev tools:      dev-tools/"
 	@echo ""
-	@echo "INFO: Quick Commands:"
+	@echo "Package Information:"
+	@echo "  Name:           $(PACKAGE_NAME)"
+	@echo "  Version:        $(VERSION)"
+	@echo "  CLI Command:    $(PACKAGE_NAME_SHORT)"
+	@echo "  Repository:     $(REPO_ORG)/$(PACKAGE_NAME)"
+	@echo ""
+	@echo "Quick Commands:"
 	@echo "  make dev-setup     - Set up development environment"
 	@echo "  make test          - Run tests"
 	@echo "  make docs          - Build documentation"
@@ -587,16 +712,20 @@ status:  ## Show project status and useful commands
 	@echo ""
 	@echo "Documentation:"
 	@echo "  Local docs:     make docs-serve (versioned)"
-	@echo "  Build docs:     make docs-build"
-	@echo "  GitHub Pages:   https://awslabs.github.io/open-hostfactory-plugin"
+	@echo "  GitHub Pages:   $(DOCS_URL)"
 	@echo "  Deploy docs:    make docs-deploy (local) or make ci-docs-deploy (CI)"
 	@echo "  List versions:  make docs-list-versions"
 	@echo "  Deploy version: make docs-deploy-version VERSION=1.0.0"
 	@echo ""
-	@echo "INFO: Version Management:"
+	@echo "Version Management:"
 	@echo "  Patch version:  make version-bump-patch"
 	@echo "  Minor version:  make version-bump-minor"
 	@echo "  Major version:  make version-bump-major"
+	@echo ""
+	@echo "Container Management:"
+	@echo "  Show info:      make container-show-version"
+	@echo "  Build single:   make container-build-single PYTHON_VERSION=3.11"
+	@echo "  Build all:      make container-build-multi"
 
 # UV-specific targets for performance optimization
 uv-lock: ## Generate uv lock file for reproducible builds

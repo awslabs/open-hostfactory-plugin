@@ -10,12 +10,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.application.commands.request_handlers import (
-    CreateMachineRequestHandler,
-)
-from src.application.dto.commands import (
-    CreateRequestCommand,
-)
+from src.application.commands.request_handlers import CreateMachineRequestHandler
+from src.application.dto.commands import CreateRequestCommand
 from src.application.services.provider_capability_service import (
     ProviderCapabilityService,
 )

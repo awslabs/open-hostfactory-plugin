@@ -418,7 +418,7 @@ class TestDIPattern:
 
         try:
             container.register(TestService, TestService, "invalid_scope")
-            raise AssertionError(), "Should have raised validation error"
+            raise AssertionError("Should have raised validation error")
         except (ValueError, TypeError):
             # Expected validation error
             pass

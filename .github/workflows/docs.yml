@@ -45,7 +45,7 @@ jobs:
 
       - name: Install dependencies with uv
         run: |
-          uv pip install --system -r requirements-dev.txt
+          make ci-install
 
       - name: Configure Git for mike
         run: |

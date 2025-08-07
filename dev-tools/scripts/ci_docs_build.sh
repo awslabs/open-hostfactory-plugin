@@ -9,7 +9,10 @@ echo "Building documentation for CI testing..."
 cd docs
 
 # Try different mkdocs installation methods in order of preference
-if command -v ../.venv/bin/mkdocs >/dev/null 2>&1; then
+if command -v uv >/dev/null 2>&1; then
+    echo "Using UV-managed mkdocs..."
+    cd .. && uv run --with mkdocs mkdocs build --strict --config-file docs/mkdocs.yml
+elif command -v ../.venv/bin/mkdocs >/dev/null 2>&1; then
     echo "Using venv mkdocs..."
     ../.venv/bin/mkdocs build --strict
 elif command -v mkdocs >/dev/null 2>&1; then

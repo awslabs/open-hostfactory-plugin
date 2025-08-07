@@ -19,10 +19,7 @@ from src.application.decorators import (
     get_command_handler_for_type,
     get_query_handler_for_type,
 )
-from src.application.interfaces.command_query import (
-    Command,
-    Query,
-)
+from src.application.interfaces.command_query import Command, Query
 from src.domain.base.ports import LoggingPort
 from src.infrastructure.di.container import DIContainer
 

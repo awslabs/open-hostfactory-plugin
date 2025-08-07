@@ -1,3 +1,30 @@
+# Generated files
+pyproject.toml
+
+# Generated requirements files (generated on-demand from uv.lock)
+requirements.txt
+requirements-dev.txt
+
+# Keep the lock file (source of truth)
+!uv.lock
+
+# Working directories
+work/
+
+# Security and analysis reports
+bandit-report.json
+bandit-report.sarif
+bandit-results.sarif
+hadolint-results.sarif
+trivy-results.json
+trivy-results.sarif
+safety-report.json
+security-report.json
+security-report.md
+*-sbom-*.json
+*-sbom-*.spdx
+*-sbom-*.cyclonedx
+
 # Python
 __pycache__/
 *.py[cod]

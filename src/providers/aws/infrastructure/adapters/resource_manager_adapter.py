@@ -19,9 +19,7 @@ from src.domain.base.resource_manager import (
 from src.infrastructure.ports.cloud_resource_manager_port import (
     CloudResourceManagerPort,
 )
-from src.providers.aws.exceptions.aws_exceptions import (
-    InfrastructureError,
-)
+from src.providers.aws.exceptions.aws_exceptions import InfrastructureError
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.managers.aws_resource_manager import AWSResourceManagerImpl
 

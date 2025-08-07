@@ -19,10 +19,12 @@ Architecture:
     between domain logic, application services, and infrastructure concerns.
 """
 
-__version__ = "0.1.0"
+from ._package import PACKAGE_NAME
+from ._version import __version__
+
 __author__ = "AWS Professional Services"
 __email__ = "aws-proserve@amazon.com"
-__package_name__ = "open-hostfactory-plugin"
+__package_name__ = PACKAGE_NAME
 
 """
 Usage:

@@ -7,9 +7,7 @@ import time
 from contextlib import contextmanager
 from typing import Any, Dict, Iterator, List, Optional, Set, Type, TypeVar
 
-from src.domain.base.dependency_injection import (
-    is_injectable,
-)
+from src.domain.base.dependency_injection import is_injectable
 from src.domain.base.di_contracts import (
     CQRSHandlerRegistrationPort,
     DependencyRegistration,

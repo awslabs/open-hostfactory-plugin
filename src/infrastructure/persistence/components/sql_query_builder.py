@@ -128,7 +128,8 @@ class SQLQueryBuilder(QueryManager):
         # Build query using validated identifiers
         # 1. Validating table_name and column names against a whitelist pattern
         # 2. Using parameterized queries for all values with :param syntax
-        query = f"INSERT INTO {self.table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"  # nosec B608
+        # nosec B608
+        query = f"INSERT INTO {self.table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
 
         self.logger.debug(f"Built INSERT query for {self.table_name}")
         return query, filtered_data
@@ -146,7 +147,8 @@ class SQLQueryBuilder(QueryManager):
         # Validate identifier
         self._validate_identifier(id_column)
 
-        query = f"SELECT * FROM {self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
+        # nosec B608
+        query = f"SELECT * FROM {self.table_name} WHERE {id_column} = :{id_column}"
 
         self.logger.debug(f"Built SELECT by ID query for {self.table_name}")
         return query, id_column
@@ -192,7 +194,10 @@ class SQLQueryBuilder(QueryManager):
             self._validate_identifier(column)
 
         set_clauses = [f"{col} = :{col}" for col in filtered_data.keys()]
-        query = f"UPDATE {self.table_name} SET {', '.join(set_clauses)} WHERE {id_column} = :entity_id"  # nosec B608
+        # nosec B608
+        query = (
+            f"UPDATE {self.table_name} SET {', '.join(set_clauses)} WHERE {id_column} = :entity_id"
+        )
 
         # Add entity_id to parameters
         parameters = filtered_data.copy()
@@ -214,7 +219,8 @@ class SQLQueryBuilder(QueryManager):
         # Validate id_column
         self._validate_identifier(id_column)
 
-        query = f"DELETE FROM { self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
+        # nosec B608
+        query = f"DELETE FROM { self.table_name} WHERE {id_column} = :{id_column}"
 
         self.logger.debug(f"Built DELETE query for {self.table_name}")
         return query, id_column
@@ -285,7 +291,8 @@ class SQLQueryBuilder(QueryManager):
                 where_clauses.append(f"{column} = :{param_name}")
                 parameters[param_name] = value
 
-        query = f"SELECT * FROM {self.table_name} WHERE {' AND '.join(where_clauses)}"  # nosec B608
+        # nosec B608
+        query = f"SELECT * FROM {self.table_name} WHERE {' AND '.join(where_clauses)}"
 
         self.logger.debug(f"Built SELECT with criteria query for {self.table_name}")
         return query, parameters
@@ -330,7 +337,8 @@ class SQLQueryBuilder(QueryManager):
             raise ValueError("No valid columns found in data")
 
         placeholders = [f":{col}" for col in filtered_columns]
-        query = f"INSERT INTO {self.table_name} ({', '.join(filtered_columns)}) VALUES ({', '.join(placeholders)})"  # nosec B608
+        # nosec B608
+        query = f"INSERT INTO {self.table_name} ({', '.join(filtered_columns)}) VALUES ({', '.join(placeholders)})"
 
         # Filter all data items
         filtered_data_list = []

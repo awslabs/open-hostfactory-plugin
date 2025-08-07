@@ -20,9 +20,7 @@ try:
     )
     from src.domain.request.value_objects import RequestStatus
     from src.domain.template.aggregate import Template
-    from src.domain.template.exceptions import (
-        TemplateValidationError,
-    )
+    from src.domain.template.exceptions import TemplateValidationError
 
     IMPORTS_AVAILABLE = True
 except ImportError as e:

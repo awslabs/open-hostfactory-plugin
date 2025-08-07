@@ -1,72 +1,101 @@
 version: 2
 updates:
-  # Python dependencies
+  # Python dependencies with smart grouping
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Etc/UTC"
+      day: "sunday"
+      time: "06:00"
+      timezone: "America/New_York"
     labels:
       - "dependencies"
       - "python"
     commit-message:
-      prefix: "chore"
-      prefix-development: "chore(dev)"
+      prefix: "chore(deps)"
       include: "scope"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "aws-samples/hostfactory-maintainers"
-    assignees:
-      - "aws-samples/hostfactory-maintainers"
+    open-pull-requests-limit: 3
+    
+    # Group related dependencies together
     groups:
-      dev-dependencies:
+      aws-dependencies:
         patterns:
-          - "*"
+          - "boto*"
+          - "aws-*"
+          - "moto*"
         update-types:
           - "minor"
           - "patch"
-    allow:
-      - dependency-type: "direct"
-      - dependency-type: "indirect"
+      
+      dev-tools:
+        patterns:
+          - "black"
+          - "isort"
+          - "mypy"
+          - "pylint"
+          - "flake8"
+          - "autopep8"
+        update-types:
+          - "minor"
+          - "patch"
+      
+      testing-tools:
+        patterns:
+          - "pytest*"
+          - "coverage"
+          - "tox"
+        update-types:
+          - "minor"
+          - "patch"
+      
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+          - "minor"
+          - "major"
+    
+    # Ignore problematic updates
+    ignore:
+      # Don't update major versions automatically for critical tools
+      - dependency-name: "black"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pytest"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Etc/UTC"
+      day: "sunday"
+      time: "06:00"
+      timezone: "America/New_York"
     labels:
       - "dependencies"
       - "github-actions"
     commit-message:
-      prefix: "chore"
+      prefix: "chore(ci)"
       include: "scope"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
-  # Docker dependencies (merged configuration)
+  # Docker dependencies
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Etc/UTC"
+      day: "sunday"
+      time: "06:00"
+      timezone: "America/New_York"
     labels:
       - "dependencies"
       - "docker"
     commit-message:
-      prefix: "chore"
+      prefix: "chore(docker)"
       include: "scope"
-    open-pull-requests-limit: 10
-    reviewers:
-      - "aws-samples/hostfactory-maintainers"
-    assignees:
-      - "aws-samples/hostfactory-maintainers"
-    groups:
-      docker:
-        patterns:
-          - "*"
+    open-pull-requests-limit: 1

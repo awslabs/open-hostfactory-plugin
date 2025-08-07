@@ -5,16 +5,7 @@ import logging
 import threading
 import typing
 from contextlib import suppress
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Optional,
-    Set,
-    Type,
-    TypeVar,
-    get_type_hints,
-)
+from typing import Any, Callable, Dict, Optional, Set, Type, TypeVar, get_type_hints
 
 from src.domain.base.dependency_injection import get_injectable_metadata, is_injectable
 from src.domain.base.di_contracts import DependencyRegistration, DILifecycle, DIScope

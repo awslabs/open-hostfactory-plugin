@@ -332,7 +332,7 @@ class TestResourceExhaustionCornerCases:
                 try:
                     temp_file.close()
                     os.unlink(temp_file.name)
-                except (OSError, IOError):
+                except OSError:
                     pass  # Cleanup failure is acceptable in tests
 
     def test_disk_space_exhaustion_simulation(self):
@@ -361,7 +361,7 @@ class TestResourceExhaustionCornerCases:
                 if os.path.exists(large_file_path):
                     os.remove(large_file_path)
                 os.rmdir(temp_dir)
-            except (OSError, IOError):
+            except OSError:
                 pass  # Cleanup failure is acceptable in tests
 
 
@@ -378,7 +378,7 @@ class TestNetworkFailureCornerCases:
         # Application should handle timeout gracefully
         try:
             result = mock_service.call_api("test_endpoint")
-            raise AssertionError(), "Should have raised TimeoutError"
+            raise AssertionError("Should have raised TimeoutError")
         except TimeoutError as e:
             assert "timed out" in str(e).lower()
 
@@ -389,7 +389,7 @@ class TestNetworkFailureCornerCases:
 
         try:
             mock_service.connect()
-            raise AssertionError(), "Should have raised ConnectionRefusedError"
+            raise AssertionError("Should have raised ConnectionRefusedError")
         except ConnectionRefusedError as e:
             assert "refused" in str(e).lower()
 
@@ -623,7 +623,7 @@ class TestEdgeCaseIntegration:
                     is_timed_out = request.is_timed_out()
                     assert isinstance(is_timed_out, bool)
 
-        except (RequestValidationError, ValueError, UnicodeError) as e:
+        except (RequestValidationError, ValueError) as e:
             # Some combinations may be invalid, which is acceptable
             assert isinstance(e, Exception)
 

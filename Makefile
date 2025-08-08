@@ -553,8 +553,32 @@ ci-security-hadolint:  ## Run Hadolint Dockerfile scan
 		echo "Hadolint not available - install with: brew install hadolint"; \
 	fi
 
+ci-security-semgrep:  ## Run Semgrep static analysis
+	@echo "Running Semgrep static analysis..."
+	@if command -v semgrep >/dev/null 2>&1; then \
+		semgrep --config=auto --sarif --output=semgrep.sarif src/ || echo "Semgrep issues found"; \
+	else \
+		echo "Semgrep not available - install with: pip install semgrep"; \
+	fi
+
+ci-security-trivy-fs:  ## Run Trivy filesystem scan
+	@echo "Running Trivy filesystem scan..."
+	@if command -v trivy >/dev/null 2>&1; then \
+		trivy fs --format sarif --output trivy-fs-results.sarif . || echo "Trivy filesystem issues found"; \
+	else \
+		echo "Trivy not available - install from https://aquasecurity.github.io/trivy/"; \
+	fi
+
+ci-security-trufflehog:  ## Run TruffleHog secrets scan
+	@echo "Running TruffleHog secrets scan..."
+	@if command -v trufflehog >/dev/null 2>&1; then \
+		trufflehog git file://. --json > trufflehog-results.json || echo "Secrets found"; \
+	else \
+		echo "TruffleHog not available - install from https://github.com/trufflesecurity/trufflehog"; \
+	fi
+
 # Composite target
-ci-security: ci-security-bandit ci-security-safety  ## Run all security scans
+ci-security: ci-security-bandit ci-security-safety ci-security-semgrep ci-security-trivy-fs ci-security-trufflehog  ## Run all security scans
 
 ci-build-sbom:  ## Generate SBOM files (matches publish.yml workflow)
 	@echo "Generating SBOM files for CI..."

@@ -140,6 +140,33 @@ repos:
         description: "Run comprehensive security scan"
         warning_only: true  # Allow this to fail without blocking commit
 
+      - id: semgrep
+        name: Semgrep (Static Analysis)
+        entry: make ci-security-semgrep
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Run Semgrep static analysis"
+        warning_only: true  # Allow this to fail without blocking commit
+
+      - id: trivy-fs
+        name: Trivy (Filesystem Scan)
+        entry: make ci-security-trivy-fs
+        language: system
+        files: \.(py|txt|yml|yaml|toml|json)$
+        pass_filenames: false
+        description: "Run Trivy filesystem vulnerability scanner"
+        warning_only: true  # Allow this to fail without blocking commit
+
+      - id: trufflehog
+        name: TruffleHog (Secrets Scan)
+        entry: make ci-security-trufflehog
+        language: system
+        files: \.(py|txt|yml|yaml|toml|json|md|sh)$
+        pass_filenames: false
+        description: "Check for secrets with TruffleHog"
+        warning_only: true  # Allow this to fail without blocking commit
+
       - id: validate-workflows
         name: Validate Workflows
         entry: make validate-workflows

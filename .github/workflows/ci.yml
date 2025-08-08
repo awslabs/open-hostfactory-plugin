@@ -37,7 +37,7 @@ jobs:
   quality-check:
     name: Professional Quality Standards
     runs-on: ubuntu-latest
-    needs: setup-env
+    needs: get-config
     
     steps:
     - uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ needs.setup-env.outputs.python-version }}
+        python-version: ${{ needs.get-config.outputs.python-version }}
     
     - name: Install UV
       uses: astral-sh/setup-uv@v3

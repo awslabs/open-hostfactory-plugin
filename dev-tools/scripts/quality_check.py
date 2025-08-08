@@ -28,6 +28,11 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+try:
+    import pathspec
+except ImportError:
+    pathspec = None
+
 # --- Configuration ---
 
 # Emoji detection pattern
@@ -380,6 +385,34 @@ class QualityChecker:
             ImportChecker(),
             CommentChecker(),
         ]
+        self.gitignore_spec = self._load_gitignore()
+
+    def _load_gitignore(self):
+        """Load .gitignore patterns for filtering files."""
+        if not pathspec:
+            return None
+        
+        gitignore_path = Path(".gitignore")
+        if not gitignore_path.exists():
+            return None
+        
+        try:
+            with open(gitignore_path, 'r', encoding='utf-8') as f:
+                return pathspec.PathSpec.from_lines('gitwildmatch', f)
+        except Exception:
+            return None
+
+    def _should_ignore_file(self, file_path: str) -> bool:
+        """Check if file should be ignored based on gitignore."""
+        if not self.gitignore_spec:
+            return False
+        
+        # Convert to relative path for gitignore matching
+        try:
+            rel_path = os.path.relpath(file_path)
+            return self.gitignore_spec.match_file(rel_path)
+        except Exception:
+            return False
 
     def check_files(self, file_paths: List[str]) -> List[Violation]:
         """Run all checks on the given files."""
@@ -390,6 +423,9 @@ class QualityChecker:
         for file_path in file_paths:
             # Skip this script to avoid self-checking issues
             if file_path.endswith("quality_check.py"):
+                continue
+            # Skip files ignored by gitignore
+            if self._should_ignore_file(file_path):
                 continue
             if os.path.isfile(file_path):
                 ext = os.path.splitext(file_path)[1].lower()

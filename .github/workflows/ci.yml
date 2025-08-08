@@ -34,6 +34,31 @@ jobs:
         echo "Using Python version: $DEFAULT_PYTHON_VERSION"
 
   # Code Quality Jobs (granular with tool names)
+  quality-check:
+    name: Professional Quality Standards
+    runs-on: ubuntu-latest
+    needs: setup-env
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ needs.setup-env.outputs.python-version }}
+    
+    - name: Install UV
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Install dependencies
+      run: |
+        uv sync --group ci --group dev
+    
+    - name: Run professional quality checks
+      run: make quality-check
+
   lint-black:
     name: Black (Code Formatting)
     runs-on: ubuntu-latest

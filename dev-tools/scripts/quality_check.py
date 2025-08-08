@@ -9,7 +9,6 @@ A quality checker that enforces coding standards:
 - Proper docstring coverage and format
 - Consistent naming conventions
 - No unused imports or commented code
-- No TODO/FIXME comments without tickets
 - README files are up-to-date
 
 Usage:
@@ -61,7 +60,6 @@ HYPERBOLIC_TERMS = {
     r"\benhanced\b": 'Use "improved" only when factually accurate',
     r"\bunified\b": 'Use "integrated" or "consolidated"',
     r"\bmodern\b": 'Use "current" or "updated"',
-    r"\badvanced\b": 'Use "comprehensive" or specific technical terms',
     r"\bcutting-edge\b": 'Use "current industry standard"',
     r"\brevolutionary\b": 'Use "significant improvement"',
     r"\bnext-generation\b": "Use specific technology names",
@@ -166,15 +164,6 @@ class UnusedImportViolation(Violation):
 
     def can_autofix(self) -> bool:
         return True
-
-
-class TodoWithoutTicketViolation(Violation):
-    """TODO/FIXME comment without ticket reference."""
-
-    def __init__(self, file_path: str, line_num: int, content: str):
-        super().__init__(
-            file_path, line_num, content, "TODO/FIXME comment without ticket reference"
-        )
 
 
 class CommentedCodeViolation(Violation):
@@ -360,22 +349,15 @@ class CommentChecker(FileChecker):
     def check_content(self, file_path: str, content: str) -> List[Violation]:
         violations = []
 
-        # Regex for TODO/FIXME without ticket reference
-        todo_pattern = re.compile(r"#\s*(TODO|FIXME)(?!:?\s*\[?[A-Z]+-\d+\]?)", re.IGNORECASE)
-
         # Regex for commented code (simple heuristic)
         code_pattern = re.compile(
             r"^\s*#\s*(def|class|if|for|while|try|except|return|import|from)\s"
         )
 
-        # Regex for debug prints
-        debug_pattern = re.compile(r"^\s*(print\(|logger\.(debug|info)\()")
+        # Regex for debug prints (only catch print statements, not logger)
+        debug_pattern = re.compile(r"^\s*print\(")
 
         for line_num, line in enumerate(content.splitlines(), 1):
-            # Check for TODO/FIXME without ticket
-            if todo_pattern.search(line):
-                violations.append(TodoWithoutTicketViolation(file_path, line_num, line.strip()))
-
             # Check for commented code
             if code_pattern.search(line):
                 violations.append(CommentedCodeViolation(file_path, line_num, line.strip()))

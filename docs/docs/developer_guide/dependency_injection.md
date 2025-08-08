@@ -80,7 +80,7 @@ The `DIContainer` class implements domain contracts:
 - `register_factory(cls, factory)` - Register with factory
 - `is_registered(cls)` - Check if registered
 
-### Enhanced Methods
+### Improved Methods
 - `get_optional(dependency_type)` - Optional resolution (returns None if not found)
 - `get_all(dependency_type)` - Get all instances of a type
 - `register_instance(cls, instance)` - Register pre-created instance
@@ -424,7 +424,7 @@ Use lazy loading or break the dependency cycle by introducing an interface.
 The DI architecture provides:
 
 [[]] **Clean Architecture Compliance** - Proper dependency direction  
-[[]] **Enhanced DI Features** - Singleton, CQRS, optional dependencies  
+[[]] **Improved DI Features** - Singleton, CQRS, optional dependencies  
 [[]] **Backward Compatibility** - All existing code continues to work  
 [[]] **Performance Optimized** - Minimal overhead with intelligent caching  
 [[]] **Type Safe** - Full generic type support  

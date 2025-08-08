@@ -61,19 +61,19 @@ def main():
     # Add parallel execution (only if pytest-xdist is available)
     if args.parallel:
         try:
-            import xdist
+            import xdist  # noqa: F401 - Used conditionally
 
             pytest_cmd.extend(["-n", "auto"])
         except ImportError:
-            print("Warning: pytest-xdist not installed, skipping parallel execution")
+            logger.warning("pytest-xdist not installed, skipping parallel execution")
 
     # Add timeout (only if pytest-timeout is available)
     try:
-        import pytest_timeout
+        import pytest_timeout  # noqa: F401 - Used conditionally
 
         pytest_cmd.extend(["--timeout", str(args.timeout)])
     except ImportError:
-        print("Warning: pytest-timeout not installed, skipping timeout option")
+        logger.warning("pytest-timeout not installed, skipping timeout option")
 
     # Add maxfail
     pytest_cmd.extend(["--maxfail", str(args.maxfail)])
@@ -137,11 +137,11 @@ def main():
     success = run_command(pytest_cmd, "Running Tests")
 
     if success:
-        print(f"\nAll tests passed!")
+        logger.info("All tests passed!")
         if args.html_coverage:
-            print(f"Coverage report generated in htmlcov/index.html")
+            logger.info("Coverage report generated in htmlcov/index.html")
     else:
-        print(f"\nSome tests failed!")
+        logger.error("Some tests failed!")
         sys.exit(1)
 
 

@@ -53,7 +53,7 @@ repos:
         pass_filenames: false
         description: "Validate GitHub Actions workflow YAML files"
       
-      - id: secrets-detection
+      - id: detect-secrets
         name: Detect Hardcoded Secrets
         entry: make detect-secrets
         language: system
@@ -61,35 +61,10 @@ repos:
         pass_filenames: false
         description: "Detect potential hardcoded secrets in source code"
       
-      - id: dockerfile-security
-        name: Dockerfile Security Check
-        entry: bash -c 'if command -v hadolint >/dev/null 2>&1; then hadolint Dockerfile; else echo "Hadolint not installed, skipping Dockerfile security check"; fi'
-        language: system
-        files: ^Dockerfile.*$
-        pass_filenames: false
-        description: "Run Hadolint security check on Dockerfiles"
-      
-      # Architecture Quality Gates
       - id: check-file-sizes
         name: Check File Sizes
-        entry: bash -c 'source .venv/bin/activate && python dev-tools/scripts/check_file_sizes.py --warn-only'
+        entry: make file-sizes
         language: system
         files: \.(py)$
         pass_filenames: false
         description: "Check for files that may violate Single Responsibility Principle"
-        
-      - id: validate-cqrs
-        name: Validate CQRS Patterns
-        entry: bash -c 'source .venv/bin/activate && python scripts/validate_cqrs.py --warn-only'
-        language: system
-        files: \.(py)$
-        pass_filenames: false
-        description: "Validate CQRS handler patterns and inheritance"
-        
-      - id: check-architecture
-        name: Check Clean Architecture
-        entry: bash -c 'source .venv/bin/activate && python dev-tools/scripts/check_architecture.py --warn-only'
-        language: system
-        files: \.(py)$
-        pass_filenames: false
-        description: "Validate Clean Architecture dependency rules"

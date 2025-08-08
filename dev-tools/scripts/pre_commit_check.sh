@@ -53,7 +53,18 @@ fi
 
 # Check if yq is available
 if ! command -v yq >/dev/null 2>&1; then
-    echo -e "${RED}ERROR: yq not found. Install with: brew install yq${NC}"
+    echo -e "${RED}ERROR: yq not found. Install with:${NC}"
+    if command -v apt >/dev/null 2>&1; then
+        echo -e "${BLUE}  Ubuntu/Debian: sudo apt install yq${NC}"
+    elif command -v dnf >/dev/null 2>&1; then
+        echo -e "${BLUE}  RHEL/Fedora: sudo dnf install yq${NC}"
+    elif command -v yum >/dev/null 2>&1; then
+        echo -e "${BLUE}  CentOS/RHEL: sudo yum install yq${NC}"
+    elif command -v brew >/dev/null 2>&1; then
+        echo -e "${BLUE}  macOS: brew install yq${NC}"
+    else
+        echo -e "${BLUE}  See: https://github.com/mikefarah/yq#install${NC}"
+    fi
     exit 1
 fi
 

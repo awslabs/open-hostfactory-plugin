@@ -38,7 +38,7 @@ jobs:
     - name: Get default Python version from Makefile
       id: version
       run: |
-        DEFAULT_PYTHON=$(make print-DEFAULT_PYTHON)
+        DEFAULT_PYTHON=$(make print-DEFAULT_PYTHON_VERSION)
         echo "python-version=$DEFAULT_PYTHON" >> $GITHUB_OUTPUT
         echo "Using Python version: $DEFAULT_PYTHON"
 

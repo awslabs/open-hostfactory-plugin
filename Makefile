@@ -9,7 +9,7 @@ BIN := $(VENV)/bin
 
 # Python version settings (centralized for all build/test operations)
 PYTHON_VERSIONS := 3.9 3.10 3.11 3.12 3.13
-DEFAULT_PYTHON := 3.13
+DEFAULT_PYTHON_VERSION_VERSION := 3.13
 
 # Generate pyproject.toml from template with centralized configuration
 generate-pyproject:  ## Generate pyproject.toml from template using centralized config
@@ -636,8 +636,8 @@ container-build-multi: dev-install  ## Build container images for all Python ver
 		MULTI_PYTHON=true \
 		./dev-tools/scripts/container-build.sh; \
 	done
-	@echo "Tagging default Python $(DEFAULT_PYTHON) as latest..."
-	@docker tag $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$(DEFAULT_PYTHON) $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
+	@echo "Tagging default Python $(DEFAULT_PYTHON_VERSION) as latest..."
+	@docker tag $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$(DEFAULT_PYTHON_VERSION) $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
 
 container-build-single: dev-install  ## Build container image for single Python version (usage: make container-build-single PYTHON_VERSION=3.11)
 	@if [ -z "$(PYTHON_VERSION)" ]; then \
@@ -665,13 +665,13 @@ container-show-version:  ## Show current version and tags that would be created
 	@echo "Version: $(VERSION)"
 	@echo "Registry: $(CONTAINER_REGISTRY)"
 	@echo "Python Versions: $(PYTHON_VERSIONS)"
-	@echo "Default Python: $(DEFAULT_PYTHON)"
+	@echo "Default Python: $(DEFAULT_PYTHON_VERSION)"
 	@echo ""
 	@echo "Container tags that would be created:"
 	@for py_ver in $(PYTHON_VERSIONS); do \
 		echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$$py_ver"; \
 	done
-	@echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION) (default: Python $(DEFAULT_PYTHON))"
+	@echo "  - $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION) (default: Python $(DEFAULT_PYTHON_VERSION))"
 
 # Configuration management targets
 show-package-info:  ## Show current package and version metadata

@@ -727,6 +727,10 @@ status:  ## Show project status and useful commands
 	@echo "  Build single:   make container-build-single PYTHON_VERSION=3.11"
 	@echo "  Build all:      make container-build-multi"
 
+# Print variable targets for CI integration
+print-%:
+	@echo $($*)
+
 # UV-specific targets for performance optimization
 uv-lock: ## Generate uv lock file for reproducible builds
 	@if ! command -v uv >/dev/null 2>&1; then \

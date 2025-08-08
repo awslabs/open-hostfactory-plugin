@@ -24,12 +24,28 @@ on:
         - pypi
 
 env:
-  PYTHON_VERSION: '3.11'
 
 jobs:
+  get-python-version:
+    name: Get Python Version from Makefile
+    runs-on: ubuntu-latest
+    outputs:
+      python-version: ${{ steps.version.outputs.python-version }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Get default Python version from Makefile
+      id: version
+      run: |
+        DEFAULT_PYTHON=$(make print-DEFAULT_PYTHON)
+        echo "python-version=$DEFAULT_PYTHON" >> $GITHUB_OUTPUT
+        echo "Using Python version: $DEFAULT_PYTHON"
+
   publish:
     name: Build and Publish Package
     runs-on: ubuntu-latest
+    needs: get-python-version
     environment: ${{ github.event.inputs.environment || 'pypi' }}
     
     steps:
@@ -39,7 +55,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -111,7 +127,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
 
     - name: Install uv
       uses: astral-sh/setup-uv@v6

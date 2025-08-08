@@ -67,6 +67,7 @@ jobs:
   lint-isort:
     name: isort (Import Sorting)
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -75,7 +76,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -96,6 +97,7 @@ jobs:
   lint-flake8:
     name: flake8 (Style Guide)
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -104,7 +106,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -125,6 +127,7 @@ jobs:
   lint-mypy:
     name: mypy (Type Checking)
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -133,7 +136,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -155,6 +158,7 @@ jobs:
   lint-pylint:
     name: pylint (Code Analysis)
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -163,7 +167,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -186,6 +190,7 @@ jobs:
   arch-cqrs:
     name: CQRS Pattern Validation
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -194,7 +199,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -216,6 +221,7 @@ jobs:
   arch-clean:
     name: Clean Architecture Dependencies
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -224,7 +230,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -246,6 +252,7 @@ jobs:
   arch-imports:
     name: Import Validation
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -254,7 +261,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -276,6 +283,7 @@ jobs:
   arch-file-sizes:
     name: File Size Compliance
     runs-on: ubuntu-latest
+    needs: get-python-version
     
     steps:
     - name: Checkout code
@@ -284,7 +292,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -306,6 +314,7 @@ jobs:
   unit-tests:
     name: Unit Tests (Fast)
     runs-on: ubuntu-latest
+    needs: get-python-version
     needs: [lint-black, lint-isort, lint-flake8]  # Can start after basic linting
     
     steps:
@@ -315,7 +324,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -355,6 +364,7 @@ jobs:
   integration-tests:
     name: Integration Tests (Fast)
     runs-on: ubuntu-latest
+    needs: get-python-version
     needs: [unit-tests]
     
     steps:
@@ -364,7 +374,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -404,6 +414,7 @@ jobs:
   e2e-tests:
     name: End-to-End Tests (Fast)
     runs-on: ubuntu-latest
+    needs: get-python-version
     needs: [unit-tests, integration-tests]
     
     steps:
@@ -413,7 +424,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -444,6 +455,7 @@ jobs:
   performance-tests:
     name: Performance Tests
     runs-on: ubuntu-latest
+    needs: get-python-version
     if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[perf]')
     
     steps:
@@ -453,7 +465,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -493,7 +505,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -534,7 +546,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
+        python-version: ${{ needs.get-python-version.outputs.python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6

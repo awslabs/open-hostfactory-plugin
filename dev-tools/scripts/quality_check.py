@@ -161,11 +161,10 @@ class DocstringFormatViolation(Violation):
 class UnusedImportViolation(Violation):
     """Unused import found in code."""
 
-    def __init__(self, file_path: str, line_num: int, import_name: str):
+    def __init__(self, file_path: str, line_num: int, message: str):
         super().__init__(
-            file_path, line_num, f"import {import_name}", f"Unused import: {import_name}"
+            file_path, line_num, "", f"Unused imports detected: {message}"
         )
-        self.import_name = import_name
 
     def can_autofix(self) -> bool:
         return True
@@ -302,7 +301,7 @@ class DocstringChecker(FileChecker):
 
 
 class ImportChecker(FileChecker):
-    """Check for unused imports."""
+    """Check for unused imports using autoflake."""
 
     def check_content(self, file_path: str, content: str) -> List[Violation]:
         if not file_path.endswith(".py"):
@@ -310,39 +309,22 @@ class ImportChecker(FileChecker):
 
         violations = []
         try:
-            tree = ast.parse(content)
-
-            # Get all imports
-            imports = {}
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for name in node.names:
-                        imports[name.name] = node.lineno
-                elif isinstance(node, ast.ImportFrom):
-                    module = node.module or ""
-                    for name in node.names:
-                        if name.name == "*":
-                            continue
-                        full_name = f"{module}.{name.name}" if module else name.name
-                        imports[name.asname or name.name] = node.lineno
-
-            # Find all used names
-            used_names = set()
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Name):
-                    used_names.add(node.id)
-                elif isinstance(node, ast.Attribute):
-                    # Handle attribute access like module.function
-                    if isinstance(node.value, ast.Name):
-                        used_names.add(node.value.id)
-
-            # Find unused imports
-            for name, line_num in imports.items():
-                if name not in used_names and not name.startswith("_"):
-                    violations.append(UnusedImportViolation(file_path, line_num, name))
-
-        except SyntaxError:
-            # Skip files with syntax errors
+            import subprocess
+            
+            # Run autoflake in check mode
+            result = subprocess.run([
+                "autoflake", "--check", "--remove-all-unused-imports", 
+                "--remove-unused-variables", file_path
+            ], capture_output=True, text=True, cwd=".")
+            
+            # If autoflake found issues, it returns non-zero exit code
+            if result.returncode != 0:
+                violations.append(UnusedImportViolation(
+                    file_path, 1, "Run 'make format' to fix automatically"
+                ))
+                
+        except (subprocess.SubprocessError, FileNotFoundError):
+            # Skip if autoflake not available
             pass
 
         return violations

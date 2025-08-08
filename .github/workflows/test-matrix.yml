@@ -19,14 +19,38 @@ env:
   TESTING: true
 
 jobs:
+  get-config:
+    name: Get Configuration from Makefile
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.config.outputs.python-versions }}
+      default-python-version: ${{ steps.config.outputs.default-python-version }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Get configuration from project config
+      id: config
+      run: |
+        # Use consistent print-* and print-json-* targets
+        PYTHON_VERSIONS_JSON=$(make print-json-PYTHON_VERSIONS)
+        DEFAULT_PYTHON_VERSION=$(yq '.python.default_version' .project.yml)
+        
+        echo "python-versions=$PYTHON_VERSIONS_JSON" >> $GITHUB_OUTPUT
+        echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> $GITHUB_OUTPUT
+        
+        echo "Found Python versions: $(make print-PYTHON_VERSIONS)"
+        echo "Default Python version: $DEFAULT_PYTHON_VERSION"
+
   unit-tests:
     name: Unit Tests
+    needs: get-config
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]  # Disabled windows-latest, macos-latest for now
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ${{ fromJSON(needs.get-config.outputs.python-versions) }}
     
     steps:
     - name: Checkout code
@@ -76,7 +100,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]  # Disabled windows-latest, macos-latest for now
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ${{ fromJSON(needs.get-config.outputs.python-versions) }}
     
     steps:
     - name: Checkout code
@@ -126,7 +150,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]  # Disabled windows-latest, macos-latest for now
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ${{ fromJSON(needs.get-config.outputs.python-versions) }}
     
     steps:
     - name: Checkout code

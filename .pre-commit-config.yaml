@@ -2,62 +2,53 @@
 repos:
   - repo: local
     hooks:
-      - id: professional-quality-check
-        name: Professional Quality Check
-        entry: bash -c 'source .venv/bin/activate && python scripts/quality_check.py --strict'
+      - id: quality-check
+        name: Quality Check
+        entry: make quality-check
         language: system
         files: \.(py|md|rst|txt|yaml|yml|json|toml)$
         pass_filenames: false
-        description: "Run comprehensive professional quality checks (emojis, language, docstrings, etc.)"
+        description: "Run comprehensive professional quality checks"
       
       - id: validate-imports
         name: Validate Python Imports
-        entry: bash -c 'source .venv/bin/activate && python scripts/validate_imports.py'
+        entry: make ci-imports
         language: system
         files: \.(py)$
         pass_filenames: false
         description: "Validate that all critical imports work correctly"
       
-      - id: test-import-validation
-        name: Run Import Validation Tests
-        entry: bash -c 'source .venv/bin/activate && python -m pytest tests/test_import_validation.py -v'
+      - id: validate-cqrs
+        name: Validate CQRS Patterns
+        entry: make ci-arch-cqrs
         language: system
         files: \.(py)$
         pass_filenames: false
-        description: "Run comprehensive import validation tests"
+        description: "Validate CQRS architecture patterns"
       
-      - id: check-deprecated-imports
-        name: Check for Deprecated Imports
-        entry: bash -c 'grep -r "from.*request.*value_objects.*import.*MachineStatus" . --include="*.py" && echo "Found deprecated MachineStatus import" && exit 1 || echo "No deprecated imports found"'
+      - id: check-architecture
+        name: Check Architecture Compliance
+        entry: make ci-arch-clean
         language: system
         files: \.(py)$
         pass_filenames: false
-        description: "Check for deprecated import patterns"
+        description: "Check Clean Architecture compliance"
       
-      # Security Checks
-      - id: comprehensive-security-scan
-        name: Comprehensive Security Scan
-        entry: bash -c 'source .venv/bin/activate && python dev-tools/security/security_scan.py'
+      - id: security-scan
+        name: Security Scan
+        entry: make security-scan
         language: system
         files: \.(py|txt|yml|yaml|toml|Dockerfile)$
         pass_filenames: false
-        description: "Run comprehensive security scan (Bandit, Safety, SBOM, Trivy, Hadolint)"
+        description: "Run comprehensive security scan"
       
-      - id: bandit-security-check
-        name: Bandit Security Check (Fallback)
-        entry: bash -c 'source .venv/bin/activate && python -m bandit -r src/ -f json -q'
+      - id: validate-workflows
+        name: Validate Workflows
+        entry: make validate-workflows
         language: system
-        files: ^src/.*\.py$
+        files: \.github/workflows/.*\.(yml|yaml)$
         pass_filenames: false
-        description: "Run Bandit security linter on source code (fallback if comprehensive scan fails)"
-      
-      - id: safety-dependency-check
-        name: Safety Dependency Check
-        entry: bash -c 'source .venv/bin/activate && python -m safety check --short-report'
-        language: system
-        files: requirements.*\.txt$
-        pass_filenames: false
-        description: "Check for known security vulnerabilities in dependencies"
+        description: "Validate GitHub Actions workflow YAML files"
       
       - id: secrets-detection
         name: Detect Hardcoded Secrets

@@ -14,7 +14,7 @@ def _get_config_value(key: str) -> str:
             cwd=project_root,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         return result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
@@ -24,16 +24,16 @@ def _get_config_value(key: str) -> str:
 
 
 # Load all values from .project.yml (single source of truth)
-PACKAGE_NAME = _get_config_value('.project.name')
-PACKAGE_NAME_SHORT = _get_config_value('.project.short_name')
-__version__ = _get_config_value('.project.version')  # Version for imports
+PACKAGE_NAME = _get_config_value(".project.name")
+PACKAGE_NAME_SHORT = _get_config_value(".project.short_name")
+__version__ = _get_config_value(".project.version")  # Version for imports
 VERSION = __version__  # Alias for compatibility
-DESCRIPTION = _get_config_value('.project.description')
+DESCRIPTION = _get_config_value(".project.description")
 
 # Repository metadata
-REPO_ORG = _get_config_value('.repository.org')
-REPO_NAME = _get_config_value('.repository.name')
-CONTAINER_REGISTRY = _get_config_value('.repository.registry')
+REPO_ORG = _get_config_value(".repository.org")
+REPO_NAME = _get_config_value(".repository.name")
+CONTAINER_REGISTRY = _get_config_value(".repository.registry")
 
 # Derived values
 PACKAGE_NAME_PYTHON = PACKAGE_NAME.replace("-", "_")

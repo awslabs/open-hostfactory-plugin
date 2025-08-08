@@ -2,6 +2,30 @@
 repos:
   - repo: local
     hooks:
+      - id: black
+        name: Black (Code Formatting)
+        entry: make ci-quality-black
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Check Python code formatting with Black"
+      
+      - id: isort
+        name: isort (Import Sorting)
+        entry: make ci-quality-isort
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Check Python import sorting with isort"
+      
+      - id: flake8
+        name: flake8 (Style Guide)
+        entry: make ci-quality-flake8
+        language: system
+        files: \.(py)$
+        pass_filenames: false
+        description: "Check Python style guide compliance with flake8"
+      
       - id: quality-check
         name: Quality Check
         entry: make quality-check

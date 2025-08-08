@@ -9,7 +9,7 @@ BIN := $(VENV)/bin
 
 # Python version settings (centralized for all build/test operations)
 PYTHON_VERSIONS := 3.9 3.10 3.11 3.12 3.13
-DEFAULT_PYTHON_VERSION_VERSION := 3.13
+DEFAULT_PYTHON_VERSION := 3.13
 
 # Generate pyproject.toml from template with centralized configuration
 generate-pyproject:  ## Generate pyproject.toml from template using centralized config

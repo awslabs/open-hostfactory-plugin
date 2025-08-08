@@ -11,7 +11,7 @@ cd "$PROJECT_ROOT"
 # Ensure we're using the venv's Python explicitly
 if [ ! -f ".venv/bin/python" ]; then
     echo "ERROR: Virtual environment not found at .venv/"
-    echo "Please create it first: python3.11 -m venv .venv"
+    echo "Please create it first: python3 -m venv .venv"
     exit 1
 fi
 
@@ -33,7 +33,7 @@ if command -v uv >/dev/null 2>&1; then
         echo "INFO: Installing build dependencies with uv..."
         uv pip install build
     fi
-    
+
     # Build package using uv (if available) or fallback to standard build
     echo "INFO: Building package with uv optimization..."
     python -m build --clean
@@ -43,7 +43,7 @@ else
         echo "INFO: Installing build dependencies..."
         python -m pip install build
     fi
-    
+
     # Build package using the venv's Python
     echo "INFO: Building package..."
     python -m build --clean

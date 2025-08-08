@@ -239,17 +239,12 @@ clean-whitespace:  ## Clean whitespace in blank lines from all files
 	./dev-tools/scripts/clean_whitespace.py
 
 format: dev-install clean-whitespace  ## Format code (Black + isort + autopep8 + autoflake + whitespace cleanup)
-	@echo "Checking for files that need formatting..."
-	@if $(BIN)/black --check $(PACKAGE) $(TESTS) >/dev/null 2>&1 && \
-	   $(BIN)/isort --check-only $(PACKAGE) $(TESTS) >/dev/null 2>&1; then \
-		echo "All files already formatted correctly"; \
-	else \
-		echo "Formatting files..."; \
-		$(BIN)/autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive $(PACKAGE) $(TESTS); \
-		$(BIN)/autopep8 --in-place --max-line-length=88 --select=E501 --recursive $(PACKAGE) $(TESTS); \
-		$(BIN)/black $(PACKAGE) $(TESTS); \
-		$(BIN)/isort $(PACKAGE) $(TESTS); \
-	fi
+	@echo "Formatting files..."
+	$(BIN)/autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive $(PACKAGE) $(TESTS)
+	$(BIN)/autopep8 --in-place --max-line-length=88 --select=E501 --recursive $(PACKAGE) $(TESTS)
+	$(BIN)/black $(PACKAGE) $(TESTS)
+	$(BIN)/isort $(PACKAGE) $(TESTS)
+	@echo "Formatting complete."
 
 security: dev-install  ## Run security checks
 	@echo "Running bandit (security linter)..."

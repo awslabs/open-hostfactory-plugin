@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       python-versions: ${{ steps.config.outputs.python-versions }}
-      default-python-version: ${{ steps.config.outputs.default-python-version }}
+      python-version: ${{ steps.config.outputs.default-python-version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

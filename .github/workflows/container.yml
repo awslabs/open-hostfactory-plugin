@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       python-versions: ${{ steps.config.outputs.python-versions }}
-      default-python-version: ${{ steps.config.outputs.default-python-version }}
+      python-version: ${{ steps.config.outputs.default-python-version }}
       container-registry: ${{ steps.config.outputs.container-registry }}
       container-image: ${{ steps.config.outputs.container-image }}
       version: ${{ steps.config.outputs.version }}
@@ -54,7 +54,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        default-python-version: ${{ steps.default-python-version.outputs.default-python-version }}
+        python-version: ${{ steps.default-python-version.outputs.default-python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6
@@ -99,7 +99,7 @@ jobs:
     
     strategy:
       matrix:
-        default-python-version: ${{ fromJSON(needs.get-config.outputs.default-python-versions) }}
+        python-version: ${{ fromJSON(needs.get-config.outputs.default-python-versions) }}
     
     permissions:
       contents: read
@@ -114,7 +114,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        default-python-version: ${{ needs.get-config.outputs.default-python-version }}
+        python-version: ${{ needs.get-config.outputs.default-python-version }}
     
     - name: Install uv
       uses: astral-sh/setup-uv@v6

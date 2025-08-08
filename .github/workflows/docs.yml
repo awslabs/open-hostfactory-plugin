@@ -28,7 +28,7 @@ jobs:
     name: Get Python Version from Makefile
     runs-on: ubuntu-latest
     outputs:
-      default-python-version: ${{ steps.version.outputs.default-python-version }}
+      python-version: ${{ steps.version.outputs.default-python-version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4

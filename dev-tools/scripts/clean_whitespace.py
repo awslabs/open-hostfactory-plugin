@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Clean whitespace from Python files."""
 
-import os
-import sys
+import logging
 from pathlib import Path
 import pathspec
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 
 def clean_file(file_path: Path) -> bool:
@@ -32,7 +35,7 @@ def clean_file(file_path: Path) -> bool:
 
         return False
     except Exception as e:
-        print(f"Error processing {file_path}: {e}")
+        logger.error(f"Error processing {file_path}: {e}")
         return False
 
 
@@ -68,13 +71,13 @@ def main():
     python_files = find_python_files(root_dir)
 
     if not python_files:
-        print("No Python files found.")
+        logger.info("No Python files found.")
         return
 
     modified_count = 0
     total_files = len(python_files)
 
-    print(f"Processing {total_files} Python files...")
+    logger.info(f"Processing {total_files} Python files...")
 
     for i, file_path in enumerate(python_files, 1):
         if clean_file(file_path):
@@ -82,9 +85,9 @@ def main():
 
         # Simple progress without tqdm to avoid context overflow
         if i % 50 == 0 or i == total_files:
-            print(f"Progress: {i}/{total_files} files processed")
+            logger.info(f"Progress: {i}/{total_files} files processed")
 
-    print(f"Completed: {total_files} files processed, {modified_count} files modified.")
+    logger.info(f"Completed: {total_files} files processed, {modified_count} files modified.")
 
 
 if __name__ == "__main__":

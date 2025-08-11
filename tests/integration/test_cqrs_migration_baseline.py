@@ -1,5 +1,5 @@
 """
-CQRS Integration Tests - Modern Architecture Validation.
+CQRS Integration Tests - Current Architecture Validation.
 
 This test suite validates the CQRS architecture implementation with
 command and query handlers, ensuring proper integration between

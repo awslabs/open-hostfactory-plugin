@@ -22,7 +22,7 @@ Provider Layer → Infrastructure Layer → Application Layer → Domain Layer
 
 ## Package Structure
 
-### 📁 `base/` - Base Provider Components
+### `base/` - Base Provider Components
 Common base classes and interfaces for all cloud providers.
 
 **Key Components:**
@@ -30,7 +30,7 @@ Common base classes and interfaces for all cloud providers.
 - Common provider utilities
 - Shared provider patterns
 
-### 📁 `aws/` - Reference Implementation
+### `aws/` - Reference Implementation
 Complete reference implementation demonstrating the provider pattern.
 
 **Supported Services:**
@@ -63,7 +63,7 @@ Provider Implementation
 
 ### Key Components
 
-#### 📁 `domain/` - Provider Domain Extensions
+#### `domain/` - Provider Domain Extensions
 Provider-specific domain extensions that don't pollute the core domain.
 
 **Components:**
@@ -71,7 +71,7 @@ Provider-specific domain extensions that don't pollute the core domain.
 - Provider domain events
 - Provider business rules
 
-#### 📁 `application/` - Provider Application Services
+#### `application/` - Provider Application Services
 Provider-specific application logic and use cases.
 
 **Components:**
@@ -79,7 +79,7 @@ Provider-specific application logic and use cases.
 - Provider query handlers
 - Provider workflow orchestration
 
-#### 📁 `infrastructure/` - Provider Infrastructure
+#### `infrastructure/` - Provider Infrastructure
 Technical implementations for cloud services.
 
 **Key Features:**
@@ -88,7 +88,7 @@ Technical implementations for cloud services.
 - **Region Management**: Multi-region support
 - **Service Integration**: Cloud service API integration
 
-#### 📁 `managers/` - Provider Resource Managers
+#### `managers/` - Provider Resource Managers
 High-level managers for cloud resource operations.
 
 **Key Managers:**
@@ -96,7 +96,7 @@ High-level managers for cloud resource operations.
 - **Instance Manager**: Virtual machine instance management
 - **Service Handlers**: Specific cloud service handlers
 
-#### 📁 `configuration/` - Provider Configuration
+#### `configuration/` - Provider Configuration
 Provider-specific configuration management.
 
 **Features:**
@@ -105,7 +105,7 @@ Provider-specific configuration management.
 - Service-specific configurations
 - Cost optimization settings
 
-#### 📁 `utilities/` - Provider Utilities
+#### `utilities/` - Provider Utilities
 Provider-specific utility functions and helpers.
 
 **Key Utilities:**
@@ -114,7 +114,7 @@ Provider-specific utility functions and helpers.
 - Cost calculation utilities
 - Resource tagging utilities
 
-#### 📁 `resilience/` - Provider Resilience
+#### `resilience/` - Provider Resilience
 Provider-specific resilience patterns and error handling.
 
 **Features:**

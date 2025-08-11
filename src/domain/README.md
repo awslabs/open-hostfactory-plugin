@@ -300,10 +300,10 @@ class ResourceNotFoundError(DomainError):
 
 ### Zero External Dependencies
 The domain layer has **NO dependencies** on other layers:
-- ❌ No infrastructure imports
-- ❌ No application imports  
-- ❌ No interface imports
-- ✅ Only standard library and domain code
+- No infrastructure imports
+- No application imports  
+- No interface imports
+- Only standard library and domain code
 
 ### Dependency Inversion
 The domain defines interfaces (ports) that other layers implement:

@@ -48,6 +48,13 @@ EMOJI_PATTERN = re.compile(
     flags=re.UNICODE,
 )
 
+# Legitimate technical characters that should be allowed
+ALLOWED_TECHNICAL_CHARS = {
+    '├', '└', '│', '─',  # Box drawing characters for tree structures
+    '▪', '▫', '■', '□',  # Simple geometric shapes for bullets
+    '→', '←', '↑', '↓',  # Basic arrows for flow diagrams
+}
+
 # Unprofessional language terms
 UNPROFESSIONAL_TERMS = {
     r"\bawesome\b": 'Use "excellent" or specific technical terms',
@@ -221,8 +228,12 @@ class EmojiChecker(FileChecker):
     def check_content(self, file_path: str, content: str) -> List[Violation]:
         violations = []
         for line_num, line in enumerate(content.splitlines(), 1):
-            if EMOJI_PATTERN.search(line):
-                violations.append(EmojiViolation(file_path, line_num, line.strip()))
+            matches = EMOJI_PATTERN.findall(line)
+            for match in matches:
+                # Check if all characters in the match are allowed technical chars
+                if not all(char in ALLOWED_TECHNICAL_CHARS for char in match):
+                    violations.append(EmojiViolation(file_path, line_num, line.strip()))
+                    break  # Only report once per line
         return violations
 
 

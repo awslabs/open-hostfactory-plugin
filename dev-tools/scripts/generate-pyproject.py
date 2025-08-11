@@ -11,6 +11,7 @@ sys.path.insert(0, str(project_root / "src"))
 
 import subprocess
 
+
 def _get_config_value(key: str) -> str:
     """Get value from .project.yml using yq."""
     try:
@@ -19,13 +20,14 @@ def _get_config_value(key: str) -> str:
             cwd=project_root,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         return result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print(f"Error reading config key '{key}': {e}")
         print("Make sure yq is installed and .project.yml exists")
         sys.exit(1)
+
 
 try:
     from _package import (
@@ -39,8 +41,8 @@ try:
     )
 
     # Get Python version info from config
-    python_versions = _get_config_value('.python.versions[]')
-    min_python_version = _get_config_value('.python.min_version')
+    python_versions = _get_config_value(".python.versions[]")
+    min_python_version = _get_config_value(".python.min_version")
 
 except ImportError as e:
     print(f"Error importing package configuration: {e}")
@@ -58,27 +60,27 @@ def generate_pyproject():
         sys.exit(1)
 
     # Read template
-    with open(template_path, 'r', encoding='utf-8') as f:
+    with open(template_path, "r", encoding="utf-8") as f:
         template_content = f.read()
 
     # Generate Python classifiers
     python_classifiers = []
-    for version in python_versions.split('\n'):
+    for version in python_versions.split("\n"):
         if version.strip():
             python_classifiers.append(f'    "Programming Language :: Python :: {version.strip()}",')
-    python_classifiers_str = '\n'.join(python_classifiers)
+    python_classifiers_str = "\n".join(python_classifiers)
 
     # Replace placeholders with actual values
     replacements = {
-        '{{PACKAGE_NAME}}': PACKAGE_NAME,
-        '{{PACKAGE_NAME_SHORT}}': PACKAGE_NAME_SHORT,
-        '{{VERSION}}': __version__,
-        '{{DESCRIPTION}}': DESCRIPTION,
-        '{{REPO_URL}}': REPO_URL,
-        '{{DOCS_URL}}': DOCS_URL,
-        '{{REPO_ISSUES_URL}}': REPO_ISSUES_URL,
-        '{{PYTHON_CLASSIFIERS}}': python_classifiers_str,
-        '{{MIN_PYTHON_VERSION}}': min_python_version,
+        "{{PACKAGE_NAME}}": PACKAGE_NAME,
+        "{{PACKAGE_NAME_SHORT}}": PACKAGE_NAME_SHORT,
+        "{{VERSION}}": __version__,
+        "{{DESCRIPTION}}": DESCRIPTION,
+        "{{REPO_URL}}": REPO_URL,
+        "{{DOCS_URL}}": DOCS_URL,
+        "{{REPO_ISSUES_URL}}": REPO_ISSUES_URL,
+        "{{PYTHON_CLASSIFIERS}}": python_classifiers_str,
+        "{{MIN_PYTHON_VERSION}}": min_python_version,
     }
 
     generated_content = template_content
@@ -86,7 +88,7 @@ def generate_pyproject():
         generated_content = generated_content.replace(placeholder, value)
 
     # Write generated file
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(generated_content)
 
     print(f"Generated pyproject.toml from template")

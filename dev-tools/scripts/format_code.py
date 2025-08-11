@@ -35,6 +35,7 @@ def main():
 
     # Change to project root
     import os
+
     os.chdir(project_root)
 
     # Define source directories
@@ -46,23 +47,31 @@ def main():
     # Run formatters in order
     formatters = [
         (
-            [".venv/bin/autoflake", "--in-place", "--remove-all-unused-imports",
-             "--remove-unused-variables", "--recursive", package_dir, tests_dir],
-            "autoflake (remove unused imports/variables)"
+            [
+                ".venv/bin/autoflake",
+                "--in-place",
+                "--remove-all-unused-imports",
+                "--remove-unused-variables",
+                "--recursive",
+                package_dir,
+                tests_dir,
+            ],
+            "autoflake (remove unused imports/variables)",
         ),
         (
-            [".venv/bin/autopep8", "--in-place", "--max-line-length=88",
-             "--select=E501", "--recursive", package_dir, tests_dir],
-            "autopep8 (fix line length)"
+            [
+                ".venv/bin/autopep8",
+                "--in-place",
+                "--max-line-length=88",
+                "--select=E501",
+                "--recursive",
+                package_dir,
+                tests_dir,
+            ],
+            "autopep8 (fix line length)",
         ),
-        (
-            [".venv/bin/black", package_dir, tests_dir],
-            "black (code formatting)"
-        ),
-        (
-            [".venv/bin/isort", package_dir, tests_dir],
-            "isort (import sorting)"
-        ),
+        ([".venv/bin/black", package_dir, tests_dir], "black (code formatting)"),
+        ([".venv/bin/isort", package_dir, tests_dir], "isort (import sorting)"),
     ]
 
     success = True

@@ -27,6 +27,7 @@ except ImportError:
     # Fallback if moto is not available
     def mock_aws():
         def decorator(func):
+            """No-op decorator when moto is not available."""
             return func
 
         return decorator

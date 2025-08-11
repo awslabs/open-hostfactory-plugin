@@ -371,6 +371,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
         """Create a simple provider context for AWS operations."""
 
         class SimpleProviderContext:
+            """Simple provider context for AWS operations."""
+
             def __init__(self, container):
                 self.container = container
 
@@ -491,8 +493,10 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
 
             # Return a no-op event publisher
             class NoOpEventPublisher:
+                """No-operation event publisher that discards events."""
+
                 def publish(self, event):
-                    pass
+                    """Publish event (no-op implementation)."""
 
             return NoOpEventPublisher()
 

@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -50,13 +50,10 @@ class CIChecker:
         """Write all output to temporary file."""
         if not self.temp_file:
             self.temp_file = tempfile.NamedTemporaryFile(
-                mode='w',
-                suffix='.txt',
-                prefix='ci_check_',
-                delete=False
+                mode="w", suffix=".txt", prefix="ci_check_", delete=False
             )
 
-        self.temp_file.write('\n'.join(self.output_lines))
+        self.temp_file.write("\n".join(self.output_lines))
         self.temp_file.flush()
         return self.temp_file.name
 
@@ -67,11 +64,7 @@ class CIChecker:
 
         try:
             result = subprocess.run(
-                cmd,
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                check=True
+                cmd, cwd=self.project_root, capture_output=True, text=True, check=True
             )
             self.log(f"PASS: {description}")
             if self.verbose and result.stdout:
@@ -113,18 +106,20 @@ class CIChecker:
             config.read(mypy_ini)
 
             # Check Python version
-            if 'mypy' in config:
-                python_version = config['mypy'].get('python_version', 'not found')
+            if "mypy" in config:
+                python_version = config["mypy"].get("python_version", "not found")
                 try:
                     # Parse version as major.minor
-                    version_parts = python_version.split('.')
+                    version_parts = python_version.split(".")
                     if len(version_parts) >= 2:
                         major = int(version_parts[0])
                         minor = int(version_parts[1])
                         version_tuple = (major, minor)
 
                         if version_tuple < (3, 9):
-                            self.log(f"FAIL: Python version {python_version} is too old (need 3.9+)")
+                            self.log(
+                                f"FAIL: Python version {python_version} is too old (need 3.9+)"
+                            )
                             self.failed_checks.append(f"Python version {python_version} too old")
                             return False
                     else:
@@ -136,14 +131,20 @@ class CIChecker:
 
             # Check for per-module flag issues
             for section_name in config.sections():
-                if section_name.startswith('mypy-') and not section_name.startswith('mypy-tests'):
+                if section_name.startswith("mypy-") and not section_name.startswith("mypy-tests"):
                     section = config[section_name]
                     # Only certain flags are allowed in per-module sections
-                    allowed_flags = {'ignore_missing_imports', 'follow_imports', 'disallow_untyped_defs'}
+                    allowed_flags = {
+                        "ignore_missing_imports",
+                        "follow_imports",
+                        "disallow_untyped_defs",
+                    }
                     for key in section.keys():
                         if key not in allowed_flags:
                             self.log(f"FAIL: Invalid per-module flag in {section_name}: {key}")
-                            self.failed_checks.append(f"Invalid per-module flag: {section_name}.{key}")
+                            self.failed_checks.append(
+                                f"Invalid per-module flag: {section_name}.{key}"
+                            )
                             return False
 
             self.log("PASS: mypy.ini configuration")
@@ -178,7 +179,7 @@ class CIChecker:
         problem_files = [
             "src/api/handlers/get_available_templates_handler.py",
             "src/api/handlers/request_machines_handler.py",
-            "src/api/routers/templates.py"
+            "src/api/routers/templates.py",
         ]
 
         all_passed = True
@@ -187,7 +188,7 @@ class CIChecker:
             if full_path.exists():
                 if not self.run_command(
                     [sys.executable, "-m", "py_compile", str(full_path)],
-                    f"Python syntax check: {file_path}"
+                    f"Python syntax check: {file_path}",
                 ):
                     all_passed = False
 
@@ -199,13 +200,16 @@ class CIChecker:
 
         checks = [
             ("Black code formatting", [sys.executable, "-m", "black", "--check", "src/", "tests/"]),
-            ("isort import sorting", [sys.executable, "-m", "isort", "--check-only", "src/", "tests/"])
+            (
+                "isort import sorting",
+                [sys.executable, "-m", "isort", "--check-only", "src/", "tests/"],
+            ),
         ]
 
         if self.fix:
             checks = [
                 ("Black code formatting", [sys.executable, "-m", "black", "src/", "tests/"]),
-                ("isort import sorting", [sys.executable, "-m", "isort", "src/", "tests/"])
+                ("isort import sorting", [sys.executable, "-m", "isort", "src/", "tests/"]),
             ]
 
         all_passed = True
@@ -223,7 +227,7 @@ class CIChecker:
         checks = [
             ("flake8 style guide", [sys.executable, "-m", "flake8", "src/", "tests/"], False),
             ("mypy type checking", [sys.executable, "-m", "mypy", "src/"], True),
-            ("pylint code analysis", [sys.executable, "-m", "pylint", "src/"], True)
+            ("pylint code analysis", [sys.executable, "-m", "pylint", "src/"], True),
         ]
 
         all_passed = True
@@ -243,13 +247,13 @@ class CIChecker:
         self.run_command(
             [sys.executable, "-m", "radon", "cc", "src/", "--min", "B", "--show-complexity"],
             "radon cyclomatic complexity",
-            allow_failure=True
+            allow_failure=True,
         )
 
         self.run_command(
             [sys.executable, "-m", "radon", "mi", "src/", "--min", "B"],
             "radon maintainability index",
-            allow_failure=True
+            allow_failure=True,
         )
 
         return True
@@ -260,22 +264,32 @@ class CIChecker:
 
         # bandit security linter (allowed to fail)
         self.run_command(
-            [sys.executable, "-m", "bandit", "-r", "src/", "-f", "json", "-o", "bandit-report.json"],
+            [
+                sys.executable,
+                "-m",
+                "bandit",
+                "-r",
+                "src/",
+                "-f",
+                "json",
+                "-o",
+                "bandit-report.json",
+            ],
             "bandit security linter",
-            allow_failure=True
+            allow_failure=True,
         )
 
         self.run_command(
             [sys.executable, "-m", "bandit", "-r", "src/", "-f", "txt"],
             "bandit security linter (text output)",
-            allow_failure=True
+            allow_failure=True,
         )
 
         # safety dependency vulnerability check (allowed to fail)
         self.run_command(
             [sys.executable, "-m", "safety", "check"],
             "safety dependency vulnerability check",
-            allow_failure=True
+            allow_failure=True,
         )
 
         return True
@@ -287,12 +301,11 @@ class CIChecker:
         if quick:
             return self.run_command(
                 [sys.executable, "dev-tools/testing/run_tests.py", "--unit", "--fast"],
-                "quick test suite"
+                "quick test suite",
             )
         else:
             return self.run_command(
-                [sys.executable, "dev-tools/testing/run_tests.py"],
-                "full test suite"
+                [sys.executable, "dev-tools/testing/run_tests.py"], "full test suite"
             )
 
     def run_all_checks(self, quick: bool = False) -> bool:
@@ -303,9 +316,9 @@ class CIChecker:
 
         # Configuration checks
         config_passed = (
-            self.check_mypy_config() and
-            self.check_python_version_consistency() and
-            self.check_syntax_errors()
+            self.check_mypy_config()
+            and self.check_python_version_consistency()
+            and self.check_syntax_errors()
         )
 
         if not config_passed:
@@ -363,7 +376,7 @@ def main():
 
     # Override temp file if specified
     if args.output_file:
-        checker.temp_file = open(args.output_file, 'w')
+        checker.temp_file = open(args.output_file, "w")
 
     success = checker.run_all_checks(quick=args.quick)
 

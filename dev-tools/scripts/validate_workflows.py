@@ -5,10 +5,11 @@ import sys
 import yaml
 from pathlib import Path
 
+
 def validate_workflow(file_path: Path):
     """Validate a single workflow file."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             yaml.safe_load(f)
         print(f"VALID: {file_path.name}")
         return True
@@ -19,15 +20,16 @@ def validate_workflow(file_path: Path):
         print(f"ERROR: {file_path.name} - {e}")
         return False
 
+
 def main():
     """Main validation function."""
-    workflows_dir = Path('.github/workflows')
+    workflows_dir = Path(".github/workflows")
 
     if not workflows_dir.exists():
         print("ERROR: .github/workflows directory not found")
         sys.exit(1)
 
-    workflow_files = list(workflows_dir.glob('*.yml')) + list(workflows_dir.glob('*.yaml'))
+    workflow_files = list(workflows_dir.glob("*.yml")) + list(workflows_dir.glob("*.yaml"))
 
     if not workflow_files:
         print("ERROR: No workflow files found")
@@ -46,5 +48,6 @@ def main():
         print("FAILED: Found invalid workflow files")
         sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

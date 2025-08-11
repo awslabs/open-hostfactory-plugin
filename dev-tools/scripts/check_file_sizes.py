@@ -24,7 +24,7 @@ def check_large_files(warn_only: bool = False, threshold: int = 600) -> None:
     # Check Python files in src directory
     for file_path in Path("src").rglob("*.py"):
         try:
-            line_count = len(file_path.read_text(encoding='utf-8').splitlines())
+            line_count = len(file_path.read_text(encoding="utf-8").splitlines())
             if line_count > threshold:
                 large_files.append((file_path, line_count))
         except Exception as e:
@@ -59,7 +59,7 @@ def get_file_size_report() -> List[Tuple[str, int]]:
 
     for file_path in Path("src").rglob("*.py"):
         try:
-            line_count = len(file_path.read_text(encoding='utf-8').splitlines())
+            line_count = len(file_path.read_text(encoding="utf-8").splitlines())
             file_sizes.append((str(file_path), line_count))
         except Exception:
             continue
@@ -72,22 +72,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="Check for large files that may violate Single Responsibility Principle"
     )
-    parser.add_argument(
-        "--warn-only",
-        action="store_true",
-        help="Only warn, don't fail the build"
-    )
+    parser.add_argument("--warn-only", action="store_true", help="Only warn, don't fail the build")
     parser.add_argument(
         "--threshold",
         type=int,
         default=600,
-        help="Line count threshold for warnings (default: 600)"
+        help="Line count threshold for warnings (default: 600)",
     )
-    parser.add_argument(
-        "--report",
-        action="store_true",
-        help="Generate a full file size report"
-    )
+    parser.add_argument("--report", action="store_true", help="Generate a full file size report")
 
     args = parser.parse_args()
 

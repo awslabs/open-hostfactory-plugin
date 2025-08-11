@@ -35,6 +35,7 @@ class LazyLoadingConfig:
     """Configuration for lazy loading behavior."""
 
     def __init__(self, config_dict: Optional[Dict[str, Any]] = None):
+        """Initialize lazy loading configuration with provided settings."""
         if config_dict is None:
             config_dict = {}
 
@@ -80,7 +81,7 @@ def timed_operation(operation_name: str) -> Iterator[None]:
 class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
     """
     Dependency injection container using composition of focused components.
-    Enhanced with lazy loading capabilities for improved startup performance.
+    Includes lazy loading capabilities for improved startup performance.
     """
 
     def __init__(self):
@@ -286,7 +287,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
 
     def _create_and_cache(self, cls: Type[T]) -> T:
         """Create an instance and cache it if caching is enabled."""
-        # This method is called by the enhanced get() method
+        # This method is called by the get() method
         # For now, delegate to the dependency resolver
         return self._dependency_resolver.resolve(cls)
 

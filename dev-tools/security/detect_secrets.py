@@ -7,16 +7,16 @@ import sys
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
 
 def detect_secrets(source_dir: str = "src") -> bool:
     """Detect potential hardcoded secrets in Python files."""
 
     # Pattern to match potential secrets
     secret_pattern = re.compile(
-        r'(password|secret|key|token)\s*=\s*["\'][^"\']{8,}["\']',
-        re.IGNORECASE
+        r'(password|secret|key|token)\s*=\s*["\'][^"\']{8,}["\']', re.IGNORECASE
     )
 
     # Exceptions - these are not real secrets
@@ -28,7 +28,7 @@ def detect_secrets(source_dir: str = "src") -> bool:
         'password="test"',
         'secret="test"',
         'token="test"',
-        'key="test"'
+        'key="test"',
     ]
 
     source_path = Path(source_dir)
@@ -40,10 +40,10 @@ def detect_secrets(source_dir: str = "src") -> bool:
 
     for py_file in source_path.rglob("*.py"):
         try:
-            with open(py_file, 'r', encoding='utf-8') as f:
+            with open(py_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            for line_num, line in enumerate(content.split('\n'), 1):
+            for line_num, line in enumerate(content.split("\n"), 1):
                 matches = secret_pattern.findall(line)
                 for match in matches:
                     # Check if this is an exception
@@ -62,11 +62,13 @@ def detect_secrets(source_dir: str = "src") -> bool:
         logger.info("No hardcoded secrets detected")
         return True
 
+
 def main():
     """Main function."""
     if not detect_secrets():
         sys.exit(1)
     sys.exit(0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

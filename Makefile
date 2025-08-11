@@ -176,9 +176,13 @@ test-report: dev-install  ## Generate comprehensive test report
 	./dev-tools/testing/run_tests.py --coverage --html-coverage
 
 # Code quality targets
-quality-check: dev-install  ## Run professional quality checks
+quality-check: dev-install  ## Run professional quality checks on modified files
 	@echo "Running professional quality checks..."
 	./dev-tools/scripts/quality_check.py --strict
+
+quality-check-all: dev-install  ## Run professional quality checks on all files
+	@echo "Running professional quality checks on all files..."
+	./dev-tools/scripts/quality_check.py --strict --all
 
 quality-check-fix: dev-install  ## Run quality checks with auto-fix
 	@echo "Running professional quality checks with auto-fix..."

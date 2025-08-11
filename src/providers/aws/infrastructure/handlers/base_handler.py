@@ -189,6 +189,7 @@ class AWSHandler(ABC):
         # Create retry decorator with appropriate strategy
         @retry(**strategy_config)
         def wrapped_operation():
+            """Wrapped operation with retry logic applied."""
             return func(*args, **kwargs)
 
         try:

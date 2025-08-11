@@ -44,7 +44,9 @@ def generate_spdx_sbom(output_file: str) -> bool:
     help_result = run_command(["cyclonedx-py", "--help"])
 
     if help_result.returncode == 0 and "spdxjson" in help_result.stdout:
-        result = run_command(["cyclonedx-py", "environment", "--format", "spdxjson", "-o", output_file])
+        result = run_command(
+            ["cyclonedx-py", "environment", "--format", "spdxjson", "-o", output_file]
+        )
 
         if result.returncode == 0:
             print(f"Generated SPDX SBOM with cyclonedx-py: {output_file}")
@@ -73,9 +75,9 @@ def generate_spdx_fallback(output_file: str) -> bool:
             "documentNamespace": "https://github.com/awslabs/open-hostfactory-plugin",
             "creationInfo": {
                 "created": datetime.now(timezone.utc).isoformat(),
-                "creators": ["Tool: generate_sbom.py"]
+                "creators": ["Tool: generate_sbom.py"],
             },
-            "packages": []
+            "packages": [],
         }
 
         # Add packages from current environment
@@ -86,7 +88,7 @@ def generate_spdx_fallback(output_file: str) -> bool:
                 "version": dist.version,
                 "downloadLocation": "NOASSERTION",
                 "filesAnalyzed": False,
-                "copyrightText": "NOASSERTION"
+                "copyrightText": "NOASSERTION",
             }
             spdx_doc["packages"].append(package)
 
@@ -109,29 +111,30 @@ def main():
         "--format",
         choices=["cyclonedx", "spdx", "both"],
         default="both",
-        help="SBOM format to generate"
+        help="SBOM format to generate",
     )
-    parser.add_argument(
-        "--output",
-        help="Output file path (for single format only)"
-    )
-    parser.add_argument(
-        "--output-dir",
-        default=".",
-        help="Output directory for SBOM files"
-    )
+    parser.add_argument("--output", help="Output file path (for single format only)")
+    parser.add_argument("--output-dir", default=".", help="Output directory for SBOM files")
 
     args = parser.parse_args()
 
     success = True
 
     if args.format in ["cyclonedx", "both"]:
-        output_file = args.output if args.output and args.format == "cyclonedx" else f"{args.output_dir}/python-sbom-cyclonedx.json"
+        output_file = (
+            args.output
+            if args.output and args.format == "cyclonedx"
+            else f"{args.output_dir}/python-sbom-cyclonedx.json"
+        )
         if not generate_cyclonedx_sbom(output_file):
             success = False
 
     if args.format in ["spdx", "both"]:
-        output_file = args.output if args.output and args.format == "spdx" else f"{args.output_dir}/python-sbom-spdx.json"
+        output_file = (
+            args.output
+            if args.output and args.format == "spdx"
+            else f"{args.output_dir}/python-sbom-spdx.json"
+        )
         if not generate_spdx_sbom(output_file):
             success = False
 

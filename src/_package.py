@@ -1,8 +1,13 @@
 """Package metadata and naming constants - centralized from .project.yml."""
 
+import logging
 import subprocess
 import sys
 from pathlib import Path
+
+# Setup logging
+logging.basicConfig(level=logging.ERROR, format="%(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
 
 
 def _get_config_value(key: str) -> str:
@@ -18,8 +23,8 @@ def _get_config_value(key: str) -> str:
         )
         return result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        print(f"Error reading config key '{key}': {e}", file=sys.stderr)
-        print("Make sure yq is installed and .project.yml exists", file=sys.stderr)
+        logger.error(f"Error reading config key '{key}': {e}")
+        logger.error("Make sure yq is installed and .project.yml exists")
         sys.exit(1)
 
 

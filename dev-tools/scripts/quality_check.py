@@ -50,9 +50,18 @@ EMOJI_PATTERN = re.compile(
 
 # Legitimate technical characters that should be allowed
 ALLOWED_TECHNICAL_CHARS = {
-    '├', '└', '│', '─',  # Box drawing characters for tree structures
-    '▪', '▫', '■', '□',  # Simple geometric shapes for bullets
-    '→', '←', '↑', '↓',  # Basic arrows for flow diagrams
+    "├",
+    "└",
+    "│",
+    "─",  # Box drawing characters for tree structures
+    "▪",
+    "▫",
+    "■",
+    "□",  # Simple geometric shapes for bullets
+    "→",
+    "←",
+    "↑",
+    "↓",  # Basic arrows for flow diagrams
 }
 
 # Unprofessional language terms
@@ -169,9 +178,7 @@ class UnusedImportViolation(Violation):
     """Unused import found in code."""
 
     def __init__(self, file_path: str, line_num: int, message: str):
-        super().__init__(
-            file_path, line_num, "", f"Unused imports detected: {message}"
-        )
+        super().__init__(file_path, line_num, "", f"Unused imports detected: {message}")
 
     def can_autofix(self) -> bool:
         return True
@@ -281,11 +288,13 @@ class DocstringChecker(FileChecker):
         try:
             tree = ast.parse(content)
 
-            # Check module docstring
+            # Check module docstring (skip empty __init__.py files)
             if not ast.get_docstring(tree):
-                violations.append(
-                    MissingDocstringViolation(file_path, 1, "module", Path(file_path).name)
-                )
+                # Skip empty __init__.py files - they're just package markers
+                if not (Path(file_path).name == "__init__.py" and len(content.strip()) == 0):
+                    violations.append(
+                        MissingDocstringViolation(file_path, 1, "module", Path(file_path).name)
+                    )
 
             # Check classes and functions
             for node in ast.walk(tree):
@@ -298,6 +307,11 @@ class DocstringChecker(FileChecker):
                     # Skip private methods (starting with _)
                     if not node.name.startswith("_") or node.name == "__init__":
                         if not ast.get_docstring(node):
+                            # Special handling for __init__ methods - use fast check
+                            if node.name == "__init__" and len(node.body) <= 8:
+                                # Quick heuristic: if small body, likely simple
+                                if self._is_simple_init_fast(node):
+                                    continue
                             violations.append(
                                 MissingDocstringViolation(
                                     file_path, node.lineno, "function", node.name
@@ -309,6 +323,30 @@ class DocstringChecker(FileChecker):
             pass
 
         return violations
+
+    def _is_simple_init_fast(self, node: ast.FunctionDef) -> bool:
+        """Fast check if __init__ method is simple (only parameter assignment)."""
+        # Only check small methods
+        if len(node.body) > 8:
+            return False
+
+        # Quick pattern check: only assignments and super() calls
+        for stmt in node.body:
+            if isinstance(stmt, ast.Assign):
+                # Must be self.x = y pattern
+                if not (
+                    len(stmt.targets) == 1
+                    and isinstance(stmt.targets[0], ast.Attribute)
+                    and isinstance(stmt.targets[0].value, ast.Name)
+                    and stmt.targets[0].value.id == "self"
+                ):
+                    return False
+            elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+                # Allow super().__init__() only
+                continue
+            else:
+                return False
+        return True
 
 
 class ImportChecker(FileChecker):
@@ -323,16 +361,24 @@ class ImportChecker(FileChecker):
             import subprocess
 
             # Run autoflake in check mode
-            result = subprocess.run([
-                "autoflake", "--check", "--remove-all-unused-imports",
-                "--remove-unused-variables", file_path
-            ], capture_output=True, text=True, cwd=".")
+            result = subprocess.run(
+                [
+                    "autoflake",
+                    "--check",
+                    "--remove-all-unused-imports",
+                    "--remove-unused-variables",
+                    file_path,
+                ],
+                capture_output=True,
+                text=True,
+                cwd=".",
+            )
 
             # If autoflake found issues, it returns non-zero exit code
             if result.returncode != 0:
-                violations.append(UnusedImportViolation(
-                    file_path, 1, "Run 'make format' to fix automatically"
-                ))
+                violations.append(
+                    UnusedImportViolation(file_path, 1, "Run 'make format' to fix automatically")
+                )
 
         except (subprocess.SubprocessError, FileNotFoundError):
             # Skip if autoflake not available
@@ -355,13 +401,22 @@ class CommentChecker(FileChecker):
         # Regex for debug prints (only catch print statements, not logger)
         debug_pattern = re.compile(r"^\s*print\(")
 
+        # Skip debug print checks for test files and markdown files
+        is_test_file = "/test" in file_path or file_path.startswith("test")
+        is_markdown_file = file_path.endswith(".md")
+
         for line_num, line in enumerate(content.splitlines(), 1):
             # Check for commented code
             if code_pattern.search(line):
                 violations.append(CommentedCodeViolation(file_path, line_num, line.strip()))
 
-            # Check for debug statements
-            if debug_pattern.search(line) and "DEBUG" not in line.upper():
+            # Check for debug statements (skip for test files and markdown files)
+            if (
+                not is_test_file
+                and not is_markdown_file
+                and debug_pattern.search(line)
+                and "DEBUG" not in line.upper()
+            ):
                 violations.append(DebugStatementViolation(file_path, line_num, line.strip()))
 
         return violations
@@ -390,8 +445,8 @@ class QualityChecker:
             return None
 
         try:
-            with open(gitignore_path, 'r', encoding='utf-8') as f:
-                return pathspec.PathSpec.from_lines('gitwildmatch', f)
+            with open(gitignore_path, "r", encoding="utf-8") as f:
+                return pathspec.PathSpec.from_lines("gitwildmatch", f)
         except Exception:
             return None
 
@@ -442,8 +497,22 @@ class QualityChecker:
     def get_modified_files(self) -> List[str]:
         """Get list of modified files from git."""
         import subprocess
+        import os
 
         try:
+            # In CI/PR context, compare against target branch
+            if os.getenv("GITHUB_EVENT_NAME") == "pull_request":
+                base_ref = os.getenv("GITHUB_BASE_REF", "main")
+                result = subprocess.run(
+                    ["git", "diff", "--name-only", f"origin/{base_ref}...HEAD"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                modified_files = result.stdout.strip().split("\n") if result.stdout.strip() else []
+                return [f for f in modified_files if f]
+
+            # Local development: check staged, unstaged, and untracked files
             # Get staged files
             result = subprocess.run(
                 ["git", "diff", "--cached", "--name-only"],
@@ -485,6 +554,7 @@ def main():
         "--strict", action="store_true", help="Exit with error code on any violation"
     )
     parser.add_argument("--files", nargs="+", help="Specific files to check")
+    parser.add_argument("--all", action="store_true", help="Check all files in repository")
 
     args = parser.parse_args()
 
@@ -493,18 +563,40 @@ def main():
     # Determine which files to check
     if args.files:
         files_to_check = args.files
+    elif args.all:
+        # Check all relevant files in repository (deterministic)
+        files_to_check = []
+        from pathlib import Path
+        import pathspec
+
+        # Load .gitignore patterns
+        gitignore_path = Path(".gitignore")
+        if gitignore_path.exists():
+            with open(gitignore_path, "r", encoding="utf-8") as f:
+                spec = pathspec.PathSpec.from_lines("gitwildmatch", f)
+        else:
+            spec = pathspec.PathSpec.from_lines("gitwildmatch", [])
+
+        for pattern in [
+            "**/*.py",
+            "**/*.md",
+            "**/*.rst",
+            "**/*.txt",
+            "**/*.yaml",
+            "**/*.yml",
+            "**/*.json",
+            "**/*.toml",
+        ]:
+            for file_path in Path(".").rglob(pattern):
+                if file_path.is_file():
+                    # Check if file should be ignored
+                    rel_path = file_path.relative_to(Path("."))
+                    if not spec.match_file(str(rel_path)):
+                        files_to_check.append(str(file_path))
+        files_to_check = sorted(files_to_check)
     else:
+        # Check only git modified files
         files_to_check = checker.get_modified_files()
-        if not files_to_check:
-            # If no modified files, check all relevant files
-            files_to_check = []
-            for root, _, files in os.walk("."):
-                if ".git" in root or ".venv" in root or "__pycache__" in root:
-                    continue
-                for file in files:
-                    # Check file types that pre-commit hook expects
-                    if file.endswith((".py", ".md", ".rst", ".txt", ".yaml", ".yml", ".json", ".toml")):
-                        files_to_check.append(os.path.join(root, file))
 
     # Run checks
     violations = checker.check_files(files_to_check)

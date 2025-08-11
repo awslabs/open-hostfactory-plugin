@@ -41,6 +41,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for git diff
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -61,7 +63,14 @@ jobs:
         uv sync --group ci --group dev
     
     - name: Run professional quality checks
-      run: make quality-check
+      run: |
+        if [ "${{ github.event_name }}" = "schedule" ]; then
+          echo "Scheduled run: Running quality checks on all files"
+          make quality-check-all
+        else
+          echo "PR/Push: Running quality checks on modified files only"
+          make quality-check
+        fi
 
   lint-black:
     name: Black (Code Formatting)

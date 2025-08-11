@@ -20,10 +20,10 @@ class ArchitectureValidator:
     def __init__(self):
         self.violations = []
         self.layer_imports = {
-            'domain': [],
-            'application': [],
-            'infrastructure': [],
-            'interface': []
+            "domain": [],
+            "application": [],
+            "infrastructure": [],
+            "interface": [],
         }
 
     def analyze_imports(self, directory: str) -> List[Tuple[Path, str]]:
@@ -36,7 +36,7 @@ class ArchitectureValidator:
 
         for file_path in dir_path.rglob("*.py"):
             try:
-                content = file_path.read_text(encoding='utf-8')
+                content = file_path.read_text(encoding="utf-8")
                 tree = ast.parse(content)
 
                 for node in ast.walk(tree):
@@ -55,7 +55,7 @@ class ArchitectureValidator:
     def check_domain_layer_dependencies(self) -> None:
         """Check that domain layer doesn't depend on outer layers."""
         domain_imports = self.analyze_imports("src/domain")
-        self.layer_imports['domain'] = domain_imports
+        self.layer_imports["domain"] = domain_imports
 
         for file_path, import_name in domain_imports:
             if not import_name:
@@ -76,7 +76,7 @@ class ArchitectureValidator:
     def check_application_layer_dependencies(self) -> None:
         """Check that application layer doesn't depend on interface layer."""
         app_imports = self.analyze_imports("src/application")
-        self.layer_imports['application'] = app_imports
+        self.layer_imports["application"] = app_imports
 
         for file_path, import_name in app_imports:
             if not import_name:
@@ -91,7 +91,7 @@ class ArchitectureValidator:
     def check_infrastructure_layer_dependencies(self) -> None:
         """Check infrastructure layer dependencies."""
         infra_imports = self.analyze_imports("src/infrastructure")
-        self.layer_imports['infrastructure'] = infra_imports
+        self.layer_imports["infrastructure"] = infra_imports
 
         for file_path, import_name in infra_imports:
             if not import_name:
@@ -106,7 +106,7 @@ class ArchitectureValidator:
     def check_interface_layer_dependencies(self) -> None:
         """Check interface layer dependencies (should be minimal)."""
         interface_imports = self.analyze_imports("src/interface")
-        self.layer_imports['interface'] = interface_imports
+        self.layer_imports["interface"] = interface_imports
 
         # Interface layer can import from any layer (it's the outermost)
         # But we can warn about excessive dependencies
@@ -160,7 +160,9 @@ class ArchitectureValidator:
             print("Clean Architecture Rules:")
             print("- Domain layer should not depend on outer layers")
             print("- Application layer should not depend on Interface layer")
-            print("- Dependencies should flow inward: Interface -> Infrastructure -> Application -> Domain")
+            print(
+                "- Dependencies should flow inward: Interface -> Infrastructure -> Application -> Domain"
+            )
             print("- Avoid circular dependencies between modules")
 
             if not warn_only:
@@ -192,19 +194,9 @@ class ArchitectureValidator:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Validate Clean Architecture dependency rules"
-    )
-    parser.add_argument(
-        "--warn-only",
-        action="store_true",
-        help="Only warn, don't fail the build"
-    )
-    parser.add_argument(
-        "--report",
-        action="store_true",
-        help="Generate detailed dependency report"
-    )
+    parser = argparse.ArgumentParser(description="Validate Clean Architecture dependency rules")
+    parser.add_argument("--warn-only", action="store_true", help="Only warn, don't fail the build")
+    parser.add_argument("--report", action="store_true", help="Generate detailed dependency report")
 
     args = parser.parse_args()
 

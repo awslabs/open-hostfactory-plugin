@@ -9,14 +9,16 @@ from pathlib import Path
 
 import yaml
 
+
 # Colors
 class Colors:
-    RED = '\033[0;31m'
-    GREEN = '\033[0;32m'
-    YELLOW = '\033[1;33m'
-    BLUE = '\033[0;34m'
-    GRAY = '\033[0;37m'
-    NC = '\033[0m'
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    YELLOW = "\033[1;33m"
+    BLUE = "\033[0;34m"
+    GRAY = "\033[0;37m"
+    NC = "\033[0m"
+
 
 def run_hook(name, command, warning_only=False, debug=False):
     """Run a single pre-commit hook."""
@@ -35,7 +37,9 @@ def run_hook(name, command, warning_only=False, debug=False):
         start_time = time.time()
 
         # Start subprocess
-        process = subprocess.Popen(cmd_args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(
+            cmd_args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        )
 
         # Show dots while running
         while process.poll() is None:
@@ -65,11 +69,17 @@ def run_hook(name, command, warning_only=False, debug=False):
                 print(f"{Colors.RED}  Output: {output}{Colors.NC}")
             return False
 
+
 def main():
     parser = argparse.ArgumentParser(description="Run pre-commit checks")
     parser.add_argument("--debug", "-d", action="store_true", help="Show debug output")
     parser.add_argument("--extended", "-e", action="store_true", help="Show extended info")
-    parser.add_argument("--required-only", "-r", action="store_true", help="Run only required checks (skip warnings)")
+    parser.add_argument(
+        "--required-only",
+        "-r",
+        action="store_true",
+        help="Run only required checks (skip warnings)",
+    )
     args = parser.parse_args()
 
     # Check for yq
@@ -143,6 +153,7 @@ def main():
         print(f"{Colors.GREEN}Passed: {passed}{Colors.NC}")
 
     return 1 if failed > 0 else 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -47,6 +47,7 @@ def main():
     parser.add_argument("--ci", action="store_true", help="Enable CI-specific outputs (XML reports, coverage)")
     parser.add_argument("--junit-xml", type=str, help="Generate JUnit XML report")
     parser.add_argument("--cov-xml", type=str, help="Generate coverage XML report")
+    parser.add_argument("--all", action="store_true", help="Run all test types")
     parser.add_argument("--maxfail", type=int, default=5, help="Stop after N failures")
     parser.add_argument("--timeout", type=int, default=300, help="Test timeout in seconds")
 
@@ -107,7 +108,9 @@ def main():
     test_paths = []
     markers = []
 
-    if args.unit:
+    if args.all:
+        test_paths = ["tests/"]
+    elif args.unit:
         test_paths.append("tests/unit")
         markers.append("unit")
 

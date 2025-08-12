@@ -60,22 +60,13 @@ jobs:
       with:
         enable-cache: true
 
-    - name: Install build dependencies with uv
-      run: |
-        uv venv
-        uv pip install build twine
-
-    - name: Generate pyproject.toml
-      run: |
-        make generate-pyproject
-
     - name: Build package
       run: |
-        python -m build --clean
+        make build
 
     - name: Check package
       run: |
-        python -m twine check dist/*
+        make test-install
 
     - name: Publish to Test PyPI
       if: github.event.inputs.environment == 'testpypi' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment != 'pypi')

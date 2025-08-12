@@ -178,7 +178,7 @@ test-html: dev-install  ## Run tests with HTML coverage report
 	@echo "Coverage report generated in htmlcov/index.html"
 
 test-report: dev-install  ## Generate comprehensive test report
-	./dev-tools/testing/run_tests.py --coverage --html-coverage
+	./dev-tools/testing/run_tests.py --all --coverage --junit-xml=test-results-combined.xml --cov-xml=coverage-combined.xml --html-coverage --maxfail=1 --timeout=60
 
 # Code quality targets
 quality-check: dev-install  ## Run professional quality checks on modified files

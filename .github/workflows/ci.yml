@@ -604,15 +604,7 @@ jobs:
 
     - name: Generate complete test report
       run: |
-        python -m pytest tests/ \
-          --junitxml=test-results-combined.xml \
-          --cov=src \
-          --cov-report=xml:coverage-combined.xml \
-          --cov-report=html:htmlcov \
-          --tb=short \
-          -q \
-          --maxfail=1 \
-          --timeout=60 \
+        make test-report
           -m "not slow"
       continue-on-error: true
 

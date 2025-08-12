@@ -472,7 +472,7 @@ if __name__ == "__main__":
 
         if FLAGS.getAvailableTemplates:
             res = hfm.get_available_templates()
-            print(json.dumps(res, indent=4))
+            log.info(json.dumps(res, indent=4))
 
         if FLAGS.requestMachines:
             template_name = FLAGS.requestMachines[0]
@@ -483,21 +483,21 @@ if __name__ == "__main__":
                 sys.exit(1)
 
             res = hfm.request_machines(template_name, machine_count)
-            print(json.dumps(res, indent=4))
+            log.info(json.dumps(res, indent=4))
 
         if FLAGS.getRequestStatus:
             request_id = FLAGS.getRequestStatus
             # Single status check without polling
             res = hfm.get_request_status(request_id)
-            print(json.dumps(res, indent=4))
+            log.info(json.dumps(res, indent=4))
 
         if FLAGS.requestReturnMachines:
             res = hfm.request_return_machines(FLAGS.requestReturnMachines)
-            print(json.dumps(res, indent=4))
+            log.info(json.dumps(res, indent=4))
 
         if FLAGS.getReturnRequests:
             res = hfm.get_return_requests(FLAGS.getReturnRequests)
-            print(json.dumps(res, indent=4))
+            log.info(json.dumps(res, indent=4))
 
     except Exception as e:
         log.error(f"Unexpected error: {e}", exc_info=True)

@@ -97,7 +97,7 @@ class ErrorMiddleware:
                 error_response = self._error_handler.handle_error_for_http(e)
 
                 # Format response for script output
-                print(
+                logger.error(
                     json.dumps(
                         {
                             "error": error_response.error_code,

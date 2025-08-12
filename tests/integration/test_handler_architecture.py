@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.abspath("."))
 def test_handler_architecture_consolidation():
     """Test Phase 4A: Handler Architecture Consolidation"""
 
-    print("🔧 PHASE 4A: HANDLER ARCHITECTURE CONSOLIDATION TEST")
+    print("PHASE 4A: HANDLER ARCHITECTURE CONSOLIDATION TEST")
     print("=" * 60)
 
     results = {
@@ -45,36 +45,36 @@ def test_handler_architecture_consolidation():
 
     try:
         # Test 1: Constructor Consistency
-        print("\n1️⃣ Testing Constructor Consistency...")
+        print("\n1. Testing Constructor Consistency...")
         results["constructor_consistency"] = test_constructor_consistency()
 
         # Test 2: Method Signature Consistency
-        print("\n2️⃣ Testing Method Signature Consistency...")
+        print("\n2. Testing Method Signature Consistency...")
         results["method_signatures"] = test_method_signatures()
 
         # Test 3: Base Class Inheritance
-        print("\n3️⃣ Testing Base Class Inheritance...")
+        print("\n3. Testing Base Class Inheritance...")
         results["base_class_inheritance"] = test_base_class_inheritance()
 
         # Test 4: Launch Template Integration
-        print("\n4️⃣ Testing Launch Template Integration...")
+        print("\n4. Testing Launch Template Integration...")
         results["launch_template_integration"] = test_launch_template_integration()
 
         # Test 5: Error Handling Consistency
-        print("\n5️⃣ Testing Error Handling Consistency...")
+        print("\n5. Testing Error Handling Consistency...")
         results["error_handling"] = test_error_handling_consistency()
 
         # Test 6: Performance Metrics
-        print("\n6️⃣ Testing Performance Metrics...")
+        print("\n6. Testing Performance Metrics...")
         results["performance_metrics"] = test_performance_metrics()
 
         # Test 7: Import Consistency
-        print("\n7️⃣ Testing Import Consistency...")
+        print("\n7. Testing Import Consistency...")
         results["import_consistency"] = test_import_consistency()
 
         # Summary
         print("\n" + "=" * 60)
-        print("📊 PHASE 4A TEST RESULTS SUMMARY")
+        print("PHASE 4A TEST RESULTS SUMMARY")
         print("=" * 60)
 
         passed = sum(1 for result in results.values() if result)
@@ -87,7 +87,7 @@ def test_handler_architecture_consolidation():
         print(f"\nOverall: {passed}/{total} tests passed")
 
         if passed == total:
-            print("🎉 ALL PHASE 4A TESTS PASSED!")
+            print("ALL PHASE 4A TESTS PASSED!")
             print("PASS: Handler architecture successfully consolidated!")
             return True
         else:
@@ -128,7 +128,7 @@ def test_constructor_consistency():
 
         for handler_class in handlers:
             handler_name = handler_class.__name__
-            print(f"   📋 Checking {handler_name}...")
+            print(f"   Checking {handler_name}...")
 
             # Get constructor signature
             sig = inspect.signature(handler_class.__init__)
@@ -193,7 +193,7 @@ def test_method_signatures():
 
         for handler_class in handlers:
             handler_name = handler_class.__name__
-            print(f"   📋 Checking {handler_name} methods...")
+            print(f"   Checking {handler_name} methods...")
 
             for method_name, expected_params in expected_methods.items():
                 if not hasattr(handler_class, method_name):
@@ -263,7 +263,7 @@ def test_base_class_inheritance():
         print("   Checking base class inheritance...")
 
         for handler_class, handler_name in handlers:
-            print(f"   📋 Checking {handler_name}...")
+            print(f"   Checking {handler_name}...")
 
             # Check direct inheritance
             if AWSHandler not in handler_class.__bases__:
@@ -323,7 +323,7 @@ def test_launch_template_integration():
         print("   Checking launch template integration...")
 
         for handler_class, handler_name in handlers:
-            print(f"   📋 Checking {handler_name}...")
+            print(f"   Checking {handler_name}...")
 
             # Create mock dependencies
             mock_aws_client = Mock()
@@ -489,7 +489,7 @@ def test_import_consistency():
                 print(f"   FAIL: Handler file not found: {handler_file}")
                 return False
 
-            print(f"   📋 Checking imports in {os.path.basename(handler_file)}...")
+            print(f"   Checking imports in {os.path.basename(handler_file)}...")
 
             with open(handler_file, "r") as f:
                 content = f.read()

@@ -158,7 +158,7 @@ if __name__ == "__main__":
     test2_passed = test_no_instance_manager_bypass()
 
     if test1_passed and test2_passed:
-        print("\n🎉 ALL PHASE 4 INTEGRATION FLOW TESTS PASSED")
+        print("\nALL PHASE 4 INTEGRATION FLOW TESTS PASSED")
         print("PASS: AWS provider strategy now uses proper handler system")
         print("PASS: AWSInstanceManager bypass has been eliminated")
         print("PASS: Launch template flow is properly integrated")

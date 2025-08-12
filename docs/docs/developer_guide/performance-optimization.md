@@ -16,10 +16,10 @@ This guide provides practical information for developers working with the Open H
 
 | Metric | Target | Current Achievement |
 |--------|--------|-------------------|
-| Startup Time | <500ms | 0.326s ✅ |
-| Help Command | <1000ms | 294ms ✅ |
-| Memory Usage | <50MB increase | ~5MB ✅ |
-| First Access | <1000ms | Variable ✅ |
+| Startup Time | <500ms | 0.326s PASS |
+| Help Command | <1000ms | 294ms PASS |
+| Memory Usage | <50MB increase | ~5MB PASS |
+| First Access | <1000ms | Variable PASS |
 
 ### Verification Commands
 
@@ -48,7 +48,7 @@ When adding new components to the system, follow these patterns to maintain perf
 #### Lazy Component Registration
 
 ```python
-# ✅ Good: Lazy registration
+# PASS Good: Lazy registration
 def register_my_service_lazy(container):
     """Register service with lazy loading support."""
     def create_my_service():
@@ -66,13 +66,13 @@ container.register_on_demand(MyService, register_my_service_lazy)
 #### Avoid Eager Initialization
 
 ```python
-# ❌ Bad: Eager initialization in constructor
+# FAIL Bad: Eager initialization in constructor
 class MyComponent:
     def __init__(self):
         self.heavy_resource = create_heavy_resource()  # Blocks startup
         self.database = connect_to_database()          # I/O operation
 
-# ✅ Good: Lazy initialization
+# PASS Good: Lazy initialization
 class MyComponent:
     def __init__(self):
         self._heavy_resource = None
@@ -614,7 +614,7 @@ def performance_health_check():
 
 ## Best Practices Summary
 
-### Do's ✅
+### Do's PASS
 
 1. **Use lazy initialization** for expensive resources
 2. **Cache frequently accessed** components and results
@@ -624,7 +624,7 @@ def performance_health_check():
 6. **Monitor key metrics** in production
 7. **Use configuration** to control performance features
 
-### Don'ts ❌
+### Don'ts FAIL
 
 1. **Don't initialize expensive resources** in constructors
 2. **Don't register all components** eagerly at startup

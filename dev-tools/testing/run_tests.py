@@ -90,7 +90,7 @@ def main():
 
         if args.html_coverage:
             pytest_cmd.extend(["--cov-report=html:htmlcov"])
-        
+
         if args.cov_xml:
             pytest_cmd.extend([f"--cov-report=xml:{args.cov_xml}"])
         elif args.ci:

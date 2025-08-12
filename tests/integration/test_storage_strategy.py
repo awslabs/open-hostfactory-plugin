@@ -202,7 +202,7 @@ if __name__ == "__main__":
     test3_passed = test_machine_repository_enhancements()
 
     if test1_passed and test2_passed and test3_passed:
-        print("\n🎉 ALL PHASE 3 STORAGE STRATEGY TESTS PASSED")
+        print("\nALL PHASE 3 STORAGE STRATEGY TESTS PASSED")
         print("PASS: Template repository enhanced field support working")
         print("PASS: Request repository enhanced field support working")
         print("PASS: Machine repository enhanced field support working")

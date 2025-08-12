@@ -87,6 +87,27 @@ HYPERBOLIC_TERMS = {
     r"\bstate-of-the-art\b": 'Use "current best practice"',
 }
 
+# Implementation detail terms that should be removed from production code
+IMPLEMENTATION_DETAIL_TERMS = {
+    r"\bphase\s+\d+\b": 'Remove implementation phase references',
+    r"\bphase\s+[a-z]+\b": 'Remove implementation phase references',
+    r"\bmigrated\s+from\b": 'Remove migration history references',
+    r"\bmigrating\s+to\b": 'Remove migration process references',
+    r"\bthis\s+instead\s+of\s+that\b": 'Remove comparison references',
+    r"\bold\s+implementation\b": 'Remove old implementation references',
+    r"\bnew\s+implementation\b": 'Remove new implementation references',
+    r"\blegacy\s+code\b": 'Remove legacy code references',
+    r"\btemporary\s+fix\b": 'Remove temporary implementation references',
+    r"\btodo\s*:\b": 'Remove TODO comments from production code',
+    r"\bfixme\s*:\b": 'Remove FIXME comments from production code',
+    r"\bhack\s*:\b": 'Remove HACK comments from production code',
+    r"\bworkaround\s+for\b": 'Remove workaround references',
+    r"\bquick\s+fix\b": 'Remove quick fix references',
+    r"\bstep\s+\d+\b": 'Remove step-by-step implementation references',
+    r"\btest\s+\d+\b": 'Remove test numbering from production code',
+    r"\bversion\s+\d+\b": 'Remove version references unless in version files',
+}
+
 # File extensions to check
 CODE_EXTENSIONS = {".py"}
 DOC_EXTENSIONS = {".md", ".rst", ".txt"}
@@ -142,6 +163,15 @@ class HyperbolicTermViolation(Violation):
 
     def __init__(self, file_path: str, line_num: int, content: str, term: str, suggestion: str):
         super().__init__(file_path, line_num, content, f"Hyperbolic term '{term}' - {suggestion}")
+        self.term = term
+        self.suggestion = suggestion
+
+
+class ImplementationDetailViolation(Violation):
+    """Implementation detail term found in production code."""
+
+    def __init__(self, file_path: str, line_num: int, content: str, term: str, suggestion: str):
+        super().__init__(file_path, line_num, content, f"Implementation detail '{term}' - {suggestion}")
         self.term = term
         self.suggestion = suggestion
 
@@ -268,6 +298,15 @@ class LanguageChecker(FileChecker):
                     term = match.group(0)
                     violations.append(
                         HyperbolicTermViolation(file_path, line_num, line.strip(), term, suggestion)
+                    )
+
+            # Check for implementation detail terms
+            for term_pattern, suggestion in IMPLEMENTATION_DETAIL_TERMS.items():
+                matches = re.finditer(term_pattern, line, re.IGNORECASE)
+                for match in matches:
+                    term = match.group(0)
+                    violations.append(
+                        ImplementationDetailViolation(file_path, line_num, line.strip(), term, suggestion)
                     )
 
         return violations

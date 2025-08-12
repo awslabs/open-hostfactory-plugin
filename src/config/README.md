@@ -15,7 +15,7 @@ The configuration system serves as the single source of truth for all applicatio
 
 ### Key Components
 
-#### 📁 `manager.py` - Configuration Manager
+#### `manager.py` - Configuration Manager
 Central configuration management with unified access patterns.
 
 **Key Features:**
@@ -25,7 +25,7 @@ Central configuration management with unified access patterns.
 - Configuration validation and error handling
 - Legacy configuration integration
 
-#### 📁 `loader.py` - Configuration Loader
+#### `loader.py` - Configuration Loader
 Handles loading configuration from multiple sources with precedence rules.
 
 **Key Features:**
@@ -34,7 +34,7 @@ Handles loading configuration from multiple sources with precedence rules.
 - Format detection and parsing
 - Error handling and reporting
 
-#### 📁 `validator.py` - Configuration Validator
+#### `validator.py` - Configuration Validator
 Comprehensive validation system for all configuration sections.
 
 **Key Features:**

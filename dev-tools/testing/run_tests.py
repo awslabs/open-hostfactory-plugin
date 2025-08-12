@@ -44,6 +44,9 @@ def main():
     parser.add_argument("--markers", type=str, help="Run tests with specific markers")
     parser.add_argument("--path", type=str, help="Run tests in specific path")
     parser.add_argument("--keyword", "-k", type=str, help="Run tests matching keyword")
+    parser.add_argument("--ci", action="store_true", help="Enable CI-specific outputs (XML reports, coverage)")
+    parser.add_argument("--junit-xml", type=str, help="Generate JUnit XML report")
+    parser.add_argument("--cov-xml", type=str, help="Generate coverage XML report")
     parser.add_argument("--maxfail", type=int, default=5, help="Stop after N failures")
     parser.add_argument("--timeout", type=int, default=300, help="Test timeout in seconds")
 
@@ -79,15 +82,28 @@ def main():
     pytest_cmd.extend(["--maxfail", str(args.maxfail)])
 
     # Add coverage options
-    if args.coverage or args.html_coverage:
+    if args.coverage or args.html_coverage or args.ci:
         pytest_cmd.extend(
             ["--cov=src", "--cov-report=term-missing", "--cov-branch", "--no-cov-on-fail"]
         )
 
         if args.html_coverage:
             pytest_cmd.extend(["--cov-report=html:htmlcov"])
+        
+        if args.cov_xml:
+            pytest_cmd.extend([f"--cov-report=xml:{args.cov_xml}"])
+        elif args.ci:
+            pytest_cmd.extend(["--cov-report=xml:coverage.xml"])
 
-    # Determine test selection
+    # Add JUnit XML output for CI
+    if args.junit_xml:
+        pytest_cmd.extend([f"--junitxml={args.junit_xml}"])
+    elif args.ci:
+        pytest_cmd.extend(["--junitxml=junit.xml"])
+
+    # Use centralized tool runner
+    run_tool_script = "./dev-tools/scripts/run_tool.sh"
+    final_cmd = [run_tool_script] + pytest_cmd
     test_paths = []
     markers = []
 
@@ -133,8 +149,12 @@ def main():
     if args.keyword:
         pytest_cmd.extend(["-k", args.keyword])
 
+    # Use centralized tool runner
+    run_tool_script = "./dev-tools/scripts/run_tool.sh"
+    final_cmd = [run_tool_script] + pytest_cmd
+
     # Run the tests
-    success = run_command(pytest_cmd, "Running Tests")
+    success = run_command(final_cmd, "Running Tests")
 
     if success:
         logger.info("All tests passed!")

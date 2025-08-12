@@ -10,6 +10,11 @@ BIN := $(VENV)/bin
 # Project configuration (single source of truth)
 PROJECT_CONFIG := .project.yml
 
+# Configurable arguments for different environments
+TEST_ARGS ?= 
+BUILD_ARGS ?=
+DOCS_ARGS ?=
+
 # Python version settings (loaded from project config)
 PYTHON_VERSIONS := $(shell yq '.python.versions | join(" ")' $(PROJECT_CONFIG))
 DEFAULT_PYTHON_VERSION := $(shell yq '.python.default_version' $(PROJECT_CONFIG))
@@ -142,13 +147,13 @@ $(VENV)/bin/activate: uv.lock
 test: test-quick  ## Run quick test suite (alias for test-quick)
 
 test-unit: dev-install  ## Run unit tests only
-	./dev-tools/testing/run_tests.py --unit
+	./dev-tools/testing/run_tests.py --unit $(TEST_ARGS)
 
 test-integration: dev-install  ## Run integration tests only
-	./dev-tools/testing/run_tests.py --integration
+	./dev-tools/testing/run_tests.py --integration $(TEST_ARGS)
 
 test-e2e: dev-install  ## Run end-to-end tests only
-	./dev-tools/testing/run_tests.py --e2e
+	./dev-tools/testing/run_tests.py --e2e $(TEST_ARGS)
 
 test-all: dev-install  ## Run all tests
 	./dev-tools/testing/run_tests.py
@@ -442,11 +447,20 @@ version-bump:  ## Show version bump help
 	@echo "Current version: $(VERSION)"
 
 # Build targets (using dev-tools)
-build: generate-pyproject clean dev-install  ## Build package
-	./dev-tools/package/build.sh
+build: clean generate-pyproject dev-install  ## Build package
+	BUILD_ARGS="$(BUILD_ARGS)" ./dev-tools/package/build.sh
 
 build-test: build  ## Build and test package installation
 	./dev-tools/package/test_install.sh
+
+test-install: build  ## Test package installation
+	./dev-tools/package/test_install.sh
+
+publish: build  ## Publish to PyPI (interactive)
+	./dev-tools/package/publish.sh pypi
+
+publish-test: build  ## Publish to test PyPI
+	./dev-tools/package/publish.sh testpypi
 
 # CI/CD targets
 # Individual code quality targets (with tool names)

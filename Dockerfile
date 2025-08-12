@@ -157,7 +157,7 @@ COPY config/ ./config/
 COPY scripts/ ./scripts/
 
 # Copy configuration files
-COPY pyproject.toml setup.py ./
+COPY pyproject.toml ./
 
 # Create necessary directories and set permissions
 RUN mkdir -p /app/logs /app/data /app/tmp && \

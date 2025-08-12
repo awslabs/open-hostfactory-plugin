@@ -559,7 +559,7 @@ jobs:
 
     - name: Build package
       run: |
-        python -m build
+        make build
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

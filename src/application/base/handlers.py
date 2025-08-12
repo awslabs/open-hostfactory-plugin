@@ -94,6 +94,7 @@ class BaseHandler(ABC):
         """
 
         def decorator(func: Callable) -> Callable:
+            """Apply monitoring decorator to function."""
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 start_time = time.time()
@@ -136,6 +137,7 @@ class BaseHandler(ABC):
 
             @wraps(func)
             def sync_wrapper(*args, **kwargs):
+                """Synchronous wrapper for async/sync function handling."""
                 if asyncio.iscoroutinefunction(func):
                     return asyncio.run(async_wrapper(*args, **kwargs))
                 else:
@@ -279,6 +281,7 @@ class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
     ):
+        """Initialize query handler with logging and error handling."""
         super().__init__(logger, error_handler)
         self._cache: Dict[str, Any] = {}
 

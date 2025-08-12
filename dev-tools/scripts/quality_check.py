@@ -597,6 +597,8 @@ class QualityChecker:
 
 
 def main():
+    """Run comprehensive code quality checks with configurable options."""
+    """Run comprehensive code quality checks with configurable options."""
     """Main entry point for the quality checker."""
     parser = argparse.ArgumentParser(description="Professional Quality Check Tool")
     parser.add_argument("--fix", action="store_true", help="Attempt to automatically fix issues")

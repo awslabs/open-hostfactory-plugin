@@ -446,6 +446,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
             ssm_client = self._aws_client.get_client("ssm")
 
             def get_parameter_func():
+                """Retrieve parameter value from SSM."""
                 response = ssm_client.get_parameter(Name=parameter_path)
                 return response["Parameter"]["Value"]
 

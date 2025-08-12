@@ -364,6 +364,7 @@ class CIChecker:
 
 
 def main():
+    """Run CI checks locally with various options."""
     parser = argparse.ArgumentParser(description="Run CI checks locally")
     parser.add_argument("--quick", action="store_true", help="Run only fast checks")
     parser.add_argument("--fix", action="store_true", help="Fix formatting issues automatically")

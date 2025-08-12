@@ -12,6 +12,8 @@ import yaml
 
 # Colors
 class Colors:
+    """ANSI color codes for terminal output formatting."""
+    """ANSI color codes for terminal output formatting."""
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
     YELLOW = "\033[1;33m"
@@ -71,6 +73,8 @@ def run_hook(name, command, warning_only=False, debug=False):
 
 
 def main():
+    """Run pre-commit checks with configurable options."""
+    """Run pre-commit checks with configurable options."""
     parser = argparse.ArgumentParser(description="Run pre-commit checks")
     parser.add_argument("--debug", "-d", action="store_true", help="Show debug output")
     parser.add_argument("--extended", "-e", action="store_true", help="Show extended info")

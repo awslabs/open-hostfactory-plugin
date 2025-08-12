@@ -1,3 +1,5 @@
+"""Composite strategy pattern implementation for provider operations."""
+
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 

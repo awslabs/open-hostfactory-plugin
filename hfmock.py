@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Mock HostFactory server for testing and development."""
+"""Mock HostFactory server for testing and development."""
 
 import json
 import os
@@ -121,6 +123,7 @@ class HostFactoryMock:
     """Mock implementation of Host Factory functionality."""
 
     def __init__(self):
+        """Initialize mock host factory with target configuration."""
         # TARGET="IBM_SYMPHONY"
         TARGET = "AWS_PLUGIN"
 

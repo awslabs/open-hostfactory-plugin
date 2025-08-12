@@ -73,6 +73,7 @@ async def handle_serve_api(args) -> Dict[str, Any]:
 
         # Setup signal handlers for graceful shutdown
         def signal_handler(signum, frame):
+            """Handle shutdown signals gracefully."""
             logger.info(f"Received signal {signum}, shutting down gracefully...")
             server.should_exit = True
 

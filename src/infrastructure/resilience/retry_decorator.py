@@ -56,6 +56,7 @@ def retry(
     """
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        """Apply retry strategy to function."""
         # Create strategy instance
         if strategy == "exponential":
             retry_strategy = ExponentialBackoffStrategy(
@@ -83,6 +84,7 @@ def retry(
 
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> T:
+            """Execute function with retry logic."""
             attempt = 0
 
             while True:

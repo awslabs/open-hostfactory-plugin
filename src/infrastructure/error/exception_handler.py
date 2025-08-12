@@ -301,6 +301,7 @@ class ExceptionHandler:
     """
 
     def __init__(self, logger=None, metrics=None):
+        """Initialize exception handler with optional logger and metrics."""
         self.logger = logger or get_logger(__name__)
         self.metrics = metrics
         self._handlers: Dict[Type[Exception], Callable] = {}

@@ -83,8 +83,10 @@ def handle_domain_exceptions(context: str):
     """
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        """Apply domain error handling to the function."""
         @wraps(func)
         def wrapper(*args, **kwargs) -> T:
+            """Wrapper function that applies domain error handling."""
             # Try to get error handler through domain container port
             error_handler = get_error_handling_port()
 

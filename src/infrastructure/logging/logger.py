@@ -69,6 +69,7 @@ class ContextLogger(logging.Logger):
     """Logger that supports context information."""
 
     def __init__(self, name: str, level: int = logging.NOTSET) -> None:
+        """Initialize context logger with name and level."""
         super().__init__(name, level)
         self._context: Dict[str, Any] = {}
 

@@ -76,9 +76,7 @@ class TestAppConfigWithScheduler:
 
         # Test AWS provider paths
         assert app_config.get_config_file_path() == "/test/path/awsprov_config.json"
-        assert (
-            app_config.get_templates_file_path() == "/test/path/awsprov_templates.json"
-        )
+        assert app_config.get_templates_file_path() == "/test/path/awsprov_templates.json"
 
     def test_app_config_path_generation_azure(self):
         """Test AppConfig path generation for Azure provider."""
@@ -101,10 +99,7 @@ class TestAppConfigWithScheduler:
 
         # Test Azure provider paths
         assert app_config.get_config_file_path() == "/test/path/azureprov_config.json"
-        assert (
-            app_config.get_templates_file_path()
-            == "/test/path/azureprov_templates.json"
-        )
+        assert app_config.get_templates_file_path() == "/test/path/azureprov_templates.json"
 
     def test_app_config_path_generation_with_complex_provider_name(self):
         """Test AppConfig path generation with complex provider names."""
@@ -127,6 +122,4 @@ class TestAppConfigWithScheduler:
 
         # Should extract 'aws' from 'aws-production-east'
         assert app_config.get_config_file_path() == "/test/path/awsprov_config.json"
-        assert (
-            app_config.get_templates_file_path() == "/test/path/awsprov_templates.json"
-        )
+        assert app_config.get_templates_file_path() == "/test/path/awsprov_templates.json"

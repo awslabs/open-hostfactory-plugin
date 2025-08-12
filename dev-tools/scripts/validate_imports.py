@@ -5,9 +5,9 @@ Import validation script for pre-commit hooks.
 This script validates that all critical imports work correctly and catches
 issues that might be introduced during code refactoring or module reorganization.
 """
-import sys
 import importlib
 import logging
+import sys
 from pathlib import Path
 
 # Setup logging

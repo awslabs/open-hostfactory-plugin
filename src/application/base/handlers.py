@@ -95,6 +95,7 @@ class BaseHandler(ABC):
 
         def decorator(func: Callable) -> Callable:
             """Apply monitoring decorator to function."""
+
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 start_time = time.time()

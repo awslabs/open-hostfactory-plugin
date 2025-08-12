@@ -84,6 +84,7 @@ def handle_domain_exceptions(context: str):
 
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         """Apply domain error handling to the function."""
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> T:
             """Wrapper function that applies domain error handling."""

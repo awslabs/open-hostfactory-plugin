@@ -4,17 +4,16 @@ CQRS pattern validator for maintaining architectural consistency.
 
 This script validates that CQRS handlers follow proper patterns and inheritance.
 """
-import sys
-import ast
 import argparse
+import ast
 import logging
+import sys
 from pathlib import Path
-from typing import List, Tuple, Set
+from typing import List
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 

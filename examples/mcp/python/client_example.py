@@ -6,9 +6,8 @@ This example demonstrates how to connect to the MCP server and perform
 common infrastructure provisioning tasks.
 """
 import asyncio
-import json
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Note: Install mcp package: pip install mcp
 from mcp import ClientSession, StdioServerParameters

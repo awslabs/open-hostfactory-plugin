@@ -7,17 +7,16 @@ This script validates that Clean Architecture dependency rules are followed:
 - Application layer should not depend on Interface layer
 - Dependencies should flow inward only
 """
-import sys
-import ast
 import argparse
+import ast
 import logging
+import sys
 from pathlib import Path
-from typing import List, Tuple, Dict, Set
+from typing import Dict, List, Tuple
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 

@@ -131,6 +131,7 @@ def with_error_handling(error_handler: Optional[ExceptionHandler] = None):
 
     def decorator(func: Callable) -> Callable:
         """Apply error handling decorator to function."""
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             """Wrapper function that handles exceptions."""
@@ -160,6 +161,7 @@ def with_api_error_handling(error_handler: Optional[ExceptionHandler] = None):
 
     def decorator(func: Callable) -> Callable:
         """Apply API error handling decorator to function."""
+
         @functools.wraps(func)
         def wrapper(input_data: Optional[Dict[str, Any]] = None, **kwargs):
             """Wrapper function for API error handling."""

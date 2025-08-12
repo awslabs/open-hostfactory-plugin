@@ -13,6 +13,7 @@ import yaml
 # Colors
 class Colors:
     """ANSI color codes for terminal output formatting."""
+
     """ANSI color codes for terminal output formatting."""
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
@@ -146,7 +147,9 @@ def main():
     total_elapsed = time.time() - total_time
 
     # Summary
-    logger.info(f"\nSummary: {len(hooks)} hooks executed in {Colors.GRAY}{total_elapsed:.2f}s{Colors.NC}")
+    logger.info(
+        f"\nSummary: {len(hooks)} hooks executed in {Colors.GRAY}{total_elapsed:.2f}s{Colors.NC}"
+    )
     if failed > 0:
         logger.info(f"{Colors.RED}Failed: {failed}{Colors.NC}")
     if warned > 0:

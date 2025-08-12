@@ -26,14 +26,12 @@ import logging
 import os
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Optional
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 try:
@@ -72,56 +70,56 @@ ALLOWED_TECHNICAL_CHARS = {
     "↓",  # Basic arrows for flow diagrams
 }
 
-# Unprofessional language terms
-UNPROFESSIONAL_TERMS = {
-    r"\bawesome\b": 'Use "excellent" or specific technical terms',
-    r"\brock\b": 'Use "implement" or "execute"',
-    r"\bcool\b": 'Use "effective" or specific benefits',
-    r"\bsweet\b": 'Use "beneficial" or specific advantages',
-    r"\bsick\b": 'Use "impressive" or specific technical terms',
-    r"\bepic\b": 'Use "comprehensive" or specific scope',
-    r"\binsane\b": 'Use "significant" or specific metrics',
-    r"\bcrazy\b": 'Use "substantial" or specific details',
+# Pre-compile regex patterns for better performance
+UNPROFESSIONAL_PATTERNS = {
+    re.compile(r"\bawesome\b", re.IGNORECASE): 'Use "excellent" or specific technical terms',
+    re.compile(r"\brock\b", re.IGNORECASE): 'Use "implement" or "execute"',
+    re.compile(r"\bcool\b", re.IGNORECASE): 'Use "effective" or specific benefits',
+    re.compile(r"\bsweet\b", re.IGNORECASE): 'Use "beneficial" or specific advantages',
+    re.compile(r"\bsick\b", re.IGNORECASE): 'Use "impressive" or specific technical terms',
+    re.compile(r"\bepic\b", re.IGNORECASE): 'Use "comprehensive" or specific scope',
+    re.compile(r"\binsane\b", re.IGNORECASE): 'Use "significant" or specific metrics',
+    re.compile(r"\bcrazy\b", re.IGNORECASE): 'Use "substantial" or specific details',
 }
 
 # Hyperbolic marketing terms
-HYPERBOLIC_TERMS = {
-    r"\benhanced\b": 'Use "improved" only when factually accurate',
-    r"\bunified\b": 'Use "integrated" or "consolidated"',
-    r"\bmodern\b": 'Use "current" or "updated"',
-    r"\bcutting-edge\b": 'Use "current industry standard"',
-    r"\brevolutionary\b": 'Use "significant improvement"',
-    r"\bnext-generation\b": "Use specific technology names",
-    r"\bstate-of-the-art\b": 'Use "current best practice"',
+HYPERBOLIC_PATTERNS = {
+    re.compile(r"\benhanced\b", re.IGNORECASE): 'Use "improved" only when factually accurate',
+    re.compile(r"\bunified\b", re.IGNORECASE): 'Use "integrated" or "consolidated"',
+    re.compile(r"\bmodern\b", re.IGNORECASE): 'Use "current" or "updated"',
+    re.compile(r"\bcutting-edge\b", re.IGNORECASE): 'Use "current industry standard"',
+    re.compile(r"\brevolutionary\b", re.IGNORECASE): 'Use "significant improvement"',
+    re.compile(r"\bnext-generation\b", re.IGNORECASE): "Use specific technology names",
+    re.compile(r"\bstate-of-the-art\b", re.IGNORECASE): 'Use "current best practice"',
 }
 
 # Implementation detail terms that should be removed from production code
-IMPLEMENTATION_DETAIL_TERMS = {
-    r"\bphase\s+\d+\b": 'Remove implementation phase references',
-    r"\bphase\s+[a-z]+\b": 'Remove implementation phase references',
-    r"\bmigrated\s+from\b": 'Remove migration history references',
-    r"\bmigrating\s+to\b": 'Remove migration process references',
-    r"\bthis\s+instead\s+of\s+that\b": 'Remove comparison references',
-    r"\bold\s+implementation\b": 'Remove old implementation references',
-    r"\bnew\s+implementation\b": 'Remove new implementation references',
-    r"\blegacy\s+code\b": 'Remove legacy code references',
-    r"\btemporary\s+fix\b": 'Remove temporary implementation references',
-    r"\btodo\s*:\b": 'Remove TODO comments from production code',
-    r"\bfixme\s*:\b": 'Remove FIXME comments from production code',
-    r"\bhack\s*:\b": 'Remove HACK comments from production code',
-    r"\bworkaround\s+for\b": 'Remove workaround references',
-    r"\bquick\s+fix\b": 'Remove quick fix references',
-    r"\bstep\s+\d+\b": 'Remove step-by-step implementation references',
-    r"\btest\s+\d+\b": 'Remove test numbering from production code',
+IMPLEMENTATION_DETAIL_PATTERNS = {
+    re.compile(r"\bphase\s+\d+\b", re.IGNORECASE): "Remove implementation phase references",
+    re.compile(r"\bphase\s+[a-z]+\b", re.IGNORECASE): "Remove implementation phase references",
+    re.compile(r"\bmigrated\s+from\b", re.IGNORECASE): "Remove migration history references",
+    re.compile(r"\bmigrating\s+to\b", re.IGNORECASE): "Remove migration process references",
+    re.compile(r"\bthis\s+instead\s+of\s+that\b", re.IGNORECASE): "Remove comparison references",
+    re.compile(r"\bold\s+implementation\b", re.IGNORECASE): "Remove old implementation references",
+    re.compile(r"\bnew\s+implementation\b", re.IGNORECASE): "Remove new implementation references",
+    re.compile(r"\blegacy\s+code\b", re.IGNORECASE): "Remove legacy code references",
+    re.compile(r"\btemporary\s+fix\b", re.IGNORECASE): "Remove temporary implementation references",
+    re.compile(r"\btodo\s*:\b", re.IGNORECASE): "Remove TODO comments from production code",
+    re.compile(r"\bfixme\s*:\b", re.IGNORECASE): "Remove FIXME comments from production code",
+    re.compile(r"\bhack\s*:\b", re.IGNORECASE): "Remove HACK comments from production code",
+    re.compile(r"\bworkaround\s+for\b", re.IGNORECASE): "Remove workaround references",
+    re.compile(r"\bquick\s+fix\b", re.IGNORECASE): "Remove quick fix references",
+    re.compile(r"\bstep\s+\d+\b", re.IGNORECASE): "Remove step-by-step implementation references",
+    re.compile(r"\btest\s+\d+\b", re.IGNORECASE): "Remove test numbering from production code",
 }
 
 # Legitimate version references that should be excluded
 VERSION_EXCLUSIONS = {
-    'CODE_OF_CONDUCT.md',  # Contributor Covenant version references
-    'LICENSE',             # License version references
-    'pyproject.toml',      # Package version references
-    'version.py',          # Version files
-    'versions.json',       # Version configuration files
+    "CODE_OF_CONDUCT.md",  # Contributor Covenant version references
+    "LICENSE",  # License version references
+    "pyproject.toml",  # Package version references
+    "version.py",  # Version files
+    "versions.json",  # Version configuration files
 }
 
 # File extensions to check
@@ -187,7 +185,9 @@ class ImplementationDetailViolation(Violation):
     """Implementation detail term found in production code."""
 
     def __init__(self, file_path: str, line_num: int, content: str, term: str, suggestion: str):
-        super().__init__(file_path, line_num, content, f"Implementation detail '{term}' - {suggestion}")
+        super().__init__(
+            file_path, line_num, content, f"Implementation detail '{term}' - {suggestion}"
+        )
         self.term = term
         self.suggestion = suggestion
 
@@ -297,8 +297,8 @@ class LanguageChecker(FileChecker):
         violations = []
         for line_num, line in enumerate(content.splitlines(), 1):
             # Check for unprofessional language
-            for term_pattern, suggestion in UNPROFESSIONAL_TERMS.items():
-                matches = re.finditer(term_pattern, line, re.IGNORECASE)
+            for pattern, suggestion in UNPROFESSIONAL_PATTERNS.items():
+                matches = pattern.finditer(line)
                 for match in matches:
                     term = match.group(0)
                     violations.append(
@@ -308,8 +308,8 @@ class LanguageChecker(FileChecker):
                     )
 
             # Check for hyperbolic terms
-            for term_pattern, suggestion in HYPERBOLIC_TERMS.items():
-                matches = re.finditer(term_pattern, line, re.IGNORECASE)
+            for pattern, suggestion in HYPERBOLIC_PATTERNS.items():
+                matches = pattern.finditer(line)
                 for match in matches:
                     term = match.group(0)
                     violations.append(
@@ -317,15 +317,19 @@ class LanguageChecker(FileChecker):
                     )
 
             # Check for implementation detail terms
-            for term_pattern, suggestion in IMPLEMENTATION_DETAIL_TERMS.items():
-                matches = re.finditer(term_pattern, line, re.IGNORECASE)
+            for pattern, suggestion in IMPLEMENTATION_DETAIL_PATTERNS.items():
+                matches = pattern.finditer(line)
                 for match in matches:
                     term = match.group(0)
                     # Skip version references in legitimate files
-                    if 'version' in term.lower() and any(excluded in file_path for excluded in VERSION_EXCLUSIONS):
+                    if "version" in term.lower() and any(
+                        excluded in file_path for excluded in VERSION_EXCLUSIONS
+                    ):
                         continue
                     violations.append(
-                        ImplementationDetailViolation(file_path, line_num, line.strip(), term, suggestion)
+                        ImplementationDetailViolation(
+                            file_path, line_num, line.strip(), term, suggestion
+                        )
                     )
 
         return violations
@@ -541,21 +545,40 @@ class QualityChecker:
         if not valid_files:
             return all_violations
 
-        for i, file_path in enumerate(valid_files, 1):
-            if i % 10 == 0 or i == len(valid_files):
-                logger.info(f"Progress: {i}/{len(valid_files)} files checked")
-
-            # Run all checkers on this file
+        # Process files in parallel for better performance
+        def check_single_file(file_path):
+            file_violations = []
             for checker in self.checkers:
-                violations = checker.check_file(file_path)
-                all_violations.extend(violations)
+                file_violations.extend(checker.check_file(file_path))
+            return file_violations
+
+        # Use ThreadPoolExecutor for parallel processing
+        with ThreadPoolExecutor(max_workers=8) as executor:  # Increased workers
+            # Submit all file checking tasks
+            future_to_file = {
+                executor.submit(check_single_file, file_path): file_path
+                for file_path in valid_files
+            }
+
+            completed = 0
+            for future in as_completed(future_to_file):
+                completed += 1
+                if completed % 10 == 0 or completed == len(valid_files):
+                    logger.info(f"Progress: {completed}/{len(valid_files)} files checked")
+
+                try:
+                    file_violations = future.result()
+                    all_violations.extend(file_violations)
+                except Exception as e:
+                    file_path = future_to_file[future]
+                    logger.error(f"Error checking {file_path}: {e}")
 
         return all_violations
 
     def get_modified_files(self) -> List[str]:
         """Get list of modified files from git."""
-        import subprocess
         import os
+        import subprocess
 
         try:
             # In CI/PR context, compare against target branch
@@ -627,6 +650,7 @@ def main():
         # Check all relevant files in repository (deterministic)
         files_to_check = []
         from pathlib import Path
+
         import pathspec
 
         # Load .gitignore patterns
@@ -663,21 +687,47 @@ def main():
 
     # Print results
     if violations:
-        logger.error(f"{len(violations)} quality issues found:")
+        logger.error(f"\n{len(violations)} quality issues found:\n")
 
-        # Group by file
+        # Group by file and count by category
         violations_by_file = {}
+        category_counts = {}
+
         for v in violations:
             if v.file_path not in violations_by_file:
                 violations_by_file[v.file_path] = []
             violations_by_file[v.file_path].append(v)
 
+            # Count by category (extract category from message)
+            if "Hyperbolic term" in v.message:
+                category = "Hyperbolic terms"
+            elif "Debug print/logging statement" in v.message:
+                category = "Debug print statements"
+            elif "Unused imports" in v.message:
+                category = "Unused imports"
+            elif "Commented-out code" in v.message:
+                category = "Commented-out code"
+            else:
+                category = "Other issues"
+
+            category_counts[category] = category_counts.get(category, 0) + 1
+
         # Print violations by file
         for file_path, file_violations in violations_by_file.items():
-            logger.error(f"{file_path}:")
+            logger.error(f"\n{file_path}: ({len(file_violations)} issues)")
             for v in sorted(file_violations, key=lambda v: v.line_num):
                 logger.error(f"  Line {v.line_num}: {v.message}")
                 logger.error(f"    {v.content}")
+
+        # Print summary by category
+        logger.error(f"\n" + "-" * 40)
+        logger.error("Summary:")
+        for category, count in sorted(category_counts.items()):
+            logger.error(f"{category}: {count}")
+
+        logger.error("-" * 40)
+        logger.error(f"Total files with issues: {len(violations_by_file)}")
+        logger.error(f"Total issues: {len(violations)}")
 
         # Exit with error if strict mode
         if args.strict:

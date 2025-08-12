@@ -2,17 +2,17 @@
 """Mock HostFactory server for testing and development."""
 """Mock HostFactory server for testing and development."""
 
+import argparse
 import json
+import logging
 import os
 import random
-import time
-import subprocess
-import argparse
-import logging
 import signal
+import subprocess
 import sys
+import time
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List
 
 # Configure logging
 log = logging.getLogger("hfmock")

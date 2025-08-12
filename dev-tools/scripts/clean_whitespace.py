@@ -3,6 +3,7 @@
 
 import logging
 from pathlib import Path
+
 import pathspec
 
 # Configure logging

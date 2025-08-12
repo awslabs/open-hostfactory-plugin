@@ -305,6 +305,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
         def decorator(func: Callable[[T], R]) -> Callable[[T], R]:
             """Apply retry decorator to function."""
+
             @retry(
                 strategy="exponential",
                 max_attempts=max_attempts,

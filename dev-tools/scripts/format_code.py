@@ -5,9 +5,14 @@ Code formatting script for Open Host Factory Plugin.
 Runs autoflake, autopep8, black, and isort to format Python code using the run-tool function.
 """
 
+import logging
 import subprocess
 import sys
 from pathlib import Path
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 
 def run_tool(tool_name, *args):
@@ -40,11 +45,12 @@ def main():
 
     # Change to project root
     import os
+
     os.chdir(project_root)
 
-    # Define source directories
-    package_dir = "src"
-    tests_dir = "tests"
+    # Define all directories with Python files
+    python_dirs = ["src", "tests", "dev-tools", "examples"]
+    python_files = ["hfmock.py"]
 
     logger.info("Formatting Python code...")
 
@@ -52,21 +58,35 @@ def main():
     success = True
 
     # autoflake - remove unused imports/variables
-    if not run_tool("autoflake", "--in-place", "--remove-all-unused-imports",
-                   "--remove-unused-variables", "--recursive", package_dir, tests_dir):
+    if not run_tool(
+        "autoflake",
+        "--in-place",
+        "--remove-all-unused-imports",
+        "--remove-unused-variables",
+        "--recursive",
+        *python_dirs,
+        *python_files,
+    ):
         success = False
 
     # autopep8 - fix line length (88 to leave room for Black's decisions)
-    if not run_tool("autopep8", "--in-place", "--max-line-length=88",
-                   "--select=E501", "--recursive", package_dir, tests_dir):
+    if not run_tool(
+        "autopep8",
+        "--in-place",
+        "--max-line-length=88",
+        "--select=E501",
+        "--recursive",
+        *python_dirs,
+        *python_files,
+    ):
         success = False
 
     # black - code formatting (uses pyproject.toml line-length=100)
-    if not run_tool("black", package_dir, tests_dir):
+    if not run_tool("black", *python_dirs, *python_files):
         success = False
 
     # isort - import sorting (uses pyproject.toml config)
-    if not run_tool("isort", package_dir, tests_dir):
+    if not run_tool("isort", *python_dirs, *python_files):
         success = False
 
     if success:

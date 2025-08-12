@@ -253,9 +253,7 @@ def test_configuration_loading():
         print(
             f"   Launch template create_per_request: {aws_config.launch_template.create_per_request}"
         )
-        print(
-            f"   Launch template naming_strategy: {aws_config.launch_template.naming_strategy}"
-        )
+        print(f"   Launch template naming_strategy: {aws_config.launch_template.naming_strategy}")
 
         return True
 

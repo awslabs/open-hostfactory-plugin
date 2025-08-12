@@ -8,19 +8,16 @@ and SBOM generation.
 """
 import argparse
 import json
-import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-import logging
 
 
 class SecurityScanner:
@@ -39,7 +36,7 @@ class SecurityScanner:
         try:
             # Check if bandit-sarif-formatter is available
             try:
-                import bandit_sarif_formatter
+                pass
 
                 sarif_available = True
             except ImportError:

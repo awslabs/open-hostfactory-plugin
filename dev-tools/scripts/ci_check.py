@@ -23,7 +23,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -326,8 +326,8 @@ class CIChecker:
             return False
 
         # Code quality checks
-        formatting_passed = self.run_formatting_checks()
-        linting_passed = self.run_linting_checks()
+        self.run_formatting_checks()
+        self.run_linting_checks()
 
         # Optional checks (don't fail CI)
         self.run_complexity_analysis()

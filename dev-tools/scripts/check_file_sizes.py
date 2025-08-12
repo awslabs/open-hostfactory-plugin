@@ -5,16 +5,15 @@ File size checker for maintaining code quality.
 This script checks for files that are getting too large and warns about them.
 Large files often indicate violations of Single Responsibility Principle.
 """
-import sys
 import argparse
 import logging
+import sys
 from pathlib import Path
 from typing import List, Tuple
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -49,7 +48,9 @@ def check_large_files(warn_only: bool = False, threshold: int = 600) -> None:
             logger.warning(f"  {file_path}: {lines} lines")
 
         logger.warning("=" * 50)
-        logger.info(f"Consider splitting files larger than {threshold} lines for better maintainability.")
+        logger.info(
+            f"Consider splitting files larger than {threshold} lines for better maintainability."
+        )
         logger.info("Large files often indicate Single Responsibility Principle violations.")
 
         if not warn_only:

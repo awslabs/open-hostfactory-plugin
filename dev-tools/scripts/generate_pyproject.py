@@ -32,13 +32,13 @@ def _get_config_value(key: str) -> str:
 
 try:
     from _package import (
+        DESCRIPTION,
+        DOCS_URL,
         PACKAGE_NAME,
         PACKAGE_NAME_SHORT,
-        __version__,
-        DESCRIPTION,
-        REPO_URL,
-        DOCS_URL,
         REPO_ISSUES_URL,
+        REPO_URL,
+        __version__,
     )
 
     # Get Python version info from config

@@ -2,8 +2,9 @@
 """Validate GitHub Actions workflow YAML files."""
 
 import sys
-import yaml
 from pathlib import Path
+
+import yaml
 
 
 def validate_workflow(file_path: Path):

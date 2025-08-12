@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Test runner script for the Open Host Factory Plugin."""
-import sys
-import subprocess
 import argparse
 import logging
+import subprocess
+import sys
 from typing import List
 
 # Configure logging
@@ -44,7 +44,9 @@ def main():
     parser.add_argument("--markers", type=str, help="Run tests with specific markers")
     parser.add_argument("--path", type=str, help="Run tests in specific path")
     parser.add_argument("--keyword", "-k", type=str, help="Run tests matching keyword")
-    parser.add_argument("--ci", action="store_true", help="Enable CI-specific outputs (XML reports, coverage)")
+    parser.add_argument(
+        "--ci", action="store_true", help="Enable CI-specific outputs (XML reports, coverage)"
+    )
     parser.add_argument("--junit-xml", type=str, help="Generate JUnit XML report")
     parser.add_argument("--cov-xml", type=str, help="Generate coverage XML report")
     parser.add_argument("--all", action="store_true", help="Run all test types")

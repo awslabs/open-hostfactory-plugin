@@ -11,13 +11,13 @@ def validate_workflow(file_path: Path):
     try:
         with open(file_path, "r") as f:
             yaml.safe_load(f)
-        print(f"VALID: {file_path.name}")
+        logger.info(f"VALID: {file_path.name}")
         return True
     except yaml.YAMLError as e:
-        print(f"INVALID: {file_path.name} - {e}")
+        logger.info(f"INVALID: {file_path.name} - {e}")
         return False
     except Exception as e:
-        print(f"ERROR: {file_path.name} - {e}")
+        logger.error(f"{file_path.name} - {e}")
         return False
 
 
@@ -26,13 +26,13 @@ def main():
     workflows_dir = Path(".github/workflows")
 
     if not workflows_dir.exists():
-        print("ERROR: .github/workflows directory not found")
+        logger.error(f".github/workflows directory not found")
         sys.exit(1)
 
     workflow_files = list(workflows_dir.glob("*.yml")) + list(workflows_dir.glob("*.yaml"))
 
     if not workflow_files:
-        print("ERROR: No workflow files found")
+        logger.error(f"No workflow files found")
         sys.exit(1)
 
     all_valid = True
@@ -42,10 +42,10 @@ def main():
             all_valid = False
 
     if all_valid:
-        print(f"SUCCESS: All {len(workflow_files)} workflow files are valid")
+        logger.info(f"All {len(workflow_files)} workflow files are valid")
         sys.exit(0)
     else:
-        print("FAILED: Found invalid workflow files")
+        logger.info("FAILED: Found invalid workflow files")
         sys.exit(1)
 
 

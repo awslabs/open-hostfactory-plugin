@@ -11,34 +11,41 @@ import sys
 from datetime import datetime, timezone
 from typing import List
 
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 def run_command(cmd: List[str], capture_output: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     try:
         return subprocess.run(cmd, capture_output=capture_output, text=True, check=False)
     except Exception as e:
-        print(f"Error running command {' '.join(cmd)}: {e}", file=sys.stderr)
+        logger.info(f"Error running command {' '.join(cmd)}: {e}", file=sys.stderr)
         sys.exit(1)
 
 
 def generate_cyclonedx_sbom(output_file: str) -> bool:
     """Generate CycloneDX SBOM using cyclonedx-py."""
-    print(f"Generating CycloneDX SBOM: {output_file}")
+    logger.info(f"Generating CycloneDX SBOM: {output_file}")
 
     # Use correct cyclonedx-py syntax
     result = run_command(["cyclonedx-py", "environment", "-o", output_file])
 
     if result.returncode == 0:
-        print(f"Generated CycloneDX SBOM: {output_file}")
+        logger.info(f"Generated CycloneDX SBOM: {output_file}")
         return True
     else:
-        print(f"Failed to generate CycloneDX SBOM: {result.stderr}", file=sys.stderr)
+        logger.info(f"Failed to generate CycloneDX SBOM: {result.stderr}", file=sys.stderr)
         return False
 
 
 def generate_spdx_sbom(output_file: str) -> bool:
     """Generate SPDX SBOM, with fallback if cyclonedx-py doesn't support SPDX."""
-    print(f"Generating SPDX SBOM: {output_file}")
+    logger.info(f"Generating SPDX SBOM: {output_file}")
 
     # Try cyclonedx-py with SPDX format first
     help_result = run_command(["cyclonedx-py", "--help"])
@@ -49,7 +56,7 @@ def generate_spdx_sbom(output_file: str) -> bool:
         )
 
         if result.returncode == 0:
-            print(f"Generated SPDX SBOM with cyclonedx-py: {output_file}")
+            logger.info(f"Generated SPDX SBOM with cyclonedx-py: {output_file}")
             return True
 
     # Fallback: generate SPDX manually
@@ -96,11 +103,11 @@ def generate_spdx_fallback(output_file: str) -> bool:
         with open(output_file, "w") as f:
             json.dump(spdx_doc, f, indent=2)
 
-        print(f"Generated SPDX SBOM with fallback: {output_file}")
+        logger.info(f"Generated SPDX SBOM with fallback: {output_file}")
         return True
 
     except Exception as e:
-        print(f"Failed to generate SPDX SBOM: {e}", file=sys.stderr)
+        logger.info(f"Failed to generate SPDX SBOM: {e}", file=sys.stderr)
         return False
 
 

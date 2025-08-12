@@ -28,14 +28,14 @@ def run_hook(name, command, warning_only=False, debug=False):
     cmd_args = command.split() if isinstance(command, str) else command
 
     if debug:
-        print(f"Running {name}...", end=" ", flush=True)
+        logger.info(f"Running {name}...", end=" ", flush=True)
         start_time = time.time()
         result = subprocess.run(cmd_args, shell=False, capture_output=True, text=True)
         duration = time.time() - start_time
         exit_code = result.returncode
         output = result.stdout + result.stderr
     else:
-        print(f"Running {name}: ", end="", flush=True)
+        logger.info(f"Running {name}: ", end="", flush=True)
         start_time = time.time()
 
         # Start subprocess
@@ -45,7 +45,7 @@ def run_hook(name, command, warning_only=False, debug=False):
 
         # Show dots while running
         while process.poll() is None:
-            print(".", end="", flush=True)
+            logger.info(".", end="", flush=True)
             time.sleep(1)
 
         # Get results
@@ -54,21 +54,21 @@ def run_hook(name, command, warning_only=False, debug=False):
         exit_code = process.returncode
         output = stdout + stderr
 
-        print(" ", end="", flush=True)  # Space after dots
+        logger.info(" ", end="", flush=True)  # Space after dots
 
     if exit_code == 0:
-        print(f"{Colors.GREEN}PASS{Colors.NC} ({duration:.1f}s)")
+        logger.info(f"{Colors.GREEN}PASS{Colors.NC} ({duration:.1f}s)")
         return True
     else:
         if warning_only:
-            print(f"{Colors.YELLOW}WARN{Colors.NC} ({duration:.1f}s)")
+            logger.info(f"{Colors.YELLOW}WARN{Colors.NC} ({duration:.1f}s)")
             if debug and output:
-                print(f"{Colors.YELLOW}  Output: {output}{Colors.NC}")
+                logger.info(f"{Colors.YELLOW}  Output: {output}{Colors.NC}")
             return True  # Don't fail on warnings
         else:
-            print(f"{Colors.RED}FAIL{Colors.NC} ({duration:.1f}s)")
+            logger.info(f"{Colors.RED}FAIL{Colors.NC} ({duration:.1f}s)")
             if debug and output:
-                print(f"{Colors.RED}  Output: {output}{Colors.NC}")
+                logger.info(f"{Colors.RED}  Output: {output}{Colors.NC}")
             return False
 
 
@@ -88,23 +88,23 @@ def main():
 
     # Check for yq
     if subprocess.run(["which", "yq"], capture_output=True).returncode != 0:
-        print(f"{Colors.RED}ERROR: yq not found. Install with:{Colors.NC}")
+        logger.info(f"{Colors.RED}ERROR: yq not found. Install with:{Colors.NC}")
         if subprocess.run(["which", "apt"], capture_output=True).returncode == 0:
-            print(f"{Colors.BLUE}  Ubuntu/Debian: sudo apt install yq{Colors.NC}")
+            logger.info(f"{Colors.BLUE}  Ubuntu/Debian: sudo apt install yq{Colors.NC}")
         elif subprocess.run(["which", "dnf"], capture_output=True).returncode == 0:
-            print(f"{Colors.BLUE}  RHEL/Fedora: sudo dnf install yq{Colors.NC}")
+            logger.info(f"{Colors.BLUE}  RHEL/Fedora: sudo dnf install yq{Colors.NC}")
         elif subprocess.run(["which", "yum"], capture_output=True).returncode == 0:
-            print(f"{Colors.BLUE}  CentOS/RHEL: sudo yum install yq{Colors.NC}")
+            logger.info(f"{Colors.BLUE}  CentOS/RHEL: sudo yum install yq{Colors.NC}")
         elif subprocess.run(["which", "brew"], capture_output=True).returncode == 0:
-            print(f"{Colors.BLUE}  macOS: brew install yq{Colors.NC}")
+            logger.info(f"{Colors.BLUE}  macOS: brew install yq{Colors.NC}")
         else:
-            print(f"{Colors.BLUE}  See: https://github.com/mikefarah/yq#install{Colors.NC}")
+            logger.info(f"{Colors.BLUE}  See: https://github.com/mikefarah/yq#install{Colors.NC}")
         return 1
 
     # Load pre-commit config
     config_file = Path(".pre-commit-config.yaml")
     if not config_file.exists():
-        print(f"{Colors.RED}ERROR: .pre-commit-config.yaml not found{Colors.NC}")
+        logger.info(f"{Colors.RED}ERROR: .pre-commit-config.yaml not found{Colors.NC}")
         return 1
 
     with open(config_file) as f:
@@ -112,11 +112,11 @@ def main():
 
     hooks = config["repos"][0]["hooks"]
 
-    print("Running pre-commit checks (reading from .pre-commit-config.yaml)...")
+    logger.info("Running pre-commit checks (reading from .pre-commit-config.yaml)...")
     if args.debug:
-        print(f"{Colors.BLUE}DEBUG: Running in debug mode{Colors.NC}")
+        logger.info(f"{Colors.BLUE}DEBUG: Running in debug mode{Colors.NC}")
     if args.extended:
-        print(f"{Colors.BLUE}Found {len(hooks)} hooks to execute{Colors.NC}")
+        logger.info(f"{Colors.BLUE}Found {len(hooks)} hooks to execute{Colors.NC}")
 
     failed = 0
     warned = 0
@@ -132,8 +132,8 @@ def main():
             continue
 
         if args.extended:
-            print(f"{Colors.BLUE}Hook {i+1}/{len(hooks)}: {name}{Colors.NC}")
-            print(f"{Colors.BLUE}  Command: {command}{Colors.NC}")
+            logger.info(f"{Colors.BLUE}Hook {i+1}/{len(hooks)}: {name}{Colors.NC}")
+            logger.info(f"{Colors.BLUE}  Command: {command}{Colors.NC}")
 
         success = run_hook(name, command, warning_only, args.debug)
 
@@ -146,15 +146,15 @@ def main():
     total_elapsed = time.time() - total_time
 
     # Summary
-    print(f"\nSummary: {len(hooks)} hooks executed in {Colors.GRAY}{total_elapsed:.2f}s{Colors.NC}")
+    logger.info(f"\nSummary: {len(hooks)} hooks executed in {Colors.GRAY}{total_elapsed:.2f}s{Colors.NC}")
     if failed > 0:
-        print(f"{Colors.RED}Failed: {failed}{Colors.NC}")
+        logger.info(f"{Colors.RED}Failed: {failed}{Colors.NC}")
     if warned > 0:
-        print(f"{Colors.YELLOW}Warnings: {warned}{Colors.NC}")
+        logger.info(f"{Colors.YELLOW}Warnings: {warned}{Colors.NC}")
 
     passed = len(hooks) - failed - warned
     if passed > 0:
-        print(f"{Colors.GREEN}Passed: {passed}{Colors.NC}")
+        logger.info(f"{Colors.GREEN}Passed: {passed}{Colors.NC}")
 
     return 1 if failed > 0 else 0
 

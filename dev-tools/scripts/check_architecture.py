@@ -10,8 +10,16 @@ This script validates that Clean Architecture dependency rules are followed:
 import sys
 import ast
 import argparse
+import logging
 from pathlib import Path
 from typing import List, Tuple, Dict, Set
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 class ArchitectureValidator:
@@ -47,7 +55,7 @@ class ArchitectureValidator:
                         if node.module:
                             imports.append((file_path, node.module))
             except Exception as e:
-                print(f"Warning: Could not analyze {file_path}: {e}")
+                logger.warning(f"Could not analyze {file_path}: {e}")
                 continue
 
         return imports
@@ -113,7 +121,7 @@ class ArchitectureValidator:
 
     def analyze_circular_dependencies(self) -> None:
         """Check for circular dependencies between modules."""
-        # This is a simplified check - could be enhanced
+        # This is a simplified check - could be improved
         module_imports = {}
 
         for layer, imports in self.layer_imports.items():
@@ -135,7 +143,7 @@ class ArchitectureValidator:
 
     def check_dependency_rules(self, warn_only: bool = False) -> None:
         """Main validation method."""
-        print("Checking Clean Architecture dependency rules...")
+        logger.info("Checking Clean Architecture dependency rules...")
 
         # Check each layer
         self.check_domain_layer_dependencies()
@@ -152,31 +160,31 @@ class ArchitectureValidator:
     def report_findings(self, warn_only: bool) -> None:
         """Report validation findings."""
         if self.violations:
-            print("WARNING: Clean Architecture violations detected:")
-            print("=" * 70)
+            logger.warning("Clean Architecture violations detected:")
+            logger.warning("=" * 70)
             for violation in self.violations:
-                print(f"  {violation}")
-            print("=" * 70)
-            print("Clean Architecture Rules:")
-            print("- Domain layer should not depend on outer layers")
-            print("- Application layer should not depend on Interface layer")
-            print(
+                logger.warning(f"  {violation}")
+            logger.warning("=" * 70)
+            logger.info("Clean Architecture Rules:")
+            logger.info("- Domain layer should not depend on outer layers")
+            logger.info("- Application layer should not depend on Interface layer")
+            logger.info(
                 "- Dependencies should flow inward: Interface -> Infrastructure -> Application -> Domain"
             )
-            print("- Avoid circular dependencies between modules")
+            logger.info("- Avoid circular dependencies between modules")
 
             if not warn_only:
-                print("FAILURE: Build failed due to architecture violations.")
+                logger.error("Build failed due to architecture violations.")
                 sys.exit(1)
             else:
-                print("Build continues with warnings.")
+                logger.warning("Build continues with warnings.")
         else:
-            print("SUCCESS: Clean Architecture dependency rules are followed.")
+            logger.info("Clean Architecture dependency rules are followed.")
 
         # Summary statistics
-        print(f"\nArchitecture Analysis Summary:")
+        logger.info("Architecture Analysis Summary:")
         for layer, imports in self.layer_imports.items():
-            print(f"  {layer.capitalize()} layer: {len(imports)} imports analyzed")
+            logger.info(f"  {layer.capitalize()} layer: {len(imports)} imports analyzed")
 
     def generate_dependency_report(self) -> Dict[str, List[str]]:
         """Generate a detailed dependency report."""
@@ -206,12 +214,12 @@ def main():
         validator.check_dependency_rules(warn_only=True)
         report = validator.generate_dependency_report()
 
-        print("\nDETAILED DEPENDENCY REPORT:")
-        print("=" * 50)
+        logger.info("DETAILED DEPENDENCY REPORT:")
+        logger.info("=" * 50)
         for layer, deps in report.items():
-            print(f"\n{layer.upper()} LAYER DEPENDENCIES:")
+            logger.info(f"{layer.upper()} LAYER DEPENDENCIES:")
             for dep in deps:
-                print(f"  - {dep}")
+                logger.info(f"  - {dep}")
     else:
         validator.check_dependency_rules(args.warn_only)
 

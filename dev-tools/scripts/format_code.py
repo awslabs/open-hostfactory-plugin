@@ -17,18 +17,18 @@ def run_tool(tool_name, *args):
 
     command = [str(run_tool_script), tool_name] + list(args)
 
-    print(f"Running {tool_name}...")
+    logger.info(f"Running {tool_name}...")
     try:
         result = subprocess.run(command, check=True, capture_output=True, text=True)
         if result.stdout:
-            print(result.stdout)
+            logger.info(result.stdout)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"Error running {tool_name}: {e}")
+        logger.info(f"Error running {tool_name}: {e}")
         if e.stdout:
-            print(f"STDOUT: {e.stdout}")
+            logger.info(f"STDOUT: {e.stdout}")
         if e.stderr:
-            print(f"STDERR: {e.stderr}")
+            logger.info(f"STDERR: {e.stderr}")
         return False
 
 
@@ -46,7 +46,7 @@ def main():
     package_dir = "src"
     tests_dir = "tests"
 
-    print("Formatting Python code...")
+    logger.info("Formatting Python code...")
 
     # Run formatters in order using run-tool
     success = True
@@ -70,10 +70,10 @@ def main():
         success = False
 
     if success:
-        print("Formatting complete.")
+        logger.info("Formatting complete.")
         return 0
     else:
-        print("Some formatters failed.")
+        logger.info("Some formatters failed.")
         return 1
 
 

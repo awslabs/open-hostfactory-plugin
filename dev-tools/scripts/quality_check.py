@@ -22,11 +22,19 @@ Options:
 
 import argparse
 import ast
+import logging
 import os
 import re
 import sys
 from pathlib import Path
 from typing import List, Optional
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 try:
     import pathspec
@@ -258,7 +266,7 @@ class FileChecker:
             # Skip binary files
             pass
         except Exception as e:
-            print(f"Error checking {file_path}: {e}")
+            logger.error(f"Error checking {file_path}: {e}")
 
         return violations
 
@@ -535,7 +543,7 @@ class QualityChecker:
 
         for i, file_path in enumerate(valid_files, 1):
             if i % 10 == 0 or i == len(valid_files):
-                print(f"Progress: {i}/{len(valid_files)} files checked", flush=True)
+                logger.info(f"Progress: {i}/{len(valid_files)} files checked")
 
             # Run all checkers on this file
             for checker in self.checkers:
@@ -592,7 +600,7 @@ class QualityChecker:
             return [f for f in all_files if f]  # Filter out empty strings
 
         except subprocess.SubprocessError:
-            print("Warning: Failed to get modified files from git. Checking all files.")
+            logger.warning("Failed to get modified files from git. Checking all files.")
             return []
 
 
@@ -655,7 +663,7 @@ def main():
 
     # Print results
     if violations:
-        print(f"\n{len(violations)} quality issues found:\n")
+        logger.error(f"{len(violations)} quality issues found:")
 
         # Group by file
         violations_by_file = {}
@@ -666,16 +674,16 @@ def main():
 
         # Print violations by file
         for file_path, file_violations in violations_by_file.items():
-            print(f"\n{file_path}:")
+            logger.error(f"{file_path}:")
             for v in sorted(file_violations, key=lambda v: v.line_num):
-                print(f"  Line {v.line_num}: {v.message}")
-                print(f"    {v.content}")
+                logger.error(f"  Line {v.line_num}: {v.message}")
+                logger.error(f"    {v.content}")
 
         # Exit with error if strict mode
         if args.strict:
             sys.exit(1)
     else:
-        print("No quality issues found!")
+        logger.info("No quality issues found!")
 
     sys.exit(0)
 

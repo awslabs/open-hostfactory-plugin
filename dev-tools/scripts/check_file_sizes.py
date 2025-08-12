@@ -7,8 +7,16 @@ Large files often indicate violations of Single Responsibility Principle.
 """
 import sys
 import argparse
+import logging
 from pathlib import Path
 from typing import List, Tuple
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 def check_large_files(warn_only: bool = False, threshold: int = 600) -> None:
@@ -28,29 +36,29 @@ def check_large_files(warn_only: bool = False, threshold: int = 600) -> None:
             if line_count > threshold:
                 large_files.append((file_path, line_count))
         except Exception as e:
-            print(f"Warning: Could not analyze {file_path}: {e}")
+            logger.warning(f"Could not analyze {file_path}: {e}")
 
     if large_files:
-        print("WARNING: Large files detected:")
-        print("=" * 50)
+        logger.warning("Large files detected:")
+        logger.warning("=" * 50)
 
         # Sort by line count (largest first)
         large_files.sort(key=lambda x: x[1], reverse=True)
 
         for file_path, lines in large_files:
-            print(f"  {file_path}: {lines} lines")
+            logger.warning(f"  {file_path}: {lines} lines")
 
-        print("=" * 50)
-        print(f"Consider splitting files larger than {threshold} lines for better maintainability.")
-        print("Large files often indicate Single Responsibility Principle violations.")
+        logger.warning("=" * 50)
+        logger.info(f"Consider splitting files larger than {threshold} lines for better maintainability.")
+        logger.info("Large files often indicate Single Responsibility Principle violations.")
 
         if not warn_only:
-            print("FAILURE: Build failed due to large files.")
+            logger.error("Build failed due to large files.")
             sys.exit(1)
         else:
-            print("Build continues with warnings.")
+            logger.warning("Build continues with warnings.")
     else:
-        print(f"SUCCESS: All files are appropriately sized (< {threshold} lines).")
+        logger.info(f"All files are appropriately sized (< {threshold} lines).")
 
 
 def get_file_size_report() -> List[Tuple[str, int]]:
@@ -84,11 +92,11 @@ def main():
     args = parser.parse_args()
 
     if args.report:
-        print("FILE SIZE REPORT:")
-        print("=" * 50)
+        logger.info("FILE SIZE REPORT:")
+        logger.info("=" * 50)
         for file_path, lines in get_file_size_report()[:20]:  # Top 20
-            print(f"  {file_path}: {lines} lines")
-        print("=" * 50)
+            logger.info(f"  {file_path}: {lines} lines")
+        logger.info("=" * 50)
     else:
         check_large_files(args.warn_only, args.threshold)
 

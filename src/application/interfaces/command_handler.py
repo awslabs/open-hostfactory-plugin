@@ -50,7 +50,7 @@ class CommandHandler(Generic[TCommand, TResponse], ABC):
         Provide synchronous wrapper for backward compatibility.
 
         This method provides a synchronous interface to the async handle method
-        for cases where async/await cannot be used (e.g., legacy code, tests).
+        for cases where async/await cannot be used (e.g., synchronous tests).
 
         Args:
             command: Command to handle (strongly typed)

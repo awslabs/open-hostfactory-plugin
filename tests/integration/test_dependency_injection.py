@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 6: Dependency Injection Updates Test
+Dependency Injection Updates Test
 
 This test validates that the dependency injection updates for AWS Launch Template Manager
 and other services are working correctly.
@@ -27,21 +27,21 @@ def test_dependency_injection_updates():
     }
 
     try:
-        # Test 1: AWS Launch Template Manager registration
+        # AWS Launch Template Manager registration
         print("\n1. Testing AWS Launch Template Manager Registration...")
         results["aws_launch_template_manager_registration"] = (
             test_aws_launch_template_manager_registration()
         )
 
-        # Test 2: Repository factory machine support
+        # Repository factory machine support
         print("\n2. Testing Repository Factory Machine Support...")
         results["repository_factory_machine_support"] = test_repository_factory_machine_support()
 
-        # Test 3: DI container resolution
+        # DI container resolution
         print("\n3. Testing DI Container Resolution...")
         results["di_container_resolution"] = test_di_container_resolution()
 
-        # Test 4: Service dependencies
+        # Service dependencies
         print("\n4. Testing Service Dependencies...")
         results["service_dependencies"] = test_service_dependencies()
 

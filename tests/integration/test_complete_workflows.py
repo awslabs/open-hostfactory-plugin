@@ -76,16 +76,16 @@ class TestCompleteWorkflowIntegration:
         }
         mock_query_bus.dispatch.return_value = mock_request_status
 
-        # Step 1: Get available templates
+        # Get available templates
         templates = app_service.get_available_templates()
         assert len(templates) == 1
         assert templates[0]["template_id"] == "test-template"
 
-        # Step 2: Request machines
+        # Request machines
         request_id = app_service.request_machines(template_id="test-template", machine_count=2)
         assert request_id == "req-12345678-1234-1234-1234-123456789012"
 
-        # Step 3: Check request status
+        # Check request status
         status = app_service.get_request_status(request_id)
         assert status["status"] == "COMPLETED"
         assert status["machine_count"] == 2
@@ -135,11 +135,11 @@ class TestCompleteWorkflowIntegration:
         }
         mock_query_bus.dispatch.return_value = [mock_return_status]
 
-        # Step 1: Request machine return
+        # Request machine return
         return_id = app_service.request_return_machines(machine_ids)
         assert return_id == return_request_id
 
-        # Step 2: Check return request status
+        # Check return request status
         return_requests = app_service.get_return_requests()
         assert len(return_requests) == 1
         assert return_requests[0]["status"] == "COMPLETED"
@@ -187,11 +187,11 @@ class TestCompleteWorkflowIntegration:
             "req-12345678-1234-1234-1234-123456789012",  # Second call succeeds
         ]
 
-        # Step 1: First request fails
+        # First request fails
         with pytest.raises(Exception):
             app_service.request_machines(template_id="test-template", machine_count=2)
 
-        # Step 2: Retry succeeds
+        # Retry succeeds
         request_id = app_service.request_machines(template_id="test-template", machine_count=2)
         assert request_id == "req-12345678-1234-1234-1234-123456789012"
 

@@ -118,7 +118,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
 
         # === SPECIAL HANDLING FOR COMPLEX FIELDS ===
 
-        # Handle vmTypes -> instance_types mapping (missing from old implementation)
+        # Handle vmTypes -> instance_types mapping
         if "vmTypes" in template and isinstance(template["vmTypes"], dict):
             mapped["instance_types"] = template["vmTypes"]
             # Ensure primary instance_type is set if not already present

@@ -320,7 +320,7 @@ def _register_template_configuration_services(container: DIContainer) -> None:
 **When to use manual registration:**
 - Configuration-driven services that need complex initialization
 - Services that require specific factory patterns
-- Legacy services being migrated from @injectable pattern
+- Services transitioning from @injectable pattern
 - Services with conditional registration based on configuration
 
 ## Migration Guide

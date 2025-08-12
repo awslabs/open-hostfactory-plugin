@@ -504,7 +504,7 @@ class AWSOperations:
 
 ## Adding New Providers
 
-### Step 1: Implement Provider Interface
+### Implement Provider Interface
 
 ```python
 # src/providers/provider1/azure_provider.py
@@ -527,7 +527,7 @@ class AzureProvider(ProviderInterface):
     # Implement all abstract methods...
 ```
 
-### Step 2: Create Provider Configuration
+### Create Provider Configuration
 
 ```python
 # src/providers/provider1/configuration/config.py
@@ -543,7 +543,7 @@ class AzureConfig(BaseModel):
     location: str = "East US"
 ```
 
-### Step 3: Register Provider
+### Register Provider
 
 ```python
 # Register Provider1 provider
@@ -551,7 +551,7 @@ from src.providers.provider1.azure_provider import AzureProvider
 ProviderFactory.register_provider("provider1", AzureProvider)
 ```
 
-### Step 4: Update Configuration
+### Update Configuration
 
 ```json
 {

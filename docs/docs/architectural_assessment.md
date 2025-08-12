@@ -41,7 +41,7 @@
 1. **Domain -> Infrastructure** (1 file)
    - File: `decorators.py`
    - Impact: Low
-   - Status: Legacy code, minimal impact
+   - Status: Minimal impact, specific utility needed
 
 2. **Application -> Infrastructure** (1 file)
    - File: `service.py`
@@ -138,7 +138,7 @@
 
 ### **MONITORING ITEMS:**
 
-#### **Legacy Code Patterns:**
+#### **Older Code Patterns:**
 - **Some older patterns** still exist in specific files
 - **Impact:** Low (functionality preserved)
 - **Recommendation:** Refactor during feature development

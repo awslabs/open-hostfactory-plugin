@@ -35,35 +35,35 @@ def test_comprehensive_edge_cases():
     }
 
     try:
-        # Test 1: Launch Template Edge Cases
+        # Launch Template Edge Cases
         print("\n1. Testing Launch Template Edge Cases...")
         results["launch_template_edge_cases"] = test_launch_template_edge_cases()
 
-        # Test 2: Configuration Combinations
+        # Configuration Combinations
         print("\n2. Testing Configuration Combinations...")
         results["configuration_combinations"] = test_configuration_combinations()
 
-        # Test 3: Scheduler Strategy Compliance
+        # Scheduler Strategy Compliance
         print("\n3. Testing Scheduler Strategy Compliance...")
         results["scheduler_strategy_compliance"] = test_scheduler_strategy_compliance()
 
-        # Test 4: Request Machine Flows
+        # Request Machine Flows
         print("\n4. Testing Request Machine Flows...")
         results["request_machine_flows"] = test_request_machine_flows()
 
-        # Test 5: Template Field Variations
+        # Template Field Variations
         print("\n5. Testing Template Field Variations...")
         results["template_field_variations"] = test_template_field_variations()
 
-        # Test 6: Error Handling Scenarios
+        # Error Handling Scenarios
         print("\n6. Testing Error Handling Scenarios...")
         results["error_handling_scenarios"] = test_error_handling_scenarios()
 
-        # Test 7: HF Input/Output Validation
+        # HF Input/Output Validation
         print("\n7. Testing HF Input/Output Validation...")
         results["hf_input_output_validation"] = test_hf_input_output_validation()
 
-        # Test 8: Provider API Combinations
+        # Provider API Combinations
         print("\n8. Testing Provider API Combinations...")
         results["provider_api_combinations"] = test_provider_api_combinations()
 

@@ -7,18 +7,18 @@ import sys
 def test_import_fixes():
     """Test that the import fixes are working."""
     try:
-        # Test 1: Check that ProviderApi exists in AWS value objects
+        # Check that ProviderApi exists in AWS value objects
         from src.providers.aws.domain.template.value_objects import ProviderApi
 
         assert ProviderApi is not None
 
-        # Test 2: Check that ProviderHandlerType does NOT exist
+        # Check that ProviderHandlerType does NOT exist
         try:
             return False  # Should not reach here
         except ImportError:
             pass  # Expected - ProviderHandlerType should not exist
 
-        # Test 3: Check that handlers can import ProviderApi
+        # Check that handlers can import ProviderApi
         try:
             # This will fail if there are import issues
             pass

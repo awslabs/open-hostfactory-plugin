@@ -57,7 +57,7 @@ class RepositoryFactory:
 
 ### Adding a New Storage Type
 
-#### Step 1: Create Storage Strategy
+#### Create Storage Strategy
 ```python
 # src/infrastructure/persistence/redis/strategy.py
 class RedisStorageStrategy(BaseStorageStrategy):
@@ -66,7 +66,7 @@ class RedisStorageStrategy(BaseStorageStrategy):
     # ... implement storage methods
 ```
 
-#### Step 2: Create Registration Module
+#### Create Registration Module
 ```python
 # src/infrastructure/persistence/redis/registration.py
 def create_redis_strategy(config: Any) -> RedisStorageStrategy:
@@ -88,7 +88,7 @@ def register_redis_storage() -> None:
     )
 ```
 
-#### Step 3: Register in Central Module
+#### Register in Central Module
 ```python
 # src/infrastructure/persistence/registration.py
 def register_all_storage_types() -> None:
@@ -103,7 +103,7 @@ def register_all_storage_types() -> None:
         failed_types.append(("redis", str(e)))
 ```
 
-#### Step 4: Update Configuration Schema
+#### Update Configuration Schema
 ```python
 # src/config/schemas/storage_schema.py
 class RedisStrategyConfig(BaseModel):

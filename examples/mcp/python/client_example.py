@@ -118,19 +118,19 @@ async def example_infrastructure_provisioning():
     async with HostFactoryMCPClient() as client:
         await client.initialize()
 
-        # Step 1: List available providers
+        # List available providers
         providers = await client.call_tool("list_providers")
         print(f"Available providers: {providers}")
 
-        # Step 2: Check provider health
+        # Check provider health
         health = await client.call_tool("check_provider_health")
         print(f"Provider health: {health}")
 
-        # Step 3: List available templates
+        # List available templates
         templates = await client.call_tool("list_templates")
         print(f"Available templates: {templates}")
 
-        # Step 4: Request infrastructure (example)
+        # Request infrastructure (example)
         # Note: This would actually provision resources
         # request_result = await client.call_tool("request_machines", {
         #     "template_id": "EC2FleetInstant",

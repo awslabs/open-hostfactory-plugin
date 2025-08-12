@@ -50,7 +50,7 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
 
     logger.info("Registering services with lazy loading enabled")
 
-    # 1. Register only essential services immediately (Phase 3 optimization)
+    # 1. Register only essential services immediately 
     from src.infrastructure.di.port_registrations import register_port_adapters
 
     register_port_adapters(container)
@@ -64,7 +64,7 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
 
     register_minimal_storage_types()
 
-    # 3. Register active scheduler only (Phase 3 optimization)
+    # 3. Register active scheduler only 
     from src.infrastructure.scheduler.registration import register_active_scheduler_only
 
     try:
@@ -82,7 +82,7 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
         # Fallback to default scheduler
         register_active_scheduler_only("default")
 
-    # 4. Register provider services immediately (Phase 3 fix for provider
+    # 4. Register provider services immediately (fix for provider
     # context errors)
     register_provider_services(container)
 
@@ -171,7 +171,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
         type("InfrastructureServices", (), {}), register_infrastructure_lazy
     )
 
-    # Register scheduler services as lazy (Phase 3 optimization)
+    # Register scheduler services as lazy 
     def register_scheduler_lazy(c):
         """Register scheduler services lazily when needed."""
         from src.infrastructure.scheduler.registration import (

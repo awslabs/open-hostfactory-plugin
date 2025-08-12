@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phase 5: Configuration Updates Test
+Configuration Updates Test
 
 This test validates that the configuration updates for launch template
 management are working correctly.

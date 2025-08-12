@@ -348,7 +348,7 @@ class TestEndToEndScenarios:
             service, "_query_bus"
         ) as mock_query_bus, patch.object(service, "_template_service") as mock_template_service:
 
-            # Step 1: Get available templates
+            # Get available templates
             mock_template = Template(
                 id="template-001",
                 name="test-template",
@@ -364,7 +364,7 @@ class TestEndToEndScenarios:
             assert len(templates) == 1
             assert templates[0].id == "template-001"
 
-            # Step 2: Request machines
+            # Request machines
             mock_command_bus.dispatch.return_value = {
                 "request_id": "req-12345678",
                 "status": "pending",
@@ -376,7 +376,7 @@ class TestEndToEndScenarios:
             )
             assert request_result["request_id"] == "req-12345678"
 
-            # Step 3: Monitor request progress
+            # Monitor request progress
             mock_query_bus.dispatch.return_value = {
                 "request_id": "req-12345678",
                 "status": "completed",
@@ -390,7 +390,7 @@ class TestEndToEndScenarios:
             assert status["status"] == "completed"
             assert status["progress"] == 100.0
 
-            # Step 4: Get machine details
+            # Get machine details
             mock_query_bus.dispatch.return_value = [
                 {
                     "machine_id": "machine-001",
@@ -407,7 +407,7 @@ class TestEndToEndScenarios:
             machines = service.get_machines_by_request("req-12345678")
             assert len(machines) == 2
 
-            # Step 5: Return machines
+            # Return machines
             mock_command_bus.dispatch.return_value = {
                 "request_id": "req-return-123",
                 "status": "pending",
@@ -421,7 +421,7 @@ class TestEndToEndScenarios:
             )
             assert return_result["request_id"] == "req-return-123"
 
-            # Step 6: Monitor return progress
+            # Monitor return progress
             mock_query_bus.dispatch.return_value = [
                 {
                     "request_id": "req-return-123",

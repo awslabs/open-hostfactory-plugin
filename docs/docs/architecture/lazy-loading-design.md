@@ -255,14 +255,14 @@ def register_json_storage():
 ### 1. Adding New Lazy Components
 
 ```python
-# Step 1: Register component factory
+# Register component factory
 def register_my_component_lazy(container):
     container.register_lazy_factory(MyComponent, create_my_component)
 
-# Step 2: Configure on-demand loading
+# Configure on-demand loading
 container.register_on_demand(MyComponent, register_my_component_lazy)
 
-# Step 3: Test performance impact
+# Test performance impact
 # - Measure startup time before/after
 # - Verify first-access performance
 # - Check memory usage impact

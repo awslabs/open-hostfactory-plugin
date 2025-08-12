@@ -37,7 +37,7 @@ class TestMCPProtocolCompliance:
     @pytest.mark.asyncio
     async def test_full_mcp_session_workflow(self, mcp_server):
         """Test complete MCP session workflow."""
-        # Step 1: Initialize session
+        # Initialize session
         init_message = {
             "jsonrpc": "2.0",
             "id": 1,
@@ -54,7 +54,7 @@ class TestMCPProtocolCompliance:
         assert init_response["result"]["protocolVersion"] == "2024-11-05"
         assert "capabilities" in init_response["result"]
 
-        # Step 2: List available tools
+        # List available tools
         tools_message = {
             "jsonrpc": "2.0",
             "id": 2,
@@ -69,7 +69,7 @@ class TestMCPProtocolCompliance:
         tools = tools_response["result"]["tools"]
         assert len(tools) > 0
 
-        # Step 3: List available resources
+        # List available resources
         resources_message = {
             "jsonrpc": "2.0",
             "id": 3,
@@ -84,7 +84,7 @@ class TestMCPProtocolCompliance:
         resources = resources_response["result"]["resources"]
         assert len(resources) == 4
 
-        # Step 4: Get prompts
+        # Get prompts
         prompts_message = {
             "jsonrpc": "2.0",
             "id": 4,

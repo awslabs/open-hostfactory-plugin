@@ -18,7 +18,7 @@ After implementing CQRS patterns:
 
 ## Current CQRS Migration Status
 
-The system is actively migrating to full CQRS implementation. Here's the current status:
+The system implements CQRS patterns. Here's the current status:
 
 **Completed Components:**
 - `CommandBus` and `QueryBus` infrastructure (`src/infrastructure/di/buses.py`)

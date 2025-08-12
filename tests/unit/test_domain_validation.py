@@ -27,19 +27,19 @@ def test_domain_validation():
     }
 
     try:
-        # Test 1: Basic AWSTemplate creation
+        # Basic AWSTemplate creation
         print("\n1. Testing Basic AWSTemplate Creation...")
         results["aws_template_basic"] = test_aws_template_basic()
 
-        # Test 2: SpotFleet AWSTemplate creation
+        # SpotFleet AWSTemplate creation
         print("\n2. Testing SpotFleet AWSTemplate Creation...")
         results["aws_template_spot_fleet"] = test_aws_template_spot_fleet()
 
-        # Test 3: Request creation
+        # Request creation
         print("\n3. Testing Request Creation...")
         results["request_creation"] = test_request_creation()
 
-        # Test 4: Base handler validation
+        # Base handler validation
         print("\n4. Testing Base Handler Validation...")
         results["base_handler_validation"] = test_base_handler_validation()
 

@@ -85,7 +85,7 @@ print(f"Currently using: {current}")
 
 ##  **Creating New Providers**
 
-### **Step 1: Implement ProviderStrategy Interface**
+### **Implement ProviderStrategy Interface**
 
 ```python
 # src/providers/provider1/strategy/provider1_strategy.py
@@ -188,7 +188,7 @@ class Provider1Strategy(ProviderStrategy):
             )
 ```
 
-### **Step 2: Create Provider Configuration**
+### **Create Provider Configuration**
 
 ```python
 # src/providers/provider1/configuration/config.py
@@ -207,7 +207,7 @@ class Provider1Config(BaseModel):
         extra = "allow"
 ```
 
-### **Step 3: Register Provider in DI Container**
+### **Register Provider in DI Container**
 
 ```python
 # In src/infrastructure/di/services.py

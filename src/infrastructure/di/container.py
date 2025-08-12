@@ -356,7 +356,7 @@ def _setup_cqrs_infrastructure(container: DIContainer) -> None:
             logger.info("Ensuring infrastructure services are available for CQRS setup")
             _ensure_infrastructure_services(container)
 
-        # Step 1: Discover and register all handlers
+        # Discover and register all handlers
         logger.info("Creating handler discovery service")
         discovery_service = create_handler_discovery_service(container)
 
@@ -372,7 +372,7 @@ def _setup_cqrs_infrastructure(container: DIContainer) -> None:
         except ImportError:
             logger.debug("Handler registry stats not available")
 
-        # Step 2: Create and register buses
+        # Create and register buses
         logger.info("Creating CQRS buses")
         logging_port = container.get(LoggingPort)
         query_bus, command_bus = BusFactory.create_buses(container, logging_port)

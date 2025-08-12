@@ -103,13 +103,13 @@ class TestAPIEndpoints:
         assert response.status_code != 500
 
     def test_404_handling(self, client):
-        """Test 404 error handling for non-existent endpoints."""
+        """404 error error handling for non-existent endpoints."""
         response = client.get("/api/v1/nonexistent")
 
         assert response.status_code == 404
 
     def test_method_not_allowed(self, client):
-        """Test 405 Method Not Allowed handling."""
+        """405 Method Not Allowed Method Not Allowed handling."""
         # Try POST on GET-only endpoint
         response = client.post("/health")
 

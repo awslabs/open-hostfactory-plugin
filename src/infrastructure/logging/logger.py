@@ -32,7 +32,7 @@ class JsonFormatter(logging.Formatter):
         except Exception as e:
             # Can't use logger here to avoid recursion
             # Just use full path and continue
-            print(
+            print(  # noqa: logging bootstrap
                 f"Warning: Error formatting log path: {e}"
             )  # Simple console output for logging system errors
 

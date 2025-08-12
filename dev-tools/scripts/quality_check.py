@@ -451,10 +451,10 @@ class ImportChecker(FileChecker):
 
 class CommentChecker(FileChecker):
     """Check for TODO/FIXME comments without tickets and commented code.
-    
+
     Supports noqa suppressions for commented code:
     - Line-level: # def function():  # noqa:COMMENTED
-    - Section-level: 
+    - Section-level:
         # noqa:COMMENTED section-start
         # def function():
         # class MyClass:
@@ -480,11 +480,11 @@ class CommentChecker(FileChecker):
         commented_code_suppressed = False
         in_multiline_string = False
         string_delimiter = None
-        
+
         for line_num, line in enumerate(content.splitlines(), 1):
             # Track multiline strings (docstrings and regular strings)
             stripped = line.strip()
-            
+
             # Check for start/end of multiline strings
             if not in_multiline_string:
                 if stripped.startswith('"""') or stripped.startswith("'''"):
@@ -499,11 +499,11 @@ class CommentChecker(FileChecker):
                 if stripped.endswith(string_delimiter):
                     in_multiline_string = False
                     string_delimiter = None
-            
+
             # Skip checks if we're inside a multiline string
             if in_multiline_string:
                 continue
-                
+
             # Check for section-level suppression controls
             if "# noqa:COMMENTED section-start" in line:
                 commented_code_suppressed = True
@@ -511,13 +511,15 @@ class CommentChecker(FileChecker):
             elif "# noqa:COMMENTED section-end" in line:
                 commented_code_suppressed = False
                 continue
-            
+
             # Check for commented code
             if code_pattern.search(line):
                 # Skip if suppressed by section-level or line-level noqa
-                if (commented_code_suppressed or 
-                    "noqa" in line.lower() or 
-                    "noqa:commented" in line.lower()):
+                if (
+                    commented_code_suppressed
+                    or "noqa" in line.lower()
+                    or "noqa:commented" in line.lower()
+                ):
                     continue
                 violations.append(CommentedCodeViolation(file_path, line_num, line.strip()))
 
@@ -527,6 +529,7 @@ class CommentChecker(FileChecker):
                 and not is_markdown_file
                 and debug_pattern.search(line)
                 and "DEBUG" not in line.upper()
+                and "noqa" not in line.lower()
             ):
                 violations.append(DebugStatementViolation(file_path, line_num, line.strip()))
 

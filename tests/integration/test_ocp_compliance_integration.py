@@ -271,8 +271,8 @@ class TestOCPComplianceIntegration:
     def test_configuration_schema_no_legacy_mode(self):
         """Test that configuration schema no longer supports legacy mode."""
         from src.config.schemas.provider_strategy_schema import (
-            ProviderMode,
             IntegratedProviderConfig,
+            ProviderMode,
         )
 
         # Verify LEGACY mode is not in enum

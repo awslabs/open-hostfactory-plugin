@@ -61,7 +61,9 @@ def test_template_repository_enhancements():
 
         print("PASS: Template deserialization successful")
         print(f"   - Template ID: {deserialized.template_id}")
-        print(f"   - Additional fields preserved: {len(deserialized.instance_types)} instance types")
+        print(
+            f"   - Additional fields preserved: {len(deserialized.instance_types)} instance types"
+        )
 
         return True
 

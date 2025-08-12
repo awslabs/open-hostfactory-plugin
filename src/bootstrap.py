@@ -332,7 +332,7 @@ async def main() -> None:
     config_path = os.getenv("CONFIG_PATH")
 
     # Only print before app creation - no logger available yet
-    print("Starting Open Host Factory...")
+    print("Starting Open Host Factory...")  # noqa: bootstrap output
 
     try:
         async with await create_application(config_path) as app:
@@ -359,7 +359,7 @@ async def main() -> None:
 
     except Exception as e:
         # Keep print here - app creation failed, no logger available
-        print(f"Application failed: {e}")
+        print(f"Application failed: {e}")  # noqa: bootstrap error
         sys.exit(1)
 
 

@@ -251,7 +251,9 @@ class ConfigurationMigrator:
                 summary["migration_type"] = "legacy_aws_to_consolidated"
                 summary["providers_before"] = 1
                 summary["mode_before"] = "legacy"
-                summary["changes"].append("Converted legacy AWS configuration to consolidated format")
+                summary["changes"].append(
+                    "Converted legacy AWS configuration to consolidated format"
+                )
 
             # Analyze migrated configuration
             migrated_provider = migrated_config.get("provider", {})

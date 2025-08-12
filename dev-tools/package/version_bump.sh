@@ -86,7 +86,7 @@ yq -i ".project.version = \"$NEW_VERSION\"" .project.yml
 # Regenerate pyproject.toml from template with new version
 if [ -f pyproject.toml.template ]; then
     echo "Regenerating pyproject.toml from template..."
-    make generate-pyproject
+    make generate_pyproject
 fi
 
 echo "Version updated to $NEW_VERSION"

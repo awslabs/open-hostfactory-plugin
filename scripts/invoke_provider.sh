@@ -88,7 +88,7 @@ else
         echo "Options:" >&2
         echo "  1. Install package: pip install $PACKAGE_NAME" >&2
         echo "  2. Use local development: USE_LOCAL_DEV=true $0 $*" >&2
-        echo "  3. Install in dev mode: ./dev-tools/package/install-dev.sh" >&2
+        echo "  3. Install in dev mode: ./dev-tools/package/install_dev.sh" >&2
         exit 1
     fi
 

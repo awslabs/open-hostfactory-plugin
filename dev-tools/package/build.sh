@@ -55,7 +55,7 @@ ls -la dist/
 
 echo ""
 echo "INFO: Next steps:"
-echo "  • Test installation: ./dev-tools/package/test-install.sh"
+echo "  • Test installation: ./dev-tools/package/test_install.sh"
 echo "  • Publish to test PyPI: ./dev-tools/package/publish.sh testpypi"
 echo "  • Publish to PyPI: ./dev-tools/package/publish.sh pypi"
 echo ""

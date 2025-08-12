@@ -17,7 +17,7 @@ DEFAULT_PYTHON_VERSION := $(shell yq '.python.default_version' $(PROJECT_CONFIG)
 # Generate pyproject.toml from template with project configuration
 generate-pyproject:  ## Generate pyproject.toml from template using project config
 	@echo "Generating pyproject.toml from template using $(PROJECT_CONFIG)..."
-	@./dev-tools/scripts/generate-pyproject.py --config $(PROJECT_CONFIG)
+	@./dev-tools/scripts/generate_pyproject.py --config $(PROJECT_CONFIG)
 
 # Package information (loaded from project config)
 PACKAGE_NAME := $(shell yq '.project.name' $(PROJECT_CONFIG))
@@ -342,16 +342,16 @@ generate-completions:     ## Generate completion scripts (bash and zsh)
 	@echo "SUCCESS: Completion scripts generated in dev-tools/completions/"
 
 install-completions:      ## Install completions for current user
-	./dev-tools/scripts/install-completions.sh
+	./dev-tools/scripts/install_completions.sh
 
 install-bash-completions: ## Install bash completions only
-	./dev-tools/scripts/install-completions.sh bash
+	./dev-tools/scripts/install_completions.sh bash
 
 install-zsh-completions:  ## Install zsh completions only
-	./dev-tools/scripts/install-completions.sh zsh
+	./dev-tools/scripts/install_completions.sh zsh
 
 uninstall-completions:    ## Remove installed completions
-	./dev-tools/scripts/install-completions.sh --uninstall
+	./dev-tools/scripts/install_completions.sh --uninstall
 
 test-completions:         ## Test completion generation
 	@echo "Testing bash completion generation..."
@@ -424,13 +424,13 @@ version-show:  ## Show current version from project config
 	@echo "Current version: $(VERSION)"
 
 version-bump-patch:  ## Bump patch version (1.0.0 -> 1.0.1)
-	@./dev-tools/package/version-bump.sh patch
+	@./dev-tools/package/version_bump.sh patch
 
 version-bump-minor:  ## Bump minor version (1.0.0 -> 1.1.0)
-	@./dev-tools/package/version-bump.sh minor
+	@./dev-tools/package/version_bump.sh minor
 
 version-bump-major:  ## Bump major version (1.0.0 -> 2.0.0)
-	@./dev-tools/package/version-bump.sh major
+	@./dev-tools/package/version_bump.sh major
 
 version-bump:  ## Show version bump help
 	@echo "Version Management Commands:"
@@ -446,7 +446,7 @@ build: generate-pyproject clean dev-install  ## Build package
 	./dev-tools/package/build.sh
 
 build-test: build  ## Build and test package installation
-	./dev-tools/package/test-install.sh
+	./dev-tools/package/test_install.sh
 
 # CI/CD targets
 # Individual code quality targets (with tool names)
@@ -695,7 +695,7 @@ docker-build:  ## Build Docker image
 	REGISTRY=$(CONTAINER_REGISTRY) \
 	VERSION=$(VERSION) \
 	IMAGE_NAME=$(CONTAINER_IMAGE) \
-	./dev-tools/scripts/container-build.sh
+	./dev-tools/scripts/container_build.sh
 
 docker-run:  ## Run Docker container
 	docker run -p 8000:8000 $(PROJECT):latest
@@ -715,7 +715,7 @@ container-build-multi: dev-install  ## Build container images for all Python ver
 		IMAGE_NAME=$(CONTAINER_IMAGE) \
 		PYTHON_VERSION=$$py_ver \
 		MULTI_PYTHON=true \
-		./dev-tools/scripts/container-build.sh; \
+		./dev-tools/scripts/container_build.sh; \
 	done
 	@echo "Tagging default Python $(DEFAULT_PYTHON_VERSION) as latest..."
 	@docker tag $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)-python$(DEFAULT_PYTHON_VERSION) $(CONTAINER_REGISTRY)/$(CONTAINER_IMAGE):$(VERSION)
@@ -729,7 +729,7 @@ container-build-single: dev-install  ## Build container image for single Python 
 	VERSION=$(VERSION) \
 	IMAGE_NAME=$(CONTAINER_IMAGE) \
 	PYTHON_VERSION=$(PYTHON_VERSION) \
-	./dev-tools/scripts/container-build.sh
+	./dev-tools/scripts/container_build.sh
 
 container-push-multi: container-build-multi  ## Push all container images to registry
 	@for py_ver in $(PYTHON_VERSIONS); do \

@@ -2,6 +2,7 @@
 """Generate pyproject.toml from template using centralized configuration."""
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 
@@ -24,8 +25,8 @@ def _get_config_value(key: str) -> str:
         )
         return result.stdout.strip()
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        print(f"Error reading config key '{key}': {e}")
-        print("Make sure yq is installed and .project.yml exists")
+        logging.error(f"Error reading config key '{key}': {e}")
+        logging.error("Make sure yq is installed and .project.yml exists")
         sys.exit(1)
 
 
@@ -45,8 +46,8 @@ try:
     min_python_version = _get_config_value(".python.min_version")
 
 except ImportError as e:
-    print(f"Error importing package configuration: {e}")
-    print("Make sure yq is installed and .project.yml exists")
+    logging.error(f"Error importing package configuration: {e}")
+    logging.error("Make sure yq is installed and .project.yml exists")
     sys.exit(1)
 
 
@@ -56,7 +57,7 @@ def generate_pyproject():
     output_path = project_root / "pyproject.toml"
 
     if not template_path.exists():
-        print(f"Error: Template file not found: {template_path}")
+        logging.error(f"Error: Template file not found: {template_path}")
         sys.exit(1)
 
     # Read template
@@ -91,9 +92,9 @@ def generate_pyproject():
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(generated_content)
 
-    print(f"Generated pyproject.toml from template")
-    print(f"Package: {PACKAGE_NAME} v{__version__}")
-    print(f"Repository: {REPO_URL}")
+    logging.info(f"Generated pyproject.toml from template")
+    logging.info(f"Package: {PACKAGE_NAME} v{__version__}")
+    logging.info(f"Repository: {REPO_URL}")
 
 
 if __name__ == "__main__":

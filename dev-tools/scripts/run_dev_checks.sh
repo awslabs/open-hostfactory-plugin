@@ -10,7 +10,7 @@ cd "$PROJECT_ROOT"
 
 # Generate pyproject.toml first
 echo "Generating pyproject.toml..."
-make generate-pyproject
+make generate_pyproject
 
 # Build dev tools container
 echo "Building dev tools container..."

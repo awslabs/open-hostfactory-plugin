@@ -73,6 +73,9 @@ class ProviderSelectionService:
         self._logger = logger
         self._provider_registry = provider_registry
         self._provider_config = config_manager.get_provider_config()
+        
+        # Cache for provider selection results
+        self._active_provider_cache: Optional[ProviderSelectionResult] = None
 
         if not self._provider_config:
             self._logger.warning(
@@ -121,6 +124,7 @@ class ProviderSelectionService:
         
         This method implements general provider selection for scenarios where
         no template context is available (e.g., configuration loading, file paths).
+        Results are cached to avoid multiple selections.
         
         Returns:
             ProviderSelectionResult with selected provider and reasoning
@@ -128,6 +132,10 @@ class ProviderSelectionService:
         Raises:
             ValueError: If no suitable provider can be found
         """
+        # Return cached result if available
+        if self._active_provider_cache is not None:
+            return self._active_provider_cache
+            
         self._logger.debug("Selecting active provider using selection policy")
         
         # Get active providers based on selection policy
@@ -146,15 +154,20 @@ class ProviderSelectionService:
             )
             reason = f"load_balanced_{self._provider_config.selection_policy.lower()}"
         
-        self._logger.info(f"Selected active provider: {selected.name} ({reason})")
-        
-        return ProviderSelectionResult(
+        result = ProviderSelectionResult(
             provider_type=selected.type,
             provider_instance=selected.name,
             selection_reason=reason,
             confidence=1.0,
             alternatives=[p.name for p in active_providers if p.name != selected.name]
         )
+        
+        # Cache the result
+        self._active_provider_cache = result
+        
+        self._logger.info(f"Selected active provider: {selected.name} ({reason})")
+        
+        return result
 
     def _select_explicit_provider(self, template: Template) -> ProviderSelectionResult:
         """Select explicitly specified provider instance."""

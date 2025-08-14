@@ -469,6 +469,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             from src.infrastructure.caching.request_cache_service import (
                 RequestCacheService,
             )
+            from src.domain.base.ports import ConfigurationPort
 
             config_manager = self._container.get(ConfigurationPort)
             cache_service = RequestCacheService(

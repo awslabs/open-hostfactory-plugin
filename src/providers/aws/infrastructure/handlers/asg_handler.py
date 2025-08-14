@@ -149,27 +149,61 @@ class ASGHandler(AWSHandler):
         return asg_name
 
     @handle_infrastructure_exceptions(context="asg_termination")
-    def release_hosts(self, request: Request) -> None:
-        """
-        Release hosts from an Auto Scaling Group.
-
-        Args:
-            request: The request containing the ASG and machine information
-        """
-        if not request.resource_id:
-            raise AWSInfrastructureError("No ASG name found in request")
-
-        # Get ASG configuration first
-        asg_response = self._retry_with_backoff(
-            self.aws_client.autoscaling_client.describe_auto_scaling_groups,
-            operation_type="read_only",
-            AutoScalingGroupNames=[request.resource_id],
+    def _get_asg_instances(self, asg_name: str) -> List[Dict[str, Any]]:
+        """Get instances for a specific ASG."""
+        # Get ASG information
+        asg_list = self._retry_with_backoff(
+            lambda: self._paginate(
+                self.aws_client.autoscaling_client.describe_auto_scaling_groups,
+                "AutoScalingGroups",
+                AutoScalingGroupNames=[asg_name],
+            )
         )
 
-        if not asg_response["AutoScalingGroups"]:
-            raise AWSEntityNotFoundError(f"ASG {request.resource_id} not found")
+        if not asg_list:
+            self._logger.warning(f"ASG {asg_name} not found")
+            return []
 
-        asg = asg_response["AutoScalingGroups"][0]
+        asg = asg_list[0]
+        instance_ids = [instance["InstanceId"] for instance in asg.get("Instances", [])]
+        
+        if not instance_ids:
+            return []
+
+        return self._get_instance_details(instance_ids)
+
+    def release_hosts(self, request: Request) -> None:
+        """Release hosts across all ASGs in the request."""
+        try:
+            if not request.resource_ids:
+                raise AWSInfrastructureError("No ASG names found in request")
+
+            # Process all ASG names instead of just the first one
+            for asg_name in request.resource_ids:
+                try:
+                    if request.machine_references:
+                        # Terminate specific instances using existing utility
+                        instance_ids = [m.machine_id for m in request.machine_references]
+                        self.aws_ops.terminate_instances_with_fallback(
+                            instance_ids=instance_ids,
+                            context=f"ASG-{asg_name}",
+                        )
+                    else:
+                        # Delete entire ASG
+                        self._retry_with_backoff(
+                            lambda: self.aws_client.autoscaling_client.delete_auto_scaling_group(
+                                AutoScalingGroupName=asg_name, ForceDelete=True
+                            ),
+                            operation_type="critical",
+                        )
+                        self._logger.info(f"Deleted Auto Scaling Group: {asg_name}")
+                except Exception as e:
+                    self._logger.error(f"Failed to terminate ASG {asg_name}: {e}")
+                    continue
+
+        except Exception as e:
+            self._logger.error(f"Failed to release ASG hosts: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to release ASG hosts: {str(e)}")
 
         # Get instance IDs from machine references
         instance_ids = []
@@ -216,49 +250,85 @@ class ASGHandler(AWSHandler):
             self._logger.info(f"Deleted Auto Scaling Group: {request.resource_id}")
 
     def check_hosts_status(self, request: Request) -> List[Dict[str, Any]]:
-        """Check the status of instances in the ASG."""
+        """Check the status of instances across all ASGs in the request."""
         try:
-            if not request.resource_id:
-                raise AWSInfrastructureError("No ASG name found in request")
-
-            # Get ASG information with pagination and retry
-            asg_list = self._retry_with_backoff(
-                lambda: self._paginate(
-                    self.aws_client.autoscaling_client.describe_auto_scaling_groups,
-                    "AutoScalingGroups",
-                    AutoScalingGroupNames=[request.resource_id],
-                )
-            )
-
-            if not asg_list:
-                raise AWSEntityNotFoundError(f"ASG {request.resource_id} not found")
-
-            asg = asg_list[0]
-
-            # Log ASG status
-            self._logger.debug(
-                f"ASG status: Desired={asg.get('DesiredCapacity')}, "
-                f"Current={len(asg.get('Instances', []))}, "
-                f"Healthy={self._count_healthy_instances(asg)}"
-            )
-
-            # Get instance IDs from ASG
-            instance_ids = [instance["InstanceId"] for instance in asg["Instances"]]
-
-            if not instance_ids:
-                self._logger.info(f"No instances found in ASG {request.resource_id}")
+            if not request.resource_ids:
+                self._logger.info("No ASG names found in request")
                 return []
 
-            # Get detailed instance information
-            return self._get_instance_details(instance_ids)
+            all_instances = []
+            
+            # Process all ASG names instead of just the first one
+            for asg_name in request.resource_ids:
+                try:
+                    asg_instances = self._get_asg_instances(asg_name)
+                    if asg_instances:
+                        formatted_instances = self._format_instance_data(asg_instances, asg_name)
+                        all_instances.extend(formatted_instances)
+                except Exception as e:
+                    self._logger.error(f"Failed to get instances for ASG {asg_name}: {e}")
+                    continue
 
-        except ClientError as e:
-            error = self._convert_client_error(e)
-            self._logger.error(f"Failed to check ASG status: {str(error)}")
-            raise error
+            return all_instances
         except Exception as e:
             self._logger.error(f"Unexpected error checking ASG status: {str(e)}")
             raise AWSInfrastructureError(f"Failed to check ASG status: {str(e)}")
+
+    def _get_asg_instances(self, asg_name: str) -> List[Dict[str, Any]]:
+        """Get instances for a specific ASG."""
+        # Get ASG information
+        asg_list = self._retry_with_backoff(
+            lambda: self._paginate(
+                self.aws_client.autoscaling_client.describe_auto_scaling_groups,
+                "AutoScalingGroups",
+                AutoScalingGroupNames=[asg_name],
+            )
+        )
+
+        if not asg_list:
+            self._logger.warning(f"ASG {asg_name} not found")
+            return []
+
+        asg = asg_list[0]
+        instance_ids = [instance["InstanceId"] for instance in asg.get("Instances", [])]
+        
+        if not instance_ids:
+            return []
+
+        return self._get_instance_details(instance_ids)
+
+    def release_hosts(self, request: Request) -> None:
+        """Release hosts across all ASGs in the request."""
+        try:
+            if not request.resource_ids:
+                raise AWSInfrastructureError("No ASG names found in request")
+
+            # Process all ASG names instead of just the first one
+            for asg_name in request.resource_ids:
+                try:
+                    if request.machine_references:
+                        # Terminate specific instances using existing utility
+                        instance_ids = [m.machine_id for m in request.machine_references]
+                        self.aws_ops.terminate_instances_with_fallback(
+                            instance_ids=instance_ids,
+                            context=f"ASG-{asg_name}",
+                        )
+                    else:
+                        # Delete entire ASG
+                        self._retry_with_backoff(
+                            lambda: self.aws_client.autoscaling_client.delete_auto_scaling_group(
+                                AutoScalingGroupName=asg_name, ForceDelete=True
+                            ),
+                            operation_type="critical",
+                        )
+                        self._logger.info(f"Deleted Auto Scaling Group: {asg_name}")
+                except Exception as e:
+                    self._logger.error(f"Failed to terminate ASG {asg_name}: {e}")
+                    continue
+
+        except Exception as e:
+            self._logger.error(f"Failed to release ASG hosts: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to release ASG hosts: {str(e)}")
 
     def _validate_asg_prerequisites(self, aws_template: AWSTemplate) -> None:
         """Validate ASG specific prerequisites."""

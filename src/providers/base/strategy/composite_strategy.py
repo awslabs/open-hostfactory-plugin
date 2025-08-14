@@ -422,7 +422,9 @@ class CompositeProviderStrategy(ProviderStrategy):
         selected_strategy_type = self._select_strategy_by_weight(strategies)
         selected_strategy = strategies[selected_strategy_type]
 
-        result = await self._execute_single_strategy(selected_strategy_type, selected_strategy, operation)
+        result = await self._execute_single_strategy(
+            selected_strategy_type, selected_strategy, operation
+        )
         return [result]
 
     def _select_strategy_by_weight(self, strategies: Dict[str, ProviderStrategy]) -> str:
@@ -454,6 +456,7 @@ class CompositeProviderStrategy(ProviderStrategy):
     ) -> StrategyExecutionResult:
         """Sync wrapper for parallel execution."""
         import asyncio
+
         return asyncio.run(self._execute_single_strategy(strategy_type, strategy, operation))
 
     async def _execute_single_strategy(

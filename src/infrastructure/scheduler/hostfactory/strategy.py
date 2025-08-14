@@ -502,7 +502,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
                 "request_type": template_data.get("requestType", "provision"),
                 "metadata": raw_data.get("metadata", {}),
             }
-        
+
         # Handle flat HostFactory format: {"templateId": ..., "maxNumber": ...}
         # Also handle request status format: {"requestId": ...}
         return {

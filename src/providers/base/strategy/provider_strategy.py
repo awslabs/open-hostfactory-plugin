@@ -196,19 +196,19 @@ class ProviderStrategy(ABC):
     async def execute_operation_async(self, operation: ProviderOperation) -> ProviderResult:
         """
         Execute a provider operation asynchronously.
-        
+
         Default implementation runs sync version in thread pool.
         Subclasses can override for native async implementation.
-        
+
         Args:
             operation: The operation to execute
-            
+
         Returns:
             Result of the operation execution
         """
         import asyncio
         import concurrent.futures
-        
+
         # Run sync version in thread pool to avoid blocking event loop
         loop = asyncio.get_event_loop()
         with concurrent.futures.ThreadPoolExecutor() as executor:

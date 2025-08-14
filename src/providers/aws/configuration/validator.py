@@ -138,4 +138,10 @@ def get_aws_config_manager() -> AWSConfigManager:
 # Import AWSProviderConfig for compatibility
 from .config import AWSProviderConfig
 
-__all__ = ["AWSLimits", "AWSNamingConfig", "AWSConfigManager", "get_aws_config_manager", "AWSProviderConfig"]
+__all__ = [
+    "AWSLimits",
+    "AWSNamingConfig",
+    "AWSConfigManager",
+    "get_aws_config_manager",
+    "AWSProviderConfig",
+]

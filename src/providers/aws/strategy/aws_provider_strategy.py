@@ -502,7 +502,9 @@ class AWSProviderStrategy(ProviderStrategy):
                 f"Failed to get available templates: {str(e)}", "GET_TEMPLATES_ERROR"
             )
 
-    async def _handle_describe_resource_instances(self, operation: ProviderOperation) -> ProviderResult:
+    async def _handle_describe_resource_instances(
+        self, operation: ProviderOperation
+    ) -> ProviderResult:
         """Handle resource-to-instance discovery operation using appropriate handlers."""
         try:
             resource_ids = operation.parameters.get("resource_ids", [])

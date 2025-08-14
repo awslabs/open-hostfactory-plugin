@@ -35,7 +35,7 @@ async def handle_get_request_status(args: "argparse.Namespace") -> Dict[str, Any
             request_id_value = args.request_ids[0]
         elif hasattr(args, "request_id") and args.request_id:
             request_id_value = args.request_id
-        
+
         raw_request_data = {
             "request_id": request_id_value,
         }

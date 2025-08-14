@@ -240,9 +240,9 @@ class ConfigurationLoader:
                 return json.load(f)
 
         except json.JSONDecodeError as e:
-            raise ConfigurationError("File", f"Invalid JSON in configuration file: {str(e)}")
+            raise ConfigurationError(f"Invalid JSON in configuration file: {str(e)}")
         except Exception as e:
-            raise ConfigurationError("File", f"Failed to load configuration file: {str(e)}")
+            raise ConfigurationError(f"Failed to load configuration file: {str(e)}")
 
     @classmethod
     def _load_config_file(

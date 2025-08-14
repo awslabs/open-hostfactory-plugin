@@ -5,6 +5,7 @@ from src.domain.base.ports import (
     EventPublisherPort,
     LoggingPort,
     SchedulerPort,
+    StoragePort,
 )
 from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.infrastructure.di.container import DIContainer
@@ -21,6 +22,9 @@ def register_core_services(container: DIContainer) -> None:
 
     # Register scheduler strategy
     container.register_factory(SchedulerPort, lambda c: _create_scheduler_strategy(c))
+
+    # Register storage strategy
+    container.register_factory(StoragePort, lambda c: _create_storage_strategy(c))
 
     # Register event publisher
     from src.infrastructure.events.publisher import ConfigurableEventPublisher
@@ -48,3 +52,15 @@ def _create_scheduler_strategy(container: DIContainer) -> SchedulerPort:
     config = container.get(ConfigurationPort)
     scheduler_type = config.get_scheduler_strategy()
     return factory.create_strategy(scheduler_type, container)
+
+
+def _create_storage_strategy(container: DIContainer) -> StoragePort:
+    """Create storage strategy using factory."""
+    from src.infrastructure.factories.storage_strategy_factory import (
+        StorageStrategyFactory,
+    )
+
+    factory = container.get(StorageStrategyFactory)
+    config = container.get(ConfigurationPort)
+    storage_type = config.get_storage_strategy()
+    return factory.create_strategy(storage_type, config)

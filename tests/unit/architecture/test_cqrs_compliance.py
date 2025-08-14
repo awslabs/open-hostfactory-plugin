@@ -37,13 +37,13 @@ class TestCQRSCompliance:
     def test_command_query_separation(self):
         """Ensure commands and queries are properly separated."""
         # Test that commands modify state and queries don't
-        command = CreateRequestCommand(template_id="test-template", machine_count=2)
+        command = CreateRequestCommand(template_id="test-template", requested_count=2)
 
         query = GetTemplateQuery(template_id="test-template")
 
         # Commands should have methods that modify state
         assert hasattr(command, "template_id")
-        assert hasattr(command, "machine_count")
+        assert hasattr(command, "requested_count")
 
         # Queries should be read-only
         assert hasattr(query, "template_id")

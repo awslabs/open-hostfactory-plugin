@@ -48,6 +48,7 @@ Usage Example:
 """
 
 # Advanced strategy patterns
+from .base_provider_strategy import BaseProviderStrategy
 from .composite_strategy import (
     AggregationPolicy,
     CompositeProviderStrategy,
@@ -104,6 +105,7 @@ __description__ = "Provider Strategy Pattern Implementation"
 # Public API exports
 __all__ = [
     # Core interfaces
+    "BaseProviderStrategy",
     "ProviderStrategy",
     "ProviderOperation",
     "ProviderResult",

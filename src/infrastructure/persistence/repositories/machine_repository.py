@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+from src.domain.base.ports.storage_port import StoragePort
 from src.domain.base.value_objects import InstanceId
 from src.domain.machine.aggregate import Machine
 from src.domain.machine.repository import (
@@ -11,7 +12,6 @@ from src.domain.machine.repository import (
 from src.domain.machine.value_objects import MachineId, MachineStatus
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.infrastructure.logging.logger import get_logger
-from src.infrastructure.persistence.base.strategy import BaseStorageStrategy
 
 
 class MachineSerializer:
@@ -131,9 +131,9 @@ class MachineSerializer:
 class MachineRepositoryImpl(MachineRepositoryInterface):
     """Single machine repository implementation using storage strategy composition."""
 
-    def __init__(self, storage_strategy: BaseStorageStrategy):
-        """Initialize repository with storage strategy."""
-        self.storage_strategy = storage_strategy
+    def __init__(self, storage_port: StoragePort):
+        """Initialize repository with storage port."""
+        self.storage_port = storage_port
         self.serializer = MachineSerializer()
         self.logger = get_logger(__name__)
 
@@ -143,7 +143,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
         try:
             # Save the machine using instance_id as the key
             machine_data = self.serializer.to_dict(machine)
-            self.storage_strategy.save(str(machine.instance_id.value), machine_data)
+            self.storage_port.save(str(machine.instance_id.value), machine_data)
 
             # Extract events from the aggregate
             events = machine.get_domain_events()
@@ -162,7 +162,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
     def get_by_id(self, machine_id: MachineId) -> Optional[Machine]:
         """Get machine by ID using storage strategy."""
         try:
-            data = self.storage_strategy.find_by_id(str(machine_id.value))
+            data = self.storage_port.find_by_id(str(machine_id.value))
             if data:
                 return self.serializer.from_dict(data)
             return None
@@ -180,7 +180,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
         """Find machine by instance ID."""
         try:
             criteria = {"instance_id": str(instance_id.value)}
-            data_list = self.storage_strategy.find_by_criteria(criteria)
+            data_list = self.storage_port.find_by_criteria(criteria)
             if data_list:
                 return self.serializer.from_dict(data_list[0])
             return None
@@ -193,7 +193,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
         """Find machines by template ID."""
         try:
             criteria = {"template_id": template_id}
-            data_list = self.storage_strategy.find_by_criteria(criteria)
+            data_list = self.storage_port.find_by_criteria(criteria)
             return [self.serializer.from_dict(data) for data in data_list]
         except Exception as e:
             self.logger.error(f"Failed to find machines by template_id {template_id}: {e}")
@@ -204,7 +204,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
         """Find machines by status."""
         try:
             criteria = {"status": status.value}
-            data_list = self.storage_strategy.find_by_criteria(criteria)
+            data_list = self.storage_port.find_by_criteria(criteria)
             return [self.serializer.from_dict(data) for data in data_list]
         except Exception as e:
             self.logger.error(f"Failed to find machines by status {status}: {e}")
@@ -215,7 +215,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
         """Find machines by request ID."""
         try:
             criteria = {"request_id": request_id}
-            data_list = self.storage_strategy.find_by_criteria(criteria)
+            data_list = self.storage_port.find_by_criteria(criteria)
 
             # Filter to only machine records (must have instance_id field)
             machine_data_list = [data for data in data_list if "instance_id" in data]
@@ -251,7 +251,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
     def find_all(self) -> List[Machine]:
         """Find all machines."""
         try:
-            all_data = self.storage_strategy.find_all()
+            all_data = self.storage_port.find_all()
             return [self.serializer.from_dict(data) for data in all_data.values()]
         except Exception as e:
             self.logger.error(f"Failed to find all machines: {e}")
@@ -261,7 +261,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
     def delete(self, machine_id: MachineId) -> None:
         """Delete machine by ID."""
         try:
-            self.storage_strategy.delete(str(machine_id.value))
+            self.storage_port.delete(str(machine_id.value))
             self.logger.debug(f"Deleted machine {machine_id}")
         except Exception as e:
             self.logger.error(f"Failed to delete machine {machine_id}: {e}")
@@ -271,7 +271,7 @@ class MachineRepositoryImpl(MachineRepositoryInterface):
     def exists(self, machine_id: MachineId) -> bool:
         """Check if machine exists."""
         try:
-            return self.storage_strategy.exists(str(machine_id.value))
+            return self.storage_port.exists(str(machine_id.value))
         except Exception as e:
             self.logger.error(f"Failed to check if machine {machine_id} exists: {e}")
             raise

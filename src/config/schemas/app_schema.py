@@ -62,8 +62,11 @@ class AppConfig(BaseModel):
     def get_config_file_path(self) -> str:
         """Build full config file path using scheduler + provider type."""
         config_root = self.scheduler.get_config_root()
-        # Extract provider type from active_provider (e.g., "aws-default" -> "aws")
-        provider_type = self.provider.active_provider.split("-")[0]
+        # Get provider type from active providers
+        active_providers = self.provider.get_active_providers()
+        if not active_providers:
+            raise ValueError("No active providers found")
+        provider_type = active_providers[0].type
         # Generate provider-specific config file name
         config_file = f"{provider_type}prov_config.json"
         return os.path.join(config_root, config_file)
@@ -71,8 +74,11 @@ class AppConfig(BaseModel):
     def get_templates_file_path(self) -> str:
         """Build full templates file path using scheduler + provider type."""
         config_root = self.scheduler.get_config_root()
-        # Extract provider type from active_provider (e.g., "aws-default" -> "aws")
-        provider_type = self.provider.active_provider.split("-")[0]
+        # Get provider type from active providers
+        active_providers = self.provider.get_active_providers()
+        if not active_providers:
+            raise ValueError("No active providers found")
+        provider_type = active_providers[0].type
         # Generate provider-specific templates file name
         templates_file = f"{provider_type}prov_templates.json"
         return os.path.join(config_root, templates_file)

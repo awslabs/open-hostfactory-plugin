@@ -211,8 +211,10 @@ class TemplateConfigurationManager:
         # 2. Use active provider from configuration
         try:
             provider_config = self.config_manager.get_provider_config()
-            if hasattr(provider_config, "active_provider") and provider_config.active_provider:
-                return provider_config.active_provider
+            if provider_config:
+                active_providers = provider_config.get_active_providers()
+                if active_providers:
+                    return active_providers[0].name
         except Exception as e:
             self.logger.debug(f"Could not determine provider instance: {e}")
 
@@ -264,10 +266,17 @@ class TemplateConfigurationManager:
                 and "aws" in provider_config.provider_defaults
             ):
                 aws_defaults = provider_config.provider_defaults["aws"]
-                if hasattr(aws_defaults, "extensions") and aws_defaults.extensions:
-                    ami_resolution = aws_defaults.extensions.get("ami_resolution", {})
-                    if isinstance(ami_resolution, dict) and ami_resolution.get("enabled"):
-                        return True
+                if hasattr(aws_defaults, "extensions"):
+                    from src.domain.template.extensions import TemplateExtensionRegistry
+
+                    aws_extension_config = TemplateExtensionRegistry.create_extension_config(
+                        "aws", aws_defaults.extensions or {}
+                    )
+                    return (
+                        aws_extension_config.ami_resolution.enabled
+                        if aws_extension_config
+                        else False
+                    )
 
             return False
 

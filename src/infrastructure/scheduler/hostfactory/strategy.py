@@ -7,9 +7,9 @@ if TYPE_CHECKING:
     pass
 
 from src.config.manager import ConfigurationManager
+from src.domain.base.exceptions import ConfigurationError
 from src.domain.base.ports.logging_port import LoggingPort
 from src.domain.base.ports.scheduler_port import SchedulerPort
-from src.domain.exceptions import ConfigurationError
 from src.domain.machine.aggregate import Machine
 from src.domain.request.aggregate import Request
 from src.domain.template.aggregate import Template
@@ -36,11 +36,16 @@ class HostFactorySchedulerStrategy(SchedulerPort):
     def get_templates_file_path(self) -> str:
         """Get the templates file path for HostFactory."""
         provider_config = self.config_manager.get_provider_config()
-        if not provider_config or not hasattr(provider_config, "active_provider"):
-            raise ConfigurationError("Provider configuration or active_provider not found")
+        if not provider_config:
+            raise ConfigurationError("Provider configuration not found")
 
-        active_provider = provider_config.active_provider
-        provider_type = active_provider.split("-")[0]
+        # Get active providers using the canonical method
+        active_providers = provider_config.get_active_providers()
+        if not active_providers:
+            raise ConfigurationError("No active providers found in configuration")
+
+        # Use the first active provider's type
+        provider_type = active_providers[0].type
         templates_file = f"{provider_type}prov_templates.json"
 
         return self.config_manager.resolve_file("template", templates_file)
@@ -171,11 +176,14 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         """Get the active provider type from configuration."""
         try:
             provider_config = self.config_manager.get_provider_config()
-            if not provider_config or not hasattr(provider_config, "active_provider"):
-                raise ConfigurationError("Provider configuration or active_provider not found")
+            if not provider_config:
+                raise ConfigurationError("Provider configuration not found")
 
-            active_provider = provider_config.active_provider  # e.g., 'aws-default'
-            provider_type = active_provider.split("-")[0]  # Extract 'aws' from 'aws-default'
+            active_providers = provider_config.get_active_providers()
+            if not active_providers:
+                raise ConfigurationError("No active providers found")
+
+            provider_type = active_providers[0].type
             self._logger.debug(f"Active provider type: {provider_type}")
             return provider_type
         except Exception as e:

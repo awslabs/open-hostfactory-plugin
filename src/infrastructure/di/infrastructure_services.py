@@ -1,6 +1,7 @@
 """Infrastructure service registrations for dependency injection."""
 
 from src.domain.base.ports import LoggingPort
+from src.domain.base.ports.configuration_port import ConfigurationPort
 from src.domain.machine.repository import MachineRepository
 from src.domain.request.repository import RequestRepository
 from src.domain.template.repository import TemplateRepository
@@ -27,16 +28,41 @@ def register_infrastructure_services(container: DIContainer) -> None:
 def _register_template_services(container: DIContainer) -> None:
     """Register template configuration services."""
 
-    # Register template configuration manager
-    container.register_singleton(TemplateConfigurationManager)
+    # Register template defaults port with inline factory
+    def create_template_defaults_service(c):
+        """Create template defaults service with injected dependencies."""
+        from src.application.services.template_defaults_service import (
+            TemplateDefaultsService,
+        )
 
-    # Register template defaults port with service implementation
-    from src.application.services.template_defaults_service import (
-        TemplateDefaultsService,
-    )
+        return TemplateDefaultsService(
+            config_manager=c.get(ConfigurationPort),
+            logger=c.get(LoggingPort),
+        )
+
     from src.domain.template.ports.template_defaults_port import TemplateDefaultsPort
 
-    container.register_singleton(TemplateDefaultsPort, TemplateDefaultsService)
+    container.register_singleton(TemplateDefaultsPort, create_template_defaults_service)
+
+    # Register template configuration manager with factory function
+    def create_template_configuration_manager(
+        container: DIContainer,
+    ) -> TemplateConfigurationManager:
+        """Create TemplateConfigurationManager."""
+        from src.domain.base.ports.scheduler_port import SchedulerPort
+
+        return TemplateConfigurationManager(
+            config_manager=container.get(ConfigurationPort),
+            scheduler_strategy=container.get(SchedulerPort),
+            logger=container.get(LoggingPort),
+            event_publisher=None,
+            provider_capability_service=None,
+            template_defaults_service=container.get(TemplateDefaultsPort),
+        )
+
+    container.register_singleton(
+        TemplateConfigurationManager, create_template_configuration_manager
+    )
 
     # Check if AMI resolution is enabled via AWS extensions
     _register_ami_resolver_if_enabled(container)
@@ -45,10 +71,10 @@ def _register_template_services(container: DIContainer) -> None:
 def _register_ami_resolver_if_enabled(container: DIContainer) -> None:
     """Register AMI resolver if enabled in AWS provider extensions."""
     try:
-        from src.config.manager import ConfigurationManager
+        from src.domain.base.ports.configuration_port import ConfigurationPort
         from src.domain.template.extensions import TemplateExtensionRegistry
 
-        config_manager = container.get(ConfigurationManager)
+        config_manager = container.get(ConfigurationPort)
         logger = get_logger(__name__)
 
         # Check if AWS extensions are registered
@@ -169,7 +195,6 @@ def _register_repository_services(container: DIContainer) -> None:
 
     # Storage strategies are now registered by storage_services.py
     # No need to register them here anymore
-
     # Register repository factory
     container.register_singleton(RepositoryFactory)
 
@@ -184,22 +209,6 @@ def _register_repository_services(container: DIContainer) -> None:
         lambda c: c.get(RepositoryFactory).create_machine_repository(),
     )
 
-    def create_template_configuration_manager(
-        container: DIContainer,
-    ) -> TemplateConfigurationManager:
-        """Create TemplateConfigurationManager."""
-        from src.config.manager import ConfigurationManager
-        from src.domain.base.ports.scheduler_port import SchedulerPort
-
-        return TemplateConfigurationManager(
-            config_manager=container.get(ConfigurationManager),
-            scheduler_strategy=container.get(SchedulerPort),
-            logger=container.get(LoggingPort),
-            event_publisher=None,  # Optional
-            provider_capability_service=None,  # Optional
-            template_defaults_service=None,  # Optional
-        )
-
     def create_template_repository(container: DIContainer) -> TemplateRepository:
         """Create TemplateRepository."""
         return create_template_repository_impl(
@@ -208,7 +217,4 @@ def _register_repository_services(container: DIContainer) -> None:
         )
 
     # Register with proper factory functions
-    container.register_singleton(
-        TemplateConfigurationManager, create_template_configuration_manager
-    )
     container.register_singleton(TemplateRepository, create_template_repository)

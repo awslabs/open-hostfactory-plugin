@@ -1,7 +1,11 @@
 """Core service registrations for dependency injection."""
 
-from src.config.manager import ConfigurationManager
-from src.domain.base.ports import EventPublisherPort, LoggingPort, SchedulerPort
+from src.domain.base.ports import (
+    ConfigurationPort,
+    EventPublisherPort,
+    LoggingPort,
+    SchedulerPort,
+)
 from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.registry.scheduler_registry import get_scheduler_registry
@@ -38,6 +42,6 @@ def register_core_services(container: DIContainer) -> None:
 def _create_scheduler_strategy(container: DIContainer) -> SchedulerPort:
     """Create scheduler strategy from registry."""
     registry = get_scheduler_registry()
-    config_manager = container.get(ConfigurationManager)
+    config_manager = container.get(ConfigurationPort)
     scheduler_type = config_manager.get_scheduler_strategy()
     return registry.create_strategy(scheduler_type, container)

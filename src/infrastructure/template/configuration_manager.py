@@ -13,13 +13,13 @@ Architecture Principles:
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from src.config.manager import ConfigurationManager
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.exceptions import (
     DomainException,
     EntityNotFoundError,
     ValidationError,
 )
+from src.domain.base.ports.configuration_port import ConfigurationPort
 from src.domain.base.ports.event_publisher_port import EventPublisherPort
 from src.domain.base.ports.logging_port import LoggingPort
 from src.domain.base.ports.scheduler_port import SchedulerPort
@@ -69,7 +69,7 @@ class TemplateConfigurationManager:
 
     def __init__(
         self,
-        config_manager: ConfigurationManager,
+        config_manager: ConfigurationPort,
         scheduler_strategy: SchedulerPort,
         logger: LoggingPort,
         cache_service: Optional[TemplateCacheService] = None,
@@ -628,7 +628,7 @@ class TemplateConfigurationManager:
 
 # Factory function for dependency injection
 def create_template_configuration_manager(
-    config_manager: ConfigurationManager,
+    config_manager: ConfigurationPort,
     scheduler_strategy: SchedulerPort,
     logger: LoggingPort,
 ) -> TemplateConfigurationManager:

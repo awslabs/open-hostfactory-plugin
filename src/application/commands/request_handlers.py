@@ -443,11 +443,10 @@ class CreateReturnRequestHandler(BaseCommandHandler[CreateReturnRequestCommand, 
         try:
             # Create return request aggregate
             # Get provider type from configuration using injected container
-            from src.config.manager import ConfigurationManager
             from src.domain.request.aggregate import Request
             from src.domain.request.value_objects import RequestType
 
-            config_manager = self._container.get(ConfigurationManager)
+            config_manager = self._container.get(ConfigurationPort)
             provider_type = config_manager.get("provider.type", "aws")
 
             # Create return request with proper business logic

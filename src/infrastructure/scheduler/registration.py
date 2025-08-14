@@ -1,6 +1,14 @@
-"""Scheduler registration functions - same pattern as provider registration."""
+"""Scheduler strategy registration and factory functions.
 
+This module provides registration functions for different scheduler strategies:
+- HostFactory scheduler for IBM Symphony compatibility
+- Default scheduler for native domain format
+- Strategy factory functions with dependency injection
+- Registry management for scheduler types
+"""
 from typing import TYPE_CHECKING, Any, Dict
+
+from src.domain.base.ports.configuration_port import ConfigurationPort
 
 if TYPE_CHECKING:
     from src.domain.base.ports.scheduler_port import SchedulerPort
@@ -17,13 +25,12 @@ def create_symphony_hostfactory_strategy(container: "DIContainer") -> "Scheduler
     Returns:
         SchedulerPort: Symphony HostFactory scheduler strategy instance
     """
-    from src.config.manager import ConfigurationManager
     from src.domain.base.ports import LoggingPort
     from src.infrastructure.scheduler.hostfactory.strategy import (
         HostFactorySchedulerStrategy,
     )
 
-    config_manager = container.get(ConfigurationManager)
+    config_manager = container.get(ConfigurationPort)
     logger = container.get(LoggingPort)
     return HostFactorySchedulerStrategy(config_manager, logger)
 
@@ -81,11 +88,10 @@ def create_default_strategy(container: "DIContainer") -> "SchedulerPort":
     Returns:
         SchedulerPort: Default scheduler strategy instance
     """
-    from src.config.manager import ConfigurationManager
     from src.domain.base.ports import LoggingPort
     from src.infrastructure.scheduler.default.strategy import DefaultSchedulerStrategy
 
-    config_manager = container.get(ConfigurationManager)
+    config_manager = container.get(ConfigurationPort)
     logger = container.get(LoggingPort)
     return DefaultSchedulerStrategy(config_manager, logger)
 

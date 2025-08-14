@@ -2,8 +2,8 @@
 
 from typing import Type, TypeVar
 
-from src.config.manager import ConfigurationManager
 from src.config.schemas.server_schema import ServerConfig
+from src.domain.base.ports.configuration_port import ConfigurationPort
 from src.infrastructure.di.buses import CommandBus, QueryBus
 from src.infrastructure.di.container import get_container
 
@@ -45,10 +45,10 @@ def get_command_bus() -> CommandBus:
     return container.get(CommandBus)
 
 
-def get_config_manager() -> ConfigurationManager:
-    """Get ConfigurationManager from DI container."""
+def get_config_manager() -> ConfigurationPort:
+    """Get ConfigurationPort from DI container."""
     container = get_di_container()
-    return container.get(ConfigurationManager)
+    return container.get(ConfigurationPort)
 
 
 def get_server_config() -> ServerConfig:

@@ -132,7 +132,7 @@ class Application:
             # Check if consolidated provider configuration is available
             if hasattr(config_manager, "get_provider_config"):
                 provider_config = config_manager.get_provider_config()
-                if provider_config:
+                if provider_config and hasattr(provider_config, "get_mode"):
                     mode = provider_config.get_mode()
                     active_providers = provider_config.get_active_providers()
 

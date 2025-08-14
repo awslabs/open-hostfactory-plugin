@@ -69,7 +69,10 @@ def _register_services_lazy(container: DIContainer) -> DIContainer:
     # context errors)
     register_provider_services(container)
 
-    # 5. Register lazy factories for non-essential services
+    # 5. Register infrastructure services immediately (needed for template system)
+    register_infrastructure_services(container)
+
+    # 6. Register lazy factories for non-essential services
     _register_lazy_service_factories(container)
 
     logger.info("Lazy service registration complete")

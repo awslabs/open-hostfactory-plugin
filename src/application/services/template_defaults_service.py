@@ -2,8 +2,8 @@
 
 from typing import Any, Dict, Optional
 
-from src.config.manager import ConfigurationManager
 from src.domain.base.dependency_injection import injectable
+from src.domain.base.ports.configuration_port import ConfigurationPort
 from src.domain.base.ports.logging_port import LoggingPort
 from src.domain.template.aggregate import Template
 from src.domain.template.extensions import TemplateExtensionRegistry
@@ -28,7 +28,7 @@ class TemplateDefaultsService(TemplateDefaultsPort):
 
     def __init__(
         self,
-        config_manager: ConfigurationManager,
+        config_manager: ConfigurationPort,
         logger: LoggingPort,
         template_factory: Optional[TemplateFactoryPort] = None,
         extension_registry: Optional[TemplateExtensionRegistry] = None,
@@ -37,7 +37,7 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         Initialize the template defaults service.
 
         Args:
-            config_manager: Configuration manager for accessing defaults
+            config_manager: Configuration port for accessing defaults
             logger: Logger for debugging and monitoring
             template_factory: Factory for creating domain templates
             extension_registry: Registry for provider extensions

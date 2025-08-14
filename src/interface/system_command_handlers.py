@@ -31,9 +31,9 @@ async def handle_list_providers(args) -> Dict[str, Any]:
 
     try:
         # Get configuration manager
-        from src.config.manager import ConfigurationManager
+        from src.domain.base.ports.configuration_port import ConfigurationPort
 
-        config_manager = container.get(ConfigurationManager)
+        config_manager = container.get(ConfigurationPort)
         provider_config = config_manager.get_provider_config()
 
         if not provider_config:

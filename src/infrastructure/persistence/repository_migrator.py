@@ -1,11 +1,19 @@
-"""Repository migration utilities."""
+"""Repository migration utilities for data persistence strategies.
 
+This module provides utilities for migrating data between different repository
+implementations and storage strategies:
+- Template migration from legacy formats
+- Data backup and restore operations
+- Repository format conversion utilities
+- Migration validation and rollback support
+"""
 import json
 import os
 from datetime import datetime
 from typing import Any, Dict, Optional
 
 from src.domain.base.domain_interfaces import Repository
+from src.domain.base.ports.configuration_port import ConfigurationPort
 from src.domain.template.repository import (
     TemplateRepository as TemplateRepositoryInterface,
 )
@@ -36,9 +44,8 @@ class RepositoryMigrator:
         self.collections = ["templates", "requests", "machines"]
 
         # Get configuration manager from container
-        from src.config.manager import ConfigurationManager
 
-        self.config_manager = self.container.get(ConfigurationManager)
+        self.config_manager = self.container.get(ConfigurationPort)
 
     def migrate(
         self,

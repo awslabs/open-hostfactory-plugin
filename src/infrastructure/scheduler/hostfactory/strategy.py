@@ -221,6 +221,13 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         else:
             raise ValueError(f"Unsupported HostFactory operation: {operation}")
 
+    def format_request_response(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Format request creation response to HostFactory format."""
+        return {
+            "requestId": request_data.get("request_id", request_data.get("requestId")),
+            "message": request_data.get("message", "Request VM success from AWS."),
+        }
+
     def convert_domain_to_hostfactory_output(
         self, operation: str, data: Dict[str, Any]
     ) -> Dict[str, Any]:

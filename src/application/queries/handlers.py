@@ -466,12 +466,11 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
     def _get_cache_service(self):
         """Get cache service for request caching."""
         try:
-            from src.config.manager import ConfigurationManager
             from src.infrastructure.caching.request_cache_service import (
                 RequestCacheService,
             )
 
-            config_manager = self._container.get(ConfigurationManager)
+            config_manager = self._container.get(ConfigurationPort)
             cache_service = RequestCacheService(
                 uow_factory=self.uow_factory,
                 config_manager=config_manager,

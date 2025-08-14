@@ -4,7 +4,6 @@ from src.application.services.provider_capability_service import (
     ProviderCapabilityService,
 )
 from src.application.services.provider_selection_service import ProviderSelectionService
-from src.config.manager import ConfigurationManager
 from src.domain.base.ports import ConfigurationPort, LoggingPort
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.factories.provider_strategy_factory import (
@@ -32,7 +31,7 @@ def register_provider_services(container: DIContainer) -> None:
     container.register_singleton(
         ProviderSelectionService,
         lambda c: ProviderSelectionService(
-            config_manager=c.get(ConfigurationManager),
+            config_manager=c.get(ConfigurationPort),
             logger=c.get(LoggingPort),
             provider_registry=None,  # Optional for now
         ),
@@ -146,7 +145,7 @@ def _register_providers_with_di_context(container: DIContainer) -> None:
 
     try:
         # Get configuration manager from DI container
-        config_manager = container.get(ConfigurationManager)
+        config_manager = container.get(ConfigurationPort)
 
         # Get provider configuration
         provider_config = config_manager.get_provider_config()
@@ -294,7 +293,7 @@ def _register_provider_instance(provider_instance) -> bool:
 def create_provider_strategy_factory(container: DIContainer) -> ProviderStrategyFactory:
     """Create provider strategy factory."""
     return ProviderStrategyFactory(
-        logger=container.get(LoggingPort), config=container.get(ConfigurationManager)
+        logger=container.get(LoggingPort), config=container.get(ConfigurationPort)
     )
 
 
@@ -302,7 +301,7 @@ def create_configured_provider_context(container: DIContainer) -> ProviderContex
     """Create provider context using configuration-driven factory with lazy loading support."""
     try:
         logger = container.get(LoggingPort)
-        config_manager = container.get(ConfigurationManager)
+        config_manager = container.get(ConfigurationPort)
 
         # Check if lazy loading is enabled
         if container.is_lazy_loading_enabled():
@@ -318,7 +317,7 @@ def create_configured_provider_context(container: DIContainer) -> ProviderContex
 
 
 def _create_lazy_provider_context(
-    container: DIContainer, logger: LoggingPort, config_manager: ConfigurationManager
+    container: DIContainer, logger: LoggingPort, config_manager: ConfigurationPort
 ) -> ProviderContext:
     """Create provider context with immediate provider registration (lazy loading fixed)."""
     logger.info("Creating provider context with lazy loading enabled")
@@ -361,7 +360,7 @@ def _create_lazy_provider_context(
 
 
 def _create_eager_provider_context(
-    container: DIContainer, logger: LoggingPort, config_manager: ConfigurationManager
+    container: DIContainer, logger: LoggingPort, config_manager: ConfigurationPort
 ) -> ProviderContext:
     """Create provider context with immediate provider registration (fallback mode)."""
     logger.info("Creating provider context with eager loading (fallback mode)")

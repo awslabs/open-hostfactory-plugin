@@ -1,7 +1,7 @@
 """Server service registrations for dependency injection."""
 
-from src.config.manager import ConfigurationManager
 from src.config.schemas.server_schema import ServerConfig
+from src.domain.base.ports.configuration_port import ConfigurationPort
 from src.infrastructure.di.container import DIContainer
 from src.infrastructure.logging.logger import get_logger
 
@@ -20,7 +20,7 @@ def register_server_services(container: DIContainer) -> None:
     """
     try:
         # Get configuration manager
-        config_manager = container.get(ConfigurationManager)
+        config_manager = container.get(ConfigurationPort)
         server_config = config_manager.get_typed(ServerConfig)
 
         # Only register server services if enabled

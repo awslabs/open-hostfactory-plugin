@@ -50,7 +50,7 @@ async def handle_get_request_status(args: "argparse.Namespace") -> Dict[str, Any
     request_dto = await query_bus.execute(query)
 
     # Pass domain DTO to scheduler strategy - NO formatting logic here
-    return scheduler_strategy.convert_domain_to_hostfactory_output("getRequestStatus", request_dto)
+    return scheduler_strategy.format_request_status_response([request_dto])
 
 
 @handle_interface_exceptions(context="request_machines", interface_type="cli")
@@ -137,9 +137,7 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
 
         # Return success response in HostFactory format with resource ID info
         if scheduler_strategy:
-            return scheduler_strategy.convert_domain_to_hostfactory_output(
-                "requestMachines", request_data
-            )
+            return scheduler_strategy.format_request_response(request_data)
         else:
             # Fallback to HostFactory format if no scheduler strategy
             resource_id_msg = f" Resource ID: {resource_ids[0]}" if resource_ids else ""
@@ -153,9 +151,7 @@ async def handle_request_machines(args: "argparse.Namespace") -> Dict[str, Any]:
 
         container.get(LoggingPort).warning(f"Could not get request details for resource ID: {e}")
         if scheduler_strategy:
-            return scheduler_strategy.convert_domain_to_hostfactory_output(
-                "requestMachines", request_id
-            )
+            return scheduler_strategy.format_request_response({"request_id": request_id})
         else:
             return {
                 "requestId": str(request_id),

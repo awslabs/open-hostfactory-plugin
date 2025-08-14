@@ -1,7 +1,7 @@
 """Port adapter registrations for dependency injection."""
 
 # Import configuration manager
-from src.config.manager import ConfigurationManager, get_config_manager
+from src.config.manager import get_config_manager
 from src.domain.base.ports import (
     ConfigurationPort,
     ContainerPort,
@@ -23,11 +23,17 @@ from src.infrastructure.template.configuration_manager import (
 def register_port_adapters(container):
     """Register all port adapters in the DI container."""
 
-    # Register configuration manager first
-    container.register_singleton(ConfigurationManager, lambda c: get_config_manager())
+    # Register configuration port with adapter
+    def create_configuration_adapter(c):
+        """Create configuration adapter bridging domain port to infrastructure manager."""
+        from src.config.manager import get_config_manager
+        from src.infrastructure.adapters.configuration_adapter import (
+            ConfigurationAdapter,
+        )
 
-    # Register configuration port
-    container.register_singleton(ConfigurationPort, lambda c: get_config_manager())
+        return ConfigurationAdapter(get_config_manager())
+
+    container.register_singleton(ConfigurationPort, create_configuration_adapter)
 
     # Register UnitOfWorkFactory (abstract -> concrete mapping)
     # This was previously in _setup_core_dependencies but got lost during DI cleanup
@@ -64,7 +70,7 @@ def register_port_adapters(container):
         )
 
         return TemplateConfigurationManager(
-            config_manager=c.get(ConfigurationManager),
+            config_manager=c.get(ConfigurationPort),
             scheduler_strategy=c.get(SchedulerPort),
             logger=c.get(LoggingPort),
             event_publisher=c.get_optional(EventPublisherPort),

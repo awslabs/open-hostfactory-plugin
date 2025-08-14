@@ -82,9 +82,7 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
 
         # Use scheduler strategy for format conversion
         if scheduler_strategy:
-            formatted_response = scheduler_strategy.convert_domain_to_hostfactory_output(
-                "getAvailableTemplates", templates
-            )
+            formatted_response = scheduler_strategy.format_templates_response(templates)
             templates_data = formatted_response.get("templates", [])
         else:
             templates_data = [

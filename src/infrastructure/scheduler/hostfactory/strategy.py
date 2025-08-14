@@ -491,11 +491,25 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         Parse HostFactory request data to domain-compatible format.
 
         This method handles the conversion from HostFactory request format to domain-compatible data.
+        Supports both nested format: {"template": {"templateId": ...}} and flat format: {"templateId": ...}
         """
+        # Handle nested HostFactory format: {"template": {"templateId": "...", "machineCount": ...}}
+        if "template" in raw_data:
+            template_data = raw_data["template"]
+            return {
+                "template_id": template_data.get("templateId"),
+                "requested_count": template_data.get("machineCount", 1),
+                "request_type": template_data.get("requestType", "provision"),
+                "metadata": raw_data.get("metadata", {}),
+            }
+        
+        # Handle flat HostFactory format: {"templateId": ..., "maxNumber": ...}
+        # Also handle request status format: {"requestId": ...}
         return {
             "template_id": raw_data.get("templateId"),
-            "requested_count": raw_data.get("maxNumber", 1),
+            "requested_count": raw_data.get("maxNumber", raw_data.get("machineCount", 1)),
             "request_type": raw_data.get("requestType", "provision"),
+            "request_id": raw_data.get("requestId", raw_data.get("request_id")),
             "metadata": raw_data.get("metadata", {}),
         }
 

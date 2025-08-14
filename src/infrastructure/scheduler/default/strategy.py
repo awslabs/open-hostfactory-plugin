@@ -85,6 +85,7 @@ class DefaultSchedulerStrategy(SchedulerPort):
             "template_id": raw_data.get("template_id"),
             "requested_count": raw_data.get("requested_count", raw_data.get("count", 1)),
             "request_type": raw_data.get("request_type", "provision"),
+            "request_id": raw_data.get("request_id"),
             "metadata": raw_data.get("metadata", {}),
         }
 

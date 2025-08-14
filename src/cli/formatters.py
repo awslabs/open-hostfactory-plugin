@@ -80,14 +80,13 @@ def format_templates_table(templates: List[Dict]) -> str:
         table.add_column("RAM (MB)", style="yellow", justify="right", width=10)
         table.add_column("Max Inst", style="red", justify="right", width=8)
 
-        # Add rows - use direct field access since Pydantic provides consistent
-        # field names
+        # Add rows - pure presentation, use whatever fields exist
         for template in templates:
-            # Handle both snake_case and camelCase field names (from Pydantic aliases)
-            template_id = template.get("template_id") or template.get("templateId", "N/A")
+            # Extract common fields that exist in any format
+            template_id = next((template.get(k) for k in ["template_id", "templateId"] if template.get(k)), "N/A")
             name = template.get("name", "N/A")
-            provider_api = template.get("provider_api") or template.get("providerApi", "N/A")
-            max_instances = template.get("max_instances") or template.get("maxNumber", "N/A")
+            provider_api = next((template.get(k) for k in ["provider_api", "providerApi"] if template.get(k)), "N/A")
+            max_instances = next((template.get(k) for k in ["max_instances", "maxNumber"] if template.get(k)), "N/A")
 
             # Handle different formats
             attributes = template.get("attributes")
@@ -136,13 +135,13 @@ def _format_ascii_table(templates: List[Dict]) -> str:
     # Define table headers
     headers = ["ID", "Name", "Provider", "CPUs", "RAM (MB)", "Max Inst"]
 
-    # Extract data for each template using direct field access
+    # Extract data - format-agnostic, use whatever fields exist
     rows = []
     for template in templates:
-        template_id = template.get("template_id") or template.get("templateId", "N/A")
+        template_id = next((template.get(k) for k in ["template_id", "templateId"] if template.get(k)), "N/A")
         name = template.get("name", "N/A")
-        provider_api = template.get("provider_api") or template.get("providerApi", "N/A")
-        max_instances = template.get("max_instances") or template.get("maxNumber", "N/A")
+        provider_api = next((template.get(k) for k in ["provider_api", "providerApi"] if template.get(k)), "N/A")
+        max_instances = next((template.get(k) for k in ["max_instances", "maxNumber"] if template.get(k)), "N/A")
 
         # Handle different formats
         attributes = template.get("attributes")
@@ -211,12 +210,12 @@ def format_templates_list(templates: List[Dict]) -> str:
         if i > 0:
             lines.append("")  # Blank line between templates
 
-        # Use direct field access since Pydantic provides consistent field names
-        template_id = template.get("template_id") or template.get("templateId", "N/A")
+        # Format-agnostic - use whatever fields exist
+        template_id = next((template.get(k) for k in ["template_id", "templateId"] if template.get(k)), "N/A")
         name = template.get("name", "N/A")
-        provider_api = template.get("provider_api") or template.get("providerApi", "N/A")
-        instance_type = template.get("instance_type") or template.get("instanceType", "N/A")
-        max_instances = template.get("max_instances") or template.get("maxNumber", "N/A")
+        provider_api = next((template.get(k) for k in ["provider_api", "providerApi"] if template.get(k)), "N/A")
+        instance_type = next((template.get(k) for k in ["instance_type", "vmType"] if template.get(k)), "N/A")
+        max_instances = next((template.get(k) for k in ["max_instances", "maxNumber"] if template.get(k)), "N/A")
 
         lines.append(f"Template: {template_id}")
         lines.append(f"  Name: {name}")
@@ -262,12 +261,12 @@ def format_requests_list(requests: List[Dict]) -> str:
         if i > 0:
             lines.append("")  # Blank line between requests
 
-        # Use direct field access with both snake_case and camelCase support
-        request_id = request.get("request_id") or request.get("requestId", "N/A")
+        # Use domain field names only
+        request_id = request.get("request_id", "N/A")
         status = request.get("status", "N/A")
-        template_id = request.get("template_id") or request.get("templateId", "N/A")
-        num_requested = request.get("requested_count") or request.get("numRequested", "N/A")
-        created_at = request.get("created_at") or request.get("createdAt", "N/A")
+        template_id = request.get("template_id", "N/A")
+        num_requested = request.get("requested_count", "N/A")
+        created_at = request.get("created_at", "N/A")
 
         lines.append(f"Request: {request_id}")
         lines.append(f"  Status: {status}")
@@ -379,12 +378,12 @@ def format_requests_table(requests: List[Dict]) -> str:
     # Extract data for each request using direct field access
     rows = []
     for request in requests:
-        # Support both snake_case and camelCase field names
-        request_id = request.get("request_id") or request.get("requestId", "N/A")
+        # Use domain field names only
+        request_id = request.get("request_id", "N/A")
         status = request.get("status", "N/A")
-        template_id = request.get("template_id") or request.get("templateId", "N/A")
-        num_requested = request.get("requested_count") or request.get("numRequested", "N/A")
-        created_at = request.get("created_at") or request.get("createdAt", "N/A")
+        template_id = request.get("template_id", "N/A")
+        num_requested = request.get("requested_count", "N/A")
+        created_at = request.get("created_at", "N/A")
 
         # Truncate long values for table display
         row = [

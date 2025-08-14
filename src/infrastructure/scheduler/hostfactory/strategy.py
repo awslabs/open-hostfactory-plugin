@@ -32,7 +32,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         self._logger = logger
         self.template_defaults_service = template_defaults_service
 
-        # Initialize provider selection service for proper provider selection
+        # Initialize provider selection service for provider selection
         from src.application.services.provider_selection_service import (
             ProviderSelectionService,
         )
@@ -44,7 +44,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
     def get_templates_file_path(self) -> str:
         """Get the templates file path for HostFactory."""
         try:
-            # Use provider selection service for proper provider selection
+            # Use provider selection service for provider selection
             selection_result = self._provider_selection_service.select_active_provider()
             provider_type = selection_result.provider_type
             templates_file = f"{provider_type}prov_templates.json"
@@ -180,7 +180,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
     def _get_active_provider_type(self) -> str:
         """Get the active provider type from configuration."""
         try:
-            # Use provider selection service for proper provider selection
+            # Use provider selection service for provider selection
             selection_result = self._provider_selection_service.select_active_provider()
             provider_type = selection_result.provider_type
             self._logger.debug(f"Active provider type: {provider_type}")
@@ -338,7 +338,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
         else:
             template_dict = template
 
-        # Convert to HostFactory format with proper HF attributes
+        # Convert to HostFactory format with HF attributes
         hf_template = {
             "templateId": template_dict.get("template_id", template_dict.get("templateId", "")),
             "maxNumber": template_dict.get("max_instances", template_dict.get("maxNumber", 1)),
@@ -392,7 +392,7 @@ class HostFactorySchedulerStrategy(SchedulerPort):
     def _create_hf_attributes(self, template_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create HF-compatible attributes object with CPU/RAM specs.
 
-        This method handles the creation of HostFactory attributes with proper
+        This method handles the creation of HostFactory attributes with
         CPU and RAM specifications based on instance type.
         """
         # Handle both snake_case and camelCase field names

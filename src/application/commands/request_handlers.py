@@ -81,7 +81,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         request = None
 
         try:
-            # Get template using CQRS QueryBus (proper architecture)
+            # Get template using CQRS QueryBus
             if not self._query_bus:
                 raise ValueError("QueryBus is required for template lookup")
 
@@ -451,7 +451,7 @@ class CreateReturnRequestHandler(BaseCommandHandler[CreateReturnRequestCommand, 
             config_manager = self._container.get(ConfigurationPort)
             provider_type = config_manager.get("provider.type", "aws")
 
-            # Create return request with proper business logic
+            # Create return request with business logic
             # Use first machine's template if available, otherwise use generic return
             # template
             template_id = "return-machines"  # Business template for return operations

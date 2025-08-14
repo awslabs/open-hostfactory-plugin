@@ -279,7 +279,7 @@ class AWSProviderStrategy(ProviderStrategy):
             )
 
     def _handle_create_instances(self, operation: ProviderOperation) -> ProviderResult:
-        """Handle instance creation operation using proper handler system."""
+        """Handle instance creation operation using handler system."""
         try:
             template_config = operation.parameters.get("template_config", {})
             count = operation.parameters.get("count", 1)
@@ -323,12 +323,11 @@ class AWSProviderStrategy(ProviderStrategy):
                     security_group_ids=template_config.get("security_group_ids", []),
                 )
 
-            # Create a minimal request object for handler using proper domain factory
+            # Create a minimal request object for handler using domain factory
             from src.domain.request.aggregate import Request
             from src.domain.request.value_objects import RequestType
 
-            # Use the domain aggregate's factory method - it handles RequestId
-            # generation properly
+            # Use the domain aggregate's factory method - it handles RequestId generation
             request = Request.create_new_request(
                 request_type=RequestType.ACQUIRE,
                 template_id=aws_template.template_id,

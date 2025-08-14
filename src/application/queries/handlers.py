@@ -742,7 +742,7 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
                         # Extract fields from configuration with defaults
                         config = dto.configuration or {}
 
-                        # Create template with proper field mapping
+                        # Create template with field mapping
                         template_data = {
                             "template_id": dto.template_id,
                             "name": dto.name or dto.template_id,

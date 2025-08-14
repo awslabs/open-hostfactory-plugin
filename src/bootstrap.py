@@ -110,7 +110,7 @@ class Application:
                 if hasattr(self._provider_context, "_initialized"):
                     self._provider_context._initialized = True
 
-            # Pre-load templates into cache properly during initialization
+            # Pre-load templates into cache during initialization
             await self._preload_templates()
 
             # Log final provider information

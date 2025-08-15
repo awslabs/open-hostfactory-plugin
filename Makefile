@@ -522,13 +522,13 @@ validate-workflow-logic: dev-install  ## Validate GitHub Actions workflows with 
 	@echo "Validating workflows with actionlint..."
 	@echo "Ensuring actionlint is installed..."
 	./dev-tools/scripts/install_dev_tools.py --tool actionlint
-	$(call run-tool,actionlint,.github/workflows/*.yml)
+	./dev-tools/scripts/validate_actionlint.py
 
 validate-shell-scripts: dev-install  ## Validate shell scripts with shellcheck
 	@echo "Validating shell scripts with shellcheck..."
 	@echo "Ensuring shellcheck is installed..."
 	./dev-tools/scripts/install_dev_tools.py --tool shellcheck
-	@find . -name "*.sh" -not -path "./.venv/*" -not -path "./node_modules/*" -print0 | xargs -0 $(call run-tool,shellcheck,-x)
+	./dev-tools/scripts/validate_shell_scripts.py
 
 validate-shellcheck: validate-shell-scripts  ## Alias for pre-commit compatibility
 

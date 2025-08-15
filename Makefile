@@ -514,7 +514,7 @@ file-sizes-report: dev-install  ## Generate detailed file size report
 
 validate-workflow-syntax: dev-install  ## Validate GitHub Actions workflow YAML syntax
 	@echo "Validating workflow files..."
-	$(call run-tool,python,./dev-tools/scripts/validate_workflows.py)
+	./dev-tools/scripts/validate_workflows.py
 
 validate-workflow-logic: dev-install  ## Validate GitHub Actions workflows with actionlint
 	@echo "Validating workflows with actionlint..."

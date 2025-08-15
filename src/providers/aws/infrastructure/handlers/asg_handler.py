@@ -188,8 +188,8 @@ class ASGHandler(AWSHandler):
                     else:
                         # Delete entire ASG
                         self._retry_with_backoff(
-                            lambda: self.aws_client.autoscaling_client.delete_auto_scaling_group(
-                                AutoScalingGroupName=asg_name, ForceDelete=True
+                            lambda name=asg_name: self.aws_client.autoscaling_client.delete_auto_scaling_group(
+                                AutoScalingGroupName=name, ForceDelete=True
                             ),
                             operation_type="critical",
                         )
@@ -208,6 +208,16 @@ class ASGHandler(AWSHandler):
             instance_ids = [m.machine_id for m in request.machine_references]
 
         if instance_ids:
+            # Get ASG details first
+            asg_response = self._retry_with_backoff(
+                self.aws_client.autoscaling_client.describe_auto_scaling_groups,
+                AutoScalingGroupNames=[request.resource_id],
+            )
+            if not asg_response["AutoScalingGroups"]:
+                raise AWSInfrastructureError(f"ASG {request.resource_id} not found")
+            
+            asg = asg_response["AutoScalingGroups"][0]
+            
             # Reduce desired capacity first
             current_capacity = asg["DesiredCapacity"]
             new_capacity = max(0, current_capacity - len(instance_ids))
@@ -271,268 +281,3 @@ class ASGHandler(AWSHandler):
             self._logger.error(f"Unexpected error checking ASG status: {str(e)}")
             raise AWSInfrastructureError(f"Failed to check ASG status: {str(e)}")
 
-    def _get_asg_instances(self, asg_name: str) -> List[Dict[str, Any]]:
-        """Get instances for a specific ASG."""
-        # Get ASG information
-        asg_list = self._retry_with_backoff(
-            lambda: self._paginate(
-                self.aws_client.autoscaling_client.describe_auto_scaling_groups,
-                "AutoScalingGroups",
-                AutoScalingGroupNames=[asg_name],
-            )
-        )
-
-        if not asg_list:
-            self._logger.warning(f"ASG {asg_name} not found")
-            return []
-
-        asg = asg_list[0]
-        instance_ids = [instance["InstanceId"] for instance in asg.get("Instances", [])]
-
-        if not instance_ids:
-            return []
-
-        return self._get_instance_details(instance_ids)
-
-    def release_hosts(self, request: Request) -> None:
-        """Release hosts across all ASGs in the request."""
-        try:
-            if not request.resource_ids:
-                raise AWSInfrastructureError("No ASG names found in request")
-
-            # Process all ASG names instead of just the first one
-            for asg_name in request.resource_ids:
-                try:
-                    if request.machine_references:
-                        # Terminate specific instances using existing utility
-                        instance_ids = [m.machine_id for m in request.machine_references]
-                        self.aws_ops.terminate_instances_with_fallback(
-                            instance_ids=instance_ids,
-                            context=f"ASG-{asg_name}",
-                        )
-                    else:
-                        # Delete entire ASG
-                        self._retry_with_backoff(
-                            lambda: self.aws_client.autoscaling_client.delete_auto_scaling_group(
-                                AutoScalingGroupName=asg_name, ForceDelete=True
-                            ),
-                            operation_type="critical",
-                        )
-                        self._logger.info(f"Deleted Auto Scaling Group: {asg_name}")
-                except Exception as e:
-                    self._logger.error(f"Failed to terminate ASG {asg_name}: {e}")
-                    continue
-
-        except Exception as e:
-            self._logger.error(f"Failed to release ASG hosts: {str(e)}")
-            raise AWSInfrastructureError(f"Failed to release ASG hosts: {str(e)}")
-
-    def _validate_asg_prerequisites(self, aws_template: AWSTemplate) -> None:
-        """Validate ASG specific prerequisites."""
-        errors = []
-
-        # First validate common prerequisites
-        try:
-            self._validate_prerequisites(aws_template)
-        except AWSValidationError as e:
-            errors.extend(str(e).split("\n"))
-
-        # Validate ASG specific requirements
-        if hasattr(aws_template, "lifecycle_hooks") and aws_template.lifecycle_hooks:
-            for hook in aws_template.lifecycle_hooks:
-                if not hook.get("role_arn"):
-                    errors.append(f"IAM role ARN required for lifecycle hook {hook.get('name')}")
-
-        if hasattr(aws_template, "target_group_arns") and aws_template.target_group_arns:
-            try:
-                self._retry_with_backoff(
-                    self.aws_client.elbv2_client.describe_target_groups,
-                    TargetGroupArns=aws_template.target_group_arns,
-                )
-            except Exception as e:
-                errors.append(f"Invalid target groups: {str(e)}")
-
-        if errors:
-            raise AWSValidationError("\n".join(errors))
-
-    def _create_asg_config(
-        self,
-        asg_name: str,
-        aws_template: AWSTemplate,
-        request: Request,
-        launch_template_id: str,
-        launch_template_version: str,
-    ) -> Dict[str, Any]:
-        """Create Auto Scaling Group configuration with improved options."""
-        asg_config = {
-            "AutoScalingGroupName": asg_name,
-            "LaunchTemplate": {
-                "LaunchTemplateId": launch_template_id,
-                "Version": launch_template_version,
-            },
-            "MinSize": request.machine_count,
-            "MaxSize": request.machine_count,
-            "DesiredCapacity": request.machine_count,
-            "VPCZoneIdentifier": (
-                ",".join(aws_template.subnet_ids)
-                if aws_template.subnet_ids
-                else aws_template.subnet_id
-            ),
-            "HealthCheckType": getattr(aws_template, "health_check_type", "EC2"),
-            "HealthCheckGracePeriod": getattr(aws_template, "health_check_grace_period", 300),
-            "Tags": [
-                {
-                    "Key": "Name",
-                    "Value": f"hf-{request.request_id}",
-                    "PropagateAtLaunch": True,
-                },
-                {
-                    "Key": "RequestId",
-                    "Value": str(request.request_id),
-                    "PropagateAtLaunch": True,
-                },
-                {
-                    "Key": "TemplateId",
-                    "Value": str(aws_template.template_id),
-                    "PropagateAtLaunch": True,
-                },
-                {"Key": "CreatedBy", "Value": "HostFactory", "PropagateAtLaunch": True},
-                {
-                    "Key": "CreatedAt",
-                    "Value": datetime.utcnow().isoformat(),
-                    "PropagateAtLaunch": True,
-                },
-            ],
-        }
-
-        # Add template tags
-        if hasattr(aws_template, "tags") and aws_template.tags:
-            for key, value in aws_template.tags.items():
-                asg_config["Tags"].append({"Key": key, "Value": value, "PropagateAtLaunch": True})
-
-        # Add target group ARNs if specified
-        if hasattr(aws_template, "target_group_arns") and aws_template.target_group_arns:
-            asg_config["TargetGroupARNs"] = aws_template.target_group_arns
-
-        # Add mixed instances policy if multiple instance types are specified
-        if hasattr(aws_template, "instance_types") and aws_template.instance_types:
-            asg_config["MixedInstancesPolicy"] = {
-                "LaunchTemplate": {
-                    "LaunchTemplateSpecification": {
-                        "LaunchTemplateId": launch_template_id,
-                        "Version": launch_template_version,
-                    },
-                    "Overrides": [
-                        {"InstanceType": instance_type, "WeightedCapacity": str(weight)}
-                        for instance_type, weight in aws_template.instance_types.items()
-                    ],
-                },
-                "InstancesDistribution": {
-                    "OnDemandPercentageAboveBaseCapacity": getattr(
-                        aws_template, "on_demand_percentage", 0
-                    ),
-                    "SpotAllocationStrategy": getattr(
-                        aws_template, "spot_allocation_strategy", "capacity-optimized"
-                    ),
-                },
-            }
-
-        return asg_config
-
-    def _enable_instance_protection(self, asg_name: str) -> None:
-        """Enable instance scale-in protection for the ASG."""
-        try:
-            self._retry_with_backoff(
-                self.aws_client.autoscaling_client.update_auto_scaling_group,
-                AutoScalingGroupName=asg_name,
-                NewInstancesProtectedFromScaleIn=True,
-            )
-            self._logger.info(f"Enabled instance protection for ASG: {asg_name}")
-        except Exception as e:
-            self._logger.warning(f"Failed to enable instance protection: {str(e)}")
-
-    def _set_lifecycle_hooks(self, asg_name: str, hooks: List[Dict[str, Any]]) -> None:
-        """Set lifecycle hooks for the ASG."""
-        for hook in hooks:
-            try:
-                self._retry_with_backoff(
-                    self.aws_client.autoscaling_client.put_lifecycle_hook,
-                    AutoScalingGroupName=asg_name,
-                    LifecycleHookName=hook["name"],
-                    LifecycleTransition=hook["transition"],
-                    RoleARN=hook["role_arn"],
-                    NotificationTargetARN=hook.get("target_arn"),
-                    NotificationMetadata=hook.get("metadata"),
-                    HeartbeatTimeout=hook.get("timeout", 3600),
-                )
-                self._logger.info(f"Set lifecycle hook {hook['name']} for ASG: {asg_name}")
-            except Exception as e:
-                self._logger.warning(f"Failed to set lifecycle hook {hook['name']}: {str(e)}")
-
-    def _wait_for_instances_termination(self, asg_name: str, timeout: int = 300) -> None:
-        """Wait for all instances in the ASG to terminate."""
-        import time
-
-        start_time = time.time()
-        while True:
-            if time.time() - start_time > timeout:
-                raise TimeoutError(f"Timeout waiting for instances to terminate in ASG {asg_name}")
-
-            response = self._retry_with_backoff(
-                self.aws_client.autoscaling_client.describe_auto_scaling_groups,
-                AutoScalingGroupNames=[asg_name],
-            )
-
-            if not response["AutoScalingGroups"]:
-                return
-
-            asg = response["AutoScalingGroups"][0]
-            if not asg["Instances"]:
-                return
-
-            self._logger.info(f"Waiting for {len(asg['Instances'])} instances to terminate...")
-            time.sleep(10)
-
-    def _count_healthy_instances(self, asg: Dict[str, Any]) -> int:
-        """Count number of healthy instances in the ASG."""
-        return sum(
-            1
-            for instance in asg.get("Instances", [])
-            if instance.get("HealthStatus") == "Healthy"
-            and instance.get("LifecycleState") == "InService"
-        )
-
-    def _tag_asg(self, asg_name: str, aws_template: AWSTemplate, request: Request) -> None:
-        """Add tags to the ASG."""
-        try:
-            tags = [
-                {
-                    "Key": "Name",
-                    "Value": f"hf-{request.request_id}",
-                    "PropagateAtLaunch": True,
-                },
-                {
-                    "Key": "RequestId",
-                    "Value": str(request.request_id),
-                    "PropagateAtLaunch": True,
-                },
-                {
-                    "Key": "TemplateId",
-                    "Value": str(aws_template.template_id),
-                    "PropagateAtLaunch": True,
-                },
-            ]
-
-            # Add template tags
-            if hasattr(aws_template, "tags") and aws_template.tags:
-                for key, value in aws_template.tags.items():
-                    tags.append({"Key": key, "Value": value, "PropagateAtLaunch": True})
-
-            self._retry_with_backoff(
-                self.aws_client.autoscaling_client.create_or_update_tags, Tags=tags
-            )
-            self._logger.debug(f"Successfully tagged ASG {asg_name}")
-
-        except Exception as e:
-            self._logger.warning(f"Failed to tag ASG {asg_name}: {str(e)}")
-            # Don't raise the exception as tagging failure is non-critical

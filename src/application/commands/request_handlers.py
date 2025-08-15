@@ -19,6 +19,7 @@ from src.application.services.provider_selection_service import ProviderSelectio
 from src.domain.base import UnitOfWorkFactory
 from src.domain.base.exceptions import EntityNotFoundError
 from src.domain.base.ports import (
+    ConfigurationPort,
     ContainerPort,
     ErrorHandlingPort,
     EventPublisherPort,
@@ -53,7 +54,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         self._query_bus = query_bus
         self._provider_selection_service = provider_selection_service
         self._provider_capability_service = provider_capability_service
-        self._provider_context = provider_context
+        self._provider_context = provider_port
 
     async def validate_command(self, command: CreateRequestCommand) -> None:
         """Validate create request command."""

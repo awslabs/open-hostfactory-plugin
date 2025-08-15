@@ -38,12 +38,12 @@ class GetProviderHealthHandler(BaseQueryHandler[GetProviderHealthQuery, Provider
         Initialize provider health handler.
 
         Args:
-            provider_context: Provider context for accessing strategies
+            provider_port: Provider context for accessing strategies
             logger: Logging port for operation logging
             error_handler: Error handling port for exception management
         """
         super().__init__(logger, error_handler)
-        self.provider_port = provider_context
+        self.provider_port = provider_port
 
     async def execute_query(self, query: GetProviderHealthQuery) -> Dict[str, Any]:
         """Execute provider health query."""
@@ -103,12 +103,12 @@ class ListAvailableProvidersHandler(
         Initialize list providers handler.
 
         Args:
-            provider_context: Provider context for accessing strategies
+            provider_port: Provider context for accessing strategies
             logger: Logging port for operation logging
             error_handler: Error handling port for exception management
         """
         super().__init__(logger, error_handler)
-        self.provider_port = provider_context
+        self.provider_port = provider_port
 
     async def execute_query(self, query: ListAvailableProvidersQuery) -> List[Dict[str, Any]]:
         """Execute list available providers query."""
@@ -165,12 +165,12 @@ class GetProviderCapabilitiesHandler(
         Initialize provider capabilities handler.
 
         Args:
-            provider_context: Provider context for accessing strategies
+            provider_port: Provider context for accessing strategies
             logger: Logging port for operation logging
             error_handler: Error handling port for exception management
         """
         super().__init__(logger, error_handler)
-        self.provider_port = provider_context
+        self.provider_port = provider_port
 
     async def execute_query(self, query: GetProviderCapabilitiesQuery) -> Dict[str, Any]:
         """Execute provider capabilities query."""
@@ -220,12 +220,12 @@ class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, Dict[s
         Initialize provider metrics handler.
 
         Args:
-            provider_context: Provider context for accessing strategies
+            provider_port: Provider context for accessing strategies
             logger: Logging port for operation logging
             error_handler: Error handling port for exception management
         """
         super().__init__(logger, error_handler)
-        self.provider_port = provider_context
+        self.provider_port = provider_port
 
     async def execute_query(self, query: GetProviderMetricsQuery) -> Dict[str, Any]:
         """Execute provider metrics query."""
@@ -279,12 +279,12 @@ class GetProviderStrategyConfigHandler(
         Initialize provider strategy config handler.
 
         Args:
-            provider_context: Provider context for accessing strategies
+            provider_port: Provider context for accessing strategies
             logger: Logging port for operation logging
             error_handler: Error handling port for exception management
         """
         super().__init__(logger, error_handler)
-        self.provider_port = provider_context
+        self.provider_port = provider_port
 
     async def execute_query(self, query: GetProviderStrategyConfigQuery) -> Dict[str, Any]:
         """Execute provider strategy configuration query."""

@@ -591,32 +591,6 @@ class SpotFleetHandler(AWSHandler):
 
             return all_instances
 
-            fleet = fleet_list[0]
-
-            # Log fleet status
-            self._logger.debug(
-                f"Fleet status: {fleet.get('SpotFleetRequestState')}, "
-                f"Target capacity: {fleet.get('SpotFleetRequestConfig', {}).get('TargetCapacity')}, "
-                f"Fulfilled capacity: {fleet.get('ActivityStatus')}"
-            )
-
-            # Get instance information with pagination and retry
-            active_instances = self._retry_with_backoff(
-                lambda: self._paginate(
-                    self.aws_client.ec2_client.describe_spot_fleet_instances,
-                    "ActiveInstances",
-                    SpotFleetRequestId=request.resource_id,
-                )
-            )
-
-            instance_ids = [instance["InstanceId"] for instance in active_instances]
-
-            if not instance_ids:
-                self._logger.info(f"No active instances found in Spot Fleet {request.resource_id}")
-                return []
-
-            # Get detailed instance information
-            return all_instances
         except Exception as e:
             self._logger.error(f"Unexpected error checking Spot Fleet status: {str(e)}")
             raise AWSInfrastructureError(f"Failed to check Spot Fleet status: {str(e)}")
@@ -638,10 +612,10 @@ class SpotFleetHandler(AWSHandler):
 
         # Get active instances
         active_instances = self._retry_with_backoff(
-            lambda: self._paginate(
+            lambda fid=fleet_id: self._paginate(
                 self.aws_client.ec2_client.describe_spot_fleet_instances,
                 "ActiveInstances",
-                SpotFleetRequestId=fleet_id,
+                SpotFleetRequestId=fid,
             )
         )
 
@@ -670,8 +644,8 @@ class SpotFleetHandler(AWSHandler):
                     else:
                         # Cancel entire spot fleet
                         self._retry_with_backoff(
-                            lambda: self.aws_client.ec2_client.cancel_spot_fleet_requests(
-                                SpotFleetRequestIds=[fleet_id], TerminateInstances=True
+                            lambda fid=fleet_id: self.aws_client.ec2_client.cancel_spot_fleet_requests(
+                                SpotFleetRequestIds=[fid], TerminateInstances=True
                             ),
                             operation_type="critical",
                         )
@@ -683,45 +657,3 @@ class SpotFleetHandler(AWSHandler):
         except Exception as e:
             self._logger.error(f"Failed to release Spot Fleet hosts: {str(e)}")
             raise AWSInfrastructureError(f"Failed to release Spot Fleet hosts: {str(e)}")
-            fleet_type = fleet["SpotFleetRequestConfig"].get("Type", "maintain")
-
-            # Get instance IDs from machine references
-            instance_ids = []
-            if request.machine_references:
-                instance_ids = [m.machine_id for m in request.machine_references]
-
-            if instance_ids:
-                if fleet_type == "maintain":
-                    # For maintain fleets, reduce capacity first
-                    current_capacity = fleet["SpotFleetRequestConfig"]["TargetCapacity"]
-                    new_capacity = max(0, current_capacity - len(instance_ids))
-
-                    self._retry_with_backoff(
-                        self.aws_client.ec2_client.modify_spot_fleet_request,
-                        operation_type="critical",
-                        SpotFleetRequestId=request.resource_id,
-                        TargetCapacity=new_capacity,
-                    )
-                    self._logger.info(
-                        f"Reduced maintain fleet {request.resource_id} capacity to {new_capacity}"
-                    )
-
-                # Use consolidated AWS operations utility for instance termination
-                self.aws_ops.terminate_instances_with_fallback(
-                    instance_ids, self._request_adapter, "Spot Fleet instances"
-                )
-                self._logger.info(f"Terminated instances: {instance_ids}")
-            else:
-                # Release entire fleet
-                self._retry_with_backoff(
-                    self.aws_client.ec2_client.cancel_spot_fleet_requests,
-                    operation_type="critical",
-                    SpotFleetRequestIds=[request.resource_id],
-                    TerminateInstances=True,
-                )
-                self._logger.info(f"Cancelled entire Spot Fleet request: {request.resource_id}")
-
-        except ClientError as e:
-            error = self._convert_client_error(e)
-            self._logger.error(f"Failed to release Spot Fleet resources: {str(error)}")
-            raise error

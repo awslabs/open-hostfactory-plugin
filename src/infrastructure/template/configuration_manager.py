@@ -208,7 +208,7 @@ class TemplateConfigurationManager:
         if "provider_name" in template_dict:
             return template_dict["provider_name"]
 
-        # 2. Use active provider from configuration with proper selection logic
+        # 2. Use active provider from configuration with appropriate selection logic
         try:
             from src.application.services.provider_selection_service import (
                 ProviderSelectionService,

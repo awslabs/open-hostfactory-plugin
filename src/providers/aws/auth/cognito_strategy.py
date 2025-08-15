@@ -249,7 +249,7 @@ class CognitoAuthStrategy(AuthPort):
             Public key for token verification
         """
         try:
-            # In production, you would cache JWKS and implement proper key rotation
+            # In production, you would cache JWKS and implement appropriate key rotation
             # This is a simplified implementation
             import requests
 
@@ -260,7 +260,7 @@ class CognitoAuthStrategy(AuthPort):
             for key in jwks.get("keys", []):
                 if key.get("kid") == kid:
                     # Convert JWK to PEM format (simplified)
-                    # In production, use a proper JWK library
+                    # In production, use a appropriate JWK library
                     return key  # Return the key dict for now
 
             return None

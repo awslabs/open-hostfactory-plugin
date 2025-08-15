@@ -183,7 +183,7 @@ class TestTemplateDefaultsService:
         # Get effective defaults for aws-primary
         result = template_defaults_service.get_effective_template_defaults("aws-primary")
 
-        # Should have merged defaults with proper precedence
+        # Should have merged defaults with correct precedence
         assert result["price_type"] == "ondemand"  # Global default
         assert result["image_id"] == "ami-aws-default"  # Provider type default
         assert result["provider_api"] == "SpotFleet"  # Provider instance override

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test for Integration Flow: Integration Flow Fix
-Tests that the AWS provider strategy now uses the proper handler system instead of bypassing it.
+Tests that the AWS provider strategy now uses the appropriate handler system instead of bypassing it.
 """
 
 import os
@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 
 def test_aws_provider_strategy_uses_handlers():
-    """Test that AWS provider strategy uses proper handler system."""
+    """Test that AWS provider strategy uses appropriate handler system."""
     print("=== Integration Flow Test ===")
 
     try:
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
     if test1_passed and test2_passed:
         print("\nALL INTEGRATION FLOW INTEGRATION FLOW TESTS PASSED")
-        print("PASS: AWS provider strategy now uses proper handler system")
+        print("PASS: AWS provider strategy now uses appropriate handler system")
         print("PASS: AWSInstanceManager bypass has been eliminated")
         print("PASS: Launch template flow is properly integrated")
         print("PASS: Handler routing works correctly")

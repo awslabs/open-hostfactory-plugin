@@ -387,7 +387,7 @@ class TestHTTPErrorHandling:
         domain_exception = TemplateNotFoundError("test-123")
         error_response = handler.handle_error_for_http(domain_exception)
 
-        # Should create proper HTTP response
+        # Should create appropriate HTTP response
         assert error_response.error_code is not None
         assert error_response.message is not None
         assert error_response.http_status == 404  # Not Found

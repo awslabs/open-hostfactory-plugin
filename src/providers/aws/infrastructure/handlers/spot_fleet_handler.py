@@ -40,7 +40,6 @@ from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.domain.template.value_objects import AWSFleetType
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSEntityNotFoundError,
     AWSInfrastructureError,
     AWSValidationError,
     IAMError,
@@ -578,7 +577,7 @@ class SpotFleetHandler(AWSHandler):
                 return []
 
             all_instances = []
-            
+
             # Process all fleet IDs instead of just the first one
             for fleet_id in request.resource_ids:
                 try:

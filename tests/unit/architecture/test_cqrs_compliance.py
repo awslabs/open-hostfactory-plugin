@@ -52,7 +52,7 @@ class TestCQRSCompliance:
         assert not isinstance(command, type(query)) and not isinstance(query, type(command))
 
     def test_command_handler_interface(self):
-        """Test that command handlers implement proper interface."""
+        """Test that command handlers implement correct interface."""
 
         # Mock a command handler
         class MockCommandHandler(ApplicationCommandHandler):
@@ -70,7 +70,7 @@ class TestCQRSCompliance:
         assert len(sig.parameters) >= 1
 
     def test_query_handler_interface(self):
-        """Test that query handlers implement proper interface."""
+        """Test that query handlers implement correct interface."""
         # Test query structure
         query = ListTemplatesQuery()
 

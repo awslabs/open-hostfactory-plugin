@@ -233,7 +233,7 @@ def test_di_container_resolution():
 
 
 def test_service_dependencies():
-    """Test that services have proper dependency injection setup."""
+    """Test that services have correct dependency injection setup."""
     try:
         print("   Testing service dependencies...")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test for Configuration Defaults Integration
-Tests that templates get proper defaults from configuration when fields are missing.
+Tests that templates get appropriate defaults from configuration when fields are missing.
 """
 
 import os
@@ -72,7 +72,7 @@ def test_template_defaults_integration():
 
 
 def test_template_defaults_precedence():
-    """Test that template values override defaults (proper precedence)."""
+    """Test that template values override defaults (correct precedence)."""
     print("\n=== Template Defaults Precedence Test ===")
 
     try:
@@ -123,7 +123,7 @@ def test_template_defaults_precedence():
         ], "Explicit security_group_ids should be preserved"
         assert template.instance_type == "t3.large", "Explicit instance_type should be preserved"
 
-        print("PASS: Template values correctly override defaults (proper precedence)")
+        print("PASS: Template values correctly override defaults (correct precedence)")
 
         return True
 

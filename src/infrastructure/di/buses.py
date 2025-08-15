@@ -8,7 +8,7 @@ SOLID principles and CQRS best practices:
 - Open/Closed: Easy to add handlers without changing buses
 - Dependency Inversion: No concrete middleware dependencies
 - CQRS Purity: Thin buses, handlers own their concerns
-- Clean Architecture: Proper layer separation
+- Clean Architecture: Appropriate layer separation
 
 No middleware complexity - handlers own their cross-cutting concerns.
 """

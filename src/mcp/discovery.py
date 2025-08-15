@@ -2,7 +2,7 @@
 MCP tool discovery from SDK methods.
 
 Automatically discovers SDK methods and creates MCP tool definitions
-with proper JSON schemas for AI assistant integration.
+with appropriate JSON schemas for AI assistant integration.
 """
 
 from dataclasses import dataclass

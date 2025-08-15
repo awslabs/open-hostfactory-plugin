@@ -15,7 +15,7 @@ class TestProviderStrategyDryRun:
         # Mock dependencies
         self.mock_logger = Mock()
 
-        # Create a proper AWSProviderConfig
+        # Create a appropriate AWSProviderConfig
         self.mock_config = AWSProviderConfig(region="us-east-1", profile="default")
 
         # Create AWS provider strategy

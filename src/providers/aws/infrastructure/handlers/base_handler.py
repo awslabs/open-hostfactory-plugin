@@ -49,7 +49,7 @@ class AWSHandler(ABC):
 
     Architecture Alignment:
     - Follows same patterns as other base handlers in the system
-    - Proper DI integration with standardized dependencies
+    - Appropriate DI integration with standardized dependencies
     - Clean separation of concerns
     - Professional error handling and logging
     """

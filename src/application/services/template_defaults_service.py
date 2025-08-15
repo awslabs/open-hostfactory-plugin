@@ -22,7 +22,7 @@ class TemplateDefaultsService(TemplateDefaultsPort):
     3. Provider type defaults
     4. Global template defaults (lowest priority)
 
-    This service ensures that templates get proper defaults applied
+    This service ensures that templates get appropriate defaults applied
     while respecting the configuration hierarchy.
     """
 
@@ -335,7 +335,7 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         Resolve template with provider extensions using domain factory.
 
         This method integrates hierarchical defaults
-        with domain extensions and creates proper domain template objects.
+        with domain extensions and creates appropriate domain template objects.
 
         Args:
             template_dict: Raw template data from file

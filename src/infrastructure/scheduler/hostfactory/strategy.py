@@ -274,7 +274,8 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
             base_message = "Request VM success from AWS."
             if resource_ids:
                 # Include the first resource ID in the message for user visibility
-                resource_id_info = f" Resource ID: {resource_ids[0]}"  # Show first for brevity
+                # Show first for brevity
+                resource_id_info = f" Resource ID: {resource_ids[0]}"
                 message = base_message + resource_id_info
             else:
                 message = base_message

@@ -39,7 +39,7 @@ class TestFleetTagBuilder:
         } in tags
         assert {"Key": "CreatedBy", "Value": "HostFactory"} in tags
 
-        # Check CreatedAt tag exists and has proper format
+        # Check CreatedAt tag exists and has correct format
         created_at_tag = next(tag for tag in tags if tag["Key"] == "CreatedAt")
         assert created_at_tag is not None
         # Verify it's a valid ISO format timestamp

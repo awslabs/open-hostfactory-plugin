@@ -19,7 +19,7 @@ extension_config = TemplateExtensionRegistry.create_extension_config(
 )
 
 if extension_config:
-    # Access configuration with proper defaults
+    # Access configuration with appropriate defaults
     enabled = extension_config.some_feature.enabled
 ```
 

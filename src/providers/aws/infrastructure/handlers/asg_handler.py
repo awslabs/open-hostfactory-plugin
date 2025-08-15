@@ -29,8 +29,6 @@ Note:
 from datetime import datetime
 from typing import Any, Dict, List
 
-from botocore.exceptions import ClientError
-
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.request.aggregate import Request
@@ -38,7 +36,6 @@ from src.infrastructure.adapters.ports.request_adapter_port import RequestAdapte
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.providers.aws.domain.template.aggregate import AWSTemplate
 from src.providers.aws.exceptions.aws_exceptions import (
-    AWSEntityNotFoundError,
     AWSInfrastructureError,
     AWSValidationError,
 )
@@ -166,7 +163,7 @@ class ASGHandler(AWSHandler):
 
         asg = asg_list[0]
         instance_ids = [instance["InstanceId"] for instance in asg.get("Instances", [])]
-        
+
         if not instance_ids:
             return []
 
@@ -257,7 +254,7 @@ class ASGHandler(AWSHandler):
                 return []
 
             all_instances = []
-            
+
             # Process all ASG names instead of just the first one
             for asg_name in request.resource_ids:
                 try:
@@ -291,7 +288,7 @@ class ASGHandler(AWSHandler):
 
         asg = asg_list[0]
         instance_ids = [instance["InstanceId"] for instance in asg.get("Instances", [])]
-        
+
         if not instance_ids:
             return []
 

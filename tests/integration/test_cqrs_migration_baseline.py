@@ -2,7 +2,7 @@
 CQRS Integration Tests - Current Architecture Validation.
 
 This test suite validates the CQRS architecture implementation with
-command and query handlers, ensuring proper integration between
+command and query handlers, ensuring appropriate integration between
 application services, domain aggregates, and infrastructure.
 """
 
@@ -353,7 +353,7 @@ class TestCQRSArchitectureIntegration:
 
     def test_cqrs_separation_of_concerns(self, create_request_handler):
         """Test that CQRS properly separates command and query concerns."""
-        # Verify handler has proper dependencies
+        # Verify handler has appropriate dependencies
         assert hasattr(create_request_handler, "_query_bus")
         assert hasattr(create_request_handler, "_provider_selection_service")
         assert hasattr(create_request_handler, "_provider_capability_service")
@@ -364,7 +364,7 @@ class TestCQRSArchitectureIntegration:
         assert hasattr(create_request_handler, "execute_command")
         assert hasattr(create_request_handler, "validate_command")
 
-        # Verify proper typing
+        # Verify appropriate typing
 
         assert create_request_handler.__class__.__annotations__
 

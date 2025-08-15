@@ -21,7 +21,7 @@ class TestDDDComplianceFixed:
     """Test Domain-Driven Design pattern implementation compliance - Fixed Version."""
 
     def test_aggregate_boundary_enforcement(self):
-        """Ensure aggregates maintain proper boundaries and don't expose internals."""
+        """Ensure aggregates maintain correct boundaries and don't expose internals."""
         # Test Template aggregate with required fields based on actual implementation
         template = Template(
             template_id="test-template",
@@ -36,7 +36,7 @@ class TestDDDComplianceFixed:
         assert hasattr(template, "image_id")
         assert hasattr(template, "max_instances")
 
-        # Template should be a proper domain object
+        # Template should be a appropriate domain object
         assert template.template_id == "test-template"
         assert template.name == "Test Template"
         assert template.image_id == "ami-12345678"

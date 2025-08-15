@@ -216,5 +216,5 @@ def _register_repository_services(container: DIContainer) -> None:
             logger=container.get(LoggingPort),
         )
 
-    # Register with proper factory functions
+    # Register with appropriate factory functions
     container.register_singleton(TemplateRepository, create_template_repository)

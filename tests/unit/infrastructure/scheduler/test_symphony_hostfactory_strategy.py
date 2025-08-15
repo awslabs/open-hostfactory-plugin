@@ -19,7 +19,7 @@ class TestSymphonyHostFactorySchedulerStrategy:
             "provider": {"active_provider": "aws-default"},
         }
 
-        # Mock provider config to return proper values instead of Mock objects
+        # Mock provider config to return appropriate values instead of Mock objects
         mock_provider_config = Mock()
         mock_provider_config.active_provider = "aws-default"
         self.mock_config_manager.get_provider_config.return_value = mock_provider_config

@@ -123,7 +123,7 @@ def test_provider_strategy_integration():
         try:
             from src.providers.aws.configuration.config import AWSProviderConfig
 
-            # Create proper AWS config
+            # Create appropriate AWS config
             aws_config = AWSProviderConfig(region="us-west-2", profile="default")
 
             strategy = AWSProviderStrategy(config=aws_config, logger=mock_logger)

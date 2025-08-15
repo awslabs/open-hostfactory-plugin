@@ -136,7 +136,7 @@ class TestDomainEventProperties:
             event.machine_count = 5
 
     def test_domain_events_have_timestamps(self):
-        """Test that domain events have proper timestamps."""
+        """Test that domain events have appropriate timestamps."""
         event = RequestCreatedEvent(
             request_id="test-request",
             template_id="test-template",

@@ -471,7 +471,7 @@ class TestCodeQualityCompliance:
         ), f"Found aws_handler usage (should be provider_api): {aws_handler_usage}"
 
     def test_proper_exception_hierarchy(self):
-        """Test that exceptions follow proper hierarchy."""
+        """Test that exceptions follow correct hierarchy."""
         try:
             from src.domain.base.exceptions import DomainException
             from src.domain.request.exceptions import RequestValidationError

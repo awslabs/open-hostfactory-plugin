@@ -326,7 +326,7 @@ class Request(AggregateRoot):
         Returns:
             New Request instance with creation event
         """
-        # Generate proper RequestId using the value object's generate method
+        # Generate appropriate RequestId using the value object's generate method
         request_id = RequestId.generate(request_type)
 
         # Create request

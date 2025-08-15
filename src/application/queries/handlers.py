@@ -428,7 +428,8 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
         return Machine(
             instance_id=InstanceId(value=aws_instance["InstanceId"]),
             request_id=str(request.request_id),
-            resource_id=request.resource_ids[0] if request.resource_ids else None,  # Use first for backward compatibility
+            # Use first for backward compatibility
+            resource_id=request.resource_ids[0] if request.resource_ids else None,
             template_id=request.template_id,
             provider_type="aws",
             status=self._map_aws_state_to_machine_status(aws_instance["State"]),

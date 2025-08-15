@@ -32,7 +32,7 @@ class EventBus:
     - Dependency injection for handlers and logger
     - Consistent error handling and logging
     - Support for multiple handlers per event type
-    - Async processing with proper error isolation
+    - Async processing with appropriate error isolation
     - Metrics and monitoring integration points
     """
 

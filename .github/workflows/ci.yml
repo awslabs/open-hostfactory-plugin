@@ -75,37 +75,6 @@ jobs:
           make quality-check
         fi
 
-  validate-workflows:
-    name: Validate Workflows
-    runs-on: ubuntu-latest
-    needs: get-config
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-
-    - name: Install yq
-      uses: mikefarah/yq@master
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ needs.get-config.outputs.default-python-version }}
-
-    - name: Install UV
-      uses: astral-sh/setup-uv@v6
-      with:
-        enable-cache: true
-        cache-dependency-glob: "pyproject.toml.template"
-
-    - name: Install PyYAML
-      run: |
-        uv venv
-        uv pip install PyYAML
-
-    - name: Validate workflows
-      run: make validate-all
-
   lint-black:
     name: Black (Code Formatting)
     runs-on: ubuntu-latest

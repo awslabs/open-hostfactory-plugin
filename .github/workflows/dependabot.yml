@@ -25,7 +25,7 @@ jobs:
       id: version
       run: |
         DEFAULT_PYTHON_VERSION=$(yq '.python.default_version' .project.yml)
-        echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> $GITHUB_OUTPUT
+        echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> "$GITHUB_OUTPUT"
         echo "Using Python version: $DEFAULT_PYTHON_VERSION"
 
   update-uv-lock:
@@ -61,9 +61,11 @@ jobs:
         run: make generate-pyproject
 
       - name: Update UV lock file
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           echo "Updating UV lock file after Dependabot changes..."
-          uv lock --upgrade-package $(echo "${{ github.event.pull_request.title }}" | grep -oP 'Bump \K[^\s]+')
+          uv lock --upgrade-package $(echo "$PR_TITLE" | grep -oP 'Bump \K[^\s]+')
 
       - name: Commit updated lock file
         run: |

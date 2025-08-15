@@ -33,7 +33,7 @@ jobs:
       id: version
       run: |
         DEFAULT_PYTHON_VERSION=$(make print-DEFAULT_PYTHON_VERSION)
-        echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> $GITHUB_OUTPUT
+        echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> "$GITHUB_OUTPUT"
         echo "Using Python version: $DEFAULT_PYTHON_VERSION"
 
   # Code Quality Jobs (granular with tool names)
@@ -606,7 +606,6 @@ jobs:
     - name: Generate complete test report
       run: |
         make test-report
-          -m "not slow"
       continue-on-error: true
 
     - name: Upload complete test report

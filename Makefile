@@ -64,8 +64,38 @@ endef
 help:  ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
-	@echo 'Targets:'
-	@awk 'BEGIN {FS = ":.*## "} /^[[:alnum:]_-]+:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo '=== SETUP & INSTALLATION ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(generate-pyproject|help|.*install.*|.*deps.*|.*requirements.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== TESTING ==='
+	@awk 'BEGIN {FS = ":.*## "} /^test.*:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== CODE QUALITY ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(quality.*|lint|.*format.*|hadolint.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== CI QUALITY CHECKS ==='
+	@awk 'BEGIN {FS = ":.*## "} /^ci-quality.*:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
+	@echo ''
+	@echo '=== SECURITY ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(security.*|.*secrets.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== ARCHITECTURE ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(architecture.*|.*arch.*|file-sizes.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== DOCUMENTATION ==='
+	@awk 'BEGIN {FS = ":.*## "} /^docs.*:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== BUILD & DEPLOY ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(build.*|publish.*|version.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== CONTAINERS ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(docker.*|container.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== DEVELOPMENT ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(dev.*|run.*|clean.*|.*completions.*|status|show.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo ''
+	@echo '=== CI WORKFLOWS ==='
+	@awk 'BEGIN {FS = ":.*## "} /^(ci.*|workflow.*|pre-commit.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -v "ci-quality"
 
 # Installation targets
 install: $(VENV)/bin/activate  ## Install production dependencies (UV-first)

@@ -58,3 +58,5 @@ jobs:
 
     - name: Validate shell scripts with shellcheck
       uses: ludeeus/action-shellcheck@master
+      with:
+        ignore_paths: '.venv .git __pycache__ node_modules'

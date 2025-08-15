@@ -202,10 +202,18 @@ test_image() {
 
     log_info "Testing built image..."
 
-    # Use the first tag that was built (which is what gets loaded)
-    local test_image="${IMAGE_NAME}:${VERSION}"
+    # Use the same tagging logic as build_image function
+    local MAKEFILE_DEFAULT_PYTHON_VERSION="${PYTHON_VERSION:-$(make -s print-DEFAULT_PYTHON_VERSION 2>/dev/null || echo '3.13')}"
+    local version_tag="${VERSION}"
+    if [[ -n "${MAKEFILE_DEFAULT_PYTHON_VERSION}" && "${MULTI_PYTHON}" == "true" ]]; then
+        version_tag="${VERSION}-python${MAKEFILE_DEFAULT_PYTHON_VERSION}"
+    fi
+
+    local test_image
     if [[ -n "${REGISTRY}" ]]; then
-        test_image="${REGISTRY}/${IMAGE_NAME}:${VERSION}"
+        test_image="${REGISTRY}/${IMAGE_NAME}:${version_tag}"
+    else
+        test_image="${IMAGE_NAME}:${version_tag}"
     fi
 
     # Test image can start

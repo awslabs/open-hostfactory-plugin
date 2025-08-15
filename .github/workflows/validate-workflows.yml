@@ -55,3 +55,6 @@ jobs:
         bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
         ./actionlint -color
       shell: bash
+
+    - name: Validate shell scripts with shellcheck
+      uses: ludeeus/action-shellcheck@master

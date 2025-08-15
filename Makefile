@@ -64,40 +64,11 @@ endef
 help:  ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
-	@echo '=== SETUP & INSTALLATION ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(generate-pyproject|help|.*install.*|.*deps.*|.*requirements.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== TESTING ==='
-	@awk 'BEGIN {FS = ":.*## "} /^test.*:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== CODE QUALITY ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(quality.*|lint|.*format.*|hadolint.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== CI QUALITY CHECKS ==='
-	@awk 'BEGIN {FS = ":.*## "} /^ci-quality.*:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
-	@echo ''
-	@echo '=== SECURITY ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(security.*|.*secrets.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== ARCHITECTURE ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(architecture.*|.*arch.*|file-sizes.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== DOCUMENTATION ==='
-	@awk 'BEGIN {FS = ":.*## "} /^docs.*:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== BUILD & DEPLOY ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(build.*|publish.*|version.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== CONTAINERS ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(docker.*|container.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== DEVELOPMENT ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(dev.*|run.*|clean.*|.*completions.*|status|show.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo ''
-	@echo '=== CI WORKFLOWS ==='
-	@awk 'BEGIN {FS = ":.*## "} /^(ci.*|workflow.*|pre-commit.*):.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST) | grep -v "ci-quality"
+	@awk 'BEGIN {FS = ":.*## "; section=""} \
+		/^# @SECTION / {section=substr($$0,12); print "\n" section ":"; next} \
+		/^[[:alnum:]_-]+:.*## / {if(section) printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Installation targets
+# @SECTION Setup & Installation
 install: $(VENV)/bin/activate  ## Install production dependencies (UV-first)
 	@echo "Installing production dependencies with UV..."
 	uv sync --no-dev
@@ -173,6 +144,7 @@ $(VENV)/bin/activate: uv.lock
 	fi
 	touch $(VENV)/bin/activate
 
+# @SECTION Testing
 # Testing targets (using dev-tools)
 test: test-quick  ## Run quick test suite (alias for test-quick)
 
@@ -210,6 +182,7 @@ test-html: dev-install  ## Run tests with HTML coverage report
 test-report: dev-install  ## Generate comprehensive test report
 	./dev-tools/testing/run_tests.py --all --coverage --junit-xml=test-results-combined.xml --cov-xml=coverage-combined.xml --html-coverage --maxfail=1 --timeout=60
 
+# @SECTION Code Quality
 # Code quality targets
 quality-check: dev-install  ## Run professional quality checks on modified files
 	@echo "Running professional quality checks..."
@@ -394,6 +367,7 @@ test-completions:         ## Test completion generation
 	@echo "Testing zsh completion generation..."
 	@$(PYTHON) src/run.py --completion zsh > /dev/null && echo "SUCCESS: Zsh completion generation works"
 
+# @SECTION Documentation
 # Documentation targets
 docs: docs-build  ## Build documentation (main docs entry point)
 
@@ -476,6 +450,7 @@ version-bump:  ## Show version bump help
 	@echo ""
 	@echo "Current version: $(VERSION)"
 
+# @SECTION Build & Deploy
 # Build targets (using dev-tools)
 build: clean generate-pyproject dev-install  ## Build package
 	BUILD_ARGS="$(BUILD_ARGS)" ./dev-tools/package/build.sh
@@ -493,6 +468,7 @@ publish-test: build  ## Publish to test PyPI
 	./dev-tools/package/publish.sh testpypi
 
 # CI/CD targets
+# @SECTION CI Quality Checks
 # Individual code quality targets (with tool names)
 ci-quality-black:  ## Run Black code formatting check
 	@echo "Running Black formatting check..."

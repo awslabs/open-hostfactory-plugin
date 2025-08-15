@@ -47,6 +47,8 @@ jobs:
       id: default-python-version
       run: |
         # Use project config directly with yq
+    - name: Install yq
+      uses: mikefarah/yq@master
         DEFAULT_PYTHON_VERSION=$(yq '.python.default_version' .project.yml)
         echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> $GITHUB_OUTPUT
         echo "Using Python version: $DEFAULT_PYTHON_VERSION"
@@ -74,6 +76,8 @@ jobs:
       id: config
       run: |
         PYTHON_VERSIONS_JSON=$(make print-json-PYTHON_VERSIONS)
+    - name: Install yq
+      uses: mikefarah/yq@master
         DEFAULT_PYTHON_VERSION=$(yq '.python.default_version' .project.yml)
         CONTAINER_REGISTRY=$(make print-CONTAINER_REGISTRY)
         CONTAINER_IMAGE=$(make print-CONTAINER_IMAGE)

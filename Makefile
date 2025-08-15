@@ -526,6 +526,8 @@ validate-workflow-logic: dev-install  ## Validate GitHub Actions workflows with 
 
 validate-shell-scripts: dev-install  ## Validate shell scripts with shellcheck
 	@echo "Validating shell scripts with shellcheck..."
+	@echo "Ensuring shellcheck is installed..."
+	./dev-tools/scripts/install_dev_tools.py --tool shellcheck
 	@find . -name "*.sh" -not -path "./.venv/*" -not -path "./node_modules/*" -print0 | xargs -0 $(call run-tool,shellcheck,-x)
 
 validate-all-workflows: validate-workflow-syntax validate-workflow-logic  ## Run all workflow validation checks

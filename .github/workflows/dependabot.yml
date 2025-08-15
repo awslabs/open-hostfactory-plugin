@@ -187,10 +187,10 @@ jobs:
 
     steps:
       - name: Checkout code
-
-    - name: Install yq
-      uses: mikefarah/yq@master
         uses: actions/checkout@v5
+
+      - name: Install yq
+        uses: mikefarah/yq@master
 
       - name: Set up Python
         uses: actions/setup-python@v5

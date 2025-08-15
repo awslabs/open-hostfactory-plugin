@@ -14,6 +14,7 @@ import os
 import sys
 from typing import Any, Dict
 
+from _package import REPO_URL
 from cli.completion import generate_bash_completion, generate_zsh_completion
 from cli.formatters import format_output
 from domain.base.exceptions import DomainException
@@ -33,7 +34,7 @@ def parse_args() -> tuple[argparse.Namespace, dict]:
         prog=os.path.basename(sys.argv[0]),
         description="Open HostFactory Plugin - Cloud resource management for IBM Spectrum Symphony",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog=f"""
 Examples:
   %(prog)s templates list                    # List all templates
   %(prog)s templates list --legacy           # List in legacy format
@@ -41,7 +42,7 @@ Examples:
   %(prog)s machines request template-id 5    # Request 5 machines
   %(prog)s requests list --status pending    # List pending requests
 
-For more information, visit: https://github.com/awslabs/open-hostfactory-plugin
+For more information, visit: {REPO_URL}
         """,
     )
 

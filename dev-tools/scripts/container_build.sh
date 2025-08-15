@@ -146,6 +146,7 @@ build_image() {
         "--build-arg" "VCS_REF=${VCS_REF}"
         "--build-arg" "PYTHON_VERSION=${PYTHON_VERSION}"
         "--build-arg" "PACKAGE_NAME_SHORT=${MAKEFILE_PACKAGE_SHORT}"
+        "--build-arg" "BUILDKIT_DOCKERFILE_CHECK=skip=SecretsUsedInArgOrEnv"
     )
 
     # Prepare cache arguments

@@ -23,8 +23,7 @@ LABEL org.opencontainers.image.title="Open Host Factory Plugin API" \
 
 # Install runtime dependencies and create user in single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl=8.14.1-2 \
-    ca-certificates=20250419 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean \
     && groupadd -r "${PACKAGE_NAME_SHORT}" \
@@ -75,7 +74,7 @@ ENV PYTHONPATH=/app \
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${HF_SERVER_PORT}/health || exit 1
+    CMD python -c "import requests; requests.get('http://localhost:${HF_SERVER_PORT}/health', timeout=5).raise_for_status()" || exit 1
 
 # Expose port
 EXPOSE 8000

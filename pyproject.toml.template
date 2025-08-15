@@ -147,8 +147,8 @@ dev = [
 
 [project.optional-dependencies]
 [project.scripts]
-{{PACKAGE_NAME_SHORT}} = "run:cli_main"     # From src._package.PACKAGE_NAME_SHORT
-{{PACKAGE_NAME}} = "run:cli_main"           # From src._package.PACKAGE_NAME
+{{PACKAGE_NAME_SHORT}} = "src.run:cli_main"     # From src._package.PACKAGE_NAME_SHORT
+{{PACKAGE_NAME}} = "src.run:cli_main"           # From src._package.PACKAGE_NAME
 
 # URLs using centralized repository detection  
 [project.urls]
@@ -158,10 +158,11 @@ Repository = "{{REPO_URL}}"         # From src._package.REPO_URL
 "Bug Reports" = "{{REPO_ISSUES_URL}}"  # From src._package.REPO_ISSUES_URL
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+py-modules = ["src.run"]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["src*"]
 
 
 

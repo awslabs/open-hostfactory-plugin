@@ -344,24 +344,26 @@ class DevToolsInstaller:
     def _install_actionlint_generic(self):
         """Install actionlint using go install or binary download."""
         # Try go install first
-        if self._run_command(["go", "install", "github.com/rhymond/actionlint/cmd/actionlint@latest"]):
+        if self._run_command(
+            ["go", "install", "github.com/rhymond/actionlint/cmd/actionlint@latest"]
+        ):
             return True
-        
+
         # Fallback to binary download
         arch = platform.machine().lower()
         if arch == "x86_64":
             arch = "amd64"
         elif arch in ["aarch64", "arm64"]:
             arch = "arm64"
-        
+
         os_name = "linux"
         if self.os_type == "darwin":
             os_name = "darwin"
-        
+
         url = f"https://github.com/rhymond/actionlint/releases/latest/download/actionlint_1.6.26_{os_name}_{arch}.tar.gz"
-        return self._run_command([
-            "curl", "-L", url, "|", "sudo", "tar", "-xz", "-C", "/usr/local/bin", "actionlint"
-        ])
+        return self._run_command(
+            ["curl", "-L", url, "|", "sudo", "tar", "-xz", "-C", "/usr/local/bin", "actionlint"]
+        )
 
     def _install_shellcheck_generic(self):
         """Install shellcheck using binary download."""
@@ -370,11 +372,23 @@ class DevToolsInstaller:
             arch = "x86_64"
         elif arch in ["aarch64", "arm64"]:
             arch = "aarch64"
-        
+
         url = f"https://github.com/koalaman/shellcheck/releases/latest/download/shellcheck-latest.linux.{arch}.tar.xz"
-        return self._run_command([
-            "curl", "-L", url, "|", "sudo", "tar", "-xJ", "-C", "/usr/local/bin", "--strip-components=1", f"shellcheck-latest/shellcheck"
-        ])
+        return self._run_command(
+            [
+                "curl",
+                "-L",
+                url,
+                "|",
+                "sudo",
+                "tar",
+                "-xJ",
+                "-C",
+                "/usr/local/bin",
+                "--strip-components=1",
+                f"shellcheck-latest/shellcheck",
+            ]
+        )
 
     def _install_trufflehog_generic(self):
         """Install trufflehog using curl."""
@@ -495,7 +509,15 @@ class DevToolsInstaller:
         required_tools = ["yq", "uv", "docker"]
 
         # Optional tools (for security/quality checks)
-        optional_tools = ["hadolint", "trivy", "syft", "semgrep", "trufflehog", "actionlint", "shellcheck"]
+        optional_tools = [
+            "hadolint",
+            "trivy",
+            "syft",
+            "semgrep",
+            "trufflehog",
+            "actionlint",
+            "shellcheck",
+        ]
 
         tools_to_install = required_tools
         if not required_only:

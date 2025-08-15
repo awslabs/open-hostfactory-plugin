@@ -62,6 +62,8 @@ PACKAGE_NAME_SHORT = config["project"].get("short_name", "ohfp")
 __version__ = config["project"]["version"]
 VERSION = __version__
 DESCRIPTION = config["project"]["description"]
+AUTHOR = config["project"].get("author", "AWS Professional Services")
+EMAIL = config["project"].get("email", "aws-proserve@amazon.com")
 
 # Repository metadata
 REPO_ORG = config["repository"].get("org", "awslabs")

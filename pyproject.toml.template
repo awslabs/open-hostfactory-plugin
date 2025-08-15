@@ -10,10 +10,10 @@ description = "{{DESCRIPTION}}"
 readme = "README.md"
 license = "Apache-2.0"
 authors = [
-    {name = "AWS Professional Services", email = "aws-proserve@amazon.com"}
+    {name = "{{AUTHOR}}", email = "{{EMAIL}}"}
 ]
 maintainers = [
-    {name = "AWS Professional Services", email = "aws-proserve@amazon.com"}
+    {name = "{{AUTHOR}}", email = "{{EMAIL}}"}
 ]
 keywords = [
     "aws",

@@ -36,8 +36,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Get configuration from project config
       id: config
@@ -67,8 +65,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -103,8 +99,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -138,8 +132,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Run Hadolint Dockerfile scan
       uses: hadolint/hadolint-action@v3.1.0
@@ -168,8 +160,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Run Semgrep security analysis
       uses: returntocorp/semgrep-action@v1
@@ -201,8 +191,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Run Trivy filesystem vulnerability scanner
       uses: aquasecurity/trivy-action@master
@@ -233,8 +221,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
       with:
         fetch-depth: 0
 
@@ -255,8 +241,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Dependency Review
       uses: actions/dependency-review-action@v4
@@ -284,8 +268,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -339,8 +321,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
-    - name: Install yq
-      uses: mikefarah/yq@master
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3

@@ -224,6 +224,7 @@ class ProviderApi(str, Enum):
                 new_member._value_ = value
                 return new_member
         except Exception:
+            # Fall through to hardcoded fallback
             pass
 
         # Fallback to hardcoded values for safety
@@ -283,6 +284,7 @@ class AWSFleetType(str, Enum):
                 new_member._value_ = value
                 return new_member
         except Exception:
+            # Fall through to hardcoded fallback
             pass
 
         # Fallback to hardcoded values for safety

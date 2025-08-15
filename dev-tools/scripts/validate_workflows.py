@@ -87,18 +87,18 @@ def validate_workflow(file_path: Path):
     # First check YAML syntax
     syntax_valid, syntax_error = validate_workflow_syntax(file_path)
     if not syntax_valid:
-        logger.error(f"  ❌ {file_path.name}: {syntax_error}")
+        logger.error(f"  INVALID: {file_path.name}: {syntax_error}")
         return False
 
     # Then check workflow structure
     structure_issues = validate_workflow_structure(file_path)
     if structure_issues:
-        logger.error(f"  ❌ {file_path.name}: Structure issues:")
+        logger.error(f"  INVALID: {file_path.name}: Structure issues:")
         for issue in structure_issues:
             logger.error(f"     - {issue}")
         return False
 
-    logger.info(f"  ✅ {file_path.name}: Valid")
+    logger.info(f"  VALID: {file_path.name}: Valid")
     return True
 
 
@@ -127,10 +127,10 @@ def main():
 
     logger.info("")
     if all_valid:
-        logger.info(f"🎉 SUCCESS: All {len(workflow_files)} workflow files are valid!")
+        logger.info(f"SUCCESS: All {len(workflow_files)} workflow files are valid!")
         sys.exit(0)
     else:
-        logger.error("❌ FAILED: Found invalid workflow files")
+        logger.error("FAILED: Found invalid workflow files")
         logger.error("Fix the issues above before committing.")
         sys.exit(1)
 

@@ -185,9 +185,9 @@ class RuntimeAMICache:
                 # The CachingAMIResolver will log cache statistics
                 pass
 
-        except Exception:
+        except Exception as e:
             # Silent failure - cache will work without persistence
-            pass
+            logger.debug(f"Failed to load persistent cache: {e}")
 
     def _save_to_persistent_cache(self) -> None:
         """Save current cache to persistent file using atomic write."""
@@ -219,9 +219,9 @@ class RuntimeAMICache:
             # Atomic replace
             os.rename(temp_file, self._persistent_file)
 
-        except Exception:
+        except Exception as e:
             # Silent failure - cache will work without persistence
-            pass
+            logger.debug(f"Failed to save persistent cache: {e}")
 
     def _remove_expired_entry(self, ssm_parameter: str) -> None:
         """Remove expired entry from cache and metadata."""

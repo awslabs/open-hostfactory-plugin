@@ -29,7 +29,11 @@ fi
 # Build package
 echo "INFO: Building package..."
 BUILD_ARGS="${BUILD_ARGS:-}"
-$RUN_TOOL python -m build "$BUILD_ARGS"
+if [ -n "$BUILD_ARGS" ]; then
+    $RUN_TOOL python -m build $BUILD_ARGS
+else
+    $RUN_TOOL python -m build
+fi
 
 echo "SUCCESS: Package built successfully!"
 echo "INFO: Files created:"

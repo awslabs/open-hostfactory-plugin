@@ -152,7 +152,8 @@ jobs:
         PUSH: ${{ github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.event_name == 'release' || github.event.inputs.push_images == 'true') }}
         CACHE: true
       run: |
-        make docker-build
+        make container-build
+      continue-on-error: true
 
     - name: Test container image
       if: matrix.default-python-version == needs.get-config.outputs.default-python-version

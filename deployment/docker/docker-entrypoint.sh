@@ -43,7 +43,7 @@ print_banner() {
 EOF
     echo ""
     log_info "Open Host Factory Plugin REST API"
-    log_info "Version: ${VERSION:-1.0.0}"
+    log_info "Version: ${VERSION:-dev}"
     log_info "Build: ${BUILD_DATE:-unknown}"
     echo ""
 }
@@ -236,7 +236,7 @@ handle_command() {
         "version")
             # Show version
             echo "Open Host Factory Plugin REST API"
-            echo "Version: ${VERSION:-1.0.0}"
+            echo "Version: ${VERSION:-dev}"
             echo "Build: ${BUILD_DATE:-unknown}"
             echo "Revision: ${VCS_REF:-unknown}"
             ;;

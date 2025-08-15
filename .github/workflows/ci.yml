@@ -21,7 +21,7 @@ jobs:
     name: Get Python Version from Makefile
     runs-on: ubuntu-latest
     outputs:
-      python-version: ${{ steps.version.outputs.default-python-version }}
+      default-python-version: ${{ steps.version.outputs.default-python-version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
@@ -47,7 +47,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ needs.get-config.outputs.python-version }}
+        python-version: ${{ needs.get-config.outputs.default-python-version }}
     
     - name: Install UV
       uses: astral-sh/setup-uv@v6

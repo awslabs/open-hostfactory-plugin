@@ -9,7 +9,7 @@ FROM python:${PYTHON_VERSION}-slim
 # Re-declare build arguments for this stage
 ARG PACKAGE_NAME_SHORT
 ARG BUILD_DATE
-ARG VERSION=1.0.0
+ARG VERSION=dev
 ARG VCS_REF
 
 # Add metadata labels in single layer

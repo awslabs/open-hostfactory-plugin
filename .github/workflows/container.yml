@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       python-versions: ${{ steps.config.outputs.python-versions }}
-      python-version: ${{ steps.config.outputs.default-python-version }}
+      default-python-version: ${{ steps.config.outputs.default-python-version }}
       container-registry: ${{ steps.config.outputs.container-registry }}
       container-image: ${{ steps.config.outputs.container-image }}
       version: ${{ steps.config.outputs.version }}

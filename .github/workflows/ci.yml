@@ -554,10 +554,8 @@ jobs:
     - name: Generate pyproject.toml
       run: |
         make generate-pyproject
-    - name: Install build dependencies with uv
+    - name: Install dependencies with uv
       run: |
-        uv venv
-        uv pip install build wheel setuptools
         make ci-install
 
     - name: Build package

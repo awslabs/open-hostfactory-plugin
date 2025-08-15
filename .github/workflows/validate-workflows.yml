@@ -9,8 +9,8 @@ on:
       - '.github/workflows/**'
 
 jobs:
-  validate-yaml:
-    name: Validate Workflow YAML
+  validate-workflows:
+    name: Validate Workflow Files
     runs-on: ubuntu-latest
 
     steps:
@@ -20,13 +20,6 @@ jobs:
     - name: Install yq
       uses: mikefarah/yq@master
 
-    - name: Validate workflow files
+    - name: Validate workflow syntax and logic
       run: |
-        echo "Validating GitHub Actions workflow YAML files..."
-        for file in .github/workflows/*.yml .github/workflows/*.yaml; do
-          if [ -f "$file" ]; then
-            echo "Validating $file..."
-            yq . "$file" > /dev/null && echo "VALID: $file" || (echo "INVALID: $file" && exit 1)
-          fi
-        done
-        echo "All workflow files are valid!"
+        make validate-all-workflows

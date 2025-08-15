@@ -26,7 +26,6 @@ Note:
     based on demand and maintain high availability across multiple AZs.
 """
 
-from datetime import datetime
 from typing import Any, Dict, List
 
 from src.domain.base.dependency_injection import injectable
@@ -35,10 +34,7 @@ from src.domain.request.aggregate import Request
 from src.infrastructure.adapters.ports.request_adapter_port import RequestAdapterPort
 from src.infrastructure.error.decorators import handle_infrastructure_exceptions
 from src.providers.aws.domain.template.aggregate import AWSTemplate
-from src.providers.aws.exceptions.aws_exceptions import (
-    AWSInfrastructureError,
-    AWSValidationError,
-)
+from src.providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.providers.aws.utilities.aws_operations import AWSOperations
 
@@ -215,9 +211,9 @@ class ASGHandler(AWSHandler):
             )
             if not asg_response["AutoScalingGroups"]:
                 raise AWSInfrastructureError(f"ASG {request.resource_id} not found")
-            
+
             asg = asg_response["AutoScalingGroups"][0]
-            
+
             # Reduce desired capacity first
             current_capacity = asg["DesiredCapacity"]
             new_capacity = max(0, current_capacity - len(instance_ids))
@@ -280,4 +276,3 @@ class ASGHandler(AWSHandler):
         except Exception as e:
             self._logger.error(f"Unexpected error checking ASG status: {str(e)}")
             raise AWSInfrastructureError(f"Failed to check ASG status: {str(e)}")
-

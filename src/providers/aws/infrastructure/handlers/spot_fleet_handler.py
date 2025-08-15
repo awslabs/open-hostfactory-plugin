@@ -30,8 +30,6 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List
 
-from botocore.exceptions import ClientError
-
 from src.domain.base.dependency_injection import injectable
 from src.domain.base.ports import LoggingPort
 from src.domain.request.aggregate import Request

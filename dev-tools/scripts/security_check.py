@@ -38,17 +38,17 @@ def run_tool(tool_name, *args):
     try:
         result = subprocess.run(command, check=False, capture_output=True, text=True)
         if result.returncode == 0:
-            logger.info(f"✓ {tool_name} passed")
+            logger.info(f"PASS {tool_name} passed")
             return True
         else:
-            logger.warning(f"⚠ {tool_name} found issues")
+            logger.warning(f"WARN {tool_name} found issues")
             if result.stdout:
                 logger.info(result.stdout)
             if result.stderr:
                 logger.warning(result.stderr)
             return False
     except Exception as e:
-        logger.error(f"✗ {tool_name} failed: {e}")
+        logger.error(f"FAIL {tool_name} failed: {e}")
         return False
 
 
@@ -98,13 +98,13 @@ def run_semgrep():
         )
 
         if result.returncode == 0:
-            logger.info("✓ Semgrep passed")
+            logger.info("PASS Semgrep passed")
             return True
         else:
-            logger.warning("⚠ Semgrep found issues")
+            logger.warning("WARN Semgrep found issues")
             return False
     except Exception as e:
-        logger.error(f"✗ Semgrep failed: {e}")
+        logger.error(f"FAIL Semgrep failed: {e}")
         return False
 
 
@@ -131,13 +131,13 @@ def run_trufflehog():
             f.write(result.stdout)
 
         if result.returncode == 0:
-            logger.info("✓ TruffleHog passed")
+            logger.info("PASS TruffleHog passed")
             return True
         else:
-            logger.warning("⚠ TruffleHog found secrets")
+            logger.warning("WARN TruffleHog found secrets")
             return False
     except Exception as e:
-        logger.error(f"✗ TruffleHog failed: {e}")
+        logger.error(f"FAIL TruffleHog failed: {e}")
         return False
 
 
@@ -168,9 +168,9 @@ def main():
         logger.info("Running container security scans via Makefile...")
         try:
             subprocess.run(["make", "security-container"], check=True)
-            logger.info("✓ Container security scans completed")
+            logger.info("PASS Container security scans completed")
         except subprocess.CalledProcessError:
-            logger.warning("⚠ Container security scans had issues")
+            logger.warning("WARN Container security scans had issues")
             results.append(False)
         else:
             results.append(True)
@@ -183,10 +183,10 @@ def main():
     logger.info(f"Passed: {passed}/{total} checks")
 
     if passed == total:
-        logger.info("✓ All security checks passed!")
+        logger.info("PASS All security checks passed!")
         return 0
     else:
-        logger.warning("⚠ Some security checks found issues")
+        logger.warning("WARN Some security checks found issues")
         return 1
 
 

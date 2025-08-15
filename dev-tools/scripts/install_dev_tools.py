@@ -199,7 +199,7 @@ class DevToolsInstaller:
         # Check if chocolatey is already installed
         try:
             subprocess.run(["choco", "--version"], check=True, capture_output=True)
-            logger.info("✓ Chocolatey is already installed")
+            logger.info("Chocolatey is already installed")
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
             pass
@@ -221,7 +221,7 @@ class DevToolsInstaller:
 
         try:
             result = subprocess.run(powershell_cmd, check=True, capture_output=True, text=True)
-            logger.info("✓ Chocolatey installed successfully")
+            logger.info("Chocolatey installed successfully")
             return True
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to install Chocolatey: {e}")
@@ -399,7 +399,7 @@ class DevToolsInstaller:
 
         # Check if already installed
         if self.is_tool_installed(tool_name):
-            logger.info(f"✓ {tool_name} is already installed")
+            logger.info(f"{tool_name} is already installed")
             return True
 
         # Ensure Chocolatey is available on Windows
@@ -445,7 +445,7 @@ class DevToolsInstaller:
         # Summary
         logger.info("\n=== Installation Summary ===")
         for tool, success in results.items():
-            status = "✓" if success else "✗"
+            status = "PASS" if success else "FAIL"
             logger.info(f"{status} {tool}")
 
         failed = [tool for tool, success in results.items() if not success]

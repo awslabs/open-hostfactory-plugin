@@ -37,19 +37,20 @@ def find_shell_scripts(gitignore_spec=None):
     """Find all shell scripts, respecting .gitignore."""
     shell_files = []
     
-    # Find .sh files
-    for sh_file in Path(".").rglob("*.sh"):
-        # Skip hidden directories and common exclusions
-        if any(part.startswith(".") for part in sh_file.parts[:-1]):
-            continue
-        if any(part in ["__pycache__", "node_modules", ".venv", ".git"] for part in sh_file.parts):
-            continue
-            
-        # Check gitignore
-        if gitignore_spec and gitignore_spec.match_file(str(sh_file)):
-            continue
-            
-        shell_files.append(sh_file)
+    # Find .sh and .bash files
+    for pattern in ["*.sh", "*.bash"]:
+        for shell_file in Path(".").rglob(pattern):
+            # Skip hidden directories and common exclusions
+            if any(part.startswith(".") for part in shell_file.parts[:-1]):
+                continue
+            if any(part in ["__pycache__", "node_modules", ".venv", ".git"] for part in shell_file.parts):
+                continue
+                
+            # Check gitignore
+            if gitignore_spec and gitignore_spec.match_file(str(shell_file)):
+                continue
+                
+            shell_files.append(shell_file)
     
     return sorted(shell_files)
 

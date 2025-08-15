@@ -21,6 +21,7 @@ setup_environment() {
     # Fallback to .venv if it exists
     if [ -f ".venv/bin/activate" ]; then
         echo "Using existing .venv environment..."
+        # shellcheck disable=SC1091
         source .venv/bin/activate
         return 0
     fi
@@ -32,6 +33,7 @@ setup_environment() {
             uv venv
         else
             python3 -m venv .venv
+            # shellcheck disable=SC1091
             source .venv/bin/activate
         fi
         return 0

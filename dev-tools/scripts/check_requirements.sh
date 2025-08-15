@@ -33,6 +33,7 @@ log_section() {
 
 # Check if virtual environment exists
 if [ -d "$PROJECT_ROOT/.venv" ]; then
+    # shellcheck disable=SC1091
     source "$PROJECT_ROOT/.venv/bin/activate"
 fi
 

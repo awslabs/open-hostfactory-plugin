@@ -271,7 +271,7 @@ class DevToolsInstaller:
             logger.error("Please install Chocolatey manually: https://chocolatey.org/install")
             return False
 
-    def _run_command(self, cmd, description=""):
+    def _run_command(self, cmd, description="", shell=False):
         """Run a command with dry-run support."""
         if isinstance(cmd, list):
             cmd_str = " ".join(cmd)
@@ -284,7 +284,7 @@ class DevToolsInstaller:
 
         logger.info(f"Running: {cmd_str}")
         try:
-            result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+            result = subprocess.run(cmd, check=True, capture_output=True, text=True, shell=shell)
             return True
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to run {cmd_str}: {e}")
@@ -376,8 +376,10 @@ class DevToolsInstaller:
             os_name = "darwin"
 
         url = f"https://github.com/rhymond/actionlint/releases/latest/download/actionlint_1.6.26_{os_name}_{arch}.tar.gz"
+        # Use shell=True for pipe command
         return self._run_command(
-            ["curl", "-L", url, "|", "sudo", "tar", "-xz", "-C", "/usr/local/bin", "actionlint"]
+            f"curl -L {url} | sudo tar -xz -C /usr/local/bin actionlint",
+            shell=True
         )
 
     def _install_shellcheck_generic(self):

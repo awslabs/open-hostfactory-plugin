@@ -530,6 +530,8 @@ validate-shell-scripts: dev-install  ## Validate shell scripts with shellcheck
 	./dev-tools/scripts/install_dev_tools.py --tool shellcheck
 	@find . -name "*.sh" -not -path "./.venv/*" -not -path "./node_modules/*" -print0 | xargs -0 $(call run-tool,shellcheck,-x)
 
+validate-shellcheck: validate-shell-scripts  ## Alias for pre-commit compatibility
+
 validate-all-workflows: validate-workflow-syntax validate-workflow-logic  ## Run all workflow validation checks
 
 validate-all-files: validate-all-workflows validate-shell-scripts  ## Run all validation checks

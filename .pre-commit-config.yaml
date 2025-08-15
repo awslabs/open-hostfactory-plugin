@@ -184,9 +184,9 @@ repos:
         description: "Validate GitHub Actions workflows with actionlint"
         warning_only: true  # Allow this to fail without blocking commit
 
-      - id: validate-shellcheck
+      - id: validate-shell-scripts
         name: Validate Shell Scripts (shellcheck)
-        entry: make validate-shellcheck
+        entry: make validate-shell-scripts
         language: system
         files: \.sh$
         pass_filenames: false

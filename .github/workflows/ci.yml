@@ -99,7 +99,9 @@ jobs:
         cache-dependency-glob: "pyproject.toml.template"
 
     - name: Install PyYAML
-      run: uv pip install --system PyYAML
+      run: |
+        uv venv
+        uv pip install PyYAML
 
     - name: Validate workflows
       run: make validate-all

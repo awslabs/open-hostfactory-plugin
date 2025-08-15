@@ -198,7 +198,7 @@ start_application() {
     fi
 
     if [[ -n "${HF_SERVER_LOG_LEVEL}" ]]; then
-        cmd_args+=("--log-level" "${HF_SERVER_LOG_LEVEL}")
+        cmd_args+=("--server-log-level" "${HF_SERVER_LOG_LEVEL}")
     fi
 
     log_info "Executing: ohfp ${cmd_args[*]}"

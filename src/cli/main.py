@@ -266,6 +266,14 @@ For more information, visit: https://github.com/aws-samples/open-hostfactory-plu
         "--format", choices=["json", "yaml", "table", "list"], help="Output format"
     )
 
+    # System serve
+    system_serve = system_subparsers.add_parser("serve", help="Start REST API server")
+    system_serve.add_argument("--host", default="0.0.0.0", help="Server host")
+    system_serve.add_argument("--port", type=int, default=8000, help="Server port")
+    system_serve.add_argument("--workers", type=int, default=1, help="Number of workers")
+    system_serve.add_argument("--reload", action="store_true", help="Enable auto-reload")
+    system_serve.add_argument("--server-log-level", default="info", help="Server log level")
+
     # Config resource
     config_parser = subparsers.add_parser("config", help="Configuration management")
     resource_parsers["config"] = config_parser

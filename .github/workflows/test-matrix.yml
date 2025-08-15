@@ -98,7 +98,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ${{ matrix.os }}
-    needs: [unit-tests]
+    needs: [get-config, unit-tests]
     strategy:
       fail-fast: false
       matrix:
@@ -149,7 +149,7 @@ jobs:
   e2e-tests:
     name: End-to-End Tests
     runs-on: ${{ matrix.os }}
-    needs: [unit-tests, integration-tests]
+    needs: [get-config, unit-tests, integration-tests]
     strategy:
       fail-fast: false
       matrix:

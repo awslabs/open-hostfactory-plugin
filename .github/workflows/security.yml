@@ -308,6 +308,7 @@ jobs:
   container-security:
     name: Container Security
     runs-on: ubuntu-latest
+    needs: get-config
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.changed_files, 'Dockerfile') || contains(github.event.pull_request.changed_files, 'docker-compose')
 
     strategy:

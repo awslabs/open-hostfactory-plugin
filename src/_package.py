@@ -1,14 +1,17 @@
 """Package metadata - works in both development and production."""
+
 import logging
 from pathlib import Path
 from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+
 def _get_from_project_yml() -> Optional[dict]:
     """Try to read from .project.yml (development mode)."""
     try:
         import yaml
+
         project_root = Path(__file__).parent.parent
         project_file = project_root / ".project.yml"
         if project_file.exists():
@@ -18,25 +21,25 @@ def _get_from_project_yml() -> Optional[dict]:
         pass
     return None
 
+
 def _get_from_package_metadata() -> Optional[dict]:
     """Try to read from package metadata (installed mode)."""
     try:
-        from importlib.metadata import version, metadata
+        from importlib.metadata import metadata, version
+
         meta = metadata("open-hostfactory-plugin")
         return {
             "project": {
                 "name": meta["Name"],
                 "version": version("open-hostfactory-plugin"),
-                "description": meta["Summary"]
+                "description": meta["Summary"],
             },
-            "repository": {
-                "org": "awslabs",
-                "name": "open-hostfactory-plugin"
-            }
+            "repository": {"org": "awslabs", "name": "open-hostfactory-plugin"},
         }
     except Exception:
         pass
     return None
+
 
 # Try development first, then production
 config = _get_from_project_yml() or _get_from_package_metadata()
@@ -46,15 +49,11 @@ if not config:
     config = {
         "project": {
             "name": "open-hostfactory-plugin",
-            "short_name": "ohfp", 
+            "short_name": "ohfp",
             "version": "0.1.0-dev",
-            "description": "Cloud provider integration plugin for IBM Spectrum Symphony Host Factory"
+            "description": "Cloud provider integration plugin for IBM Spectrum Symphony Host Factory",
         },
-        "repository": {
-            "org": "awslabs",
-            "name": "open-hostfactory-plugin",
-            "registry": "ghcr.io"
-        }
+        "repository": {"org": "awslabs", "name": "open-hostfactory-plugin", "registry": "ghcr.io"},
     }
 
 # Export the same interface

@@ -148,6 +148,34 @@ class DevToolsInstaller:
                     "generic": ["pip", "install", "semgrep"],
                 },
             },
+            "actionlint": {
+                "description": "GitHub Actions workflow linter",
+                "check_cmd": ["actionlint", "-version"],
+                "install": {
+                    "darwin": ["brew", "install", "actionlint"],
+                    "windows": ["choco", "install", "-y", "actionlint"],
+                    "ubuntu": self._install_actionlint_generic,
+                    "debian": self._install_actionlint_generic,
+                    "rhel": self._install_actionlint_generic,
+                    "centos": self._install_actionlint_generic,
+                    "fedora": self._install_actionlint_generic,
+                    "generic": self._install_actionlint_generic,
+                },
+            },
+            "shellcheck": {
+                "description": "Shell script linter",
+                "check_cmd": ["shellcheck", "--version"],
+                "install": {
+                    "darwin": ["brew", "install", "shellcheck"],
+                    "windows": ["choco", "install", "-y", "shellcheck"],
+                    "ubuntu": ["sudo", "apt", "install", "-y", "shellcheck"],
+                    "debian": ["sudo", "apt", "install", "-y", "shellcheck"],
+                    "rhel": ["sudo", "yum", "install", "-y", "ShellCheck"],
+                    "centos": ["sudo", "yum", "install", "-y", "ShellCheck"],
+                    "fedora": ["sudo", "dnf", "install", "-y", "ShellCheck"],
+                    "generic": self._install_shellcheck_generic,
+                },
+            },
             "trufflehog": {
                 "description": "Secrets scanner (optional)",
                 "check_cmd": ["trufflehog", "--version"],
@@ -313,6 +341,41 @@ class DevToolsInstaller:
         """Install uv using their install script."""
         return self._run_command(["curl", "-LsSf", "https://astral.sh/uv/install.sh", "|", "sh"])
 
+    def _install_actionlint_generic(self):
+        """Install actionlint using go install or binary download."""
+        # Try go install first
+        if self._run_command(["go", "install", "github.com/rhymond/actionlint/cmd/actionlint@latest"]):
+            return True
+        
+        # Fallback to binary download
+        arch = platform.machine().lower()
+        if arch == "x86_64":
+            arch = "amd64"
+        elif arch in ["aarch64", "arm64"]:
+            arch = "arm64"
+        
+        os_name = "linux"
+        if self.os_type == "darwin":
+            os_name = "darwin"
+        
+        url = f"https://github.com/rhymond/actionlint/releases/latest/download/actionlint_1.6.26_{os_name}_{arch}.tar.gz"
+        return self._run_command([
+            "curl", "-L", url, "|", "sudo", "tar", "-xz", "-C", "/usr/local/bin", "actionlint"
+        ])
+
+    def _install_shellcheck_generic(self):
+        """Install shellcheck using binary download."""
+        arch = platform.machine().lower()
+        if arch == "x86_64":
+            arch = "x86_64"
+        elif arch in ["aarch64", "arm64"]:
+            arch = "aarch64"
+        
+        url = f"https://github.com/koalaman/shellcheck/releases/latest/download/shellcheck-latest.linux.{arch}.tar.xz"
+        return self._run_command([
+            "curl", "-L", url, "|", "sudo", "tar", "-xJ", "-C", "/usr/local/bin", "--strip-components=1", f"shellcheck-latest/shellcheck"
+        ])
+
     def _install_trufflehog_generic(self):
         """Install trufflehog using curl."""
         arch = platform.machine().lower()
@@ -432,7 +495,7 @@ class DevToolsInstaller:
         required_tools = ["yq", "uv", "docker"]
 
         # Optional tools (for security/quality checks)
-        optional_tools = ["hadolint", "trivy", "syft", "semgrep", "trufflehog"]
+        optional_tools = ["hadolint", "trivy", "syft", "semgrep", "trufflehog", "actionlint", "shellcheck"]
 
         tools_to_install = required_tools
         if not required_only:

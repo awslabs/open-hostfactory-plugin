@@ -517,6 +517,16 @@ validate-workflows: dev-install  ## Validate GitHub Actions workflow YAML files
 	@echo "Validating workflow files..."
 	./dev-tools/scripts/validate_workflows.py
 
+validate-actionlint: dev-install  ## Validate GitHub Actions workflows with actionlint
+	@echo "Validating workflows with actionlint..."
+	$(call run-tool,actionlint,.github/workflows/*.yml)
+
+validate-shellcheck: dev-install  ## Validate shell scripts with shellcheck
+	@echo "Validating shell scripts with shellcheck..."
+	@find . -name "*.sh" -not -path "./.venv/*" -not -path "./node_modules/*" -print0 | xargs -0 $(call run-tool,shellcheck,-x)
+
+validate-all: validate-workflows validate-actionlint validate-shellcheck  ## Run all validation checks
+
 detect-secrets: dev-install  ## Detect potential hardcoded secrets in source code
 	@echo "Detecting hardcoded secrets..."
 	./dev-tools/security/detect_secrets.py

@@ -204,7 +204,8 @@ class SQLQueryBuilder(QueryManager):
         set_clauses = [f"{col} = :{col}" for col in filtered_data.keys()]
         # nosec B608
         query = (
-            f"UPDATE {self.table_name} SET {', '.join(set_clauses)} WHERE {id_column} = :entity_id"  # nosec B608
+            f"UPDATE {self.table_name} SET {', '.join(set_clauses)} "  # nosec B608
+            f"WHERE {id_column} = :entity_id"  # nosec B608
         )
 
         # Add entity_id to parameters
@@ -228,7 +229,10 @@ class SQLQueryBuilder(QueryManager):
         self._validate_identifier(id_column)
 
         # nosec B608
-        query = f"DELETE FROM { self.table_name} WHERE {id_column} = :{id_column}"  # nosec B608
+        query = (
+            f"DELETE FROM {self.table_name} "  # nosec B608
+            f"WHERE {id_column} = :{id_column}"  # nosec B608
+        )
 
         self.logger.debug(f"Built DELETE query for {self.table_name}")
         return query, id_column
@@ -300,7 +304,10 @@ class SQLQueryBuilder(QueryManager):
                 parameters[param_name] = value
 
         # nosec B608
-        query = f"SELECT * FROM {self.table_name} WHERE {' AND '.join(where_clauses)}"  # nosec B608
+        query = (
+            f"SELECT * FROM {self.table_name} "  # nosec B608
+            f"WHERE {' AND '.join(where_clauses)}"  # nosec B608
+        )
 
         self.logger.debug(f"Built SELECT with criteria query for {self.table_name}")
         return query, parameters
@@ -346,7 +353,10 @@ class SQLQueryBuilder(QueryManager):
 
         placeholders = [f":{col}" for col in filtered_columns]
         # nosec B608
-        query = f"INSERT INTO {self.table_name} ({', '.join(filtered_columns)}) VALUES ({', '.join(placeholders)})"  # nosec B608
+        query = (
+            f"INSERT INTO {self.table_name} "  # nosec B608
+            f"({', '.join(filtered_columns)}) VALUES ({', '.join(placeholders)})"  # nosec B608
+        )
 
         # Filter all data items
         filtered_data_list = []

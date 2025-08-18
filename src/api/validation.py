@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 class ValidationException(Exception):
     """Exception raised for validation errors."""
 
-    def __init__(self, message: str, errors: Optional[List[Dict[str, Any]]] = None):
+    def __init__(self, message: str, errors: Optional[List[Dict[str, Any]]] = None) -> None:
         """
         Initialize validation exception.
 

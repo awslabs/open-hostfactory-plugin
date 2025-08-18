@@ -23,7 +23,7 @@ class CachingAMIResolver(TemplateResolverPort):
     cache settings and path resolution.
     """
 
-    def __init__(self, aws_client: AWSClient, config: ConfigurationPort, logger: LoggingPort):
+    def __init__(self, aws_client: AWSClient, config: ConfigurationPort, logger: LoggingPort) -> None:
         """
         Initialize AMI resolver.
 

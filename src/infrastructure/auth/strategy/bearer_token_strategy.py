@@ -23,7 +23,7 @@ class BearerTokenStrategy(AuthPort):
         algorithm: str = "HS256",
         token_expiry: int = 3600,  # 1 hour
         enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize bearer token strategy.
 

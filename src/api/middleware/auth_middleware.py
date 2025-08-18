@@ -23,7 +23,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         auth_port: AuthPort,
         excluded_paths: List[str] = None,
         require_auth: bool = True,
-    ):
+    ) -> None:
         """
         Initialize authentication middleware.
 
@@ -172,7 +172,7 @@ class AuthDependency:
         required_permissions: List[str] = None,
         required_roles: List[str] = None,
         allow_service_accounts: bool = True,
-    ):
+    ) -> None:
         """
         Initialize auth dependency.
 

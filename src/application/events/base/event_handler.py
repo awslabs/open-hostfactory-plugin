@@ -36,7 +36,7 @@ class EventHandler(ABC):
     - Error Handling: Consistent error handling and retry logic
     """
 
-    def __init__(self, logger: Optional[LoggingPort] = None):
+    def __init__(self, logger: Optional[LoggingPort] = None) -> None:
         """
         Initialize event handler.
 
@@ -125,7 +125,7 @@ class EventHandler(ABC):
         """
         # Future: Add metrics collection, audit logging, etc.
 
-    async def _process_with_retry(self, event: DomainEvent) -> None:
+    async def _process_with_retry(self, event: DomainEvent):
         """
         Process event with retry logic.
 

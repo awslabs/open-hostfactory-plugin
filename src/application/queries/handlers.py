@@ -367,7 +367,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
         class SimpleProviderContext:
             """Simple provider context for AWS operations."""
 
-            def __init__(self, container):
+            def __init__(self, container) -> None:
                 self.container = container
 
             async def check_resource_status(self, request) -> List[Dict[str, Any]]:
@@ -489,7 +489,7 @@ class GetRequestHandler(BaseQueryHandler[GetRequestQuery, RequestDTO]):
             class NoOpEventPublisher:
                 """No-operation event publisher that discards events."""
 
-                def publish(self, event):
+                def publish(self, event) -> None:
                     """Publish event (no-op implementation)."""
 
             return NoOpEventPublisher()
@@ -504,7 +504,7 @@ class GetRequestStatusQueryHandler(BaseQueryHandler[GetRequestStatusQuery, str])
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
 
@@ -543,7 +543,7 @@ class ListActiveRequestsHandler(BaseQueryHandler[ListActiveRequestsQuery, List[R
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
 
@@ -595,7 +595,7 @@ class ListReturnRequestsHandler(BaseQueryHandler[ListReturnRequestsQuery, List[R
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
 
@@ -641,7 +641,7 @@ class GetTemplateHandler(BaseQueryHandler[GetTemplateQuery, Template]):
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
         container: ContainerPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self._container = container
 
@@ -707,7 +707,7 @@ class ListTemplatesHandler(BaseQueryHandler[ListTemplatesQuery, List[Template]])
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
         container: ContainerPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self._container = container
 
@@ -784,7 +784,7 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
         logger: LoggingPort,
         container: ContainerPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.container = container
 
@@ -837,7 +837,7 @@ class GetMachineHandler(BaseQueryHandler[GetMachineQuery, MachineDTO]):
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
 
@@ -884,7 +884,7 @@ class ListMachinesHandler(BaseQueryHandler[ListMachinesQuery, List[MachineDTO]])
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
 

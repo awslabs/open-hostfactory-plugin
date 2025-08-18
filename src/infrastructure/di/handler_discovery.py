@@ -46,7 +46,7 @@ class HandlerDiscoveryService:
     repeated module scanning and handler discovery.
     """
 
-    def __init__(self, container: DIContainer):
+    def __init__(self, container: DIContainer) -> None:
         """Initialize the instance."""
         self.container = container
 

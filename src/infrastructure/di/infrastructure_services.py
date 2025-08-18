@@ -23,7 +23,7 @@ def register_infrastructure_services(container: DIContainer) -> None:
     _register_repository_services(container)
 
 
-def _register_template_services(container: DIContainer) -> None:
+def _register_template_services(container: DIContainer):
     """Register template configuration services."""
 
     # Register template defaults port with inline factory

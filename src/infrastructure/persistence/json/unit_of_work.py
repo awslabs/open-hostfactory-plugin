@@ -33,7 +33,7 @@ class JSONUnitOfWork(BaseUnitOfWork):
         template_file: str = "templates.json",
         legacy_template_file: Optional[str] = None,
         create_dirs: bool = True,
-    ):
+    ) -> None:
         """
         Initialize JSON unit of work with simplified repositories.
 

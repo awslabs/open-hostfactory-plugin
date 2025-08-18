@@ -41,7 +41,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
     - Provider-agnostic interface implementation
     """
 
-    def __init__(self, logger: Optional[LoggingPort] = None):
+    def __init__(self, logger: Optional[LoggingPort] = None) -> None:
         """Initialize base resource manager."""
         self.logger = logger
         self._metrics: Dict[str, Any] = {}
@@ -368,7 +368,7 @@ class CloudProviderResourceManager(BaseResourceManager, Generic[T]):
     such as client management and provider-specific error handling.
     """
 
-    def __init__(self, provider_client: T, logger: Optional[LoggingPort] = None):
+    def __init__(self, provider_client: T, logger: Optional[LoggingPort] = None) -> None:
         """Initialize with provider-specific client."""
         super().__init__(logger)
         self.provider_client = provider_client

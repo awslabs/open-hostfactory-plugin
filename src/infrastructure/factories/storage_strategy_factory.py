@@ -14,7 +14,7 @@ from infrastructure.registry.storage_registry import get_storage_registry
 class StorageStrategyFactory:
     """Factory for creating storage strategy components using storage registry."""
 
-    def __init__(self, config_manager: Optional[Any] = None):
+    def __init__(self, config_manager: Optional[Any] = None) -> None:
         """Initialize factory with optional configuration manager."""
         self.logger = get_logger(__name__)
         self.config_manager = config_manager

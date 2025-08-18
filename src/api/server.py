@@ -214,7 +214,7 @@ def _create_auth_strategy(auth_config):
         return None
 
 
-def _register_routers(app: FastAPI):
+def _register_routers(app: FastAPI) -> None:
     """
     Register API routers.
 

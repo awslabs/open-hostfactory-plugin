@@ -48,7 +48,7 @@ class ProviderHandlerTypePort(Protocol):
 class ProviderConfiguration:
     """Provider-agnostic configuration container."""
 
-    def __init__(self, config_data: Dict[str, Any]):
+    def __init__(self, config_data: Dict[str, Any]) -> None:
         """Initialize the instance."""
         self.config_data = config_data
 

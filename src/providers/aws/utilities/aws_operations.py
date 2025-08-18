@@ -20,7 +20,7 @@ from providers.aws.infrastructure.aws_client import AWSClient
 class AWSOperations:
     """Integrated AWS operations utility with all common patterns."""
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort) -> None:
         """
         Initialize AWS operations utility.
 
@@ -32,7 +32,7 @@ class AWSOperations:
         self._logger = logger
         self._retry_with_backoff = None  # Will be set by the handler
 
-    def set_retry_method(self, retry_method: Callable):
+    def set_retry_method(self, retry_method: Callable) -> None:
         """
         Set the handler's retry method.
 
@@ -195,7 +195,7 @@ class AWSOperations:
             response = client_method(**kwargs)
             return response.get(result_key, [])
 
-    def set_pagination_method(self, paginate_func: Callable):
+    def set_pagination_method(self, paginate_func: Callable) -> None:
         """Set the handler's pagination method."""
         self._paginate_func = paginate_func
 
@@ -205,7 +205,7 @@ class AWSOperations:
         resource_type: str,
         resource_id: Optional[str] = None,
         **context,
-    ):
+    ) -> None:
         """Standardized operation start logging."""
         if resource_id:
             self._logger.info("Starting %s for %s: %s", operation, resource_type, resource_id)
@@ -217,7 +217,7 @@ class AWSOperations:
 
     def log_operation_success(
         self, operation: str, resource_type: str, resource_id: str, **context
-    ):
+    ) -> None:
         """Standardized operation success logging."""
         self._logger.info("Successfully completed %s for %s: %s", operation, resource_type, resource_id)
 
@@ -230,7 +230,7 @@ class AWSOperations:
         resource_type: str,
         error: Exception,
         resource_id: Optional[str] = None,
-    ):
+    ) -> None:
         """Standardized operation failure logging."""
         if resource_id:
             self._logger.error(

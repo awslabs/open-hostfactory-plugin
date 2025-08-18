@@ -18,7 +18,7 @@ class DynamoDBConverter(DataConverter):
     Handles type conversion, Decimal handling, and DynamoDB-specific data types.
     """
 
-    def __init__(self, partition_key: str = "id", sort_key: Optional[str] = None):
+    def __init__(self, partition_key: str = "id", sort_key: Optional[str] = None) -> None:
         """
         Initialize DynamoDB converter.
 

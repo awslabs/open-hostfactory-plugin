@@ -95,7 +95,7 @@ class InjectableMetadata:
         dependencies: Optional[List[Type]] = None,
         factory: Optional[Callable] = None,
         lazy: bool = False,
-    ):
+    ) -> None:
         """Initialize the instance."""
         self.auto_wire = auto_wire
         self.singleton = singleton
@@ -140,7 +140,7 @@ def injectable(cls: Type[T]) -> Type[T]:
     Example:
         @injectable
         class UserService:
-            def __init__(self, repository: UserRepository):
+            def __init__(self, repository: UserRepository) -> None:
                 self.repository = repository
     """
     # Preserve existing functionality
@@ -289,7 +289,7 @@ def command_handler(command_type: Type) -> Callable[[Type[T]], Type[T]]:
     Example:
         @command_handler(CreateUserCommand)
         class CreateUserHandler:
-            def handle(self, command: CreateUserCommand):
+            def handle(self, command: CreateUserCommand) -> None:
                 pass
     """
 
@@ -319,7 +319,7 @@ def query_handler(query_type: Type) -> Callable[[Type[T]], Type[T]]:
     Example:
         @query_handler(GetUserQuery)
         class GetUserHandler:
-            def handle(self, query: GetUserQuery):
+            def handle(self, query: GetUserQuery) -> None:
                 pass
     """
 
@@ -349,7 +349,7 @@ def event_handler(event_type: Type) -> Callable[[Type[T]], Type[T]]:
     Example:
         @event_handler(UserCreatedEvent)
         class UserCreatedHandler:
-            def handle(self, event: UserCreatedEvent):
+            def handle(self, event: UserCreatedEvent) -> None:
                 pass
     """
 
@@ -466,7 +466,7 @@ class OptionalDependency(Generic[T]):
     Use this to mark dependencies as optional in constructor parameters.
     """
 
-    def __init__(self, dependency_type: Type[T]):
+    def __init__(self, dependency_type: Type[T]) -> None:
         self.dependency_type = dependency_type
 
     def __repr__(self):

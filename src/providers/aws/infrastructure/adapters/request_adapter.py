@@ -19,7 +19,7 @@ from providers.aws.infrastructure.aws_client import AWSClient
 class AWSRequestAdapter(RequestAdapterPort):
     """Adapter for AWS-specific request operations."""
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort) -> None:
         """
         Initialize the adapter.
 

@@ -25,7 +25,7 @@ class SQLQueryBuilder(QueryManager):
     Builds safe, parameterized SQL queries to prevent SQL injection.
     """
 
-    def __init__(self, table_name: str, columns: Dict[str, str]):
+    def __init__(self, table_name: str, columns: Dict[str, str]) -> None:
         """
         Initialize query builder.
 

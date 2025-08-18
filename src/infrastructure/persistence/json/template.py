@@ -25,7 +25,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
         file_path: str,
         legacy_file_path: Optional[str] = None,
         create_dirs: bool = True,
-    ):
+    ) -> None:
         """
         Initialize with both main and legacy file paths.
 
@@ -133,7 +133,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
 class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
     """JSON-based template repository with provider-specific file support."""
 
-    def __init__(self, config_manager: ConfigurationManager, use_provider_strategy: bool = True):
+    def __init__(self, config_manager: ConfigurationManager, use_provider_strategy: bool = True) -> None:
         """
         Initialize template repository.
 

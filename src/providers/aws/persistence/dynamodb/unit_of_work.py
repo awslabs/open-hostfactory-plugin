@@ -33,7 +33,7 @@ class DynamoDBUnitOfWork(BaseUnitOfWork):
         machine_table: str = "machines",
         request_table: str = "requests",
         template_table: str = "templates",
-    ):
+    ) -> None:
         """
         Initialize DynamoDB unit of work with simplified repositories.
 

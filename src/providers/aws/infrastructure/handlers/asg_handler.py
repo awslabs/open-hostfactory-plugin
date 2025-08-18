@@ -50,7 +50,7 @@ class ASGHandler(AWSHandler):
         aws_ops: AWSOperations,
         launch_template_manager,
         request_adapter: RequestAdapterPort = None,
-    ):
+    ) -> None:
         """
         Initialize the ASG handler with integrated dependencies.
 

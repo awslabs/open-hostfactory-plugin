@@ -26,7 +26,7 @@ from infrastructure.registry.storage_registry import get_storage_registry
 class RepositoryFactory:
     """Factory for creating repositories using storage registry pattern."""
 
-    def __init__(self, config_manager: ConfigurationManager, logger: LoggingPort):
+    def __init__(self, config_manager: ConfigurationManager, logger: LoggingPort) -> None:
         """Initialize factory with configuration."""
         self.config_manager = config_manager
         self.logger = logger
@@ -118,7 +118,7 @@ class RepositoryFactory:
 class UnitOfWorkFactory(AbstractUnitOfWorkFactory):
     """Factory for creating unit of work instances."""
 
-    def __init__(self, config_manager: ConfigurationManager, logger: LoggingPort):
+    def __init__(self, config_manager: ConfigurationManager, logger: LoggingPort) -> None:
         """Initialize factory with configuration."""
         self.config_manager = config_manager
         self.logger = logger
@@ -146,7 +146,7 @@ class RepositoryFactoryWithStrategies:
     This class creates repositories once and caches them for reuse.
     """
 
-    def __init__(self, config_manager: ConfigurationManager, logger: LoggingPort):
+    def __init__(self, config_manager: ConfigurationManager, logger: LoggingPort) -> None:
         """Initialize factory with optional configuration manager."""
         self.logger = logger
         self._repositories = {}

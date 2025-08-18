@@ -44,7 +44,7 @@ class CircuitBreakerStrategy(RetryStrategy):
         max_delay: float = 30.0,
         jitter: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize circuit breaker strategy.
 

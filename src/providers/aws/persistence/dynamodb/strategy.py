@@ -34,7 +34,7 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
         region: str,
         table_name: str,
         profile: Optional[str] = None,
-    ):
+    ) -> None:
         """
         Initialize DynamoDB storage strategy with components.
 

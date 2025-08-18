@@ -62,7 +62,7 @@ class AWSHandler(ABC):
         launch_template_manager,
         request_adapter=None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """
         Initialize AWS handler with standardized dependencies.
 
@@ -87,7 +87,7 @@ class AWSHandler(ABC):
         self._setup_aws_operations(aws_ops)
         self._setup_dependencies(request_adapter)
 
-    def _setup_aws_operations(self, aws_ops):
+    def _setup_aws_operations(self, aws_ops) -> None:
         """Configure AWS operations utility - eliminates duplication across handlers."""
         self.aws_ops = aws_ops
         if hasattr(aws_ops, "set_retry_method"):
@@ -95,7 +95,7 @@ class AWSHandler(ABC):
         if hasattr(aws_ops, "set_pagination_method"):
             aws_ops.set_pagination_method(self._paginate)
 
-    def _setup_dependencies(self, request_adapter):
+    def _setup_dependencies(self, request_adapter) -> None:
         """Configure optional dependencies - eliminates duplication across handlers."""
         self._request_adapter = request_adapter
 

@@ -33,7 +33,7 @@ class StorageRegistration(BaseRegistration):
         strategy_factory: Callable,
         config_factory: Callable,
         unit_of_work_factory: Optional[Callable] = None,
-    ):
+    ) -> None:
         """Initialize the instance."""
         super().__init__(
             type_name,
@@ -52,7 +52,7 @@ class StorageRegistry(BaseRegistry):
     Thread-safe singleton implementation using integrated BaseRegistry.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Storage is SINGLE_CHOICE - only one storage strategy at a time
         super().__init__(mode=RegistryMode.SINGLE_CHOICE)
 
@@ -62,7 +62,7 @@ class StorageRegistry(BaseRegistry):
         strategy_factory: Callable,
         config_factory: Callable,
         unit_of_work_factory: Optional[Callable] = None,
-    ):
+    ) -> None:
         """Register storage strategy factory - implements abstract method."""
         self.register_type(
             storage_type,

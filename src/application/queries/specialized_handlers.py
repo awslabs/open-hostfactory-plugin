@@ -30,7 +30,7 @@ class GetActiveMachineCountHandler(BaseQueryHandler[GetActiveMachineCountQuery, 
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize get active machine count handler.
 
@@ -75,7 +75,7 @@ class GetRequestSummaryHandler(BaseQueryHandler[GetRequestSummaryQuery, RequestS
         uow_factory: UnitOfWorkFactory,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize get request summary handler.
 
@@ -143,7 +143,7 @@ class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHea
         provisioning_port: ResourceProvisioningPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize get machine health handler.
 

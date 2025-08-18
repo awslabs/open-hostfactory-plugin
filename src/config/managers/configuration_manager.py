@@ -38,7 +38,7 @@ class ConfigurationManager:
     It uses ConfigurationLoader to load configuration from multiple sources.
     """
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: Optional[str] = None) -> None:
         """Initialize configuration manager with lazy loading."""
         self._config_file = config_file
         self._loader: Optional["ConfigurationLoader"] = None

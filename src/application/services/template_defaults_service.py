@@ -32,7 +32,7 @@ class TemplateDefaultsService(TemplateDefaultsPort):
         logger: LoggingPort,
         template_factory: Optional[TemplateFactoryPort] = None,
         extension_registry: Optional[TemplateExtensionRegistry] = None,
-    ):
+    ) -> None:
         """
         Initialize the template defaults service.
 

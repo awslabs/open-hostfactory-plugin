@@ -29,7 +29,7 @@ def injectable(cls: Type[T]) -> Type[T]:
     Usage:
         @injectable
         class MyService:
-            def __init__(self, logger: LoggingPort, config: Optional[ConfigPort] = None):
+            def __init__(self, logger: LoggingPort, config: Optional[ConfigPort] = None) -> None:
                 self.logger = logger
                 self.config = config
 

@@ -16,7 +16,7 @@ T = TypeVar("T")  # Entity type
 class StrategyBasedRepository(Repository[T], Generic[T]):
     """Repository implementation using a storage strategy."""
 
-    def __init__(self, entity_class: type, storage_strategy):
+    def __init__(self, entity_class: type, storage_strategy) -> None:
         """
         Initialize repository.
 

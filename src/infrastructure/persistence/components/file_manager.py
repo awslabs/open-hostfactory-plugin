@@ -19,7 +19,7 @@ class FileManager:
     backup management, and integrity verification.
     """
 
-    def __init__(self, file_path: str, create_dirs: bool = True, backup_count: int = 5):
+    def __init__(self, file_path: str, create_dirs: bool = True, backup_count: int = 5) -> None:
         """
         Initialize file manager.
 

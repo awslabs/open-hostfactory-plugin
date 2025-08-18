@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class ConfigTypeConverter:
     """Handles type conversion for configuration values."""
 
-    def __init__(self, raw_config: Dict[str, Any]):
+    def __init__(self, raw_config: Dict[str, Any]) -> None:
         """Initialize the instance."""
         self._raw_config = raw_config
 
@@ -168,7 +168,7 @@ class ConfigTypeConverter:
     def update(self, updates: Dict[str, Any]) -> None:
         """Update configuration with new values."""
 
-        def deep_update(base_dict: Dict[str, Any], update_dict: Dict[str, Any]):
+        def deep_update(base_dict: Dict[str, Any], update_dict: Dict[str, Any]) -> None:
             """Recursively update nested dictionary values."""
             for key, value in update_dict.items():
                 if (

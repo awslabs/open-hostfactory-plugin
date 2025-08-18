@@ -14,7 +14,7 @@ T = TypeVar("T")  # Repository type
 class BaseUnitOfWork(UnitOfWork, ABC):
     """Base unit of work implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize unit of work."""
         self.logger = get_logger(__name__)
         self._in_transaction = False
@@ -86,7 +86,7 @@ class BaseUnitOfWork(UnitOfWork, ABC):
 class StrategyUnitOfWork(BaseUnitOfWork):
     """Unit of work implementation for strategy-based repositories."""
 
-    def __init__(self, repositories: List[StrategyBasedRepository]):
+    def __init__(self, repositories: List[StrategyBasedRepository]) -> None:
         """
         Initialize unit of work.
 

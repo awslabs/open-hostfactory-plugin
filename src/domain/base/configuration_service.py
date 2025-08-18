@@ -8,7 +8,7 @@ from domain.ports import ConfigurationPort
 class DomainConfigurationService:
     """Domain service for accessing configuration through ports."""
 
-    def __init__(self, config_port: ConfigurationPort):
+    def __init__(self, config_port: ConfigurationPort) -> None:
         """Initialize with configuration port."""
         self._config_port = config_port
 

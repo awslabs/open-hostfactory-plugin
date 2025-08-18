@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class ServiceRegistry:
     """Manages service registration for dependency injection."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self._registrations: Dict[Type, DependencyRegistration] = {}
         self._singletons: Dict[Type, Any] = {}

@@ -23,7 +23,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
     and transaction management. Reduced from 935 lines to ~200 lines.
     """
 
-    def __init__(self, file_path: str, create_dirs: bool = True, entity_type: str = "entities"):
+    def __init__(self, file_path: str, create_dirs: bool = True, entity_type: str = "entities") -> None:
         """
         Initialize JSON storage strategy with components.
 

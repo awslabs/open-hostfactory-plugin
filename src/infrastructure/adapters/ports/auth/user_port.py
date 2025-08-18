@@ -32,7 +32,7 @@ class User:
     last_login: Optional[int] = None  # Unix timestamp
     metadata: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.roles is None:
             self.roles = []
         if self.permissions is None:

@@ -28,7 +28,7 @@ class CognitoAuthStrategy(AuthPort):
         region: str = "us-east-1",
         jwks_url: Optional[str] = None,
         enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize Cognito authentication strategy.
 

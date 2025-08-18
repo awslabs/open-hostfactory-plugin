@@ -57,7 +57,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         event_publisher: EventPublisherPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._machine_repository = machine_repository
@@ -70,7 +70,7 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         if not command.status:
             raise ValueError("status is required") from e
 
-    async def execute_command(self, command: UpdateMachineStatusCommand) -> None:
+    async def execute_command(self, command: UpdateMachineStatusCommand):
         """Execute machine status update command - error handling via base handler."""
         # Get machine
         machine = await self._machine_repository.get_by_id(command.machine_id)
@@ -99,7 +99,7 @@ class ConvertMachineStatusCommandHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """Initialize with provider context."""
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
@@ -199,7 +199,7 @@ class ConvertBatchMachineStatusCommandHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """Initialize with status converter handler."""
         super().__init__(logger, event_publisher, error_handler)
         self._status_converter = status_converter
@@ -248,7 +248,7 @@ class ValidateProviderStateCommandHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """Initialize with provider context."""
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
@@ -313,7 +313,7 @@ class CleanupMachineResourcesHandler(BaseCommandHandler[CleanupMachineResourcesC
         event_publisher: EventPublisherPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._machine_repository = machine_repository
 
@@ -323,7 +323,7 @@ class CleanupMachineResourcesHandler(BaseCommandHandler[CleanupMachineResourcesC
         if not command.machine_id:
             raise ValueError("machine_id is required") from e
 
-    async def execute_command(self, command: CleanupMachineResourcesCommand) -> None:
+    async def execute_command(self, command: CleanupMachineResourcesCommand):
         """Execute machine cleanup command - error handling via base handler."""
         # Get machine
         machine = await self._machine_repository.get_by_id(command.machine_id)
@@ -351,7 +351,7 @@ class RegisterMachineHandler(BaseCommandHandler[RegisterMachineCommand, None]):
         event_publisher: EventPublisherPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._machine_repository = machine_repository
 
@@ -363,7 +363,7 @@ class RegisterMachineHandler(BaseCommandHandler[RegisterMachineCommand, None]):
         if not command.template_id:
             raise ValueError("template_id is required") from e
 
-    async def execute_command(self, command: RegisterMachineCommand) -> None:
+    async def execute_command(self, command: RegisterMachineCommand):
         """Execute machine registration command."""
         # Check if machine already exists
         existing_machine = await self._machine_repository.get_by_id(command.machine_id)
@@ -395,7 +395,7 @@ class DeregisterMachineHandler(BaseCommandHandler[DeregisterMachineCommand, None
         event_publisher: EventPublisherPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._machine_repository = machine_repository
 
@@ -405,7 +405,7 @@ class DeregisterMachineHandler(BaseCommandHandler[DeregisterMachineCommand, None
         if not command.machine_id:
             raise ValueError("machine_id is required") from e
 
-    async def execute_command(self, command: DeregisterMachineCommand) -> None:
+    async def execute_command(self, command: DeregisterMachineCommand):
         """Execute machine deregistration command."""
         # Get machine
         machine = await self._machine_repository.get_by_id(command.machine_id)

@@ -58,7 +58,7 @@ class RunInstancesHandler(AWSHandler):
         launch_template_manager: AWSLaunchTemplateManager,
         request_adapter: RequestAdapterPort = None,
         error_handler: ErrorHandlingPort = None,
-    ):
+    ) -> None:
         """
         Initialize RunInstances handler with integrated dependencies.
 

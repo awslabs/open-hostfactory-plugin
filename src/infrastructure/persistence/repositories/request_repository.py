@@ -24,7 +24,7 @@ from infrastructure.logging.logger import get_logger
 class RequestSerializer:
     """Handles Request aggregate serialization/deserialization."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self.logger = get_logger(__name__)
 
@@ -134,7 +134,7 @@ class RequestSerializer:
 class RequestRepositoryImpl(RequestRepositoryInterface):
     """Single request repository implementation using storage strategy composition."""
 
-    def __init__(self, storage_port: StoragePort, event_publisher=None):
+    def __init__(self, storage_port: StoragePort, event_publisher=None) -> None:
         """Initialize repository with storage port and optional event publisher."""
         self.storage_port = storage_port
         self.serializer = RequestSerializer()

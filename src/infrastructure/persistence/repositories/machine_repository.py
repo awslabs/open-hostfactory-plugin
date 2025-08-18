@@ -15,7 +15,7 @@ from infrastructure.logging.logger import get_logger
 class MachineSerializer:
     """Handles Machine aggregate serialization/deserialization."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self.logger = get_logger(__name__)
 
@@ -129,7 +129,7 @@ class MachineSerializer:
 class MachineRepositoryImpl(MachineRepositoryInterface):
     """Single machine repository implementation using storage strategy composition."""
 
-    def __init__(self, storage_port: StoragePort):
+    def __init__(self, storage_port: StoragePort) -> None:
         """Initialize repository with storage port."""
         self.storage_port = storage_port
         self.serializer = MachineSerializer()

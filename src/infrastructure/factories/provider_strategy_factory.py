@@ -33,7 +33,7 @@ class ProviderCreationError(Exception):
 class ProviderStrategyFactory:
     """Factory for creating provider strategies from integrated configuration."""
 
-    def __init__(self, config_manager: ConfigurationPort, logger: Optional[LoggingPort] = None):
+    def __init__(self, config_manager: ConfigurationPort, logger: Optional[LoggingPort] = None) -> None:
         """
         Initialize provider strategy factory.
 

@@ -46,7 +46,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         provider_selection_service: ProviderSelectionService,
         provider_capability_service: ProviderCapabilityService,
         provider_port: ProviderPort,
-    ):
+    ) -> None:
         """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self.uow_factory = uow_factory  # Use UoW factory pattern
@@ -423,14 +423,14 @@ class CreateReturnRequestHandler(BaseCommandHandler[CreateReturnRequestCommand, 
         container: ContainerPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._request_repository = request_repository
         self._machine_repository = machine_repository
         self._template_repository = template_repository
         self._container = container
 
-    async def validate_command(self, command: CreateReturnRequestCommand) -> None:
+    async def validate_command(self, command: CreateReturnRequestCommand):
         """Validate create return request command."""
         await super().validate_command(command)
         if not command.machine_ids:
@@ -501,7 +501,7 @@ class UpdateRequestStatusHandler(BaseCommandHandler[UpdateRequestStatusCommand, 
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._request_repository = request_repository
 
@@ -556,7 +556,7 @@ class CancelRequestHandler(BaseCommandHandler[CancelRequestCommand, None]):
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._request_repository = request_repository
 
@@ -605,7 +605,7 @@ class CompleteRequestHandler(BaseCommandHandler[CompleteRequestCommand, None]):
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._request_repository = request_repository
 

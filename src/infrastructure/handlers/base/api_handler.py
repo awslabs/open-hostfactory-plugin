@@ -17,7 +17,7 @@ R = TypeVar("R")  # Response type
 class RequestContext:
     """Request context for storing request-specific data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize request context."""
         self.correlation_id = str(uuid.uuid4())
         self.start_time = time.time()
@@ -32,7 +32,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
     including middleware, validation, and error handling.
     """
 
-    def __init__(self, logger=None, metrics=None):
+    def __init__(self, logger=None, metrics=None) -> None:
         """
         Initialize the API handler.
 

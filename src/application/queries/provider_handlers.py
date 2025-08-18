@@ -33,7 +33,7 @@ class GetProviderHealthHandler(BaseQueryHandler[GetProviderHealthQuery, Provider
         provider_port: ProviderPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize provider health handler.
 
@@ -98,7 +98,7 @@ class ListAvailableProvidersHandler(
         provider_port: ProviderPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize list providers handler.
 
@@ -160,7 +160,7 @@ class GetProviderCapabilitiesHandler(
         provider_port: ProviderPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize provider capabilities handler.
 
@@ -215,7 +215,7 @@ class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, Dict[s
         provider_port: ProviderPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize provider metrics handler.
 
@@ -274,7 +274,7 @@ class GetProviderStrategyConfigHandler(
         provider_port: ProviderPort,
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize provider strategy config handler.
 

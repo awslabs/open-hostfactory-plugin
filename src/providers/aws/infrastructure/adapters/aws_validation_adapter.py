@@ -27,7 +27,7 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
     - AWS-specific template validation
     """
 
-    def __init__(self, config: AWSProviderConfig, logger: LoggingPort):
+    def __init__(self, config: AWSProviderConfig, logger: LoggingPort) -> None:
         """
         Initialize AWS validation adapter.
 

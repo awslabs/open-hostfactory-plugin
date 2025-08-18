@@ -12,13 +12,13 @@ if TYPE_CHECKING:
 class PerformanceMonitor:
     """Performance monitoring utility for tracking execution times and bottlenecks."""
 
-    def __init__(self, logger: Optional["LoggingPort"] = None):
+    def __init__(self, logger: Optional["LoggingPort"] = None) -> None:
         """Initialize performance monitor."""
         self.logger = logger
         self._metrics: Dict[str, Dict[str, Any]] = {}
 
     @contextmanager
-    def measure(self, operation_name: str):
+    def measure(self, operation_name: str) -> None:
         """Context manager for measuring operation performance."""
         start_time = time.perf_counter()
         try:
@@ -28,7 +28,7 @@ class PerformanceMonitor:
             duration = end_time - start_time
             self._record_metric(operation_name, duration)
 
-    def _record_metric(self, operation_name: str, duration: float):
+    def _record_metric(self, operation_name: str, duration: float) -> None:
         """Record performance metric."""
         if operation_name not in self._metrics:
             self._metrics[operation_name] = {
@@ -58,7 +58,7 @@ class PerformanceMonitor:
         sorted_ops = sorted(self._metrics.items(), key=lambda x: x[1]["avg_time"], reverse=True)
         return dict(sorted_ops[:limit])
 
-    def reset_metrics(self):
+    def reset_metrics(self) -> None:
         """Reset all metrics."""
         self._metrics.clear()
 

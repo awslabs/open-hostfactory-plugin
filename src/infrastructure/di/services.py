@@ -126,7 +126,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
     logger = get_logger(__name__)
 
     # Register CQRS infrastructure as lazy - triggered by QueryBus or CommandBus access
-    def setup_cqrs_lazy(c):
+    def setup_cqrs_lazy(c) -> None:
         """Setup CQRS infrastructure lazily when needed."""
         from infrastructure.di.container import _setup_cqrs_infrastructure
 
@@ -142,7 +142,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
 
     # Register infrastructure services as lazy - triggered by first
     # infrastructure service access
-    def register_infrastructure_lazy(c):
+    def register_infrastructure_lazy(c) -> None:
         """Register infrastructure services lazily when first accessed."""
         register_infrastructure_services(c)
         # Also setup CQRS if not already done (infrastructure services may need buses)
@@ -156,7 +156,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
     )
 
     # Register scheduler services as lazy
-    def register_scheduler_lazy(c):
+    def register_scheduler_lazy(c) -> None:
         """Register scheduler services lazily when needed."""
         from infrastructure.scheduler.registration import register_active_scheduler_only
 
@@ -182,7 +182,7 @@ def _register_lazy_service_factories(container: DIContainer) -> None:
     container.register_on_demand(SchedulerPort, register_scheduler_lazy)
 
     # Register server services as lazy
-    def register_server_lazy(c):
+    def register_server_lazy(c) -> None:
         """Register server services lazily when needed."""
         register_server_services(c)
 

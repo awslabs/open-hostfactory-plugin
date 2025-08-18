@@ -36,7 +36,7 @@ class EventBus:
     - Metrics and monitoring integration points
     """
 
-    def __init__(self, logger: Optional[LoggingPort] = None):
+    def __init__(self, logger: Optional[LoggingPort] = None) -> None:
         """
         Initialize event bus.
 

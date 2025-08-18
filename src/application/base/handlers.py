@@ -39,7 +39,7 @@ class BaseHandler(ABC):
         self,
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """Initialize base handler with optional logger and error handler."""
         self.logger = logger
         self.error_handler = error_handler
@@ -202,7 +202,7 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
         logger: Optional[LoggingPort] = None,
         event_publisher: Optional[EventPublisherPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """Initialize the instance."""
         super().__init__(logger, error_handler)
         self.event_publisher = event_publisher
@@ -281,7 +281,7 @@ class BaseQueryHandler(BaseHandler, QueryHandler[TQuery, TResult]):
         self,
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """Initialize query handler with logging and error handling."""
         super().__init__(logger, error_handler)
         self._cache: Dict[str, Any] = {}
@@ -365,7 +365,7 @@ class BaseProviderHandler(BaseHandler):
         self,
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         super().__init__(logger, error_handler)
         self.max_retries = 3
         self.retry_delay = 2.0

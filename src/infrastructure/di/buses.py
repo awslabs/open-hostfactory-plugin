@@ -40,7 +40,7 @@ class QueryBus:
     Handlers own their cross-cutting concerns (logging, validation, caching).
     """
 
-    def __init__(self, container: DIContainer, logger: LoggingPort):
+    def __init__(self, container: DIContainer, logger: LoggingPort) -> None:
         """Initialize the instance."""
         self.container = container
         self.logger = logger
@@ -92,7 +92,7 @@ class QueryBus:
             self.logger.error("Query execution failed: %s", str(e))
             raise
 
-    def _trigger_lazy_cqrs_setup(self):
+    def _trigger_lazy_cqrs_setup(self) -> None:
         """Trigger lazy CQRS infrastructure setup."""
         try:
             from infrastructure.di.container import _setup_cqrs_infrastructure
@@ -115,7 +115,7 @@ class CommandBus:
     Handlers own their cross-cutting concerns (logging, validation, events).
     """
 
-    def __init__(self, container: DIContainer, logger: LoggingPort):
+    def __init__(self, container: DIContainer, logger: LoggingPort) -> None:
         self.container = container
         self.logger = logger
 
@@ -166,7 +166,7 @@ class CommandBus:
             self.logger.error("Command execution failed: %s", str(e))
             raise
 
-    def _trigger_lazy_cqrs_setup(self):
+    def _trigger_lazy_cqrs_setup(self) -> None:
         """Trigger lazy CQRS infrastructure setup."""
         try:
             from infrastructure.di.container import _setup_cqrs_infrastructure

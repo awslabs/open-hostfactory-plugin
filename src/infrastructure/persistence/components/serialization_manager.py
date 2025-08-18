@@ -25,7 +25,7 @@ class SerializationManager(ABC):
 class JSONSerializer(SerializationManager):
     """JSON serialization manager with enum support."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self.logger = get_logger(__name__)
 
@@ -120,7 +120,7 @@ class JSONSerializer(SerializationManager):
 class BinarySerializer(SerializationManager):
     """Binary serialization manager using pickle."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize binary serializer."""
         self.logger = get_logger(__name__)
 

@@ -37,7 +37,7 @@ class OpenHFPluginMCPServer:
     CLI commands as MCP tools and domain objects as MCP resources.
     """
 
-    def __init__(self, app=None):
+    def __init__(self, app=None) -> None:
         """Initialize MCP server with application instance."""
         self.app = app
         self.logger = get_logger(__name__)
@@ -52,7 +52,7 @@ class OpenHFPluginMCPServer:
         self._register_core_resources()
         self._register_core_prompts()
 
-    def _register_core_tools(self):
+    def _register_core_tools(self) -> None:
         """Register core MCP tools from CLI handlers."""
         from interface.request_command_handlers import (
             handle_get_request_status,
@@ -89,14 +89,14 @@ class OpenHFPluginMCPServer:
         self.tools["list_return_requests"] = handle_get_return_requests
         self.tools["return_machines"] = handle_request_return_machines
 
-    def _register_core_resources(self):
+    def _register_core_resources(self) -> None:
         """Register core MCP resources."""
         self.resources["templates"] = self._get_templates_resource
         self.resources["requests"] = self._get_requests_resource
         self.resources["machines"] = self._get_machines_resource
         self.resources["providers"] = self._get_providers_resource
 
-    def _register_core_prompts(self):
+    def _register_core_prompts(self) -> None:
         """Register core MCP prompts for AI assistants."""
         self.prompts = {
             "provision_infrastructure": {

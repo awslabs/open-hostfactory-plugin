@@ -22,7 +22,7 @@ class BaseRegistration(ABC):
         strategy_factory: Callable,
         config_factory: Callable,
         **additional_factories,
-    ):
+    ) -> None:
         """
         Initialize base registration.
 
@@ -57,7 +57,7 @@ class BaseRegistry(ABC):
                     cls._instances[registry_name] = super().__new__(cls)
         return cls._instances[registry_name]
 
-    def __init__(self, mode: RegistryMode = RegistryMode.SINGLE_CHOICE):
+    def __init__(self, mode: RegistryMode = RegistryMode.SINGLE_CHOICE) -> None:
         """
         Initialize registry with specified mode.
 
@@ -87,7 +87,7 @@ class BaseRegistry(ABC):
         strategy_factory: Callable,
         config_factory: Callable,
         **kwargs,
-    ):
+    ) -> None:
         """Register a strategy factory."""
 
     @abstractmethod

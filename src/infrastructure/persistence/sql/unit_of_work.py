@@ -26,7 +26,7 @@ from infrastructure.persistence.sql.strategy import SQLStorageStrategy
 class SQLUnitOfWork(BaseUnitOfWork):
     """SQL-based unit of work implementation using simplified repositories."""
 
-    def __init__(self, engine: Engine):
+    def __init__(self, engine: Engine) -> None:
         """
         Initialize SQL unit of work with simplified repositories.
 

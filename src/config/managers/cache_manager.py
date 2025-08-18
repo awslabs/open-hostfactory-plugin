@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class ConfigCacheManager:
     """Manages configuration caching and reloading."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self._config_cache: Dict[Type, Any] = {}
         self._cache_lock = threading.RLock()

@@ -16,7 +16,7 @@ class DynamoDBTransactionManager(TransactionManager):
     TransactWrite and TransactRead operations.
     """
 
-    def __init__(self, client_manager):
+    def __init__(self, client_manager) -> None:
         """
         Initialize DynamoDB transaction manager.
 
@@ -249,7 +249,7 @@ class DynamoDBTransactionManager(TransactionManager):
             raise
 
     @contextmanager
-    def atomic_operation(self):
+    def atomic_operation(self) -> None:
         """
         Context manager for atomic DynamoDB operations.
 

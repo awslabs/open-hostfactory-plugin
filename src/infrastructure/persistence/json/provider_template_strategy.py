@@ -28,7 +28,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
         base_file_path: str,
         config_manager: ConfigurationManager,
         create_dirs: bool = True,
-    ):
+    ) -> None:
         """
         Initialize provider template strategy.
 

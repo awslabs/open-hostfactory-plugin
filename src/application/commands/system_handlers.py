@@ -27,7 +27,7 @@ class ReloadProviderConfigHandler(BaseCommandHandler[ReloadProviderConfigCommand
         container: ContainerPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """Initialize reload provider config handler."""
         super().__init__(logger, event_publisher, error_handler)
         self.container = container

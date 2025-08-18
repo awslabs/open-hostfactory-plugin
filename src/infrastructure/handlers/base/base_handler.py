@@ -18,7 +18,7 @@ class BaseHandler:
     including logging, error handling, and metrics collection.
     """
 
-    def __init__(self, logger=None, metrics=None):
+    def __init__(self, logger=None, metrics=None) -> None:
         """
         Initialize the handler.
 

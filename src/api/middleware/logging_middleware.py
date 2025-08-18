@@ -12,7 +12,7 @@ from infrastructure.logging.logger import get_logger
 class LoggingMiddleware(BaseHTTPMiddleware):
     """Logging middleware for FastAPI requests."""
 
-    def __init__(self, app, log_requests: bool = True, log_responses: bool = True):
+    def __init__(self, app, log_requests: bool = True, log_responses: bool = True) -> None:
         """
         Initialize logging middleware.
 
@@ -65,7 +65,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             self._log_error(request, e, request_id, duration)
             raise
 
-    def _log_request(self, request: Request, request_id: str):
+    def _log_request(self, request: Request, request_id: str) -> None:
         """Log incoming request."""
         user_id = getattr(request.state, "user_id", "anonymous")
         client_ip = request.client.host if request.client else "unknown"
@@ -79,7 +79,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         if request.query_params:
             self.logger.debug("Request %s query params: %s", request_id, dict(request.query_params))
 
-    def _log_response(self, request: Request, response: Response, request_id: str, duration: float):
+    def _log_response(self, request: Request, response: Response, request_id: str, duration: float) -> None:
         """Log outgoing response."""
         user_id = getattr(request.state, "user_id", "anonymous")
 
@@ -89,7 +89,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             f"(user: {user_id}, duration: {duration:.3f}s)"
         )
 
-    def _log_error(self, request: Request, error: Exception, request_id: str, duration: float):
+    def _log_error(self, request: Request, error: Exception, request_id: str, duration: float) -> None:
         """Log request error."""
         user_id = getattr(request.state, "user_id", "anonymous")
 

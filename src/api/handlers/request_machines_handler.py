@@ -29,7 +29,7 @@ class RequestMachinesRESTHandler(BaseAPIHandler[RequestMachinesModel, RequestMac
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
         metrics: Optional[MetricsCollector] = None,
-    ):
+    ) -> None:
         """
         Initialize handler with pure CQRS dependencies.
 

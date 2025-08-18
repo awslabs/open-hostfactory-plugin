@@ -27,7 +27,7 @@ class GetAvailableTemplatesRESTHandler(BaseAPIHandler[Dict[str, Any], Dict[str, 
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
         metrics: Optional[MetricsCollector] = None,
-    ):
+    ) -> None:
         """
         Initialize handler with injected CQRS dependencies.
 

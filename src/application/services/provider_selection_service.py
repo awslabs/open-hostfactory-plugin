@@ -26,7 +26,7 @@ class ProviderSelectionResult:
     confidence: float = 1.0
     alternatives: List[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.alternatives is None:
             self.alternatives = []
 
@@ -60,7 +60,7 @@ class ProviderSelectionService:
         config_manager: ConfigurationPort,
         logger: LoggingPort,
         provider_registry: Optional[ProviderRegistry] = None,
-    ):
+    ) -> None:
         """
         Initialize provider selection service.
 

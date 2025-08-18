@@ -33,7 +33,7 @@ class ActionEventHandler(EventHandler):
     validates the event, executes the action, and handles results.
     """
 
-    def __init__(self, logger: Optional[LoggingPort] = None):
+    def __init__(self, logger: Optional[LoggingPort] = None) -> None:
         """
         Initialize action event handler.
 

@@ -17,7 +17,7 @@ class SQLSerializer(DataConverter):
     and enum handling for SQL storage.
     """
 
-    def __init__(self, id_column: str = "id"):
+    def __init__(self, id_column: str = "id") -> None:
         """
         Initialize SQL serializer.
 

@@ -38,7 +38,7 @@ class ApplicationCommandHandler(CommandHandler[TCommand, TResponse]):
         logger: Optional[Any] = None,
         metrics: Optional[Any] = None,
         event_publisher: Optional[Any] = None,
-    ):
+    ) -> None:
         """
         Initialize application command handler.
 
@@ -92,7 +92,7 @@ class CLICommandHandler(CommandHandler[TCommand, TResponse]):
         command_bus: Optional[Any] = None,
         logger: Optional[Any] = None,
         metrics: Optional[Any] = None,
-    ):
+    ) -> None:
         """
         Initialize CLI command handler.
 

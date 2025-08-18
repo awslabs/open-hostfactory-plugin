@@ -26,7 +26,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
         config_manager: ConfigurationManager,
         logger: LoggingPort,
         template_defaults_service=None,
-    ):
+    ) -> None:
         """Initialize the instance."""
         self.config_manager = config_manager
         self._logger = logger

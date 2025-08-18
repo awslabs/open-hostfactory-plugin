@@ -20,7 +20,7 @@ TResponse = TypeVar("TResponse")
 class ProviderContext:
     """Context for provider operations."""
 
-    def __init__(self, provider_type: str, region: str = None):
+    def __init__(self, provider_type: str, region: str = None) -> None:
         """Initialize provider context."""
         self.provider_type = provider_type
         self.region = region
@@ -56,7 +56,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
         provider_type: str,
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """
         Initialize base provider handler.
 
@@ -232,7 +232,7 @@ class BaseAWSHandler(BaseProviderHandler[TRequest, TResponse]):
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
         region: str = None,
-    ):
+    ) -> None:
         """Initialize base AWS handler."""
         super().__init__("aws", logger, error_handler)
         self.aws_client = aws_client

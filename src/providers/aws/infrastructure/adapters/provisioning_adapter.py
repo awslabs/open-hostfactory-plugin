@@ -45,7 +45,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
         aws_handler_factory: AWSHandlerFactory,
         template_config_manager: Optional[TemplateConfigurationManager] = None,
         provider_strategy: Optional["AWSProviderStrategy"] = None,
-    ):
+    ) -> None:
         """
         Initialize the adapter.
 

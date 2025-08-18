@@ -31,7 +31,7 @@ class Application:
         # Only create logger immediately (lightweight)
         self.logger = get_logger(__name__)
 
-    def _ensure_container(self):
+    def _ensure_container(self) -> None:
         """Ensure DI container is created (lazy initialization)."""
         if self._container is None:
             from infrastructure.di.container import get_container
@@ -45,7 +45,7 @@ class Application:
                 set_domain_container(self._container)
                 self._domain_container_set = True
 
-    def _ensure_config_manager(self):
+    def _ensure_config_manager(self) -> None:
         """Ensure config manager is created (lazy initialization)."""
         if self._config_manager is None:
             from config.manager import get_config_manager

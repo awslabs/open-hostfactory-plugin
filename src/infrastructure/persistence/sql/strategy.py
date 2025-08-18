@@ -26,7 +26,7 @@ class SQLStorageStrategy(BaseStorageStrategy):
     serialization, and locking. Reduced from 769 lines to ~200 lines.
     """
 
-    def __init__(self, config: Dict[str, Any], table_name: str, columns: Dict[str, str]):
+    def __init__(self, config: Dict[str, Any], table_name: str, columns: Dict[str, str]) -> None:
         """
         Initialize SQL storage strategy with components.
 
@@ -310,7 +310,7 @@ class SQLStorageStrategy(BaseStorageStrategy):
         self.logger.debug("Transaction rollback (handled by session)")
 
     @contextmanager
-    def transaction(self):
+    def transaction(self) -> None:
         """Context manager for database transactions."""
         with self.connection_manager.get_session() as session:
             try:

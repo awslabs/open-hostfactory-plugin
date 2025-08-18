@@ -10,7 +10,7 @@ from infrastructure.logging.logger import get_logger
 class AuthRegistry:
     """Registry for authentication strategies."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize authentication registry."""
         self._strategies: Dict[str, Callable[..., AuthPort]] = {}
         self._lock = threading.Lock()

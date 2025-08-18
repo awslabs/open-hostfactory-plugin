@@ -29,7 +29,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
         error_handler: Optional[ErrorHandlingPort] = None,
         metrics: Optional[MetricsCollector] = None,
         max_retries: int = 3,
-    ):
+    ) -> None:
         """
         Initialize handler with pure CQRS dependencies.
 

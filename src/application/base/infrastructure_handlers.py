@@ -21,7 +21,7 @@ TResponse = TypeVar("TResponse")
 class RequestContext:
     """Request context for storing request-specific data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize request context."""
         self.correlation_id = str(uuid.uuid4())
         self.start_time = time.time()
@@ -54,7 +54,7 @@ class BaseInfrastructureHandler(
         self,
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """
         Initialize base infrastructure handler.
 
@@ -215,7 +215,7 @@ class BaseAPIHandler(BaseInfrastructureHandler[TRequest, TResponse]):
         self,
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
-    ):
+    ) -> None:
         """Initialize base API handler."""
         super().__init__(logger, error_handler)
         self.middleware_stack: list[Callable] = []

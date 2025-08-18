@@ -60,7 +60,7 @@ class SpotFleetHandler(AWSHandler):
         aws_ops: AWSOperations,
         launch_template_manager: AWSLaunchTemplateManager,
         request_adapter: RequestAdapterPort = None,
-    ):
+    ) -> None:
         """
         Initialize the Spot Fleet handler.
 

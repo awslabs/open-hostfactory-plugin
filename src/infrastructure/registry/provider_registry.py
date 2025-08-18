@@ -34,7 +34,7 @@ class ProviderRegistration(BaseRegistration):
         config_factory: Callable,
         resolver_factory: Optional[Callable] = None,
         validator_factory: Optional[Callable] = None,
-    ):
+    ) -> None:
         """Initialize the instance."""
         super().__init__(
             type_name,
@@ -55,7 +55,7 @@ class ProviderRegistry(BaseRegistry):
     Thread-safe singleton implementation using BaseRegistry.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Provider is MULTI_CHOICE - multiple provider strategies simultaneously
         super().__init__(mode=RegistryMode.MULTI_CHOICE)
 
@@ -66,7 +66,7 @@ class ProviderRegistry(BaseRegistry):
         config_factory: Callable,
         resolver_factory: Optional[Callable] = None,
         validator_factory: Optional[Callable] = None,
-    ):
+    ) -> None:
         """Register provider type - implements abstract method."""
         try:
             self.register_type(

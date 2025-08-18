@@ -71,7 +71,7 @@ class TemplateConfigurationManager:
         event_publisher: Optional[EventPublisherPort] = None,
         provider_capability_service: Optional["ProviderCapabilityService"] = None,
         template_defaults_service: Optional["TemplateDefaultsService"] = None,
-    ):
+    ) -> None:
         """
         Initialize the template configuration manager.
 

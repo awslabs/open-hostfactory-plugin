@@ -33,7 +33,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
     interface while using the new AWSResourceManagerImpl internally.
     """
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort) -> None:
         """
         Initialize AWS resource manager adapter.
 

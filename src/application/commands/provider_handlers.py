@@ -43,7 +43,7 @@ class SelectProviderStrategyHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """Initialize the instance."""
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
@@ -114,7 +114,7 @@ class ExecuteProviderOperationHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
 
@@ -191,7 +191,7 @@ class RegisterProviderStrategyHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
 
@@ -269,7 +269,7 @@ class UpdateProviderHealthHandler(BaseCommandHandler[UpdateProviderHealthCommand
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
 
@@ -330,7 +330,7 @@ class ConfigureProviderStrategyHandler(
         logger: LoggingPort,
         event_publisher: EventPublisherPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         super().__init__(logger, event_publisher, error_handler)
         self._provider_context = provider_context
 

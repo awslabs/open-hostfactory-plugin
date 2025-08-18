@@ -273,7 +273,7 @@ ErrorResponse = InfrastructureErrorResponse
 class ExceptionContext:
     """Rich context information for exception handling."""
 
-    def __init__(self, operation: str, layer: str = "application", **additional_context):
+    def __init__(self, operation: str, layer: str = "application", **additional_context) -> None:
         """Initialize the instance."""
         self.operation = operation
         self.layer = layer
@@ -300,7 +300,7 @@ class ExceptionHandler:
     preserving domain semantics while adding consistent logging and context.
     """
 
-    def __init__(self, logger=None, metrics=None):
+    def __init__(self, logger=None, metrics=None) -> None:
         """Initialize exception handler with optional logger and metrics."""
         self.logger = logger or get_logger(__name__)
         self.metrics = metrics
@@ -362,7 +362,7 @@ class ExceptionHandler:
         # 3. Fall back to generic handler
         return self._handle_generic_exception
 
-    def _register_handlers(self):
+    def _register_handlers(self) -> None:
         """Register handlers for different exception types."""
 
         # DOMAIN EXCEPTIONS - Preserve with rich logging
@@ -1039,7 +1039,7 @@ def get_exception_handler() -> ExceptionHandler:
     return _exception_handler_instance
 
 
-def reset_exception_handler():
+def reset_exception_handler() -> None:
     """Reset the global exception handler (for testing)."""
     global _exception_handler_instance
     with _exception_handler_lock:

@@ -74,7 +74,7 @@ _query_handler_registry: Dict[Type[Query], Type[QueryHandler]] = {}
 _command_handler_registry: Dict[Type[Command], Type[CommandHandler]] = {}
 
 
-def query_handler(query_type: Type[TQuery]):
+def query_handler(query_type: Type[TQuery]) -> None:
     """
     Application-layer decorator to mark query handlers.
 
@@ -116,7 +116,7 @@ def query_handler(query_type: Type[TQuery]):
     return decorator
 
 
-def command_handler(command_type: Type[TCommand]):
+def command_handler(command_type: Type[TCommand]) -> None:
     """
     Application-layer decorator to mark command handlers.
 

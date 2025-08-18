@@ -31,7 +31,7 @@ class RepositoryMigrator:
     detailed statistics about the migration process.
     """
 
-    def __init__(self, container: DIContainer):
+    def __init__(self, container: DIContainer) -> None:
         """
         Initialize repository migrator.
 

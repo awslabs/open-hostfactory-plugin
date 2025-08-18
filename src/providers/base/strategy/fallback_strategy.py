@@ -57,7 +57,7 @@ class FallbackConfig:
     fallback_timeout_seconds: float = 30.0
     enable_graceful_degradation: bool = True
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate configuration after initialization."""
         if self.max_retries < 0:
             raise ValueError("max_retries must be non-negative") from e
@@ -87,14 +87,14 @@ class CircuitBreakerState:
             return 0.0
         return (self.total_requests - self.successful_requests) / self.total_requests
 
-    def record_success(self):
+    def record_success(self) -> None:
         """Record a successful request."""
         self.successful_requests += 1
         self.total_requests += 1
         self.last_success_time = time.time()
         self.failure_count = 0  # Reset failure count on success
 
-    def record_failure(self):
+    def record_failure(self) -> None:
         """Record a failed request."""
         self.total_requests += 1
         self.failure_count += 1
@@ -128,7 +128,7 @@ class FallbackProviderStrategy(ProviderStrategy):
         primary_strategy: ProviderStrategy,
         fallback_strategies: List[ProviderStrategy],
         config: FallbackConfig = None,
-    ):
+    ) -> None:
         """
         Initialize fallback provider strategy.
 
@@ -517,7 +517,7 @@ class FallbackProviderStrategy(ProviderStrategy):
                 {"degraded": True, "last_error": last_error},
             )
 
-    def _update_health_status(self):
+    def _update_health_status(self) -> None:
         """Update health status of primary strategy if needed."""
         current_time = time.time()
         if current_time - self._last_health_check >= self._config.health_check_interval_seconds:

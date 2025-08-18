@@ -26,7 +26,7 @@ class IAMAuthStrategy(AuthPort):
         profile: Optional[str] = None,
         required_actions: List[str] = None,
         enabled: bool = True,
-    ):
+    ) -> None:
         """
         Initialize IAM authentication strategy.
 

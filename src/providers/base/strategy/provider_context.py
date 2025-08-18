@@ -39,7 +39,7 @@ class StrategyMetrics:
             return 0.0
         return (self.successful_operations / self.total_operations) * 100.0
 
-    def record_operation(self, success: bool, response_time_ms: float):
+    def record_operation(self, success: bool, response_time_ms: float) -> None:
         """Record an operation execution."""
         self.total_operations += 1
         if success:
@@ -76,7 +76,7 @@ class ProviderContext:
     - Context manager support
     """
 
-    def __init__(self, logger: LoggingPort):
+    def __init__(self, logger: LoggingPort) -> None:
         """
         Initialize the provider context.
 

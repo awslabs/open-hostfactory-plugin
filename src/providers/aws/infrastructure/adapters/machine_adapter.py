@@ -27,7 +27,7 @@ from providers.aws.infrastructure.aws_client import AWSClient
 class AWSMachineAdapter:
     """Adapter for AWS-specific machine operations."""
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort) -> None:
         """
         Initialize the adapter.
 

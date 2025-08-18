@@ -17,7 +17,7 @@ class SQLConnectionManager(ResourceManager):
     Handles database connections, connection pooling, and session management.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Initialize SQL connection manager.
 
@@ -146,7 +146,7 @@ class SQLConnectionManager(ResourceManager):
             raise
 
     @contextmanager
-    def get_session(self):
+    def get_session(self) -> None:
         """
         Get database session with automatic cleanup.
 
@@ -167,7 +167,7 @@ class SQLConnectionManager(ResourceManager):
             session.close()
 
     @contextmanager
-    def get_connection(self):
+    def get_connection(self) -> None:
         """
         Get raw database connection.
 

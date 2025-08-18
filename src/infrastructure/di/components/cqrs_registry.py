@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class CQRSHandlerRegistry:
     """Manages CQRS handler registration for dependency injection."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self._command_handlers: Dict[Type, Type] = {}
         self._query_handlers: Dict[Type, Type] = {}

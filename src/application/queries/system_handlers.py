@@ -105,7 +105,7 @@ class GetProviderConfigHandler(BaseQueryHandler[GetProviderConfigQuery, Provider
         logger: LoggingPort,
         container: ContainerPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize get provider config handler.
 
@@ -180,7 +180,7 @@ class ValidateProviderConfigHandler(
         logger: LoggingPort,
         container: ContainerPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize validate provider config handler.
 
@@ -252,7 +252,7 @@ class GetSystemStatusHandler(BaseQueryHandler[GetSystemStatusQuery, SystemStatus
         logger: LoggingPort,
         container: ContainerPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize get system status handler.
 
@@ -326,7 +326,7 @@ class GetProviderMetricsHandler(BaseQueryHandler[GetProviderMetricsQuery, Provid
         logger: LoggingPort,
         container: ContainerPort,
         error_handler: ErrorHandlingPort,
-    ):
+    ) -> None:
         """
         Initialize get provider metrics handler.
 

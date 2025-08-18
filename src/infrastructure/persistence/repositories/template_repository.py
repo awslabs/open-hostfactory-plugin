@@ -14,7 +14,7 @@ from infrastructure.persistence.base.strategy import BaseStorageStrategy
 class TemplateSerializer:
     """Handles Template aggregate serialization/deserialization."""
 
-    def __init__(self, defaults_service=None):
+    def __init__(self, defaults_service=None) -> None:
         """Initialize the instance."""
         self.logger = get_logger(__name__)
         self.defaults_service = defaults_service
@@ -200,7 +200,7 @@ class TemplateSerializer:
 class TemplateRepositoryImpl(TemplateRepositoryInterface):
     """Template repository implementation using storage strategy composition."""
 
-    def __init__(self, storage_strategy: BaseStorageStrategy):
+    def __init__(self, storage_strategy: BaseStorageStrategy) -> None:
         """Initialize repository with storage strategy."""
         self.storage_strategy = storage_strategy
         self.serializer = TemplateSerializer()

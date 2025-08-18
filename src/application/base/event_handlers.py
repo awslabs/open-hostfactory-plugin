@@ -41,7 +41,7 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
         logger: Optional[LoggingPort] = None,
         error_handler: Optional[ErrorHandlingPort] = None,
         event_publisher: Optional[EventPublisherPort] = None,
-    ):
+    ) -> None:
         """
         Initialize base event handler.
 

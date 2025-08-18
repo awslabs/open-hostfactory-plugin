@@ -21,7 +21,7 @@ class TransactionState(str, Enum):
 class TransactionManager(ABC):
     """Base interface for transaction managers."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self.logger = get_logger(__name__)
         self.state = TransactionState.INACTIVE
@@ -39,7 +39,7 @@ class TransactionManager(ABC):
         """Rollback the current transaction."""
 
     @contextmanager
-    def transaction(self):
+    def transaction(self) -> None:
         """Context manager for transaction handling."""
         self.begin_transaction()
         try:
@@ -59,7 +59,7 @@ class TransactionManager(ABC):
 class MemoryTransactionManager(TransactionManager):
     """In-memory transaction manager for testing and simple operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize in-memory transaction manager."""
         super().__init__()
         self.operations: List[Callable[[], None]] = []
@@ -126,7 +126,7 @@ class MemoryTransactionManager(TransactionManager):
         self,
         operation: Callable[[], None],
         rollback_operation: Optional[Callable[[], None]] = None,
-    ):
+    ) -> None:
         """Add operation to transaction."""
         if self.state != TransactionState.ACTIVE:
             raise RuntimeError("No active transaction") from e

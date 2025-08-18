@@ -274,7 +274,7 @@ def _register_aws_components_with_di(container, aws_config, instance_name: str) 
         class AWSInstanceConfigPort:
             """Configuration port that provides instance-specific AWS configuration."""
 
-            def __init__(self, aws_config):
+            def __init__(self, aws_config) -> None:
                 """Initialize with AWS configuration."""
                 self._aws_config = aws_config
 

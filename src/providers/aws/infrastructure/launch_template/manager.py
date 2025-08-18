@@ -41,7 +41,7 @@ class LaunchTemplateResult:
 class AWSLaunchTemplateManager:
     """Manages AWS launch template creation and updates."""
 
-    def __init__(self, aws_client: AWSClient, logger: LoggingPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort) -> None:
         """
         Initialize the launch template manager.
 

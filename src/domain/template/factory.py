@@ -51,7 +51,7 @@ class TemplateFactory(BaseTemplateFactory):
         self,
         extension_registry: Optional[TemplateExtensionRegistry] = None,
         logger: Optional[LoggingPort] = None,
-    ):
+    ) -> None:
         """Initialize template factory.
 
         Args:

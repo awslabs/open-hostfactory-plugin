@@ -76,7 +76,7 @@ async def handle_serve_api(args) -> Dict[str, Any]:
         server = uvicorn.Server(config)
 
         # Setup signal handlers for graceful shutdown
-        def signal_handler(signum, frame):
+        def signal_handler(signum, frame) -> None:
             """Handle shutdown signals gracefully."""
             logger.info("Received signal %s, shutting down gracefully...", signum)
             server.should_exit = True

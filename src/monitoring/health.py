@@ -41,7 +41,7 @@ class HealthStatus:
 class HealthCheck:
     """Health check implementation."""
 
-    def __init__(self, config: ConfigurationManager, aws_client: Optional[AWSClient] = None):
+    def __init__(self, config: ConfigurationManager, aws_client: Optional[AWSClient] = None) -> None:
         """Initialize health check."""
         self.config = config.get_config()
         self.aws_client = aws_client

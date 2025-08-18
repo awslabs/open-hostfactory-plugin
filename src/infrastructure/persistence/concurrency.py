@@ -14,7 +14,7 @@ R = TypeVar("R")  # Return type
 class OptimisticConcurrencyControl:
     """Utilities for optimistic concurrency control."""
 
-    def __init__(self, max_retries: int = 3, retry_delay: float = 0.1):
+    def __init__(self, max_retries: int = 3, retry_delay: float = 0.1) -> None:
         """
         Initialize optimistic concurrency control.
 

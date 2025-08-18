@@ -15,7 +15,7 @@ class DynamoDBClientManager(ResourceManager):
     Handles AWS client initialization, session management, and error handling.
     """
 
-    def __init__(self, aws_client=None, region: str = "us-east-1", profile: Optional[str] = None):
+    def __init__(self, aws_client=None, region: str = "us-east-1", profile: Optional[str] = None) -> None:
         """
         Initialize DynamoDB client manager.
 

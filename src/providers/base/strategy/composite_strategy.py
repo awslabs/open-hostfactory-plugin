@@ -59,7 +59,7 @@ class CompositionConfig:
     min_success_count: int = 1
     failure_threshold: float = 0.5  # Fail if more than 50% of strategies fail
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate configuration after initialization."""
         if self.max_concurrent_operations < 1:
             raise ValueError("max_concurrent_operations must be at least 1") from e
@@ -108,7 +108,7 @@ class CompositeProviderStrategy(ProviderStrategy):
         logger: LoggingPort,
         strategies: List[ProviderStrategy],
         config: CompositionConfig = None,
-    ):
+    ) -> None:
         """
         Initialize composite provider strategy.
 

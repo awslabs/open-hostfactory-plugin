@@ -37,7 +37,7 @@ class OpenHFPluginSDK:
         config: Optional[Dict[str, Any]] = None,
         config_path: Optional[str] = None,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialize the Host Factory SDK.
 

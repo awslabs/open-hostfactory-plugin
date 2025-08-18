@@ -72,7 +72,7 @@ class Timer:
 class MetricsCollector:
     """Collects and manages application metrics."""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """Initialize metrics collector."""
         self.config = config
         self.metrics: Dict[str, Metric] = {}

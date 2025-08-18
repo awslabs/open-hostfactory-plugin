@@ -33,7 +33,7 @@ class AuthContext:
     # Additional context
     metadata: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.metadata is None:
             self.metadata = {}
 
@@ -51,7 +51,7 @@ class AuthResult:
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.user_roles is None:
             self.user_roles = []
         if self.permissions is None:

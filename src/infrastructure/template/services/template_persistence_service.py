@@ -34,7 +34,7 @@ class TemplatePersistenceService:
         scheduler_strategy: SchedulerPort,
         logger: LoggingPort,
         event_publisher: Optional[EventPublisherPort] = None,
-    ):
+    ) -> None:
         """
         Initialize the template persistence service.
 

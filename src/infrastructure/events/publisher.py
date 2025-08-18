@@ -16,7 +16,7 @@ class ConfigurableEventPublisher(EventPublisher):
     - "async": Publish to message queues (EDA mode - future)
     """
 
-    def __init__(self, mode: str = "logging"):
+    def __init__(self, mode: str = "logging") -> None:
         """Initialize with publishing mode."""
         self.mode = mode
         self._handlers: Dict[str, List[Callable]] = {}

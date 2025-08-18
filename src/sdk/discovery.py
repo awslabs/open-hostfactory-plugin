@@ -39,7 +39,7 @@ class SDKMethodDiscovery:
     but creates SDK method interfaces instead of DI registrations.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the instance."""
         self._method_info_cache: Dict[str, MethodInfo] = {}
 

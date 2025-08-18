@@ -52,7 +52,7 @@ class AWSProviderStrategy(ProviderStrategy):
     - AWS-specific optimizations and features
     """
 
-    def __init__(self, config: AWSProviderConfig, logger: LoggingPort):
+    def __init__(self, config: AWSProviderConfig, logger: LoggingPort) -> None:
         """
         Initialize AWS provider strategy.
 
@@ -89,7 +89,7 @@ class AWSProviderStrategy(ProviderStrategy):
             class AWSInstanceConfigPort:
                 """Configuration port that provides instance-specific AWS configuration."""
 
-                def __init__(self, aws_config: AWSProviderConfig):
+                def __init__(self, aws_config: AWSProviderConfig) -> None:
                     self._aws_config = aws_config
 
                 def get_typed(self, config_type):

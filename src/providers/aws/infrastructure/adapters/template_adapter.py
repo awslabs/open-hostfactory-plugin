@@ -74,7 +74,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
         template_config_manager: TemplateConfigurationManager,
         aws_client: AWSClient,
         logger: LoggingPort,
-    ):
+    ) -> None:
         """
         Initialize the adapter.
 

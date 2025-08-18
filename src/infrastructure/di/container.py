@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 class LazyLoadingConfig:
     """Configuration for lazy loading behavior."""
 
-    def __init__(self, config_dict: Optional[Dict[str, Any]] = None):
+    def __init__(self, config_dict: Optional[Dict[str, Any]] = None) -> None:
         """Initialize lazy loading configuration with provided settings."""
         if config_dict is None:
             config_dict = {}
@@ -84,7 +84,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
     Includes lazy loading capabilities for improved startup performance.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the DI container."""
         self._service_registry = ServiceRegistry()
         self._cqrs_registry = CQRSHandlerRegistry()

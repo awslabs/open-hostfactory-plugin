@@ -65,7 +65,7 @@ class EC2FleetHandler(AWSHandler):
         aws_ops: AWSOperations,
         launch_template_manager: AWSLaunchTemplateManager,
         request_adapter: RequestAdapterPort = None,
-    ):
+    ) -> None:
         """
         Initialize the EC2 Fleet handler.
 

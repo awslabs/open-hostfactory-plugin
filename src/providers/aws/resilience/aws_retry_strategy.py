@@ -18,7 +18,7 @@ from providers.aws.resilience.aws_retry_errors import (
 class AWSRetryStrategy(RetryStrategy):
     """AWS-specific retry strategy with service-aware error handling."""
 
-    def __init__(self, logger: LoggingPort, service: str = "ec2", **kwargs):
+    def __init__(self, logger: LoggingPort, service: str = "ec2", **kwargs) -> None:
         """
         Initialize AWS retry strategy.
 

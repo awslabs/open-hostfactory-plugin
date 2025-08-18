@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class DependencyResolver:
     """Handles dependency resolution and instance creation."""
 
-    def __init__(self, service_registry, cqrs_registry):
+    def __init__(self, service_registry, cqrs_registry) -> None:
         """Initialize the instance."""
         self._service_registry = service_registry
         self._cqrs_registry = cqrs_registry

@@ -28,7 +28,7 @@ class ValidationResult:
     supported_features: List[str]
     unsupported_features: List[str]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.errors is None:
             self.errors = []
         if self.warnings is None:
@@ -64,7 +64,7 @@ class ProviderCapabilityService:
     - Provide detailed validation results with actionable feedback
     """
 
-    def __init__(self, logger: LoggingPort, provider_registry: Optional[ProviderRegistry] = None):
+    def __init__(self, logger: LoggingPort, provider_registry: Optional[ProviderRegistry] = None) -> None:
         """
         Initialize provider capability service.
 
@@ -223,7 +223,7 @@ class ProviderCapabilityService:
         template: Template,
         capabilities: ProviderCapabilities,
         result: ValidationResult,
-    ):
+    ) -> None:
         """Validate that provider supports the required API."""
         if not template.provider_api:
             result.warnings.append("No provider API specified in template")
@@ -242,7 +242,7 @@ class ProviderCapabilityService:
         template: Template,
         capabilities: ProviderCapabilities,
         result: ValidationResult,
-    ):
+    ) -> None:
         """Validate pricing model support (spot/on-demand)."""
         if not template.provider_api:
             return
@@ -302,7 +302,7 @@ class ProviderCapabilityService:
         template: Template,
         capabilities: ProviderCapabilities,
         result: ValidationResult,
-    ):
+    ) -> None:
         """Validate instance count limits."""
         if not template.provider_api:
             return

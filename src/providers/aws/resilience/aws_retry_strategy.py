@@ -129,9 +129,12 @@ class AWSRetryStrategy(RetryStrategy):
         delay = self.calculate_delay(attempt)
 
         self._logger.warning(
-            "Retrying AWS %s operation (attempt %s/%s) ", self.service, attempt + \
-                                        1, self.max_attempts
-            f"after {delay:.2f}s delay due to {error_info['code']}",
+            "Retrying AWS %s operation (attempt %s/%s) after %.2fs delay due to %s",
+            self.service,
+            attempt + 1,
+            self.max_attempts,
+            delay,
+            error_info['code'],
             extra={
                 "service": self.service,
                 "attempt": attempt + 1,

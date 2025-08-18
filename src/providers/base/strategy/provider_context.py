@@ -282,8 +282,11 @@ class ProviderContext:
                 metrics.record_operation(result.success, response_time_ms)
 
             self._logger.debug(
-                "Operation %s executed by %s: ", operation.operation_type, strategy_type
-                f"success={result.success}, time={response_time_ms:.2f}ms"
+                "Operation %s executed by %s: success=%s, time=%.2fms",
+                operation.operation_type,
+                strategy_type,
+                result.success,
+                response_time_ms
             )
 
             return result
@@ -362,8 +365,11 @@ class ProviderContext:
                 metrics.record_operation(result.success, response_time_ms)
 
             self._logger.debug(
-                "Operation %s executed by %s: ", operation.operation_type, strategy_type
-                f"success={result.success}, time={response_time_ms:.2f}ms"
+                "Operation %s executed by %s: success=%s, time=%.2fms",
+                operation.operation_type,
+                strategy_type,
+                result.success,
+                response_time_ms
             )
 
             return result

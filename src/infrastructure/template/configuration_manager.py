@@ -539,8 +539,9 @@ class TemplateConfigurationManager:
                 )
 
             self.logger.info(
-                "Template validation completed for %s: ", template.template_id
-                f"{'valid' if validation_result['is_valid'] else 'invalid'}"
+                "Template validation completed for %s: %s",
+                template.template_id,
+                'valid' if validation_result['is_valid'] else 'invalid'
             )
 
             return validation_result

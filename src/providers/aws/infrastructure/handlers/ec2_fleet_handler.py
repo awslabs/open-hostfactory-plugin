@@ -440,9 +440,10 @@ class EC2FleetHandler(AWSHandler):
 
             # Log fleet status
             self._logger.debug(
-                "Fleet status: %s, ", fleet.get('Status')
-                f"Target capacity: {fleet.get('TargetCapacitySpecification', {}).get('TotalTargetCapacity')}, "
-                f"Fulfilled capacity: {fleet.get('FulfilledCapacity', 0)}"
+                "Fleet status: %s, Target capacity: %s, Fulfilled capacity: %s",
+                fleet.get('Status'),
+                fleet.get('TargetCapacitySpecification', {}).get('TotalTargetCapacity'),
+                fleet.get('FulfilledCapacity', 0)
             )
 
             # Get instance IDs based on fleet type

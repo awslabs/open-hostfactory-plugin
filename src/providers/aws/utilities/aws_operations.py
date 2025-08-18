@@ -299,8 +299,11 @@ class AWSOperations:
 
             if expected_status and current_status != expected_status:
                 self._logger.warning(
-                    "%s %s status is %s, ", resource_type, resource_id, current_status
-                    f"expected {expected_status}"
+                    "%s %s status is %s, expected %s",
+                    resource_type,
+                    resource_id,
+                    current_status,
+                    expected_status
                 )
 
             return str(current_status)

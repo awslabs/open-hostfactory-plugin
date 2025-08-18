@@ -137,11 +137,12 @@ jobs:
         if [[ "${{ github.event_name }}" == "release" ]]; then
           echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "TARGET=pypi" >> $GITHUB_ENV
-        elif [[ "${{ github.event.inputs.environment }}" == "pypi" ]]; then
+        elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.environment }}" == "pypi" ]]; then
           echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "TARGET=pypi" >> $GITHUB_ENV
         else
           # Dev version for TestPyPI (push to main/develop or comment trigger)
+          # Comment triggers can ONLY publish to TestPyPI for security
           VERSION="0.1.0.dev$(date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TARGET=testpypi" >> $GITHUB_ENV

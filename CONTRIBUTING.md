@@ -64,10 +64,12 @@ You can trigger CI/CD actions by commenting on pull requests:
 - **`/security`** - Run security scans
 
 #### Publishing Commands (Members, Owners only)
-- **`/package`** - Build and publish to TestPyPI for testing
+- **`/package`** - Build and publish to TestPyPI only (never production PyPI)
   - Creates a dev version: `0.1.0.dev20250818125457+abc1234`
   - Publishes to https://test.pypi.org for installation testing
   - Use: `pip install --index-url https://test.pypi.org/simple/ open-hostfactory-plugin`
+
+**Security Note**: Comment triggers can never publish to production PyPI. Only GitHub releases publish to PyPI.
 
 #### Future Commands (planned)
 - **`/container`** - Build and test container images
@@ -76,11 +78,13 @@ Commands must be exact matches (e.g., `/test` not `/test please`).
 
 ### Automated Publishing
 
-The project uses a three-tier publishing strategy:
+The project uses a secure three-tier publishing strategy:
 
-1. **PR Comments** (`/build-package`) → TestPyPI with dev versions
+1. **PR Comments** (`/package`) → TestPyPI only with dev versions
 2. **Merge to main/develop** → TestPyPI with dev versions  
-3. **GitHub Releases** → PyPI with release versions
+3. **GitHub Releases** → Production PyPI with release versions
+
+**Security**: Comment triggers and branch pushes can never publish to production PyPI.
 
 ## Code Quality
 

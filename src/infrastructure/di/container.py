@@ -88,8 +88,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         """Initialize the DI container."""
         self._service_registry = ServiceRegistry()
         self._cqrs_registry = CQRSHandlerRegistry()
-        self._dependency_resolver = DependencyResolver(
-            self._service_registry, self._cqrs_registry)
+        self._dependency_resolver = DependencyResolver(self._service_registry, self._cqrs_registry)
         self._lock = threading.RLock()
 
         # Lazy loading support
@@ -98,7 +97,8 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
         self._on_demand_registrations: Dict[Type, Any] = {}
 
         logger.info(
-            "DI Container initialized (lazy_loading=%s)",  'enabled' if self._lazy_config.enabled else 'disabled'
+            "DI Container initialized (lazy_loading=%s)",
+            "enabled" if self._lazy_config.enabled else "disabled",
         )
 
     def is_registered(self, cls: Type) -> bool:
@@ -171,8 +171,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
             if isinstance(e, CircularDependencyError):
                 raise
             else:
-                raise DependencyResolutionError(
-                    cls, f"Failed to resolve {cls.__name__}: {str(e)}")
+                raise DependencyResolutionError(cls, f"Failed to resolve {cls.__name__}: {str(e)}")
 
     def get_optional(self, dependency_type: Type[T]) -> Optional[T]:
         """Get an optional instance of the specified type."""

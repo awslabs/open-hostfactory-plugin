@@ -119,7 +119,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
             try:
                 # Log request
                 self.logger.info(
-                    "Processing request: %s", func.__name__,
+                    "Processing request: %s",
+                    func.__name__,
                     extra={"correlation_id": correlation_id, "request": request},
                 )
 
@@ -142,7 +143,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
                 # Log success
                 self.logger.info(
-                    "Request completed: %s", func.__name__,
+                    "Request completed: %s",
+                    func.__name__,
                     extra={
                         "correlation_id": correlation_id,
                         "duration": time.time() - context.start_time,
@@ -168,7 +170,8 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
                 # Log error with stack trace
                 self.logger.error(
-                    "Request failed: %s", func.__name__,
+                    "Request failed: %s",
+                    func.__name__,
                     exc_info=True,
                     extra={
                         "correlation_id": correlation_id,
@@ -244,17 +247,20 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
                 # Log the error with appropriate level based on error type
                 if isinstance(e, ValidationError):
                     self.logger.warning(
-                        "Validation error: %s", str(e),
+                        "Validation error: %s",
+                        str(e),
                         extra={"error_details": error_dict},
                     )
                 elif isinstance(e, EntityNotFoundError):
                     self.logger.info(
-                        "Not found error: %s", str(e),
+                        "Not found error: %s",
+                        str(e),
                         extra={"error_details": error_dict},
                     )
                 else:
                     self.logger.error(
-                        "Application error: %s", str(e),
+                        "Application error: %s",
+                        str(e),
                         extra={"error_details": error_dict},
                     )
 
@@ -267,8 +273,7 @@ class BaseAPIHandler(BaseHandler, Generic[T, R]):
 
             except Exception as e:
                 # Handle unexpected errors
-                self.logger.error("Unexpected error", exc_info=True,
-                                  extra={"error": str(e)})
+                self.logger.error("Unexpected error", exc_info=True, extra={"error": str(e)})
 
                 # Return standardized error response for unexpected errors
                 return {

@@ -78,7 +78,7 @@ class HostFactoryFieldMappings:
             total_mappings,
             provider_type,
             len(generic_mappings),
-            len(provider_mappings)
+            len(provider_mappings),
         )
 
         return {**generic_mappings, **provider_mappings}

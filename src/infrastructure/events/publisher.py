@@ -25,8 +25,7 @@ class ConfigurableEventPublisher(EventPublisher):
         # Validate mode
         valid_modes = ["logging", "sync", "async"]
         if mode not in valid_modes:
-            raise ValueError(
-                f"Invalid mode '{mode}'. Must be one of: {valid_modes}") from e
+            raise ValueError(f"Invalid mode '{mode}'. Must be one of: {valid_modes}") from e
 
     def publish(self, event: DomainEvent) -> None:
         """Publish event based on configured mode."""
@@ -56,7 +55,7 @@ class ConfigurableEventPublisher(EventPublisher):
             event.event_type,
             event.aggregate_type,
             event.aggregate_id,
-            event.occurred_at.isoformat()
+            event.occurred_at.isoformat(),
         )
 
     def _call_handlers_sync(self, event: DomainEvent) -> None:
@@ -71,8 +70,7 @@ class ConfigurableEventPublisher(EventPublisher):
             try:
                 handler(event)
             except Exception as e:
-                self._logger.error("Event handler failed for %s: %s",
-                                   event.event_type, e)
+                self._logger.error("Event handler failed for %s: %s", event.event_type, e)
                 # Continue with other handlers
 
     def _publish_to_queue(self, event: DomainEvent) -> None:

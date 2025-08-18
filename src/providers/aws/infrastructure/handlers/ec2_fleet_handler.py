@@ -172,8 +172,7 @@ class EC2FleetHandler(AWSHandler):
                 **fleet_config,
             )
         except CircuitBreakerOpenError as e:
-            self._logger.error(
-                "Circuit breaker OPEN for EC2 Fleet creation: %s", str(e))
+            self._logger.error("Circuit breaker OPEN for EC2 Fleet creation: %s", str(e))
             # Re-raise to allow upper layers to handle graceful degradation
             raise e
 
@@ -195,8 +194,7 @@ class EC2FleetHandler(AWSHandler):
                 )
 
             request.metadata["instance_ids"] = instance_ids
-            self._logger.debug(
-                "Stored instance IDs in request metadata: %s", instance_ids)
+            self._logger.debug("Stored instance IDs in request metadata: %s", instance_ids)
 
         return fleet_id
 
@@ -278,8 +276,7 @@ class EC2FleetHandler(AWSHandler):
             if template.max_spot_price is not None:
                 if "SpotOptions" not in fleet_config:
                     fleet_config["SpotOptions"] = {}
-                fleet_config["SpotOptions"]["MaxTotalPrice"] = str(
-                    template.max_spot_price)
+                fleet_config["SpotOptions"]["MaxTotalPrice"] = str(template.max_spot_price)
         elif price_type == "heterogeneous":
             # For heterogeneous fleets, we need to specify both on-demand and spot
             # capacities
@@ -310,8 +307,7 @@ class EC2FleetHandler(AWSHandler):
             if template.max_spot_price is not None:
                 if "SpotOptions" not in fleet_config:
                     fleet_config["SpotOptions"] = {}
-                fleet_config["SpotOptions"]["MaxTotalPrice"] = str(
-                    template.max_spot_price)
+                fleet_config["SpotOptions"]["MaxTotalPrice"] = str(template.max_spot_price)
 
         # Add overrides with weighted capacity if multiple instance types are specified
         if template.instance_types:
@@ -332,8 +328,7 @@ class EC2FleetHandler(AWSHandler):
                     on_demand_overrides.append(override)
 
                 # Add on-demand overrides to the existing overrides
-                fleet_config["LaunchTemplateConfigs"][0]["Overrides"].extend(
-                    on_demand_overrides)
+                fleet_config["LaunchTemplateConfigs"][0]["Overrides"].extend(on_demand_overrides)
 
         # Add subnet configuration
         if template.subnet_ids:
@@ -412,12 +407,10 @@ class EC2FleetHandler(AWSHandler):
             query = GetTemplateQuery(template_id=str(request.template_id))
             template = query_bus.execute(query)
             if not template:
-                raise AWSEntityNotFoundError(
-                    f"Template {request.template_id} not found") from e
+                raise AWSEntityNotFoundError(f"Template {request.template_id} not found") from e
 
             # Ensure fleet_type is not None
-            fleet_type_value = template.metadata.get(
-                "aws", {}).get("fleet_type", "instant")
+            fleet_type_value = template.metadata.get("aws", {}).get("fleet_type", "instant")
             if not fleet_type_value:
                 raise AWSValidationError("Fleet type is required") from e
 
@@ -441,9 +434,9 @@ class EC2FleetHandler(AWSHandler):
             # Log fleet status
             self._logger.debug(
                 "Fleet status: %s, Target capacity: %s, Fulfilled capacity: %s",
-                fleet.get('Status'),
-                fleet.get('TargetCapacitySpecification', {}).get('TotalTargetCapacity'),
-                fleet.get('FulfilledCapacity', 0)
+                fleet.get("Status"),
+                fleet.get("TargetCapacitySpecification", {}).get("TotalTargetCapacity"),
+                fleet.get("FulfilledCapacity", 0),
             )
 
             # Get instance IDs based on fleet type
@@ -523,8 +516,7 @@ class EC2FleetHandler(AWSHandler):
                         self.aws_client.ec2_client.modify_fleet,
                         operation_type="critical",
                         FleetId=fleet_id,
-                        TargetCapacitySpecification={
-                            "TotalTargetCapacity": new_capacity},
+                        TargetCapacitySpecification={"TotalTargetCapacity": new_capacity},
                     )
                     self._logger.info(
                         "Reduced maintain fleet %s capacity to %s", fleet_id, new_capacity

@@ -1,13 +1,16 @@
 """Collection validation utility functions."""
 
-from typing import Callable, Dict, Iterable, List, Set, Tuple, TypeVar, Union, Protocol
+from typing import Callable, Dict, Iterable, List, Protocol, Set, Tuple, TypeVar, Union
+
 
 class Comparable(Protocol):
     """Protocol for types that support comparison operators."""
+
     def __lt__(self, other: "Comparable") -> bool: ...
     def __le__(self, other: "Comparable") -> bool: ...
     def __gt__(self, other: "Comparable") -> bool: ...
     def __ge__(self, other: "Comparable") -> bool: ...
+
 
 T = TypeVar("T")
 C = TypeVar("C", bound=Comparable)

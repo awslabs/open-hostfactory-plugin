@@ -80,7 +80,7 @@ class EventHandler(ABC):
                     "Event processed successfully: %s (ID: %s) in %.3fs",
                     event.event_type,
                     event_id,
-                    duration
+                    duration,
                 )
 
         except Exception as e:
@@ -152,7 +152,7 @@ class EventHandler(ABC):
                             attempt + 1,
                             self.retry_count,
                             event.event_type,
-                            str(e)
+                            str(e),
                         )
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
                 else:
@@ -182,7 +182,7 @@ class EventHandler(ABC):
                 event.event_type,
                 event_id,
                 duration,
-                str(error)
+                str(error),
             )
 
         # Future: Send to dead letter queue, trigger alerts, etc.
@@ -199,8 +199,9 @@ class EventHandler(ABC):
             error: The exception that occurred
         """
         if self.logger:
-            self.logger.error("Event sent to dead letter queue: %s - %s",
-                              event.event_type, str(error))
+            self.logger.error(
+                "Event sent to dead letter queue: %s - %s", event.event_type, str(error)
+            )
         # Future: Implement actual dead letter queue integration
 
     def extract_fields(self, event: DomainEvent, field_mapping: Dict[str, Any]) -> Dict[str, Any]:

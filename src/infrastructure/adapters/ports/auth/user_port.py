@@ -125,7 +125,7 @@ class UserPort(ABC):
         self,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
-        filters: Dict[str, Any] = None,
+        filters: Optional[Dict[str, Any]] = None,
     ) -> List[User]:
         """
         List users with optional filtering and pagination.

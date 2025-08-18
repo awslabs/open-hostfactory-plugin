@@ -185,7 +185,7 @@ class Application:
     def get_query_bus(self):
         """Get the query bus for CQRS operations (cached after first access)."""
         if not self._initialized:
-            raise RuntimeError("Application not initialized")
+            raise RuntimeError("Application not initialized") from e
 
         # Cache the query bus after first lookup for performance
         if not hasattr(self, "_query_bus"):

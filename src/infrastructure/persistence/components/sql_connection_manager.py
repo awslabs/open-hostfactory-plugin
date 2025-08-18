@@ -271,7 +271,7 @@ class SQLConnectionManager(ResourceManager):
     def get_engine(self) -> Engine:
         """Get SQLAlchemy engine."""
         if not self.engine:
-            raise RuntimeError("Engine not initialized")
+            raise RuntimeError("Engine not initialized") from e
         return self.engine
 
     def close(self) -> None:

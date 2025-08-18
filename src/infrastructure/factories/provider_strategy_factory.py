@@ -218,7 +218,7 @@ class ProviderStrategyFactory:
             available_providers = get_provider_registry().get_registered_providers()
             raise ProviderCreationError(
                 f"Unsupported provider type: {provider_config.type}. "
-                f"Available providers: {', '.join(available_providers)}"
+                f"Available providers: {', '.join(available_providers) from e}"
             ) from e
         except Exception as e:
             raise ProviderCreationError(

@@ -82,11 +82,11 @@ class AWSLaunchTemplateManager:
         except ClientError as e:
             error_msg = f"Failed to create/update launch template: {e.response['Error']['Message']}"
             self._logger.error(error_msg)
-            raise InfrastructureError(error_msg)
+            raise InfrastructureError(error_msg) from e
         except Exception as e:
             error_msg = f"Unexpected error in launch template management: {str(e)}"
             self._logger.error(error_msg)
-            raise InfrastructureError(error_msg)
+            raise InfrastructureError(error_msg) from e
 
     def _create_per_request_version(
         self, aws_template: AWSTemplate, request: Request
@@ -203,7 +203,7 @@ class AWSLaunchTemplateManager:
 
         except ClientError as e:
             if e.response["Error"]["Code"] == "InvalidLaunchTemplateId.NotFound":
-                raise AWSValidationError(f"Launch template {template_id} not found")
+                raise AWSValidationError(f"Launch template {template_id} not found") from e
             else:
                 raise e
 

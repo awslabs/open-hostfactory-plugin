@@ -75,7 +75,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to save %s entity %s: %s", self.entity_type, entity_id, e)
-                raise PersistenceError(f"Failed to save entity {entity_id}: {e}")
+                raise PersistenceError(f"Failed to save entity {entity_id}: {e}") from e
 
     def find_by_id(self, entity_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -101,7 +101,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to find %s entity %s: %s", self.entity_type, entity_id, e)
-                raise PersistenceError(f"Failed to find entity {entity_id}: {e}")
+                raise PersistenceError(f"Failed to find entity {entity_id}: {e}") from e
 
     def find_all(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -118,7 +118,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to load all %s entities: %s", self.entity_type, e)
-                raise PersistenceError(f"Failed to load all entities: {e}")
+                raise PersistenceError(f"Failed to load all entities: {e}") from e
 
     def delete(self, entity_id: str) -> None:
         """
@@ -150,7 +150,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to delete %s entity %s: %s", self.entity_type, entity_id, e)
-                raise PersistenceError(f"Failed to delete entity {entity_id}: {e}")
+                raise PersistenceError(f"Failed to delete entity {entity_id}: {e}") from e
 
     def exists(self, entity_id: str) -> bool:
         """
@@ -201,7 +201,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to search %s entities: %s", self.entity_type, e)
-                raise PersistenceError(f"Failed to search entities: {e}")
+                raise PersistenceError(f"Failed to search entities: {e}") from e
 
     def save_batch(self, entities: Dict[str, Dict[str, Any]]) -> None:
         """
@@ -221,7 +221,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to save batch of %s entities: %s", self.entity_type, e)
-                raise PersistenceError(f"Failed to save batch: {e}")
+                raise PersistenceError(f"Failed to save batch: {e}") from e
 
     def delete_batch(self, entity_ids: List[str]) -> None:
         """
@@ -244,7 +244,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
 
             except Exception as e:
                 self.logger.error("Failed to delete batch of %s entities: %s", self.entity_type, e)
-                raise PersistenceError(f"Failed to delete batch: {e}")
+                raise PersistenceError(f"Failed to delete batch: {e}") from e
 
     def begin_transaction(self) -> None:
         """Begin transaction."""

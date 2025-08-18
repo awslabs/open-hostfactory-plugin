@@ -99,7 +99,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Authentication service error",
-            )
+            ) from e
 
     def _is_excluded_path(self, path: str) -> bool:
         """

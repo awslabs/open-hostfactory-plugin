@@ -30,7 +30,7 @@ def read_text_file(file_path: str, encoding: str = "utf-8") -> str:
             e.start,
             e.end,
             f"Failed to decode text file {file_path}: {e.reason}",
-        )
+        ) from e
 
 
 def write_text_file(file_path: str, content: str, encoding: str = "utf-8") -> None:
@@ -110,7 +110,7 @@ def read_text_lines(
             e.start,
             e.end,
             f"Failed to decode text file {file_path}: {e.reason}",
-        )
+        ) from e
 
 
 def write_text_lines(

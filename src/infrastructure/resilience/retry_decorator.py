@@ -108,7 +108,7 @@ def retry(
                             logger.error(
                                 "Max retry attempts (%s) exceeded for %s: %s", max_attempts,  func.__name__, e
                             )
-                            raise MaxRetriesExceededError(attempt + 1, e)
+                            raise MaxRetriesExceededError(attempt + 1, e) from e
                         else:
                             logger.error("Non-retryable error in %s: %s", func.__name__, e)
                             raise e

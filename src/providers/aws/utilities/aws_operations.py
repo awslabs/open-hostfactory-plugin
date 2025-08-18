@@ -145,7 +145,7 @@ class AWSOperations:
         except Exception as e:
             error_msg = error_message or f"Unexpected error in {operation_name}: {str(e)}"
             self._logger.error(error_msg)
-            raise AWSInfrastructureError(error_msg)
+            raise AWSInfrastructureError(error_msg) from e
 
     def describe_with_pagination_and_retry(
         self, client_method: Callable, result_key: str, operation_name: str, **filters
@@ -383,7 +383,7 @@ class AWSOperations:
         except Exception as e:
             error_msg = f"Failed to {operation_name}: {str(e)}"
             self._logger.error("Unexpected error in %s: %s", context, error_msg)
-            raise AWSInfrastructureError(error_msg)
+            raise AWSInfrastructureError(error_msg) from e
 
     def _convert_client_error(
         self, error: ClientError, operation_name: str = "AWS operation"

@@ -210,11 +210,11 @@ class ConfigurationLoader:
 
         except ValueError as e:
             # Convert Pydantic validation errors to ConfigurationError
-            raise ConfigurationError("App", f"Configuration validation failed: {str(e)}")
+            raise ConfigurationError("App", f"Configuration validation failed: {str(e)}") from e
         except KeyError as e:
-            raise ConfigurationError("App", f"Missing required configuration: {str(e)}")
+            raise ConfigurationError("App", f"Missing required configuration: {str(e)}") from e
         except Exception as e:
-            raise ConfigurationError("App", f"Failed to create typed configuration: {str(e)}")
+            raise ConfigurationError("App", f"Failed to create typed configuration: {str(e)}") from e
 
     @classmethod
     def _load_from_file(cls, config_path: str) -> Optional[Dict[str, Any]]:

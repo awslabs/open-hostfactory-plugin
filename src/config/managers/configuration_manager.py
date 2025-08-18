@@ -141,7 +141,7 @@ class ConfigurationManager:
             logger.info("Configuration reloaded successfully")
         except Exception as e:
             logger.error("Failed to reload configuration: %s", e)
-            raise ConfigurationError(f"Configuration reload failed: {e}")
+            raise ConfigurationError(f"Configuration reload failed: {e}") from e
 
     # Delegate type conversion methods
     def get(self, key: str, default: Any = None) -> Any:
@@ -237,7 +237,7 @@ class ConfigurationManager:
             logger.info("Configuration saved to %s", config_path)
         except Exception as e:
             logger.error("Failed to save configuration: %s", e)
-            raise ConfigurationError(f"Failed to save configuration: {e}")
+            raise ConfigurationError(f"Failed to save configuration: {e}") from e
 
     def get_raw_config(self) -> Dict[str, Any]:
         """Get raw configuration dictionary."""

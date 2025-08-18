@@ -517,7 +517,7 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
             logger = get_logger(__name__)
             logger.error("Failed to load input file %s: %s", args.file, e)
-            raise DomainException(f"Failed to load input file: {e}")
+            raise DomainException(f"Failed to load input file: {e}") from e
     elif hasattr(args, "data") and args.data:
         try:
             import json
@@ -528,7 +528,7 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
             logger = get_logger(__name__)
             logger.error("Failed to parse input data: %s", e)
-            raise DomainException(f"Failed to parse input data: {e}")
+            raise DomainException(f"Failed to parse input data: {e}") from e
 
     # Add input_data to args for handlers to use
     args.input_data = input_data

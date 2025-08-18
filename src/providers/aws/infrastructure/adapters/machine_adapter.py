@@ -183,7 +183,7 @@ class AWSMachineAdapter:
                 error_code = getattr(e, "error_code", "")
                 if error_code == "InvalidInstanceID.NotFound":
                     self._logger.error("Instance not found: %s", machine.machine_id)
-                    raise EC2InstanceNotFoundError(str(machine.machine_id))
+                    raise EC2InstanceNotFoundError(str(machine.machine_id) from e)
                 else:
                     self._logger.error("AWS error during health check: %s", str(e))
                     raise AWSError(
@@ -281,7 +281,7 @@ class AWSMachineAdapter:
                 error_code = getattr(e, "error_code", "")
                 if error_code == "InvalidInstanceID.NotFound":
                     self._logger.error("Instance not found during cleanup: %s", machine.machine_id)
-                    raise EC2InstanceNotFoundError(str(machine.machine_id))
+                    raise EC2InstanceNotFoundError(str(machine.machine_id) from e)
                 else:
                     self._logger.error("AWS error during cleanup: %s", str(e))
                     raise AWSError(f"AWS error during cleanup: {str(e)}", error_code=error_code)
@@ -469,7 +469,7 @@ class AWSMachineAdapter:
                 error_code = getattr(e, "error_code", "")
                 if error_code == "InvalidInstanceID.NotFound":
                     self._logger.error("Instance not found: %s", machine.machine_id)
-                    raise EC2InstanceNotFoundError(str(machine.machine_id))
+                    raise EC2InstanceNotFoundError(str(machine.machine_id) from e)
                 else:
                     self._logger.error("AWS error getting machine details: %s", str(e))
                     raise AWSError(

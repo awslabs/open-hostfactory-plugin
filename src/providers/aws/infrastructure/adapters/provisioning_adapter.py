@@ -372,7 +372,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                 # If we get here, we couldn't determine the resource type
                 raise AWSEntityNotFoundError(
                     f"Resource {resource_id} not found or type not supported"
-                )
+                ) from e
         except AWSEntityNotFoundError:
             raise
         except Exception as e:

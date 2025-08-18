@@ -93,11 +93,11 @@ class AWSAMIResolver(ImageResolver):
             return ami_id
 
         except ClientError as e:
-            raise ValueError(f"Failed to resolve SSM parameter {ssm_path}: {e}")
+            raise ValueError(f"Failed to resolve SSM parameter {ssm_path}: {e}") from e
         except ImportError:
-            raise ValueError("boto3 is required for SSM parameter resolution")
+            raise ValueError("boto3 is required for SSM parameter resolution") from e
         except Exception as e:
-            raise ValueError(f"Unexpected error resolving SSM parameter {ssm_path}: {e}")
+            raise ValueError(f"Unexpected error resolving SSM parameter {ssm_path}: {e}") from e
 
     def _is_custom_alias(self, reference: str) -> bool:
         """

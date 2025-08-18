@@ -99,11 +99,11 @@ class AWSClient:
             error_message = e.response["Error"]["Message"]
 
             if error_code in ["UnauthorizedOperation", "InvalidClientTokenId"]:
-                raise AuthorizationError(f"AWS authentication failed: {error_message}")
+                raise AuthorizationError(f"AWS authentication failed: {error_message}") from e
             elif error_code == "RequestTimeout":
-                raise NetworkError(f"AWS connection failed: {error_message}")
+                raise NetworkError(f"AWS connection failed: {error_message}") from e
             else:
-                raise AWSConfigurationError(f"AWS client initialization failed: {error_message}")
+                raise AWSConfigurationError(f"AWS client initialization failed: {error_message}") from e
 
     def _get_region_from_config_manager(self, config_manager) -> Optional[str]:
         """

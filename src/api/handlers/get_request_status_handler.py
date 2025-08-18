@@ -78,7 +78,7 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
                 context.metadata["validated_data"] = validated_data
 
             except ValidationException as e:
-                raise ValueError(f"Validation error: {e.message}")
+                raise ValueError(f"Validation error: {e.message}") from e
 
     @handle_interface_exceptions(context="get_request_status_api", interface_type="api")
     async def execute_api_request(

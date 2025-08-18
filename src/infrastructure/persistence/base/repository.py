@@ -109,7 +109,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 return self.entity_class(**entity_dict)  # Last resort
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
-            raise ValueError(f"Validation error: {e}")
+            raise ValueError(f"Validation error: {e}") from e
 
     def save(self, entity: Any) -> None:
         """
@@ -218,7 +218,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
-            raise ValueError(f"Validation error: {e}")
+            raise ValueError(f"Validation error: {e}") from e
 
     def find_by_id(self, entity_id: Any) -> Optional[T]:
         """
@@ -455,7 +455,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
-            raise ValueError(f"Validation error: {e}")
+            raise ValueError(f"Validation error: {e}") from e
 
     def delete_batch(self, entity_ids: List[Any]) -> None:
         """

@@ -88,7 +88,7 @@ class SDKConfig:
         file_path = Path(path)
 
         if not file_path.exists():
-            raise ConfigurationError(f"Configuration file not found: {path}") from e
+            raise ConfigurationError(f"Configuration file not found: {path}")
 
         try:
             with open(file_path, "r") as f:
@@ -98,9 +98,7 @@ class SDKConfig:
 
                         data = yaml.safe_load(f)
                     except ImportError:
-                        raise ConfigurationError(
-                            "YAML support requires PyYAML: pip install PyYAML"
-                        ) from e
+                        raise ConfigurationError("YAML support requires PyYAML: pip install PyYAML")
                 else:
                     data = json.load(f)
 
@@ -109,7 +107,7 @@ class SDKConfig:
             return config
 
         except Exception as e:
-            raise ConfigurationError(f"Failed to load configuration from {path}: {str(e)}") from e
+            raise ConfigurationError(f"Failed to load configuration from {path}: {str(e)}")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
@@ -135,13 +133,13 @@ class SDKConfig:
         Follows the same validation patterns as existing config classes.
         """
         if not self.provider:
-            raise ConfigurationError("Provider is required") from e
+            raise ConfigurationError("Provider is required")
 
         if self.timeout <= 0:
-            raise ConfigurationError("Timeout must be positive") from e
+            raise ConfigurationError("Timeout must be positive")
 
         if self.retry_attempts < 0:
-            raise ConfigurationError("Retry attempts cannot be negative") from e
+            raise ConfigurationError("Retry attempts cannot be negative")
 
         valid_log_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         if self.log_level.upper() not in valid_log_levels:

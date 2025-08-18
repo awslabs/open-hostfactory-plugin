@@ -24,7 +24,7 @@ def read_json_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
             result: Dict[str, Any] = json.load(f)
             return result
     except FileNotFoundError:
-        raise FileNotFoundError(f"JSON file not found: {file_path}") from e
+        raise FileNotFoundError(f"JSON file not found: {file_path}")
     except json.JSONDecodeError as e:
         raise json.JSONDecodeError(f"Failed to parse JSON file {file_path}: {str(e)}", e.doc, e.pos)
 

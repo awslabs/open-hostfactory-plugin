@@ -186,7 +186,7 @@ class Application:
     def get_query_bus(self):
         """Get the query bus for CQRS operations (cached after first access)."""
         if not self._initialized:
-            raise RuntimeError("Application not initialized") from e
+            raise RuntimeError("Application not initialized")
 
         # Cache the query bus after first lookup for performance
         if not hasattr(self, "_query_bus"):
@@ -198,7 +198,7 @@ class Application:
     def get_command_bus(self):
         """Get the command bus for CQRS operations (cached after first access)."""
         if not self._initialized:
-            raise RuntimeError("Application not initialized") from e
+            raise RuntimeError("Application not initialized")
 
         # Cache the command bus after first lookup for performance
         if not hasattr(self, "_command_bus"):
@@ -308,7 +308,7 @@ class Application:
     async def __aenter__(self) -> "Application":
         """Async context manager entry."""
         if not await self.initialize():
-            raise RuntimeError("Failed to initialize application") from e
+            raise RuntimeError("Failed to initialize application")
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -320,9 +320,7 @@ async def create_application(config_path: Optional[str] = None) -> Application:
     """Create and initialize a provider-aware application."""
     app = Application(config_path)
     if not await app.initialize():
-        raise RuntimeError(
-            f"Failed to initialize application with {app.provider_type} provider"
-        ) from e
+        raise RuntimeError(f"Failed to initialize application with {app.provider_type} provider")
     return app
 
 

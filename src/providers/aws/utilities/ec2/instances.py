@@ -29,7 +29,7 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
     try:
         # Require AWSClient for consistent configuration
         if not aws_client:
-            raise ValueError("AWSClient is required for EC2 operations") from e
+            raise ValueError("AWSClient is required for EC2 operations")
         ec2_client = aws_client.ec2_client
 
         # Call with retry built into the function
@@ -37,7 +37,7 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
 
         # Check if instance exists
         if not response["Reservations"] or not response["Reservations"][0]["Instances"]:
-            raise InfrastructureError("AWS.EC2", f"EC2 instance {instance_id} not found") from e
+            raise InfrastructureError("AWS.EC2", f"EC2 instance {instance_id} not found")
 
         return response["Reservations"][0]["Instances"][0]
 
@@ -107,7 +107,7 @@ def create_instance(
     try:
         # Require AWSClient for consistent configuration
         if not aws_client:
-            raise ValueError("AWSClient is required for EC2 operations") from e
+            raise ValueError("AWSClient is required for EC2 operations")
         ec2_client = aws_client.ec2_client
 
         # Build parameters
@@ -203,7 +203,7 @@ def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, An
     try:
         # Require AWSClient for consistent configuration
         if not aws_client:
-            raise ValueError("AWSClient is required for EC2 operations") from e
+            raise ValueError("AWSClient is required for EC2 operations")
         ec2_client = aws_client.ec2_client
 
         # Terminate instance with retry built-in

@@ -70,7 +70,7 @@ def register_all_storage_types() -> None:
 
     if not registered_types:
         logger.error("No storage types were successfully registered!")
-        raise RuntimeError("Failed to register any storage types") from e
+        raise RuntimeError("Failed to register any storage types")
 
 
 def register_storage_type_on_demand(storage_type: str) -> bool:
@@ -139,7 +139,7 @@ def register_minimal_storage_types() -> None:
         logger.info("Minimal storage registration complete: json")
     except Exception as e:
         logger.error("Failed to register minimal storage types: %s", e)
-        raise RuntimeError("Failed to register minimal storage types") from e
+        raise RuntimeError("Failed to register minimal storage types")
 
 
 def get_available_storage_types() -> list:

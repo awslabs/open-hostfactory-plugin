@@ -38,10 +38,10 @@ class ProviderOperation:
     def __post_init__(self) -> None:
         """Validate operation parameters after initialization."""
         if not isinstance(self.parameters, dict):
-            raise ValueError("Operation parameters must be a dictionary") from e
+            raise ValueError("Operation parameters must be a dictionary")
 
         if self.context is not None and not isinstance(self.context, dict):
-            raise ValueError("Operation context must be a dictionary or None") from e
+            raise ValueError("Operation context must be a dictionary or None")
 
 
 class ProviderResult(BaseModel):
@@ -249,9 +249,7 @@ class ProviderStrategy(ABC):
     def __enter__(self) -> "ProviderStrategy":
         """Context manager entry."""
         if not self._initialized and not self.initialize():
-            raise RuntimeError(
-                f"Failed to initialize {self.provider_type} provider strategy"
-            ) from e
+            raise RuntimeError(f"Failed to initialize {self.provider_type} provider strategy")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:

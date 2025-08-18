@@ -209,7 +209,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
         except Exception as e:
             error_msg = f"Error cleaning up storage strategy: {str(e)}"
             self.logger.error(error_msg)
-            raise PersistenceError(error_msg) from e
+            raise PersistenceError(error_msg)
 
     def __enter__(self) -> "StorageStrategy[T]":
         """
@@ -219,7 +219,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             Self for use in with statement
         """
         if self._is_closed:
-            raise PersistenceError("Cannot enter context with closed storage strategy") from e
+            raise PersistenceError("Cannot enter context with closed storage strategy")
         return self
 
     def __exit__(
@@ -267,7 +267,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             PersistenceError: If there's an error beginning the transaction
         """
         if self._in_transaction:
-            raise PersistenceError("Transaction already in progress") from e
+            raise PersistenceError("Transaction already in progress")
 
         try:
             # Take a snapshot of the current state
@@ -283,7 +283,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
 
             self._in_transaction = True
         except Exception as e:
-            raise PersistenceError(f"Error beginning transaction: {str(e)}") from e
+            raise PersistenceError(f"Error beginning transaction: {str(e)}")
 
     def commit_transaction(self) -> None:
         """
@@ -293,14 +293,14 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             PersistenceError: If there's an error committing the transaction
         """
         if not self._in_transaction:
-            raise PersistenceError("No transaction in progress") from e
+            raise PersistenceError("No transaction in progress")
 
         try:
             # Clear the snapshot
             self._transaction_snapshot = None
             self._in_transaction = False
         except Exception as e:
-            raise PersistenceError(f"Error committing transaction: {str(e)}") from e
+            raise PersistenceError(f"Error committing transaction: {str(e)}")
 
     def rollback_transaction(self) -> None:
         """
@@ -310,7 +310,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             PersistenceError: If there's an error rolling back the transaction
         """
         if not self._in_transaction:
-            raise PersistenceError("No transaction in progress") from e
+            raise PersistenceError("No transaction in progress")
 
         try:
             # Restore from snapshot
@@ -322,7 +322,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             self._transaction_snapshot = None
             self._in_transaction = False
         except Exception as e:
-            raise PersistenceError(f"Error rolling back transaction: {str(e)}") from e
+            raise PersistenceError(f"Error rolling back transaction: {str(e)}")
 
     def save_batch(self, entities: Dict[str, Dict[str, Any]]) -> None:
         """
@@ -339,7 +339,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             for entity_id, entity_data in entities.items():
                 self.save(entity_id, entity_data)
         except Exception as e:
-            raise PersistenceError(f"Error saving batch: {str(e)}") from e
+            raise PersistenceError(f"Error saving batch: {str(e)}")
 
     def delete_batch(self, entity_ids: List[str]) -> None:
         """
@@ -356,7 +356,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             for entity_id in entity_ids:
                 self.delete(entity_id)
         except Exception as e:
-            raise PersistenceError(f"Error deleting batch: {str(e)}") from e
+            raise PersistenceError(f"Error deleting batch: {str(e)}")
 
     def _get_entity_id_from_dict(self, data: Dict[str, Any]) -> str:
         """
@@ -380,7 +380,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
         elif "template_id" in data:
             return str(data["template_id"])
         else:
-            raise ValueError(f"Cannot determine ID for entity data: {data}") from e
+            raise ValueError(f"Cannot determine ID for entity data: {data}")
 
     def find_by_criteria(self, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
         """

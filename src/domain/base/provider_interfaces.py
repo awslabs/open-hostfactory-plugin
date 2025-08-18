@@ -38,13 +38,13 @@ class ProviderResourceTag:
     def __post_init__(self) -> None:
         """Validate tag key and value."""
         if not self.key or len(self.key) > 128:
-            raise ValueError("Tag key must be 1-128 characters") from e
+            raise ValueError("Tag key must be 1-128 characters")
         if len(self.value) > 256:
-            raise ValueError("Tag value must be 0-256 characters") from e
+            raise ValueError("Tag value must be 0-256 characters")
 
         # Basic validation - providers can add specific rules
         if self.key.startswith("provider:"):
-            raise ValueError("Tag keys cannot start with 'provider:'") from e
+            raise ValueError("Tag keys cannot start with 'provider:'")
 
 
 @dataclass(frozen=True)
@@ -59,9 +59,9 @@ class ProviderResourceIdentifier:
     def __post_init__(self) -> None:
         """Validate resource identifier."""
         if not self.identifier:
-            raise ValueError("Resource identifier cannot be empty") from e
+            raise ValueError("Resource identifier cannot be empty")
         if not self.resource_type:
-            raise ValueError("Resource type cannot be empty") from e
+            raise ValueError("Resource type cannot be empty")
 
 
 @dataclass(frozen=True)
@@ -74,7 +74,7 @@ class ProviderLaunchTemplate:
     def __post_init__(self) -> None:
         """Validate launch template."""
         if not self.template_id:
-            raise ValueError("Template ID cannot be empty") from e
+            raise ValueError("Template ID cannot be empty")
 
 
 class ProviderStateMapper(Protocol):

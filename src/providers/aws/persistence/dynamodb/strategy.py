@@ -104,16 +104,16 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
                 success = self.client_manager.put_item(self.table_name, item)
 
                 if not success:
-                    raise PersistenceError(f"Failed to save entity {entity_id}") from e
+                    raise PersistenceError(f"Failed to save entity {entity_id}")
 
                 self._self._logger.debug("Saved entity: %s", entity_id)
 
             except ClientError as e:
                 self.client_manager.handle_client_error(e, "Save")
-                raise PersistenceError(f"Failed to save entity {entity_id}: {e}") from e
+                raise PersistenceError(f"Failed to save entity {entity_id}: {e}")
             except Exception as e:
                 self._self._logger.error("Failed to save entity %s: %s", entity_id, e)
-                raise PersistenceError(f"Failed to save entity {entity_id}: {e}") from e
+                raise PersistenceError(f"Failed to save entity {entity_id}: {e}")
 
     def find_by_id(self, entity_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -199,10 +199,10 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
 
             except ClientError as e:
                 self.client_manager.handle_client_error(e, "Delete")
-                raise PersistenceError(f"Failed to delete entity {entity_id}: {e}") from e
+                raise PersistenceError(f"Failed to delete entity {entity_id}: {e}")
             except Exception as e:
                 self._self._logger.error("Failed to delete entity %s: %s", entity_id, e)
-                raise PersistenceError(f"Failed to delete entity {entity_id}: {e}") from e
+                raise PersistenceError(f"Failed to delete entity {entity_id}: {e}")
 
     def exists(self, entity_id: str) -> bool:
         """
@@ -280,16 +280,16 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
                 success = self.client_manager.batch_write_items(self.table_name, items)
 
                 if not success:
-                    raise PersistenceError("Failed to save batch") from e
+                    raise PersistenceError("Failed to save batch")
 
                 self._self._logger.debug("Saved batch of %s entities", len(entities))
 
             except ClientError as e:
                 self.client_manager.handle_client_error(e, "Batch save")
-                raise PersistenceError(f"Failed to save batch: {e}") from e
+                raise PersistenceError(f"Failed to save batch: {e}")
             except Exception as e:
                 self._self._logger.error("Failed to save batch: %s", e)
-                raise PersistenceError(f"Failed to save batch: {e}") from e
+                raise PersistenceError(f"Failed to save batch: {e}")
 
     def delete_batch(self, entity_ids: List[str]) -> None:
         """
@@ -310,10 +310,10 @@ class DynamoDBStorageStrategy(BaseStorageStrategy):
 
             except ClientError as e:
                 self.client_manager.handle_client_error(e, "Batch delete")
-                raise PersistenceError(f"Failed to delete batch: {e}") from e
+                raise PersistenceError(f"Failed to delete batch: {e}")
             except Exception as e:
                 self._self._logger.error("Failed to delete batch: %s", e)
-                raise PersistenceError(f"Failed to delete batch: {e}") from e
+                raise PersistenceError(f"Failed to delete batch: {e}")
 
     def begin_transaction(self) -> None:
         """Begin transaction."""

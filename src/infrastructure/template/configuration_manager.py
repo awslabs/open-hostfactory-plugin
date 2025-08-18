@@ -169,7 +169,7 @@ class TemplateConfigurationManager:
         template_id = template_dict.get("template_id", template_dict.get("templateId", ""))
 
         if not template_id:
-            raise ValueError("Template missing required template_id field") from e
+            raise ValueError("Template missing required template_id field")
 
         # Apply hierarchical defaults if service is available
         template_with_defaults = template_dict
@@ -384,7 +384,7 @@ class TemplateConfigurationManager:
         try:
             # Validate input
             if not template_id or not isinstance(template_id, str):
-                raise TemplateValidationError("Template ID must be a non-empty string") from e
+                raise TemplateValidationError("Template ID must be a non-empty string")
 
             # Load templates (uses cache)
             templates = await self.load_templates()
@@ -402,9 +402,7 @@ class TemplateConfigurationManager:
             raise
         except Exception as e:
             self.logger.error("Failed to get template %s: %s", template_id, e)
-            raise TemplateConfigurationError(
-                f"Failed to retrieve template {template_id}: {str(e)}"
-            ) from e
+            raise TemplateConfigurationError(f"Failed to retrieve template {template_id}: {str(e)}")
 
     async def get_templates_by_provider(self, provider_api: str) -> List[TemplateDTO]:
         """

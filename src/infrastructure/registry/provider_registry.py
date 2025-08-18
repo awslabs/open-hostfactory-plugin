@@ -77,7 +77,7 @@ class ProviderRegistry(BaseRegistry):
                 validator_factory=validator_factory,
             )
         except ValueError as e:
-            raise ConfigurationError(str(e)) from e
+            raise ConfigurationError(str(e))
 
     def register_provider(
         self,
@@ -140,8 +140,8 @@ class ProviderRegistry(BaseRegistry):
                 resolver_factory=resolver_factory,
                 validator_factory=validator_factory,
             )
-        except ValueError as e:
-            raise ValueError(f"Provider instance '{instance_name}' is already registered") from e
+        except ValueError:
+            raise ValueError(f"Provider instance '{instance_name}' is already registered")
 
     def create_strategy(self, provider_type: str, config: Any) -> Any:
         """
@@ -159,12 +159,12 @@ class ProviderRegistry(BaseRegistry):
         """
         try:
             return self.create_strategy_by_type(provider_type, config)
-        except ValueError as e:
+        except ValueError:
             available_providers = ", ".join(self.get_registered_types())
             raise UnsupportedProviderError(
                 f"Provider type '{provider_type}' is not registered. "
                 f"Available providers: {available_providers}"
-            ) from e
+            )
 
     def create_strategy_from_instance(self, instance_name: str, config: Any) -> Any:
         """
@@ -182,12 +182,12 @@ class ProviderRegistry(BaseRegistry):
         """
         try:
             return self.create_strategy_by_instance(instance_name, config)
-        except ValueError as e:
+        except ValueError:
             available_instances = ", ".join(self.get_registered_instances())
             raise UnsupportedProviderError(
                 f"Provider instance '{instance_name}' is not registered. "
                 f"Available instances: {available_instances}"
-            ) from e
+            )
 
     def create_config(self, provider_type: str, data: Dict[str, Any]) -> Any:
         """
@@ -208,16 +208,16 @@ class ProviderRegistry(BaseRegistry):
             config = registration.config_factory(data)
             self.logger.debug("Created config for provider: %s", provider_type)
             return config
-        except ValueError as e:
+        except ValueError:
             available_providers = ", ".join(self.get_registered_types())
             raise UnsupportedProviderError(
                 f"Provider type '{provider_type}' is not registered. "
                 f"Available providers: {available_providers}"
-            ) from e
+            )
         except Exception as e:
             raise ConfigurationError(
                 f"Failed to create config for provider '{provider_type}': {str(e)}"
-            ) from e
+            )
 
     def create_resolver(self, provider_type: str) -> Optional[Any]:
         """

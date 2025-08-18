@@ -70,25 +70,25 @@ class RequestReturnMachinesRESTHandler(
 
         # Validate input data
         if not input_data or "machines" not in input_data:
-            raise ValueError("Input must include 'machines' key") from e
+            raise ValueError("Input must include 'machines' key")
 
         # Validate machine data
         machines_data = input_data.get("machines", [])
         if not isinstance(machines_data, list):
-            raise ValueError("'machines' must be a list") from e
+            raise ValueError("'machines' must be a list")
 
         # Store extracted machine IDs in context for later use
         machine_ids = []
         for machine in machines_data:
             if not isinstance(machine, dict):
-                raise ValueError("Each machine entry must be a dictionary") from e
+                raise ValueError("Each machine entry must be a dictionary")
 
             machine_id = machine.get("machineId")
             if not machine_id:
                 continue
 
             if not isinstance(machine_id, str):
-                raise ValueError(f"Invalid machine ID format: {machine_id}") from e
+                raise ValueError(f"Invalid machine ID format: {machine_id}")
 
             machine_ids.append(machine_id)
 
@@ -281,14 +281,14 @@ class RequestReturnMachinesRESTHandler(
         machine_ids = []
         for machine in machines_data:
             if not isinstance(machine, dict):
-                raise ValueError("Each machine entry must be a dictionary") from e
+                raise ValueError("Each machine entry must be a dictionary")
 
             machine_id = machine.get("machineId")
             if not machine_id:
                 continue
 
             if not isinstance(machine_id, str):
-                raise ValueError(f"Invalid machine ID format: {machine_id}") from e
+                raise ValueError(f"Invalid machine ID format: {machine_id}")
 
             machine_ids.append(machine_id)
 

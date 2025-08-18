@@ -111,7 +111,7 @@ class SpotFleetHandler(AWSHandler):
 
         # Validate fleet type
         if not aws_template.fleet_type:
-            raise AWSValidationError("Fleet type is required for SpotFleet") from e
+            raise AWSValidationError("Fleet type is required for SpotFleet")
 
         # Validate fleet type - SpotFleet supports REQUEST and MAINTAIN types
         valid_types = ["request", "maintain"]
@@ -306,7 +306,7 @@ class SpotFleetHandler(AWSHandler):
             # Check evaluation results
             for result in response["EvaluationResults"]:
                 if result["EvalDecision"] != "allowed":
-                    raise IAMError(f"Missing permission: {result['EvalActionName']}") from e
+                    raise IAMError(f"Missing permission: {result['EvalActionName']}")
 
         except Exception as e:
             raise IAMError(f"Failed to validate IAM permissions: {str(e)}")
@@ -632,7 +632,7 @@ class SpotFleetHandler(AWSHandler):
         """Release hosts across all spot fleets in the request."""
         try:
             if not request.resource_ids:
-                raise AWSInfrastructureError("No Spot Fleet Request IDs found in request") from e
+                raise AWSInfrastructureError("No Spot Fleet Request IDs found in request")
 
             # Process all fleet IDs instead of just the first one
             for fleet_id in request.resource_ids:

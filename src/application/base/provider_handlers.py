@@ -156,7 +156,7 @@ class BaseProviderHandler(Generic[TRequest, TResponse], ProviderHandler[TRequest
             ValidationError: If request is invalid
         """
         if not request:
-            raise ValueError("Request cannot be None") from e
+            raise ValueError("Request cannot be None")
 
     @abstractmethod
     async def execute_provider_request(

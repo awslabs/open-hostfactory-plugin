@@ -252,7 +252,7 @@ class BaseCommandHandler(BaseHandler, CommandHandler[TCommand, TResponse]):
         Override in specific handlers for custom validation logic.
         """
         if not command:
-            raise ValueError("Command cannot be None") from e
+            raise ValueError("Command cannot be None")
 
     @abstractmethod
     async def execute_command(self, command: TCommand) -> TResponse:

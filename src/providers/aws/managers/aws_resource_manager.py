@@ -36,7 +36,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
         elif specification.resource_type == ResourceType.STORAGE_VOLUME:
             return await self._provision_storage_volume(specification)
         else:
-            raise ValueError(f"Unsupported resource type: {specification.resource_type}") from e
+            raise ValueError(f"Unsupported resource type: {specification.resource_type}")
 
     async def execute_deprovisioning(self, allocation: ResourceAllocation) -> None:
         """Execute AWS-specific resource deprovisioning."""
@@ -45,7 +45,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
         elif allocation.resource_type == ResourceType.STORAGE_VOLUME:
             await self._deprovision_storage_volume(allocation)
         else:
-            raise ValueError(f"Unsupported resource type: {allocation.resource_type}") from e
+            raise ValueError(f"Unsupported resource type: {allocation.resource_type}")
 
     async def fetch_resource_status(self, resource_id: ResourceId) -> ResourceAllocation:
         """Fetch resource status from AWS."""
@@ -56,7 +56,7 @@ class AWSResourceManagerImpl(CloudProviderResourceManager[AWSClient]):
             response = await self.provider_client.describe_instances(InstanceIds=[str(resource_id)])
 
             if not response.get("Reservations"):
-                raise ValueError(f"Resource not found: {resource_id}") from e
+                raise ValueError(f"Resource not found: {resource_id}")
 
             instance = response["Reservations"][0]["Instances"][0]
 

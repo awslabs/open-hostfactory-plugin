@@ -517,7 +517,7 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
             logger = get_logger(__name__)
             logger.error("Failed to load input file %s: %s", args.file, e)
-            raise DomainException(f"Failed to load input file: {e}") from e
+            raise DomainException(f"Failed to load input file: {e}")
     elif hasattr(args, "data") and args.data:
         try:
             import json
@@ -528,7 +528,7 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
             logger = get_logger(__name__)
             logger.error("Failed to parse input data: %s", e)
-            raise DomainException(f"Failed to parse input data: {e}") from e
+            raise DomainException(f"Failed to parse input data: {e}")
 
     # Add input_data to args for handlers to use
     args.input_data = input_data
@@ -655,14 +655,12 @@ async def execute_command(args, app) -> Dict[str, Any]:
 
         # All handlers are now async functions - no special handling needed
         if handler_key not in COMMAND_HANDLERS:
-            raise ValueError(f"Unknown command: {args.resource} {args.action}") from e
+            raise ValueError(f"Unknown command: {args.resource} {args.action}")
 
         handler_func = COMMAND_HANDLERS[handler_key]
 
         if handler_func is None:
-            raise NotImplementedError(
-                f"Command not yet implemented: {args.resource} {args.action}"
-            ) from e
+            raise NotImplementedError(f"Command not yet implemented: {args.resource} {args.action}")
 
         # All handlers are async functions with decorators
         result = await handler_func(args)
@@ -753,7 +751,7 @@ async def main() -> None:
 
             app = Application(args.config)
             if not await app.initialize(dry_run=args.dry_run):
-                raise RuntimeError("Failed to initialize application") from e
+                raise RuntimeError("Failed to initialize application")
         except Exception as e:
             logger.error("Failed to initialize application: %s", e)
             if args.verbose:

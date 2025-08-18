@@ -141,7 +141,7 @@ class ProviderSelectionService:
         # Get active providers based on selection policy
         active_providers = self._provider_config.get_active_providers()
         if not active_providers:
-            raise ValueError("No active providers found in configuration") from e
+            raise ValueError("No active providers found in configuration")
 
         # Apply selection policy for multi-provider scenarios
         if len(active_providers) == 1:
@@ -176,12 +176,10 @@ class ProviderSelectionService:
         # Validate provider instance exists and is enabled
         provider_instance = self._get_provider_instance_config(provider_name)
         if not provider_instance:
-            raise ValueError(
-                f"Provider instance '{provider_name}' not found in configuration"
-            ) from e
+            raise ValueError(f"Provider instance '{provider_name}' not found in configuration")
 
         if not provider_instance.enabled:
-            raise ValueError(f"Provider instance '{provider_name}' is disabled") from e
+            raise ValueError(f"Provider instance '{provider_name}' is disabled")
 
         self._logger.info("Selected explicit provider: %s", provider_name)
 
@@ -199,9 +197,7 @@ class ProviderSelectionService:
         # Get all enabled instances of the provider type
         instances = self._get_enabled_instances_by_type(provider_type)
         if not instances:
-            raise ValueError(
-                f"No enabled instances found for provider type '{provider_type}'"
-            ) from e
+            raise ValueError(f"No enabled instances found for provider type '{provider_type}'")
 
         # Apply load balancing strategy
         selected_instance = self._apply_load_balancing_strategy(instances)
@@ -225,7 +221,7 @@ class ProviderSelectionService:
         # Find providers that support the required API
         compatible_instances = self._find_compatible_providers(provider_api)
         if not compatible_instances:
-            raise ValueError(f"No providers support API '{provider_api}'") from e
+            raise ValueError(f"No providers support API '{provider_api}'")
 
         # Select best instance (could be based on health, performance, etc.)
         selected_instance = self._select_best_compatible_instance(compatible_instances)
@@ -258,7 +254,7 @@ class ProviderSelectionService:
         if not default_provider_instance:
             enabled_instances = [p for p in self._provider_config.providers if p.enabled]
             if not enabled_instances:
-                raise ValueError("No enabled providers found in configuration") from e
+                raise ValueError("No enabled providers found in configuration")
 
             default_instance = enabled_instances[0]
             default_provider_type = default_instance.type

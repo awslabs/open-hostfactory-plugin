@@ -106,7 +106,7 @@ class OpenHFPluginSDK:
             self._command_bus = self._app.get_command_bus()
 
             if not self._query_bus or not self._command_bus:
-                raise ConfigurationError("CQRS buses not available") from e
+                raise ConfigurationError("CQRS buses not available")
 
             # Initialize method discovery
             self._discovery = SDKMethodDiscovery()
@@ -126,7 +126,7 @@ class OpenHFPluginSDK:
         except Exception as e:
             if isinstance(e, (SDKError, ConfigurationError, ProviderError)):
                 raise
-            raise SDKError(f"SDK initialization failed: {str(e)}") from e
+            raise SDKError(f"SDK initialization failed: {str(e)}")
 
     async def cleanup(self) -> None:
         """Clean up resources and connections."""

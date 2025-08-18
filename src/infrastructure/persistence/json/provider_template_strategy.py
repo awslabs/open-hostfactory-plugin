@@ -220,7 +220,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
         """
         template_id = entity_data.get("template_id")
         if not template_id:
-            raise ValueError("Template data must include 'template_id'") from e
+            raise ValueError("Template data must include 'template_id'")
 
         # Determine which file to save to based on provider information
         target_file = self._determine_target_file(entity_data)

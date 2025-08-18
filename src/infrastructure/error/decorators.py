@@ -68,7 +68,7 @@ def handle_exceptions(
                     handled_exception = exception_handler.handle(e, exc_context)
 
                     # Re-raise with context chain
-                    raise handled_exception from e
+                    raise handled_exception
 
             return async_wrapper
         else:
@@ -92,7 +92,7 @@ def handle_exceptions(
                     handled_exception = exception_handler.handle(e, exc_context)
 
                     # Re-raise with context chain
-                    raise handled_exception from e
+                    raise handled_exception
 
             return sync_wrapper
 

@@ -88,7 +88,7 @@ class APIHandlerFactory:
                 return handler_class()
         except Exception as e:
             logger.error("Failed to create handler %s: %s", name, e)
-            raise ValueError(f"Failed to create handler {name}: {e}") from e
+            raise ValueError(f"Failed to create handler {name}: {e}")
 
     @classmethod
     def _try_dynamic_load(cls, name: str) -> None:

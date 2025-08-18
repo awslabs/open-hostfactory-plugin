@@ -60,9 +60,9 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         """Validate create request command."""
         await super().validate_command(command)
         if not command.template_id:
-            raise ValueError("template_id is required") from e
+            raise ValueError("template_id is required")
         if not command.requested_count or command.requested_count <= 0:
-            raise ValueError("requested_count must be positive") from e
+            raise ValueError("requested_count must be positive")
 
     async def execute_command(self, command: CreateRequestCommand) -> str:
         """Handle machine request creation command."""
@@ -72,7 +72,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         if not self._provider_context.available_strategies:
             error_msg = "No provider strategies available - cannot create machine requests"
             self.logger.error(error_msg)
-            raise ValueError(error_msg) from e
+            raise ValueError(error_msg)
 
         self.logger.debug(
             "Available provider strategies: %s", self._provider_context.available_strategies
@@ -84,7 +84,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
         try:
             # Get template using CQRS QueryBus
             if not self._query_bus:
-                raise ValueError("QueryBus is required for template lookup") from e
+                raise ValueError("QueryBus is required for template lookup")
 
             from application.dto.queries import GetTemplateQuery
 
@@ -92,7 +92,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             template = await self._query_bus.execute(template_query)
 
             if not template:
-                raise EntityNotFoundError("Template", command.template_id) from e
+                raise EntityNotFoundError("Template", command.template_id)
 
             # Select provider based on template requirements
             selection_result = self._provider_selection_service.select_provider_for_template(
@@ -112,7 +112,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
             if not validation_result.is_valid:
                 error_msg = f"Template incompatible with provider {selection_result.provider_instance}: {'; '.join(validation_result.errors)}"
                 self.logger.error(error_msg)
-                raise ValueError(error_msg) from e
+                raise ValueError(error_msg)
 
             self.logger.info("Template validation passed: %s", validation_result.supported_features)
 
@@ -448,7 +448,7 @@ class CreateReturnRequestHandler(BaseCommandHandler[CreateReturnRequestCommand, 
         """Validate create return request command."""
         await super().validate_command(command)
         if not command.machine_ids:
-            raise ValueError("machine_ids is required and cannot be empty") from e
+            raise ValueError("machine_ids is required and cannot be empty")
 
     async def execute_command(self, command: CreateReturnRequestCommand) -> str:
         """Handle return request creation command."""
@@ -524,9 +524,9 @@ class UpdateRequestStatusHandler(BaseCommandHandler[UpdateRequestStatusCommand, 
         """Validate update request status command."""
         await super().validate_command(command)
         if not command.request_id:
-            raise ValueError("request_id is required") from e
+            raise ValueError("request_id is required")
         if not command.status:
-            raise ValueError("status is required") from e
+            raise ValueError("status is required")
 
     async def execute_command(self, command: UpdateRequestStatusCommand) -> None:
         """Handle request status update command."""
@@ -536,7 +536,7 @@ class UpdateRequestStatusHandler(BaseCommandHandler[UpdateRequestStatusCommand, 
             # Get request
             request = self._request_repository.get_by_id(command.request_id)
             if not request:
-                raise EntityNotFoundError("Request", command.request_id) from e
+                raise EntityNotFoundError("Request", command.request_id)
 
             # Update status
             request.update_status(
@@ -579,7 +579,7 @@ class CancelRequestHandler(BaseCommandHandler[CancelRequestCommand, None]):
         """Validate cancel request command."""
         await super().validate_command(command)
         if not command.request_id:
-            raise ValueError("request_id is required") from e
+            raise ValueError("request_id is required")
 
     async def execute_command(self, command: CancelRequestCommand) -> None:
         """Handle request cancellation command."""
@@ -589,7 +589,7 @@ class CancelRequestHandler(BaseCommandHandler[CancelRequestCommand, None]):
             # Get request
             request = self._request_repository.get_by_id(command.request_id)
             if not request:
-                raise EntityNotFoundError("Request", command.request_id) from e
+                raise EntityNotFoundError("Request", command.request_id)
 
             # Cancel request
             request.cancel(reason=command.reason, metadata=command.metadata)
@@ -628,7 +628,7 @@ class CompleteRequestHandler(BaseCommandHandler[CompleteRequestCommand, None]):
         """Validate complete request command."""
         await super().validate_command(command)
         if not command.request_id:
-            raise ValueError("request_id is required") from e
+            raise ValueError("request_id is required")
 
     async def execute_command(self, command: CompleteRequestCommand) -> None:
         """Handle request completion command."""
@@ -638,7 +638,7 @@ class CompleteRequestHandler(BaseCommandHandler[CompleteRequestCommand, None]):
             # Get request
             request = self._request_repository.get_by_id(command.request_id)
             if not request:
-                raise EntityNotFoundError("Request", command.request_id) from e
+                raise EntityNotFoundError("Request", command.request_id)
 
             # Complete request
             request.complete(result_data=command.result_data, metadata=command.metadata)

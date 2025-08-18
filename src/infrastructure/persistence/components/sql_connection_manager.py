@@ -134,7 +134,7 @@ class SQLConnectionManager(ResourceManager):
                 )
 
             else:
-                raise ValueError(f"Unsupported database type: {db_type}") from e
+                raise ValueError(f"Unsupported database type: {db_type}")
 
             # Create session factory
             self.session_factory = sessionmaker(bind=self.engine)
@@ -154,7 +154,7 @@ class SQLConnectionManager(ResourceManager):
             SQLAlchemy session
         """
         if not self.session_factory:
-            raise RuntimeError("Connection manager not initialized") from e
+            raise RuntimeError("Connection manager not initialized")
 
         session = self.session_factory()
         try:
@@ -175,7 +175,7 @@ class SQLConnectionManager(ResourceManager):
             SQLAlchemy connection
         """
         if not self.engine:
-            raise RuntimeError("Engine not initialized") from e
+            raise RuntimeError("Engine not initialized")
 
         connection = self.engine.connect()
         try:
@@ -271,7 +271,7 @@ class SQLConnectionManager(ResourceManager):
     def get_engine(self) -> Engine:
         """Get SQLAlchemy engine."""
         if not self.engine:
-            raise RuntimeError("Engine not initialized") from e
+            raise RuntimeError("Engine not initialized")
         return self.engine
 
     def close(self) -> None:

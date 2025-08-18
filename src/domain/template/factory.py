@@ -98,9 +98,7 @@ class TemplateFactory(BaseTemplateFactory):
             template_class: The template class for this provider
         """
         if not issubclass(template_class, Template):
-            raise ValueError(
-                f"Template class must inherit from Template, got {template_class}"
-            ) from e
+            raise ValueError(f"Template class must inherit from Template, got {template_class}")
 
         self._provider_template_classes[provider_type] = template_class
 

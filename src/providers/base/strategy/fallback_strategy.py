@@ -60,13 +60,13 @@ class FallbackConfig:
     def __post_init__(self) -> None:
         """Validate configuration after initialization."""
         if self.max_retries < 0:
-            raise ValueError("max_retries must be non-negative") from e
+            raise ValueError("max_retries must be non-negative")
         if self.retry_delay_seconds < 0:
-            raise ValueError("retry_delay_seconds must be non-negative") from e
+            raise ValueError("retry_delay_seconds must be non-negative")
         if self.circuit_breaker_threshold < 1:
-            raise ValueError("circuit_breaker_threshold must be at least 1") from e
+            raise ValueError("circuit_breaker_threshold must be at least 1")
         if self.circuit_breaker_timeout_seconds <= 0:
-            raise ValueError("circuit_breaker_timeout_seconds must be positive") from e
+            raise ValueError("circuit_breaker_timeout_seconds must be positive")
 
 
 @dataclass
@@ -142,9 +142,9 @@ class FallbackProviderStrategy(ProviderStrategy):
             ValueError: If primary strategy is None or fallback list is empty
         """
         if primary_strategy is None:
-            raise ValueError("Primary strategy is required") from e
+            raise ValueError("Primary strategy is required")
         if not fallback_strategies:
-            raise ValueError("At least one fallback strategy is required") from e
+            raise ValueError("At least one fallback strategy is required")
 
         # Create a dummy config for the parent class
 

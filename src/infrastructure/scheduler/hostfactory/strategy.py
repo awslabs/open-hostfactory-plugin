@@ -105,7 +105,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
         using HostFactory-specific field mappings.
         """
         if template is None:
-            raise ValueError("Template cannot be None in field mapping") from e
+            raise ValueError("Template cannot be None in field mapping")
 
         if not isinstance(template, dict):
             raise ValueError(f"Template must be a dictionary, got {type(template)}")
@@ -221,7 +221,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
                 ]
             }
         else:
-            raise ValueError(f"Unsupported HostFactory operation: {operation}") from e
+            raise ValueError(f"Unsupported HostFactory operation: {operation}")
 
     def format_request_response(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Format request creation response to HostFactory format."""
@@ -329,7 +329,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
                 return {"requests": [], "message": "Request not found."}
 
         else:
-            raise ValueError(f"Unsupported HostFactory operation: {operation}") from e
+            raise ValueError(f"Unsupported HostFactory operation: {operation}")
 
     def _convert_template_to_hostfactory(self, template: Template) -> Dict[str, Any]:
         """Convert internal template to HostFactory format."""

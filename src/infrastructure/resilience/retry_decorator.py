@@ -111,10 +111,10 @@ def retry(
                                 func.__name__,
                                 e,
                             )
-                            raise MaxRetriesExceededError(attempt + 1, e) from e
+                            raise MaxRetriesExceededError(attempt + 1, e)
                         else:
                             logger.error("Non-retryable error in %s: %s", func.__name__, e)
-                            raise e
+                            raise
 
                     # Calculate delay
                     delay = retry_strategy.get_delay(attempt)

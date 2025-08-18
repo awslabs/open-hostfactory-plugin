@@ -82,11 +82,11 @@ class AWSLaunchTemplateManager:
         except ClientError as e:
             error_msg = f"Failed to create/update launch template: {e.response['Error']['Message']}"
             self._logger.error(error_msg)
-            raise InfrastructureError(error_msg) from e
+            raise InfrastructureError(error_msg)
         except Exception as e:
             error_msg = f"Unexpected error in launch template management: {str(e)}"
             self._logger.error(error_msg)
-            raise InfrastructureError(error_msg) from e
+            raise InfrastructureError(error_msg)
 
     def _create_per_request_version(
         self, aws_template: AWSTemplate, request: Request
@@ -155,7 +155,7 @@ class AWSLaunchTemplateManager:
                 )
             else:
                 # Some other error
-                raise e
+                raise
 
     def _create_or_reuse_base_template(self, aws_template: AWSTemplate) -> LaunchTemplateResult:
         """
@@ -170,7 +170,7 @@ class AWSLaunchTemplateManager:
         """
         # This would be implemented for base template strategy
         # For now, not implemented as we're using per-request strategy
-        raise NotImplementedError("Base template strategy not yet implemented") from e
+        raise NotImplementedError("Base template strategy not yet implemented")
 
     def _use_existing_template_strategy(self, aws_template: AWSTemplate) -> LaunchTemplateResult:
         """
@@ -205,9 +205,9 @@ class AWSLaunchTemplateManager:
 
         except ClientError as e:
             if e.response["Error"]["Code"] == "InvalidLaunchTemplateId.NotFound":
-                raise AWSValidationError(f"Launch template {template_id} not found") from e
+                raise AWSValidationError(f"Launch template {template_id} not found")
             else:
-                raise e
+                raise
 
     def _create_new_launch_template(
         self,
@@ -276,7 +276,7 @@ class AWSLaunchTemplateManager:
         if not image_id:
             error_msg = f"Template {aws_template.template_id} has no image_id specified"
             self._logger.error(error_msg)
-            raise AWSValidationError(error_msg) from e
+            raise AWSValidationError(error_msg)
 
         # Log the image_id being used
         self._logger.info("Creating launch template with resolved image_id: %s", image_id)

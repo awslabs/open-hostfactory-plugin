@@ -208,14 +208,14 @@ class AWSHandler(ABC):
                         "operation_type": operation_type,
                     },
                 )
-                raise e
+                raise
 
             # Convert AWS ClientError to domain exception
             if isinstance(e, ClientError):
                 raise self._convert_client_error(e, operation_name)
 
             # Re-raise other exceptions as-is
-            raise e
+            raise
 
     def _get_service_name(self) -> str:
         """Get service name from handler class name."""
@@ -412,7 +412,7 @@ class AWSHandler(ABC):
                 error_details.append(f"{field}: {message}")
 
             detailed_message = f"Template validation failed - {'; '.join(error_details)}"
-            raise AWSValidationError(detailed_message, errors) from e
+            raise AWSValidationError(detailed_message, errors)
 
     # Performance monitoring methods
     def _record_success_metrics(self, request_type: str, duration: float) -> None:

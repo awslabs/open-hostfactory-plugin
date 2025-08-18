@@ -294,21 +294,19 @@ class TemplateJSONRepository(StrategyBasedRepository, TemplateRepository):
         # Extract required fields
         template_id = data.get("template_id")
         if not template_id:
-            raise ValueError("Template data must include 'template_id'") from e
+            raise ValueError("Template data must include 'template_id'")
 
         image_id = data.get("image_id")
         if not image_id:
-            raise ValueError(f"Template '{template_id}' must include 'image_id'") from e
+            raise ValueError(f"Template '{template_id}' must include 'image_id'")
 
         subnet_ids = data.get("subnet_ids", [])
         if not subnet_ids:
-            raise ValueError(f"Template '{template_id}' must include 'subnet_ids'") from e
+            raise ValueError(f"Template '{template_id}' must include 'subnet_ids'")
 
         max_instances = data.get("max_instances", 1)
         if max_instances <= 0:
-            raise ValueError(
-                f"Template '{template_id}' max_instances must be greater than 0"
-            ) from e
+            raise ValueError(f"Template '{template_id}' max_instances must be greater than 0")
 
         # Create Template aggregate with all fields
         return Template(

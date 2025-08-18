@@ -88,7 +88,7 @@ class HealthCheck:
     def run_check(self, name: str) -> HealthStatus:
         """Run a specific health check."""
         if name not in self.checks:
-            raise ValueError(f"Unknown health check: {name}") from e
+            raise ValueError(f"Unknown health check: {name}")
 
         try:
             status = self.checks[name]()
@@ -119,7 +119,7 @@ class HealthCheck:
         with self._lock:
             if name:
                 if name not in self.status_history:
-                    raise ValueError(f"Unknown health check: {name}") from e
+                    raise ValueError(f"Unknown health check: {name}")
                 history = self.status_history[name]
                 return {
                     "current": history[-1].to_dict() if history else None,

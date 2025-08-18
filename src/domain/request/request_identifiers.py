@@ -121,11 +121,11 @@ class MachineReference(ValueObject):
     def validate_machine_id(cls, v: str) -> str:
         """Validate machine ID format."""
         if not v or not isinstance(v, str):
-            raise ValueError("Machine ID must be a non-empty string") from e
+            raise ValueError("Machine ID must be a non-empty string")
 
         # Basic format validation - can be extended based on requirements
         if len(v) < 3:
-            raise ValueError("Machine ID must be at least 3 characters long") from e
+            raise ValueError("Machine ID must be at least 3 characters long")
 
         return v
 
@@ -137,7 +137,7 @@ class MachineReference(ValueObject):
             return v
 
         if not isinstance(v, str) or not v.strip():
-            raise ValueError("Instance ID must be a non-empty string if provided") from e
+            raise ValueError("Instance ID must be a non-empty string if provided")
 
         return v.strip()
 
@@ -221,16 +221,14 @@ class ResourceIdentifier(ValueObject):
     def validate_resource_type(cls, v: str) -> str:
         """Validate resource type."""
         if not v or not isinstance(v, str):
-            raise ValueError("Resource type must be a non-empty string") from e
+            raise ValueError("Resource type must be a non-empty string")
 
         # Normalize to lowercase with underscores
         normalized = v.lower().replace("-", "_").replace(" ", "_")
 
         # Basic validation of allowed characters
         if not re.match(r"^[a-z_][a-z0-9_]*$", normalized):
-            raise ValueError(
-                "Resource type must contain only letters, numbers, and underscores"
-            ) from e
+            raise ValueError("Resource type must contain only letters, numbers, and underscores")
 
         return normalized
 
@@ -239,7 +237,7 @@ class ResourceIdentifier(ValueObject):
     def validate_resource_id(cls, v: str) -> str:
         """Validate resource ID."""
         if not v or not isinstance(v, str):
-            raise ValueError("Resource ID must be a non-empty string") from e
+            raise ValueError("Resource ID must be a non-empty string")
 
         return v.strip()
 

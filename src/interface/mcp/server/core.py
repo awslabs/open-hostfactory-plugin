@@ -260,7 +260,7 @@ class OpenHFPluginMCPServer:
         arguments = params.get("arguments", {})
 
         if tool_name not in self.tools:
-            raise ValueError(f"Unknown tool: {tool_name}") from e
+            raise ValueError(f"Unknown tool: {tool_name}")
 
         # Convert arguments to args-like object
         args = type("Args", (), arguments)()
@@ -315,7 +315,7 @@ class OpenHFPluginMCPServer:
         elif uri.startswith("providers://"):
             content = await self._get_providers_resource(uri)
         else:
-            raise ValueError(f"Unknown resource URI: {uri}") from e
+            raise ValueError(f"Unknown resource URI: {uri}")
 
         return {
             "contents": [
@@ -346,7 +346,7 @@ class OpenHFPluginMCPServer:
         arguments = params.get("arguments", {})
 
         if prompt_name not in self.prompts:
-            raise ValueError(f"Unknown prompt: {prompt_name}") from e
+            raise ValueError(f"Unknown prompt: {prompt_name}")
 
         # Generate prompt content based on the prompt type
         if prompt_name == "provision_infrastructure":

@@ -120,13 +120,13 @@ class BaseEventHandler(Generic[TEvent], EventHandler[TEvent], ABC):
             ValidationError: If event is invalid
         """
         if not event:
-            raise ValueError("Event cannot be None") from e
+            raise ValueError("Event cannot be None")
 
         if not hasattr(event, "event_id"):
-            raise ValueError("Event must have event_id") from e
+            raise ValueError("Event must have event_id")
 
         if not hasattr(event, "event_type"):
-            raise ValueError("Event must have event_type") from e
+            raise ValueError("Event must have event_type")
 
     @abstractmethod
     async def execute_event(self, event: TEvent) -> None:

@@ -65,20 +65,20 @@ class GetRequestStatusRESTHandler(BaseAPIHandler[Dict[str, Any], RequestStatusRe
 
         # Validate input if not using all_flag
         if not all_flag and input_data is None:
-            raise ValueError("Input data is required when not using all_flag") from e
+            raise ValueError("Input data is required when not using all_flag")
 
         # If input_data is provided, validate it
         if not all_flag and input_data is not None:
             try:
                 validated_data = self.validator.validate(RequestStatusModel, input_data)
                 if not validated_data.request_ids:
-                    raise ValueError("No request IDs provided") from e
+                    raise ValueError("No request IDs provided")
 
                 # Store validated data in context for later use
                 context.metadata["validated_data"] = validated_data
 
             except ValidationException as e:
-                raise ValueError(f"Validation error: {e.message}") from e
+                raise ValueError(f"Validation error: {e.message}")
 
     @handle_interface_exceptions(context="get_request_status_api", interface_type="api")
     async def execute_api_request(

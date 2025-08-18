@@ -68,7 +68,7 @@ class MemoryTransactionManager(TransactionManager):
     def begin_transaction(self) -> None:
         """Begin a new transaction."""
         if self.state == TransactionState.ACTIVE:
-            raise RuntimeError("Transaction already active") from e
+            raise RuntimeError("Transaction already active")
 
         self.state = TransactionState.ACTIVE
         self.operations.clear()
@@ -78,7 +78,7 @@ class MemoryTransactionManager(TransactionManager):
     def commit_transaction(self) -> None:
         """Commit the current transaction."""
         if self.state != TransactionState.ACTIVE:
-            raise RuntimeError("No active transaction to commit") from e
+            raise RuntimeError("No active transaction to commit")
 
         try:
             # Execute all operations
@@ -130,7 +130,7 @@ class MemoryTransactionManager(TransactionManager):
     ) -> None:
         """Add operation to transaction."""
         if self.state != TransactionState.ACTIVE:
-            raise RuntimeError("No active transaction") from e
+            raise RuntimeError("No active transaction")
 
         self.operations.append(operation)
         if rollback_operation:

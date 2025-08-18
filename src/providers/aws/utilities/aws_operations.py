@@ -77,7 +77,7 @@ class AWSOperations:
             else:
                 self._logger.info("Using EC2 client directly for %s termination", operation_context)
                 if not self._retry_with_backoff:
-                    raise ValueError("Retry method not set. Call set_retry_method first.") from e
+                    raise ValueError("Retry method not set. Call set_retry_method first.")
 
                 result = self._retry_with_backoff(
                     self.aws_client.ec2_client.terminate_instances,
@@ -126,7 +126,7 @@ class AWSOperations:
             )
 
             if not self._retry_with_backoff:
-                raise ValueError("Retry method not set. Call set_retry_method first.") from e
+                raise ValueError("Retry method not set. Call set_retry_method first.")
 
             result = self._retry_with_backoff(operation, operation_type=operation_type, **kwargs)
 
@@ -140,16 +140,16 @@ class AWSOperations:
         except CircuitBreakerOpenError as e:
             error_msg = f"Circuit breaker OPEN for {operation_name}: {str(e)}"
             self._logger.error(error_msg)
-            raise e
+            raise
 
-        except ClientError as e:
+        except ClientError:
             # Let the handler's _convert_client_error handle this
-            raise e
+            raise
 
         except Exception as e:
             error_msg = error_message or f"Unexpected error in {operation_name}: {str(e)}"
             self._logger.error(error_msg)
-            raise AWSInfrastructureError(error_msg) from e
+            raise AWSInfrastructureError(error_msg)
 
     def describe_with_pagination_and_retry(
         self, client_method: Callable, result_key: str, operation_name: str, **filters
@@ -172,7 +172,7 @@ class AWSOperations:
 
         try:
             if not self._retry_with_backoff:
-                raise ValueError("Retry method not set. Call set_retry_method first.") from e
+                raise ValueError("Retry method not set. Call set_retry_method first.")
 
             # Use the handler's existing _paginate method through retry
             result = self._retry_with_backoff(
@@ -272,7 +272,7 @@ class AWSOperations:
             self._logger.debug("Checking status for %s: %s", resource_type, resource_id)
 
             if not self._retry_with_backoff:
-                raise ValueError("Retry method not set. Call set_retry_method first.") from e
+                raise ValueError("Retry method not set. Call set_retry_method first.")
 
             response = self._retry_with_backoff(
                 describe_method, operation_type="read_only", **describe_params
@@ -329,7 +329,7 @@ class AWSOperations:
             self._logger.debug("Getting instances for %s: %s", resource_type, resource_id)
 
             if not self._retry_with_backoff:
-                raise ValueError("Retry method not set. Call set_retry_method first.") from e
+                raise ValueError("Retry method not set. Call set_retry_method first.")
 
             response = self._retry_with_backoff(
                 describe_instances_method, operation_type="read_only", **describe_params
@@ -394,7 +394,7 @@ class AWSOperations:
         except Exception as e:
             error_msg = f"Failed to {operation_name}: {str(e)}"
             self._logger.error("Unexpected error in %s: %s", context, error_msg)
-            raise AWSInfrastructureError(error_msg) from e
+            raise AWSInfrastructureError(error_msg)
 
     def _convert_client_error(
         self, error: ClientError, operation_name: str = "AWS operation"

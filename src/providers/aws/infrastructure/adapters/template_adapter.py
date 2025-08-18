@@ -321,7 +321,7 @@ class AWSTemplateAdapter(TemplateAdapterPort):
                 self._logger.error("Failed to resolve SSM parameter %s: %s", ami_id_or_alias, e)
                 raise AWSValidationError(
                     f"Failed to resolve AMI ID from SSM parameter: {ami_id_or_alias}"
-                ) from e
+                )
 
         # Handle known aliases (could be extended)
         alias_mappings = {

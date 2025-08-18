@@ -44,7 +44,7 @@ class BaseUnitOfWork(UnitOfWork, ABC):
     def begin(self) -> None:
         """Begin transaction."""
         if self._in_transaction:
-            raise TransactionError("Transaction already in progress") from e
+            raise TransactionError("Transaction already in progress")
 
         self._in_transaction = True
         self._begin_transaction()
@@ -54,7 +54,7 @@ class BaseUnitOfWork(UnitOfWork, ABC):
     def commit(self) -> None:
         """Commit transaction."""
         if not self._in_transaction:
-            raise TransactionError("No transaction in progress") from e
+            raise TransactionError("No transaction in progress")
 
         self._commit_transaction()
         self._in_transaction = False
@@ -64,7 +64,7 @@ class BaseUnitOfWork(UnitOfWork, ABC):
     def rollback(self) -> None:
         """Rollback transaction."""
         if not self._in_transaction:
-            raise TransactionError("No transaction in progress") from e
+            raise TransactionError("No transaction in progress")
 
         self._rollback_transaction()
         self._in_transaction = False
@@ -113,7 +113,7 @@ class StrategyUnitOfWork(BaseUnitOfWork):
             self.logger.error("Error beginning transaction: %s", str(e))
             # Clean up any started transactions
             self._rollback_transaction()
-            raise TransactionError(f"Error beginning transaction: {str(e)}") from e
+            raise TransactionError(f"Error beginning transaction: {str(e)}")
 
     def _commit_transaction(self) -> None:
         """Commit transaction by delegating to storage strategies."""
@@ -127,7 +127,7 @@ class StrategyUnitOfWork(BaseUnitOfWork):
             self._snapshots.clear()
         except Exception as e:
             self.logger.error("Error committing transaction: %s", str(e))
-            raise TransactionError(f"Error committing transaction: {str(e)}") from e
+            raise TransactionError(f"Error committing transaction: {str(e)}")
 
     def _rollback_transaction(self) -> None:
         """Rollback transaction by delegating to storage strategies."""
@@ -154,4 +154,4 @@ class StrategyUnitOfWork(BaseUnitOfWork):
             self._snapshots.clear()
         except Exception as e:
             self.logger.error("Error rolling back transaction: %s", str(e))
-            raise TransactionError(f"Error rolling back transaction: {str(e)}") from e
+            raise TransactionError(f"Error rolling back transaction: {str(e)}")

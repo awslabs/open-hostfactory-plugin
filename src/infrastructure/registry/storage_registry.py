@@ -98,7 +98,7 @@ class StorageRegistry(BaseRegistry):
                 unit_of_work_factory=unit_of_work_factory,
             )
         except ValueError as e:
-            raise ConfigurationError(str(e)) from e
+            raise ConfigurationError(str(e))
 
     def create_strategy(self, storage_type: str, config: Any) -> Any:
         """
@@ -117,7 +117,7 @@ class StorageRegistry(BaseRegistry):
         try:
             return self.create_strategy_by_type(storage_type, config)
         except ValueError as e:
-            raise UnsupportedStorageError(str(e)) from e
+            raise UnsupportedStorageError(str(e))
 
     def create_config(self, storage_type: str, data: Dict[str, Any]) -> Any:
         """
@@ -139,11 +139,11 @@ class StorageRegistry(BaseRegistry):
             self.logger.debug("Created config for storage type: %s", storage_type)
             return config
         except ValueError as e:
-            raise UnsupportedStorageError(str(e)) from e
+            raise UnsupportedStorageError(str(e))
         except Exception as e:
             error_msg = f"Failed to create config for storage type '{storage_type}': {str(e)}"
             self.logger.error(error_msg)
-            raise ConfigurationError(error_msg) from e
+            raise ConfigurationError(error_msg)
 
     def create_unit_of_work(self, storage_type: str) -> Optional[Any]:
         """
@@ -192,11 +192,11 @@ class StorageRegistry(BaseRegistry):
 
                 register_dynamodb_storage()
             else:
-                raise ValueError(f"Unknown storage type: {storage_type}") from e
+                raise ValueError(f"Unknown storage type: {storage_type}")
         except ImportError as e:
             from domain.base.exceptions import ConfigurationError
 
-            raise ConfigurationError(f"Storage type '{storage_type}' not available: {e}") from e
+            raise ConfigurationError(f"Storage type '{storage_type}' not available: {e}")
 
     def _create_registration(
         self,

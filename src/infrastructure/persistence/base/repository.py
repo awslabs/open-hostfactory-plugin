@@ -47,7 +47,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
         elif hasattr(entity, "machine_id"):
             return str(entity.machine_id)
         else:
-            raise ValueError(f"Cannot determine ID for entity: {entity}") from e
+            raise ValueError(f"Cannot determine ID for entity: {entity}")
 
     def _to_dict(self, entity: Any) -> Dict[str, Any]:
         """
@@ -109,7 +109,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 return self.entity_class(**entity_dict)  # Last resort
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
-            raise ValueError(f"Validation error: {e}") from e
+            raise ValueError(f"Validation error: {e}")
 
     def save(self, entity: Any) -> None:
         """
@@ -225,7 +225,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
-            raise ValueError(f"Validation error: {e}") from e
+            raise ValueError(f"Validation error: {e}")
 
     def find_by_id(self, entity_id: Any) -> Optional[T]:
         """
@@ -317,7 +317,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
         elif "machine_id" in data:
             return str(data["machine_id"])
         else:
-            raise ValueError(f"Cannot determine ID for entity data: {data}") from e
+            raise ValueError(f"Cannot determine ID for entity data: {data}")
 
     def delete(self, entity_id: Any) -> None:
         """
@@ -333,7 +333,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
 
         # Check if entity exists
         if not self.exists(entity_id_str):
-            raise EntityNotFoundError(self.entity_class.__name__, entity_id_str) from e
+            raise EntityNotFoundError(self.entity_class.__name__, entity_id_str)
 
         # Delete entity from storage
         self.storage_strategy.delete(entity_id_str)
@@ -464,7 +464,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
                 )
         except PydanticValidationError as e:
             # Convert Pydantic validation error to ValueError
-            raise ValueError(f"Validation error: {e}") from e
+            raise ValueError(f"Validation error: {e}")
 
     def delete_batch(self, entity_ids: List[Any]) -> None:
         """
@@ -482,7 +482,7 @@ class StrategyBasedRepository(Repository[T], Generic[T]):
         # Check if entities exist
         for entity_id_str in entity_id_strs:
             if not self.exists(entity_id_str):
-                raise EntityNotFoundError(self.entity_class.__name__, entity_id_str) from e
+                raise EntityNotFoundError(self.entity_class.__name__, entity_id_str)
 
         # Delete entities from storage
         self.storage_strategy.delete_batch(entity_id_strs)

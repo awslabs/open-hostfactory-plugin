@@ -109,9 +109,9 @@ class CLICommandHandler(CommandHandler[TCommand, TResponse]):
 
         # Validate required dependencies for CLI handlers
         if not query_bus:
-            raise ValueError("QueryBus is required for CLI command handlers") from e
+            raise ValueError("QueryBus is required for CLI command handlers")
         if not command_bus:
-            raise ValueError("CommandBus is required for CLI command handlers") from e
+            raise ValueError("CommandBus is required for CLI command handlers")
 
     def process_input(self, command) -> Optional[Dict[str, Any]]:
         """

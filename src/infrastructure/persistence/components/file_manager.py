@@ -100,11 +100,11 @@ class FileManager:
                 self.file_path.unlink()
             temp_path.replace(self.file_path)
 
-        except Exception as e:
+        except Exception:
             # Clean up temp file on failure
             if temp_path.exists():
                 temp_path.unlink()
-            raise e
+            raise
 
     def create_backup(self) -> Optional[str]:
         """

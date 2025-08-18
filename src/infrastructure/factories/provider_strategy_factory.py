@@ -63,7 +63,7 @@ class ProviderStrategyFactory:
             # Get integrated provider configuration
             provider_config = self._config_manager.get_provider_config()
             if not provider_config:
-                raise ConfigurationError("Provider configuration not found") from e
+                raise ConfigurationError("Provider configuration not found")
 
             mode = provider_config.get_mode()
 
@@ -74,11 +74,11 @@ class ProviderStrategyFactory:
             elif mode == ProviderMode.MULTI:
                 return self._create_multi_provider_context(provider_config)
             else:
-                raise ConfigurationError("Provider", "No valid provider configuration found") from e
+                raise ConfigurationError("Provider", "No valid provider configuration found")
 
         except Exception as e:
             self._logger.error("Failed to create provider context: %s", str(e))
-            raise ProviderCreationError(f"Provider context creation failed: {str(e)}") from e
+            raise ProviderCreationError(f"Provider context creation failed: {str(e)}")
 
     def _create_single_provider_context(self, config: ProviderConfig) -> ProviderContext:
         """
@@ -220,16 +220,16 @@ class ProviderStrategyFactory:
             )
             return strategy
 
-        except UnsupportedProviderError as e:
+        except UnsupportedProviderError:
             available_providers = get_provider_registry().get_registered_providers()
             raise ProviderCreationError(
                 f"Unsupported provider type: {provider_config.type}. "
                 f"Available providers: {', '.join(available_providers)}"
-            ) from e
+            )
         except Exception as e:
             raise ProviderCreationError(
                 f"Failed to create {provider_config.type} provider '{provider_config.name}': {str(e)}"
-            ) from e
+            )
 
     def _parse_selection_policy(self, policy_name: str) -> SelectionPolicy:
         """

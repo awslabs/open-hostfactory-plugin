@@ -200,10 +200,10 @@ class EventBus:
         """
         try:
             await handler.handle(event)
-        except Exception as e:
+        except Exception:
             # Error is logged by the handler itself, we just need to isolate it
             # The exception will be caught by asyncio.gather() above
-            raise e
+            raise
 
     def get_handlers_for_event(self, event_type: str) -> List[EventHandler]:
         """

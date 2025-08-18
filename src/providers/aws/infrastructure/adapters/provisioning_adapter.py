@@ -139,9 +139,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             return resource_id
         else:
             self._logger.error("Provider strategy operation failed: %s", result.error_message)
-            raise InfrastructureError(
-                f"Failed to provision resources: {result.error_message}"
-            ) from e
+            raise InfrastructureError(f"Failed to provision resources: {result.error_message}")
 
     def _provision_via_handlers(self, request: Request, template: Template) -> str:
         """
@@ -190,9 +188,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
 
         if not request.resource_id:
             self._logger.error("No resource ID found in request %s", request.request_id)
-            raise AWSEntityNotFoundError(
-                f"No resource ID found in request {request.request_id}"
-            ) from e
+            raise AWSEntityNotFoundError(f"No resource ID found in request {request.request_id}")
 
         # Get the template to determine the handler type
         if not self._template_config_manager:
@@ -206,7 +202,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
 
         # Ensure template_id is not None
         if not request.template_id:
-            raise AWSValidationError("Template ID is required") from e
+            raise AWSValidationError("Template ID is required")
 
         # Get template using the configuration manager
         template = self._template_config_manager.get_template(str(request.template_id))
@@ -245,9 +241,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
 
         if not request.resource_id:
             self._logger.error("No resource ID found in request %s", request.request_id)
-            raise AWSEntityNotFoundError(
-                f"No resource ID found in request {request.request_id}"
-            ) from e
+            raise AWSEntityNotFoundError(f"No resource ID found in request {request.request_id}")
 
         # Get the template to determine the handler type
         if not self._template_config_manager:
@@ -261,7 +255,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
 
         # Ensure template_id is not None
         if not request.template_id:
-            raise AWSValidationError("Template ID is required") from e
+            raise AWSValidationError("Template ID is required")
 
         # Get template using the configuration manager
         template = self._template_config_manager.get_template(str(request.template_id))
@@ -306,7 +300,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                     InstanceIds=[resource_id]
                 )
                 if not response["InstanceStatuses"]:
-                    raise AWSEntityNotFoundError(f"Instance {resource_id} not found") from e
+                    raise AWSEntityNotFoundError(f"Instance {resource_id} not found")
 
                 status = response["InstanceStatuses"][0]
                 return {
@@ -321,7 +315,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                 # EC2 Fleet
                 response = self.aws_client.ec2_client.describe_fleets(FleetIds=[resource_id])
                 if not response["Fleets"]:
-                    raise AWSEntityNotFoundError(f"Fleet {resource_id} not found") from e
+                    raise AWSEntityNotFoundError(f"Fleet {resource_id} not found")
 
                 fleet = response["Fleets"][0]
                 return {
@@ -339,7 +333,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                     SpotFleetRequestIds=[resource_id]
                 )
                 if not response["SpotFleetRequestConfigs"]:
-                    raise AWSEntityNotFoundError(f"Spot Fleet {resource_id} not found") from e
+                    raise AWSEntityNotFoundError(f"Spot Fleet {resource_id} not found")
 
                 fleet = response["SpotFleetRequestConfigs"][0]
                 return {
@@ -381,7 +375,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
                 # If we get here, we couldn't determine the resource type
                 raise AWSEntityNotFoundError(
                     f"Resource {resource_id} not found or type not supported"
-                ) from e
+                )
         except AWSEntityNotFoundError:
             raise
         except Exception as e:

@@ -141,7 +141,7 @@ class BaseInfrastructureHandler(
             ValidationError: If request is invalid
         """
         if not request:
-            raise ValueError("Request cannot be None") from e
+            raise ValueError("Request cannot be None")
 
     @abstractmethod
     async def execute_request(self, request: TRequest, context: RequestContext) -> TResponse:

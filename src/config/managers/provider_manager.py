@@ -106,7 +106,7 @@ class ProviderConfigManager:
             logger.info("Provider configuration saved")
         except Exception as e:
             logger.error("Failed to save provider config: %s", e)
-            raise ConfigurationError(f"Failed to save provider configuration: {e}") from e
+            raise ConfigurationError(f"Failed to save provider configuration: {e}")
 
     def _get_nested_value(self, key: str, default: Any = None) -> Any:
         """Get nested configuration value using dot notation."""

@@ -79,21 +79,21 @@ class AWSMachineAdapter:
             for field in required_fields:
                 if field not in aws_instance_data:
                     self._logger.error("Missing required field in AWS instance data: %s", field)
-                    raise AWSError(f"Missing required field in AWS instance data: {field}") from e
+                    raise AWSError(f"Missing required field in AWS instance data: {field}")
 
             # Validate AWS handler type
             try:
                 ProviderApi(provider_api)
             except ValueError:
                 self._logger.error("Invalid provider API type: %s", provider_api)
-                raise AWSError(f"Invalid provider API type: {provider_api}") from e
+                raise AWSError(f"Invalid provider API type: {provider_api}")
 
             # Validate instance type
             try:
                 InstanceType(aws_instance_data["InstanceType"])
             except ValueError:
                 self._logger.error("Invalid instance type: %s", aws_instance_data["InstanceType"])
-                raise AWSError(f"Invalid instance type: {aws_instance_data['InstanceType']}") from e
+                raise AWSError(f"Invalid instance type: {aws_instance_data['InstanceType']}")
 
             # Extract core machine data
             machine_data = {

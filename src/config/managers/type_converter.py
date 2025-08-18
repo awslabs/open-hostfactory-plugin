@@ -106,9 +106,7 @@ class ConfigTypeConverter:
             return config_class(**config_data)
         except Exception as e:
             logger.error("Failed to create typed config for %s: %s", config_class.__name__, e)
-            raise ConfigurationError(
-                f"Invalid configuration for {config_class.__name__}: {e}"
-            ) from e
+            raise ConfigurationError(f"Invalid configuration for {config_class.__name__}: {e}")
 
     def _get_aws_provider_config(self, config_class: Type[T]) -> T:
         """Get AWS provider configuration from provider strategy system."""

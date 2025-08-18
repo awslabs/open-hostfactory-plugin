@@ -27,7 +27,7 @@ class AWSAMIResolver(ImageResolver):
             ValueError: If AMI cannot be resolved
         """
         if not image_reference:
-            raise ValueError("Image reference cannot be empty") from e
+            raise ValueError("Image reference cannot be empty")
 
         # Direct AMI ID - return as-is
         if image_reference.startswith("ami-"):
@@ -93,11 +93,11 @@ class AWSAMIResolver(ImageResolver):
             return ami_id
 
         except ClientError as e:
-            raise ValueError(f"Failed to resolve SSM parameter {ssm_path}: {e}") from e
+            raise ValueError(f"Failed to resolve SSM parameter {ssm_path}: {e}")
         except ImportError:
-            raise ValueError("boto3 is required for SSM parameter resolution") from e
+            raise ValueError("boto3 is required for SSM parameter resolution")
         except Exception as e:
-            raise ValueError(f"Unexpected error resolving SSM parameter {ssm_path}: {e}") from e
+            raise ValueError(f"Unexpected error resolving SSM parameter {ssm_path}: {e}")
 
     def _is_custom_alias(self, reference: str) -> bool:
         """
@@ -143,4 +143,4 @@ class AWSAMIResolver(ImageResolver):
             # Recursively resolve the SSM parameter
             return self.resolve_image_id(alias_mappings[alias])
 
-        raise ValueError(f"Unknown AMI alias: {alias}") from e
+        raise ValueError(f"Unknown AMI alias: {alias}")

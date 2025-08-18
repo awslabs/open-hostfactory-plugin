@@ -1,6 +1,6 @@
 # Development tools container with security hardening
 
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.13
 ARG PACKAGE_NAME_SHORT=ohfp
 
 FROM python:${PYTHON_VERSION}-slim

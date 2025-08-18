@@ -4,10 +4,20 @@
 ARG PYTHON_VERSION=3.13
 ARG PACKAGE_NAME_SHORT=ohfp
 
-FROM python:${PYTHON_VERSION}-slim
+FROM python:${PYTHON_VERSION}-slim-bookworm
 
 # Re-declare build arguments for this stage
 ARG PACKAGE_NAME_SHORT
+
+# Security: Update system packages and install security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Security: Upgrade setuptools to latest version
+    pip install --no-cache-dir --upgrade pip setuptools>=70.0.0
 ARG BUILD_DATE
 ARG VERSION=dev
 ARG VCS_REF

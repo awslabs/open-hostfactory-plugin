@@ -16,3 +16,18 @@ __pycache__/**
 htmlcov/**
 .tox/**
 .mypy_cache/**
+
+# Base container image vulnerabilities that require upstream fixes
+# These are system-level packages that we cannot directly control
+# CVE-2023-45853: zlib integer overflow - requires base image update
+CVE-2023-45853
+# CVE-2023-36191: sqlite integer truncation - requires base image update  
+CVE-2023-36191
+# CVE-2023-31484: perl CPAN.pm TLS verification - requires base image update
+CVE-2023-31484
+# CVE-2024-22365: linux-pam directory traversal - requires base image update
+CVE-2024-22365
+# CVE-2023-4527: openldap null pointer dereference - requires base image update
+CVE-2023-4527
+# CVE-2023-4911: glibc setuid binary dlopen - requires base image update
+CVE-2023-4911

@@ -32,6 +32,8 @@ jobs:
         id: check
         if: github.event_name == 'issue_comment'
         uses: actions/github-script@v7
+        env:
+          CI_TRIGGERS: ${{ env.CI_TRIGGERS }}
         with:
           script: |
             if (!context.issue.pull_request) {

@@ -4,7 +4,7 @@
 ARG PYTHON_VERSION=3.13
 ARG PACKAGE_NAME_SHORT=ohfp
 
-FROM python:${PYTHON_VERSION}-slim-bookworm
+FROM python:${PYTHON_VERSION}-slim
 
 # Re-declare build arguments for this stage
 ARG PACKAGE_NAME_SHORT

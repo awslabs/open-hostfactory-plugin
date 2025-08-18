@@ -37,7 +37,6 @@ on:
 
 jobs:
   check-container-comment:
-    if: github.event_name == 'issue_comment'
     runs-on: ubuntu-latest
     outputs:
       triggered: ${{ steps.check.outputs.triggered }}
@@ -45,6 +44,7 @@ jobs:
     steps:
       - name: Check container comment
         id: check
+        if: github.event_name == 'issue_comment'
         uses: actions/github-script@v7
         with:
           script: |

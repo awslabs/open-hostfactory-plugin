@@ -187,8 +187,11 @@ class EventBus:
 
         if self.logger:
             self.logger.debug(
-                "Event %s processed: %s succeeded, ", event_type, success_count
-                f"{error_count} failed in {duration:.3f}s"
+                "Event %s processed: %s succeeded, %s failed in %.3fs",
+                event_type,
+                success_count,
+                error_count,
+                duration
             )
 
     async def _handle_with_error_isolation(self, handler: EventHandler, event: DomainEvent) -> None:

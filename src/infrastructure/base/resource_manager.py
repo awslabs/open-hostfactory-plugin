@@ -79,7 +79,7 @@ class BaseResourceManager(ResourceManagerPort, ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.info(
-                    "Resource provisioned successfully: %s in %ss",  allocation.resource_id,  duration:.3f
+                    "Resource provisioned successfully: %s in %.3fs", allocation.resource_id, duration
                 )
 
             self._record_metric(operation_id, duration, "success")

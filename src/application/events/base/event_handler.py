@@ -77,8 +77,10 @@ class EventHandler(ABC):
             duration = time.time() - start_time
             if self.logger:
                 self.logger.debug(
-                    "Event processed successfully: %s ", event.event_type
-                    f"(ID: {event_id}) in {duration:.3f}s"
+                    "Event processed successfully: %s (ID: %s) in %.3fs",
+                    event.event_type,
+                    event_id,
+                    duration
                 )
 
         except Exception as e:
@@ -146,9 +148,11 @@ class EventHandler(ABC):
                     # Not the last attempt, wait and retry
                     if self.logger:
                         self.logger.warning(
-                            "Event processing failed (attempt %s/%s): ", attempt + \
-                                                      1, self.retry_count
-                            f"{event.event_type} - {str(e)}"
+                            "Event processing failed (attempt %s/%s): %s - %s",
+                            attempt + 1,
+                            self.retry_count,
+                            event.event_type,
+                            str(e)
                         )
                     await asyncio.sleep(self.retry_delay * (attempt + 1))
                 else:
@@ -174,8 +178,11 @@ class EventHandler(ABC):
 
         if self.logger:
             self.logger.error(
-                "Event processing failed: %s ", event.event_type
-                f"(ID: {event_id}) after {duration:.3f}s - {str(error)}"
+                "Event processing failed: %s (ID: %s) after %.3fs - %s",
+                event.event_type,
+                event_id,
+                duration,
+                str(error)
             )
 
         # Future: Send to dead letter queue, trigger alerts, etc.

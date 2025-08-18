@@ -1,12 +1,11 @@
 name: Publish to PyPI
 
-# SECURITY NOTE: This workflow requires the following repository secrets:
-# - PYPI_API_TOKEN: Production PyPI API token (scope: entire account or project)
-# - TEST_PYPI_API_TOKEN: Test PyPI API token (scope: entire account or project)
+# SECURITY NOTE: This workflow uses PyPI Trusted Publishing (OIDC)
+# No API tokens required - authentication is handled automatically via GitHub's OIDC token
 # 
-# To set up:
-# 1. Create API tokens at https://pypi.org/manage/account/ and https://test.pypi.org/manage/account/
-# 2. Add them as repository secrets in GitHub Settings > Secrets and variables > Actions
+# Prerequisites:
+# 1. Configure trusted publisher on PyPI: https://pypi.org/manage/account/publishing/
+# 2. Configure trusted publisher on TestPyPI: https://test.pypi.org/manage/account/publishing/
 # 3. See docs/deployment/pypi-setup.md for detailed setup instructions
 
 on:
@@ -43,18 +42,20 @@ jobs:
         echo "default-python-version=$DEFAULT_PYTHON_VERSION" >> "$GITHUB_OUTPUT"
         echo "Using Python version: $DEFAULT_PYTHON_VERSION"
 
-
-
   publish:
     name: Build and Publish Package
     runs-on: ubuntu-latest
     needs: get-config
-    environment: ${{ github.event.inputs.environment || 'pypi' }}
+    environment: 
+      name: ${{ github.event.inputs.environment || 'pypi' }}
+      url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/p/open-hostfactory-plugin' || 'https://pypi.org/p/open-hostfactory-plugin' }}
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      contents: read   # needed to checkout code
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
-
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -79,14 +80,12 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         verbose: true
 
     - name: Publish to PyPI
       if: github.event.inputs.environment == 'pypi' || github.event_name == 'release'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
         verbose: true
 
     - name: Create deployment summary
@@ -121,7 +120,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
-
 
     - name: Set up Python
       uses: actions/setup-python@v5

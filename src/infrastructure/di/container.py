@@ -412,7 +412,7 @@ def reset_container() -> None:
         _container_instance = None
 
 
-__all__ = [
+__all__: list[str] = [
     "DIContainer",
     "get_container",
     "reset_container",

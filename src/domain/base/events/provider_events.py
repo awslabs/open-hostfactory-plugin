@@ -212,7 +212,7 @@ class ProviderStrategyRegisteredEvent(DomainEvent):
 
 
 # Export all provider events
-__all__ = [
+__all__: list[str] = [
     "ProviderOperationEvent",
     "ProviderRateLimitEvent",
     "ProviderCredentialsEvent",

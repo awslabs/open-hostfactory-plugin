@@ -68,7 +68,7 @@ def validate_collection(collection, validator_func):
 
 
 # Export commonly used functions
-__all__ = [
+__all__: list[str] = [
     # Validation functions
     "is_empty",
     "is_not_empty",

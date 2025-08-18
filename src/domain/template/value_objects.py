@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Protocol
 from domain.base.value_objects import ResourceId
 
 # Export all public classes
-__all__ = ["TemplateId", "ProviderConfiguration"]
+__all__: list[str] = ["TemplateId", "ProviderConfiguration"]
 
 
 class TemplateId(ResourceId):

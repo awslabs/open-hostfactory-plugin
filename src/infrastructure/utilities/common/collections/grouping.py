@@ -59,7 +59,7 @@ def count_by(collection: Iterable[T], key_func: Callable[[T], K]) -> Dict[K, int
     Returns:
         Dictionary mapping keys to counts
     """
-    counts = defaultdict(int)
+    counts: dict[Any, int] = defaultdict(int)
     for item in collection:
         key = key_func(item)
         counts[key] += 1

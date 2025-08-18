@@ -138,7 +138,7 @@ def get_aws_config_manager() -> AWSConfigManager:
     return _aws_config_manager
 
 
-__all__ = [
+__all__: list[str] = [
     "AWSLimits",
     "AWSNamingConfig",
     "AWSConfigManager",

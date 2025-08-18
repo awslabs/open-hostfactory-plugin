@@ -98,7 +98,7 @@ from .provider_strategy import (
 )
 
 # Public API exports
-__all__ = [
+__all__: list[str] = [
     # Core interfaces
     "BaseProviderStrategy",
     "ProviderStrategy",

@@ -55,11 +55,11 @@ gh workflow run publish.yml -f environment=pypi
 
 ## Security Benefits
 
-✅ **No API tokens to manage** - eliminates secret rotation concerns  
-✅ **OIDC-based authentication** - more secure than static tokens  
-✅ **Automatic attestations** - digital signatures for all packages  
-✅ **Scoped permissions** - `id-token: write` only in publishing job  
-✅ **Environment protection** - optional approval workflows  
+**No API tokens to manage** - eliminates secret rotation concerns  
+**OIDC-based authentication** - more secure than static tokens  
+**Automatic attestations** - digital signatures for all packages  
+**Scoped permissions** - `id-token: write` only in publishing job  
+**Environment protection** - optional approval workflows  
 
 ## Migration from API Tokens
 

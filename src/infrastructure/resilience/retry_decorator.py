@@ -122,8 +122,12 @@ def retry(
 
                     # Log retry attempt
                     logger.warning(
-                        "Retry attempt %s/%s for %s ", attempt + 1, max_attempts, func.__name__
-                        f"after {delay:.2f}s delay. Error: {e}"
+                        "Retry attempt %s/%s for %s after %.2fs delay. Error: %s",
+                        attempt + 1,
+                        max_attempts,
+                        func.__name__,
+                        delay,
+                        e
                     )
 
                     # Wait before retry

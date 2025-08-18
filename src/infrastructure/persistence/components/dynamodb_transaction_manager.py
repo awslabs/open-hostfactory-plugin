@@ -164,7 +164,8 @@ class DynamoDBTransactionManager(TransactionManager):
             else:
                 self.state = TransactionState.FAILED
                 self.logger.error(
-                    "DynamoDB transaction failed with status: %s).get('HTTPStatusCode')}", response.get('ResponseMetadata', {,
+                    "DynamoDB transaction failed with status: %s",
+                    response.get('ResponseMetadata', {}).get('HTTPStatusCode'),
                     extra={"response": response},
                 )
 

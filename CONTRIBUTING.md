@@ -55,12 +55,15 @@ make test-integration
 
 You can trigger CI/CD actions by commenting on pull requests:
 
-#### Testing Commands
+**Security Note**: Comment triggers are restricted to repository members, owners, and collaborators.
+
+#### Testing Commands (Members, Owners, Collaborators)
 - **`/test`** - Run full CI pipeline (tests, linting, type checking)
 - **`/build`** - Run CI pipeline including package build verification
-- **`/ci`** - Same as `/test` - run complete CI pipeline  
+- **`/ci`** - Same as `/test` - run complete CI pipeline
+- **`/security`** - Run security scans
 
-#### Publishing Commands
+#### Publishing Commands (Members, Owners only)
 - **`/package`** - Build and publish to TestPyPI for testing
   - Creates a dev version: `0.1.0.dev20250818125457+abc1234`
   - Publishes to https://test.pypi.org for installation testing
@@ -68,6 +71,8 @@ You can trigger CI/CD actions by commenting on pull requests:
 
 #### Future Commands (planned)
 - **`/container`** - Build and test container images
+
+Commands must be exact matches (e.g., `/test` not `/test please`).
 
 ### Automated Publishing
 

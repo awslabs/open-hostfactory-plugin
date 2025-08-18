@@ -48,11 +48,21 @@ jobs:
               return;
             }
             
-            const comment = context.payload.comment.body.toLowerCase();
-            const triggers = process.env.PUBLISH_TRIGGERS.split(',');
-            const triggered = triggers.some(t => comment.includes(t.trim()));
+            // Security: Only allow authorized users for publishing
+            const allowedAssociations = ['MEMBER', 'OWNER'];
+            const userAssociation = context.payload.comment.author_association;
+            
+            if (!allowedAssociations.includes(userAssociation)) {
+              console.log(`User ${context.payload.comment.user.login} not authorized for publishing (${userAssociation})`);
+              return;
+            }
+            
+            const comment = context.payload.comment.body.toLowerCase().trim();
+            const triggers = process.env.PUBLISH_TRIGGERS.split(',').map(t => t.trim());
+            const triggered = triggers.some(t => comment === t);
             
             console.log(`Comment: ${context.payload.comment.body}`);
+            console.log(`User: ${context.payload.comment.user.login} (${userAssociation})`);
             console.log(`Build triggered: ${triggered}`);
             
             if (triggered) {

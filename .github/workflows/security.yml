@@ -1,5 +1,9 @@
 name: Security Scan
 
+env:
+  # Comment trigger words for security scans
+  SECURITY_TRIGGERS: "/security"
+
 on:
   push:
     branches: [ main, develop ]
@@ -17,6 +21,8 @@ on:
       - 'Dockerfile*'
       - 'docker-compose*.yml'
       - '.dockerignore'
+  issue_comment:
+    types: [created]
   schedule:
     # Run weekly security scan on Sundays at 3 AM UTC
     - cron: '0 3 * * 0'

@@ -8,9 +8,17 @@ name: Publish to PyPI
 # 2. Configure trusted publisher on TestPyPI: https://test.pypi.org/manage/account/publishing/
 # 3. See docs/deployment/pypi-setup.md for detailed setup instructions
 
+env:
+  # Comment trigger words for package publishing
+  PUBLISH_TRIGGERS: "/package"
+
 on:
+  push:
+    branches: [main, develop]
   release:
     types: [published]
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       environment:
@@ -23,9 +31,54 @@ on:
         - pypi
 
 jobs:
+  check-build-comment:
+    if: github.event_name == 'issue_comment'
+    runs-on: ubuntu-latest
+    outputs:
+      triggered: ${{ steps.check.outputs.triggered }}
+      pr_ref: ${{ steps.check.outputs.pr_ref }}
+    steps:
+      - name: Check build comment
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (!context.issue.pull_request) {
+              console.log('Not a PR comment, skipping');
+              return;
+            }
+            
+            const comment = context.payload.comment.body.toLowerCase();
+            const triggers = process.env.PUBLISH_TRIGGERS.split(',');
+            const triggered = triggers.some(t => comment.includes(t.trim()));
+            
+            console.log(`Comment: ${context.payload.comment.body}`);
+            console.log(`Build triggered: ${triggered}`);
+            
+            if (triggered) {
+              const pr = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              core.setOutput('triggered', 'true');
+              core.setOutput('pr_ref', pr.data.head.sha);
+              
+              // Add reaction to confirm command received
+              await github.rest.reactions.createForIssueComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: context.payload.comment.id,
+                content: 'eyes'
+              });
+            }
   get-config:
     name: Get Python Version from Makefile
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'issue_comment' || 
+      needs.check-build-comment.outputs.triggered == 'true'
+    needs: [check-build-comment]
     outputs:
       default-python-version: ${{ steps.version.outputs.default-python-version }}
     steps:
@@ -45,10 +98,20 @@ jobs:
   publish:
     name: Build and Publish Package
     runs-on: ubuntu-latest
-    needs: get-config
+    needs: [get-config, check-build-comment]
+    if: |
+      github.event_name != 'issue_comment' || 
+      needs.check-build-comment.outputs.triggered == 'true'
     environment: 
-      name: ${{ github.event.inputs.environment || 'pypi' }}
-      url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/p/open-hostfactory-plugin' || 'https://pypi.org/p/open-hostfactory-plugin' }}
+      name: ${{ 
+        github.event_name == 'release' && 'pypi' || 
+        github.event.inputs.environment || 'testpypi' 
+      }}
+      url: ${{ 
+        (github.event_name == 'release' || github.event.inputs.environment == 'pypi') && 
+        'https://pypi.org/p/open-hostfactory-plugin' || 
+        'https://test.pypi.org/p/open-hostfactory-plugin' 
+      }}
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
       contents: read   # needed to checkout code
@@ -56,6 +119,24 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
+      with:
+        ref: ${{ needs.check-build-comment.outputs.pr_ref || github.sha }}
+
+    - name: Determine version and target
+      run: |
+        if [[ "${{ github.event_name }}" == "release" ]]; then
+          echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "TARGET=pypi" >> $GITHUB_ENV
+        elif [[ "${{ github.event.inputs.environment }}" == "pypi" ]]; then
+          echo "VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "TARGET=pypi" >> $GITHUB_ENV
+        else
+          # Dev version for TestPyPI (push to main/develop or comment trigger)
+          VERSION="0.1.0.dev$(date +%Y%m%d%H%M%S)+$(git rev-parse --short HEAD)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TARGET=testpypi" >> $GITHUB_ENV
+        fi
+        echo "Publishing to: $TARGET with version: $VERSION"
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -76,14 +157,14 @@ jobs:
         make test-install
 
     - name: Publish to Test PyPI
-      if: github.event.inputs.environment == 'testpypi' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment != 'pypi')
+      if: env.TARGET == 'testpypi'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
         verbose: true
 
     - name: Publish to PyPI
-      if: github.event.inputs.environment == 'pypi' || github.event_name == 'release'
+      if: env.TARGET == 'pypi'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         verbose: true
@@ -93,7 +174,7 @@ jobs:
         {
           echo "## Package Published Successfully"
           echo ""
-          if [ "${{ github.event.inputs.environment }}" = "pypi" ] || [ "${{ github.event_name }}" = "release" ]; then
+          if [ "$TARGET" = "pypi" ]; then
             echo "**Environment:** Production PyPI"
             echo "**Installation:** \`pip install open-hostfactory-plugin\`"
           else
@@ -101,6 +182,7 @@ jobs:
             echo "**Installation:** \`pip install --index-url https://test.pypi.org/simple/ open-hostfactory-plugin\`"
           fi
           echo ""
+          echo "**Version:** $VERSION"
           echo "**Commands:**"
           echo "- \`ohfp --help\`"
           echo "- \`open-hostfactory-plugin --help\`"

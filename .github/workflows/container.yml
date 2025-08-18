@@ -1,5 +1,9 @@
 name: Container Build and Publish
 
+env:
+  # Comment trigger words for container builds
+  CONTAINER_TRIGGERS: "/container"
+
 on:
   push:
     branches: [ main, develop ]
@@ -19,6 +23,8 @@ on:
       - 'deployment/docker/**'
       - 'dev-tools/scripts/container_build.sh'
       - '.github/workflows/container.yml'
+  issue_comment:
+    types: [created]
   release:
     types: [published]
   workflow_dispatch:

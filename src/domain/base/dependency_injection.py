@@ -472,7 +472,7 @@ class OptionalDependency(Generic[T]):
     def __init__(self, dependency_type: Type[T]) -> None:
         self.dependency_type = dependency_type
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"OptionalDependency({self.dependency_type})"
 
 

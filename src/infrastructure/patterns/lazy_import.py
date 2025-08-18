@@ -27,7 +27,7 @@ class LazyImport:
         self._module = None
         self._attribute = None
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """
         Call the lazily imported attribute.
 

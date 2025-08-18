@@ -52,15 +52,15 @@ class TestContextFieldSupport:
 
         # Create handler with mocked dependencies
         handler = EC2FleetHandler(Mock(), Mock(), Mock(), Mock(), Mock())
-        
+
         # Test _create_fleet_config method
         config = handler._create_fleet_config(
             template=template,
             request=request,
             launch_template_id="lt-123",
-            launch_template_version="1"
+            launch_template_version="1",
         )
-        
+
         # Assert Context field is included
         assert "Context" in config
         assert config["Context"] == "production-workload"
@@ -78,16 +78,16 @@ class TestContextFieldSupport:
 
         # Create handler with mocked dependencies
         handler = ASGHandler(Mock(), Mock(), Mock(), Mock(), Mock())
-        
+
         # Test _create_asg_config method
         config = handler._create_asg_config(
             asg_name="test-asg",
             aws_template=template,
             request=request,
             launch_template_id="lt-456",
-            launch_template_version="2"
+            launch_template_version="2",
         )
-        
+
         # Assert Context field is included
         assert "Context" in config
         assert config["Context"] == "staging-environment"
@@ -115,15 +115,15 @@ class TestContextFieldSupport:
         aws_client = Mock()
         aws_client.sts_client.get_caller_identity.return_value = {"Account": "123456789012"}
         handler = SpotFleetHandler(aws_client, Mock(), Mock(), Mock(), Mock())
-        
+
         # Test _create_spot_fleet_config method
         config = handler._create_spot_fleet_config(
             template=template,
             request=request,
             launch_template_id="lt-789",
-            launch_template_version="3"
+            launch_template_version="3",
         )
-        
+
         # Assert Context field is included
         assert "Context" in config
         assert config["Context"] == "development-testing"
@@ -151,15 +151,15 @@ class TestContextFieldSupport:
 
         # Create handler with mocked dependencies
         handler = EC2FleetHandler(Mock(), Mock(), Mock(), Mock(), Mock())
-        
+
         # Test _create_fleet_config method
         config = handler._create_fleet_config(
             template=template,
             request=request,
             launch_template_id="lt-999",
-            launch_template_version="1"
+            launch_template_version="1",
         )
-        
+
         # Assert Context field is not included when not specified
         assert "Context" not in config
 

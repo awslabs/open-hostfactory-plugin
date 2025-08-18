@@ -73,7 +73,9 @@ class AWSTemplateExtensionConfig(BaseModel):
     security_group_ids: Optional[List[str]] = Field(None, description="Default security group IDs")
 
     # AWS Context field for fleet operations
-    context: Optional[str] = Field(None, description="AWS Context field for EC2 Fleet, ASG, and Spot Fleet")
+    context: Optional[str] = Field(
+        None, description="AWS Context field for EC2 Fleet, ASG, and Spot Fleet"
+    )
 
     @field_validator("subnet_ids")
     @classmethod

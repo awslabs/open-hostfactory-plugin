@@ -55,7 +55,28 @@ run_tool() {
     # Try different execution methods in order of preference
     if command -v uv >/dev/null 2>&1 && [ -f "$project_root/pyproject.toml" ]; then
         echo "Executing with UV..."
-        cd "$project_root" && uv run "${TOOL_NAME}" "$@"
+        # If we're in a subdirectory of the project, adjust paths for UV
+        if [ "$PWD" != "$project_root" ]; then
+            # We're in a subdirectory (like src/), need to adjust paths
+            adjusted_args=""
+            for arg in "$@"; do
+                case "$arg" in
+                    .*)
+                        # Relative path - adjust it relative to project root
+                        rel_to_root=$(realpath --relative-to="$project_root" "$PWD/$arg" 2>/dev/null || python3 -c "import os; print(os.path.relpath(os.path.join('$PWD', '$arg'), '$project_root'))")
+                        adjusted_args="$adjusted_args $rel_to_root"
+                        ;;
+                    *)
+                        # Other arguments - keep as is
+                        adjusted_args="$adjusted_args $arg"
+                        ;;
+                esac
+            done
+            (cd "$project_root" && uv run "${TOOL_NAME}" $adjusted_args)
+        else
+            # We're in project root
+            uv run "${TOOL_NAME}" "$@"
+        fi
     elif [ -f ".venv/bin/${TOOL_NAME}" ]; then
         echo "Executing with venv..."
         .venv/bin/"${TOOL_NAME}" "$@"
@@ -65,7 +86,24 @@ run_tool() {
     else
         echo "Executing as Python module..."
         if command -v uv >/dev/null 2>&1 && [ -f "$project_root/pyproject.toml" ]; then
-            cd "$project_root" && uv run python -m "${TOOL_NAME}" "$@"
+            # Same path adjustment for python -m
+            if [ "$PWD" != "$project_root" ]; then
+                adjusted_args=""
+                for arg in "$@"; do
+                    case "$arg" in
+                        .*)
+                            rel_to_root=$(realpath --relative-to="$project_root" "$PWD/$arg" 2>/dev/null || python3 -c "import os; print(os.path.relpath(os.path.join('$PWD', '$arg'), '$project_root'))")
+                            adjusted_args="$adjusted_args $rel_to_root"
+                            ;;
+                        *)
+                            adjusted_args="$adjusted_args $arg"
+                            ;;
+                    esac
+                done
+                (cd "$project_root" && uv run python -m "${TOOL_NAME}" $adjusted_args)
+            else
+                uv run python -m "${TOOL_NAME}" "$@"
+            fi
         else
             python3 -m "${TOOL_NAME}" "$@"
         fi

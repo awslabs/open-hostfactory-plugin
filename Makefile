@@ -476,7 +476,7 @@ ci-quality-flake8:  ## Run flake8 style guide check
 
 ci-quality-mypy:  ## Run mypy type checking
 	@echo "Running mypy type check..."
-	$(call run-tool,mypy,. ../$(TESTS),$(PACKAGE))
+	@dev-tools/scripts/run_tool.sh mypy --explicit-package-bases $(PACKAGE)
 
 ci-quality-pylint:  ## Run pylint code analysis
 	@echo "Running pylint analysis..."

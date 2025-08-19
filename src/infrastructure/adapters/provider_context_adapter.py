@@ -54,7 +54,6 @@ class ProviderContextAdapter(ProviderPort):
 
     def execute_with_strategy(self, *args, **kwargs):
         """Execute with strategy using provider context."""
-        if hasattr(self.provider_context, 'execute_with_strategy'):
+        if hasattr(self.provider_context, "execute_with_strategy"):
             return self.provider_context.execute_with_strategy(*args, **kwargs)
         raise NotImplementedError("execute_with_strategy not available")
-

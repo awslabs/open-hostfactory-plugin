@@ -391,6 +391,7 @@ class TestValueObjectEquality:
 
         # Should not be able to modify the value (Pydantic frozen models raise ValidationError)
         from pydantic_core import ValidationError
+
         with pytest.raises(ValidationError):
             instance_id.value = "i-new-value"
 

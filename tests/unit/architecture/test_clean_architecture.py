@@ -207,7 +207,9 @@ class TestCleanArchitecture:
         """Validate dependency inversion implementation."""
         # Test that high-level modules don't depend on low-level modules
         # Mock the ProviderCapabilityService since it requires many dependencies
-        with patch("application.services.provider_capability_service.ProviderCapabilityService") as MockAppService:
+        with patch(
+            "application.services.provider_capability_service.ProviderCapabilityService"
+        ) as MockAppService:
             mock_instance = Mock()
             MockAppService.return_value = mock_instance
 
@@ -274,7 +276,9 @@ class TestCleanArchitecture:
     def test_application_service_layer(self):
         """Test application service layer compliance."""
         # Mock the ProviderCapabilityService since it requires many dependencies
-        with patch("application.services.provider_capability_service.ProviderCapabilityService") as MockAppService:
+        with patch(
+            "application.services.provider_capability_service.ProviderCapabilityService"
+        ) as MockAppService:
             mock_instance = Mock()
             MockAppService.return_value = mock_instance
 

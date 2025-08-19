@@ -72,7 +72,12 @@ run_tool() {
                         ;;
                 esac
             done
-            (cd "$project_root" && uv run "${TOOL_NAME}" $adjusted_args)
+            if [ -n "$adjusted_args" ]; then
+                # shellcheck disable=SC2086
+                (cd "$project_root" && uv run "${TOOL_NAME}" $adjusted_args)
+            else
+                (cd "$project_root" && uv run "${TOOL_NAME}")
+            fi
         else
             # We're in project root
             uv run "${TOOL_NAME}" "$@"
@@ -100,7 +105,12 @@ run_tool() {
                             ;;
                     esac
                 done
+            if [ -n "$adjusted_args" ]; then
+                # shellcheck disable=SC2086
                 (cd "$project_root" && uv run python -m "${TOOL_NAME}" $adjusted_args)
+            else
+                (cd "$project_root" && uv run python -m "${TOOL_NAME}")
+            fi
             else
                 uv run python -m "${TOOL_NAME}" "$@"
             fi

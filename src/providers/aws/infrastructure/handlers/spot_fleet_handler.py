@@ -42,6 +42,7 @@ from providers.aws.exceptions.aws_exceptions import (
     AWSValidationError,
     IAMError,
 )
+from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
@@ -50,7 +51,7 @@ from providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable
-class SpotFleetHandler(AWSHandler):
+class SpotFleetHandler(AWSHandler, BaseContextMixin):
     """Handler for Spot Fleet operations."""
 
     def __init__(
@@ -332,91 +333,84 @@ class SpotFleetHandler(AWSHandler):
 
     def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
         """Prepare context with all computed values for template rendering."""
-        
-        # Business logic: heterogeneous capacity calculations
-        if template.price_type == "heterogeneous":
-            percent_on_demand = template.percent_on_demand or 0
-            on_demand_count = int(request.requested_count * percent_on_demand / 100)
-            spot_count = request.requested_count - on_demand_count
-        else:
-            on_demand_count = 0
-            spot_count = request.requested_count
-        
-        # Launch specifications computation
-        launch_specs = []
+
+        # Start with base context
+        context = self._prepare_base_context(template, request)
+
+        # Add capacity distribution
+        context.update(self._calculate_capacity_distribution(template, request))
+
+        # Add standard flags
+        context.update(self._prepare_standard_flags(template))
+
+        # Add standard tags
+        tag_context = self._prepare_standard_tags(template, request)
+        context.update(tag_context)
+
+        # Add SpotFleet-specific context
+        context.update(self._prepare_spotfleet_specific_context(template, request))
+
+        return context
+
+    def _prepare_spotfleet_specific_context(
+        self, template: AWSTemplate, request: Request
+    ) -> Dict[str, Any]:
+        """Prepare SpotFleet-specific context with template reference pattern."""
+
+        # Base template data (referenced by all specs)
+        base_launch_spec = {
+            "image_id": template.image_id,
+            "security_groups": template.security_group_ids or [],
+        }
+
+        # Instance type overrides (minimal data)
+        instance_overrides = []
         if template.instance_types and template.subnet_ids:
             for subnet_id in template.subnet_ids:
                 for instance_type, weight in template.instance_types.items():
-                    launch_specs.append({
-                        "instance_type": instance_type,
-                        "subnet_id": subnet_id,
-                        "weighted_capacity": weight,
-                        "image_id": template.image_id,
-                        "security_groups": template.security_group_ids or []
-                    })
+                    instance_overrides.append(
+                        {
+                            "instance_type": instance_type,
+                            "subnet_id": subnet_id,
+                            "weighted_capacity": weight,
+                        }
+                    )
         elif template.instance_types:
             for instance_type, weight in template.instance_types.items():
-                launch_specs.append({
-                    "instance_type": instance_type,
-                    "weighted_capacity": weight,
-                    "image_id": template.image_id,
-                    "security_groups": template.security_group_ids or []
-                })
+                instance_overrides.append(
+                    {"instance_type": instance_type, "weighted_capacity": weight}
+                )
         else:
             # Single instance type
-            launch_specs.append({
-                "instance_type": template.instance_type,
-                "weighted_capacity": 1,
-                "image_id": template.image_id,
-                "security_groups": template.security_group_ids or [],
-                "subnet_id": template.subnet_ids[0] if template.subnet_ids else None
-            })
-        
-        # Get package name for CreatedBy tag
-        created_by = "open-hostfactory-plugin"
-        if hasattr(self, "config_port") and self.config_port:
-            try:
-                package_info = self.config_port.get_package_info()
-                created_by = package_info.get("name", "open-hostfactory-plugin")
-            except Exception:  # nosec B110
-                pass
-        
-        # Process custom tags
-        custom_tags = []
-        if template.tags:
-            custom_tags = [{"key": k, "value": v} for k, v in template.tags.items()]
-        
+            instance_overrides.append(
+                {
+                    "instance_type": template.instance_type,
+                    "weighted_capacity": 1,
+                    "subnet_id": template.subnet_ids[0] if template.subnet_ids else None,
+                }
+            )
+
         return {
-            # Basic values
-            "target_capacity": request.requested_count,
-            "request_id": str(request.request_id),
-            "template_id": str(template.template_id),
-            
-            # Computed business logic
-            "on_demand_target_capacity": on_demand_count,
-            "spot_target_capacity": spot_count,
-            "launch_specifications": launch_specs,
-            
+            # Fleet-specific values
+            "fleet_name": f"hf-spotfleet-{request.request_id}",
+            # Template reference approach (fixes duplication)
+            "base_launch_spec": base_launch_spec,
+            "instance_overrides": instance_overrides,
+            "has_overrides": len(instance_overrides) > 1,
             # Fleet configuration
             "fleet_role": template.fleet_role,
             "allocation_strategy": template.allocation_strategy or "lowestPrice",
-            "instance_interruption_behavior": getattr(template, 'instance_interruption_behavior', 'terminate'),
-            "replace_unhealthy_instances": getattr(template, 'replace_unhealthy_instances', True),
-            
-            # Conditional flags
-            "is_heterogeneous": template.price_type == "heterogeneous",
-            "has_multiple_specs": len(launch_specs) > 1,
-            "has_spot_price": hasattr(template, 'max_price') and template.max_price is not None,
-            "has_custom_tags": bool(custom_tags),
-            
+            "instance_interruption_behavior": getattr(
+                template, "instance_interruption_behavior", "terminate"
+            ),
+            "replace_unhealthy_instances": getattr(template, "replace_unhealthy_instances", True),
             # Pricing
-            "spot_price": str(template.max_price) if hasattr(template, 'max_price') and template.max_price is not None else None,
-            
-            # Dynamic values
-            "created_by": created_by,
-            "timestamp": datetime.utcnow().isoformat(),
-            "fleet_name": f"hf-spotfleet-{request.request_id}",
-            "custom_tags": custom_tags
+            "spot_price": (
+                str(template.max_price)
+                if hasattr(template, "max_price") and template.max_price is not None
+                else "0.10"
+            ),
+            "has_spot_price": hasattr(template, "max_price") and template.max_price is not None,
         }
 
     def _create_spot_fleet_config(
@@ -445,13 +439,15 @@ class SpotFleetHandler(AWSHandler):
 
             # Use template-driven approach with native spec service
             context = self._prepare_template_context(template, request)
-            context.update({
-                "launch_template_id": launch_template_id,
-                "launch_template_version": launch_template_version
-            })
-            
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                }
+            )
+
             return self.aws_native_spec_service.render_default_spec("spotfleet", context)
-        
+
         # Fallback to legacy logic when native spec service is not available
         return self._create_spot_fleet_config_legacy(
             template, request, launch_template_id, launch_template_version

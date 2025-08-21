@@ -47,6 +47,7 @@ from providers.aws.exceptions.aws_exceptions import (
     AWSInfrastructureError,
     AWSValidationError,
 )
+from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
@@ -55,7 +56,7 @@ from providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable
-class EC2FleetHandler(AWSHandler):
+class EC2FleetHandler(AWSHandler, BaseContextMixin):
     """Handler for EC2 Fleet operations."""
 
     def __init__(
@@ -233,91 +234,90 @@ class EC2FleetHandler(AWSHandler):
 
     def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
         """Prepare context with all computed values for template rendering."""
-        
-        # Business logic: heterogeneous capacity calculations
-        if template.price_type == "heterogeneous":
-            percent_on_demand = template.percent_on_demand or 0
-            on_demand_count = int(request.requested_count * percent_on_demand / 100)
-            spot_count = request.requested_count - on_demand_count
-        else:
-            on_demand_count = 0
-            spot_count = 0
-        
+
+        # Start with base context
+        context = self._prepare_base_context(template, request)
+
+        # Add capacity distribution
+        context.update(self._calculate_capacity_distribution(template, request))
+
+        # Add standard flags
+        context.update(self._prepare_standard_flags(template))
+
+        # Add standard tags
+        tag_context = self._prepare_standard_tags(template, request)
+        context.update(tag_context)
+
+        # Add EC2Fleet-specific context
+        context.update(self._prepare_ec2fleet_specific_context(template, request))
+
+        return context
+
+    def _prepare_ec2fleet_specific_context(
+        self, template: AWSTemplate, request: Request
+    ) -> Dict[str, Any]:
+        """Prepare EC2Fleet-specific context."""
+
         # Instance overrides computation
         instance_overrides = []
         if template.instance_types and template.subnet_ids:
             for subnet_id in template.subnet_ids:
                 for instance_type, weight in template.instance_types.items():
-                    instance_overrides.append({
-                        "instance_type": instance_type,
-                        "subnet_id": subnet_id,
-                        "weighted_capacity": weight
-                    })
+                    instance_overrides.append(
+                        {
+                            "instance_type": instance_type,
+                            "subnet_id": subnet_id,
+                            "weighted_capacity": weight,
+                        }
+                    )
         elif template.instance_types:
             for instance_type, weight in template.instance_types.items():
-                instance_overrides.append({
-                    "instance_type": instance_type,
-                    "weighted_capacity": weight
-                })
-        
+                instance_overrides.append(
+                    {"instance_type": instance_type, "weighted_capacity": weight}
+                )
+
         # On-demand instance overrides for heterogeneous fleets
         ondemand_overrides = []
-        if template.price_type == "heterogeneous" and hasattr(template, 'instance_types_ondemand') and template.instance_types_ondemand:
+        if (
+            template.price_type == "heterogeneous"
+            and hasattr(template, "instance_types_ondemand")
+            and template.instance_types_ondemand
+        ):
             for instance_type, weight in template.instance_types_ondemand.items():
-                ondemand_overrides.append({
-                    "instance_type": instance_type,
-                    "weighted_capacity": weight
-                })
-        
-        # Get package name for CreatedBy tag
-        created_by = "open-hostfactory-plugin"
-        if hasattr(self, "config_port") and self.config_port:
-            try:
-                package_info = self.config_port.get_package_info()
-                created_by = package_info.get("name", "open-hostfactory-plugin")
-            except Exception:  # nosec B110
-                pass
-        
-        # Process custom tags
-        custom_tags = []
-        if template.tags:
-            custom_tags = [{"key": k, "value": v} for k, v in template.tags.items()]
-        
+                ondemand_overrides.append(
+                    {"instance_type": instance_type, "weighted_capacity": weight}
+                )
+
         return {
-            # Basic values
+            # Fleet-specific values
             "fleet_type": template.fleet_type,
-            "requested_count": request.requested_count,
-            "request_id": str(request.request_id),
-            "template_id": str(template.template_id),
-            
-            # Computed business logic
-            "on_demand_count": on_demand_count,
-            "spot_count": spot_count,
+            "fleet_name": f"hf-fleet-{request.request_id}",
+            # Computed overrides
             "instance_overrides": instance_overrides,
             "ondemand_overrides": ondemand_overrides,
-            
-            # Conditional flags
-            "is_heterogeneous": template.price_type == "heterogeneous",
+            "needs_overrides": bool(instance_overrides or ondemand_overrides),
+            # Fleet-specific flags
             "is_maintain_fleet": template.fleet_type == AWSFleetType.MAINTAIN.value,
             "replace_unhealthy": template.fleet_type == AWSFleetType.MAINTAIN.value,
             "has_spot_options": bool(template.allocation_strategy or template.max_spot_price),
             "has_ondemand_options": bool(template.allocation_strategy_on_demand),
-            "needs_overrides": bool(instance_overrides or ondemand_overrides),
-            
             # Configuration values
-            "allocation_strategy": self._get_allocation_strategy(template.allocation_strategy) if template.allocation_strategy else None,
-            "allocation_strategy_on_demand": self._get_allocation_strategy_on_demand(template.allocation_strategy_on_demand) if template.allocation_strategy_on_demand else None,
-            "max_spot_price": str(template.max_spot_price) if template.max_spot_price is not None else None,
+            "allocation_strategy": (
+                self._get_allocation_strategy(template.allocation_strategy)
+                if template.allocation_strategy
+                else None
+            ),
+            "allocation_strategy_on_demand": (
+                self._get_allocation_strategy_on_demand(template.allocation_strategy_on_demand)
+                if template.allocation_strategy_on_demand
+                else None
+            ),
+            "max_spot_price": (
+                str(template.max_spot_price) if template.max_spot_price is not None else None
+            ),
             "default_capacity_type": self._get_default_capacity_type(template.price_type),
-            
-            # Dynamic values
-            "created_by": created_by,
-            "timestamp": datetime.utcnow().isoformat(),
-            "fleet_name": f"hf-fleet-{request.request_id}",
-            "custom_tags": custom_tags,
-            "has_custom_tags": bool(custom_tags)
         }
-    
+
     def _get_default_capacity_type(self, price_type: str) -> str:
         """Get default target capacity type based on price type."""
         if price_type == "spot":
@@ -352,13 +352,15 @@ class EC2FleetHandler(AWSHandler):
 
             # Use template-driven approach with native spec service
             context = self._prepare_template_context(template, request)
-            context.update({
-                "launch_template_id": launch_template_id,
-                "launch_template_version": launch_template_version
-            })
-            
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                }
+            )
+
             return self.aws_native_spec_service.render_default_spec("ec2fleet", context)
-        
+
         # Fallback to legacy logic when native spec service is not available
         return self._create_fleet_config_legacy(
             template, request, launch_template_id, launch_template_version

@@ -35,12 +35,13 @@ from infrastructure.adapters.ports.request_adapter_port import RequestAdapterPor
 from infrastructure.error.decorators import handle_infrastructure_exceptions
 from providers.aws.domain.template.aggregate import AWSTemplate
 from providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
+from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable
-class ASGHandler(AWSHandler):
+class ASGHandler(AWSHandler, BaseContextMixin):
     """Handler for Auto Scaling Group operations."""
 
     def __init__(
@@ -162,48 +163,49 @@ class ASGHandler(AWSHandler):
 
     def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
         """Prepare context with all computed values for template rendering."""
-        
-        # Get package name for CreatedBy tag
-        created_by = "open-hostfactory-plugin"
-        if hasattr(self, "config_port") and self.config_port:
-            try:
-                package_info = self.config_port.get_package_info()
-                created_by = package_info.get("name", "open-hostfactory-plugin")
-            except Exception:  # nosec B110
-                pass
-        
-        # Process custom tags
-        custom_tags = []
-        if template.tags:
-            custom_tags = [{"key": k, "value": v} for k, v in template.tags.items()]
-        
+
+        # Start with base context
+        context = self._prepare_base_context(template, request)
+
+        # Add capacity distribution (for consistency, even if not all used)
+        context.update(self._calculate_capacity_distribution(template, request))
+
+        # Add standard flags
+        context.update(self._prepare_standard_flags(template))
+
+        # Add standard tags
+        tag_context = self._prepare_standard_tags(template, request)
+        context.update(tag_context)
+
+        # Add ASG-specific context
+        context.update(self._prepare_asg_specific_context(template, request))
+
+        return context
+
+    def _prepare_asg_specific_context(
+        self, template: AWSTemplate, request: Request
+    ) -> Dict[str, Any]:
+        """Prepare ASG-specific context."""
+
         return {
-            # Basic values
+            # ASG-specific values
             "asg_name": f"hf-asg-{request.request_id}",
             "min_size": 0,
             "max_size": request.requested_count * 2,  # Allow buffer
-            "desired_capacity": request.requested_count,
-            "request_id": str(request.request_id),
-            "template_id": str(template.template_id),
-            
             # Configuration values
             "default_cooldown": 300,
             "health_check_type": "EC2",
             "health_check_grace_period": 300,
             "vpc_zone_identifier": ",".join(template.subnet_ids) if template.subnet_ids else None,
-            "context": template.context if hasattr(template, 'context') and template.context else None,
-            
-            # Conditional flags
-            "has_subnets": bool(template.subnet_ids),
-            "has_context": hasattr(template, 'context') and bool(template.context),
-            "has_instance_protection": hasattr(template, 'instance_protection') and template.instance_protection,
-            "has_lifecycle_hooks": hasattr(template, 'lifecycle_hooks') and bool(template.lifecycle_hooks),
-            "has_custom_tags": bool(custom_tags),
-            
-            # Dynamic values
-            "created_by": created_by,
-            "timestamp": datetime.utcnow().isoformat(),
-            "custom_tags": custom_tags
+            "context": (
+                template.context if hasattr(template, "context") and template.context else None
+            ),
+            # ASG-specific flags
+            "has_context": hasattr(template, "context") and bool(template.context),
+            "has_instance_protection": hasattr(template, "instance_protection")
+            and template.instance_protection,
+            "has_lifecycle_hooks": hasattr(template, "lifecycle_hooks")
+            and bool(template.lifecycle_hooks),
         }
 
     def _create_asg_config(
@@ -234,14 +236,16 @@ class ASGHandler(AWSHandler):
 
             # Use template-driven approach with native spec service
             context = self._prepare_template_context(aws_template, request)
-            context.update({
-                "launch_template_id": launch_template_id,
-                "launch_template_version": launch_template_version,
-                "asg_name": asg_name
-            })
-            
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                    "asg_name": asg_name,
+                }
+            )
+
             return self.aws_native_spec_service.render_default_spec("asg", context)
-        
+
         # Fallback to legacy logic when native spec service is not available
         return self._create_asg_config_legacy(
             asg_name, aws_template, request, launch_template_id, launch_template_version

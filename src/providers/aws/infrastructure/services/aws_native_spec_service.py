@@ -22,27 +22,36 @@ class AWSNativeSpecService:
 
     def render_default_spec(self, spec_type: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Render default specification template with context.
-        
+
         Args:
             spec_type: Type of spec (ec2fleet, spotfleet, asg, runinstances, launch-template)
             context: Template context variables
-            
+
         Returns:
             Rendered specification dictionary
         """
         try:
             # Construct path to default spec file
             spec_file_path = os.path.join(
-                os.path.dirname(__file__), 
-                "..", "..", "..", "..", "..", 
-                "specs", "aws", spec_type, "default.json"
+                os.path.dirname(__file__),
+                "..",
+                "..",
+                "..",
+                "..",
+                "..",
+                "specs",
+                "aws",
+                spec_type,
+                "default.json",
             )
-            
+
             # Use spec renderer to render from file
             return self.spec_renderer.render_spec_from_file(spec_file_path, context)
-            
+
         except Exception as e:
-            self.native_spec_service.logger.error(f"Failed to render default spec for {spec_type}: {e}")
+            self.native_spec_service.logger.error(
+                f"Failed to render default spec for {spec_type}: {e}"
+            )
             raise
 
     def process_launch_template_spec(

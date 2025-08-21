@@ -39,6 +39,7 @@ from infrastructure.adapters.ports.request_adapter_port import RequestAdapterPor
 from infrastructure.error.decorators import handle_infrastructure_exceptions
 from providers.aws.domain.template.aggregate import AWSTemplate
 from providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
+from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
@@ -47,7 +48,7 @@ from providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable
-class RunInstancesHandler(AWSHandler):
+class RunInstancesHandler(AWSHandler, BaseContextMixin):
     """Handler for direct EC2 instance operations using RunInstances."""
 
     def __init__(
@@ -209,36 +210,30 @@ class RunInstancesHandler(AWSHandler):
 
     def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
         """Prepare context with all computed values for template rendering."""
-        
-        # Get package name for CreatedBy tag
-        created_by = "open-hostfactory-plugin"
-        if hasattr(self, "config_port") and self.config_port:
-            try:
-                package_info = self.config_port.get_package_info()
-                created_by = package_info.get("name", "open-hostfactory-plugin")
-            except Exception:  # nosec B110
-                pass
-        
-        # Process custom tags
-        custom_tags = []
-        if template.tags:
-            custom_tags = [{"key": k, "value": v} for k, v in template.tags.items()]
-        
+
+        # Start with base context
+        context = self._prepare_base_context(template, request)
+
+        # Add standard flags
+        context.update(self._prepare_standard_flags(template))
+
+        # Add standard tags
+        tag_context = self._prepare_standard_tags(template, request)
+        context.update(tag_context)
+
+        # Add RunInstances-specific context
+        context.update(self._prepare_runinstances_specific_context(template, request))
+
+        return context
+
+    def _prepare_runinstances_specific_context(
+        self, template: AWSTemplate, request: Request
+    ) -> Dict[str, Any]:
+        """Prepare RunInstances-specific context."""
+
         return {
-            # Basic values
-            "min_count": 1,
-            "max_count": request.requested_count,
-            "request_id": str(request.request_id),
-            "template_id": str(template.template_id),
-            
-            # Conditional flags
-            "has_custom_tags": bool(custom_tags),
-            
-            # Dynamic values
-            "created_by": created_by,
-            "timestamp": datetime.utcnow().isoformat(),
+            # RunInstances-specific values
             "instance_name": f"hf-instance-{request.request_id}",
-            "custom_tags": custom_tags
         }
 
     def _create_run_instances_params(
@@ -273,13 +268,15 @@ class RunInstancesHandler(AWSHandler):
 
             # Use template-driven approach with native spec service
             context = self._prepare_template_context(aws_template, request)
-            context.update({
-                "launch_template_id": launch_template_id,
-                "launch_template_version": launch_template_version
-            })
-            
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                }
+            )
+
             return self.aws_native_spec_service.render_default_spec("runinstances", context)
-        
+
         # Fallback to legacy logic when native spec service is not available
         return self._create_run_instances_params_legacy(
             aws_template, request, launch_template_id, launch_template_version

@@ -21,27 +21,28 @@ class JinjaSpecRenderer(SpecRenderingPort):
 
     def render_spec_from_file(self, file_path: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Render specification from file with Jinja2 templating support.
-        
+
         Args:
             file_path: Path to the specification file
             context: Template context variables
-            
+
         Returns:
             Rendered specification as dictionary
         """
         try:
             # Read file content
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
-            
+
             # Always process through Jinja2 - handles static content automatically
             template = self.jinja_env.from_string(content)
             rendered_content = template.render(**context)
-            
+
             # Parse rendered JSON
             import json
+
             return json.loads(rendered_content)
-                
+
         except Exception as e:
             self.logger.error(f"Failed to render spec from file {file_path}: {e}")
             raise

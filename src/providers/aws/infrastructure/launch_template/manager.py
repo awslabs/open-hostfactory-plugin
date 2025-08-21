@@ -285,7 +285,7 @@ class AWSLaunchTemplateManager:
 
     def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
         """Prepare context with all computed values for template rendering."""
-        
+
         # Get package name for CreatedBy tag
         created_by = "open-hostfactory-plugin"
         if self.config_port:
@@ -294,48 +294,74 @@ class AWSLaunchTemplateManager:
                 created_by = package_info.get("name", "open-hostfactory-plugin")
             except Exception:  # nosec B110
                 pass
-        
+
         # Process custom tags
         custom_tags = []
         if template.tags:
             custom_tags = [{"key": k, "value": v} for k, v in template.tags.items()]
-        
+
         # Get instance name
         instance_name = get_instance_name(request.request_id)
-        
+
         return {
             # Basic values
             "image_id": template.image_id,
-            "instance_type": template.instance_type if template.instance_type else list(template.instance_types.keys())[0],
+            "instance_type": (
+                template.instance_type
+                if template.instance_type
+                else list(template.instance_types.keys())[0]
+            ),
             "request_id": str(request.request_id),
             "template_id": str(template.template_id),
             "instance_name": instance_name,
-            
             # Network configuration
-            "subnet_id": template.subnet_id if hasattr(template, 'subnet_id') and template.subnet_id else None,
+            "subnet_id": (
+                template.subnet_id
+                if hasattr(template, "subnet_id") and template.subnet_id
+                else None
+            ),
             "security_group_ids": template.security_group_ids or [],
             "associate_public_ip": True,
-            
             # Optional configurations
-            "key_name": template.key_name if hasattr(template, 'key_name') and template.key_name else None,
-            "user_data": template.user_data if hasattr(template, 'user_data') and template.user_data else None,
-            "instance_profile": template.instance_profile if hasattr(template, 'instance_profile') and template.instance_profile else None,
-            "ebs_optimized": template.ebs_optimized if hasattr(template, 'ebs_optimized') and template.ebs_optimized is not None else None,
-            "monitoring_enabled": template.monitoring_enabled if hasattr(template, 'monitoring_enabled') and template.monitoring_enabled is not None else None,
-            
+            "key_name": (
+                template.key_name if hasattr(template, "key_name") and template.key_name else None
+            ),
+            "user_data": (
+                template.user_data
+                if hasattr(template, "user_data") and template.user_data
+                else None
+            ),
+            "instance_profile": (
+                template.instance_profile
+                if hasattr(template, "instance_profile") and template.instance_profile
+                else None
+            ),
+            "ebs_optimized": (
+                template.ebs_optimized
+                if hasattr(template, "ebs_optimized") and template.ebs_optimized is not None
+                else None
+            ),
+            "monitoring_enabled": (
+                template.monitoring_enabled
+                if hasattr(template, "monitoring_enabled")
+                and template.monitoring_enabled is not None
+                else None
+            ),
             # Conditional flags
-            "has_subnet": hasattr(template, 'subnet_id') and bool(template.subnet_id),
+            "has_subnet": hasattr(template, "subnet_id") and bool(template.subnet_id),
             "has_security_groups": bool(template.security_group_ids),
-            "has_key_name": hasattr(template, 'key_name') and bool(template.key_name),
-            "has_user_data": hasattr(template, 'user_data') and bool(template.user_data),
-            "has_instance_profile": hasattr(template, 'instance_profile') and bool(template.instance_profile),
-            "has_ebs_optimized": hasattr(template, 'ebs_optimized') and template.ebs_optimized is not None,
-            "has_monitoring": hasattr(template, 'monitoring_enabled') and template.monitoring_enabled is not None,
+            "has_key_name": hasattr(template, "key_name") and bool(template.key_name),
+            "has_user_data": hasattr(template, "user_data") and bool(template.user_data),
+            "has_instance_profile": hasattr(template, "instance_profile")
+            and bool(template.instance_profile),
+            "has_ebs_optimized": hasattr(template, "ebs_optimized")
+            and template.ebs_optimized is not None,
+            "has_monitoring": hasattr(template, "monitoring_enabled")
+            and template.monitoring_enabled is not None,
             "has_custom_tags": bool(custom_tags),
-            
             # Dynamic values
             "created_by": created_by,
-            "custom_tags": custom_tags
+            "custom_tags": custom_tags,
         }
 
     def _create_launch_template_data(
@@ -365,7 +391,7 @@ class AWSLaunchTemplateManager:
             # Use template-driven approach with native spec service
             context = self._prepare_template_context(aws_template, request)
             return self.aws_native_spec_service.render_default_spec("launch-template", context)
-        
+
         # Fallback to legacy logic when native spec service is not available
         return self._create_launch_template_data_legacy(aws_template, request)
 

@@ -13,41 +13,15 @@
   "VPCZoneIdentifier": "{{ vpc_zone_identifier }}"{% endif %}{% if has_context %},
   "Context": "{{ context }}"{% endif %},
   "Tags": [
+    {% for tag in base_tags %}
     {
-      "Key": "Name",
-      "Value": "{{ asg_name }}",
+      "Key": "{{ tag.key }}",
+      "Value": "{{ tag.value }}",
       "PropagateAtLaunch": true,
       "ResourceId": "{{ asg_name }}",
       "ResourceType": "auto-scaling-group"
-    },
-    {
-      "Key": "RequestId",
-      "Value": "{{ request_id }}",
-      "PropagateAtLaunch": true,
-      "ResourceId": "{{ asg_name }}",
-      "ResourceType": "auto-scaling-group"
-    },
-    {
-      "Key": "TemplateId",
-      "Value": "{{ template_id }}",
-      "PropagateAtLaunch": true,
-      "ResourceId": "{{ asg_name }}",
-      "ResourceType": "auto-scaling-group"
-    },
-    {
-      "Key": "CreatedBy",
-      "Value": "{{ created_by }}",
-      "PropagateAtLaunch": true,
-      "ResourceId": "{{ asg_name }}",
-      "ResourceType": "auto-scaling-group"
-    },
-    {
-      "Key": "CreatedAt",
-      "Value": "{{ timestamp }}",
-      "PropagateAtLaunch": true,
-      "ResourceId": "{{ asg_name }}",
-      "ResourceType": "auto-scaling-group"
-    }{% if has_custom_tags %},
+    }{% if not loop.last or has_custom_tags %},{% endif %}
+    {% endfor %}{% if has_custom_tags %},
     {% for tag in custom_tags %}
     {
       "Key": "{{ tag.key }}",

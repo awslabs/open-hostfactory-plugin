@@ -1,6 +1,6 @@
 """Tests for Symphony HostFactory scheduler strategy."""
 
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from domain.template.aggregate import Template
 from infrastructure.scheduler.hostfactory.strategy import HostFactorySchedulerStrategy
@@ -11,26 +11,31 @@ class TestSymphonyHostFactorySchedulerStrategy:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.mock_config_manager = Mock()
-        self.mock_config_manager.get_app_config.return_value = {
-            "scheduler": {"type": "hostfactory", "config_root": "/test/config"},
-            "provider": {"active_provider": "aws-default"},
-        }
+        with patch("infrastructure.di.container.get_container") as mock_get_container:
+            mock_container = Mock()
+            mock_container.get.return_value = Mock()
+            mock_get_container.return_value = mock_container
 
-        # Mock provider config to return appropriate values instead of Mock objects
-        mock_provider_config = Mock()
-        mock_provider_config.active_provider = "aws-default"
-        self.mock_config_manager.get_provider_config.return_value = mock_provider_config
+            self.mock_config_manager = Mock()
+            self.mock_config_manager.get_app_config.return_value = {
+                "scheduler": {"type": "hostfactory", "config_root": "/test/config"},
+                "provider": {"active_provider": "aws-default"},
+            }
 
-        # Mock resolve_file method to return actual paths
-        def mock_resolve_file(file_type, filename):
-            config_root = "/test/config"
-            return f"{config_root}/{filename}"
+            # Mock provider config to return appropriate values instead of Mock objects
+            mock_provider_config = Mock()
+            mock_provider_config.active_provider = "aws-default"
+            self.mock_config_manager.get_provider_config.return_value = mock_provider_config
 
-        self.mock_config_manager.resolve_file.side_effect = mock_resolve_file
+            # Mock resolve_file method to return actual paths
+            def mock_resolve_file(file_type, filename):
+                config_root = "/test/config"
+                return f"{config_root}/{filename}"
 
-        self.mock_logger = Mock()
-        self.strategy = HostFactorySchedulerStrategy(self.mock_config_manager, self.mock_logger)
+            self.mock_config_manager.resolve_file.side_effect = mock_resolve_file
+
+            self.mock_logger = Mock()
+            self.strategy = HostFactorySchedulerStrategy(self.mock_config_manager, self.mock_logger)
 
     def test_get_templates_file_path(self):
         """Test templates file path generation."""
@@ -200,6 +205,40 @@ class TestSymphonyHostFactorySchedulerStrategy:
         assert parsed_request["requested_count"] == 1  # Default
         assert parsed_request["request_type"] == "provision"  # Default
         assert parsed_request["metadata"] == {}  # Default
+
+    def test_parse_request_data_requests_list_format(self):
+        """Test request status parsing with list format."""
+        raw_request = {"requests": [{"requestId": "req-ABC"}, {"requestId": "req-DEF"}]}
+
+        parsed_request = self.strategy.parse_request_data(raw_request)
+
+        # Verify list format parsing
+        assert isinstance(parsed_request, list)
+        assert len(parsed_request) == 2
+        assert parsed_request[0]["request_id"] == "req-ABC"
+        assert parsed_request[1]["request_id"] == "req-DEF"
+
+    def test_parse_request_data_requests_single_format(self):
+        """Test request status parsing with single request format."""
+        raw_request = {"requests": {"requestId": "req-XYZ"}}
+
+        parsed_request = self.strategy.parse_request_data(raw_request)
+
+        # Verify single format parsing (converted to list)
+        assert isinstance(parsed_request, list)
+        assert len(parsed_request) == 1
+        assert parsed_request[0]["request_id"] == "req-XYZ"
+
+    def test_parse_request_data_requests_fallback_field(self):
+        """Test request status parsing with fallback field name."""
+        raw_request = {"requests": [{"request_id": "req-123"}]}
+
+        parsed_request = self.strategy.parse_request_data(raw_request)
+
+        # Verify fallback field mapping
+        assert isinstance(parsed_request, list)
+        assert len(parsed_request) == 1
+        assert parsed_request[0]["request_id"] == "req-123"
 
     def test_field_mapping_consistency(self):
         """Test that field mapping is consistent in both directions."""

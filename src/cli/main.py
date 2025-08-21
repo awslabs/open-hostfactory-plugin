@@ -240,7 +240,7 @@ For more information, visit: {REPO_URL}
 
     # Requests status
     requests_status = requests_subparsers.add_parser("status", help="Check request status")
-    requests_status.add_argument("request_ids", nargs="+", help="Request IDs to check")
+    requests_status.add_argument("request_ids", nargs="*", help="Request IDs to check")
 
     # System resource
     system_parser = subparsers.add_parser("system", help="System operations")

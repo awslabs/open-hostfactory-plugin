@@ -1,6 +1,6 @@
 """Default scheduler strategy using native domain fields - no conversion needed."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from config.manager import ConfigurationManager
 from domain.base.ports.logging_port import LoggingPort
@@ -74,12 +74,20 @@ class DefaultSchedulerStrategy(BaseSchedulerStrategy):
             # Provide helpful error message for debugging
             raise ValueError(f"Failed to create Template from data: {e}. Data: {raw_data}")
 
-    def parse_request_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
+    def parse_request_data(
+        self, raw_data: Dict[str, Any]
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Parse request data using native domain format - no conversion needed.
 
         Request data is expected to be in domain format already.
         """
+
+        # Request Status
+        if "requests" in raw_data:
+            return [{"request_id": req.get("request_id")} for req in raw_data["requests"]]
+
+        # Request Machines
         # Return as-is since it's already in domain format
         return {
             "template_id": raw_data.get("template_id"),

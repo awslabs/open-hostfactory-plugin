@@ -245,13 +245,21 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
         launch_template_version: str,
     ) -> Dict[str, Any]:
         """Create RunInstances parameters with native spec support."""
-        # Try native spec processing first
+        # Try native spec processing with merge support
         if self.aws_native_spec_service:
-            native_spec = self.aws_native_spec_service.process_provider_api_spec(
-                aws_template, request
+            context = self._prepare_template_context(aws_template, request)
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                }
+            )
+            
+            native_spec = self.aws_native_spec_service.process_provider_api_spec_with_merge(
+                aws_template, request, "runinstances", context
             )
             if native_spec:
-                # Merge launch template info into native spec
+                # Ensure launch template info is in the spec
                 if "LaunchTemplate" not in native_spec:
                     native_spec["LaunchTemplate"] = {}
                 native_spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
@@ -262,20 +270,12 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
                 if "MaxCount" not in native_spec:
                     native_spec["MaxCount"] = request.requested_count
                 self._logger.info(
-                    "Using native provider API spec for RunInstances template %s",
+                    "Using native provider API spec with merge for RunInstances template %s",
                     aws_template.template_id,
                 )
                 return native_spec
 
             # Use template-driven approach with native spec service
-            context = self._prepare_template_context(aws_template, request)
-            context.update(
-                {
-                    "launch_template_id": launch_template_id,
-                    "launch_template_version": launch_template_version,
-                }
-            )
-
             return self.aws_native_spec_service.render_default_spec("runinstances", context)
 
         # Fallback to legacy logic when native spec service is not available

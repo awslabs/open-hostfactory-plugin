@@ -427,23 +427,8 @@ class SpotFleetHandler(AWSHandler, BaseContextMixin):
         launch_template_version: str,
     ) -> Dict[str, Any]:
         """Create Spot Fleet configuration with native spec support."""
-        # Try native spec processing first
+        # Try native spec processing with merge support
         if self.aws_native_spec_service:
-            native_spec = self.aws_native_spec_service.process_provider_api_spec(template, request)
-            if native_spec:
-                # Merge launch template info into native spec
-                if "LaunchSpecifications" in native_spec:
-                    for spec in native_spec["LaunchSpecifications"]:
-                        if "LaunchTemplate" not in spec:
-                            spec["LaunchTemplate"] = {}
-                        spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
-                        spec["LaunchTemplate"]["Version"] = launch_template_version
-                self._logger.info(
-                    "Using native provider API spec for SpotFleet template %s", template.template_id
-                )
-                return native_spec
-
-            # Use template-driven approach with native spec service
             context = self._prepare_template_context(template, request)
             context.update(
                 {
@@ -451,7 +436,24 @@ class SpotFleetHandler(AWSHandler, BaseContextMixin):
                     "launch_template_version": launch_template_version,
                 }
             )
+            
+            native_spec = self.aws_native_spec_service.process_provider_api_spec_with_merge(
+                template, request, "spotfleet", context
+            )
+            if native_spec:
+                # Ensure launch template info is in the spec
+                if "LaunchSpecifications" in native_spec:
+                    for spec in native_spec["LaunchSpecifications"]:
+                        if "LaunchTemplate" not in spec:
+                            spec["LaunchTemplate"] = {}
+                        spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
+                        spec["LaunchTemplate"]["Version"] = launch_template_version
+                self._logger.info(
+                    "Using native provider API spec with merge for SpotFleet template %s", template.template_id
+                )
+                return native_spec
 
+            # Use template-driven approach with native spec service
             return self.aws_native_spec_service.render_default_spec("spotfleet", context)
 
         # Fallback to legacy logic when native spec service is not available

@@ -218,24 +218,8 @@ class ASGHandler(AWSHandler, BaseContextMixin):
         launch_template_version: str,
     ) -> Dict[str, Any]:
         """Create Auto Scaling Group configuration with native spec support."""
-        # Try native spec processing first
+        # Try native spec processing with merge support
         if self.aws_native_spec_service:
-            native_spec = self.aws_native_spec_service.process_provider_api_spec(
-                aws_template, request
-            )
-            if native_spec:
-                # Merge launch template info into native spec
-                if "LaunchTemplate" not in native_spec:
-                    native_spec["LaunchTemplate"] = {}
-                native_spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
-                native_spec["LaunchTemplate"]["Version"] = launch_template_version
-                native_spec["AutoScalingGroupName"] = asg_name
-                self._logger.info(
-                    "Using native provider API spec for ASG template %s", aws_template.template_id
-                )
-                return native_spec
-
-            # Use template-driven approach with native spec service
             context = self._prepare_template_context(aws_template, request)
             context.update(
                 {
@@ -244,7 +228,23 @@ class ASGHandler(AWSHandler, BaseContextMixin):
                     "asg_name": asg_name,
                 }
             )
+            
+            native_spec = self.aws_native_spec_service.process_provider_api_spec_with_merge(
+                aws_template, request, "asg", context
+            )
+            if native_spec:
+                # Ensure launch template info is in the spec
+                if "LaunchTemplate" not in native_spec:
+                    native_spec["LaunchTemplate"] = {}
+                native_spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
+                native_spec["LaunchTemplate"]["Version"] = launch_template_version
+                native_spec["AutoScalingGroupName"] = asg_name
+                self._logger.info(
+                    "Using native provider API spec with merge for ASG template %s", aws_template.template_id
+                )
+                return native_spec
 
+            # Use template-driven approach with native spec service
             return self.aws_native_spec_service.render_default_spec("asg", context)
 
         # Fallback to legacy logic when native spec service is not available

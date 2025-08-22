@@ -202,7 +202,7 @@ class ConfigurationAdapter(ConfigurationPort):
             return {"enabled": config.enabled, "merge_mode": config.merge_mode}
         except Exception:
             # Fallback configuration if config not available
-            return {"enabled": False, "merge_mode": "extend"}
+            return {"enabled": False, "merge_mode": "merge"}
 
     def get_package_info(self) -> Dict[str, Any]:
         """Get package metadata information."""

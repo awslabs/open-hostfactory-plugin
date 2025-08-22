@@ -7,6 +7,7 @@ from application.services.native_spec_service import NativeSpecService
 from domain.base.dependency_injection import injectable
 from domain.base.ports.configuration_port import ConfigurationPort
 from domain.request.aggregate import Request
+from infrastructure.utilities.common.deep_merge import deep_merge
 from infrastructure.utilities.file.json_utils import read_json_file
 from providers.aws.domain.template.aggregate import AWSTemplate
 
@@ -68,10 +69,38 @@ class AWSNativeSpecService:
         context = self._build_aws_context(template, request)
         return self.native_spec_service.render_spec(spec, context)
 
+    def process_provider_api_spec_with_merge(
+        self, template: AWSTemplate, request: Request, spec_type: str, context: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        """Process AWS provider API spec with merge mode support."""
+        if not self.native_spec_service.is_native_spec_enabled():
+            return None
+
+        native_spec = self._resolve_provider_api_spec(template)
+        if not native_spec:
+            return None
+
+        # Render the native spec with context
+        rendered_native_spec = self.native_spec_service.render_spec(native_spec, context)
+        
+        # Get merge mode from configuration
+        native_config = self.config_port.get_native_spec_config()
+        merge_mode = native_config.get("merge_mode", "merge")
+        
+        if merge_mode == "replace":
+            return rendered_native_spec
+        elif merge_mode == "merge":
+            # Render default template
+            default_spec = self.render_default_spec(spec_type, context)
+            # Deep merge: default as base, native spec as override
+            return deep_merge(default_spec, rendered_native_spec)
+        
+        return rendered_native_spec  # Fallback to replace behavior
+
     def process_provider_api_spec(
         self, template: AWSTemplate, request: Request
     ) -> Optional[Dict[str, Any]]:
-        """Process AWS provider API spec."""
+        """Process AWS provider API spec (legacy method for backward compatibility)."""
         if not self.native_spec_service.is_native_spec_enabled():
             return None
 

@@ -9,6 +9,6 @@ class NativeSpecConfig(BaseModel):
     """Native spec configuration."""
 
     enabled: bool = Field(False, description="Enable native spec support")
-    merge_mode: Literal["extend", "override", "none"] = Field(
-        "extend", description="Spec merge mode"
+    merge_mode: Literal["merge", "replace"] = Field(
+        "merge", description="Spec merge mode: 'merge' combines native spec with default template, 'replace' uses only native spec"
     )

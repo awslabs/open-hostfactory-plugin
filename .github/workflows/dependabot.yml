@@ -56,7 +56,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
       - name: Generate pyproject.toml
         run: make generate-pyproject
 
@@ -204,7 +204,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-        cache-dependency-glob: "pyproject.toml"
+        cache-dependency-glob: "pyproject.toml.template"
       - name: Generate pyproject.toml
         run: make generate-pyproject
 

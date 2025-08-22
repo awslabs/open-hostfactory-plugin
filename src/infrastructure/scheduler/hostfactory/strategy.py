@@ -1,7 +1,7 @@
 """HostFactory scheduler strategy for field mapping and response formatting."""
 
 import os
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 if TYPE_CHECKING:
     pass
@@ -489,13 +489,29 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
         # Create domain Template object with validation
         return Template(**domain_data)
 
-    def parse_request_data(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
+    def parse_request_data(
+        self, raw_data: Dict[str, Any]
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Parse HostFactory request data to domain-compatible format.
 
         This method handles the conversion from HostFactory request format to domain-compatible data.
-        Supports both nested format: {"template": {"templateId": ...}} and flat format: {"templateId": ...}
+        For [request machines]: supports both nested format: {"template": {"templateId": ...}} and flat format: {"templateId": ...}
+        For [requests status]: supports both list and a single request_id
         """
+
+        # Request Status
+        # Handles 2 formats of requests
+        # 1. {"requests": [{"requestId": "req-ABC"}, {"requestId": "req-DEF"}]}
+        # 2. {"requests": {"requestId": "XYZ"}}
+        if "requests" in raw_data:
+            requests = raw_data["requests"]
+            requests_list = requests if isinstance(requests, list) else [requests]
+            return [
+                {"request_id": req.get("requestId", req.get("request_id"))} for req in requests_list
+            ]
+
+        # Request Machines
         # Handle nested HostFactory format: {"template": {"templateId": "...", "machineCount": ...}}
         if "template" in raw_data:
             template_data = raw_data["template"]

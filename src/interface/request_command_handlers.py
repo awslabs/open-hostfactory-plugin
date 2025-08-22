@@ -27,33 +27,42 @@ async def handle_get_request_status(args: "argparse.Namespace") -> Dict[str, Any
     scheduler_strategy = container.get(SchedulerPort)
 
     # Pass raw input data to scheduler strategy (scheduler-agnostic)
+    # First precedence is input data, then arguments
     if hasattr(args, "input_data") and args.input_data:
         raw_request_data = args.input_data
     else:
-        request_id_value = None
+        request_ids_from_args = []
         if hasattr(args, "request_ids") and args.request_ids:
-            request_id_value = args.request_ids[0]
+            request_ids_from_args = args.request_ids
         elif hasattr(args, "request_id") and args.request_id:
-            request_id_value = args.request_id
+            request_ids_from_args.append(args.request_id)
 
         raw_request_data = {
-            "request_id": request_id_value,
+            "requests": [{"request_id": request_id} for request_id in request_ids_from_args]
         }
 
     # Let scheduler strategy parse the raw data (each scheduler handles its own format)
-    parsed_data = scheduler_strategy.parse_request_data(raw_request_data)
-    request_id = parsed_data.get("request_id")
+    parsed_data_list = scheduler_strategy.parse_request_data(raw_request_data)
 
-    if not request_id:
+    # Validate parsed data
+    if not isinstance(parsed_data_list, list) or len(parsed_data_list) == 0:
         return {"error": "No request ID provided", "message": "Request ID is required"}
+
+    request_dtos = []
 
     from application.dto.queries import GetRequestQuery
 
-    query = GetRequestQuery(request_id=request_id)
-    request_dto = await query_bus.execute(query)
+    for parsed_data in parsed_data_list:
+        request_id = parsed_data.get("request_id")
+        if not request_id:
+            continue
+
+        query = GetRequestQuery(request_id=request_id)
+        request_dto = await query_bus.execute(query)
+        request_dtos.append(request_dto)
 
     # Pass domain DTO to scheduler strategy - NO formatting logic here
-    return scheduler_strategy.format_request_status_response([request_dto])
+    return scheduler_strategy.format_request_status_response(request_dtos)
 
 
 @handle_interface_exceptions(context="request_machines", interface_type="cli")

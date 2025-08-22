@@ -510,22 +510,6 @@ local-clean: ## Clean local act artifacts and containers
 		docker images --filter "dangling=true" -q | xargs -r docker rmi; \
 	fi
 	@echo "Local cleanup complete!"
-
-local-env-setup: ## Create local environment files from examples
-	@echo "Setting up local environment files..."
-	@if [ ! -f .env.local ]; then \
-		cp .env.local.example .env.local; \
-		echo "Created .env.local from example - please customize as needed"; \
-	else \
-		echo ".env.local already exists"; \
-	fi
-	@if [ ! -f .secrets.local ]; then \
-		cp .secrets.local.example .secrets.local; \
-		echo "Created .secrets.local from example - please add your secrets"; \
-		echo "WARNING: Never commit .secrets.local to version control!"; \
-	else \
-		echo ".secrets.local already exists"; \
-	fi
 # @SECTION Build & Deploy
 build: clean generate-pyproject dev-install  ## Build package
 	BUILD_ARGS="$(BUILD_ARGS)" ./dev-tools/package/build.sh

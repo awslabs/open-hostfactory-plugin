@@ -189,11 +189,10 @@ Thumbs.db
 .env.*.local
 .env.development
 .env.test
-.secrets.local
 
 # Act (GitHub Actions local execution) artifacts
 .local/
-.actrc.local
+.secrets.local
 .env.production
 
 # Compiled files

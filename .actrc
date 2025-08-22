@@ -4,10 +4,6 @@
 # Use consistent container architecture (important for M-series Macs)
 --container-architecture linux/amd64
 
-# Environment and secrets files
---env-file .env.local
---secret-file .secrets.local
-
 # Artifact handling
 --artifact-server-path .local/artifacts
 

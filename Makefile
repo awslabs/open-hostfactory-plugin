@@ -216,8 +216,8 @@ container-health-check:  ## Test container health endpoint
 	@echo "Container health check passed!"
 
 git-setup-ci:  ## Setup git configuration for CI
-	git config --local user.email "action@github.com"
-	git config --local user.name "GitHub Action"
+	git config --local user.name "github-actions[bot]"
+	git config --local user.email "github-actions[bot]@users.noreply.github.com"
 
 git-setup-docs:  ## Setup git configuration for docs
 	git config --global user.name "github-actions[bot]"

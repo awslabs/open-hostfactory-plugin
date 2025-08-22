@@ -1,0 +1,19 @@
+{
+  "AutoScalingGroupName": "asg-{{ request_id }}",
+  "LaunchTemplate": {
+    "LaunchTemplateId": "{{ launch_template_id }}",
+    "Version": "{{ launch_template_version | default('$Latest') }}"
+  },
+  "MinSize": "{{ min_size | default(0) }}",
+  "MaxSize": "{{ max_size | default(requested_count * 2) }}",
+  "DesiredCapacity": "{{ requested_count }}",
+  "VPCZoneIdentifier": "{{ subnet_ids | join(',') }}",
+  "HealthCheckType": "{{ health_check_type | default('EC2') }}",
+  "HealthCheckGracePeriod": "{{ health_check_grace_period | default(300) }}",
+  "Tags": [
+    {"Key": "Name", "Value": "asg-{{ request_id }}", "PropagateAtLaunch": true, "ResourceId": "asg-{{ request_id }}", "ResourceType": "auto-scaling-group"},
+    {"Key": "RequestId", "Value": "{{ request_id }}", "PropagateAtLaunch": true, "ResourceId": "asg-{{ request_id }}", "ResourceType": "auto-scaling-group"},
+    {"Key": "TemplateId", "Value": "{{ template_id }}", "PropagateAtLaunch": true, "ResourceId": "asg-{{ request_id }}", "ResourceType": "auto-scaling-group"},
+    {"Key": "CreatedBy", "Value": "{{ package_name }}", "PropagateAtLaunch": true, "ResourceId": "asg-{{ request_id }}", "ResourceType": "auto-scaling-group"}
+  ]
+}

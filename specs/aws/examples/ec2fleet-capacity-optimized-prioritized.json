@@ -6,21 +6,26 @@
       "Version": "{{ launch_template_version | default('$Latest') }}"
     },
     "Overrides": [
-      {"InstanceType": "r6i.large", "Priority": 1},
-      {"InstanceType": "r6a.xlarge", "Priority": 2},
-      {"InstanceType": "r5.large", "Priority": 3},
-      {"InstanceType": "r5n.xlarge", "Priority": 4},
-      {"InstanceType": "r5a.2xlarge", "Priority": 5},
-      {"InstanceType": "r5d.large", "Priority": 6},
-      {"InstanceType": "r5dn.xlarge", "Priority": 7},
-      {"InstanceType": "r6id.large", "Priority": 8},
-      {"InstanceType": "m6i.large", "Priority": 9},
-      {"InstanceType": "m6a.xlarge", "Priority": 10},
-      {"InstanceType": "m5.large", "Priority": 11},
-      {"InstanceType": "m5n.xlarge", "Priority": 12},
-      {"InstanceType": "m5a.2xlarge", "Priority": 13},
-      {"InstanceType": "m5d.large", "Priority": 14},
-      {"InstanceType": "m5dn.xlarge", "Priority": 15}
+      {"InstanceType": "r6i.xlarge", "Priority": 1},
+      {"InstanceType": "r6a.2xlarge", "Priority": 2},
+      {"InstanceType": "r5.4xlarge", "Priority": 3},
+      {"InstanceType": "r5n.8xlarge", "Priority": 4},
+      {"InstanceType": "r5a.12xlarge", "Priority": 5},
+      {"InstanceType": "r5d.16xlarge", "Priority": 6},
+      {"InstanceType": "r5dn.24xlarge", "Priority": 7},
+      {"InstanceType": "r6id.32xlarge", "Priority": 8},
+      {"InstanceType": "r6i.48xlarge", "Priority": 9},
+      {"InstanceType": "r5.xlarge", "Priority": 10},
+      {"InstanceType": "r5n.2xlarge", "Priority": 11},
+      {"InstanceType": "r6a.4xlarge", "Priority": 12},
+      {"InstanceType": "m6i.xlarge", "Priority": 13},
+      {"InstanceType": "m6a.2xlarge", "Priority": 14},
+      {"InstanceType": "m5.4xlarge", "Priority": 15},
+      {"InstanceType": "m5n.8xlarge", "Priority": 16},
+      {"InstanceType": "m5a.12xlarge", "Priority": 17},
+      {"InstanceType": "m5d.16xlarge", "Priority": 18},
+      {"InstanceType": "m5dn.24xlarge", "Priority": 19},
+      {"InstanceType": "m6i.32xlarge", "Priority": 20}
     ]
   }],
   "TargetCapacitySpecification": {
@@ -31,10 +36,11 @@
   "TagSpecifications": [{
     "ResourceType": "fleet",
     "Tags": [
-      {"Key": "Name", "Value": "prioritized-fleet-{{ request_id }}"},
+      {"Key": "Name", "Value": "hpc-prioritized-fleet-{{ request_id }}"},
       {"Key": "RequestId", "Value": "{{ request_id }}"},
       {"Key": "TemplateId", "Value": "{{ template_id }}"},
       {"Key": "CreatedBy", "Value": "{{ package_name }}"},
+      {"Key": "WorkloadType", "Value": "hpc"},
       {"Key": "AllocationStrategy", "Value": "capacity-optimized-prioritized"}
     ]
   }]

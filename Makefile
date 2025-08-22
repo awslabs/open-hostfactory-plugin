@@ -125,15 +125,7 @@ clean-requirements:  ## Remove generated requirements files
 	rm -f requirements.txt requirements-dev.txt
 
 $(VENV)/bin/activate: uv.lock
-	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
-	@if command -v uv >/dev/null 2>&1; then \
-		echo "INFO: Using uv for virtual environment setup..."; \
-		uv pip install --upgrade pip; \
-	else \
-		echo "INFO: Using pip for virtual environment setup..."; \
-		$(BIN)/pip install --upgrade pip; \
-	fi
-	touch $(VENV)/bin/activate
+	./dev-tools/scripts/venv_setup.py
 
 # @SECTION Testing
 # Testing targets (using enhanced dispatcher)
@@ -210,7 +202,6 @@ container-health-check:  ## Test container health endpoint
 ci-git-setup:  ## Setup git configuration for CI automated commits
 	git config --local user.name "github-actions[bot]"
 	git config --local user.email "github-actions[bot]@users.noreply.github.com"
-	uv run ruff check --fix .
 
 lint: dev-install  ## Check enforced rules (fail on issues)
 	uv run ruff check .
@@ -455,7 +446,10 @@ publish-test: build  ## Publish to test PyPI
 # CI/CD targets
 # @SECTION CI Quality Checks
 # Individual code quality targets (with tool names)
-ci-quality-ruff:  ## Run Ruff formatting and linting check
+format: dev-install clean-whitespace  ## Format code with Ruff (no auto-fix)
+	uv run ruff format --check .
+
+ci-quality-ruff: dev-install  ## Run Ruff formatting and linting check
 	@echo "Running Ruff formatting and linting check..."
 	uv run ruff check .
 	uv run ruff format --check .
@@ -549,47 +543,20 @@ ci-security-safety:  ## Run Safety dependency scan
 	@echo "Running Safety dependency scan..."
 	$(call run-tool,safety,check)
 
-ci-security-trivy:  ## Run Trivy container scan
-	@echo "Running Trivy container scan..."
-	@if command -v docker >/dev/null 2>&1; then \
-		docker build -t security-scan:latest .; \
-		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-			-v $(PWD):/workspace aquasec/trivy:latest image security-scan:latest; \
-	else \
-		echo "Docker not available - Trivy requires Docker"; \
-	fi
+ci-security-trivy: dev-install  ## Run Trivy container scan
+	./dev-tools/scripts/ci_security.py trivy
 
-ci-security-hadolint:  ## Run Hadolint Dockerfile scan
-	@echo "Running Hadolint Dockerfile scan..."
-	@if command -v hadolint >/dev/null 2>&1; then \
-		hadolint Dockerfile; \
-	else \
-		echo "Hadolint not available - install with: brew install hadolint"; \
-	fi
+ci-security-hadolint: dev-install  ## Run Hadolint Dockerfile scan
+	./dev-tools/scripts/ci_security.py hadolint
 
-ci-security-semgrep:  ## Run Semgrep static analysis
-	@echo "Running Semgrep static analysis..."
-	@if command -v semgrep >/dev/null 2>&1; then \
-		semgrep --config=auto --sarif --output=semgrep.sarif $(PACKAGE) || echo "Semgrep issues found"; \
-	else \
-		echo "Semgrep not available - install with: pip install semgrep"; \
-	fi
+ci-security-semgrep: dev-install  ## Run Semgrep static analysis
+	./dev-tools/scripts/ci_security.py semgrep
 
-ci-security-trivy-fs:  ## Run Trivy filesystem scan
-	@echo "Running Trivy filesystem scan..."
-	@if command -v trivy >/dev/null 2>&1; then \
-		trivy fs --skip-dirs .venv --format sarif --output trivy-fs-results.sarif . || echo "Trivy filesystem issues found"; \
-	else \
-		echo "Trivy not available - install from https://aquasecurity.github.io/trivy/"; \
-	fi
+ci-security-trivy-fs: dev-install  ## Run Trivy filesystem scan
+	./dev-tools/scripts/ci_security.py trivy-fs
 
-ci-security-trufflehog:  ## Run TruffleHog secrets scan
-	@echo "Running TruffleHog secrets scan..."
-	@if command -v trufflehog >/dev/null 2>&1; then \
-		trufflehog git file://. --json > trufflehog-results.json || echo "Secrets found"; \
-	else \
-		echo "TruffleHog not available - install from https://github.com/trufflesecurity/trufflehog"; \
-	fi
+ci-security-trufflehog: dev-install  ## Run TruffleHog secrets scan
+	./dev-tools/scripts/ci_security.py trufflehog
 
 # Composite target
 ci-security: ci-security-bandit ci-security-safety ci-security-semgrep ci-security-trivy-fs ci-security-trufflehog  ## Run all security scans

@@ -4,6 +4,43 @@
 
 Native AWS Spec support allows you to specify AWS API configurations directly in your templates using Jinja2 templating. This provides full access to AWS API capabilities while maintaining template flexibility.
 
+## Standardized Template Variables
+
+All handlers now provide consistent template variables through the BaseContextMixin pattern.
+
+### Standard Base Variables
+
+| Variable | Type | Description | Example |
+|----------|------|-------------|---------|
+| `request_id` | string | Unique request identifier | `"req-12345678-1234-1234-1234-123456789012"` |
+| `template_id` | string | Template identifier | `"my-ec2fleet-template"` |
+| `requested_count` | integer | Number of instances requested | `5` |
+| `min_count` | integer | Minimum instance count (always 1) | `1` |
+| `max_count` | integer | Maximum instance count (same as requested) | `5` |
+| `timestamp` | string | ISO timestamp of creation | `"2025-01-15T10:30:00Z"` |
+| `created_by` | string | Package name that created the resource | `"open-hostfactory-plugin"` |
+
+### Capacity Distribution Variables
+
+| Variable | Type | Description | Example |
+|----------|------|-------------|---------|
+| `total_capacity` | integer | Total target capacity | `10` |
+| `target_capacity` | integer | Fleet API target capacity | `10` |
+| `desired_capacity` | integer | ASG desired capacity | `10` |
+| `on_demand_count` | integer | On-demand instance count | `3` |
+| `spot_count` | integer | Spot instance count | `7` |
+| `is_heterogeneous` | boolean | Mixed pricing fleet | `true` |
+| `is_spot_only` | boolean | Spot-only fleet | `false` |
+| `is_ondemand_only` | boolean | On-demand only fleet | `false` |
+
+### Standardized Tag Variables
+
+| Variable | Type | Description | Example |
+|----------|------|-------------|---------|
+| `base_tags` | array | Standard system tags | `[{"key": "RequestId", "value": "req-123"}]` |
+| `custom_tags` | array | User-defined tags | `[{"key": "Environment", "value": "prod"}]` |
+| `has_custom_tags` | boolean | Whether custom tags exist | `true` |
+
 ## Template Fields Reference
 
 ### Core Native Spec Fields
@@ -20,7 +57,20 @@ Native AWS Spec support allows you to specify AWS API configurations directly in
     "LaunchTemplateName": "lt-{{ request_id }}",
     "LaunchTemplateData": {
       "ImageId": "{{ image_id }}",
-      "InstanceType": "{{ instance_type }}"
+      "InstanceType": "{{ instance_type }}",
+      "TagSpecifications": [
+        {
+          "ResourceType": "instance",
+          "Tags": [
+            {% for tag in base_tags %}
+            {"Key": "{{ tag.key }}", "Value": "{{ tag.value }}"}{% if not loop.last or has_custom_tags %},{% endif %}
+            {% endfor %}{% if has_custom_tags %},
+            {% for tag in custom_tags %}
+            {"Key": "{{ tag.key }}", "Value": "{{ tag.value }}"}{% if not loop.last %},{% endif %}
+            {% endfor %}{% endif %}
+          ]
+        }
+      ]
     }
   }
 }

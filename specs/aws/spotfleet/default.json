@@ -38,7 +38,21 @@
           {% for sg in base_launch_spec.security_groups %}
           {"GroupId": "{{ sg }}"}{% if not loop.last %},{% endif %}
           {% endfor %}
-        ]{% endif %}
+        ]{% endif %},
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {"Key": "Name", "Value": "{{ fleet_name }}"},
+              {% for tag in base_tags %}
+              {"Key": "{{ tag.key }}", "Value": "{{ tag.value }}"}{% if not loop.last or has_custom_tags %},{% endif %}
+              {% endfor %}{% if has_custom_tags %},
+              {% for tag in custom_tags %}
+              {"Key": "{{ tag.key }}", "Value": "{{ tag.value }}"}{% if not loop.last %},{% endif %}
+              {% endfor %}{% endif %}
+            ]
+          }
+        ]
       }
       {% endif %}
     ],

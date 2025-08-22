@@ -55,7 +55,7 @@ jobs:
 
       - name: Commit updated lock file
         run: |
-          make git-setup-ci
+          make git-ci-setup
 
           if [[ -n $(git status --porcelain) ]]; then
             git add uv.lock

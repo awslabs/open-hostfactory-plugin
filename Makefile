@@ -215,13 +215,9 @@ container-health-check:  ## Test container health endpoint
 	@timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done' || (echo "Health check failed" && exit 1)
 	@echo "Container health check passed!"
 
-git-setup-ci:  ## Setup git configuration for CI
+git-ci-setup:  ## Setup git configuration for CI automated commits
 	git config --local user.name "github-actions[bot]"
 	git config --local user.email "github-actions[bot]@users.noreply.github.com"
-
-git-setup-docs:  ## Setup git configuration for docs
-	git config --global user.name "github-actions[bot]"
-	git config --global user.email "github-actions[bot]@users.noreply.github.com"
 	uv run ruff check --fix .
 
 lint: dev-install  ## Check enforced rules (fail on issues)

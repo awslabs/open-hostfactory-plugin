@@ -14,15 +14,15 @@ from infrastructure.error.exception_handler import (
 )
 
 __all__: list[str] = [
-    "ExceptionHandler",
-    "ErrorResponse",
     "ErrorCategory",
     "ErrorCode",
     "ErrorMiddleware",
-    "with_error_handling",
-    "with_api_error_handling",
-    "get_exception_handler",
+    "ErrorResponse",
+    "ExceptionHandler",
     "create_error_middleware",
+    "get_exception_handler",
+    "with_api_error_handling",
+    "with_error_handling",
 ]
 
 

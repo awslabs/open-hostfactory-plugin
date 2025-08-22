@@ -138,7 +138,7 @@ def test_advanced_edge_cases():
             return False
 
     except Exception as e:
-        print(f"Test execution failed: {str(e)}")
+        print(f"Test execution failed: {e!s}")
         import traceback
 
         traceback.print_exc()
@@ -217,7 +217,7 @@ def test_multi_provider_edge_cases():
         return success_rate >= 0.75
 
     except Exception as e:
-        print(f"   Multi-provider edge cases test failed: {str(e)}")
+        print(f"   Multi-provider edge cases test failed: {e!s}")
         return False
 
 
@@ -343,7 +343,7 @@ def test_concurrent_request_handling():
         return success_rate >= 0.75
 
     except Exception as e:
-        print(f"   Concurrent request handling test failed: {str(e)}")
+        print(f"   Concurrent request handling test failed: {e!s}")
         return False
 
 
@@ -412,7 +412,7 @@ def test_storage_strategy_stress():
                             json.dump(large_data, f)
 
                         # Read back and verify
-                        with open(storage_file, "r") as f:
+                        with open(storage_file) as f:
                             loaded_data = json.load(f)
 
                         end_time = time.time()
@@ -467,7 +467,7 @@ def test_storage_strategy_stress():
                         try:
                             # Simulate read from non-existent file
                             non_existent_file = os.path.join(temp_dir, "non_existent.json")
-                            with open(non_existent_file, "r") as f:
+                            with open(non_existent_file) as f:
                                 json.load(f)
                             actual_performance = "unexpected_success"
                         except FileNotFoundError:
@@ -490,7 +490,7 @@ def test_storage_strategy_stress():
                             json.dump(old_data, f)
 
                         # Simulate migration to new schema
-                        with open(old_schema_file, "r") as f:
+                        with open(old_schema_file) as f:
                             old_data = json.load(f)
 
                         new_data = []
@@ -507,7 +507,7 @@ def test_storage_strategy_stress():
                             json.dump(new_data, f)
 
                         # Verify migration
-                        with open(new_schema_file, "r") as f:
+                        with open(new_schema_file) as f:
                             migrated_data = json.load(f)
 
                         if len(migrated_data) == scale and all(
@@ -538,7 +538,7 @@ def test_storage_strategy_stress():
             return success_rate >= 0.75
 
     except Exception as e:
-        print(f"   Storage strategy stress test failed: {str(e)}")
+        print(f"   Storage strategy stress test failed: {e!s}")
         return False
 
 
@@ -618,7 +618,7 @@ def test_domain_boundary_violations():
         return success_rate >= 0.75
 
     except Exception as e:
-        print(f"   Domain boundary violations test failed: {str(e)}")
+        print(f"   Domain boundary violations test failed: {e!s}")
         return False
 
 
@@ -702,7 +702,7 @@ def test_aws_api_integration_edge_cases():
         return success_rate >= 0.75
 
     except Exception as e:
-        print(f"   AWS API integration edge cases test failed: {str(e)}")
+        print(f"   AWS API integration edge cases test failed: {e!s}")
         return False
 
 

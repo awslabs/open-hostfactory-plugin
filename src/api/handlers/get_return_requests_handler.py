@@ -81,7 +81,7 @@ class GetReturnRequestsRESTHandler(BaseAPIHandler[Dict[str, Any], ReturnRequestR
                         raise ValueError("Start time must be before end time")
 
                 except (ValueError, KeyError) as e:
-                    raise ValueError(f"Invalid time range format: {str(e)}")
+                    raise ValueError(f"Invalid time range format: {e!s}")
 
     @handle_interface_exceptions(context="get_return_requests_api", interface_type="api")
     async def execute_api_request(

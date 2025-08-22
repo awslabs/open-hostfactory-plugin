@@ -282,7 +282,7 @@ class TestCQRSHandlerRegistry:
                     errors.append(f"Thread {thread_id}: Registration verification failed")
 
             except Exception as e:
-                errors.append(f"Thread {thread_id}: {str(e)}")
+                errors.append(f"Thread {thread_id}: {e!s}")
 
         # Create multiple threads
         threads = []

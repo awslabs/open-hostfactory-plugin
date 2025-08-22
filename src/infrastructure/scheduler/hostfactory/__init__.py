@@ -5,7 +5,7 @@ from .strategy import HostFactorySchedulerStrategy
 from .transformations import HostFactoryTransformations
 
 __all__: list[str] = [
-    "HostFactorySchedulerStrategy",
     "HostFactoryFieldMappings",
+    "HostFactorySchedulerStrategy",
     "HostFactoryTransformations",
 ]

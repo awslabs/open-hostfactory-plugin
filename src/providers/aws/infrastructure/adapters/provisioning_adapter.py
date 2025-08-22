@@ -168,7 +168,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             raise
         except Exception as e:
             self._logger.error("Error during resource provisioning: %s", str(e))
-            raise InfrastructureError(f"Failed to provision resources: {str(e)}")
+            raise InfrastructureError(f"Failed to provision resources: {e!s}")
 
     def check_resources_status(self, request: Request) -> List[Dict[str, Any]]:
         """
@@ -224,7 +224,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             raise
         except Exception as e:
             self._logger.error("Error during resource status check: %s", str(e))
-            raise InfrastructureError(f"Failed to check resource status: {str(e)}")
+            raise InfrastructureError(f"Failed to check resource status: {e!s}")
 
     def release_resources(self, request: Request) -> None:
         """
@@ -274,7 +274,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             raise
         except Exception as e:
             self._logger.error("Error during resource release: %s", str(e))
-            raise InfrastructureError(f"Failed to release resources: {str(e)}")
+            raise InfrastructureError(f"Failed to release resources: {e!s}")
 
     def get_resource_health(self, resource_id: str) -> Dict[str, Any]:
         """
@@ -380,7 +380,7 @@ class AWSProvisioningAdapter(ResourceProvisioningPort):
             raise
         except Exception as e:
             self._logger.error("Error getting resource health: %s", str(e))
-            raise InfrastructureError(f"Failed to get resource health: {str(e)}")
+            raise InfrastructureError(f"Failed to get resource health: {e!s}")
 
     def _get_handler_for_template(self, template: Template) -> AWSHandler:
         """

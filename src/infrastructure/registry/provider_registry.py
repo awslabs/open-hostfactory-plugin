@@ -216,7 +216,7 @@ class ProviderRegistry(BaseRegistry):
             )
         except Exception as e:
             raise ConfigurationError(
-                f"Failed to create config for provider '{provider_type}': {str(e)}"
+                f"Failed to create config for provider '{provider_type}': {e!s}"
             )
 
     def create_resolver(self, provider_type: str) -> Optional[Any]:

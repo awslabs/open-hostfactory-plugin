@@ -84,7 +84,7 @@ class SDKMethodDiscovery:
             return methods
 
         except Exception as e:
-            raise HandlerDiscoveryError(f"Failed to discover SDK methods: {str(e)}")
+            raise HandlerDiscoveryError(f"Failed to discover SDK methods: {e!s}")
 
     async def discover_sdk_methods(self, service) -> Dict[str, Callable]:
         """
@@ -220,7 +220,7 @@ class SDKMethodDiscovery:
 
             except Exception as e:
                 raise MethodExecutionError(
-                    f"Failed to execute {method_info.name}: {str(e)}",
+                    f"Failed to execute {method_info.name}: {e!s}",
                     method_name=method_info.name,
                     details={"query_type": query_type.__name__, "kwargs": kwargs},
                 )
@@ -250,7 +250,7 @@ class SDKMethodDiscovery:
 
             except Exception as e:
                 raise MethodExecutionError(
-                    f"Failed to execute {method_info.name}: {str(e)}",
+                    f"Failed to execute {method_info.name}: {e!s}",
                     method_name=method_info.name,
                     details={"command_type": command_type.__name__, "kwargs": kwargs},
                 )

@@ -56,7 +56,7 @@ class TestLoggingIntegration:
         ] + command
 
         return subprocess.run(
-            command_with_dry_run, capture_output=True, text=True, timeout=30, env=env
+            command_with_dry_run, check=False, capture_output=True, text=True, timeout=30, env=env
         )
 
     def test_templates_list_logging_output(self, complete_test_environment):

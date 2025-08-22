@@ -53,24 +53,26 @@ def main():
     parser.add_argument("--all", action="store_true", help="Run all test types")
     parser.add_argument("--maxfail", type=int, default=5, help="Stop after N failures")
     parser.add_argument("--timeout", type=int, default=300, help="Test timeout in seconds")
-    parser.add_argument("extra_args", nargs="*", help="Additional paths, patterns, or pytest options")
+    parser.add_argument(
+        "extra_args", nargs="*", help="Additional paths, patterns, or pytest options"
+    )
 
     args = parser.parse_args()
 
     # Parse mixed arguments (paths, patterns, pytest options)
     extra_paths = []
     extra_pytest_args = []
-    
+
     for arg in args.extra_args:
-        if arg.startswith('-'):
+        if arg.startswith("-"):
             # Pytest option (e.g., -v, -s, --tb=short, -x)
             extra_pytest_args.append(arg)
-        elif '/' in arg or arg.endswith('.py') or arg in ['tests', 'unit', 'integration', 'e2e']:
+        elif "/" in arg or arg.endswith(".py") or arg in ["tests", "unit", "integration", "e2e"]:
             # Path or directory
             extra_paths.append(arg)
         else:
             # Treat as keyword pattern
-            extra_pytest_args.extend(['-k', arg])
+            extra_pytest_args.extend(["-k", arg])
 
     # Base pytest command
     pytest_cmd = ["python", "-m", "pytest"]

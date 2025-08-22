@@ -84,6 +84,7 @@ class SecurityScanner:
         try:
             result = subprocess.run(
                 ["python", "-m", "safety", "check", "--json"],
+                check=False,
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
@@ -182,7 +183,7 @@ class SecurityScanner:
             )
 
             # Check if Syft is available
-            if subprocess.run(["which", "syft"], capture_output=True).returncode == 0:
+            if subprocess.run(["which", "syft"], check=False, capture_output=True).returncode == 0:
                 # Project SBOM with Syft
                 subprocess.run(
                     ["syft", ".", "-o", "spdx-json=project-sbom-spdx.json"],

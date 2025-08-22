@@ -64,7 +64,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
         try:
             import json
 
-            with open(template_path, "r") as f:
+            with open(template_path) as f:
                 data = json.load(f)
 
             # Handle different template file formats

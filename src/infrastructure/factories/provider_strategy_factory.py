@@ -78,7 +78,7 @@ class ProviderStrategyFactory:
 
         except Exception as e:
             self._logger.error("Failed to create provider context: %s", str(e))
-            raise ProviderCreationError(f"Provider context creation failed: {str(e)}")
+            raise ProviderCreationError(f"Provider context creation failed: {e!s}")
 
     def _create_single_provider_context(self, config: ProviderConfig) -> ProviderContext:
         """
@@ -228,7 +228,7 @@ class ProviderStrategyFactory:
             )
         except Exception as e:
             raise ProviderCreationError(
-                f"Failed to create {provider_config.type} provider '{provider_config.name}': {str(e)}"
+                f"Failed to create {provider_config.type} provider '{provider_config.name}': {e!s}"
             )
 
     def _parse_selection_policy(self, policy_name: str) -> SelectionPolicy:
@@ -360,7 +360,7 @@ class ProviderStrategyFactory:
                     validation_result["warnings"].append(
                         "Multiple active providers in single provider mode"
                     )
-            elif mode == ProviderMode.MULTI:  # noqa: SIM102 (false positive - if-elif structure)
+            elif mode == ProviderMode.MULTI:
                 if len(active_providers) < 2:
                     validation_result["errors"].append(
                         "Multi-provider mode requires at least 2 active providers"
@@ -373,14 +373,14 @@ class ProviderStrategyFactory:
                     self._create_provider_strategy(provider_config)
                 except Exception as e:
                     validation_result["errors"].append(
-                        f"Provider '{provider_config.name}' validation failed: {str(e)}"
+                        f"Provider '{provider_config.name}' validation failed: {e!s}"
                     )
 
             # Set overall validation status
             validation_result["valid"] = len(validation_result["errors"]) == 0
 
         except Exception as e:
-            validation_result["errors"].append(f"Configuration validation failed: {str(e)}")
+            validation_result["errors"].append(f"Configuration validation failed: {e!s}")
 
         return validation_result
 

@@ -104,6 +104,7 @@ def run_bash_script(script_path: str, argument: str, timeout: int = 300) -> Dict
     try:
         result = subprocess.run(
             ["/bin/bash", script_path, "-f", argument],
+            check=False,
             capture_output=True,
             text=True,
             timeout=timeout,

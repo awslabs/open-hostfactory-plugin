@@ -21,12 +21,12 @@ def read_yaml_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
     import yaml
 
     try:
-        with open(file_path, "r", encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             return yaml.safe_load(f) or {}
     except FileNotFoundError:
         raise FileNotFoundError(f"YAML file not found: {file_path}")
     except yaml.YAMLError as e:
-        raise yaml.YAMLError(f"Failed to parse YAML file {file_path}: {str(e)}")
+        raise yaml.YAMLError(f"Failed to parse YAML file {file_path}: {e!s}")
 
 
 def write_yaml_file(file_path: str, data: Dict[str, Any], encoding: str = "utf-8") -> None:
@@ -51,6 +51,6 @@ def write_yaml_file(file_path: str, data: Dict[str, Any], encoding: str = "utf-8
         with open(file_path, "w", encoding=encoding) as f:
             yaml.safe_dump(data, f, default_flow_style=False, allow_unicode=True)
     except yaml.YAMLError as e:
-        raise yaml.YAMLError(f"Failed to serialize data to YAML for {file_path}: {str(e)}")
+        raise yaml.YAMLError(f"Failed to serialize data to YAML for {file_path}: {e!s}")
     except OSError as e:
-        raise OSError(f"Failed to write YAML file {file_path}: {str(e)}")
+        raise OSError(f"Failed to write YAML file {file_path}: {e!s}")

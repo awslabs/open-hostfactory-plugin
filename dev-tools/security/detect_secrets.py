@@ -40,7 +40,7 @@ def detect_secrets(source_dir: str = "src") -> bool:
 
     for py_file in source_path.rglob("*.py"):
         try:
-            with open(py_file, "r", encoding="utf-8") as f:
+            with open(py_file, encoding="utf-8") as f:
                 content = f.read()
 
             for line_num, line in enumerate(content.split("\n"), 1):

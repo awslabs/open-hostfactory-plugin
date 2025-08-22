@@ -758,7 +758,7 @@ class TestSystemValidation:
                 validation_checklist["performance_acceptable"] = True
 
         except Exception as e:
-            print(f"Validation failed: {str(e)}")
+            print(f"Validation failed: {e!s}")
 
         # Report validation results
         passed_checks = sum(validation_checklist.values())

@@ -20,13 +20,13 @@ def read_json_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
         json.JSONDecodeError: If JSON parsing fails
     """
     try:
-        with open(file_path, "r", encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             result: Dict[str, Any] = json.load(f)
             return result
     except FileNotFoundError:
         raise FileNotFoundError(f"JSON file not found: {file_path}")
     except json.JSONDecodeError as e:
-        raise json.JSONDecodeError(f"Failed to parse JSON file {file_path}: {str(e)}", e.doc, e.pos)
+        raise json.JSONDecodeError(f"Failed to parse JSON file {file_path}: {e!s}", e.doc, e.pos)
 
 
 def write_json_file(
@@ -63,6 +63,6 @@ def write_json_file(
                 separators=(",", ": "),
             )
     except TypeError as e:
-        raise TypeError(f"Failed to serialize data to JSON for {file_path}: {str(e)}")
+        raise TypeError(f"Failed to serialize data to JSON for {file_path}: {e!s}")
     except OSError as e:
-        raise OSError(f"Failed to write JSON file {file_path}: {str(e)}")
+        raise OSError(f"Failed to write JSON file {file_path}: {e!s}")

@@ -97,6 +97,7 @@ class TestDockerfile:
                     "VCS_REF=test",
                     str(project_root),
                 ],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=300,
@@ -131,6 +132,7 @@ class TestDockerfile:
             # Test version command
             _ = subprocess.run(
                 ["docker", "run", "--rm", "ohfp-api:test-startup", "version"],
+                check=False,
                 capture_output=True,
                 text=True,
                 timeout=30,
@@ -182,6 +184,7 @@ class TestDockerfile:
                     "ohfp-api:test-health",
                     "serve",
                 ],
+                check=False,
                 capture_output=True,
                 text=True,
             )
@@ -205,6 +208,7 @@ class TestDockerfile:
                         "-f",
                         "http://localhost:8000/health",
                     ],
+                    check=False,
                     capture_output=True,
                     text=True,
                     timeout=10,
@@ -215,8 +219,8 @@ class TestDockerfile:
 
             finally:
                 # Cleanup
-                subprocess.run(["docker", "stop", container_id], capture_output=True)
-                subprocess.run(["docker", "rm", container_id], capture_output=True)
+                subprocess.run(["docker", "stop", container_id], check=False, capture_output=True)
+                subprocess.run(["docker", "rm", container_id], check=False, capture_output=True)
 
         except subprocess.TimeoutExpired:
             pytest.fail("Health check timed out")

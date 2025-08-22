@@ -180,14 +180,14 @@ class LoadBalancingProviderStrategy(ProviderStrategy):
 
                 return ProviderResult(
                     success=False,
-                    error_message=f"Strategy execution failed: {str(e)}",
+                    error_message=f"Strategy execution failed: {e!s}",
                     operation_type=operation.operation_type,
                 )
 
         except Exception as e:
             return ProviderResult(
                 success=False,
-                error_message=f"Load balancing failed: {str(e)}",
+                error_message=f"Load balancing failed: {e!s}",
                 operation_type=operation.operation_type,
             )
 
@@ -317,9 +317,8 @@ class LoadBalancingProviderStrategy(ProviderStrategy):
         if success:
             if stats.consecutive_successes >= self._config.recovery_threshold:
                 stats.is_healthy = True
-        else:
-            if stats.consecutive_failures >= self._config.unhealthy_threshold:
-                stats.is_healthy = False
+        elif stats.consecutive_failures >= self._config.unhealthy_threshold:
+            stats.is_healthy = False
 
     def _get_session_strategy(self, session_id: str) -> Optional[str]:
         """Get strategy for sticky session."""

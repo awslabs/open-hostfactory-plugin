@@ -224,7 +224,7 @@ class TestConfigurationManager:
         # Verify file was created and contains correct data
         assert output_file.exists()
 
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             saved_config = json.load(f)
 
         assert saved_config["aws"]["region"] == "us-east-1"
@@ -478,7 +478,7 @@ class TestConfigurationManagerEdgeCases:
         with pytest.raises(PermissionError):
             manager.load_from_file("/restricted/config.json")
 
-    @patch("builtins.open", side_effect=IOError("I/O error"))
+    @patch("builtins.open", side_effect=OSError("I/O error"))
     def test_file_io_error(self, mock_open):
         """Test handling file I/O errors."""
         manager = ConfigurationManager()

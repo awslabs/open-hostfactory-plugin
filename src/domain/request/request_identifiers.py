@@ -47,7 +47,7 @@ class RequestId(ValueObject):
         return RequestType.ACQUIRE if prefix == "req" else RequestType.RETURN
 
     @classmethod
-    def generate(cls, request_type: RequestType) -> "RequestId":
+    def generate(cls, request_type: RequestType) -> RequestId:
         """
         Generate a new request ID with appropriate prefix.
 
@@ -70,7 +70,7 @@ class RequestId(ValueObject):
             # Fallback if service not available
             prefix = "req-" if request_type == RequestType.ACQUIRE else "ret-"
 
-        return cls(value=f"{prefix}{str(uuid.uuid4())}")
+        return cls(value=f"{prefix}{uuid.uuid4()!s}")
 
     @staticmethod
     def _is_valid_format(value: str) -> bool:
@@ -170,7 +170,7 @@ class MachineReference(ValueObject):
 
     def update_status(
         self, new_status: str, result: str, error_message: Optional[str] = None
-    ) -> "MachineReference":
+    ) -> MachineReference:
         """
         Create a new MachineReference with updated status.
 

@@ -3,9 +3,9 @@
 # Import handlers directly from their modules when needed
 
 __all__: list[str] = [
-    "AWSHandler",
     "ASGHandler",
+    "AWSHandler",
     "EC2FleetHandler",
-    "SpotFleetHandler",
     "RunInstancesHandler",
+    "SpotFleetHandler",
 ]

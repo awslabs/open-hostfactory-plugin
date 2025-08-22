@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def validate_workflow_syntax(file_path: Path):
     """Validate YAML syntax of a workflow file."""
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             content = f.read()
             yaml.safe_load(content)
         return True, None
@@ -28,7 +28,7 @@ def validate_workflow_syntax(file_path: Path):
 def validate_workflow_structure(file_path: Path):
     """Validate GitHub Actions workflow structure."""
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             workflow = yaml.safe_load(f)
 
         issues = []

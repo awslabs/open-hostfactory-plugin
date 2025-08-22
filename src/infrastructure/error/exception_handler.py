@@ -736,7 +736,7 @@ class ExceptionHandler:
     ) -> InfrastructureError:
         """Wrap connection error into infrastructure exception."""
         return InfrastructureError(
-            message=f"Connection failed: {str(exc)}",
+            message=f"Connection failed: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -783,7 +783,7 @@ class ExceptionHandler:
     def _wrap_value_error(self, exc: ValueError, context: str = None, **kwargs) -> ValidationError:
         """Wrap value error into validation exception."""
         return ValidationError(
-            message=f"Invalid value: {str(exc)}",
+            message=f"Invalid value: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -797,7 +797,7 @@ class ExceptionHandler:
     def _wrap_key_error(self, exc: KeyError, context: str = None, **kwargs) -> ValidationError:
         """Wrap key error into validation exception."""
         return ValidationError(
-            message=f"Missing required key: {str(exc)}",
+            message=f"Missing required key: {exc!s}",
             details={
                 "original_error": str(exc),
                 "missing_key": str(exc).strip("'\""),
@@ -811,7 +811,7 @@ class ExceptionHandler:
     def _wrap_type_error(self, exc: TypeError, context: str = None, **kwargs) -> ValidationError:
         """Wrap type error into validation exception."""
         return ValidationError(
-            message=f"Type error: {str(exc)}",
+            message=f"Type error: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -827,7 +827,7 @@ class ExceptionHandler:
     ) -> InfrastructureError:
         """Wrap attribute error into infrastructure exception."""
         return InfrastructureError(
-            message=f"Attribute error: {str(exc)}",
+            message=f"Attribute error: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -849,7 +849,7 @@ class ExceptionHandler:
             context_str = context or ""
 
         return InfrastructureError(
-            message=f"Unexpected error: {str(exc)}",
+            message=f"Unexpected error: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,

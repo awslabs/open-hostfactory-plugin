@@ -20,7 +20,7 @@ class RequestType(str, Enum):
     RETURN = "return"
 
     @classmethod
-    def from_str(cls, value: str) -> "RequestType":
+    def from_str(cls, value: str) -> RequestType:
         """
         Create RequestType from string value.
 
@@ -88,7 +88,7 @@ class RequestStatus(str, Enum):
     TIMEOUT = "timeout"
 
     @classmethod
-    def from_str(cls, value: str) -> "RequestStatus":
+    def from_str(cls, value: str) -> RequestStatus:
         """
         Create RequestStatus from string value.
 
@@ -121,7 +121,7 @@ class RequestStatus(str, Enum):
         """Check if this status represents an active state."""
         return self in [RequestStatus.PENDING, RequestStatus.IN_PROGRESS]
 
-    def can_transition_to(self, new_status: "RequestStatus") -> bool:
+    def can_transition_to(self, new_status: RequestStatus) -> bool:
         """
         Check if transition to new status is valid.
 
@@ -167,7 +167,7 @@ class MachineResult(str, Enum):
     SKIPPED = "skipped"
 
     @classmethod
-    def from_str(cls, value: str) -> "MachineResult":
+    def from_str(cls, value: str) -> MachineResult:
         """
         Create MachineResult from string value.
 

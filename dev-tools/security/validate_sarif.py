@@ -118,7 +118,7 @@ class SarifValidator:
         self.warnings = []
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 sarif_data = json.load(f)
         except json.JSONDecodeError as e:
             self.errors.append(f"Invalid JSON: {e}")

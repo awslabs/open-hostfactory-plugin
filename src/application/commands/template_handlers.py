@@ -350,5 +350,5 @@ class ValidateTemplateHandler(BaseCommandHandler[ValidateTemplateCommand, Templa
             self.logger.error("Template validation failed for %s: %s", command.template_id, e)
             return TemplateCommandResponse(
                 template_id=command.template_id,
-                validation_errors=[f"Validation error: {str(e)}"],
+                validation_errors=[f"Validation error: {e!s}"],
             )

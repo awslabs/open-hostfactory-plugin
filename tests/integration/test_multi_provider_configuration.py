@@ -81,7 +81,7 @@ class TestMultiProviderConfiguration:
             config_path = Path(config_file)
             assert config_path.exists(), f"Configuration file {config_file} not found"
 
-            with open(config_path, "r") as f:
+            with open(config_path) as f:
                 config_data = json.load(f)
 
             provider_section = config_data.get("provider", {})

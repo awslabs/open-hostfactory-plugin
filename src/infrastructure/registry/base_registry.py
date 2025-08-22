@@ -272,6 +272,6 @@ class BaseRegistry(ABC):
         except Exception as e:
             from domain.base.exceptions import ConfigurationError
 
-            error_msg = f"Failed to create strategy for '{identifier}': {str(e)}"
+            error_msg = f"Failed to create strategy for '{identifier}': {e!s}"
             self.logger.error(error_msg)
             raise ConfigurationError(error_msg)

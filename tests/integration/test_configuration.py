@@ -66,7 +66,7 @@ def test_configuration_updates():
             return False
 
     except Exception as e:
-        print(f"FAIL: Test execution failed: {str(e)}")
+        print(f"FAIL: Test execution failed: {e!s}")
         import traceback
 
         traceback.print_exc()
@@ -79,7 +79,7 @@ def test_default_config_validation():
         print("   Testing default configuration file validation...")
 
         # Load and parse the configuration file
-        with open("config/default_config.json", "r") as f:
+        with open("config/default_config.json") as f:
             config = json.load(f)
 
         # Validate basic structure
@@ -101,13 +101,13 @@ def test_default_config_validation():
         return True
 
     except json.JSONDecodeError as e:
-        print(f"   FAIL: Configuration file is not valid JSON: {str(e)}")
+        print(f"   FAIL: Configuration file is not valid JSON: {e!s}")
         return False
     except FileNotFoundError:
         print("   FAIL: Configuration file not found")
         return False
     except Exception as e:
-        print(f"   FAIL: Configuration validation failed: {str(e)}")
+        print(f"   FAIL: Configuration validation failed: {e!s}")
         return False
 
 
@@ -117,7 +117,7 @@ def test_launch_template_config_present():
         print("   Testing launch template configuration presence...")
 
         # Load configuration
-        with open("config/default_config.json", "r") as f:
+        with open("config/default_config.json") as f:
             config = json.load(f)
 
         # Check for launch template configuration
@@ -154,7 +154,7 @@ def test_launch_template_config_present():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Launch template config test failed: {str(e)}")
+        print(f"   FAIL: Launch template config test failed: {e!s}")
         return False
 
 
@@ -211,10 +211,10 @@ def test_aws_provider_config_class():
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: AWS provider config class test failed: {str(e)}")
+        print(f"   FAIL: AWS provider config class test failed: {e!s}")
         return False
 
 
@@ -227,7 +227,7 @@ def test_configuration_loading():
         from providers.aws.configuration.config import AWSProviderConfig
 
         # Load from JSON file
-        with open("config/default_config.json", "r") as f:
+        with open("config/default_config.json") as f:
             config_data = json.load(f)
 
         # Extract AWS provider defaults
@@ -258,7 +258,7 @@ def test_configuration_loading():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Configuration loading test failed: {str(e)}")
+        print(f"   FAIL: Configuration loading test failed: {e!s}")
         import traceback
 
         traceback.print_exc()

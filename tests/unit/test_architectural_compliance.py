@@ -23,7 +23,7 @@ class TestDDDCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 try:
                     tree = ast.parse(f.read())
                     for node in ast.walk(tree):
@@ -51,7 +51,7 @@ class TestDDDCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 try:
                     tree = ast.parse(f.read())
                     for node in ast.walk(tree):
@@ -84,7 +84,7 @@ class TestDDDCompliance:
                 if py_file.name == "__init__.py":
                     continue
 
-                with open(py_file, "r") as f:
+                with open(py_file) as f:
                     try:
                         tree = ast.parse(f.read())
                         for node in ast.walk(tree):
@@ -294,7 +294,7 @@ class TestCleanArchitectureCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 content = f.read()
                 if "from domain" in content or "import domain" in content:
                     app_imports_domain = True
@@ -305,7 +305,7 @@ class TestCleanArchitectureCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 content = f.read()
                 if "from application" in content or "import application" in content:
                     domain_imports_app = True
@@ -323,7 +323,7 @@ class TestCleanArchitectureCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 try:
                     tree = ast.parse(f.read())
                     for node in ast.walk(tree):
@@ -362,7 +362,7 @@ class TestCleanArchitectureCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 content = f.read().lower()
                 for framework in frameworks:
                     if framework in content:
@@ -461,7 +461,7 @@ class TestCodeQualityCompliance:
             if py_file.name == "__init__.py":
                 continue
 
-            with open(py_file, "r") as f:
+            with open(py_file) as f:
                 content = f.read()
                 if "aws_handler" in content and "test" not in str(py_file):
                     aws_handler_usage.append(str(py_file))

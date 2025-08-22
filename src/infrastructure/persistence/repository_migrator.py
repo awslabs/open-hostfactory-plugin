@@ -366,7 +366,7 @@ class RepositoryMigrator:
                                             str(conversion_error),
                                         )
                                         raise ValueError(
-                                            f"Entity conversion failed: {str(conversion_error)}"
+                                            f"Entity conversion failed: {conversion_error!s}"
                                         )
                                 else:
                                     # Try to determine the entity class from the
@@ -398,7 +398,7 @@ class RepositoryMigrator:
                                                 str(conversion_error),
                                             )
                                             raise ValueError(
-                                                f"Entity creation failed: {str(conversion_error)}"
+                                                f"Entity creation failed: {conversion_error!s}"
                                             )
                                     else:
                                         # Fallback to direct save, which might fail
@@ -408,7 +408,7 @@ class RepositoryMigrator:
                                         )
                                         target_repo.save(item)
                             except Exception as e:
-                                raise ValueError(f"Failed to save item {item_id}: {str(e)}")
+                                raise ValueError(f"Failed to save item {item_id}: {e!s}")
                         stats["migrated"] += 1
 
                     except Exception as e:

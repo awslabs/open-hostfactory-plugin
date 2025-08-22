@@ -335,7 +335,7 @@ class FallbackProviderStrategy(ProviderStrategy):
                 "Fallback operation %s failed: %s", operation.operation_type, e
             )
             return ProviderResult.error_result(
-                f"Fallback operation failed: {str(e)}",
+                f"Fallback operation failed: {e!s}",
                 "FALLBACK_EXECUTION_ERROR",
                 {"total_execution_time_ms": total_time_ms},
             )

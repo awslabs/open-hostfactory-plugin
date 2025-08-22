@@ -64,7 +64,7 @@ def generate_pyproject():
         sys.exit(1)
 
     # Read template
-    with open(template_path, "r", encoding="utf-8") as f:
+    with open(template_path, encoding="utf-8") as f:
         template_content = f.read()
 
     # Generate Python classifiers

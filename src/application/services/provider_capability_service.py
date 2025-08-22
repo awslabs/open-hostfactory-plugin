@@ -148,7 +148,7 @@ class ProviderCapabilityService:
         except Exception as e:
             self._logger.error("Validation failed with exception: %s", str(e))
             result.is_valid = False
-            result.errors.append(f"Validation error: {str(e)}")
+            result.errors.append(f"Validation error: {e!s}")
 
         return result
 

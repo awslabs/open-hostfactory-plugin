@@ -204,7 +204,7 @@ class ValidateSchedulerConfigurationHandler(
                 if strategy is None:
                     errors.append(f"Failed to create scheduler strategy '{scheduler_name}'")
             except Exception as e:
-                errors.append(f"Scheduler strategy creation failed: {str(e)}")
+                errors.append(f"Scheduler strategy creation failed: {e!s}")
 
             # Check configuration completeness
             try:
@@ -214,10 +214,10 @@ class ValidateSchedulerConfigurationHandler(
                 elif not app_config.scheduler.type:
                     warnings.append("Scheduler type not specified in configuration")
             except Exception as e:
-                errors.append(f"Configuration access failed: {str(e)}")
+                errors.append(f"Configuration access failed: {e!s}")
 
         except Exception as e:
-            errors.append(f"Validation failed: {str(e)}")
+            errors.append(f"Validation failed: {e!s}")
 
         return ValidationResultDTO(
             is_valid=len(errors) == 0, validation_errors=errors, warnings=warnings

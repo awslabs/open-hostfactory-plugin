@@ -223,13 +223,13 @@ class Machine(AggregateRoot):
         }
 
         # Handle optional fields
-        if "private_ip" in data and data["private_ip"]:
+        if data.get("private_ip"):
             core_data["private_ip"] = IPAddress(value=data["private_ip"])
-        if "public_ip" in data and data["public_ip"]:
+        if data.get("public_ip"):
             core_data["public_ip"] = IPAddress(value=data["public_ip"])
-        if "launch_time" in data and data["launch_time"]:
+        if data.get("launch_time"):
             core_data["launch_time"] = datetime.fromisoformat(data["launch_time"])
-        if "termination_time" in data and data["termination_time"]:
+        if data.get("termination_time"):
             core_data["termination_time"] = datetime.fromisoformat(data["termination_time"])
 
         return cls.model_validate(core_data)

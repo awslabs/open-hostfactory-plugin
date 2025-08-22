@@ -19,9 +19,9 @@ from . import (
 )
 
 __all__: list[str] = [
+    "infrastructure_handlers",
     "machine_handlers",
     "request_handlers",
     "system_handlers",
-    "infrastructure_handlers",
     "template_handlers",
 ]

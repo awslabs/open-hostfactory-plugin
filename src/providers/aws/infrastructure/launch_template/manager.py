@@ -109,7 +109,7 @@ class AWSLaunchTemplateManager:
             self._logger.error(error_msg)
             raise InfrastructureError(error_msg)
         except Exception as e:
-            error_msg = f"Unexpected error in launch template management: {str(e)}"
+            error_msg = f"Unexpected error in launch template management: {e!s}"
             self._logger.error(error_msg)
             raise InfrastructureError(error_msg)
 

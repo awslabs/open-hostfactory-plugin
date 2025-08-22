@@ -217,7 +217,7 @@ class DevToolsInstaller:
             return self.os_type
 
         try:
-            with open("/etc/os-release", "r") as f:
+            with open("/etc/os-release") as f:
                 content = f.read().lower()
                 if "ubuntu" in content:
                     return "ubuntu"

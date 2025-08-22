@@ -250,7 +250,7 @@ class TestOCPComplianceIntegration:
 
         for file_path in files_to_check:
             if os.path.exists(file_path):
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     content = f.read()
 
                 # Check for hard-coded provider conditionals

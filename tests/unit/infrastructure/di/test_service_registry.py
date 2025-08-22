@@ -255,7 +255,7 @@ class TestServiceRegistry:
                         f"Thread {thread_id}: Expected {thread_id}, got {retrieved.value if retrieved else None}"
                     )
             except Exception as e:
-                errors.append(f"Thread {thread_id}: {str(e)}")
+                errors.append(f"Thread {thread_id}: {e!s}")
 
         # Create multiple threads
         threads = []

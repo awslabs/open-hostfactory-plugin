@@ -84,7 +84,6 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         await self._machine_repository.save(machine)
 
         # Events will be published by the base handler
-        return None  # No response needed for this command
 
 
 @command_handler(ConvertMachineStatusCommand)
@@ -381,8 +380,6 @@ class RegisterMachineHandler(BaseCommandHandler[RegisterMachineCommand, None]):
 
         # Save machine
         await self._machine_repository.save(machine)
-
-        return None
 
 
 @command_handler(DeregisterMachineCommand)

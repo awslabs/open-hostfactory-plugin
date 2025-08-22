@@ -207,7 +207,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
 
             self.logger.debug("Base storage strategy cleanup completed")
         except Exception as e:
-            error_msg = f"Error cleaning up storage strategy: {str(e)}"
+            error_msg = f"Error cleaning up storage strategy: {e!s}"
             self.logger.error(error_msg)
             raise PersistenceError(error_msg)
 
@@ -283,7 +283,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
 
             self._in_transaction = True
         except Exception as e:
-            raise PersistenceError(f"Error beginning transaction: {str(e)}")
+            raise PersistenceError(f"Error beginning transaction: {e!s}")
 
     def commit_transaction(self) -> None:
         """
@@ -300,7 +300,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             self._transaction_snapshot = None
             self._in_transaction = False
         except Exception as e:
-            raise PersistenceError(f"Error committing transaction: {str(e)}")
+            raise PersistenceError(f"Error committing transaction: {e!s}")
 
     def rollback_transaction(self) -> None:
         """
@@ -322,7 +322,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             self._transaction_snapshot = None
             self._in_transaction = False
         except Exception as e:
-            raise PersistenceError(f"Error rolling back transaction: {str(e)}")
+            raise PersistenceError(f"Error rolling back transaction: {e!s}")
 
     def save_batch(self, entities: Dict[str, Dict[str, Any]]) -> None:
         """
@@ -339,7 +339,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             for entity_id, entity_data in entities.items():
                 self.save(entity_id, entity_data)
         except Exception as e:
-            raise PersistenceError(f"Error saving batch: {str(e)}")
+            raise PersistenceError(f"Error saving batch: {e!s}")
 
     def delete_batch(self, entity_ids: List[str]) -> None:
         """
@@ -356,7 +356,7 @@ class BaseStorageStrategy(StorageStrategy[T], Generic[T]):
             for entity_id in entity_ids:
                 self.delete(entity_id)
         except Exception as e:
-            raise PersistenceError(f"Error deleting batch: {str(e)}")
+            raise PersistenceError(f"Error deleting batch: {e!s}")
 
     def _get_entity_id_from_dict(self, data: Dict[str, Any]) -> str:
         """

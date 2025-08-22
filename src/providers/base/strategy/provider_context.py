@@ -301,7 +301,7 @@ class ProviderContext:
                 e,
             )
             return ProviderResult.error_result(
-                f"Operation execution failed: {str(e)}", "EXECUTION_ERROR"
+                f"Operation execution failed: {e!s}", "EXECUTION_ERROR"
             )
 
     async def execute_with_strategy(
@@ -333,7 +333,7 @@ class ProviderContext:
                     )
             except Exception as e:
                 return ProviderResult.error_result(
-                    f"Error initializing strategy {strategy_type}: {str(e)}",
+                    f"Error initializing strategy {strategy_type}: {e!s}",
                     "STRATEGY_INITIALIZATION_ERROR",
                 )
 
@@ -387,7 +387,7 @@ class ProviderContext:
                 e,
             )
             return ProviderResult.error_result(
-                f"Operation execution failed: {str(e)}", "EXECUTION_ERROR"
+                f"Operation execution failed: {e!s}", "EXECUTION_ERROR"
             )
 
     def get_strategy_capabilities(
@@ -450,7 +450,7 @@ class ProviderContext:
         except Exception as e:
             self._logger.error("Error checking health of strategy %s: %s", strategy_type, e)
             return ProviderHealthStatus.unhealthy(
-                f"Health check failed: {str(e)}", {"exception": str(e)}
+                f"Health check failed: {e!s}", {"exception": str(e)}
             )
 
     def get_strategy_metrics(self, strategy_type: str = None) -> Optional[StrategyMetrics]:

@@ -10,9 +10,9 @@ from .load_balancing import *
 
 # Maintain backward compatibility
 __all__: list[str] = [
-    "LoadBalancingAlgorithm",
     "HealthCheckMode",
+    "LoadBalancingAlgorithm",
     "LoadBalancingConfig",
-    "StrategyStats",
     "LoadBalancingProviderStrategy",
+    "StrategyStats",
 ]

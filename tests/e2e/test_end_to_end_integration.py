@@ -96,7 +96,7 @@ def test_end_to_end_integration():
             return False
 
     except Exception as e:
-        print(f"FAIL: Test execution failed: {str(e)}")
+        print(f"FAIL: Test execution failed: {e!s}")
         import traceback
 
         traceback.print_exc()
@@ -129,7 +129,7 @@ def test_provider_strategy_integration():
             strategy = AWSProviderStrategy(config=aws_config, logger=mock_logger)
             print("   PASS: Provider strategy instantiation successful")
         except Exception as e:
-            print(f"   FAIL: Provider strategy instantiation failed: {str(e)}")
+            print(f"   FAIL: Provider strategy instantiation failed: {e!s}")
             return False
 
         # Test handler initialization for each provider API
@@ -164,17 +164,17 @@ def test_provider_strategy_integration():
                     )
 
             except Exception as e:
-                print(f"   FAIL: {api.value} handler integration failed: {str(e)}")
+                print(f"   FAIL: {api.value} handler integration failed: {e!s}")
                 return False
 
         print("   PASS: Provider strategy handler integration successful")
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Provider strategy integration test failed: {str(e)}")
+        print(f"   FAIL: Provider strategy integration test failed: {e!s}")
         return False
 
 
@@ -203,7 +203,7 @@ def test_launch_template_integration():
             lt_manager = AWSLaunchTemplateManager(aws_client=mock_aws_client, logger=mock_logger)
             print("   PASS: Launch template manager instantiation successful")
         except Exception as e:
-            print(f"   FAIL: Launch template manager instantiation failed: {str(e)}")
+            print(f"   FAIL: Launch template manager instantiation failed: {e!s}")
             return False
 
         # Test handler with launch template manager
@@ -227,7 +227,7 @@ def test_launch_template_integration():
                 return False
 
         except Exception as e:
-            print(f"   FAIL: Handler with launch template manager failed: {str(e)}")
+            print(f"   FAIL: Handler with launch template manager failed: {e!s}")
             return False
 
         # Test launch template creation flow (mocked)
@@ -269,17 +269,17 @@ def test_launch_template_integration():
                 return False
 
         except Exception as e:
-            print(f"   FAIL: Launch template creation test failed: {str(e)}")
+            print(f"   FAIL: Launch template creation test failed: {e!s}")
             return False
 
         print("   PASS: Launch template integration successful")
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Launch template integration test failed: {str(e)}")
+        print(f"   FAIL: Launch template integration test failed: {e!s}")
         return False
 
 
@@ -346,17 +346,17 @@ def test_handler_routing():
                         return False
 
             except Exception as e:
-                print(f"   FAIL: {api.value} handler routing failed: {str(e)}")
+                print(f"   FAIL: {api.value} handler routing failed: {e!s}")
                 return False
 
         print("   PASS: Handler routing successful")
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Handler routing test failed: {str(e)}")
+        print(f"   FAIL: Handler routing test failed: {e!s}")
         return False
 
 
@@ -439,10 +439,10 @@ def test_domain_model_flow():
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Domain model flow test failed: {str(e)}")
+        print(f"   FAIL: Domain model flow test failed: {e!s}")
         return False
 
 
@@ -503,17 +503,17 @@ def test_error_handling_integration():
                 print("   FAIL: AWSValidationError message incorrect")
                 return False
         except Exception as e:
-            print(f"   FAIL: AWSValidationError test failed: {str(e)}")
+            print(f"   FAIL: AWSValidationError test failed: {e!s}")
             return False
 
         print("   PASS: Error handling integration successful")
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Error handling integration test failed: {str(e)}")
+        print(f"   FAIL: Error handling integration test failed: {e!s}")
         return False
 
 
@@ -567,17 +567,17 @@ def test_performance_metrics_integration():
                 print(f"   FAIL: get_metrics returns {type(metrics)}, expected dict")
                 return False
         except Exception as e:
-            print(f"   FAIL: get_metrics test failed: {str(e)}")
+            print(f"   FAIL: get_metrics test failed: {e!s}")
             return False
 
         print("   PASS: Performance metrics integration successful")
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Performance metrics integration test failed: {str(e)}")
+        print(f"   FAIL: Performance metrics integration test failed: {e!s}")
         return False
 
 
@@ -691,17 +691,17 @@ def test_full_end_to_end_flow():
             print("   PASS: AWS operations properly called")
 
         except Exception as e:
-            print(f"   FAIL: End-to-end flow failed: {str(e)}")
+            print(f"   FAIL: End-to-end flow failed: {e!s}")
             return False
 
         print("   PASS: Full end-to-end flow successful")
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Full end-to-end flow test failed: {str(e)}")
+        print(f"   FAIL: Full end-to-end flow test failed: {e!s}")
         return False
 
 

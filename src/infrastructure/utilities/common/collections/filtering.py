@@ -1,6 +1,7 @@
 """Collection filtering utility functions."""
 
-from typing import Callable, Iterable, List, Optional, TypeVar
+from collections.abc import Iterable
+from typing import Callable, List, Optional, TypeVar
 
 T = TypeVar("T")
 K = TypeVar("K")

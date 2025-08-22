@@ -12,8 +12,8 @@ Architecture:
 """
 
 import threading
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator
 
 # Thread-local storage for dry-run state
 _dry_run_context = threading.local()

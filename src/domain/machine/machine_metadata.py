@@ -27,7 +27,7 @@ class PriceType(str, Enum):
     HETEROGENEOUS = "heterogeneous"
 
     @classmethod
-    def from_string(cls, value: str) -> "PriceType":
+    def from_string(cls, value: str) -> PriceType:
         """Create PriceType from string value.
 
         Args:
@@ -62,7 +62,7 @@ class MachineConfiguration(ValueObject):
     cloud_host_id: Optional[str] = None
 
     @model_validator(mode="after")
-    def validate_configuration(self) -> "MachineConfiguration":
+    def validate_configuration(self) -> MachineConfiguration:
         """Validate machine configuration."""
         if not self.instance_type:
             raise ValueError("Instance type is required")
@@ -90,7 +90,7 @@ class MachineConfiguration(ValueObject):
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MachineConfiguration":
+    def from_dict(cls, data: Dict[str, Any]) -> MachineConfiguration:
         """Create configuration from dictionary."""
         return cls(
             instance_type=data["instanceType"],
@@ -115,7 +115,7 @@ class MachineEvent(ValueObject):
     details: Optional[Dict[str, Any]] = None
 
     @model_validator(mode="after")
-    def validate_event(self) -> "MachineEvent":
+    def validate_event(self) -> MachineEvent:
         """Validate machine event."""
         if not self.event_type:
             raise ValueError("Event type is required")
@@ -141,7 +141,7 @@ class HealthCheck(ValueObject):
     details: Optional[Dict[str, Any]] = None
 
     @model_validator(mode="after")
-    def validate_health_check(self) -> "HealthCheck":
+    def validate_health_check(self) -> HealthCheck:
         """Validate health check."""
         if not self.check_type:
             raise ValueError("Health check type is required")
@@ -239,7 +239,7 @@ class MachineMetadata(ValueObject):
     tags: Dict[str, str] = {}
 
     @model_validator(mode="after")
-    def validate_metadata(self) -> "MachineMetadata":
+    def validate_metadata(self) -> MachineMetadata:
         """Validate machine metadata."""
         if not self.availability_zone:
             raise ValueError("Availability zone is required")
@@ -264,7 +264,7 @@ class MachineMetadata(ValueObject):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "MachineMetadata":
+    def from_dict(cls, data: Dict[str, Any]) -> MachineMetadata:
         """Create metadata from dictionary."""
         return cls(
             availability_zone=data["availability_zone"],
@@ -313,7 +313,7 @@ class HealthCheckResult(ValueObject):
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "HealthCheckResult":
+    def from_dict(cls, data: Dict[str, Any]) -> HealthCheckResult:
         """Create health check result from dictionary."""
         return cls(
             system_status=data["system"]["status"],
@@ -337,7 +337,7 @@ class ResourceTag(ValueObject):
     value: str
 
     @model_validator(mode="after")
-    def validate_tag(self) -> "ResourceTag":
+    def validate_tag(self) -> ResourceTag:
         """Validate resource tag."""
         if not self.key:
             raise ValueError("Tag key is required")
@@ -356,7 +356,7 @@ class ResourceTag(ValueObject):
         return {"Key": self.key, "Value": self.value}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, str]) -> "ResourceTag":
+    def from_dict(cls, data: Dict[str, str]) -> ResourceTag:
         """Create tag from dictionary."""
         if "Key" in data and "Value" in data:
             return cls(key=data["Key"], value=data["Value"])
@@ -365,7 +365,7 @@ class ResourceTag(ValueObject):
             return [cls(key=k, value=v) for k, v in data.items()]
 
     @classmethod
-    def get_default_tags(cls) -> List["ResourceTag"]:
+    def get_default_tags(cls) -> List[ResourceTag]:
         """Get basic default tags.
 
         Returns:

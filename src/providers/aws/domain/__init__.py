@@ -10,9 +10,9 @@ from .template.value_objects import (
 )
 
 __all__: list[str] = [
-    "AWSImageId",
-    "AWSSubnetId",
-    "AWSSecurityGroupId",
     "AWSFleetId",
+    "AWSImageId",
     "AWSLaunchTemplateId",
+    "AWSSecurityGroupId",
+    "AWSSubnetId",
 ]

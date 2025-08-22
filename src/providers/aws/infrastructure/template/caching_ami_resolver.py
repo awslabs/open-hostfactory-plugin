@@ -175,7 +175,7 @@ class CachingAMIResolver(TemplateResolverPort):
             else:
                 self._logger.error("Fallback disabled, raising error for %s", ami_id_or_parameter)
                 raise InfrastructureError(
-                    f"Failed to resolve AMI parameter {ami_id_or_parameter}: {str(e)}"
+                    f"Failed to resolve AMI parameter {ami_id_or_parameter}: {e!s}"
                 )
 
     def _resolve_ssm_parameter(self, parameter_path: str) -> str:
@@ -219,7 +219,7 @@ class CachingAMIResolver(TemplateResolverPort):
             )
             raise
             # Re-raise with more context
-            raise Exception(f"SSM parameter resolution failed: {str(e)}")
+            raise Exception(f"SSM parameter resolution failed: {e!s}")
 
     def get_cache_stats(self) -> dict:
         """

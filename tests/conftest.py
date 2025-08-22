@@ -6,9 +6,10 @@ import shutil
 import sys
 import tempfile
 import uuid
+from collections.abc import Generator
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Generator, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import Mock
 
 import pytest

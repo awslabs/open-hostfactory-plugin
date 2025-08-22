@@ -71,7 +71,7 @@ def get_instance_by_id(instance_id: str, aws_client: Any = None) -> Dict[str, An
         )
 
         raise InfrastructureError(
-            "AWS.EC2", f"Unexpected error getting EC2 instance {instance_id}: {str(e)}"
+            "AWS.EC2", f"Unexpected error getting EC2 instance {instance_id}: {e!s}"
         )
 
 
@@ -183,7 +183,7 @@ def create_instance(
             },
         )
 
-        raise InfrastructureError("AWS.EC2", f"Unexpected error creating EC2 instance: {str(e)}")
+        raise InfrastructureError("AWS.EC2", f"Unexpected error creating EC2 instance: {e!s}")
 
 
 def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, Any]:
@@ -244,7 +244,7 @@ def terminate_instance(instance_id: str, aws_client: Any = None) -> Dict[str, An
 
         raise InfrastructureError(
             "AWS.EC2",
-            f"Unexpected error terminating EC2 instance {instance_id}: {str(e)}",
+            f"Unexpected error terminating EC2 instance {instance_id}: {e!s}",
         )
 
 

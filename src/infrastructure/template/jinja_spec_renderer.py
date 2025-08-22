@@ -31,7 +31,7 @@ class JinjaSpecRenderer(SpecRenderingPort):
         """
         try:
             # Read file content
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Always process through Jinja2 - handles static content automatically

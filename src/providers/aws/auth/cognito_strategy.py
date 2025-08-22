@@ -155,7 +155,7 @@ class CognitoAuthStrategy(AuthPort):
         except jwt.ExpiredSignatureError:
             return AuthResult(status=AuthStatus.EXPIRED, error_message="Token has expired")
         except jwt.InvalidTokenError as e:
-            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {str(e)}")
+            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {e!s}")
         except Exception as e:
             self._logger.error("Cognito token validation error: %s", e)
             return AuthResult(status=AuthStatus.FAILED, error_message="Token validation failed")

@@ -163,7 +163,7 @@ class TestOpenHFPluginMCPTools:
         """Test successful tool call."""
         mock_sdk = Mock(spec=OpenHFPluginSDK)
         mock_method = AsyncMock(return_value={"result": "success"})
-        setattr(mock_sdk, "test_method", mock_method)
+        mock_sdk.test_method = mock_method
 
         mock_tool_def = Mock()
         mock_tool_def.method_name = "test_method"
@@ -200,7 +200,7 @@ class TestOpenHFPluginMCPTools:
         """Test call_tool when method execution fails."""
         mock_sdk = Mock(spec=OpenHFPluginSDK)
         mock_method = AsyncMock(side_effect=Exception("Execution failed"))
-        setattr(mock_sdk, "test_method", mock_method)
+        mock_sdk.test_method = mock_method
 
         mock_tool_def = Mock()
         mock_tool_def.method_name = "test_method"

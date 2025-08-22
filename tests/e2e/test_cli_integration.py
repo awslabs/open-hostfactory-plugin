@@ -212,7 +212,7 @@ class TestCLIIntegration:
             json.dump(input_data, f)
 
         # Test file input parsing directly
-        with open(input_file, "r") as f:
+        with open(input_file) as f:
             parsed_data = json.load(f)
 
         assert parsed_data["config_path"] == "/test/path.json"

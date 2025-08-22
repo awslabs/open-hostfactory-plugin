@@ -1,6 +1,7 @@
 """Collection validation utility functions."""
 
-from typing import Callable, Dict, Iterable, List, Protocol, Set, Tuple, TypeVar, Union
+from collections.abc import Iterable
+from typing import Callable, Dict, List, Protocol, Set, Tuple, TypeVar, Union
 
 
 class Comparable(Protocol):

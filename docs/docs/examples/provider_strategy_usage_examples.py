@@ -117,7 +117,7 @@ class Provider1Strategy(ProviderStrategy):
                 )
         except Exception as e:
             return ProviderResult.error_result(
-                f"Provider1 operation failed: {str(e)}", "PROVIDER1_ERROR"
+                f"Provider1 operation failed: {e!s}", "PROVIDER1_ERROR"
             )
 
     def _create_instances(self, operation: ProviderOperation) -> ProviderResult:
@@ -273,7 +273,7 @@ class Provider1Strategy(ProviderStrategy):
         except Exception as e:
             response_time_ms = (time.time() - start_time) * 1000
             return ProviderHealthStatus.unhealthy(
-                f"Provider1 health check failed: {str(e)}",
+                f"Provider1 health check failed: {e!s}",
                 {"error": str(e), "response_time_ms": response_time_ms},
             )
 

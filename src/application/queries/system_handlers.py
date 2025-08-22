@@ -226,7 +226,7 @@ class ValidateProviderConfigHandler(
                     warnings.append("Unable to access provider configuration")
             except Exception as validation_error:
                 validation_errors.append(
-                    f"Provider configuration validation failed: {str(validation_error)}"
+                    f"Provider configuration validation failed: {validation_error!s}"
                 )
 
             is_valid = len(validation_errors) == 0
@@ -292,7 +292,7 @@ class GetSystemStatusHandler(BaseQueryHandler[GetSystemStatusQuery, SystemStatus
             except Exception as e:
                 system_status["components"]["configuration"] = {
                     "status": "unhealthy",
-                    "details": f"Configuration manager error: {str(e)}",
+                    "details": f"Configuration manager error: {e!s}",
                 }
                 system_status["status"] = "degraded"
 
@@ -306,7 +306,7 @@ class GetSystemStatusHandler(BaseQueryHandler[GetSystemStatusQuery, SystemStatus
             except Exception as e:
                 system_status["components"]["dependency_injection"] = {
                     "status": "unhealthy",
-                    "details": f"DI container error: {str(e)}",
+                    "details": f"DI container error: {e!s}",
                 }
                 system_status["status"] = "degraded"
 

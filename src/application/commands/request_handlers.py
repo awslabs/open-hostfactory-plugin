@@ -275,7 +275,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                 # CRITICAL FIX: Assign the returned updated request back to the variable
                 request = request.update_status(
                     RequestStatus.FAILED,
-                    f"Provisioning failed: {str(provisioning_error)}",
+                    f"Provisioning failed: {provisioning_error!s}",
                 )
                 self.logger.error(
                     "Provisioning failed for request %s: %s", request.request_id, provisioning_error
@@ -291,7 +291,7 @@ class CreateMachineRequestHandler(BaseCommandHandler[CreateRequestCommand, str])
                     self.event_publisher.publish(event)
 
                 # CRITICAL FIX: Raise exception instead of returning success
-                raise ValueError(f"Machine provisioning failed: {str(provisioning_error)}")
+                raise ValueError(f"Machine provisioning failed: {provisioning_error!s}")
             else:
                 self.logger.error("Failed to create request: %s", provisioning_error)
                 raise

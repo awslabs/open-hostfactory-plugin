@@ -247,7 +247,7 @@ class TestProviderTemplateStrategy:
         assert os.path.exists(instance_file)
 
         # Check file contents
-        with open(instance_file, "r") as f:
+        with open(instance_file) as f:
             saved_data = json.load(f)
 
         assert len(saved_data) == 1
@@ -275,7 +275,7 @@ class TestProviderTemplateStrategy:
         assert os.path.exists(provider_file)
 
         # Check file contents
-        with open(provider_file, "r") as f:
+        with open(provider_file) as f:
             saved_data = json.load(f)
 
         assert len(saved_data) == 1
@@ -300,7 +300,7 @@ class TestProviderTemplateStrategy:
         assert os.path.exists(main_file)
 
         # Check file contents
-        with open(main_file, "r") as f:
+        with open(main_file) as f:
             saved_data = json.load(f)
 
         assert len(saved_data) == 1

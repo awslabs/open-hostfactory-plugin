@@ -644,7 +644,7 @@ class EC2FleetHandler(AWSHandler, BaseContextMixin):
             raise error
         except Exception as e:
             self._logger.error("Unexpected error checking EC2 Fleet status: %s", str(e))
-            raise AWSInfrastructureError(f"Failed to check EC2 Fleet status: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to check EC2 Fleet status: {e!s}")
 
     def release_hosts(self, request: Request) -> None:
         """

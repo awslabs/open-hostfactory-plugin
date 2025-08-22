@@ -65,7 +65,7 @@ def test_domain_validation():
             return False
 
     except Exception as e:
-        print(f"FAIL: Test execution failed: {str(e)}")
+        print(f"FAIL: Test execution failed: {e!s}")
         import traceback
 
         traceback.print_exc()
@@ -101,14 +101,14 @@ def test_aws_template_basic():
             return True
 
         except Exception as e:
-            print(f"   FAIL: Basic template creation failed: {str(e)}")
+            print(f"   FAIL: Basic template creation failed: {e!s}")
             import traceback
 
             traceback.print_exc()
             return False
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
 
 
@@ -144,14 +144,14 @@ def test_aws_template_spot_fleet():
             return True
 
         except Exception as e:
-            print(f"   FAIL: SpotFleet template creation failed: {str(e)}")
+            print(f"   FAIL: SpotFleet template creation failed: {e!s}")
             import traceback
 
             traceback.print_exc()
             return False
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
 
 
@@ -181,14 +181,14 @@ def test_request_creation():
             return True
 
         except Exception as e:
-            print(f"   FAIL: Request creation failed: {str(e)}")
+            print(f"   FAIL: Request creation failed: {e!s}")
             import traceback
 
             traceback.print_exc()
             return False
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
 
 
@@ -243,7 +243,7 @@ def test_base_handler_validation():
             return True
 
         except Exception as e:
-            print(f"   FAIL: Base handler validation failed: {str(e)}")
+            print(f"   FAIL: Base handler validation failed: {e!s}")
 
             # Try to get more detailed error information
             if hasattr(e, "errors") and e.errors:
@@ -262,7 +262,7 @@ def test_base_handler_validation():
             return False
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
 
 

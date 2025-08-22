@@ -93,6 +93,7 @@ def run_semgrep():
     try:
         result = subprocess.run(
             ["semgrep", "--config=auto", "--sarif", "--output=semgrep.sarif", "src"],
+            check=False,
             capture_output=True,
             text=True,
         )
@@ -123,7 +124,7 @@ def run_trufflehog():
 
     try:
         result = subprocess.run(
-            ["trufflehog", "git", "file://.", "--json"], capture_output=True, text=True
+            ["trufflehog", "git", "file://.", "--json"], check=False, capture_output=True, text=True
         )
 
         # Write results to file

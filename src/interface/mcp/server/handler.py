@@ -79,7 +79,7 @@ async def _run_stdio_server(mcp_server: OpenHFPluginMCPServer):
                 # Send error response
                 error_response = {
                     "jsonrpc": "2.0",
-                    "error": {"code": -32603, "message": f"Server error: {str(e)}"},
+                    "error": {"code": -32603, "message": f"Server error: {e!s}"},
                 }
                 print(error_response, flush=True)  # noqa: MCP protocol output
 

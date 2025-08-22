@@ -157,7 +157,7 @@ class RuntimeAMICache:
             if not os.path.exists(self._persistent_file):
                 return
 
-            with open(self._persistent_file, "r") as f:
+            with open(self._persistent_file) as f:
                 data = json.load(f)
 
             current_time = time.time()

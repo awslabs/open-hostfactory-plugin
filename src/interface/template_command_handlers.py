@@ -100,7 +100,7 @@ async def handle_list_templates(args: argparse.Namespace) -> Dict[str, Any]:
     except Exception as e:
         return {
             "success": False,
-            "error": f"Failed to list templates: {str(e)}",
+            "error": f"Failed to list templates: {e!s}",
             "templates": [],
         }
 
@@ -156,7 +156,7 @@ async def handle_get_template(args: argparse.Namespace) -> Dict[str, Any]:
     except Exception as e:
         return {
             "success": False,
-            "error": f"Failed to get template: {str(e)}",
+            "error": f"Failed to get template: {e!s}",
             "template": None,
         }
 
@@ -236,7 +236,7 @@ async def handle_create_template(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to create template: {str(e)}"}
+        return {"success": False, "error": f"Failed to create template: {e!s}"}
 
 
 @handle_interface_exceptions(context="update_template", interface_type="cli")
@@ -305,7 +305,7 @@ async def handle_update_template(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to update template: {str(e)}"}
+        return {"success": False, "error": f"Failed to update template: {e!s}"}
 
 
 @handle_interface_exceptions(context="delete_template", interface_type="cli")
@@ -362,7 +362,7 @@ async def handle_delete_template(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to delete template: {str(e)}"}
+        return {"success": False, "error": f"Failed to delete template: {e!s}"}
 
 
 @handle_interface_exceptions(context="validate_template", interface_type="cli")
@@ -410,7 +410,7 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
                 }
 
             try:
-                with open(template_file, "r") as f:
+                with open(template_file) as f:
                     if template_file.suffix.lower() in {".yml", ".yaml"}:
                         template_config = yaml.safe_load(f)
                     else:
@@ -419,7 +419,7 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
             except Exception as e:
                 return {
                     "success": False,
-                    "error": f"Failed to parse template file: {str(e)}",
+                    "error": f"Failed to parse template file: {e!s}",
                     "valid": False,
                 }
         else:
@@ -468,7 +468,7 @@ async def handle_validate_template(args: argparse.Namespace) -> Dict[str, Any]:
     except Exception as e:
         return {
             "success": False,
-            "error": f"Failed to validate template: {str(e)}",
+            "error": f"Failed to validate template: {e!s}",
             "valid": False,
         }
 
@@ -508,4 +508,4 @@ async def handle_refresh_templates(args: argparse.Namespace) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        return {"success": False, "error": f"Failed to refresh templates: {str(e)}"}
+        return {"success": False, "error": f"Failed to refresh templates: {e!s}"}

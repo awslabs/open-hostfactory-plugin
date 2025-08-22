@@ -42,7 +42,7 @@ def _safe_reset_class_instance(module_name: str, class_name: str) -> None:
         if hasattr(module, class_name):
             cls = getattr(module, class_name)
             if hasattr(cls, "_instance"):
-                setattr(cls, "_instance", None)
+                cls._instance = None
     except (ImportError, AttributeError):
         pass
 

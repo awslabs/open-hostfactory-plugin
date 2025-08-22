@@ -354,8 +354,7 @@ class JSONStorageStrategy(BaseStorageStrategy):
                 pattern = expected_value["$regex"]
                 if not re.search(pattern, str(actual_value)):
                     return False
-            else:
-                if actual_value != expected_value:
-                    return False
+            elif actual_value != expected_value:
+                return False
 
         return True

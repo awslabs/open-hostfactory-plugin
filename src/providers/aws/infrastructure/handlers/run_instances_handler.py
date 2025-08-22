@@ -45,6 +45,7 @@ from providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
 )
 from providers.aws.utilities.aws_operations import AWSOperations
+from infrastructure.utilities.common.resource_naming import get_resource_prefix
 
 
 @injectable
@@ -233,7 +234,7 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
 
         return {
             # RunInstances-specific values
-            "instance_name": f"hf-instance-{request.request_id}",
+            "instance_name": f"{get_resource_prefix('instance')}{request.request_id}",
         }
 
     def _create_run_instances_params(
@@ -347,7 +348,7 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
             {
                 "ResourceType": "instance",
                 "Tags": [
-                    {"Key": "Name", "Value": f"hf-{request.request_id}"},
+                    {"Key": "Name", "Value": f"{get_resource_prefix('instance')}{request.request_id}"},
                     {"Key": "RequestId", "Value": str(request.request_id)},
                     {"Key": "TemplateId", "Value": str(aws_template.template_id)},
                     {"Key": "CreatedBy", "Value": created_by},

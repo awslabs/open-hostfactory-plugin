@@ -38,6 +38,7 @@ from providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
 from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.utilities.aws_operations import AWSOperations
+from infrastructure.utilities.common.resource_naming import get_resource_prefix
 
 
 @injectable
@@ -189,7 +190,7 @@ class ASGHandler(AWSHandler, BaseContextMixin):
 
         return {
             # ASG-specific values
-            "asg_name": f"hf-asg-{request.request_id}",
+            "asg_name": f"{get_resource_prefix('asg')}{request.request_id}",
             "min_size": 0,
             "max_size": request.requested_count * 2,  # Allow buffer
             # Configuration values

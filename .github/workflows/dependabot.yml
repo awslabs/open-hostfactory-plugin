@@ -55,8 +55,7 @@ jobs:
 
       - name: Commit updated lock file
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          make git-setup-ci
 
           if [[ -n $(git status --porcelain) ]]; then
             git add uv.lock

@@ -183,9 +183,8 @@ jobs:
         echo "Waiting for container to start..."
         sleep 15
 
-        # Test health endpoint
-        echo "Testing health endpoint..."
-        curl -f http://localhost:8000/health || exit 1
+        # Test health endpoint using Makefile target
+        make container-health-check
 
         echo "Container test passed!"
 

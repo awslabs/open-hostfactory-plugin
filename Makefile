@@ -206,8 +206,22 @@ quality-check-files: dev-install  ## Run quality checks on specific files (usage
 	@echo "Running professional quality checks on specified files..."
 	./dev-tools/scripts/quality_check.py --strict --files $(FILES)
 
-format: dev-install clean-whitespace  ## Format code with Ruff
+format-fix: dev-install clean-whitespace  ## Auto-fix code formatting with Ruff
 	uv run ruff format .
+	uv run ruff check --fix --exit-zero .
+
+container-health-check:  ## Test container health endpoint
+	@echo "Testing container health endpoint..."
+	@timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done' || (echo "Health check failed" && exit 1)
+	@echo "Container health check passed!"
+
+git-setup-ci:  ## Setup git configuration for CI
+	git config --local user.email "action@github.com"
+	git config --local user.name "GitHub Action"
+
+git-setup-docs:  ## Setup git configuration for docs
+	git config --global user.name "github-actions[bot]"
+	git config --global user.email "github-actions[bot]@users.noreply.github.com"
 	uv run ruff check --fix .
 
 lint: dev-install  ## Check enforced rules (fail on issues)

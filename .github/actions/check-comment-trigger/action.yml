@@ -27,7 +27,8 @@ runs:
         ALLOWED_ASSOCIATIONS: ${{ inputs.allowed-associations }}
       with:
         script: |
-          if (!context.issue.pull_request) {
+          // Check if this is a comment on a pull request
+          if (!context.payload.issue || !context.payload.issue.pull_request) {
             console.log('Not a PR comment, skipping');
             return;
           }
@@ -52,7 +53,7 @@ runs:
             const pr = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.issue.number
+              pull_number: context.payload.issue.number
             });
             core.setOutput('triggered', 'true');
             core.setOutput('pr_ref', pr.data.head.sha);

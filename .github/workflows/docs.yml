@@ -53,9 +53,7 @@ jobs:
           cache-key-suffix: docs
 
       - name: Configure Git for mike
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        run: make git-setup-docs
 
       - name: Build documentation
         run: |

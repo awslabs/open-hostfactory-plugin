@@ -104,14 +104,11 @@ jobs:
           cache-key-suffix: format
 
       - name: Auto-format (no checks)
-        run: |
-          uv run ruff format .
-          uv run ruff check --fix --exit-zero .
+        run: make format-fix
 
       - name: Commit formatting changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          make git-setup-ci
           git add .
           if ! git diff --staged --quiet; then
             git commit -m "style: auto-format code with ruff [skip ci]"

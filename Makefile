@@ -1,6 +1,6 @@
 # Makefile for Open Host Factory Plugin
 
-.PHONY: help install install-pip dev-install dev-install-pip test test-unit test-integration test-e2e test-all test-cov test-html test-parallel test-quick test-performance test-aws test-report lint format security security-quick security-all security-with-container security-container security-full security-scan security-validate-sarif security-report sbom-generate clean clean-all build build-test docs docs-build docs-serve docs-deploy docs-clean docs-deploy-version docs-list-versions docs-delete-version ci-docs-build ci-docs-build-for-pages ci-docs-deploy run run-dev version-show version-bump version-bump-patch version-bump-minor version-bump-major generate-pyproject ci-quality ci-security ci-security-codeql ci-security-container ci-architecture ci-imports ci-tests-unit ci-tests-integration ci-tests-e2e ci-tests-matrix ci-tests-performance ci-check ci-check-quick ci-check-fix ci-check-verbose ci ci-quick workflow-ci workflow-test-matrix workflow-security architecture-check architecture-report quality-check quality-check-fix quality-check-files quality-gates quality-full generate-completions install-completions install-bash-completions install-zsh-completions uninstall-completions test-completions dev-setup install-package uninstall-package reinstall-package init-db create-config validate-config container-build container-build-single container-build-multi container-push-multi container-show-version container-run docker-compose-up docker-compose-down quick-start dev status uv-lock uv-sync uv-sync-dev uv-check uv-benchmark file-sizes file-sizes-report validate-workflows detect-secrets clean-whitespace hadolint-check install-dev-tools install-dev-tools-required install-dev-tools-dry-run dev-checks-container dev-checks-container-required format-container hadolint-check-container pre-commit-check pre-commit-check-required
+.PHONY: help install install-pip dev-install dev-install-pip test test-unit test-integration test-e2e test-all test-cov test-html test-parallel test-quick test-performance test-aws test-report lint format security security-quick security-all security-with-container ci-security-container security-full security-scan security-validate-sarif security-report sbom-generate clean clean-all build build-test docs docs-build docs-serve docs-deploy docs-clean docs-deploy-version docs-list-versions docs-delete-version ci-docs-build ci-docs-build-for-pages ci-docs-deploy run run-dev version-show version-bump version-bump-patch version-bump-minor version-bump-major generate-pyproject ci-quality ci-security ci-security-codeql ci-security-container ci-architecture ci-imports ci-tests-unit ci-tests-integration ci-tests-e2e ci-tests-matrix ci-tests-performance ci-check ci-check-quick ci-check-fix ci-check-verbose ci ci-quick workflow-ci workflow-test-matrix workflow-security architecture-check architecture-report quality-check quality-check-fix quality-check-files quality-gates quality-full generate-completions install-completions install-bash-completions install-zsh-completions uninstall-completions test-completions dev-setup install-package uninstall-package reinstall-package init-db create-config validate-config container-build container-build-single container-build-multi container-push-multi container-show-version container-run docker-compose-up docker-compose-down quick-start dev status uv-lock uv-sync uv-sync-dev uv-check uv-benchmark file-sizes file-sizes-report validate-workflows detect-secrets clean-whitespace hadolint-check install-dev-tools install-dev-tools-required install-dev-tools-dry-run dev-checks-container dev-checks-container-required format-container hadolint-check-container pre-commit-check pre-commit-check-required
 
 # Python settings
 PYTHON := python3
@@ -113,9 +113,11 @@ deps-update:  ## Update dependencies and regenerate lock file
 	uv lock --upgrade
 
 deps-add:  ## Add new dependency (usage: make deps-add PACKAGE=package-name)
+	@if [ -z "$(PACKAGE)" ]; then echo "Usage: make deps-add PACKAGE=package-name"; exit 1; fi
 	./dev-tools/scripts/deps_manager.py add $(PACKAGE)
 
 deps-add-dev:  ## Add new dev dependency (usage: make deps-add-dev PACKAGE=package-name)
+	@if [ -z "$(PACKAGE)" ]; then echo "Usage: make deps-add-dev PACKAGE=package-name"; exit 1; fi
 	./dev-tools/scripts/deps_manager.py add --dev $(PACKAGE)
 
 # Cleanup
@@ -260,17 +262,8 @@ security-quick: dev-install  ## Run quick security checks only
 security-all: dev-install  ## Run all available security tools
 	./dev-tools/scripts/security_check.py --all
 
-security-container: dev-install ## Run container security scans
-	@echo "Running container security scans..."
-	@echo "Ensuring required tools are installed..."
-	./dev-tools/scripts/install_dev_tools.py --tool trivy --tool hadolint
-	@echo "Building Docker image for security scan..."
-	docker build -t $(PROJECT):security-scan .
-	@echo "Running Trivy vulnerability scan..."
-	trivy image --format sarif --output trivy-results.sarif $(PROJECT):security-scan
-	trivy image --format json --output trivy-results.json $(PROJECT):security-scan
-	@echo "Running Hadolint Dockerfile scan..."
-	hadolint Dockerfile --format sarif > hadolint-results.sarif || echo "Dockerfile issues found"
+ci-security-container: dev-install ## Run container security scans (CI)
+	./dev-tools/scripts/security_container.py
 
 security-with-container: dev-install  ## Run security checks including container scans
 	./dev-tools/scripts/security_check.py --all --container

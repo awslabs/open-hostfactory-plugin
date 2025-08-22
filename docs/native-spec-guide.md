@@ -163,13 +163,43 @@ All specifications support Jinja2 variables:
 
 ## Examples
 
-### EC2Fleet with Custom Configuration
+### EC2Fleet with Price-Capacity Optimized (Recommended)
 
 ```json
 {
-  "template_id": "custom-fleet",
+  "template_id": "optimized-fleet",
   "provider_api_spec": {
     "Type": "instant",
+    "LaunchTemplateConfigs": [{
+      "LaunchTemplateSpecification": {
+        "LaunchTemplateName": "my-template",
+        "Version": "$Latest"
+      },
+      "Overrides": [
+        {"InstanceType": "c5.large", "SubnetId": "subnet-1"},
+        {"InstanceType": "c5.xlarge", "SubnetId": "subnet-2"},
+        {"InstanceType": "m5.large", "SubnetId": "subnet-1"},
+        {"InstanceType": "m5.xlarge", "SubnetId": "subnet-2"}
+      ]
+    }],
+    "TargetCapacitySpecification": {
+      "TotalTargetCapacity": "{{ requested_count }}",
+      "DefaultTargetCapacityType": "spot",
+      "OnDemandTargetCapacity": 1,
+      "OnDemandAllocationStrategy": "prioritized",
+      "SpotAllocationStrategy": "price-capacity-optimized"
+    }
+  }
+}
+```
+
+### EC2Fleet with Capacity Optimized
+
+```json
+{
+  "template_id": "capacity-fleet",
+  "provider_api_spec": {
+    "Type": "maintain",
     "LaunchTemplateConfigs": [{
       "LaunchTemplateSpecification": {
         "LaunchTemplateName": "my-template",
@@ -183,19 +213,46 @@ All specifications support Jinja2 variables:
     "TargetCapacitySpecification": {
       "TotalTargetCapacity": "{{ requested_count }}",
       "DefaultTargetCapacityType": "spot",
-      "OnDemandTargetCapacity": 1
+      "SpotAllocationStrategy": "capacity-optimized"
     }
   }
 }
 ```
 
-### SpotFleet with Launch Template
+### EC2Fleet with Capacity Optimized Prioritized
 
 ```json
 {
-  "template_id": "spot-fleet",
+  "template_id": "prioritized-fleet",
+  "provider_api_spec": {
+    "Type": "instant",
+    "LaunchTemplateConfigs": [{
+      "LaunchTemplateSpecification": {
+        "LaunchTemplateName": "my-template", 
+        "Version": "$Latest"
+      },
+      "Overrides": [
+        {"InstanceType": "c5.large", "SubnetId": "subnet-1", "Priority": 1},
+        {"InstanceType": "m5.large", "SubnetId": "subnet-1", "Priority": 2},
+        {"InstanceType": "c5.xlarge", "SubnetId": "subnet-2", "Priority": 3}
+      ]
+    }],
+    "TargetCapacitySpecification": {
+      "TotalTargetCapacity": "{{ requested_count }}",
+      "DefaultTargetCapacityType": "spot",
+      "SpotAllocationStrategy": "capacity-optimized-prioritized"
+    }
+  }
+}
+```
+
+### EC2Fleet with Launch Template (Recommended over SpotFleet)
+
+```json
+{
+  "template_id": "launch-template-fleet",
   "launch_template_spec": {
-    "LaunchTemplateName": "spot-lt-{{ request_id }}",
+    "LaunchTemplateName": "fleet-lt-{{ request_id }}",
     "LaunchTemplateData": {
       "ImageId": "ami-12345",
       "InstanceType": "m5.large",
@@ -204,14 +261,23 @@ All specifications support Jinja2 variables:
     }
   },
   "provider_api_spec": {
-    "LaunchSpecifications": [{
-      "LaunchTemplate": {
-        "LaunchTemplateName": "spot-lt-{{ request_id }}",
+    "Type": "instant",
+    "LaunchTemplateConfigs": [{
+      "LaunchTemplateSpecification": {
+        "LaunchTemplateName": "fleet-lt-{{ request_id }}",
         "Version": "$Latest"
-      }
+      },
+      "Overrides": [
+        {"InstanceType": "m5.large", "SubnetId": "subnet-1"},
+        {"InstanceType": "m5.xlarge", "SubnetId": "subnet-2"},
+        {"InstanceType": "c5.large", "SubnetId": "subnet-1"}
+      ]
     }],
-    "TargetCapacity": "{{ requested_count }}",
-    "AllocationStrategy": "diversified"
+    "TargetCapacitySpecification": {
+      "TotalTargetCapacity": "{{ requested_count }}",
+      "DefaultTargetCapacityType": "spot",
+      "SpotAllocationStrategy": "price-capacity-optimized"
+    }
   }
 }
 ```
@@ -271,11 +337,28 @@ config/
 
 ## Best Practices
 
+### Allocation Strategies (Recommended)
+
+1. **price-capacity-optimized** (Recommended for most workloads)
+   - Balances cost savings with capacity availability
+   - Best for production workloads requiring reliability
+
+2. **capacity-optimized-prioritized** 
+   - Use when you have specific instance type preferences
+   - Set priorities in Overrides array
+
+3. **capacity-optimized**
+   - Focuses on capacity availability over cost
+   - Good for workloads that need consistent capacity
+
+### General Guidelines
+
 1. **Start with merge mode** for gradual adoption
-2. **Use Jinja2 variables** for dynamic values
-3. **External files** for complex specifications
-4. **Test thoroughly** before production use
-5. **Keep templates simple** - use native specs for complexity
+2. **Use EC2Fleet over SpotFleet** for new implementations
+3. **Use Jinja2 variables** for dynamic values
+4. **External files** for complex specifications
+5. **Test thoroughly** before production use
+6. **Keep templates simple** - use native specs for complexity
 
 ## Troubleshooting
 

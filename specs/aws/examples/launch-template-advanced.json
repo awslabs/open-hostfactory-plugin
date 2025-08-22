@@ -1,0 +1,55 @@
+{
+  "LaunchTemplateName": "lt-advanced-{{ request_id }}",
+  "LaunchTemplateData": {
+    "ImageId": "{{ image_id }}",
+    "InstanceType": "{{ instance_type | default('m5.large') }}",
+    "KeyName": "{{ key_name }}",
+    "NetworkInterfaces": [{
+      "DeviceIndex": 0,
+      "AssociatePublicIpAddress": "{{ associate_public_ip | default(false) }}",
+      "Groups": ["{{ security_group_ids | join('\", \"') }}"],
+      "SubnetId": "{{ subnet_ids[0] }}"
+    }],
+    "IamInstanceProfile": {
+      "Name": "{{ iam_instance_profile }}"
+    },
+    "BlockDeviceMappings": [
+      {
+        "DeviceName": "/dev/xvda",
+        "Ebs": {
+          "VolumeSize": "{{ root_volume_size | default(20) }}",
+          "VolumeType": "{{ volume_type | default('gp3') }}",
+          "DeleteOnTermination": true,
+          "Encrypted": true,
+          "KmsKeyId": "{{ kms_key_id | default('alias/aws/ebs') }}"
+        }
+      },
+      {
+        "DeviceName": "/dev/xvdf",
+        "Ebs": {
+          "VolumeSize": "{{ data_volume_size | default(100) }}",
+          "VolumeType": "{{ data_volume_type | default('gp3') }}",
+          "DeleteOnTermination": false,
+          "Encrypted": true
+        }
+      }
+    ],
+    "UserData": "{{ user_data | b64encode }}",
+    "MetadataOptions": {
+      "HttpEndpoint": "enabled",
+      "HttpTokens": "required",
+      "HttpPutResponseHopLimit": 2,
+      "InstanceMetadataTags": "enabled"
+    },
+    "TagSpecifications": [{
+      "ResourceType": "instance",
+      "Tags": [
+        {"Key": "Name", "Value": "{{ instance_name_prefix | default('advanced-instance') }}-{{ request_id }}"},
+        {"Key": "RequestId", "Value": "{{ request_id }}"},
+        {"Key": "TemplateId", "Value": "{{ template_id }}"},
+        {"Key": "CreatedBy", "Value": "{{ package_name }}"},
+        {"Key": "Environment", "Value": "{{ environment | default('production') }}"}
+      ]
+    }]
+  }
+}

@@ -35,6 +35,7 @@ from domain.base.ports import LoggingPort
 from domain.request.aggregate import Request
 from infrastructure.adapters.ports.request_adapter_port import RequestAdapterPort
 from infrastructure.error.decorators import handle_infrastructure_exceptions
+from infrastructure.utilities.common.resource_naming import get_resource_prefix
 from providers.aws.domain.template.aggregate import AWSTemplate
 from providers.aws.domain.template.value_objects import AWSFleetType
 from providers.aws.exceptions.aws_exceptions import (
@@ -42,6 +43,7 @@ from providers.aws.exceptions.aws_exceptions import (
     AWSValidationError,
     IAMError,
 )
+from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.infrastructure.launch_template.manager import (
     AWSLaunchTemplateManager,
@@ -50,7 +52,7 @@ from providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable
-class SpotFleetHandler(AWSHandler):
+class SpotFleetHandler(AWSHandler, BaseContextMixin):
     """Handler for Spot Fleet operations."""
 
     def __init__(
@@ -73,6 +75,25 @@ class SpotFleetHandler(AWSHandler):
         """
         # Use base class initialization - eliminates duplication
         super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
+
+        # Get AWS native spec service from container
+        from infrastructure.di.container import get_container
+
+        container = get_container()
+        try:
+            from providers.aws.infrastructure.services.aws_native_spec_service import (
+                AWSNativeSpecService,
+            )
+
+            self.aws_native_spec_service = container.get(AWSNativeSpecService)
+            # Get config port for package info
+            from domain.base.ports.configuration_port import ConfigurationPort
+
+            self.config_port = container.get(ConfigurationPort)
+        except Exception:
+            # Service not available, native specs disabled
+            self.aws_native_spec_service = None
+            self.config_port = None
 
     @handle_infrastructure_exceptions(context="spot_fleet_creation")
     def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
@@ -157,6 +178,11 @@ class SpotFleetHandler(AWSHandler):
 
         fleet_id = response["SpotFleetRequestId"]
         self._logger.info("Successfully created Spot Fleet request: %s", fleet_id)
+
+        # Apply post-creation tagging for spot fleet instances as fallback
+        # SpotFleet instances should be tagged via LaunchSpecifications in template
+        # But add fallback post-creation tagging to ensure RequestId tracking
+        self._tag_fleet_instances_if_needed(fleet_id, request, aws_template)
 
         return fleet_id
 
@@ -311,6 +337,88 @@ class SpotFleetHandler(AWSHandler):
         except Exception as e:
             raise IAMError(f"Failed to validate IAM permissions: {str(e)}")
 
+    def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
+        """Prepare context with all computed values for template rendering."""
+
+        # Start with base context
+        context = self._prepare_base_context(template, request)
+
+        # Add capacity distribution
+        context.update(self._calculate_capacity_distribution(template, request))
+
+        # Add standard flags
+        context.update(self._prepare_standard_flags(template))
+
+        # Add standard tags
+        tag_context = self._prepare_standard_tags(template, request)
+        context.update(tag_context)
+
+        # Add SpotFleet-specific context
+        context.update(self._prepare_spotfleet_specific_context(template, request))
+
+        return context
+
+    def _prepare_spotfleet_specific_context(
+        self, template: AWSTemplate, request: Request
+    ) -> Dict[str, Any]:
+        """Prepare SpotFleet-specific context with template reference pattern."""
+
+        # Base template data (referenced by all specs)
+        base_launch_spec = {
+            "image_id": template.image_id,
+            "security_groups": template.security_group_ids or [],
+        }
+
+        # Instance type overrides (minimal data)
+        instance_overrides = []
+        if template.instance_types and template.subnet_ids:
+            for subnet_id in template.subnet_ids:
+                for instance_type, weight in template.instance_types.items():
+                    instance_overrides.append(
+                        {
+                            "instance_type": instance_type,
+                            "subnet_id": subnet_id,
+                            "weighted_capacity": weight,
+                        }
+                    )
+        elif template.instance_types:
+            for instance_type, weight in template.instance_types.items():
+                instance_overrides.append(
+                    {"instance_type": instance_type, "weighted_capacity": weight}
+                )
+        else:
+            # Single instance type
+            instance_overrides.append(
+                {
+                    "instance_type": template.instance_type,
+                    "weighted_capacity": 1,
+                    "subnet_id": template.subnet_ids[0] if template.subnet_ids else None,
+                }
+            )
+
+        return {
+            # Fleet-specific values
+            "fleet_name": f"{get_resource_prefix('spot_fleet')}{request.request_id}",
+            # Template reference approach (fixes duplication)
+            "base_launch_spec": base_launch_spec,
+            "instance_overrides": instance_overrides,
+            "has_overrides": len(instance_overrides) > 1,
+            # Fleet configuration
+            "fleet_role": template.fleet_role,
+            "allocation_strategy": template.allocation_strategy or "lowestPrice",
+            "instance_interruption_behavior": getattr(
+                template, "instance_interruption_behavior", "terminate"
+            ),
+            "replace_unhealthy_instances": getattr(template, "replace_unhealthy_instances", True),
+            # Pricing
+            "spot_price": (
+                str(template.max_price)
+                if hasattr(template, "max_price") and template.max_price is not None
+                else "0.10"
+            ),
+            "has_spot_price": hasattr(template, "max_price") and template.max_price is not None,
+        }
+
     def _create_spot_fleet_config(
         self,
         template: AWSTemplate,
@@ -318,7 +426,50 @@ class SpotFleetHandler(AWSHandler):
         launch_template_id: str,
         launch_template_version: str,
     ) -> Dict[str, Any]:
-        """Create Spot Fleet configuration with additional options."""
+        """Create Spot Fleet configuration with native spec support."""
+        # Try native spec processing with merge support
+        if self.aws_native_spec_service:
+            context = self._prepare_template_context(template, request)
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                }
+            )
+
+            native_spec = self.aws_native_spec_service.process_provider_api_spec_with_merge(
+                template, request, "spotfleet", context
+            )
+            if native_spec:
+                # Ensure launch template info is in the spec
+                if "LaunchSpecifications" in native_spec:
+                    for spec in native_spec["LaunchSpecifications"]:
+                        if "LaunchTemplate" not in spec:
+                            spec["LaunchTemplate"] = {}
+                        spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
+                        spec["LaunchTemplate"]["Version"] = launch_template_version
+                self._logger.info(
+                    "Using native provider API spec with merge for SpotFleet template %s",
+                    template.template_id,
+                )
+                return native_spec
+
+            # Use template-driven approach with native spec service
+            return self.aws_native_spec_service.render_default_spec("spotfleet", context)
+
+        # Fallback to legacy logic when native spec service is not available
+        return self._create_spot_fleet_config_legacy(
+            template, request, launch_template_id, launch_template_version
+        )
+
+    def _create_spot_fleet_config_legacy(
+        self,
+        template: AWSTemplate,
+        request: Request,
+        launch_template_id: str,
+        launch_template_version: str,
+    ) -> Dict[str, Any]:
+        """Create Spot Fleet configuration using legacy logic."""
         # Strip the full ARN for service-linked role
         fleet_role = template.fleet_role
         if fleet_role == "AWSServiceRoleForEC2SpotFleet":
@@ -328,12 +479,22 @@ class SpotFleetHandler(AWSHandler):
                 f"spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet"
             )
 
+        # Get package name for CreatedBy tag
+        created_by = "open-hostfactory-plugin"  # fallback
+        if hasattr(self, "config_port") and self.config_port:
+            try:
+                package_info = self.config_port.get_package_info()
+                created_by = package_info.get("name", "open-hostfactory-plugin")
+            except Exception:  # nosec B110
+                # Intentionally silent fallback for package info retrieval
+                pass
+
         # Common tags for both fleet and instances
         common_tags = [
             {"Key": "Name", "Value": f"hf-{request.request_id}"},
             {"Key": "RequestId", "Value": str(request.request_id)},
             {"Key": "TemplateId", "Value": str(template.template_id)},
-            {"Key": "CreatedBy", "Value": "HostFactory"},
+            {"Key": "CreatedBy", "Value": created_by},
             {"Key": "CreatedAt", "Value": datetime.utcnow().isoformat()},
         ]
 

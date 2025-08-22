@@ -1,0 +1,69 @@
+{
+  "Type": "maintain",
+  "LaunchTemplateConfigs": [{
+    "LaunchTemplateSpecification": {
+      "LaunchTemplateId": "{{ launch_template_id }}",
+      "Version": "{{ launch_template_version | default('$Latest') }}"
+    },
+    "Overrides": [
+      {"InstanceType": "r6i.xlarge", "WeightedCapacity": 4},
+      {"InstanceType": "r6a.2xlarge", "WeightedCapacity": 8},
+      {"InstanceType": "r5.4xlarge", "WeightedCapacity": 16},
+      {"InstanceType": "r5n.8xlarge", "WeightedCapacity": 32},
+      {"InstanceType": "r5a.12xlarge", "WeightedCapacity": 48},
+      {"InstanceType": "r5d.16xlarge", "WeightedCapacity": 64},
+      {"InstanceType": "r5dn.24xlarge", "WeightedCapacity": 96},
+      {"InstanceType": "r6id.32xlarge", "WeightedCapacity": 128},
+      {"InstanceType": "r6i.48xlarge", "WeightedCapacity": 192},
+      {"InstanceType": "r5.xlarge", "WeightedCapacity": 4},
+      {"InstanceType": "r5n.2xlarge", "WeightedCapacity": 8},
+      {"InstanceType": "r6a.4xlarge", "WeightedCapacity": 16},
+      {"InstanceType": "r5a.8xlarge", "WeightedCapacity": 32},
+      {"InstanceType": "r5d.12xlarge", "WeightedCapacity": 48},
+      {"InstanceType": "r6i.16xlarge", "WeightedCapacity": 64},
+      {"InstanceType": "m6i.2xlarge", "WeightedCapacity": 8},
+      {"InstanceType": "m6a.4xlarge", "WeightedCapacity": 16},
+      {"InstanceType": "m5.8xlarge", "WeightedCapacity": 32},
+      {"InstanceType": "m5n.12xlarge", "WeightedCapacity": 48},
+      {"InstanceType": "m5a.16xlarge", "WeightedCapacity": 64},
+      {"InstanceType": "m5d.24xlarge", "WeightedCapacity": 96},
+      {"InstanceType": "m6i.32xlarge", "WeightedCapacity": 128},
+      {"InstanceType": "m5.xlarge", "WeightedCapacity": 4},
+      {"InstanceType": "m5n.2xlarge", "WeightedCapacity": 8},
+      {"InstanceType": "m5a.4xlarge", "WeightedCapacity": 16},
+      {"InstanceType": "m5d.8xlarge", "WeightedCapacity": 32},
+      {"InstanceType": "m6i.12xlarge", "WeightedCapacity": 48},
+      {"InstanceType": "m5.16xlarge", "WeightedCapacity": 64}
+    ]
+  }],
+  "TargetCapacitySpecification": {
+    "TotalTargetCapacity": "{{ requested_count }}",
+    "DefaultTargetCapacityType": "spot",
+    "OnDemandTargetCapacity": "{{ on_demand_capacity | default(0) }}",
+    "SpotAllocationStrategy": "price-capacity-optimized",
+    "TargetCapacityUnitType": "vcpu"
+  },
+  "SpotOptions": {
+    "AllocationStrategy": "price-capacity-optimized",
+    "InstanceInterruptionBehavior": "terminate",
+    "MaintenanceStrategies": {
+      "CapacityRebalance": {
+        "ReplacementStrategy": "launch",
+        "TerminationDelay": 120
+      }
+    }
+  },
+  "ReplaceUnhealthyInstances": true,
+  "TagSpecifications": [{
+    "ResourceType": "fleet",
+    "Tags": [
+      {"Key": "Name", "Value": "hpc-spot-diversified-{{ request_id }}"},
+      {"Key": "RequestId", "Value": "{{ request_id }}"},
+      {"Key": "TemplateId", "Value": "{{ template_id }}"},
+      {"Key": "CreatedBy", "Value": "{{ package_name }}"},
+      {"Key": "WorkloadType", "Value": "hpc"},
+      {"Key": "OptimizationStrategy", "Value": "maximum-spot-diversification"},
+      {"Key": "AllocationStrategy", "Value": "price-capacity-optimized"}
+    ]
+  }]
+}

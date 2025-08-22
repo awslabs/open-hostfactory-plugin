@@ -33,14 +33,16 @@ from domain.base.ports import LoggingPort
 from domain.request.aggregate import Request
 from infrastructure.adapters.ports.request_adapter_port import RequestAdapterPort
 from infrastructure.error.decorators import handle_infrastructure_exceptions
+from infrastructure.utilities.common.resource_naming import get_resource_prefix
 from providers.aws.domain.template.aggregate import AWSTemplate
 from providers.aws.exceptions.aws_exceptions import AWSInfrastructureError
+from providers.aws.infrastructure.handlers.base_context_mixin import BaseContextMixin
 from providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from providers.aws.utilities.aws_operations import AWSOperations
 
 
 @injectable
-class ASGHandler(AWSHandler):
+class ASGHandler(AWSHandler, BaseContextMixin):
     """Handler for Auto Scaling Group operations."""
 
     def __init__(
@@ -63,6 +65,25 @@ class ASGHandler(AWSHandler):
         """
         # Use integrated base class initialization
         super().__init__(aws_client, logger, aws_ops, launch_template_manager, request_adapter)
+
+        # Get AWS native spec service from container
+        from infrastructure.di.container import get_container
+
+        container = get_container()
+        try:
+            from providers.aws.infrastructure.services.aws_native_spec_service import (
+                AWSNativeSpecService,
+            )
+
+            self.aws_native_spec_service = container.get(AWSNativeSpecService)
+            # Get config port for package info
+            from domain.base.ports.configuration_port import ConfigurationPort
+
+            self.config_port = container.get(ConfigurationPort)
+        except Exception:
+            # Service not available, native specs disabled
+            self.aws_native_spec_service = None
+            self.config_port = None
 
     @handle_infrastructure_exceptions(context="asg_creation")
     def acquire_hosts(self, request: Request, aws_template: AWSTemplate) -> Dict[str, Any]:
@@ -141,6 +162,53 @@ class ASGHandler(AWSHandler):
 
         return asg_name
 
+    def _prepare_template_context(self, template: AWSTemplate, request: Request) -> Dict[str, Any]:
+        """Prepare context with all computed values for template rendering."""
+
+        # Start with base context
+        context = self._prepare_base_context(template, request)
+
+        # Add capacity distribution (for consistency, even if not all used)
+        context.update(self._calculate_capacity_distribution(template, request))
+
+        # Add standard flags
+        context.update(self._prepare_standard_flags(template))
+
+        # Add standard tags
+        tag_context = self._prepare_standard_tags(template, request)
+        context.update(tag_context)
+
+        # Add ASG-specific context
+        context.update(self._prepare_asg_specific_context(template, request))
+
+        return context
+
+    def _prepare_asg_specific_context(
+        self, template: AWSTemplate, request: Request
+    ) -> Dict[str, Any]:
+        """Prepare ASG-specific context."""
+
+        return {
+            # ASG-specific values
+            "asg_name": f"{get_resource_prefix('asg')}{request.request_id}",
+            "min_size": 0,
+            "max_size": request.requested_count * 2,  # Allow buffer
+            # Configuration values
+            "default_cooldown": 300,
+            "health_check_type": "EC2",
+            "health_check_grace_period": 300,
+            "vpc_zone_identifier": ",".join(template.subnet_ids) if template.subnet_ids else None,
+            "context": (
+                template.context if hasattr(template, "context") and template.context else None
+            ),
+            # ASG-specific flags
+            "has_context": hasattr(template, "context") and bool(template.context),
+            "has_instance_protection": hasattr(template, "instance_protection")
+            and template.instance_protection,
+            "has_lifecycle_hooks": hasattr(template, "lifecycle_hooks")
+            and bool(template.lifecycle_hooks),
+        }
+
     def _create_asg_config(
         self,
         asg_name: str,
@@ -149,7 +217,51 @@ class ASGHandler(AWSHandler):
         launch_template_id: str,
         launch_template_version: str,
     ) -> Dict[str, Any]:
-        """Create Auto Scaling Group configuration."""
+        """Create Auto Scaling Group configuration with native spec support."""
+        # Try native spec processing with merge support
+        if self.aws_native_spec_service:
+            context = self._prepare_template_context(aws_template, request)
+            context.update(
+                {
+                    "launch_template_id": launch_template_id,
+                    "launch_template_version": launch_template_version,
+                    "asg_name": asg_name,
+                }
+            )
+
+            native_spec = self.aws_native_spec_service.process_provider_api_spec_with_merge(
+                aws_template, request, "asg", context
+            )
+            if native_spec:
+                # Ensure launch template info is in the spec
+                if "LaunchTemplate" not in native_spec:
+                    native_spec["LaunchTemplate"] = {}
+                native_spec["LaunchTemplate"]["LaunchTemplateId"] = launch_template_id
+                native_spec["LaunchTemplate"]["Version"] = launch_template_version
+                native_spec["AutoScalingGroupName"] = asg_name
+                self._logger.info(
+                    "Using native provider API spec with merge for ASG template %s",
+                    aws_template.template_id,
+                )
+                return native_spec
+
+            # Use template-driven approach with native spec service
+            return self.aws_native_spec_service.render_default_spec("asg", context)
+
+        # Fallback to legacy logic when native spec service is not available
+        return self._create_asg_config_legacy(
+            asg_name, aws_template, request, launch_template_id, launch_template_version
+        )
+
+    def _create_asg_config_legacy(
+        self,
+        asg_name: str,
+        aws_template: AWSTemplate,
+        request: Request,
+        launch_template_id: str,
+        launch_template_version: str,
+    ) -> Dict[str, Any]:
+        """Create Auto Scaling Group configuration using legacy logic."""
         asg_config = {
             "AutoScalingGroupName": asg_name,
             "LaunchTemplate": {

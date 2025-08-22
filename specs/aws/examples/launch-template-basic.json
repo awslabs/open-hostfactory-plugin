@@ -1,0 +1,32 @@
+{
+  "LaunchTemplateName": "lt-{{ request_id }}",
+  "LaunchTemplateData": {
+    "ImageId": "{{ image_id }}",
+    "InstanceType": "{{ instance_type | default('m5.large') }}",
+    "KeyName": "{{ key_name }}",
+    "SecurityGroupIds": ["{{ security_group_ids | join('\", \"') }}"],
+    "SubnetId": "{{ subnet_ids[0] }}",
+    "IamInstanceProfile": {
+      "Name": "{{ iam_instance_profile }}"
+    },
+    "BlockDeviceMappings": [{
+      "DeviceName": "/dev/xvda",
+      "Ebs": {
+        "VolumeSize": "{{ root_volume_size | default(20) }}",
+        "VolumeType": "{{ volume_type | default('gp3') }}",
+        "DeleteOnTermination": true,
+        "Encrypted": "{{ encrypt_volumes | default(true) }}"
+      }
+    }],
+    "UserData": "{{ user_data | b64encode }}",
+    "TagSpecifications": [{
+      "ResourceType": "instance",
+      "Tags": [
+        {"Key": "Name", "Value": "{{ instance_name_prefix | default('instance') }}-{{ request_id }}"},
+        {"Key": "RequestId", "Value": "{{ request_id }}"},
+        {"Key": "TemplateId", "Value": "{{ template_id }}"},
+        {"Key": "CreatedBy", "Value": "{{ package_name }}"}
+      ]
+    }]
+  }
+}

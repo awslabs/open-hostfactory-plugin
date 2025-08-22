@@ -166,7 +166,7 @@
       "vmType": "t2.micro",
       "keyName": "HF_SSH_KEY",
       "securityGroupIds": ["sg-0528dfedb6d763b16"],
-      "provider_api_spec_file": "examples/basic/ec2fleet-instant.json"
+      "provider_api_spec_file": "examples/ec2fleet-price-capacity-optimized.json"
     },
     {
       "templateId": "SpotFleetNativeSpec",
@@ -183,7 +183,7 @@
       "vmType": "t2.micro",
       "keyName": "HF_SSH_KEY",
       "securityGroupIds": ["sg-0528dfedb6d763b16"],
-      "provider_api_spec_file": "examples/basic/spotfleet-basic.json"
+      "provider_api_spec_file": "examples/spotfleet-price-capacity-optimized.json"
     },
     {
       "templateId": "ASGNativeSpec",
@@ -200,7 +200,7 @@
       "vmType": "t2.micro",
       "keyName": "HF_SSH_KEY",
       "securityGroupIds": ["sg-0528dfedb6d763b16"],
-      "provider_api_spec_file": "examples/basic/asg-simple.json"
+      "provider_api_spec_file": "examples/asg-basic.json"
     },
     {
       "templateId": "RunInstancesNativeSpec",
@@ -217,7 +217,7 @@
       "vmType": "t2.micro",
       "keyName": "HF_SSH_KEY",
       "securityGroupIds": ["sg-0528dfedb6d763b16"],
-      "launch_template_spec_file": "examples/basic/launch-template-minimal.json"
+      "launch_template_spec_file": "examples/launch-template-basic.json"
     }
   ]
 }

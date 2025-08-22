@@ -84,7 +84,7 @@ All handlers now provide consistent template variables through the BaseContextMi
 
 ```json
 {
-  "launch_template_spec_file": "examples/basic/launch-template-minimal.json"
+  "launch_template_spec_file": "examples/launch-template-basic.json"
 }
 ```
 
@@ -113,7 +113,7 @@ All handlers now provide consistent template variables through the BaseContextMi
 
 ```json
 {
-  "provider_api_spec_file": "examples/basic/ec2fleet-instant.json"
+  "provider_api_spec_file": "examples/ec2fleet-price-capacity-optimized.json"
 }
 ```
 

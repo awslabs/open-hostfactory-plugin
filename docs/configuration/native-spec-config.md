@@ -420,7 +420,7 @@ ohfp templates validate --native-spec-test
 
 #### Issue: Templates not found
 ```
-Error: Template file 'examples/basic/ec2fleet-instant.json' not found
+Error: Template file 'examples/ec2fleet-price-capacity-optimized.json' not found
 ```
 **Solution**: Check `spec_file_base_path` and `template_search_paths` settings
 

@@ -41,10 +41,10 @@ class TestSpecFileLoading:
         with patch("infrastructure.utilities.file.json_utils.read_json_file") as mock_read:
             mock_read.return_value = spec_content
 
-            result = self.service._load_spec_file("examples/basic/ec2fleet-instant.json")
+            result = self.service._load_spec_file("examples/ec2fleet-price-capacity-optimized.json")
 
             assert result == spec_content
-            mock_read.assert_called_once_with("specs/aws/examples/basic/ec2fleet-instant.json")
+            mock_read.assert_called_once_with("specs/aws/examples/ec2fleet-price-capacity-optimized.json")
 
     def test_load_spec_file_with_custom_base_path(self):
         """Test spec file loading with custom base path."""

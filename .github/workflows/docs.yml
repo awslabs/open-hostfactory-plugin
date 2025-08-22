@@ -53,7 +53,7 @@ jobs:
           cache-key-suffix: docs
 
       - name: Configure Git for mike
-        run: make git-ci-setup
+        run: make ci-git-setup
 
       - name: Build documentation
         run: |

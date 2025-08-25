@@ -77,7 +77,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
 
         except Exception as e:
             self._logger.error("Failed to get resource quota: %s", str(e))
-            raise InfrastructureError(f"Failed to get resource quota: {str(e)}")
+            raise InfrastructureError(f"Failed to get resource quota: {e!s}")
 
     def list_available_resources(
         self, resource_type: Optional[str] = None, region: Optional[str] = None
@@ -105,7 +105,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
 
         except Exception as e:
             self._logger.error("Failed to list resources: %s", str(e))
-            raise InfrastructureError(f"Failed to list resources: {str(e)}")
+            raise InfrastructureError(f"Failed to list resources: {e!s}")
 
     def create_resource(self, resource_config: Dict[str, Any]) -> str:
         """
@@ -126,7 +126,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
 
         except Exception as e:
             self._logger.error("Failed to create resource: %s", str(e))
-            raise InfrastructureError(f"Failed to create resource: {str(e)}")
+            raise InfrastructureError(f"Failed to create resource: {e!s}")
 
     def delete_resource(self, resource_id: str) -> bool:
         """
@@ -170,7 +170,7 @@ class AWSResourceManagerAdapter(CloudResourceManagerPort):
 
         except Exception as e:
             self._logger.error("Failed to get resource status: %s", str(e))
-            raise InfrastructureError(f"Failed to get resource status: {str(e)}")
+            raise InfrastructureError(f"Failed to get resource status: {e!s}")
 
     # Private helper methods for adaptation
 

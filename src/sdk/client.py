@@ -126,7 +126,7 @@ class OpenHFPluginSDK:
         except Exception as e:
             if isinstance(e, (SDKError, ConfigurationError, ProviderError)):
                 raise
-            raise SDKError(f"SDK initialization failed: {str(e)}")
+            raise SDKError(f"SDK initialization failed: {e!s}")
 
     async def cleanup(self) -> None:
         """Clean up resources and connections."""

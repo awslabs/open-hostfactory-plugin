@@ -402,7 +402,7 @@ class TemplateConfigurationManager:
             raise
         except Exception as e:
             self.logger.error("Failed to get template %s: %s", template_id, e)
-            raise TemplateConfigurationError(f"Failed to retrieve template {template_id}: {str(e)}")
+            raise TemplateConfigurationError(f"Failed to retrieve template {template_id}: {e!s}")
 
     async def get_templates_by_provider(self, provider_api: str) -> List[TemplateDTO]:
         """
@@ -537,7 +537,7 @@ class TemplateConfigurationManager:
         except Exception as e:
             self.logger.error("Template validation failed for %s: %s", template.template_id, e)
             validation_result["is_valid"] = False
-            validation_result["errors"].append(f"Validation error: {str(e)}")
+            validation_result["errors"].append(f"Validation error: {e!s}")
             return validation_result
 
     def _validate_basic_template_structure(
@@ -613,7 +613,7 @@ class TemplateConfigurationManager:
             self.logger.warning(
                 "Provider capability validation failed for template %s: %s", template.template_id, e
             )
-            result["warnings"].append(f"Could not validate provider capabilities: {str(e)}")
+            result["warnings"].append(f"Could not validate provider capabilities: {e!s}")
 
     def clear_cache(self) -> None:
         """Clear template cache."""

@@ -93,6 +93,6 @@ class MachineType(ValueObject):
         return self.value.split(".")[1]
 
     @classmethod
-    def from_str(cls, value: str) -> "MachineType":
+    def from_str(cls, value: str) -> MachineType:
         """Create instance from string value."""
         return cls(value=value)

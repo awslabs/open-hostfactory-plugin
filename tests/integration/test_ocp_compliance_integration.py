@@ -250,7 +250,7 @@ class TestOCPComplianceIntegration:
 
         for file_path in files_to_check:
             if os.path.exists(file_path):
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     content = f.read()
 
                 # Check for hard-coded provider conditionals
@@ -264,9 +264,9 @@ class TestOCPComplianceIntegration:
                 ]
 
                 for pattern in hard_coded_patterns:
-                    assert (
-                        pattern not in content
-                    ), f"Found hard-coded conditional '{pattern}' in {file_path}"
+                    assert pattern not in content, (
+                        f"Found hard-coded conditional '{pattern}' in {file_path}"
+                    )
 
     def test_configuration_schema_no_legacy_mode(self):
         """Test that configuration schema no longer supports legacy mode."""

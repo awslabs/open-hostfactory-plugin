@@ -48,10 +48,10 @@ def get_config_manager(config_path: Optional[str] = None) -> ConfigurationManage
 
 # Backward compatibility - re-export main class
 __all__: list[str] = [
-    "ConfigurationManager",
-    "ConfigTypeConverter",
-    "ConfigPathResolver",
-    "ProviderConfigManager",
     "ConfigCacheManager",
+    "ConfigPathResolver",
+    "ConfigTypeConverter",
+    "ConfigurationManager",
+    "ProviderConfigManager",
     "get_config_manager",
 ]

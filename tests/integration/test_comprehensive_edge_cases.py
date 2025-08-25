@@ -89,7 +89,7 @@ def test_comprehensive_edge_cases():
             return False
 
     except Exception as e:
-        print(f"Test execution failed: {str(e)}")
+        print(f"Test execution failed: {e!s}")
         import traceback
 
         traceback.print_exc()
@@ -251,7 +251,7 @@ def test_launch_template_edge_cases():
         return success_rate >= 0.8  # 80% success rate acceptable
 
     except Exception as e:
-        print(f"   Launch template edge cases test failed: {str(e)}")
+        print(f"   Launch template edge cases test failed: {e!s}")
         return False
 
 
@@ -375,7 +375,7 @@ def test_configuration_combinations():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   Configuration combinations test failed: {str(e)}")
+        print(f"   Configuration combinations test failed: {e!s}")
         return False
 
 
@@ -607,7 +607,7 @@ def test_scheduler_strategy_compliance():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   Scheduler strategy compliance test failed: {str(e)}")
+        print(f"   Scheduler strategy compliance test failed: {e!s}")
         return False
 
 
@@ -769,7 +769,7 @@ def test_request_machine_flows():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   Request machine flows test failed: {str(e)}")
+        print(f"   Request machine flows test failed: {e!s}")
         return False
 
 
@@ -877,7 +877,7 @@ def test_template_field_variations():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   Template field variations test failed: {str(e)}")
+        print(f"   Template field variations test failed: {e!s}")
         return False
 
 
@@ -949,7 +949,7 @@ def test_error_handling_scenarios():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   Error handling scenarios test failed: {str(e)}")
+        print(f"   Error handling scenarios test failed: {e!s}")
         return False
 
 
@@ -1026,7 +1026,7 @@ def test_hf_input_output_validation():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   HF input/output validation test failed: {str(e)}")
+        print(f"   HF input/output validation test failed: {e!s}")
         return False
 
 
@@ -1103,7 +1103,7 @@ def test_provider_api_combinations():
         return success_rate >= 0.8
 
     except Exception as e:
-        print(f"   Provider API combinations test failed: {str(e)}")
+        print(f"   Provider API combinations test failed: {e!s}")
         return False
 
 

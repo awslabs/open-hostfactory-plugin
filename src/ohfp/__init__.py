@@ -18,11 +18,11 @@ import infrastructure
 import providers
 
 __all__: list[str] = [
+    "api",
+    "application",
     "cli",
+    "config",
     "domain",
     "infrastructure",
-    "application",
-    "config",
-    "api",
     "providers",
 ]

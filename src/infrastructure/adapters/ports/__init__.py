@@ -16,8 +16,8 @@ from .request_adapter_port import RequestAdapterPort
 from .resource_provisioning_port import ResourceProvisioningPort
 
 __all__: list[str] = [
-    "ResourceProvisioningPort",
     "CloudResourceManagerPort",
-    "RequestAdapterPort",
     "LoggerPort",
+    "RequestAdapterPort",
+    "ResourceProvisioningPort",
 ]

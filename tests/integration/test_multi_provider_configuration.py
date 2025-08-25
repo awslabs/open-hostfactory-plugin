@@ -81,7 +81,7 @@ class TestMultiProviderConfiguration:
             config_path = Path(config_file)
             assert config_path.exists(), f"Configuration file {config_file} not found"
 
-            with open(config_path, "r") as f:
+            with open(config_path) as f:
                 config_data = json.load(f)
 
             provider_section = config_data.get("provider", {})
@@ -95,9 +95,9 @@ class TestMultiProviderConfiguration:
 
             # Verify providers don't have old capabilities field
             for provider in providers:
-                assert (
-                    "capabilities" not in provider
-                ), f"Provider {provider['name']} has deprecated capabilities field"
+                assert "capabilities" not in provider, (
+                    f"Provider {provider['name']} has deprecated capabilities field"
+                )
 
     def test_handler_configuration_flexibility(self):
         """Test handler configuration with flexible additional fields."""

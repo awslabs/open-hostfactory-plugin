@@ -261,7 +261,7 @@ class AWSValidationAdapter(BaseProviderValidationAdapter):
 
         except Exception as e:
             self._logger.error("Error during AWS template validation: %s", e)
-            errors.append(f"Validation error: {str(e)}")
+            errors.append(f"Validation error: {e!s}")
 
         return {
             "valid": len(errors) == 0,

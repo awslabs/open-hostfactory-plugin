@@ -70,9 +70,9 @@ class BaseRegistry(ABC):
         self.mode = mode
         # Type-based registrations
         self._type_registrations: Dict[str, BaseRegistration] = {}
-        self._instance_registrations: Dict[str, BaseRegistration] = (
-            {}
-        )  # Instance-based registrations (multi-choice only)
+        self._instance_registrations: Dict[
+            str, BaseRegistration
+        ] = {}  # Instance-based registrations (multi-choice only)
         self._registry_lock = threading.RLock()  # Use RLock for nested locking
 
         from infrastructure.logging.logger import get_logger
@@ -272,6 +272,6 @@ class BaseRegistry(ABC):
         except Exception as e:
             from domain.base.exceptions import ConfigurationError
 
-            error_msg = f"Failed to create strategy for '{identifier}': {str(e)}"
+            error_msg = f"Failed to create strategy for '{identifier}': {e!s}"
             self.logger.error(error_msg)
             raise ConfigurationError(error_msg)

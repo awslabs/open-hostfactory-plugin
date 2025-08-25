@@ -86,7 +86,7 @@ class DependencyResolver:
             if isinstance(e, (DependencyResolutionError, CircularDependencyError)):
                 raise
             else:
-                raise DependencyResolutionError(cls, f"Failed to resolve {cls.__name__}: {str(e)}")
+                raise DependencyResolutionError(cls, f"Failed to resolve {cls.__name__}: {e!s}")
 
     def _create_instance(self, cls: Type[T], dependency_chain: Set[Type]) -> T:
         """Create an instance of the specified type."""
@@ -104,9 +104,7 @@ class DependencyResolver:
             if isinstance(e, (DependencyResolutionError, CircularDependencyError)):
                 raise
             else:
-                raise InstantiationError(
-                    cls, f"Failed to create instance of {cls.__name__}: {str(e)}"
-                )
+                raise InstantiationError(cls, f"Failed to create instance of {cls.__name__}: {e!s}")
 
     def _create_from_registration(
         self, registration: DependencyRegistration, dependency_chain: Set[Type]
@@ -125,7 +123,7 @@ class DependencyResolver:
             except Exception as e:
                 raise FactoryError(
                     registration.dependency_type,
-                    f"Factory failed for { registration.dependency_type.__name__}: { str(e)}",
+                    f"Factory failed for {registration.dependency_type.__name__}: {e!s}",
                 )
 
         if registration.implementation_type is not None:
@@ -154,7 +152,7 @@ class DependencyResolver:
             if isinstance(e, (DependencyResolutionError, CircularDependencyError)):
                 raise
             else:
-                raise InstantiationError(cls, f"Failed to instantiate {cls.__name__}: {str(e)}")
+                raise InstantiationError(cls, f"Failed to instantiate {cls.__name__}: {e!s}")
 
     def _auto_register_injectable_class(self, cls: Type) -> None:
         """Auto-register an injectable class."""
@@ -255,7 +253,7 @@ class DependencyResolver:
             else:
                 raise DependencyResolutionError(
                     cls,
-                    f"Failed to resolve constructor parameters for { cls.__name__}: { str(e)}",
+                    f"Failed to resolve constructor parameters for {cls.__name__}: {e!s}",
                 )
 
     def _resolve_function_parameters(
@@ -311,7 +309,7 @@ class DependencyResolver:
                 raise
             else:
                 raise DependencyResolutionError(
-                    type(func), f"Failed to resolve factory parameters: {str(e)}"
+                    type(func), f"Failed to resolve factory parameters: {e!s}"
                 )
 
     def _resolve_string_annotation(self, annotation: str, context_class: Type) -> Type:
@@ -371,7 +369,7 @@ class DependencyResolver:
         except Exception as e:
             raise DependencyResolutionError(
                 context_class,
-                f"Failed to resolve string annotation '{annotation}': {str(e)}",
+                f"Failed to resolve string annotation '{annotation}': {e!s}",
             )
 
     def _is_primitive_type(self, param_type: Type) -> bool:

@@ -205,7 +205,7 @@ class OpenHFPluginMCPTools:
             return {
                 "error": {
                     "type": "ResultFormattingError",
-                    "message": f"Failed to format result: {str(e)}",
+                    "message": f"Failed to format result: {e!s}",
                     "tool": tool_name,
                     "result_type": type(result).__name__,
                 }

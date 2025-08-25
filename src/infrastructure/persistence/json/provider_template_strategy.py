@@ -125,7 +125,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
         for file_path in reversed(self._template_files):
             try:
                 if os.path.exists(file_path):
-                    with open(file_path, "r", encoding="utf-8") as f:
+                    with open(file_path, encoding="utf-8") as f:
                         file_data = json.load(f)
 
                     # Handle different file formats
@@ -229,7 +229,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
             # Load existing data from target file
             existing_data = []
             if os.path.exists(target_file):
-                with open(target_file, "r", encoding="utf-8") as f:
+                with open(target_file, encoding="utf-8") as f:
                     existing_data = json.load(f)
                     if not isinstance(existing_data, list):
                         existing_data = []
@@ -302,7 +302,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                 if not os.path.exists(file_path):
                     continue
 
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     file_data = json.load(f)
 
                 if isinstance(file_data, list):
@@ -351,7 +351,7 @@ class ProviderTemplateStrategy(JSONStorageStrategy):
                 if not os.path.exists(file_path):
                     continue
 
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     file_data = json.load(f)
 
                 # Check if template exists in this file

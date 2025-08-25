@@ -301,7 +301,7 @@ class Application:
             self.logger.error("Health check failed: %s", e)
             return {
                 "status": "error",
-                "message": f"Health check failed: {str(e)}",
+                "message": f"Health check failed: {e!s}",
                 "initialized": self._initialized,
             }
 
@@ -310,7 +310,7 @@ class Application:
         self.logger.info("Shutting down application")
         self._initialized = False
 
-    async def __aenter__(self) -> "Application":
+    async def __aenter__(self) -> Application:
         """Async context manager entry."""
         if not await self.initialize():
             raise RuntimeError("Failed to initialize application")

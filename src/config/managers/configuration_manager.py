@@ -41,7 +41,7 @@ class ConfigurationManager:
     def __init__(self, config_file: Optional[str] = None) -> None:
         """Initialize configuration manager with lazy loading."""
         self._config_file = config_file
-        self._loader: Optional["ConfigurationLoader"] = None
+        self._loader: Optional[ConfigurationLoader] = None
         self._app_config: Optional[AppConfig] = None
 
         # Initialize component managers
@@ -55,7 +55,7 @@ class ConfigurationManager:
         self._scheduler_override: Optional[str] = None
 
     @property
-    def loader(self) -> "ConfigurationLoader":
+    def loader(self) -> ConfigurationLoader:
         """Lazy load configuration loader."""
         if self._loader is None:
             from config.loader import ConfigurationLoader
@@ -224,7 +224,7 @@ class ConfigurationManager:
         """Get provider type."""
         return self._ensure_provider_manager().get_provider_type()
 
-    def get_provider_config(self) -> Optional["ProviderConfig"]:
+    def get_provider_config(self) -> Optional[ProviderConfig]:
         """Get provider configuration."""
         return self._ensure_provider_manager().get_provider_config()
 

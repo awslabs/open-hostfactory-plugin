@@ -124,7 +124,6 @@ class RuntimeAMICache:
 
         # Clear persistent cache file if configured
         if self._persistent_file and os.path.exists(self._persistent_file):
-
             with suppress(Exception):
                 os.remove(self._persistent_file)
 
@@ -158,7 +157,7 @@ class RuntimeAMICache:
             if not os.path.exists(self._persistent_file):
                 return
 
-            with open(self._persistent_file, "r") as f:
+            with open(self._persistent_file) as f:
                 data = json.load(f)
 
             current_time = time.time()

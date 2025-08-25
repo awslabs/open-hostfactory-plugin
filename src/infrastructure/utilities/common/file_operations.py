@@ -52,7 +52,7 @@ def read_text_file(file_path: str, encoding: str = "utf-8") -> str:
         FileNotFoundError: If file doesn't exist
         IOError: If file cannot be read
     """
-    with open(file_path, "r", encoding=encoding) as f:
+    with open(file_path, encoding=encoding) as f:
         return f.read()
 
 
@@ -88,7 +88,7 @@ def read_json_file(file_path: str, encoding: str = "utf-8") -> Dict[str, Any]:
         FileNotFoundError: If file doesn't exist
         json.JSONDecodeError: If file is not valid JSON
     """
-    with open(file_path, "r", encoding=encoding) as f:
+    with open(file_path, encoding=encoding) as f:
         result: Dict[str, Any] = json.load(f)
         return result
 

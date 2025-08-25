@@ -439,9 +439,9 @@ class Request(AggregateRoot):
         }
 
         # Handle optional timestamps
-        if "started_at" in data and data["started_at"]:
+        if data.get("started_at"):
             core_data["started_at"] = datetime.fromisoformat(data["started_at"])
-        if "completed_at" in data and data["completed_at"]:
+        if data.get("completed_at"):
             core_data["completed_at"] = datetime.fromisoformat(data["completed_at"])
 
         return cls.model_validate(core_data)

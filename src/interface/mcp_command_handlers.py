@@ -67,19 +67,19 @@ async def handle_mcp_tools_call(args) -> Dict[str, Any]:
             return {"error": f"Arguments file not found: {args.file}"}
 
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 tool_args = json.load(f)
         except json.JSONDecodeError as e:
-            return {"error": f"Invalid JSON in arguments file: {str(e)}"}
+            return {"error": f"Invalid JSON in arguments file: {e!s}"}
         except Exception as e:
-            return {"error": f"Failed to read arguments file: {str(e)}"}
+            return {"error": f"Failed to read arguments file: {e!s}"}
 
     elif hasattr(args, "args") and args.args:
         # Parse arguments from command line JSON string
         try:
             tool_args = json.loads(args.args)
         except json.JSONDecodeError as e:
-            return {"error": f"Invalid JSON in arguments: {str(e)}"}
+            return {"error": f"Invalid JSON in arguments: {e!s}"}
 
     # Execute tool
     async with OpenHFPluginMCPTools() as tools:
@@ -184,7 +184,7 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
                             {
                                 "check": "Tool Execution Test",
                                 "status": "WARNING",
-                                "details": f"Tool execution failed (may be expected): {str(e)}",
+                                "details": f"Tool execution failed (may be expected): {e!s}",
                             }
                         )
 
@@ -199,7 +199,7 @@ async def handle_mcp_validate(args) -> Dict[str, Any]:
         config_path = Path(args.config)
         if config_path.exists():
             try:
-                with open(config_path, "r") as f:
+                with open(config_path) as f:
                     config_data = json.load(f)
                 validation_result["checks"].append(
                     {
@@ -304,10 +304,10 @@ def _format_tool_info_table(info: Dict[str, Any]) -> Dict[str, Any]:
         ["Handler Type", info.get("handler_type", "unknown")],
     ]
 
-    if "required_params" in info and info["required_params"]:
+    if info.get("required_params"):
         rows.append(["Required Parameters", ", ".join(info["required_params"])])
 
-    if "parameters" in info and info["parameters"]:
+    if info.get("parameters"):
         param_count = len(info["parameters"])
         rows.append(["Total Parameters", str(param_count)])
 

@@ -148,7 +148,7 @@ class AWSOperations:
             return result
 
         except CircuitBreakerOpenError as e:
-            error_msg = f"Circuit breaker OPEN for {operation_name}: {str(e)}"
+            error_msg = f"Circuit breaker OPEN for {operation_name}: {e!s}"
             self._logger.error(error_msg)
             raise
 
@@ -157,7 +157,7 @@ class AWSOperations:
             raise
 
         except Exception as e:
-            error_msg = error_message or f"Unexpected error in {operation_name}: {str(e)}"
+            error_msg = error_message or f"Unexpected error in {operation_name}: {e!s}"
             self._logger.error(error_msg)
             raise AWSInfrastructureError(error_msg)
 
@@ -402,7 +402,7 @@ class AWSOperations:
             self.log_operation_failure(operation_name, context, error)
             raise error
         except Exception as e:
-            error_msg = f"Failed to {operation_name}: {str(e)}"
+            error_msg = f"Failed to {operation_name}: {e!s}"
             self._logger.error("Unexpected error in %s: %s", context, error_msg)
             raise AWSInfrastructureError(error_msg)
 

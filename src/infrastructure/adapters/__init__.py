@@ -7,9 +7,9 @@ from .logging_adapter import LoggingAdapter
 from .template_configuration_adapter import TemplateConfigurationAdapter
 
 __all__: list[str] = [
-    "LoggingAdapter",
     "ContainerAdapter",
     "ContainerAdapterFactory",
     "ErrorHandlingAdapter",
+    "LoggingAdapter",
     "TemplateConfigurationAdapter",
 ]

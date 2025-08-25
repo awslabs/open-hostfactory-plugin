@@ -57,9 +57,9 @@ def get_event_bus():
 
 __all__: list[str] = [
     "ConfigurableEventPublisher",
-    "create_event_publisher",
-    "get_event_publisher",
     "EventBus",
     "create_event_bus",
+    "create_event_publisher",
     "get_event_bus",
+    "get_event_publisher",
 ]

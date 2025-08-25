@@ -91,7 +91,7 @@ class SDKConfig:
             raise ConfigurationError(f"Configuration file not found: {path}")
 
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 if file_path.suffix.lower() in [".yml", ".yaml"]:
                     try:
                         import yaml
@@ -107,7 +107,7 @@ class SDKConfig:
             return config
 
         except Exception as e:
-            raise ConfigurationError(f"Failed to load configuration from {path}: {str(e)}")
+            raise ConfigurationError(f"Failed to load configuration from {path}: {e!s}")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
@@ -144,6 +144,5 @@ class SDKConfig:
         valid_log_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         if self.log_level.upper() not in valid_log_levels:
             raise ConfigurationError(
-                f"Invalid log level: {self.log_level}. "
-                f"Valid levels: {', '.join(valid_log_levels)}"
+                f"Invalid log level: {self.log_level}. Valid levels: {', '.join(valid_log_levels)}"
             )

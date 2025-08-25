@@ -341,7 +341,7 @@ class ASGHandler(AWSHandler, BaseContextMixin):
 
         except Exception as e:
             self._logger.error("Failed to release ASG hosts: %s", str(e))
-            raise AWSInfrastructureError(f"Failed to release ASG hosts: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to release ASG hosts: {e!s}")
 
         # Get instance IDs from machine references
         instance_ids = []
@@ -420,4 +420,4 @@ class ASGHandler(AWSHandler, BaseContextMixin):
             return all_instances
         except Exception as e:
             self._logger.error("Unexpected error checking ASG status: %s", str(e))
-            raise AWSInfrastructureError(f"Failed to check ASG status: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to check ASG status: {e!s}")

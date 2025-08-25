@@ -12,9 +12,9 @@ from .resource_manager_adapter import AWSResourceManagerAdapter
 from .template_adapter import AWSTemplateAdapter
 
 __all__: list[str] = [
-    "AWSResourceManagerAdapter",
+    "AWSMachineAdapter",
     "AWSProvisioningAdapter",
     "AWSRequestAdapter",
-    "AWSMachineAdapter",
+    "AWSResourceManagerAdapter",
     "AWSTemplateAdapter",
 ]

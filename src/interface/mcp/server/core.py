@@ -171,7 +171,7 @@ class OpenHFPluginMCPServer:
             self.logger.error("Error handling MCP message: %s", e)
             error_response = MCPMessage(
                 id=getattr(mcp_msg, "id", None) if "mcp_msg" in locals() else None,
-                error={"code": -32603, "message": f"Internal error: {str(e)}"},
+                error={"code": -32603, "message": f"Internal error: {e!s}"},
             )
             return json.dumps(error_response.__dict__)
 
@@ -207,7 +207,7 @@ class OpenHFPluginMCPServer:
             self.logger.error("Error handling method %s: %s", method, e)
             return MCPMessage(
                 id=message.id,
-                error={"code": -32603, "message": f"Internal error: {str(e)}"},
+                error={"code": -32603, "message": f"Internal error: {e!s}"},
             )
 
     async def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:

@@ -95,7 +95,7 @@ def test_handler_architecture_consolidation():
             return False
 
     except Exception as e:
-        print(f"FAIL: Test execution failed: {str(e)}")
+        print(f"FAIL: Test execution failed: {e!s}")
         import traceback
 
         traceback.print_exc()
@@ -156,10 +156,10 @@ def test_constructor_consistency():
         return True
 
     except ImportError as e:
-        print(f"   FAIL: Import error: {str(e)}")
+        print(f"   FAIL: Import error: {e!s}")
         return False
     except Exception as e:
-        print(f"   FAIL: Constructor consistency test failed: {str(e)}")
+        print(f"   FAIL: Constructor consistency test failed: {e!s}")
         return False
 
 
@@ -233,7 +233,7 @@ def test_method_signatures():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Method signature test failed: {str(e)}")
+        print(f"   FAIL: Method signature test failed: {e!s}")
         return False
 
 
@@ -294,7 +294,7 @@ def test_base_class_inheritance():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Base class inheritance test failed: {str(e)}")
+        print(f"   FAIL: Base class inheritance test failed: {e!s}")
         return False
 
 
@@ -355,7 +355,7 @@ def test_launch_template_integration():
 
             except Exception as e:
                 print(
-                    f"   FAIL: {handler_name}: Failed to instantiate with launch template manager: {str(e)}"
+                    f"   FAIL: {handler_name}: Failed to instantiate with launch template manager: {e!s}"
                 )
                 return False
 
@@ -363,7 +363,7 @@ def test_launch_template_integration():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Launch template integration test failed: {str(e)}")
+        print(f"   FAIL: Launch template integration test failed: {e!s}")
         return False
 
 
@@ -410,7 +410,7 @@ def test_error_handling_consistency():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Error handling consistency test failed: {str(e)}")
+        print(f"   FAIL: Error handling consistency test failed: {e!s}")
         return False
 
 
@@ -459,7 +459,7 @@ def test_performance_metrics():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Performance metrics test failed: {str(e)}")
+        print(f"   FAIL: Performance metrics test failed: {e!s}")
         return False
 
 
@@ -491,7 +491,7 @@ def test_import_consistency():
 
             print(f"   Checking imports in {os.path.basename(handler_file)}...")
 
-            with open(handler_file, "r") as f:
+            with open(handler_file) as f:
                 content = f.read()
 
             # Check for AWSTemplate import (not Template)
@@ -519,7 +519,7 @@ def test_import_consistency():
         return True
 
     except Exception as e:
-        print(f"   FAIL: Import consistency test failed: {str(e)}")
+        print(f"   FAIL: Import consistency test failed: {e!s}")
         return False
 
 

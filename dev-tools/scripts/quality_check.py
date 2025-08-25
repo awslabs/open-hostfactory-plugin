@@ -44,12 +44,12 @@ except ImportError:
 # Emoji detection pattern
 EMOJI_PATTERN = re.compile(
     "["
-    "\U0001F600-\U0001F64F"  # emoticons
-    "\U0001F300-\U0001F5FF"  # symbols & pictographs
-    "\U0001F680-\U0001F6FF"  # transport & map
-    "\U0001F1E0-\U0001F1FF"  # flags
-    "\U00002702-\U000027B0"  # dingbats
-    "\U000024C2-\U0001F251"
+    "\U0001f600-\U0001f64f"  # emoticons
+    "\U0001f300-\U0001f5ff"  # symbols & pictographs
+    "\U0001f680-\U0001f6ff"  # transport & map
+    "\U0001f1e0-\U0001f1ff"  # flags
+    "\U00002702-\U000027b0"  # dingbats
+    "\U000024c2-\U0001f251"
     "]+",
     flags=re.UNICODE,
 )
@@ -262,7 +262,7 @@ class FileChecker:
         """Check a file for violations."""
         violations = []
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
             violations.extend(self.check_content(file_path, content))
         except UnicodeDecodeError:
@@ -434,6 +434,7 @@ class ImportChecker(FileChecker):
                     "--remove-unused-variables",
                     file_path,
                 ],
+                check=False,
                 capture_output=True,
                 text=True,
                 cwd=".",
@@ -498,10 +499,9 @@ class CommentChecker(FileChecker):
                     string_delimiter = stripped[1:4]
                     if not (stripped.endswith(string_delimiter) and len(stripped) > 4):
                         in_multiline_string = True
-            else:
-                if stripped.endswith(string_delimiter):
-                    in_multiline_string = False
-                    string_delimiter = None
+            elif stripped.endswith(string_delimiter):
+                in_multiline_string = False
+                string_delimiter = None
 
             # Skip checks if we're inside a multiline string
             if in_multiline_string:
@@ -562,7 +562,7 @@ class QualityChecker:
             return None
 
         try:
-            with open(gitignore_path, "r", encoding="utf-8") as f:
+            with open(gitignore_path, encoding="utf-8") as f:
                 return pathspec.PathSpec.from_lines("gitwildmatch", f)
         except Exception:
             return None
@@ -711,7 +711,7 @@ def main():
         # Load .gitignore patterns
         gitignore_path = Path(".gitignore")
         if gitignore_path.exists():
-            with open(gitignore_path, "r", encoding="utf-8") as f:
+            with open(gitignore_path, encoding="utf-8") as f:
                 spec = pathspec.PathSpec.from_lines("gitwildmatch", f)
         else:
             spec = pathspec.PathSpec.from_lines("gitwildmatch", [])
@@ -775,7 +775,7 @@ def main():
                 logger.error(f"    {v.content}")
 
         # Print summary by category
-        logger.error(f"\n" + "-" * 40)
+        logger.error("\n" + "-" * 40)
         logger.error("Summary:")
         for category, count in sorted(category_counts.items()):
             logger.error(f"{category}: {count}")

@@ -9,11 +9,11 @@ from .config import (
 from .validator import AWSConfigManager, AWSNamingConfig, get_aws_config_manager
 
 __all__: list[str] = [
+    "AWSConfigManager",
+    "AWSNamingConfig",
     "AWSProviderConfig",
-    "HandlersConfig",
     "HandlerCapabilityConfig",
     "HandlerDefaultsConfig",
-    "AWSNamingConfig",
-    "AWSConfigManager",
+    "HandlersConfig",
     "get_aws_config_manager",
 ]

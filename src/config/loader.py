@@ -183,8 +183,7 @@ class ConfigurationLoader:
             return config
         else:
             get_config_logger().warning(
-                "Failed to load default configuration from any location. "
-                "Using empty configuration."
+                "Failed to load default configuration from any location. Using empty configuration."
             )
             return {}
 
@@ -210,11 +209,11 @@ class ConfigurationLoader:
 
         except ValueError as e:
             # Convert Pydantic validation errors to ConfigurationError
-            raise ConfigurationError("App", f"Configuration validation failed: {str(e)}")
+            raise ConfigurationError("App", f"Configuration validation failed: {e!s}")
         except KeyError as e:
-            raise ConfigurationError("App", f"Missing required configuration: {str(e)}")
+            raise ConfigurationError("App", f"Missing required configuration: {e!s}")
         except Exception as e:
-            raise ConfigurationError("App", f"Failed to create typed configuration: {str(e)}")
+            raise ConfigurationError("App", f"Failed to create typed configuration: {e!s}")
 
     @classmethod
     def _load_from_file(cls, config_path: str) -> Optional[Dict[str, Any]]:
@@ -240,9 +239,9 @@ class ConfigurationLoader:
                 return json.load(f)
 
         except json.JSONDecodeError as e:
-            raise ConfigurationError(f"Invalid JSON in configuration file: {str(e)}")
+            raise ConfigurationError(f"Invalid JSON in configuration file: {e!s}")
         except Exception as e:
-            raise ConfigurationError(f"Failed to load configuration file: {str(e)}")
+            raise ConfigurationError(f"Failed to load configuration file: {e!s}")
 
     @classmethod
     def _load_config_file(

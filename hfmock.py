@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Mock HostFactory server for testing and development."""
+
 """Mock HostFactory server for testing and development."""
 
 import argparse
@@ -103,12 +104,13 @@ def run_bash_script(script_path: str, argument: str, timeout: int = 300) -> Dict
     try:
         result = subprocess.run(
             ["/bin/bash", script_path, "-f", argument],
+            check=False,
             capture_output=True,
             text=True,
             timeout=timeout,
         )
         return {"stdout": result.stdout, "stderr": result.stderr, "return_code": result.returncode}
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired:
         log.error(f"Script execution timed out after {timeout} seconds")
         return {"stdout": "", "stderr": f"Timeout after {timeout} seconds", "return_code": -1}
     except subprocess.CalledProcessError as e:

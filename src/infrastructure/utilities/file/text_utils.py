@@ -19,7 +19,7 @@ def read_text_file(file_path: str, encoding: str = "utf-8") -> str:
         UnicodeDecodeError: If file cannot be decoded with specified encoding
     """
     try:
-        with open(file_path, "r", encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             return f.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Text file not found: {file_path}")
@@ -52,7 +52,7 @@ def write_text_file(file_path: str, content: str, encoding: str = "utf-8") -> No
         with open(file_path, "w", encoding=encoding) as f:
             f.write(content)
     except OSError as e:
-        raise OSError(f"Failed to write text file {file_path}: {str(e)}")
+        raise OSError(f"Failed to write text file {file_path}: {e!s}")
 
 
 def append_text_file(file_path: str, content: str, encoding: str = "utf-8") -> None:
@@ -74,7 +74,7 @@ def append_text_file(file_path: str, content: str, encoding: str = "utf-8") -> N
         with open(file_path, "a", encoding=encoding) as f:
             f.write(content)
     except OSError as e:
-        raise OSError(f"Failed to append to text file {file_path}: {str(e)}")
+        raise OSError(f"Failed to append to text file {file_path}: {e!s}")
 
 
 def read_text_lines(
@@ -96,7 +96,7 @@ def read_text_lines(
         UnicodeDecodeError: If file cannot be decoded with specified encoding
     """
     try:
-        with open(file_path, "r", encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             lines = f.readlines()
             if strip_whitespace:
                 lines = [line.strip() for line in lines]
@@ -138,4 +138,4 @@ def write_text_lines(
                     line += "\n"
                 f.write(line)
     except OSError as e:
-        raise OSError(f"Failed to write text lines to {file_path}: {str(e)}")
+        raise OSError(f"Failed to write text lines to {file_path}: {e!s}")

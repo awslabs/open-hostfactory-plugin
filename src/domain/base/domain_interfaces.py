@@ -82,7 +82,7 @@ class AggregateRepository(Generic[A], ABC):
 class UnitOfWork(Protocol):
     """Unit of work pattern for transaction management."""
 
-    def __enter__(self) -> "UnitOfWork":
+    def __enter__(self) -> UnitOfWork:
         """Enter the unit of work context."""
         ...
 

@@ -510,7 +510,7 @@ async def execute_command(args, app) -> Dict[str, Any]:
         try:
             import json
 
-            with open(args.file, "r") as f:
+            with open(args.file) as f:
                 input_data = json.load(f)
         except Exception as e:
             from infrastructure.logging.logger import get_logger

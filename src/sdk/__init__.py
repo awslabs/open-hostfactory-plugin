@@ -28,10 +28,10 @@ from .exceptions import ConfigurationError, ProviderError, SDKError
 OHFPSDK = OpenHFPluginSDK
 
 __all__: list[str] = [
-    "OpenHFPluginSDK",
     "OHFPSDK",
+    "ConfigurationError",
+    "OpenHFPluginSDK",
+    "ProviderError",
     "SDKConfig",
     "SDKError",
-    "ConfigurationError",
-    "ProviderError",
 ]

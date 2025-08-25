@@ -30,13 +30,12 @@ class ConfigPathResolver:
         """
         if config_path:
             path = config_path
+        # Use base config path if available
+        elif self._base_config_path:
+            base_dir = os.path.dirname(self._base_config_path)
+            path = os.path.join(base_dir, default_path)
         else:
-            # Use base config path if available
-            if self._base_config_path:
-                base_dir = os.path.dirname(self._base_config_path)
-                path = os.path.join(base_dir, default_path)
-            else:
-                path = default_path
+            path = default_path
 
         # Expand user home directory
         path = os.path.expanduser(path)
@@ -74,13 +73,12 @@ class ConfigPathResolver:
         if config_path:
             if os.path.isabs(config_path):
                 return config_path
+            # Relative to base config directory
+            elif self._base_config_path:
+                base_dir = os.path.dirname(self._base_config_path)
+                return os.path.abspath(os.path.join(base_dir, config_path))
             else:
-                # Relative to base config directory
-                if self._base_config_path:
-                    base_dir = os.path.dirname(self._base_config_path)
-                    return os.path.abspath(os.path.join(base_dir, config_path))
-                else:
-                    return os.path.abspath(config_path)
+                return os.path.abspath(config_path)
 
         # Use default directory
         if default_dir:

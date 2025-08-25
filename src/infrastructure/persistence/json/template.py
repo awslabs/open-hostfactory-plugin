@@ -74,7 +74,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
         # Then check legacy file if it exists
         if self.legacy_file_path and os.path.exists(self.legacy_file_path):
             try:
-                with open(self.legacy_file_path, "r", encoding="utf-8") as f:
+                with open(self.legacy_file_path, encoding="utf-8") as f:
                     legacy_data = json.load(f)
 
                 if isinstance(legacy_data, list):
@@ -103,7 +103,7 @@ class TemplateJSONStorageStrategy(JSONStorageStrategy):
         # Load from legacy file first (lower priority)
         if self.legacy_file_path and os.path.exists(self.legacy_file_path):
             try:
-                with open(self.legacy_file_path, "r", encoding="utf-8") as f:
+                with open(self.legacy_file_path, encoding="utf-8") as f:
                     legacy_data = json.load(f)
 
                 if isinstance(legacy_data, list):

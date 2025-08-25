@@ -344,7 +344,7 @@ class CompositeProviderStrategy(ProviderStrategy):
                 "Composite operation %s failed: %s", operation.operation_type, e
             )
             return ProviderResult.error_result(
-                f"Composite operation failed: {str(e)}",
+                f"Composite operation failed: {e!s}",
                 "COMPOSITE_EXECUTION_ERROR",
                 {"total_execution_time_ms": total_time_ms},
             )
@@ -390,7 +390,7 @@ class CompositeProviderStrategy(ProviderStrategy):
                     StrategyExecutionResult(
                         strategy_type=strategy_type,
                         result=ProviderResult.error_result(
-                            f"Execution failed: {str(e)}", "EXECUTION_ERROR"
+                            f"Execution failed: {e!s}", "EXECUTION_ERROR"
                         ),
                         execution_time_ms=0.0,
                         success=False,
@@ -491,7 +491,7 @@ class CompositeProviderStrategy(ProviderStrategy):
             return StrategyExecutionResult(
                 strategy_type=strategy_type,
                 result=ProviderResult.error_result(
-                    f"Strategy execution failed: {str(e)}", "STRATEGY_ERROR"
+                    f"Strategy execution failed: {e!s}", "STRATEGY_ERROR"
                 ),
                 execution_time_ms=execution_time_ms,
                 success=False,
@@ -646,7 +646,7 @@ class CompositeProviderStrategy(ProviderStrategy):
             except Exception as e:
                 health_details[strategy_type] = {
                     "healthy": False,
-                    "message": f"Health check failed: {str(e)}",
+                    "message": f"Health check failed: {e!s}",
                     "error": str(e),
                 }
 

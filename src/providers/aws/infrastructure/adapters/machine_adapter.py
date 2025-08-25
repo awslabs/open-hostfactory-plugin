@@ -130,10 +130,10 @@ class AWSMachineAdapter:
 
         except KeyError as e:
             self._logger.error("Missing key in AWS instance data: %s", str(e))
-            raise AWSError(f"Missing key in AWS instance data: {str(e)}")
+            raise AWSError(f"Missing key in AWS instance data: {e!s}")
         except Exception as e:
             self._logger.error("Failed to create machine from AWS instance: %s", str(e))
-            raise AWSError(f"Failed to create machine from AWS instance: {str(e)}")
+            raise AWSError(f"Failed to create machine from AWS instance: {e!s}")
 
     def perform_health_check(self, machine: Machine) -> Dict[str, Any]:
         """
@@ -169,14 +169,14 @@ class AWSMachineAdapter:
                 self._logger.error("Network error during health check: %s", str(e))
                 health_checks["system"] = {
                     "status": False,
-                    "details": {"reason": f"Network error: {str(e)}"},
+                    "details": {"reason": f"Network error: {e!s}"},
                 }
                 return health_checks
             except RateLimitError as e:
                 self._logger.warning("Rate limit exceeded during health check: %s", str(e))
                 health_checks["system"] = {
                     "status": False,
-                    "details": {"reason": f"Rate limit exceeded: {str(e)}"},
+                    "details": {"reason": f"Rate limit exceeded: {e!s}"},
                 }
                 return health_checks
             except AWSError as e:
@@ -187,7 +187,7 @@ class AWSMachineAdapter:
                 else:
                     self._logger.error("AWS error during health check: %s", str(e))
                     raise AWSError(
-                        f"AWS error during health check: {str(e)}",
+                        f"AWS error during health check: {e!s}",
                         error_code=error_code,
                     )
 
@@ -239,7 +239,7 @@ class AWSMachineAdapter:
             raise
         except Exception as e:
             self._logger.error("Unexpected error during health check: %s", str(e))
-            raise AWSError(f"Unexpected error during health check: {str(e)}")
+            raise AWSError(f"Unexpected error during health check: {e!s}")
 
     def cleanup_machine_resources(self, machine: Machine) -> Dict[str, Any]:
         """
@@ -276,10 +276,10 @@ class AWSMachineAdapter:
                 )
             except NetworkError as e:
                 self._logger.error("Network error checking instance existence: %s", str(e))
-                raise AWSError(f"Network error checking instance existence: {str(e)}")
+                raise AWSError(f"Network error checking instance existence: {e!s}")
             except RateLimitError as e:
                 self._logger.warning("Rate limit exceeded checking instance existence: %s", str(e))
-                raise AWSError(f"Rate limit exceeded checking instance existence: {str(e)}")
+                raise AWSError(f"Rate limit exceeded checking instance existence: {e!s}")
             except AWSError as e:
                 error_code = getattr(e, "error_code", "")
                 if error_code == "InvalidInstanceID.NotFound":
@@ -287,7 +287,7 @@ class AWSMachineAdapter:
                     raise EC2InstanceNotFoundError(str(machine.machine_id))
                 else:
                     self._logger.error("AWS error during cleanup: %s", str(e))
-                    raise AWSError(f"AWS error during cleanup: {str(e)}", error_code=error_code)
+                    raise AWSError(f"AWS error during cleanup: {e!s}", error_code=error_code)
 
             # Detach and delete EBS volumes using circuit breaker
             try:
@@ -424,7 +424,7 @@ class AWSMachineAdapter:
         except Exception as e:
             self._logger.error("Unexpected error during resource cleanup: %s", str(e))
             raise ResourceCleanupError(
-                f"Failed to cleanup resources for {machine.machine_id}: {str(e)}",
+                f"Failed to cleanup resources for {machine.machine_id}: {e!s}",
                 str(machine.machine_id),
                 "EC2Instance",
             )
@@ -466,10 +466,10 @@ class AWSMachineAdapter:
 
             except NetworkError as e:
                 self._logger.error("Network error getting machine details: %s", str(e))
-                raise AWSError(f"Network error getting machine details: {str(e)}")
+                raise AWSError(f"Network error getting machine details: {e!s}")
             except RateLimitError as e:
                 self._logger.warning("Rate limit exceeded getting machine details: %s", str(e))
-                raise AWSError(f"Rate limit exceeded getting machine details: {str(e)}")
+                raise AWSError(f"Rate limit exceeded getting machine details: {e!s}")
             except AWSError as e:
                 error_code = getattr(e, "error_code", "")
                 if error_code == "InvalidInstanceID.NotFound":
@@ -478,7 +478,7 @@ class AWSMachineAdapter:
                 else:
                     self._logger.error("AWS error getting machine details: %s", str(e))
                     raise AWSError(
-                        f"AWS error getting machine details: {str(e)}",
+                        f"AWS error getting machine details: {e!s}",
                         error_code=error_code,
                     )
 
@@ -510,4 +510,4 @@ class AWSMachineAdapter:
             raise
         except Exception as e:
             self._logger.error("Unexpected error getting machine details: %s", str(e))
-            raise AWSError(f"Unexpected error getting machine details: {str(e)}")
+            raise AWSError(f"Unexpected error getting machine details: {e!s}")

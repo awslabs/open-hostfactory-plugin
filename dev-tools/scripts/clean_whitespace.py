@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def clean_file(file_path: Path) -> bool:
     """Clean whitespace from a single file."""
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         original_content = content
@@ -44,7 +44,7 @@ def load_gitignore_spec(root_dir: Path) -> pathspec.PathSpec:
     """Load .gitignore patterns."""
     gitignore_path = root_dir / ".gitignore"
     if gitignore_path.exists():
-        with open(gitignore_path, "r", encoding="utf-8") as f:
+        with open(gitignore_path, encoding="utf-8") as f:
             return pathspec.PathSpec.from_lines("gitwildmatch", f)
     return pathspec.PathSpec.from_lines("gitwildmatch", [])
 

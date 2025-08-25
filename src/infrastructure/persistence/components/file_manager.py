@@ -49,7 +49,7 @@ class FileManager:
                 self.logger.debug("File does not exist: %s", self.file_path)
                 return ""
 
-            with open(self.file_path, "r", encoding="utf-8") as f:
+            with open(self.file_path, encoding="utf-8") as f:
                 content = f.read()
 
             self.logger.debug("Read %s characters from %s", len(content), self.file_path)

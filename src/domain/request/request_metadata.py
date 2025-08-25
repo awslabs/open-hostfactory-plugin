@@ -61,12 +61,12 @@ class RequestTimeout(ValueObject):
         return (datetime.utcnow() - start_time) > self.duration
 
     @classmethod
-    def from_seconds(cls, seconds: int) -> "RequestTimeout":
+    def from_seconds(cls, seconds: int) -> RequestTimeout:
         """Create timeout from seconds."""
         return cls(seconds=seconds)
 
     @classmethod
-    def default(cls) -> "RequestTimeout":
+    def default(cls) -> RequestTimeout:
         """Create default timeout from configuration."""
         try:
             from domain.base.configuration_service import get_domain_config_service
@@ -97,7 +97,7 @@ class MachineCount(ValueObject):
     max_allowed: Optional[int] = None
 
     @model_validator(mode="after")
-    def validate_machine_count(self) -> "MachineCount":
+    def validate_machine_count(self) -> MachineCount:
         """Validate machine count constraints.
 
         Returns:
@@ -152,7 +152,7 @@ class MachineCount(ValueObject):
         return self.value
 
     @classmethod
-    def from_int(cls, value: int, max_allowed: Optional[int] = None) -> "MachineCount":
+    def from_int(cls, value: int, max_allowed: Optional[int] = None) -> MachineCount:
         """Create count from integer."""
         return cls(value=value, max_allowed=max_allowed)
 
@@ -224,7 +224,7 @@ class RequestTag(ValueObject):
         return f"{self.key}={self.value}"
 
     @classmethod
-    def from_string(cls, tag_string: str) -> "RequestTag":
+    def from_string(cls, tag_string: str) -> RequestTag:
         """Create tag from key=value string."""
         if "=" not in tag_string:
             raise ValueError("Tag string must be in format 'key=value'")
@@ -334,7 +334,7 @@ class RequestConfiguration(ValueObject):
         """Get tags as list of RequestTag objects."""
         return [RequestTag(key=k, value=v) for k, v in self.tags.items()]
 
-    def add_tag(self, key: str, value: str) -> "RequestConfiguration":
+    def add_tag(self, key: str, value: str) -> RequestConfiguration:
         """Add a tag and return new configuration."""
         new_tags = self.tags.copy()
         new_tags[key] = value
@@ -349,7 +349,7 @@ class RequestConfiguration(ValueObject):
             notification_config=self.notification_config.copy(),
         )
 
-    def with_provider_config(self, config: Dict[str, Any]) -> "RequestConfiguration":
+    def with_provider_config(self, config: Dict[str, Any]) -> RequestConfiguration:
         """Set provider config and return new configuration."""
         return RequestConfiguration(
             template_id=self.template_id,
@@ -475,7 +475,7 @@ class RequestHistoryEvent(ValueObject):
         message: str,
         details: Optional[Dict[str, Any]] = None,
         source: str = "system",
-    ) -> "RequestHistoryEvent":
+    ) -> RequestHistoryEvent:
         """Create a new event with current timestamp."""
         return cls(
             event_type=event_type,

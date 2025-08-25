@@ -3,7 +3,8 @@
 import os
 import shutil
 import tempfile
-from typing import ContextManager, Generator, Optional
+from collections.abc import Generator
+from typing import ContextManager, Optional
 
 
 def file_exists(file_path: str) -> bool:
@@ -38,7 +39,7 @@ def get_file_size(file_path: str) -> int:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get file size for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get file size for {file_path}: {e!s}")
 
 
 def get_file_modification_time(file_path: str) -> float:
@@ -60,7 +61,7 @@ def get_file_modification_time(file_path: str) -> float:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get modification time for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get modification time for {file_path}: {e!s}")
 
 
 def get_file_creation_time(file_path: str) -> float:
@@ -82,7 +83,7 @@ def get_file_creation_time(file_path: str) -> float:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get creation time for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get creation time for {file_path}: {e!s}")
 
 
 def get_file_access_time(file_path: str) -> float:
@@ -104,7 +105,7 @@ def get_file_access_time(file_path: str) -> float:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get access time for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get access time for {file_path}: {e!s}")
 
 
 def delete_file(file_path: str) -> None:
@@ -124,7 +125,7 @@ def delete_file(file_path: str) -> None:
     try:
         os.remove(file_path)
     except OSError as e:
-        raise OSError(f"Failed to delete file {file_path}: {str(e)}")
+        raise OSError(f"Failed to delete file {file_path}: {e!s}")
 
 
 def copy_file(source_path: str, destination_path: str) -> None:
@@ -148,7 +149,7 @@ def copy_file(source_path: str, destination_path: str) -> None:
         ensure_parent_directory_exists(destination_path)
         shutil.copy2(source_path, destination_path)
     except OSError as e:
-        raise OSError(f"Failed to copy file from {source_path} to {destination_path}: {str(e)}")
+        raise OSError(f"Failed to copy file from {source_path} to {destination_path}: {e!s}")
 
 
 def move_file(source_path: str, destination_path: str) -> None:
@@ -172,7 +173,7 @@ def move_file(source_path: str, destination_path: str) -> None:
         ensure_parent_directory_exists(destination_path)
         shutil.move(source_path, destination_path)
     except OSError as e:
-        raise OSError(f"Failed to move file from {source_path} to {destination_path}: {str(e)}")
+        raise OSError(f"Failed to move file from {source_path} to {destination_path}: {e!s}")
 
 
 def rename_file(file_path: str, new_name: str) -> str:
@@ -200,7 +201,7 @@ def rename_file(file_path: str, new_name: str) -> str:
         os.rename(file_path, new_path)
         return new_path
     except OSError as e:
-        raise OSError(f"Failed to rename file {file_path} to {new_name}: {str(e)}")
+        raise OSError(f"Failed to rename file {file_path} to {new_name}: {e!s}")
 
 
 def touch_file(file_path: str) -> None:
@@ -220,7 +221,7 @@ def touch_file(file_path: str) -> None:
         with open(file_path, "a"):
             os.utime(file_path, None)
     except OSError as e:
-        raise OSError(f"Failed to touch file {file_path}: {str(e)}")
+        raise OSError(f"Failed to touch file {file_path}: {e!s}")
 
 
 def is_file_empty(file_path: str) -> bool:
@@ -262,7 +263,7 @@ def create_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> str
         os.close(fd)  # Close the file descriptor
         return path
     except OSError as e:
-        raise OSError(f"Failed to create temporary file: {str(e)}")
+        raise OSError(f"Failed to create temporary file: {e!s}")
 
 
 def with_temp_file(suffix: str = "", prefix: str = "", dir: str = None) -> ContextManager[str]:
@@ -423,7 +424,7 @@ def get_file_permissions(file_path: str) -> int:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get permissions for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get permissions for {file_path}: {e!s}")
 
 
 def set_file_permissions(file_path: str, permissions: int) -> None:
@@ -444,7 +445,7 @@ def set_file_permissions(file_path: str, permissions: int) -> None:
     try:
         os.chmod(file_path, permissions)
     except OSError as e:
-        raise OSError(f"Failed to set permissions for {file_path}: {str(e)}")
+        raise OSError(f"Failed to set permissions for {file_path}: {e!s}")
 
 
 def get_file_owner(file_path: str) -> int:
@@ -466,7 +467,7 @@ def get_file_owner(file_path: str) -> int:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get owner for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get owner for {file_path}: {e!s}")
 
 
 def get_file_group(file_path: str) -> int:
@@ -488,7 +489,7 @@ def get_file_group(file_path: str) -> int:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to get group for {file_path}: {str(e)}")
+        raise OSError(f"Failed to get group for {file_path}: {e!s}")
 
 
 def set_file_owner_and_group(file_path: str, owner: int, group: int) -> None:
@@ -510,4 +511,4 @@ def set_file_owner_and_group(file_path: str, owner: int, group: int) -> None:
     try:
         os.chown(file_path, owner, group)
     except OSError as e:
-        raise OSError(f"Failed to set owner/group for {file_path}: {str(e)}")
+        raise OSError(f"Failed to set owner/group for {file_path}: {e!s}")

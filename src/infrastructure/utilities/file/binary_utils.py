@@ -21,7 +21,7 @@ def read_binary_file(file_path: str) -> bytes:
     except FileNotFoundError:
         raise FileNotFoundError(f"Binary file not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to read binary file {file_path}: {str(e)}")
+        raise OSError(f"Failed to read binary file {file_path}: {e!s}")
 
 
 def write_binary_file(file_path: str, content: bytes) -> None:
@@ -46,7 +46,7 @@ def write_binary_file(file_path: str, content: bytes) -> None:
         with open(file_path, "wb") as f:
             f.write(content)
     except OSError as e:
-        raise OSError(f"Failed to write binary file {file_path}: {str(e)}")
+        raise OSError(f"Failed to write binary file {file_path}: {e!s}")
 
 
 def append_binary_file(file_path: str, content: bytes) -> None:
@@ -71,7 +71,7 @@ def append_binary_file(file_path: str, content: bytes) -> None:
         with open(file_path, "ab") as f:
             f.write(content)
     except OSError as e:
-        raise OSError(f"Failed to append to binary file {file_path}: {str(e)}")
+        raise OSError(f"Failed to append to binary file {file_path}: {e!s}")
 
 
 def get_file_hash(file_path: str, algorithm: str = "sha256") -> str:
@@ -106,7 +106,7 @@ def get_file_hash(file_path: str, algorithm: str = "sha256") -> str:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to read file for hashing {file_path}: {str(e)}")
+        raise OSError(f"Failed to read file for hashing {file_path}: {e!s}")
 
 
 def get_file_mime_type(file_path: str) -> str:
@@ -158,7 +158,7 @@ def is_binary_file(file_path: str) -> bool:
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {file_path}")
     except OSError as e:
-        raise OSError(f"Failed to read file {file_path}: {str(e)}")
+        raise OSError(f"Failed to read file {file_path}: {e!s}")
 
 
 def is_text_file(file_path: str) -> bool:

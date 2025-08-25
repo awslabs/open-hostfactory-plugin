@@ -50,7 +50,7 @@ class ConfigValidator:
             self._validate_business_rules(app_config, result)
 
         except Exception as e:
-            result.add_error(f"Configuration validation failed: {str(e)}")
+            result.add_error(f"Configuration validation failed: {e!s}")
 
         return result
 

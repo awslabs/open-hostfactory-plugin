@@ -4,8 +4,9 @@ Dependency Injection Container Implementation
 
 import threading
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Dict, Iterator, List, Optional, Set, Type, TypeVar
+from typing import Any, Dict, List, Optional, Set, Type, TypeVar
 
 from domain.base.dependency_injection import is_injectable
 from domain.base.di_contracts import (
@@ -171,7 +172,7 @@ class DIContainer(DIContainerPort, CQRSHandlerRegistrationPort, ContainerPort):
             if isinstance(e, CircularDependencyError):
                 raise
             else:
-                raise DependencyResolutionError(cls, f"Failed to resolve {cls.__name__}: {str(e)}")
+                raise DependencyResolutionError(cls, f"Failed to resolve {cls.__name__}: {e!s}")
 
     def get_optional(self, dependency_type: Type[T]) -> Optional[T]:
         """Get an optional instance of the specified type."""
@@ -415,8 +416,8 @@ def reset_container() -> None:
 
 __all__: list[str] = [
     "DIContainer",
+    "_setup_cqrs_infrastructure",
     "get_container",
     "reset_container",
     "timed_operation",
-    "_setup_cqrs_infrastructure",
 ]

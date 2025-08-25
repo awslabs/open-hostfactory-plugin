@@ -10,10 +10,10 @@ from .exceptions import (
 )
 
 __all__: list[str] = [
+    "InvalidTemplateConfigurationError",
     "Template",
+    "TemplateAlreadyExistsError",
     "TemplateException",
     "TemplateNotFoundError",
     "TemplateValidationError",
-    "InvalidTemplateConfigurationError",
-    "TemplateAlreadyExistsError",
 ]

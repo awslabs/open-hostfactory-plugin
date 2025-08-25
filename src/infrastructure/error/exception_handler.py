@@ -689,7 +689,7 @@ class ExceptionHandler:
         # Context-aware exception mapping
         if "config" in context_lower or "template" in context_lower:
             return ConfigurationError(
-                message=f"Invalid JSON format in { context_str or 'configuration'}: { exc.msg}",
+                message=f"Invalid JSON format in {context_str or 'configuration'}: {exc.msg}",
                 details={
                     "original_error": str(exc),
                     "line_number": exc.lineno,
@@ -736,7 +736,7 @@ class ExceptionHandler:
     ) -> InfrastructureError:
         """Wrap connection error into infrastructure exception."""
         return InfrastructureError(
-            message=f"Connection failed: {str(exc)}",
+            message=f"Connection failed: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -783,7 +783,7 @@ class ExceptionHandler:
     def _wrap_value_error(self, exc: ValueError, context: str = None, **kwargs) -> ValidationError:
         """Wrap value error into validation exception."""
         return ValidationError(
-            message=f"Invalid value: {str(exc)}",
+            message=f"Invalid value: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -797,7 +797,7 @@ class ExceptionHandler:
     def _wrap_key_error(self, exc: KeyError, context: str = None, **kwargs) -> ValidationError:
         """Wrap key error into validation exception."""
         return ValidationError(
-            message=f"Missing required key: {str(exc)}",
+            message=f"Missing required key: {exc!s}",
             details={
                 "original_error": str(exc),
                 "missing_key": str(exc).strip("'\""),
@@ -811,7 +811,7 @@ class ExceptionHandler:
     def _wrap_type_error(self, exc: TypeError, context: str = None, **kwargs) -> ValidationError:
         """Wrap type error into validation exception."""
         return ValidationError(
-            message=f"Type error: {str(exc)}",
+            message=f"Type error: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -827,7 +827,7 @@ class ExceptionHandler:
     ) -> InfrastructureError:
         """Wrap attribute error into infrastructure exception."""
         return InfrastructureError(
-            message=f"Attribute error: {str(exc)}",
+            message=f"Attribute error: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -849,7 +849,7 @@ class ExceptionHandler:
             context_str = context or ""
 
         return InfrastructureError(
-            message=f"Unexpected error: {str(exc)}",
+            message=f"Unexpected error: {exc!s}",
             details={
                 "original_error": str(exc),
                 "error_type": type(exc).__name__,
@@ -890,25 +890,25 @@ class ExceptionHandler:
 
     def _register_http_handlers(self) -> None:
         """Register HTTP error handlers."""
-        self._http_handlers: Dict[Type[Exception], Callable[[Exception], ErrorResponse]] = (
-            {  # Domain errors
-                ValidationError: self._handle_validation_error_http,
-                EntityNotFoundError: self._handle_not_found_error_http,
-                BusinessRuleViolationError: self._handle_business_rule_error_http,
-                # Request errors
-                RequestNotFoundError: self._handle_request_not_found_http,
-                RequestValidationError: self._handle_request_validation_http,
-                # Machine errors
-                MachineNotFoundError: self._handle_machine_not_found_http,
-                MachineValidationError: self._handle_machine_validation_http,
-                # Template errors
-                TemplateNotFoundError: self._handle_template_not_found_http,
-                TemplateValidationError: self._handle_template_validation_http,
-                # Infrastructure errors (will handle AWS errors through inheritance)
-                InfrastructureError: self._handle_infrastructure_error_http,
-                ConfigurationError: self._handle_configuration_error_http,
-            }
-        )
+        self._http_handlers: Dict[
+            Type[Exception], Callable[[Exception], ErrorResponse]
+        ] = {  # Domain errors
+            ValidationError: self._handle_validation_error_http,
+            EntityNotFoundError: self._handle_not_found_error_http,
+            BusinessRuleViolationError: self._handle_business_rule_error_http,
+            # Request errors
+            RequestNotFoundError: self._handle_request_not_found_http,
+            RequestValidationError: self._handle_request_validation_http,
+            # Machine errors
+            MachineNotFoundError: self._handle_machine_not_found_http,
+            MachineValidationError: self._handle_machine_validation_http,
+            # Template errors
+            TemplateNotFoundError: self._handle_template_not_found_http,
+            TemplateValidationError: self._handle_template_validation_http,
+            # Infrastructure errors (will handle AWS errors through inheritance)
+            InfrastructureError: self._handle_infrastructure_error_http,
+            ConfigurationError: self._handle_configuration_error_http,
+        }
 
     # HTTP ERROR HANDLERS
 

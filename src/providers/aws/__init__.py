@@ -15,13 +15,13 @@ from providers.aws.registration import (
 from providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 
 __all__: list[str] = [
-    "AWSProviderStrategy",
-    "AWSProviderConfig",
-    "AWSTemplateExtensionConfig",
     "AMIResolutionConfig",
-    "register_aws_extensions",
+    "AWSProviderConfig",
+    "AWSProviderStrategy",
+    "AWSTemplateExtensionConfig",
     "get_aws_extension_defaults",
-    "register_aws_template_factory",
     "initialize_aws_provider",
     "is_aws_provider_registered",
+    "register_aws_extensions",
+    "register_aws_template_factory",
 ]

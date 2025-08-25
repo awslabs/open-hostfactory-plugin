@@ -100,7 +100,7 @@ class TestCLIMigration:
         """Test that run.py is now minimal and delegates to CLI modules."""
         run_py_path = os.path.join(project_root, "src", "run.py")
 
-        with open(run_py_path, "r") as f:
+        with open(run_py_path) as f:
             content = f.read()
 
         # Should be very short now

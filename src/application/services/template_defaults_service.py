@@ -325,7 +325,7 @@ class TemplateDefaultsService(TemplateDefaultsPort):
 
         except Exception as e:
             validation_result["is_valid"] = False
-            validation_result["errors"].append(f"Validation failed: {str(e)}")
+            validation_result["errors"].append(f"Validation failed: {e!s}")
             self.logger.error("Template defaults validation failed: %s", e)
 
         return validation_result

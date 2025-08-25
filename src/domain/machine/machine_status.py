@@ -31,7 +31,7 @@ class MachineStatus(str, Enum):
     UNKNOWN = "unknown"  # Used for unrecognized states
 
     @classmethod
-    def from_str(cls, value: str) -> "MachineStatus":
+    def from_str(cls, value: str) -> MachineStatus:
         """Create MachineStatus from string value.
 
         Args:
@@ -62,7 +62,7 @@ class MachineStatus(str, Enum):
 
         raise ValueError(f"Invalid machine status: {value}")
 
-    def can_transition_to(self, new_status: "MachineStatus") -> bool:
+    def can_transition_to(self, new_status: MachineStatus) -> bool:
         """Validate state transition."""
         valid_transitions = {
             self.PENDING: {self.RUNNING, self.FAILED},

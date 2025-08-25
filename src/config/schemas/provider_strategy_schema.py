@@ -143,16 +143,15 @@ class ProviderInstanceConfig(BaseModel):
                 if override_config is None:
                     # Remove handler (null override)
                     effective_handlers.pop(handler_name, None)
+                # Merge or add handler
+                elif handler_name in effective_handlers:
+                    # Merge with existing default
+                    effective_handlers[handler_name] = effective_handlers[handler_name].merge_with(
+                        override_config
+                    )
                 else:
-                    # Merge or add handler
-                    if handler_name in effective_handlers:
-                        # Merge with existing default
-                        effective_handlers[handler_name] = effective_handlers[
-                            handler_name
-                        ].merge_with(override_config)
-                    else:
-                        # New handler not in defaults
-                        effective_handlers[handler_name] = override_config
+                    # New handler not in defaults
+                    effective_handlers[handler_name] = override_config
 
         return effective_handlers
 

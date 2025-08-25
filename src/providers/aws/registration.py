@@ -54,9 +54,9 @@ def create_aws_strategy(provider_config: Any) -> Any:
         return strategy
 
     except ImportError as e:
-        raise ImportError(f"AWS provider strategy not available: {str(e)}")
+        raise ImportError(f"AWS provider strategy not available: {e!s}")
     except Exception as e:
-        raise RuntimeError(f"Failed to create AWS strategy: {str(e)}")
+        raise RuntimeError(f"Failed to create AWS strategy: {e!s}")
 
 
 def create_aws_config(data: Dict[str, Any]) -> Any:
@@ -74,9 +74,9 @@ def create_aws_config(data: Dict[str, Any]) -> Any:
 
         return AWSProviderConfig(**data)
     except ImportError as e:
-        raise ImportError(f"AWS configuration not available: {str(e)}")
+        raise ImportError(f"AWS configuration not available: {e!s}")
     except Exception as e:
-        raise RuntimeError(f"Failed to create AWS config: {str(e)}")
+        raise RuntimeError(f"Failed to create AWS config: {e!s}")
 
 
 def create_aws_resolver() -> Any:
@@ -97,7 +97,7 @@ def create_aws_resolver() -> Any:
         return None
     except Exception as e:
         # Re-raise with context - let caller handle logging
-        raise RuntimeError(f"Failed to create AWS resolver: {str(e)}")
+        raise RuntimeError(f"Failed to create AWS resolver: {e!s}")
 
 
 def create_aws_validator() -> Any:
@@ -112,7 +112,7 @@ def create_aws_validator() -> Any:
         return None
     except Exception as e:
         # Re-raise with context - let caller handle logging
-        raise RuntimeError(f"Failed to create AWS validator: {str(e)}")
+        raise RuntimeError(f"Failed to create AWS validator: {e!s}")
 
 
 def register_aws_provider(

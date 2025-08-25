@@ -196,7 +196,7 @@ class HandlerDiscoveryService:
             return None
 
         try:
-            with open(self.cache_file, "r") as f:
+            with open(self.cache_file) as f:
                 cache_data = json.load(f)
 
             # Check if cache is for the same base package

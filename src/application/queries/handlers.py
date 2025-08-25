@@ -832,7 +832,7 @@ class ValidateTemplateHandler(BaseQueryHandler[ValidateTemplateQuery, Validation
             return {
                 "template_id": query.template_id,
                 "is_valid": False,
-                "validation_errors": [f"Validation error: {str(e)}"],
+                "validation_errors": [f"Validation error: {e!s}"],
                 "configuration": query.configuration,
             }
 

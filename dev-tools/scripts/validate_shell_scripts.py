@@ -26,7 +26,7 @@ def load_gitignore():
         return None
 
     try:
-        with open(gitignore_path, "r", encoding="utf-8") as f:
+        with open(gitignore_path, encoding="utf-8") as f:
             return pathspec.PathSpec.from_lines("gitwildmatch", f)
     except Exception as e:
         logger.warning(f"Could not load .gitignore: {e}")

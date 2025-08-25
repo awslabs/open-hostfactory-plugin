@@ -568,7 +568,7 @@ class TestConfigurationIntegration:
         try:
             # Test configuration loading
             # In a real implementation, this would use ConfigurationManager
-            with open(config_file_path, "r") as f:
+            with open(config_file_path) as f:
                 loaded_config = json.load(f)
 
             # Verify configuration was loaded correctly

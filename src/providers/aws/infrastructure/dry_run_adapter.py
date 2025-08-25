@@ -12,8 +12,8 @@ Architecture:
 """
 
 import logging
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator
 
 from infrastructure.mocking.dry_run_context import is_dry_run_active
 

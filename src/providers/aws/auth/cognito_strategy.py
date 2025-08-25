@@ -50,8 +50,7 @@ class CognitoAuthStrategy(AuthPort):
             self.jwks_url = jwks_url
         else:
             self.jwks_url = (
-                f"https://cognito-idp.{region}.amazonaws.com/"
-                f"{user_pool_id}/.well-known/jwks.json"
+                f"https://cognito-idp.{region}.amazonaws.com/{user_pool_id}/.well-known/jwks.json"
             )
 
         # Initialize Cognito client
@@ -156,7 +155,7 @@ class CognitoAuthStrategy(AuthPort):
         except jwt.ExpiredSignatureError:
             return AuthResult(status=AuthStatus.EXPIRED, error_message="Token has expired")
         except jwt.InvalidTokenError as e:
-            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {str(e)}")
+            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {e!s}")
         except Exception as e:
             self._logger.error("Cognito token validation error: %s", e)
             return AuthResult(status=AuthStatus.FAILED, error_message="Token validation failed")

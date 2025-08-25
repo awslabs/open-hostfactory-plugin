@@ -370,7 +370,7 @@ class AWSHandler(ABC):
             raise error
         except Exception as e:
             self._logger.error("Unexpected error getting instance details: %s", str(e))
-            raise InfrastructureError(f"Failed to get instance details: {str(e)}")
+            raise InfrastructureError(f"Failed to get instance details: {e!s}")
 
     def _validate_prerequisites(self, template: AWSTemplate) -> None:
         """

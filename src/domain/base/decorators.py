@@ -108,7 +108,7 @@ def handle_domain_exceptions(context: str):
                     return func(*args, **kwargs)
                 except Exception as e:
                     # Simple re-raise with context
-                    raise type(e)(f"{context}: {str(e)}")
+                    raise type(e)(f"{context}: {e!s}")
 
         return wrapper
 

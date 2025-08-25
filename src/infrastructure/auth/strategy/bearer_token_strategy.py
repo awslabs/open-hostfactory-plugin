@@ -108,7 +108,7 @@ class BearerTokenStrategy(AuthPort):
         except jwt.ExpiredSignatureError:
             return AuthResult(status=AuthStatus.EXPIRED, error_message="Token has expired")
         except jwt.InvalidTokenError as e:
-            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {str(e)}")
+            return AuthResult(status=AuthStatus.INVALID, error_message=f"Invalid token: {e!s}")
         except Exception as e:
             self.logger.error("Token validation error: %s", e)
             return AuthResult(status=AuthStatus.FAILED, error_message="Token validation failed")
@@ -154,7 +154,7 @@ class BearerTokenStrategy(AuthPort):
         except jwt.InvalidTokenError as e:
             return AuthResult(
                 status=AuthStatus.INVALID,
-                error_message=f"Invalid refresh token: {str(e)}",
+                error_message=f"Invalid refresh token: {e!s}",
             )
         except Exception as e:
             self.logger.error("Token refresh error: %s", e)

@@ -396,7 +396,7 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
 
         except Exception as e:
             self._logger.error("Unexpected error checking RunInstances status: %s", str(e))
-            raise AWSInfrastructureError(f"Failed to check RunInstances status: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to check RunInstances status: {e!s}")
 
     def _find_instances_by_resource_ids(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Find instances using resource IDs (reservation IDs for RunInstances)."""
@@ -461,7 +461,7 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
 
         except Exception as e:
             self._logger.error("Failed to find instances by resource IDs: %s", str(e))
-            raise AWSInfrastructureError(f"Failed to find instances by resource IDs: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to find instances by resource IDs: {e!s}")
 
     def _find_instances_by_tags_fallback(self, resource_ids: List[str]) -> List[Dict[str, Any]]:
         """Fallback method to find instances by tags when reservation-id filter is not supported."""
@@ -564,4 +564,4 @@ class RunInstancesHandler(AWSHandler, BaseContextMixin):
             raise error
         except Exception as e:
             self._logger.error("Unexpected error releasing RunInstances resources: %s", str(e))
-            raise AWSInfrastructureError(f"Failed to release RunInstances resources: {str(e)}")
+            raise AWSInfrastructureError(f"Failed to release RunInstances resources: {e!s}")

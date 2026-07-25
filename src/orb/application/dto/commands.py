@@ -75,35 +75,6 @@ class SyncRequestCommand(Command, BaseModel):
     request_id: str
 
 
-class CleanupOldRequestsCommand(BaseCommand):
-    """Command to clean up old requests.
-
-    CQRS: Commands should not return data. Results are stored in mutable fields.
-    """
-
-    older_than_days: int = 1
-    statuses_to_cleanup: Optional[list[str]] = None
-
-    # Store results for caller to access after command execution
-    requests_cleaned: Optional[int] = None
-    request_ids_found: Optional[list[str]] = None
-
-
-class CleanupAllResourcesCommand(BaseCommand):
-    """Command to clean up all resources.
-
-    CQRS: Commands should not return data. Results are stored in mutable fields.
-    """
-
-    older_than_days: int = 1
-    include_pending: bool = False
-
-    # Store results for caller to access after command execution
-    requests_cleaned: Optional[int] = None
-    machines_cleaned: Optional[int] = None
-    total_cleaned: Optional[int] = None
-
-
 class CompleteRequestCommand(Command, BaseModel):
     """Command to mark a request as completed."""
 

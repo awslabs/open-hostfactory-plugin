@@ -33,11 +33,7 @@ EXPECTED_METHODS = [
     "get_active_machine_count",
     "get_machine_health",
     "update_machine_status",
-    "convert_machine_status",
-    "convert_batch_machine_status",
     "cleanup_machine_resources",
-    "register_machine",
-    "deregister_machine",
     # Provider operations
     "get_provider_health",
     "list_available_providers",
@@ -52,8 +48,6 @@ EXPECTED_METHODS = [
     "get_multiple_templates",
     "get_multiple_machines",
     # Cleanup operations
-    "list_cleanable_requests",
-    "list_cleanable_resources",
     "cleanup_old_requests",
     "cleanup_all_resources",
     # Storage operations

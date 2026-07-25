@@ -491,6 +491,8 @@ class TestNotFoundErrors:
 @pytest.mark.unit
 class TestGetRequestStatusAliases:
     def test_request_id_singular_merged_into_list(self):
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
         client = _initialized_client()
 
         captured = {}
@@ -503,7 +505,13 @@ class TestGetRequestStatusAliases:
 
         mock_orchestrator = AsyncMock()
         mock_orchestrator.execute = _execute
-        client._container.get.return_value = mock_orchestrator  # type: ignore[union-attr]
+
+        def _get(cls):
+            if cls is ResponseFormattingService:
+                return ResponseFormattingService(MagicMock())
+            return mock_orchestrator
+
+        client._container.get.side_effect = _get  # type: ignore[union-attr]
         client._container.get_optional.return_value = None  # type: ignore[union-attr]
 
         loop = asyncio.new_event_loop()
@@ -515,6 +523,8 @@ class TestGetRequestStatusAliases:
         assert "single-id" in captured["ids"]
 
     def test_request_id_not_duplicated_when_already_in_list(self):
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
         client = _initialized_client()
 
         captured = {}
@@ -527,7 +537,13 @@ class TestGetRequestStatusAliases:
 
         mock_orchestrator = AsyncMock()
         mock_orchestrator.execute = _execute
-        client._container.get.return_value = mock_orchestrator  # type: ignore[union-attr]
+
+        def _get(cls):
+            if cls is ResponseFormattingService:
+                return ResponseFormattingService(MagicMock())
+            return mock_orchestrator
+
+        client._container.get.side_effect = _get  # type: ignore[union-attr]
         client._container.get_optional.return_value = None  # type: ignore[union-attr]
 
         loop = asyncio.new_event_loop()

@@ -21,11 +21,21 @@ def _initialized_sdk() -> ORBClient:
 
 
 def _mock_container(sdk: ORBClient, orchestrator_class, orchestrator, scheduler=None):
-    """Wire container.get() for one orchestrator and container.get_optional() for scheduler."""
+    """Wire container.get() for one orchestrator plus the shared response formatter,
+    and container.get_optional() for scheduler.
+
+    The SDK resolves ``ResponseFormattingService`` from the container to render each
+    operation's body, so the fake container returns a real formatter over the given
+    (mock) scheduler. Renders therefore delegate through the scheduler exactly as in
+    production, keeping response shapes and scheduler-call assertions faithful.
+    """
+    from orb.interface.response_formatting_service import ResponseFormattingService
 
     def _get(cls):
         if cls is orchestrator_class:
             return orchestrator
+        if cls is ResponseFormattingService:
+            return ResponseFormattingService(scheduler if scheduler is not None else MagicMock())
         raise KeyError(cls)
 
     assert sdk._container is not None

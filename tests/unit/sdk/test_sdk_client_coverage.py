@@ -58,6 +58,25 @@ def _initialized_client() -> ORBClient:
     return client
 
 
+def _wire_container(client, orchestrator, scheduler=None):
+    """Point the fake container at one orchestrator and a real response formatter.
+
+    The SDK resolves ``ResponseFormattingService`` from the container to render each
+    operation body; the formatter delegates to the given (mock) scheduler, so scheduler
+    formatting calls and response shapes stay faithful to production.
+    """
+    from orb.interface.response_formatting_service import ResponseFormattingService
+
+    def _get(cls):
+        if cls is ResponseFormattingService:
+            return ResponseFormattingService(scheduler if scheduler is not None else MagicMock())
+        return orchestrator
+
+    assert client._container is not None
+    client._container.get.side_effect = _get
+    client._container.get_optional.return_value = scheduler
+
+
 # ---------------------------------------------------------------------------
 # initialize() — config_path does not exist
 # ---------------------------------------------------------------------------
@@ -281,33 +300,41 @@ class TestListReturnRequests:
 
         mock_result = MagicMock()
         mock_result.requests = [{"id": "r1"}]
+        mock_result.total_count = 1
+        mock_result.next_cursor = None
 
         mock_orchestrator = MagicMock()
         mock_orchestrator.execute = AsyncMock(return_value=mock_result)
 
-        client._container.get.return_value = mock_orchestrator
-        client._container.get_optional.return_value = None  # no scheduler
+        # list_return_requests renders through the request-status formatter,
+        # producing the {"requests": [...]} shape shared with get_request_status,
+        # paginated like the other list operations.
+        mock_scheduler = MagicMock()
+        mock_scheduler.format_request_status_response.return_value = {"requests": [{"id": "r1"}]}
+        _wire_container(client, mock_orchestrator, mock_scheduler)
 
         output = asyncio.run(client.list_return_requests())
-        assert output == {"requests": [{"id": "r1"}]}
+        assert output == {"requests": [{"id": "r1"}], "total_count": 1, "next_cursor": None}
 
     def test_initialized_with_scheduler_formats_response(self):
         client = _initialized_client()
 
         mock_result = MagicMock()
         mock_result.requests = [{"id": "r1"}]
+        mock_result.total_count = 1
+        mock_result.next_cursor = None
 
         mock_orchestrator = MagicMock()
         mock_orchestrator.execute = AsyncMock(return_value=mock_result)
 
+        # Return requests render via the request-status formatter, matching the
+        # {"requests": [...]} shape that all shipped REST consumers parse.
         mock_scheduler = MagicMock()
         mock_scheduler.format_request_status_response.return_value = {"formatted": True}
-
-        client._container.get.return_value = mock_orchestrator
-        client._container.get_optional.return_value = mock_scheduler
+        _wire_container(client, mock_orchestrator, mock_scheduler)
 
         output = asyncio.run(client.list_return_requests())
-        assert output == {"formatted": True}
+        assert output == {"formatted": True, "total_count": 1, "next_cursor": None}
 
 
 # ---------------------------------------------------------------------------
@@ -329,13 +356,14 @@ class TestShowTemplate:
 
         mock_result = MagicMock()
         mock_result.template = MagicMock()
-        mock_result.template.to_dict.return_value = expected
 
         mock_orchestrator = MagicMock()
         mock_orchestrator.execute = AsyncMock(return_value=mock_result)
 
-        client._container.get.return_value = mock_orchestrator
-        client._container.get_optional.return_value = None
+        # get_template renders the template detail through the scheduler.
+        mock_scheduler = MagicMock()
+        mock_scheduler.format_template_for_display.return_value = expected
+        _wire_container(client, mock_orchestrator, mock_scheduler)
 
         result = asyncio.run(client.show_template("t1"))
         assert result == expected
@@ -460,9 +488,7 @@ class TestCancelRequestGuard:
 
         mock_scheduler = MagicMock()
         mock_scheduler.format_request_response.return_value = {"formatted": "cancel"}
-
-        client._container.get.return_value = mock_orchestrator
-        client._container.get_optional.return_value = mock_scheduler
+        _wire_container(client, mock_orchestrator, mock_scheduler)
 
         result = asyncio.run(client.cancel_request("req-1"))
         assert result == {"formatted": "cancel"}
@@ -489,9 +515,7 @@ class TestReturnMachinesSchedulerBranch:
 
         mock_scheduler = MagicMock()
         mock_scheduler.format_request_response.return_value = {"formatted": "return"}
-
-        client._container.get.return_value = mock_orchestrator
-        client._container.get_optional.return_value = mock_scheduler
+        _wire_container(client, mock_orchestrator, mock_scheduler)
 
         result = asyncio.run(client.return_machines(["m1", "m2"]))
         assert result == {"formatted": "return"}

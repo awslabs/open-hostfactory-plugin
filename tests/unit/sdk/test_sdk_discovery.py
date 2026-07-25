@@ -57,14 +57,6 @@ class TestExtractCommandOutput:
         result = self.discovery._extract_command_output(cmd)
         assert result is None
 
-    def test_cleanup_old_requests_command_returns_counts(self):
-        cmd = MagicMock()
-        cmd.__class__.__name__ = "CleanupOldRequestsCommand"
-        cmd.requests_cleaned = 5
-        cmd.request_ids_found = ["r-1", "r-2"]
-        result = self.discovery._extract_command_output(cmd)
-        assert result == {"requests_cleaned": 5, "request_ids_found": ["r-1", "r-2"]}
-
     def test_create_template_command_success_returns_created_true(self):
         cmd = MagicMock()
         cmd.__class__.__name__ = "CreateTemplateCommand"

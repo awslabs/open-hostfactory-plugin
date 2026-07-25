@@ -416,6 +416,10 @@ class AWSProviderStrategy(ProviderStrategy):
             return self._get_instance_service().start_instances(operation)
         elif operation.operation_type == ProviderOperationType.STOP_INSTANCES:
             return self._get_instance_service().stop_instances(operation)
+        elif operation.operation_type == ProviderOperationType.CLEANUP_MACHINE_RESOURCES:
+            return self._get_instance_service().cleanup_machine_resources(operation)
+        elif operation.operation_type == ProviderOperationType.GET_MACHINE_HEALTH:
+            return self._get_instance_service().get_machine_health(operation)
         else:
             return ProviderResult.error_result(
                 f"Unsupported operation: {operation.operation_type}", "UNSUPPORTED_OPERATION"

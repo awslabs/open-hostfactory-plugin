@@ -269,3 +269,73 @@ class AWSInstanceOperationService:
             return ProviderResult.error_result(
                 f"Failed to stop instances: {e}", "STOP_INSTANCES_ERROR"
             )
+
+    def cleanup_machine_resources(self, operation: ProviderOperation) -> ProviderResult:
+        """Tear down provider-side resources (volumes, ENIs) for a single machine.
+
+        The machine domain entity is supplied via ``operation.parameters["machine"]``.
+        Delegates the actual AWS teardown to the machine adapter.
+        """
+        machine = operation.parameters.get("machine")
+        if machine is None:
+            return ProviderResult.error_result(
+                "A machine is required for resource cleanup", "MISSING_MACHINE"
+            )
+        try:
+            results = self._machine_adapter.cleanup_machine_resources(machine)
+            # The adapter reports per-resource teardown failures inside the
+            # returned dict (e.g. results["volumes"]["failed"]) rather than
+            # raising. A partial teardown leaves orphaned volumes/ENIs behind,
+            # so surface it as an error result — otherwise the caller would
+            # treat success=True and terminalise the machine, leaking those
+            # resources.
+            failed_resources = self._collect_failed_resources(results)
+            if failed_resources:
+                return ProviderResult.error_result(
+                    "Provider cleanup left resources behind: " + ", ".join(failed_resources),
+                    "CLEANUP_MACHINE_RESOURCES_PARTIAL_FAILURE",
+                    {"operation": "cleanup_machine_resources", "results": results},
+                )
+            return ProviderResult.success_result(
+                results, {"operation": "cleanup_machine_resources"}
+            )
+        except Exception as e:
+            return ProviderResult.error_result(
+                f"Failed to clean up machine resources: {e}", "CLEANUP_MACHINE_RESOURCES_ERROR"
+            )
+
+    @staticmethod
+    def _collect_failed_resources(results: object) -> list[str]:
+        """Return names of resource categories with a non-empty ``failed`` list.
+
+        The machine adapter reports teardown outcomes as a mapping of resource
+        category to ``{"success": [...], "failed": [...]}``. Any non-empty
+        ``failed`` list means a resource was not deleted.
+        """
+        failed: list[str] = []
+        if not isinstance(results, dict):
+            return failed
+        for category, outcome in results.items():
+            if isinstance(outcome, dict) and outcome.get("failed"):
+                failed.append(str(category))
+        return failed
+
+    def get_machine_health(self, operation: ProviderOperation) -> ProviderResult:
+        """Perform a live health check for a single machine.
+
+        The machine domain entity is supplied via ``operation.parameters["machine"]``.
+        Delegates to the machine adapter, which returns per-dimension system and
+        instance health from EC2.
+        """
+        machine = operation.parameters.get("machine")
+        if machine is None:
+            return ProviderResult.error_result(
+                "A machine is required for a health check", "MISSING_MACHINE"
+            )
+        try:
+            results = self._machine_adapter.perform_health_check(machine)
+            return ProviderResult.success_result(results, {"operation": "get_machine_health"})
+        except Exception as e:
+            return ProviderResult.error_result(
+                f"Failed to get machine health: {e}", "GET_MACHINE_HEALTH_ERROR"
+            )

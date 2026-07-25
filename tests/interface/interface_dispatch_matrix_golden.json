@@ -1,0 +1,116 @@
+{
+  "cancel_request": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "create_template": {
+    "cli": "orch/RFS",
+    "mcp": null,
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "delete_template": {
+    "cli": "orch/RFS",
+    "mcp": null,
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "get_machine": {
+    "cli": "orch/RFS",
+    "mcp": null,
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "get_request_status": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "get_template": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "list_machines": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "list_requests": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "list_return_requests": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "list_templates": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "refresh_templates": {
+    "cli": "orch/RFS",
+    "mcp": null,
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "request_machines": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "return_machines": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/RFS",
+    "sdk": "orch/sched"
+  },
+  "start_machines": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": null,
+    "sdk": "bus/sched"
+  },
+  "stop_machines": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": null,
+    "sdk": "bus/sched"
+  },
+  "sync_machine": {
+    "cli": null,
+    "mcp": null,
+    "rest": "orch/RFS",
+    "sdk": null
+  },
+  "update_template": {
+    "cli": "orch/RFS",
+    "mcp": null,
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "validate_template": {
+    "cli": "orch/RFS",
+    "mcp": "orch/RFS",
+    "rest": "orch/sched",
+    "sdk": "orch/sched"
+  },
+  "watch_request_status": {
+    "cli": "orch/inline",
+    "mcp": null,
+    "rest": "orch/RFS",
+    "sdk": null
+  }
+}

@@ -518,7 +518,7 @@ class TestHandleGetMachine:
         fmt = _make_formatter()
         orch = AsyncMock(spec=GetMachineOrchestrator)
         mock_machine = MagicMock()
-        mock_machine.model_dump.return_value = {"machine_id": "m-123"}
+        mock_machine.to_dict.return_value = {"machine_id": "m-123"}
         orch.execute.return_value = GetMachineOutput(machine=mock_machine)
 
         container = MagicMock()
@@ -540,7 +540,7 @@ class TestHandleGetMachine:
         fmt = _make_formatter()
         orch = AsyncMock(spec=GetMachineOrchestrator)
         mock_machine = MagicMock()
-        mock_machine.model_dump.return_value = {"machine_id": "m-flag"}
+        mock_machine.to_dict.return_value = {"machine_id": "m-flag"}
         orch.execute.return_value = GetMachineOutput(machine=mock_machine)
 
         container = MagicMock()

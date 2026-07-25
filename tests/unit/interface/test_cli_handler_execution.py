@@ -228,5 +228,5 @@ class TestFormatConversionConsistency:
         assert isinstance(result, InterfaceResponse)
         assert "templates" in result.data
         formatter.format_template_list.assert_called_once_with(
-            templates, total_count=None, next_cursor=None
+            templates, total_count=len(templates), next_cursor=None
         )

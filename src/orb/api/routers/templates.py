@@ -17,7 +17,7 @@ from orb.api.dependencies import (
     get_get_template_orchestrator,
     get_list_templates_orchestrator,
     get_refresh_templates_orchestrator,
-    get_request_scheduler,
+    get_request_formatter,
     get_template_generation_service,
     get_update_template_orchestrator,
     get_validate_template_orchestrator,
@@ -42,6 +42,7 @@ from orb.application.services.orchestration.dtos import (
 from orb.application.services.template_generation_service import TemplateGenerationService
 from orb.domain.base.exceptions import EntityNotFoundError
 from orb.infrastructure.error.decorators import handle_rest_exceptions
+from orb.interface.catalog import OPERATION_CATALOG, Interface
 
 router = APIRouter(prefix="/templates", tags=["Templates"])
 
@@ -53,7 +54,7 @@ UPDATE_ORCHESTRATOR = Depends(get_update_template_orchestrator)
 DELETE_ORCHESTRATOR = Depends(get_delete_template_orchestrator)
 VALIDATE_ORCHESTRATOR = Depends(get_validate_template_orchestrator)
 REFRESH_ORCHESTRATOR = Depends(get_refresh_templates_orchestrator)
-SCHEDULER_STRATEGY = Depends(get_request_scheduler)
+FORMATTER = Depends(get_request_formatter)
 TEMPLATE_GENERATION_SERVICE = Depends(get_template_generation_service)
 PROVIDER_API_QUERY = Query(None, description="Filter by provider API")
 TEMPLATE_DATA_BODY = Body(...)
@@ -138,7 +139,7 @@ async def list_templates(
     filter_expressions: list[str] = Query(default=[]),
     _user=Depends(require_role("viewer")),
     orchestrator=LIST_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """List all available templates with server-side filter/sort/pagination."""
     result = await orchestrator.execute(
@@ -155,19 +156,10 @@ async def list_templates(
             filter_expressions=filter_expressions,
         )
     )
-    payload = scheduler.format_templates_response(result.templates)
-    # The scheduler formatter does not carry pagination metadata, so the
-    # orchestrator's total_count and next_cursor are overlaid on the
-    # response body. total_count falls back to the page size when the
-    # orchestrator does not provide it.
-    if isinstance(payload, dict):
-        payload = {
-            **payload,
-            "total_count": (
-                result.total_count if result.total_count is not None else len(result.templates)
-            ),
-            "next_cursor": result.next_cursor,
-        }
+    # The catalog renderer stamps the orchestrator's total_count and next_cursor
+    # onto the formatted body, matching the CLI/SDK paginated template list.
+    entry = OPERATION_CATALOG["list_templates"]
+    payload = entry.renderer_for(Interface.REST)(formatter, result).data
     return JSONResponse(status_code=200, content=payload)
 
 
@@ -183,7 +175,7 @@ async def validate_template(
     template_data: dict[str, Any] = TEMPLATE_DATA_BODY,
     _user=Depends(require_role("viewer")),
     orchestrator=VALIDATE_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """
     Validate template configuration.
@@ -196,17 +188,10 @@ async def validate_template(
             config=template_data,
         )
     )
+    entry = OPERATION_CATALOG["validate_template"]
     return JSONResponse(
         status_code=200,
-        content=scheduler.format_template_mutation_response(
-            {
-                "template_id": result.template_id,
-                "status": "validated",
-                "valid": result.valid,
-                "validation_errors": result.errors,
-                "message": result.message,
-            }
-        ),
+        content=entry.renderer_for(Interface.REST)(formatter, result).data,
     )
 
 
@@ -221,15 +206,16 @@ async def validate_template(
 async def refresh_templates(
     _user=Depends(require_role("admin")),
     orchestrator=REFRESH_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """
     Refresh template cache and reload from files.
     """
     result = await orchestrator.execute(RefreshTemplatesInput())
+    entry = OPERATION_CATALOG["refresh_templates"]
     return JSONResponse(
         status_code=200,
-        content=scheduler.format_templates_response(result.templates),
+        content=entry.renderer_for(Interface.REST)(formatter, result).data,
     )
 
 
@@ -293,7 +279,7 @@ async def get_template(
     template_id: str,
     _user=Depends(require_role("viewer")),
     orchestrator=GET_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """
     Get a specific template by ID.
@@ -303,9 +289,10 @@ async def get_template(
     result = await orchestrator.execute(GetTemplateInput(template_id=template_id))
     if not result.template:
         raise EntityNotFoundError("Template", template_id)
+    entry = OPERATION_CATALOG["get_template"]
     return JSONResponse(
         status_code=200,
-        content=scheduler.format_template_for_display(result.template),
+        content=entry.renderer_for(Interface.REST)(formatter, result).data,
     )
 
 
@@ -321,7 +308,7 @@ async def create_template(
     template_data: TemplateCreateRequest,
     _user=Depends(require_role("admin")),
     orchestrator=CREATE_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """
     Create a new template.
@@ -348,16 +335,10 @@ async def create_template(
             configuration=template_dict,
         )
     )
+    entry = OPERATION_CATALOG["create_template"]
     return JSONResponse(
         status_code=201,
-        content=scheduler.format_template_mutation_response(
-            {
-                "template_id": result.template_id,
-                "status": "created" if result.created else "validation_failed",
-                "created": result.created,
-                "validation_errors": result.validation_errors,
-            }
-        ),
+        content=entry.renderer_for(Interface.REST)(formatter, result).data,
     )
 
 
@@ -374,7 +355,7 @@ async def update_template(
     template_data: TemplateUpdateRequest,
     _user=Depends(require_role("admin")),
     orchestrator=UPDATE_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """
     Update an existing template.
@@ -400,16 +381,10 @@ async def update_template(
             configuration=template_dict,
         )
     )
+    entry = OPERATION_CATALOG["update_template"]
     return JSONResponse(
         status_code=200,
-        content=scheduler.format_template_mutation_response(
-            {
-                "template_id": result.template_id,
-                "status": "updated" if result.updated else "validation_failed",
-                "updated": result.updated,
-                "validation_errors": result.validation_errors,
-            }
-        ),
+        content=entry.renderer_for(Interface.REST)(formatter, result).data,
     )
 
 
@@ -425,7 +400,7 @@ async def delete_template(
     template_id: str,
     _user=Depends(require_role("admin")),
     orchestrator=DELETE_ORCHESTRATOR,
-    scheduler=SCHEDULER_STRATEGY,
+    formatter=FORMATTER,
 ) -> JSONResponse:
     """
     Delete a template.
@@ -433,13 +408,8 @@ async def delete_template(
     - **template_id**: Template identifier
     """
     result = await orchestrator.execute(DeleteTemplateInput(template_id=template_id))
+    entry = OPERATION_CATALOG["delete_template"]
     return JSONResponse(
         status_code=200,
-        content=scheduler.format_template_mutation_response(
-            {
-                "template_id": result.template_id,
-                "status": "deleted" if result.deleted else "not_found",
-                "deleted": result.deleted,
-            }
-        ),
+        content=entry.renderer_for(Interface.REST)(formatter, result).data,
     )

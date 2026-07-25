@@ -104,10 +104,11 @@ async def handle_list_machines(
         Machines list formatted for scheduler compatibility
     """
     from orb.application.services.orchestration.dtos import ListMachinesInput
-    from orb.application.services.orchestration.list_machines import ListMachinesOrchestrator
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["list_machines"]
     container = args._container
-    orchestrator = container.get(ListMachinesOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     _limit = getattr(args, "limit", None)
@@ -126,11 +127,7 @@ async def handle_list_machines(
             filter_expressions=getattr(args, "filter", None) or [],
         )
     )
-    return formatter.format_machine_list(
-        result.machines,
-        total_count=result.total_count,
-        next_cursor=result.next_cursor,
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="stop_machines", interface_type="cli")
@@ -183,10 +180,11 @@ async def handle_stop_machines(
         )
 
     from orb.application.services.orchestration.dtos import StopMachinesInput
-    from orb.application.services.orchestration.stop_machines import StopMachinesOrchestrator
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["stop_machines"]
     container = args._container
-    orchestrator = container.get(StopMachinesOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
     result = await orchestrator.execute(
         StopMachinesInput(
@@ -198,13 +196,7 @@ async def handle_stop_machines(
             filter_expressions=getattr(args, "filter", None) or [],
         )
     )
-    return formatter.format_success(
-        {
-            "message": result.message,
-            "stopped_machines": result.stopped_machines,
-            "failed_machines": result.failed_machines,
-        }
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="start_machines", interface_type="cli")
@@ -246,10 +238,11 @@ async def handle_start_machines(
         )
 
     from orb.application.services.orchestration.dtos import StartMachinesInput
-    from orb.application.services.orchestration.start_machines import StartMachinesOrchestrator
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["start_machines"]
     container = args._container
-    orchestrator = container.get(StartMachinesOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
     result = await orchestrator.execute(
         StartMachinesInput(
@@ -260,13 +253,7 @@ async def handle_start_machines(
             filter_expressions=getattr(args, "filter", None) or [],
         )
     )
-    return formatter.format_success(
-        {
-            "message": result.message,
-            "started_machines": result.started_machines,
-            "failed_machines": result.failed_machines,
-        }
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="get_machine", interface_type="cli")
@@ -275,10 +262,11 @@ async def handle_get_machine(
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle machines show — fetch a single machine and wrap in InterfaceResponse."""
     from orb.application.services.orchestration.dtos import GetMachineInput
-    from orb.application.services.orchestration.get_machine import GetMachineOrchestrator
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["get_machine"]
     container = args._container
-    orchestrator = container.get(GetMachineOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     machine_id = getattr(args, "machine_id", None) or getattr(args, "flag_machine_id", None)
@@ -286,14 +274,7 @@ async def handle_get_machine(
         return formatter.format_error("Machine ID is required")
 
     result = await orchestrator.execute(GetMachineInput(machine_id=machine_id))
-    if result.machine is None:
-        return formatter.format_error("Machine not found")
-    raw = (
-        result.machine.model_dump()
-        if hasattr(result.machine, "model_dump")
-        else vars(result.machine)
-    )
-    return formatter.format_machine_operation(raw)
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="get_multiple_machines", interface_type="cli")

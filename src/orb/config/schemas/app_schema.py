@@ -82,7 +82,13 @@ class AppConfig(BaseModel):
         active_providers = self.provider.get_active_providers()
         if active_providers:
             return active_providers[0].type
-        return "aws"  # Ultimate fallback
+
+        from orb.domain.base.exceptions import ConfigurationError
+
+        raise ConfigurationError(
+            "Cannot determine provider type: no active provider is configured. "
+            "Run 'orb init' to configure a provider."
+        )
 
     @field_validator("environment")
     @classmethod

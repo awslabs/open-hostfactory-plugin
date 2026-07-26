@@ -33,19 +33,23 @@ class ProviderConfigManager:
 
     def get_provider_type(self) -> str:
         """Get provider type from configuration."""
-        # Get first available provider as default
-        default_provider = "aws"  # Keep as fallback
-        try:
-            from orb.providers.registry import get_provider_registry
+        # Prefer the explicitly configured provider type.
+        configured_type = self._get_nested_value("provider.type", None)
+        if configured_type:
+            return configured_type
 
-            registry = get_provider_registry()
-            registered_types = registry.get_registered_providers()
-            if registered_types:
-                default_provider = registered_types[0]
-        except Exception as e:
-            logger.debug(f"Failed to get default provider: {e}")  # Use fallback
+        # Fall back to the provider registry so the default stays
+        # provider-agnostic instead of assuming a specific provider.
+        from orb.providers.registry import get_provider_registry
 
-        return self._get_nested_value("provider.type", default_provider)
+        registered_types = get_provider_registry().get_registered_providers()
+        if registered_types:
+            return registered_types[0]
+
+        raise ConfigurationError(
+            "Cannot determine provider type: 'provider.type' is not configured and "
+            "no providers are registered. Run 'orb init' to configure a provider."
+        )
 
     def get_provider_config(self) -> Optional["ProviderConfig"]:
         """Get provider configuration."""

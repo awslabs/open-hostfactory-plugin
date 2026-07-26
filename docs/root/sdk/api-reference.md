@@ -338,43 +338,37 @@ Validate a template configuration without persisting it.
 
 Remove requests older than a given age.
 
-**CQRS command:** `CleanupOldRequestsCommand`
+| Interface | Parameter | Notes |
+|-----------|-----------|-------|
+| SDK | `older_than_days` | optional, default `1` |
+| SDK | `statuses` | optional list of status strings; defaults to terminal statuses |
 
-| Interface | Parameter | CQRS field | Notes |
-|-----------|-----------|------------|-------|
-| CQRS | `older_than_days` | — | optional, default `1` |
-| CQRS | `statuses_to_cleanup` | — | optional list of status strings |
-| SDK | `older_than_days` | `older_than_days` | |
-
-**SDK command output fields:**
+**SDK output fields:**
 
 | Field | Description |
 |-------|-------------|
-| `requests_cleaned` | Count of requests removed |
-| `request_ids_found` | List of request IDs that were found for cleanup |
+| `requests_deleted` | Count of requests removed |
+| `machines_deleted` | Count of machines removed |
+| `details` | Per-record cleanup detail |
 
 ---
 
 ### Cleanup All Resources
 
-Remove all stale requests and machines.
+Remove all stale requests and their machines.
 
-**CQRS command:** `CleanupAllResourcesCommand`
+| Interface | Parameter | Notes |
+|-----------|-----------|-------|
+| SDK | `older_than_days` | optional, default `1` |
+| SDK | `statuses` | optional list of status strings; defaults to terminal statuses |
 
-| Interface | Parameter | CQRS field | Notes |
-|-----------|-----------|------------|-------|
-| CQRS | `older_than_days` | — | optional, default `1` |
-| CQRS | `include_pending` | — | optional, default `false` |
-| SDK | `older_than_days` | `older_than_days` | |
-| SDK | `include_pending` | `include_pending` | |
-
-**SDK command output fields:**
+**SDK output fields:**
 
 | Field | Description |
 |-------|-------------|
-| `requests_cleaned` | Count of requests removed |
-| `machines_cleaned` | Count of machines removed |
-| `total_cleaned` | Combined total |
+| `requests_deleted` | Count of requests removed |
+| `machines_deleted` | Count of machines removed |
+| `details` | Per-record cleanup detail |
 
 ---
 
@@ -389,8 +383,6 @@ The SDK auto-discovers CQRS handlers and derives method names by stripping the `
 | `CancelRequestCommand` | `cancel_request` |
 | `UpdateRequestStatusCommand` | `update_request_status` |
 | `SyncRequestCommand` | `sync_request` |
-| `CleanupOldRequestsCommand` | `cleanup_old_requests` |
-| `CleanupAllResourcesCommand` | `cleanup_all_resources` |
 | `CleanupTerminatedMachinesCommand` | `cleanup_terminated_machines` |
 | `CompleteRequestCommand` | `complete_request` |
 | `PopulateMachineIdsCommand` | `populate_machine_ids` |

@@ -6,15 +6,25 @@ from typing import Any, cast
 
 from orb.application.base.handlers import BaseQueryHandler
 from orb.application.decorators import query_handler
-from orb.application.dto.queries import GetMachineQuery, ListMachinesQuery
-from orb.application.dto.responses import MachineDTO
+from orb.application.dto.queries import (
+    GetMachineHealthQuery,
+    GetMachineQuery,
+    ListMachinesQuery,
+)
+from orb.application.dto.responses import MachineDTO, MachineHealthDTO
 from orb.application.ports.command_bus_port import CommandBusPort
 from orb.application.services.machine_sync_service import MachineSyncService
 from orb.application.services.orchestration.dtos import Paginated
+from orb.application.services.provider_registry_service import ProviderRegistryService
 from orb.domain.base import UnitOfWorkFactory
 from orb.domain.base.exceptions import EntityNotFoundError
+from orb.domain.base.operations import Operation, OperationType
 from orb.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
 from orb.domain.services.generic_filter_service import GenericFilterService
+
+# Sentinel used whenever a health dimension cannot be determined. Unknown health
+# is never fabricated as "ok" — callers must be able to tell "we don't know".
+_HEALTH_NOT_AVAILABLE = "not_available"
 
 
 @query_handler(GetMachineQuery)
@@ -51,6 +61,152 @@ class GetMachineHandler(BaseQueryHandler[GetMachineQuery, MachineDTO]):
         except Exception as e:
             self.logger.error("Failed to get machine: %s", e)
             raise
+
+
+def _dimension_status(dimension: Any) -> str:
+    """Reduce a stored/provider health dimension to a display string.
+
+    Accepts either the coarse persisted form (a plain status string) or the
+    richer provider form (``{"status": bool, "details": {"status": str}}``).
+    Anything unrecognised collapses to ``not_available`` rather than guessing.
+    """
+    if dimension is None:
+        return _HEALTH_NOT_AVAILABLE
+    if isinstance(dimension, str):
+        return dimension
+    if isinstance(dimension, dict):
+        details = dimension.get("details")
+        if isinstance(details, dict) and details.get("status"):
+            return str(details["status"])
+        # A details.reason with no status string means the provider could not
+        # determine health (e.g. a transient API error surfaced as a returned
+        # dict rather than a raised exception). Report that as unknown instead
+        # of collapsing the accompanying ``status: False`` flag into a
+        # fabricated "impaired" reading indistinguishable from a real one.
+        if isinstance(details, dict) and details.get("reason"):
+            return _HEALTH_NOT_AVAILABLE
+        status = dimension.get("status")
+        if isinstance(status, bool):
+            return "ok" if status else "impaired"
+        if status is not None:
+            return str(status)
+    return _HEALTH_NOT_AVAILABLE
+
+
+@query_handler(GetMachineHealthQuery)
+class GetMachineHealthHandler(BaseQueryHandler[GetMachineHealthQuery, MachineHealthDTO]):
+    """Handler for getting machine health, from stored data or a live refresh."""
+
+    def __init__(
+        self,
+        uow_factory: UnitOfWorkFactory,
+        logger: LoggingPort,
+        error_handler: ErrorHandlingPort,
+        provider_registry_service: ProviderRegistryService,
+    ) -> None:
+        super().__init__(logger, error_handler)
+        self.uow_factory = uow_factory
+        self._provider_registry_service = provider_registry_service
+
+    async def execute_query(self, query: GetMachineHealthQuery) -> MachineHealthDTO:
+        """Return machine health.
+
+        With ``refresh=False`` the persisted health snapshot on the machine is
+        returned. With ``refresh=True`` a live provider health check is
+        dispatched and its result mapped into the DTO; if the live check yields
+        nothing the stored snapshot is returned as a fallback.
+        """
+        self.logger.info("Getting machine health: %s", query.machine_id)
+
+        try:
+            with self.uow_factory.create_unit_of_work() as uow:
+                machine = uow.machines.get_by_id(query.machine_id)
+                if not machine:
+                    raise EntityNotFoundError("Machine", query.machine_id)
+
+                if query.refresh:
+                    refreshed = await self._refresh_health(machine)
+                    if refreshed is not None:
+                        return refreshed
+
+                return self._health_from_stored(machine)
+
+        except EntityNotFoundError:
+            self.logger.error("Machine not found: %s", query.machine_id)
+            raise
+        except Exception as e:
+            self.logger.error("Failed to get machine health: %s", e)
+            raise
+
+    def _health_from_stored(self, machine: Any) -> MachineHealthDTO:
+        """Build a health DTO from the machine's persisted state."""
+        status = machine.status.value if hasattr(machine.status, "value") else str(machine.status)
+        provider_data = machine.provider_data or {}
+        health_checks = provider_data.get("health_checks") or {}
+
+        overall_status = status
+        if isinstance(health_checks, dict) and health_checks.get("status"):
+            overall_status = str(health_checks["status"])
+
+        system_status = _HEALTH_NOT_AVAILABLE
+        instance_status = _HEALTH_NOT_AVAILABLE
+        if isinstance(health_checks, dict):
+            if "system" in health_checks:
+                system_status = _dimension_status(health_checks.get("system"))
+            if "instance" in health_checks:
+                instance_status = _dimension_status(health_checks.get("instance"))
+
+        return MachineHealthDTO(
+            machine_id=str(machine.machine_id),
+            overall_status=overall_status,
+            system_status=system_status,
+            instance_status=instance_status,
+        )
+
+    async def _refresh_health(self, machine: Any) -> MachineHealthDTO | None:
+        """Dispatch a live provider health check and map the result.
+
+        Returns ``None`` when the provider yields no usable result so the caller
+        can fall back to the stored snapshot.
+        """
+        operation = Operation(
+            operation_type=OperationType.GET_MACHINE_HEALTH,
+            parameters={
+                "machine": machine,
+                "instance_ids": [machine.machine_id],
+            },
+            context={"machine_id": str(machine.machine_id)},
+        )
+
+        try:
+            result = await self._provider_registry_service.execute_operation(
+                machine.provider_name, operation
+            )
+        except Exception as exc:
+            self.logger.warning("Live health refresh failed for %s: %s", machine.machine_id, exc)
+            return None
+
+        if result is None or not result.success or not isinstance(result.data, dict):
+            return None
+
+        data = result.data
+        system_status = _dimension_status(data.get("system"))
+        instance_status = _dimension_status(data.get("instance"))
+
+        known = [s for s in (system_status, instance_status) if s != _HEALTH_NOT_AVAILABLE]
+        if not known:
+            overall_status = _HEALTH_NOT_AVAILABLE
+        elif all(s == "ok" for s in known):
+            overall_status = "ok"
+        else:
+            overall_status = "impaired"
+
+        return MachineHealthDTO(
+            machine_id=str(machine.machine_id),
+            overall_status=overall_status,
+            system_status=system_status,
+            instance_status=instance_status,
+        )
 
 
 @query_handler(ListMachinesQuery)

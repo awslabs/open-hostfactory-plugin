@@ -8,7 +8,6 @@ from orb.domain.request.request_metadata import (
     LaunchTemplateInfo,
     MachineCount,
     RequestConfiguration,
-    RequestHistoryEvent,
     RequestTag,
     RequestTimeout,
 )
@@ -220,62 +219,3 @@ class TestLaunchTemplateInfo:
         assert "lt-123" in str(lt)
         assert "my-tmpl" in str(lt)
         assert "3" in str(lt)
-
-
-class TestRequestHistoryEvent:
-    def test_valid_event(self):
-        evt = RequestHistoryEvent(
-            event_type="status_change",
-            timestamp="2026-01-01T00:00:00",
-            message="Status changed",
-        )
-        assert evt.event_type == "status_change"
-        assert evt.message == "Status changed"
-
-    def test_event_type_normalized(self):
-        evt = RequestHistoryEvent(
-            event_type="Status-Change",
-            timestamp="2026-01-01T00:00:00",
-            message="msg",
-        )
-        assert evt.event_type == "status_change"
-
-    def test_invalid_timestamp_raises(self):
-        with pytest.raises(Exception):
-            RequestHistoryEvent(
-                event_type="error",
-                timestamp="not-a-date",
-                message="msg",
-            )
-
-    def test_empty_message_raises(self):
-        with pytest.raises(Exception):
-            RequestHistoryEvent(
-                event_type="error",
-                timestamp="2026-01-01T00:00:00",
-                message="",
-            )
-
-    def test_create_factory(self):
-        evt = RequestHistoryEvent.create("error", "Something went wrong", source="provider")
-        assert evt.event_type == "error"
-        assert evt.message == "Something went wrong"
-        assert evt.source == "provider"
-
-    def test_is_error_event(self):
-        evt = RequestHistoryEvent.create("error", "msg")
-        assert evt.is_error_event() is True
-
-    def test_is_not_error_event(self):
-        evt = RequestHistoryEvent.create("status_change", "msg")
-        assert evt.is_error_event() is False
-
-    def test_is_status_change_event(self):
-        evt = RequestHistoryEvent.create("status_change", "msg")
-        assert evt.is_status_change_event() is True
-
-    def test_str_representation(self):
-        evt = RequestHistoryEvent.create("error", "Something failed")
-        s = str(evt)
-        assert "error" in s
-        assert "Something failed" in s

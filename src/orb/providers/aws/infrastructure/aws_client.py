@@ -56,17 +56,18 @@ def _mask_config_dict(config: dict) -> dict:
     return masked
 
 
-from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from orb.domain.base.ports import ConfigurationPort, LoggingPort
 from orb.infrastructure.di.injectable import injectable
+from orb.infrastructure.utilities.network_utils import TimeoutConfig
 from orb.providers.aws.exceptions.aws_exceptions import (
     AuthorizationError,
     AWSConfigurationError,
     NetworkError,
 )
 from orb.providers.aws.infrastructure.instrumentation.botocore_metrics import BotocoreMetricsHandler
+from orb.providers.aws.utilities.boto_config import get_boto3_config
 
 if TYPE_CHECKING:
     from orb.providers.aws.configuration.config import AWSProviderConfig
@@ -119,14 +120,10 @@ class AWSClient:
         read_timeout = int(aws_provider_config.aws_read_timeout) if aws_provider_config else 10
 
         # Configure retry settings
-        self.boto_config = Config(
+        self.boto_config = get_boto3_config(
+            timeout=TimeoutConfig(connect=connect_timeout, read=read_timeout),
+            max_retries=max_attempts,
             region_name=self.region_name,
-            retries={
-                "max_attempts": max_attempts,
-                "mode": "adaptive",
-            },
-            connect_timeout=connect_timeout,
-            read_timeout=read_timeout,
         )
 
         # Load performance configuration

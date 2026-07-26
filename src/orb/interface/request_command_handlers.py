@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 async def handle_get_request_status(
     args: "argparse.Namespace",
 ) -> Union[dict[str, Any], "InterfaceResponse"]:
-    """Handle get request status operations with --all support."""
+    """Get the status of one or more provisioning requests by ID, or all requests."""
     from orb.application.services.orchestration.dtos import GetRequestStatusInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 
@@ -87,7 +87,7 @@ async def handle_get_request_status(
 async def handle_request_machines(
     args: "argparse.Namespace",
 ) -> Union[dict[str, Any], "InterfaceResponse"]:
-    """Handle request machines operations."""
+    """Provision machines from a template, specifying the requested machine count."""
     from orb.application.services.orchestration.dtos import AcquireMachinesInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 
@@ -145,7 +145,7 @@ async def handle_request_machines(
 async def handle_get_return_requests(
     args: "argparse.Namespace",
 ) -> Union[dict[str, Any], "InterfaceResponse"]:
-    """Handle get return requests operations."""
+    """List machine return requests, optionally filtered by status, provider, or filter expressions."""
     from orb.application.services.orchestration.dtos import ListReturnRequestsInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 
@@ -171,7 +171,7 @@ async def handle_get_return_requests(
 async def handle_request_return_machines(
     args: "argparse.Namespace",
 ) -> Union[dict[str, Any], "InterfaceResponse"]:
-    """Handle request return machines operations."""
+    """Return machines to the provider by machine IDs, request ID, or all (with --force)."""
     from orb.application.services.orchestration.dtos import ReturnMachinesInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 
@@ -249,7 +249,7 @@ async def handle_request_return_machines(
 async def handle_list_requests(
     args: "argparse.Namespace",
 ) -> Union[dict[str, Any], "InterfaceResponse"]:
-    """List all active provisioning requests."""
+    """List provisioning requests, optionally filtered by status with pagination."""
     from orb.application.services.orchestration.dtos import ListRequestsInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 
@@ -278,7 +278,7 @@ async def handle_list_requests(
 async def handle_cancel_request(
     args: "argparse.Namespace",
 ) -> Union[dict[str, Any], "InterfaceResponse"]:
-    """Handle cancel request operations."""
+    """Cancel a provisioning request by ID, with an optional cancellation reason."""
     from orb.application.services.orchestration.dtos import CancelRequestInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 async def handle_list_templates(
     args: argparse.Namespace,
 ) -> dict[str, Any] | InterfaceResponse:
-    """Handle list templates operations using the ListTemplatesOrchestrator."""
+    """List compute templates, optionally filtered by provider and active status, with pagination."""
     from orb.application.services.orchestration.dtos import ListTemplatesInput
     from orb.domain.base.ports.console_port import ConsolePort
     from orb.interface.catalog import OPERATION_CATALOG, Interface
@@ -78,7 +78,7 @@ async def handle_list_templates(
 async def handle_get_template(
     args: argparse.Namespace,
 ) -> dict[str, Any] | InterfaceResponse:
-    """Handle get template operations using the GetTemplateOrchestrator."""
+    """Retrieve a single compute template by its template ID."""
     from orb.application.services.orchestration.dtos import GetTemplateInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 
@@ -377,7 +377,7 @@ async def handle_delete_template(
 async def handle_validate_template(
     args: argparse.Namespace,
 ) -> dict[str, Any] | InterfaceResponse:
-    """Handle validate template operations using the ValidateTemplateOrchestrator."""
+    """Validate a compute template by ID, from a file, or all templates with --all."""
     from orb.application.services.orchestration.dtos import ValidateTemplateInput
     from orb.interface.catalog import OPERATION_CATALOG, Interface
 

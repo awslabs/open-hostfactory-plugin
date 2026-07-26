@@ -323,7 +323,7 @@ class TestSDKRequestLifecycle:
     @pytest.mark.asyncio
     @pytest.mark.parametrize("scenario", get_smoke_scenarios(), ids=lambda s: s.scenario_id)
     async def test_full_request_and_return_cycle(
-        self, orb_config_dir, moto_aws, moto_vpc_resources, scenario: TestScenario
+        self, orb_config_dir, moto_aws, moto_vpc_resources, ec2_client, scenario: TestScenario
     ):
         """Full cycle: create_request -> get_request -> create_return_request.
 
@@ -436,6 +436,23 @@ class TestSDKRequestLifecycle:
                         if done:
                             break
                         await asyncio.sleep(0.5)
+
+                # 5b. Verify the underlying moto instances are actually being
+                # terminated. RunInstances creates real moto instances, so after
+                # the return request completes every acquired instance must be in
+                # a terminating/terminated state.
+                describe_result = ec2_client.describe_instances(InstanceIds=machine_ids)
+                instance_states = [
+                    inst["State"]["Name"]
+                    for reservation in describe_result["Reservations"]
+                    for inst in reservation["Instances"]
+                ]
+                assert instance_states, (
+                    f"describe_instances returned no instances for {machine_ids}"
+                )
+                assert all(state in ("shutting-down", "terminated") for state in instance_states), (
+                    f"Instances not terminated after return: {instance_states}"
+                )
 
                 # 6. After return, status should not be 'running' (machines were released)
                 if "get_request_status" in methods:

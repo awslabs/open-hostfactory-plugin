@@ -97,6 +97,25 @@ class SQLConnectionManager(ResourceManager):
                 connection_string = f"sqlite:///{db_path}"
                 timeout = self.config.get("connection_timeout", 30)
 
+                # Cross-process write serialization for SQLite
+                # ---------------------------------------------
+                # Unlike the JSON backend (which must reimplement cross-process
+                # write serialization with an fcntl.flock on a sibling .lock
+                # file), SQLite provides this natively. Its built-in
+                # database-level file locking escalates a writer to a RESERVED
+                # then EXCLUSIVE lock, so at most one process writes at a time
+                # on the same host; other writers block until it commits. The
+                # LockManager("simple") on the SQL strategy only serializes
+                # threads within THIS process — SQLite's own file locking is
+                # what serializes writers ACROSS processes.
+                #
+                # ``timeout`` (default 30s) sets SQLite's busy-timeout so a
+                # writer waiting on another process's lock retries rather than
+                # failing immediately with "database is locked". WAL mode is
+                # deliberately not forced here: the default rollback-journal
+                # mode already serializes cross-process writes correctly, and
+                # the in-memory (":memory:") databases used in tests do not
+                # support a persistent WAL file.
                 self.engine = create_engine(
                     connection_string,
                     echo=self.config.get("echo", False),

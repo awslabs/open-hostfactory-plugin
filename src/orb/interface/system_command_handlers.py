@@ -19,7 +19,7 @@ async def handle_system_health(args) -> InterfaceResponse:
 
 @handle_interface_exceptions(context="provider_health", interface_type="cli")
 async def handle_provider_health(args) -> dict[str, Any]:
-    """Handle provider health operations."""
+    """Check health status of cloud providers, optionally filtered by name or type."""
     from orb.application.services.orchestration.dtos import GetProviderHealthInput
     from orb.application.services.orchestration.get_provider_health import (
         GetProviderHealthOrchestrator,
@@ -38,7 +38,7 @@ async def handle_provider_health(args) -> dict[str, Any]:
 
 @handle_interface_exceptions(context="list_providers", interface_type="cli")
 async def handle_list_providers(args) -> dict[str, Any]:
-    """Handle list available providers with real capabilities from configuration."""
+    """List configured cloud providers with their capabilities and selection policy."""
     from orb.application.services.orchestration.dtos import ListProvidersInput
     from orb.application.services.orchestration.list_providers import ListProvidersOrchestrator
 
@@ -61,7 +61,7 @@ async def handle_list_providers(args) -> dict[str, Any]:
 
 @handle_interface_exceptions(context="provider_config", interface_type="cli")
 async def handle_provider_config(args) -> dict[str, Any]:
-    """Handle get provider config operations."""
+    """Retrieve the current provider configuration."""
     from orb.application.services.orchestration.dtos import GetProviderConfigInput
     from orb.application.services.orchestration.get_provider_config import (
         GetProviderConfigOrchestrator,
@@ -103,7 +103,7 @@ async def handle_execute_provider_operation(args) -> dict[str, Any]:
 
 @handle_interface_exceptions(context="provider_metrics", interface_type="cli")
 async def handle_provider_metrics(args) -> dict[str, Any]:
-    """Handle get provider metrics operations."""
+    """Retrieve provider usage metrics for a given timeframe, optionally filtered by provider."""
     from orb.application.services.orchestration.dtos import GetProviderMetricsInput
     from orb.application.services.orchestration.get_provider_metrics import (
         GetProviderMetricsOrchestrator,

@@ -97,10 +97,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up Node.js 20 (with npm registry auth)
-      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
         node-version: '20'
         # Point npm at the destination registry so setup-node writes the matching
@@ -118,7 +118,7 @@ jobs:
     # openapi-generator needs a JVM; generated models are gitignored and MUST be
     # produced here or the published package ships with no model types.
     - name: Set up Java (Corretto 17) — openapi-generator
-      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9  # v4
+      uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95  # v5.6.0
       with:
         java-version: '17'
         distribution: 'corretto'
@@ -227,10 +227,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up Java (Corretto 17, with GPG signing)
-      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9  # v4
+      uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95  # v5.6.0
       with:
         java-version: '17'
         distribution: 'corretto'
@@ -238,7 +238,7 @@ jobs:
     # openapi-generator-cli resolves its jar via the npm package cache; Node is
     # required even though the SDK itself builds with Gradle.
     - name: Set up Node.js 20 (openapi-generator-cli)
-      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
         node-version: '20'
 
@@ -333,10 +333,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up Java (Corretto 17, Kotlin runs on JVM)
-      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9  # v4
+      uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95  # v5.6.0
       with:
         java-version: '17'
         distribution: 'corretto'
@@ -344,7 +344,7 @@ jobs:
     # openapi-generator-cli resolves its jar via the npm package cache; Node is
     # required even though the SDK itself builds with Gradle.
     - name: Set up Node.js 20 (openapi-generator-cli)
-      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
         node-version: '20'
 
@@ -437,10 +437,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up .NET 8
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9  # v4
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
       with:
         dotnet-version: '8.0.x'
 
@@ -580,7 +580,7 @@ jobs:
 
     steps:
     - name: Checkout release commit
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       with:
         ref: ${{ github.sha }}
         # The composite below mints the App token and resets the remote URL to

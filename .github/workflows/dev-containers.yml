@@ -63,7 +63,7 @@ jobs:
       python-tags: ${{ steps.tags.outputs.python-tags }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Calculate container tags
       id: tags
@@ -110,7 +110,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4
@@ -118,7 +118,7 @@ jobs:
         platforms: ${{ needs.config.outputs.build-platforms }}
 
     - name: Log in to Container Registry
-      uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0  # v4
+      uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7  # v4
       with:
         registry: ${{ needs.config.outputs.container-registry }}
         username: ${{ github.actor }}
@@ -253,7 +253,7 @@ jobs:
         trivyignores: .trivyignore
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9  # v4.37.0
+      uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81  # v4.37.3
       if: always()
       with:
         sarif_file: 'trivy-results-py${{ matrix.python-version }}.sarif'
@@ -269,7 +269,7 @@ jobs:
 
     - name: Upload Hadolint scan results
       if: matrix.python-version == needs.config.outputs.default-python-version
-      uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9  # v4.37.0
+      uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81  # v4.37.3
       with:
         sarif_file: hadolint-dockerfile.sarif
 
@@ -289,7 +289,7 @@ jobs:
 
     steps:
     - name: Log in to Container Registry
-      uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0  # v4
+      uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7  # v4
       with:
         registry: ${{ needs.config.outputs.container-registry }}
         username: ${{ github.actor }}
@@ -341,7 +341,7 @@ jobs:
 
     steps:
     - name: Log in to Container Registry
-      uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0  # v4
+      uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7  # v4
       with:
         registry: ${{ needs.config.outputs.container-registry }}
         username: ${{ github.actor }}

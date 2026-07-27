@@ -8,7 +8,7 @@ Coverage targets: lines 38,63-65,102-104,121,123-124,172-174,178,187-189,
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -104,7 +104,7 @@ class TestGetNamingConfig:
         # Fallback defaults must be returned, and the failure must be logged.
         assert result["prefixes"]["request"] == "req-"
         assert result["prefixes"]["return"] == "ret-"
-        adapter._logger.warning.assert_called_once()
+        cast(MagicMock, adapter._logger.warning).assert_called_once()
 
     def test_uses_constant_when_prefixes_attr_missing(self):
         adapter, cm = _make_adapter()

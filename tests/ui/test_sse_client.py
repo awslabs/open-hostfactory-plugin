@@ -302,3 +302,92 @@ async def test_non_200_status_triggers_retry():
 
     assert call_count >= 2
     assert events[0][1]["status"] == "recovered"
+
+
+# ---------------------------------------------------------------------------
+# Last-Event-ID tracking + reconnect replay via url_builder
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_id_line_tracked_and_replayed_on_reconnect():
+    """stream_sse records the SSE ``id:`` and, on reconnect, asks url_builder
+    to resume from the last id it saw (Last-Event-ID → ?since_seq=).
+
+    First connection delivers two events (id 7 then id 9) then drops
+    (transport error); the second connection returns one event. We assert the
+    url_builder was invoked with the last-seen id (9) for the reconnect.
+    """
+    from orb.ui.sse_client import stream_sse
+
+    first = _make_sse_response(
+        [
+            "id: 7",
+            "event: RequestStatusChangedEvent",
+            "data: " + json.dumps({"n": 1}),
+            "",
+            "id: 9",
+            "event: RequestStatusChangedEvent",
+            "data: " + json.dumps({"n": 2}),
+            "",
+        ]
+    )
+    first_client = _make_client(first)
+    # Make the first client's stream raise AFTER its lines are consumed so the
+    # generator reconnects. Simplest: second client raises to force url_builder,
+    # then a good client. We instead drop after first via a bad second client.
+    good = _make_sse_response(["data: " + json.dumps({"n": 3}), ""])
+    good_client = _make_client(good)
+
+    bad_client = MagicMock()
+    bad_client.__aenter__ = AsyncMock(side_effect=httpx.ConnectError("blip"))
+    bad_client.__aexit__ = AsyncMock(return_value=False)
+
+    builder_calls: list[int | None] = []
+
+    def _url_builder(last_id: int | None) -> str:
+        builder_calls.append(last_id)
+        return "http://localhost/events"
+
+    clients = [first_client, bad_client, good_client]
+    call_count = 0
+
+    def _factory(*a, **k):
+        nonlocal call_count
+        c = clients[min(call_count, len(clients) - 1)]
+        call_count += 1
+        return c
+
+    events: list[tuple[str, Any]] = []
+    with (
+        patch("orb.ui.sse_client.httpx.AsyncClient", side_effect=_factory),
+        patch("asyncio.sleep", new=AsyncMock()),
+    ):
+        async for evt, data in stream_sse("http://localhost/events", url_builder=_url_builder):
+            events.append((evt, data))
+            if len(events) >= 3:
+                break
+
+    # First connect asks for cursor None; after seeing id 9 and dropping, the
+    # reconnect asks the builder to resume from 9.
+    assert builder_calls[0] is None
+    assert 9 in builder_calls, f"reconnect must resume from last id 9; got {builder_calls}"
+
+
+@pytest.mark.asyncio
+async def test_replay_truncated_event_is_yielded_to_caller():
+    """The replay_truncated sentinel is passed through so the caller can react
+    (e.g. full refresh). It carries no id:, so it never becomes a resume cursor.
+    """
+    lines = [
+        "event: replay_truncated",
+        "data: " + json.dumps({"type": "replay_truncated", "since": 1, "seq_id": 0}),
+        "",
+    ]
+    resp = _make_sse_response(lines)
+    client = _make_client(resp)
+
+    events = await _collect_n("http://localhost/events", 1, client)
+
+    assert events[0][0] == "replay_truncated"
+    assert events[0][1]["seq_id"] == 0

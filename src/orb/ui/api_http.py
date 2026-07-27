@@ -453,17 +453,32 @@ async def get_provider_schemas() -> dict[str, list[dict[str, Any]]]:
         return {}
 
 
-async def subscribe_events(event_types=None):
+async def subscribe_events(event_types=None, since_seq: int | None = None):
     """Yield (event_type, data) from the backend SSE stream.
 
     ``event_types`` is an optional iterable that filters server-side via
     ?type=a,b,c.
+
+    ``since_seq`` seeds the reconnect cursor: the initial connection resumes
+    from it (``?since_seq=``) so a page re-mount after a brief outage replays
+    missed events. On every reconnect ``stream_sse`` rebuilds the URL via the
+    ``url_builder`` below with the last SSE ``id:`` it saw, so events missed
+    during a connection blip are replayed instead of silently dropped — the
+    fix for status transitions being lost on reconnect.
     """
     from .sse_client import stream_sse
 
-    params = ""
-    if event_types:
-        params = "?type=" + ",".join(sorted(event_types))
-    url = f"{ORB_BASE_URL}{ORB_ROOT_PREFIX}/api/v1/events{params}"
-    async for evt, data in stream_sse(url, headers=_headers()):
+    def _build_url(last_event_id: int | None) -> str:
+        query: list[str] = []
+        if event_types:
+            query.append("type=" + ",".join(sorted(event_types)))
+        # Prefer the freshest cursor: the id observed on the last open stream,
+        # falling back to the caller-seeded since_seq for the very first connect.
+        resume_from = last_event_id if last_event_id is not None else since_seq
+        if resume_from is not None:
+            query.append(f"since_seq={resume_from}")
+        suffix = ("?" + "&".join(query)) if query else ""
+        return f"{ORB_BASE_URL}{ORB_ROOT_PREFIX}/api/v1/events{suffix}"
+
+    async for evt, data in stream_sse(_build_url(None), headers=_headers(), url_builder=_build_url):
         yield evt, data

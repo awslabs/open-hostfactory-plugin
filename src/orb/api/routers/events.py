@@ -4,10 +4,17 @@ Provides a single persistent connection that the UI subscribes to once per page
 load, receiving push deltas for machines, requests, templates, and heartbeats.
 
 Wire protocol (standard SSE):
+    id: <seq_id>        (present for every real event; absent for heartbeat
+                         and the replay_truncated sentinel, whose reserved
+                         seq_id 0 must never be adopted as a Last-Event-ID)
     event: <type>
     data: {"json": "..."}
 
     (blank line terminates each event)
+
+    The ``id:`` line carries the monotonic ``seq_id`` so standard SSE clients
+    get Last-Event-ID semantics: on reconnect a client re-opens the stream with
+    ``?since_seq=<last id>`` and the server replays only events after that id.
 
 Event types emitted:
     machine.created / machine.updated / machine.deleted
@@ -17,10 +24,13 @@ Event types emitted:
 
 Query parameters:
     ?since=<ISO>        optional – replay events newer than this timestamp (best-effort)
-    ?since_seq=<int>    optional – combined with ?since= to enable gap-detection.
-                        When the server cannot fully serve the requested range
-                        (oldest surviving history entry is newer than since_seq+1),
-                        a synthetic sentinel event is emitted first:
+    ?since_seq=<int>    optional – the Last-Event-ID (seq_id) of the last event the
+                        client received; standard SSE clients resend it on reconnect.
+                        Enables gap-detection and works with OR without ?since= (when
+                        alone, replay resumes from the oldest retained event after
+                        since_seq).  When the server cannot fully serve the requested
+                        range (oldest surviving history entry is newer than
+                        since_seq+1), a synthetic sentinel event is emitted first:
                             event: replay_truncated
                             data: {"type": "replay_truncated", "since": <int>, "seq_id": 0}
                         seq_id 0 is reserved for this sentinel and is never issued by
@@ -72,6 +82,10 @@ logger = logging.getLogger(__name__)
 _HEARTBEAT_INTERVAL: float = 15.0  # seconds
 _QUEUE_MAXSIZE: int = 256  # drop oldest on overflow rather than blocking
 
+# Lower bound for "replay everything retained" when a client reconnects with
+# ?since_seq= but no ?since= timestamp — every recorded event has ts > _EPOCH.
+_EPOCH: datetime = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
 # Monotonic sequence counter — starts at 1.  seq_id 0 is reserved for the
 # replay_truncated sentinel and is never issued by this counter.
 _seq_counter = itertools.count(1)
@@ -112,21 +126,21 @@ class _SseEventBus:
     """
 
     def __init__(self) -> None:
-        self._subscribers: set[asyncio.Queue[Optional[tuple[str, dict]]]] = set()
+        self._subscribers: set[asyncio.Queue[Optional[tuple]]] = set()
         self._subscribers_lock: asyncio.Lock = asyncio.Lock()
         # Store recent events for ?since= replay (capped ring-buffer backed by deque
         # so append is O(1) and maxlen enforces the cap without manual slicing).
         self._history_max: int = 512
         self._history: deque[tuple[datetime, str, dict, int]] = deque(maxlen=self._history_max)
 
-    async def subscribe(self) -> asyncio.Queue[Optional[tuple[str, dict]]]:
+    async def subscribe(self) -> asyncio.Queue[Optional[tuple]]:
         """Register a new subscriber; returns its dedicated queue."""
-        q: asyncio.Queue[Optional[tuple[str, dict]]] = asyncio.Queue(maxsize=_QUEUE_MAXSIZE)
+        q: asyncio.Queue[Optional[tuple]] = asyncio.Queue(maxsize=_QUEUE_MAXSIZE)
         async with self._subscribers_lock:
             self._subscribers.add(q)
         return q
 
-    async def unsubscribe(self, q: asyncio.Queue[Optional[tuple[str, dict]]]) -> None:
+    async def unsubscribe(self, q: asyncio.Queue[Optional[tuple]]) -> None:
         """Remove subscriber. Safe to call even if already removed.
 
         ``set.discard`` is idempotent — unlike ``list.remove`` it does not
@@ -157,15 +171,20 @@ class _SseEventBus:
         async with self._subscribers_lock:
             snapshot = set(self._subscribers)
         for q in snapshot:
-            self._enqueue_for(q, event_type, payload)
+            self._enqueue_for(q, event_type, payload, seq_id)
 
     @staticmethod
     def _enqueue_for(
-        q: asyncio.Queue[Optional[tuple[str, dict]]],
+        q: asyncio.Queue[Optional[tuple]],
         event_type: str,
         payload: dict,
+        seq_id: int,
     ) -> None:
-        """Push (event_type, payload) onto a subscriber's queue.
+        """Push ``(event_type, payload, seq_id)`` onto a subscriber's queue.
+
+        The ``seq_id`` rides along so the SSE generator can emit the
+        wire-level ``id:`` line (Last-Event-ID) for each live event, giving
+        reconnecting clients a cursor to replay from.
 
         Strategy: check ``full()`` first (LBYL). If full, evict the
         oldest entry then enqueue. Both ``get_nowait``+``put_nowait``
@@ -173,18 +192,28 @@ class _SseEventBus:
         treat any race as "subscriber is too slow" and drop the event.
         """
         if not q.full():
-            q.put_nowait((event_type, payload))
+            q.put_nowait((event_type, payload, seq_id))
             return
         # Queue full — try to make room by evicting the oldest entry.
         evicted = _drain_one(q)
         if evicted and not q.full():
-            q.put_nowait((event_type, payload))
+            q.put_nowait((event_type, payload, seq_id))
             return
         logger.debug("SSE publish: subscriber queue full; dropping %s", event_type)
 
     def history_since(self, since: datetime) -> list[tuple[str, dict]]:
         """Return (event_type, payload) pairs recorded after *since*."""
-        return [(et, p) for (ts, et, p, _seq) in self._history if ts > since]
+        return [(et, p) for (et, p, _seq) in self.history_since_with_seq(since)]
+
+    def history_since_with_seq(self, since: datetime) -> list[tuple[str, dict, int]]:
+        """Return ``(event_type, payload, seq_id)`` triples recorded after *since*.
+
+        Seq-carrying sibling of ``history_since`` so the SSE generator can
+        emit the wire-level ``id:`` line for replayed events, giving a
+        reconnecting client the same Last-Event-ID cursor it would have
+        received live.
+        """
+        return [(et, p, seq) for (ts, et, p, seq) in self._history if ts > since]
 
     def history_since_seq(self, since: datetime, since_seq: int) -> list[tuple[str, dict]]:
         """Return history with gap-detection via ``since_seq``.
@@ -216,12 +245,34 @@ class _SseEventBus:
         ``seq_id`` is within the contiguous range (``oldest_seq <=
         since_seq + 1``), no sentinel is emitted.
         """
-        sentinel: tuple[str, dict] = (
+        return [(et, p) for (et, p, _seq) in self.history_since_seq_with_seq(since, since_seq)]
+
+    def history_since_seq_with_seq(
+        self, since: datetime, since_seq: int
+    ) -> list[tuple[str, dict, int]]:
+        """Seq-carrying sibling of ``history_since_seq``.
+
+        Returns ``(event_type, payload, seq_id)`` triples so the SSE
+        generator can emit each replayed event's wire-level ``id:`` line.
+        The gap-detection logic (deque overflow, empty-history restart,
+        client-ahead-of-bus) is identical to ``history_since_seq``; only the
+        tuple width differs.  The ``replay_truncated`` sentinel carries
+        seq_id 0 — the reserved marker that the generator never emits as an
+        ``id:`` so a client can never adopt it as a Last-Event-ID.
+        """
+        sentinel: tuple[str, dict, int] = (
             "replay_truncated",
             {"type": "replay_truncated", "since": since_seq, "seq_id": 0},
+            0,
         )
 
-        entries = [(ts, et, p, seq) for (ts, et, p, seq) in self._history if ts > since]
+        # Replay only events strictly after the client's cursor. Constrain by
+        # both the ISO ``since`` window (when supplied) and ``since_seq`` so a
+        # reconnect resumes exactly where the client left off instead of
+        # re-emitting events it already applied.
+        entries = [
+            (et, p, seq) for (ts, et, p, seq) in self._history if ts > since and seq > since_seq
+        ]
 
         if not self._history:
             # After a restart (or fresh bus): no history at all.  If the
@@ -238,15 +289,15 @@ class _SseEventBus:
         # Case 1: gap at the tail of history (deque overflow evicted events
         # that the client has not seen yet).
         if oldest_seq > since_seq + 1:
-            return [sentinel] + [(et, p) for (_ts, et, p, _seq) in entries]
+            return [sentinel] + entries
 
         # Case 2: the client claims to have seen a seq_id that is *ahead* of
         # anything this bus has ever issued — impossible unless the bus was
         # restarted and the counter reset.  Treat as truncated.
         if since_seq > newest_seq:
-            return [sentinel] + [(et, p) for (_ts, et, p, _seq) in entries]
+            return [sentinel] + entries
 
-        return [(et, p) for (_ts, et, p, _seq) in entries]
+        return entries
 
     def _record(self, ts: datetime, event_type: str, payload: dict, seq_id: int = 0) -> None:
         # deque(maxlen=...) discards the oldest entry automatically on overflow.
@@ -261,9 +312,17 @@ sse_event_bus = _SseEventBus()
 # ---------------------------------------------------------------------------
 
 
-def _format_sse(event_type: str, data: dict) -> str:
-    """Format a single SSE message block (terminated by double newline)."""
-    return f"event: {event_type}\ndata: {json.dumps(data)}\n\n"
+def _format_sse(event_type: str, data: dict, seq_id: Optional[int] = None) -> str:
+    """Format a single SSE message block (terminated by double newline).
+
+    When ``seq_id`` is a positive integer an ``id:`` line is prepended so
+    standard SSE clients record it as the Last-Event-ID and can reconnect
+    with ``?since_seq=<id>``.  ``seq_id`` of ``None`` (heartbeat) or ``0``
+    (the reserved ``replay_truncated`` sentinel) emits no ``id:`` line — a
+    client must never adopt those as a resume cursor.
+    """
+    prefix = f"id: {seq_id}\n" if seq_id else ""
+    return f"{prefix}event: {event_type}\ndata: {json.dumps(data)}\n\n"
 
 
 def _parse_since(since_str: Optional[str]) -> Optional[datetime]:
@@ -279,9 +338,23 @@ def _parse_since(since_str: Optional[str]) -> Optional[datetime]:
         return None
 
 
+# Control-signal event types that always pass the ?type= filter. The
+# replay_truncated sentinel tells a reconnecting client its local state is
+# stale; suppressing it because the client narrowed ?type= would reintroduce
+# the silent-gap bug it exists to close.
+_ALWAYS_ALLOWED: frozenset[str] = frozenset({"replay_truncated"})
+
+
 def _allowed(event_type: str, type_filter: Optional[set[str]]) -> bool:
-    """Return True if this event_type passes the type filter."""
+    """Return True if this event_type passes the type filter.
+
+    The ``replay_truncated`` control sentinel always passes, even under a
+    narrow ?type= allow-list, so a filtered client still learns it must
+    perform a full reload after a history gap.
+    """
     if type_filter is None:
+        return True
+    if event_type in _ALWAYS_ALLOWED:
         return True
     return event_type in type_filter
 
@@ -312,9 +385,11 @@ _TYPE_QUERY = Query(None, description="Comma-separated event type filter")
     description=(
         "Subscribe once per page load. Receives push deltas for machines, requests, "
         "templates, and a heartbeat every 15 s.  Supports ?since= for replay and "
-        "?type= for filtering.  Add ?since_seq= alongside ?since= to enable "
-        "gap-detection: if history has overflowed a replay_truncated sentinel is "
-        "emitted first (seq_id 0)."
+        "?type= for filtering.  Add ?since_seq= (the Last-Event-ID of the last "
+        "event received, sent automatically by standard SSE clients on reconnect) "
+        "to enable gap-detection: replay resumes after that id, and if history has "
+        "overflowed a replay_truncated sentinel is emitted first (seq_id 0).  Every "
+        "real event carries an id: line so clients get Last-Event-ID semantics."
     ),
     response_class=StreamingResponse,
     responses={
@@ -340,14 +415,21 @@ async def stream_events(
     async def generator() -> AsyncGenerator[str, None]:
         q = await sse_event_bus.subscribe()
         try:
-            if since_dt is not None:
-                if since_seq is not None:
-                    history = sse_event_bus.history_since_seq(since_dt, since_seq)
-                else:
-                    history = sse_event_bus.history_since(since_dt)
-                for event_type, payload in history:
-                    if _allowed(event_type, type_filter):
-                        yield _format_sse(event_type, payload)
+            # Reconnect replay. ?since_seq= (Last-Event-ID) drives gap-detection
+            # and works with OR without ?since=: a standard SSE client resuming
+            # from a Last-Event-ID sends only since_seq, so we fall back to the
+            # epoch to replay everything the bus still retains after that id.
+            if since_seq is not None:
+                history = sse_event_bus.history_since_seq_with_seq(
+                    since_dt if since_dt is not None else _EPOCH, since_seq
+                )
+            elif since_dt is not None:
+                history = sse_event_bus.history_since_with_seq(since_dt)
+            else:
+                history = []
+            for event_type, payload, seq_id in history:
+                if _allowed(event_type, type_filter):
+                    yield _format_sse(event_type, payload, seq_id)
 
             while True:
                 try:
@@ -362,9 +444,13 @@ async def stream_events(
                     continue
                 if item is None:
                     break
-                event_type, payload = item
+                # Queue items are (event_type, payload, seq_id). Tolerate legacy
+                # 2-tuples (event_type, payload) so any external enqueuer or test
+                # that predates the seq_id contract still streams (id: omitted).
+                event_type, payload = item[0], item[1]
+                seq_id = item[2] if len(item) > 2 else None
                 if _allowed(event_type, type_filter):
-                    yield _format_sse(event_type, payload)
+                    yield _format_sse(event_type, payload, seq_id)
         finally:
             await sse_event_bus.unsubscribe(q)
 

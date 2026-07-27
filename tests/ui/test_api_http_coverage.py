@@ -675,9 +675,10 @@ class TestSubscribeEvents:
     async def test_builds_url_without_filter(self, api_http):
         captured: dict[str, Any] = {}
 
-        async def _fake_stream(url, headers=None):
+        async def _fake_stream(url, headers=None, url_builder=None):
             captured["url"] = url
             captured["headers"] = headers
+            captured["url_builder"] = url_builder
             yield "message", {"n": 1}
 
         fake_sse = MagicMock()
@@ -690,13 +691,20 @@ class TestSubscribeEvents:
         expected = f"{api_http.ORB_BASE_URL}{api_http.ORB_ROOT_PREFIX}/api/v1/events"
         assert captured["url"] == expected
         assert captured["headers"] == {"X-ORB-Scheduler": "default"}
+        # The reconnect url_builder threads the last-seen SSE id into
+        # ?since_seq= so a reconnect replays events missed during the blip.
+        builder = captured["url_builder"]
+        assert builder is not None
+        assert builder(None) == expected
+        assert builder(42) == expected + "?since_seq=42"
 
     @pytest.mark.asyncio
     async def test_builds_url_with_sorted_type_filter(self, api_http):
         captured: dict[str, Any] = {}
 
-        async def _fake_stream(url, headers=None):
+        async def _fake_stream(url, headers=None, url_builder=None):
             captured["url"] = url
+            captured["url_builder"] = url_builder
             if False:
                 yield  # pragma: no cover - make this an async generator
 
@@ -708,3 +716,6 @@ class TestSubscribeEvents:
 
         # types are joined sorted → alert,machine
         assert captured["url"].endswith("/api/v1/events?type=alert,machine")
+        # On reconnect the type filter and the resume cursor are combined.
+        builder = captured["url_builder"]
+        assert builder(7).endswith("/api/v1/events?type=alert,machine&since_seq=7")

@@ -328,9 +328,18 @@ def create_fastapi_app(server_config: Any) -> Any:
     )
     logger.info("Security headers middleware enabled")
 
-    # Add trusted host middleware only when an explicit allowlist is provided.
-    # The default is [] (disabled), so omitting this in config is safe.
-    if server_config.trusted_hosts:
+    # Add trusted host middleware only when a restrictive allowlist is provided.
+    # An empty list or a wildcard ('*') disables Host-header validation entirely,
+    # so warn the operator that this protection has been turned off.
+    if not server_config.trusted_hosts or "*" in server_config.trusted_hosts:
+        logger.warning(
+            "SECURITY WARNING: trusted_hosts is %s — Host-header protection is "
+            "effectively DISABLED. The server will accept requests with any Host "
+            "header, exposing it to DNS-rebinding and Host-header spoofing attacks. "
+            "Set server.trusted_hosts to an explicit list of expected hostnames.",
+            "empty" if not server_config.trusted_hosts else "['*']",
+        )
+    else:
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=server_config.trusted_hosts)  # type: ignore[arg-type]
 
     # Add read-only mode middleware (runs before CORS so preflight OPTIONS still pass freely)

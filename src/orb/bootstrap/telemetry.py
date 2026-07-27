@@ -171,7 +171,7 @@ def _resolve_telemetry_file_dir(configured: Optional[str]) -> Path:
     return Path(tempfile.mkdtemp(prefix="orb-telemetry-"))
 
 
-def configure_telemetry(container: "DIContainer") -> None:  # noqa: C901
+def configure_telemetry(container: DIContainer) -> None:
     """Initialise the OTel SDK from the container's OtelConfig.
 
     This function is a complete no-op in any of the following situations:
@@ -202,7 +202,7 @@ def configure_telemetry(container: "DIContainer") -> None:  # noqa: C901
 
     # --- guard: SDK may not be installed ---
     try:
-        from opentelemetry import metrics, trace  # noqa: F401 (availability probe)
+        from opentelemetry import metrics, trace
         from opentelemetry.sdk.metrics import MeterProvider
         from opentelemetry.sdk.resources import SERVICE_NAME, Resource
         from opentelemetry.sdk.trace import TracerProvider
@@ -296,9 +296,7 @@ def configure_telemetry(container: "DIContainer") -> None:  # noqa: C901
                 # it deterministically, preventing a resource leak.
                 from opentelemetry.sdk.metrics.export import ConsoleMetricExporter
 
-                _metrics_fh = open(  # noqa: SIM115,WPS515
-                    metrics_path, "a", encoding="utf-8"
-                )
+                _metrics_fh = open(metrics_path, "a", encoding="utf-8")
                 try:
                     _metric_file_exporter = ConsoleMetricExporter(
                         out=_metrics_fh,
@@ -367,9 +365,7 @@ def configure_telemetry(container: "DIContainer") -> None:  # noqa: C901
                 # it deterministically, preventing a resource leak.
                 from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 
-                _traces_fh = open(  # noqa: SIM115,WPS515
-                    traces_path, "a", encoding="utf-8"
-                )
+                _traces_fh = open(traces_path, "a", encoding="utf-8")
                 try:
                     _span_file_exporter = ConsoleSpanExporter(
                         out=_traces_fh,

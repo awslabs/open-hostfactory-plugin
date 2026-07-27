@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import Field, field_validator, model_validator
 
@@ -387,87 +387,3 @@ class LaunchTemplateInfo(ValueObject):
     def get_display_name(self) -> str:
         """Get a display-friendly name."""
         return self.template_name or self.template_id
-
-
-class RequestHistoryEvent(ValueObject):
-    """
-    Event that occurred during request processing.
-
-    This represents significant events in the request lifecycle,
-    such as status changes, errors, or completion milestones.
-
-    Attributes:
-        event_type: Type of event (e.g., 'status_change', 'error', 'completion')
-        timestamp: When the event occurred
-        message: Human-readable event message
-        details: Additional event details
-        source: Source of the event (e.g., 'system', 'user', 'provider')
-    """
-
-    event_type: str
-    timestamp: str  # ISO format datetime string
-    message: str
-    details: dict[str, Any] = Field(default_factory=dict)
-    source: str = "system"
-
-    @field_validator("event_type")
-    @classmethod
-    def validate_event_type(cls, v: str) -> str:
-        """Validate event type format."""
-        if not v or not isinstance(v, str):
-            raise ValueError("Event type must be a non-empty string")
-
-        # Normalize to lowercase with underscores
-        normalized = v.lower().replace("-", "_").replace(" ", "_")
-        return normalized
-
-    @field_validator("timestamp")
-    @classmethod
-    def validate_timestamp(cls, v: str) -> str:
-        """Validate timestamp format."""
-        if not v or not isinstance(v, str):
-            raise ValueError("Timestamp must be a non-empty string")
-
-        # Basic ISO format validation
-        try:
-            datetime.fromisoformat(v.replace("Z", "+00:00"))
-        except ValueError:
-            raise ValueError("Timestamp must be in ISO format")
-
-        return v
-
-    @field_validator("message")
-    @classmethod
-    def validate_message(cls, v: str) -> str:
-        """Validate event message format."""
-        if not v or not isinstance(v, str):
-            raise ValueError("Event message must be a non-empty string")
-        return v.strip()
-
-    def __str__(self) -> str:
-        return f"[{self.timestamp}] {self.event_type}: {self.message}"
-
-    @classmethod
-    def create(
-        cls,
-        event_type: str,
-        message: str,
-        details: Optional[Dict[str, Any]] = None,
-        source: str = "system",
-    ) -> RequestHistoryEvent:
-        """Create a new event with current timestamp."""
-        return cls(
-            event_type=event_type,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            message=message,
-            details=details or {},
-            source=source,
-        )
-
-    def is_error_event(self) -> bool:
-        """Check if this is an error event."""
-        return self.event_type in ["error", "failure", "exception"]
-
-    def is_status_change_event(self) -> bool:
-        """Check if this is a status change event."""
-        return self.event_type in ["status_change", "state_change"]

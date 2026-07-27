@@ -164,11 +164,12 @@ class AWSAMIResolver(ImageResolver):
         """
         try:
             import boto3
-            from botocore.config import Config
+
+            from orb.providers.aws.utilities.boto_config import get_boto3_config
 
             ssm_client = boto3.client(
                 "ssm",
-                config=Config(connect_timeout=10, read_timeout=30, retries={"max_attempts": 3}),
+                config=get_boto3_config(),
             )
             response = ssm_client.get_parameter(Name=ssm_path)
             ami_id = str(response["Parameter"]["Value"])

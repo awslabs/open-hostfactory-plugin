@@ -11,6 +11,7 @@ from orb.application.services.orchestration.dtos import (
     GetRequestStatusOutput,
     Paginated,
 )
+from orb.domain.base.exceptions import EntityNotFoundError
 from orb.domain.base.ports.logging_port import LoggingPort
 
 
@@ -51,7 +52,22 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
                 )
                 result = await self._query_bus.execute(query)
                 request_dicts.append(self._to_dict(result))
+            except EntityNotFoundError as exc:
+                # A genuinely non-existent request. Tag it with an explicit
+                # ``not_found`` flag so single-ID callers can distinguish it
+                # from an existing request that merely errored during sync.
+                # A real RequestDTO never carries a "not_found" key, so this
+                # flag is an unambiguous synthetic-only discriminator.
+                self._logger.info("Request %s not found: %s", request_id, exc)
+                request_dicts.append(
+                    {"request_id": request_id, "not_found": True, "error": str(exc)}
+                )
             except Exception as exc:
+                # The request may well exist but its provider sync failed
+                # (e.g. ProviderContractError, infra error). Emit an error
+                # entry WITHOUT the not_found flag so batch callers still see
+                # a per-ID partial failure and single-ID callers do not 404 a
+                # request that actually exists.
                 self._logger.error("Failed to get status for %s: %s", request_id, exc)
                 request_dicts.append({"request_id": request_id, "error": str(exc)})
 

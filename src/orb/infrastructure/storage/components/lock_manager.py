@@ -13,6 +13,14 @@ class ReaderWriterLock:
 
     Allows multiple readers to access the resource simultaneously,
     but only one writer at a time, with no readers present.
+
+    IN-PROCESS ONLY: this lock is built on ``threading`` primitives, so it
+    serializes readers/writers only among threads of the *same* process. It
+    provides no guarantee across separate processes or hosts — a second
+    process holds its own independent lock instance and will not observe this
+    one. For cross-process write serialization the storage backend itself must
+    provide it (the JSON backend uses ``fcntl.flock`` on a sibling lock file;
+    SQLite relies on its built-in database-level file locking).
     """
 
     def __init__(self) -> None:
@@ -80,6 +88,19 @@ class LockManager:
     High-level locking manager for storage operations.
 
     Provides different locking strategies based on storage type and requirements.
+
+    IN-PROCESS ONLY: every strategy exposed here (``reader_writer``, ``simple``,
+    ``none``) is backed by ``threading`` primitives. The acquired locks
+    serialize writes among threads WITHIN a single process; they do NOT
+    serialize across processes or hosts. Cross-process safety must come from
+    the underlying storage backend, not from this manager:
+
+    * JSON backend — wraps its read-modify-write cycle in an ``fcntl.flock``
+      exclusive lock on a sibling ``.lock`` file (single-host only).
+    * SQLite backend — relies on SQLite's built-in database-level file locking,
+      which already serializes writers across processes on the same host.
+    * PostgreSQL / MySQL backend — the database server serializes concurrent
+      writers; this manager only reduces contention among in-process threads.
     """
 
     def __init__(self, lock_type: str = "reader_writer") -> None:

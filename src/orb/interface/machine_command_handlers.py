@@ -16,7 +16,7 @@ async def handle_get_machine_status(
     args: "argparse.Namespace",
 ) -> dict[str, Any] | InterfaceResponse:
     """
-    Handle get machine status operations for multiple machine IDs.
+    Get status details for specific machines by ID, or all machines with --all.
 
     Args:
         args: Argument namespace with machine_ids
@@ -95,7 +95,7 @@ async def handle_list_machines(
     args: "argparse.Namespace",
 ) -> dict[str, Any] | InterfaceResponse:
     """
-    Handle list machines operations with scheduler-aware formatting.
+    List machines, optionally filtered by status, request ID, or provider, with pagination.
 
     Args:
         args: Argument namespace with filtering options
@@ -135,7 +135,7 @@ async def handle_stop_machines(
     args: "argparse.Namespace",
 ) -> dict[str, Any] | InterfaceResponse:
     """
-    Handle stop machines operations.
+    Stop machines by ID, or all machines with --all --force.
 
     Args:
         args: Argument namespace with machine_ids, all, and force flags
@@ -204,7 +204,7 @@ async def handle_start_machines(
     args: "argparse.Namespace",
 ) -> dict[str, Any] | InterfaceResponse:
     """
-    Handle start machines operations.
+    Start machines by ID, or all machines with --all.
 
     Args:
         args: Argument namespace with machine_ids and all flags

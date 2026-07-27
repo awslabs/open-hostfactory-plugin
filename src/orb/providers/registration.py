@@ -190,16 +190,15 @@ def register_all_providers(container: DIContainer | None = None) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Deprecated aliases – kept for backward compatibility with existing callers.
+# Bootstrap aliases – kept for backward compatibility with existing callers.
 # ---------------------------------------------------------------------------
 
 
 def register_all_provider_types() -> None:
     """Register all available provider types.
 
-    Deprecated: use ``register_all_providers()`` instead.  Kept as a
-    backward-compatible alias so existing callers continue to work without
-    modification.
+    Backward-compatible alias that delegates to ``register_all_providers()``
+    so existing callers continue to work without modification.
     """
     register_all_providers(container=None)
 
@@ -209,10 +208,8 @@ def register_all_provider_cli_specs() -> None:
 
     Lightweight bootstrap that only registers CLI specs so that
     ``build_parser`` can call it before any application context exists.
-
-    Deprecated: ``register_all_providers()`` now handles CLI spec registration
-    as part of ``initialize_<name>_provider``.  This alias is retained so that
-    ``cli/args.py`` and other early-bootstrap callers continue to work.
+    Retained so that ``cli/args.py`` and other early-bootstrap callers
+    continue to work.
     """
     # Ensure entry-point providers are registered before iterating the list;
     # this function may be called before full bootstrap (e.g. from cli/args.py).
@@ -258,12 +255,9 @@ def register_all_defaults_loaders() -> None:
 
     Lightweight bootstrap that only registers ``ProviderDefaultsLoaderPort``
     implementations so that ``ConfigurationLoader._load_strategy_defaults`` can
-    call it before a full application context has been set up.
-
-    Deprecated: ``register_all_providers()`` now handles defaults-loader
-    registration as part of ``initialize_<name>_provider``.  This alias is
-    retained so that ``config/loader.py`` and other early-bootstrap callers
-    continue to work.
+    call it before a full application context has been set up.  Retained so
+    that ``config/loader.py`` and other early-bootstrap callers continue to
+    work.
     """
     # Ensure entry-point providers are registered before iterating the list;
     # this function may be called before full bootstrap (e.g. from config/loader.py).

@@ -2,18 +2,14 @@
 
 from typing import Any, Optional
 
-from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from orb.infrastructure.storage.components.resource_manager import (
     StorageResourceManager as ResourceManager,
 )
+from orb.providers.aws.utilities.boto_config import get_boto3_config
 
-_DEFAULT_CONFIG = Config(
-    connect_timeout=10,
-    read_timeout=30,
-    retries={"max_attempts": 3},
-)
+_DEFAULT_CONFIG = get_boto3_config()
 
 
 class DynamoDBClientManager(ResourceManager):

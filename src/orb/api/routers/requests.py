@@ -35,6 +35,7 @@ from orb.application.services.orchestration.dtos import (
     ListReturnRequestsInput,
 )
 from orb.domain.base import UnitOfWorkFactory
+from orb.domain.base.exceptions import EntityNotFoundError
 from orb.domain.request.request_types import RequestStatus
 from orb.infrastructure.error.decorators import handle_rest_exceptions
 from orb.interface.catalog import OPERATION_CATALOG, Interface
@@ -42,6 +43,22 @@ from orb.interface.catalog import OPERATION_CATALOG, Interface
 router = APIRouter(prefix="/requests", tags=["Requests"])
 
 _logger = _logging.getLogger(__name__)
+
+
+def _is_not_found_marker(entry: dict) -> bool:
+    """Return True when ``entry`` is the orchestrator's synthetic not-found marker.
+
+    When a per-ID lookup raises EntityNotFoundError (e.g. RequestNotFoundError)
+    the orchestrator swallows it into a synthetic dict carrying an explicit
+    ``"not_found": True`` flag so batch callers can report partial failures. Any
+    OTHER per-ID error (a request that exists but whose provider sync failed,
+    e.g. ProviderContractError) produces an ``"error"`` entry WITHOUT that flag.
+    A real request DTO never carries a "not_found" key, so the flag is an
+    unambiguous discriminator: only entries explicitly marked not_found mean the
+    request does not exist and should surface a 404.
+    """
+    return bool(entry.get("not_found"))
+
 
 # Module-level dependency variables to avoid B008 warnings
 STATUS_ORCHESTRATOR = Depends(get_request_status_orchestrator)
@@ -184,6 +201,16 @@ async def get_request(
     result = await orchestrator.execute(
         GetRequestStatusInput(request_ids=[request_id], verbose=verbose)
     )
+    # The orchestrator tags a genuinely non-existent request with an explicit
+    # "not_found" flag (EntityNotFoundError swallowed for batch partial-failure
+    # reporting). Only that flag means the request does not exist, so surface a
+    # 404. An existing request whose provider sync errored comes back as an
+    # error entry WITHOUT the flag and must be returned as 200 — as must a real
+    # request that failed provisioning (status="failed" with an error block).
+    if not result.requests or (
+        len(result.requests) == 1 and _is_not_found_marker(result.requests[0])
+    ):
+        raise EntityNotFoundError("Request", request_id)
     entry = OPERATION_CATALOG["get_request_status"]
     return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 
@@ -212,6 +239,16 @@ async def get_request_status(
     result = await orchestrator.execute(
         GetRequestStatusInput(request_ids=[request_id], verbose=verbose)
     )
+    # The orchestrator tags a genuinely non-existent request with an explicit
+    # "not_found" flag (EntityNotFoundError swallowed for batch partial-failure
+    # reporting). Only that flag means the request does not exist, so surface a
+    # 404. An existing request whose provider sync errored comes back as an
+    # error entry WITHOUT the flag and must be returned as 200 — as must a real
+    # request that failed provisioning (status="failed" with an error block).
+    if not result.requests or (
+        len(result.requests) == 1 and _is_not_found_marker(result.requests[0])
+    ):
+        raise EntityNotFoundError("Request", request_id)
     entry = OPERATION_CATALOG["get_request_status"]
     return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 

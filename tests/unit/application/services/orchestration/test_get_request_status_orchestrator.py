@@ -130,6 +130,58 @@ class TestGetRequestStatusOrchestrator:
         mock_logger.error.assert_called()
 
     @pytest.mark.asyncio
+    async def test_execute_not_found_error_tags_not_found_flag(self, orchestrator, mock_query_bus):
+        """A genuine EntityNotFoundError → entry carries the explicit not_found flag."""
+        from orb.domain.request.exceptions import RequestNotFoundError
+
+        mock_query_bus.execute.side_effect = RequestNotFoundError("req-missing")
+        input = GetRequestStatusInput(request_ids=["req-missing"])
+        result = await orchestrator.execute(input)
+        entry = result.requests[0]
+        assert entry["not_found"] is True
+        assert entry["request_id"] == "req-missing"
+        assert entry["error"]
+
+    @pytest.mark.asyncio
+    async def test_execute_sync_error_has_no_not_found_flag(self, orchestrator, mock_query_bus):
+        """A non-not-found error (ProviderContractError) → error entry, no not_found flag."""
+        from orb.domain.base.exceptions import ProviderContractError
+
+        mock_query_bus.execute.side_effect = ProviderContractError("contract violated")
+        input = GetRequestStatusInput(request_ids=["req-exists"])
+        result = await orchestrator.execute(input)
+        entry = result.requests[0]
+        assert "not_found" not in entry
+        assert entry["error"] == "contract violated"
+
+    @pytest.mark.asyncio
+    async def test_execute_batch_partial_failure_mixes_markers(self, orchestrator, mock_query_bus):
+        """Batch fan-out: one ok, one not-found, one sync-errored — one entry each.
+
+        Guards the per-ID partial-failure contract the batch POST relies on: the
+        orchestrator never blows up mid-batch and each ID yields exactly one
+        entry, with the not_found flag present only on the genuinely missing ID.
+        """
+        from orb.domain.base.exceptions import ProviderContractError
+        from orb.domain.request.exceptions import RequestNotFoundError
+
+        ok = MagicMock(spec=["model_dump"])
+        ok.model_dump.return_value = {"request_id": "req-ok", "status": "completed"}
+        mock_query_bus.execute.side_effect = [
+            ok,
+            RequestNotFoundError("req-missing"),
+            ProviderContractError("contract violated"),
+        ]
+        input = GetRequestStatusInput(request_ids=["req-ok", "req-missing", "req-errored"])
+        result = await orchestrator.execute(input)
+
+        assert len(result.requests) == 3
+        ok_entry, missing_entry, errored_entry = result.requests
+        assert "not_found" not in ok_entry and ok_entry["status"] == "completed"
+        assert missing_entry["not_found"] is True
+        assert "not_found" not in errored_entry and errored_entry["error"] == "contract violated"
+
+    @pytest.mark.asyncio
     async def test_execute_all_requests_none_result_returns_empty(
         self, orchestrator, mock_query_bus
     ):

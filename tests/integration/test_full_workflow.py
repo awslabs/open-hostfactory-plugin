@@ -352,7 +352,8 @@ class TestEndToEndScenarios:
         """Test concurrent operations scenario."""
         app, _, _ = await _init_app()
 
-        command_bus = app.get_command_bus()
+        # Confirm the application exposes a command bus with an execute API.
+        assert hasattr(app.get_command_bus(), "execute")
         results = []
         errors = []
 
@@ -360,20 +361,21 @@ class TestEndToEndScenarios:
             import asyncio
 
             try:
-                with patch.object(
-                    command_bus,
-                    "execute",
-                    new=AsyncMock(
-                        return_value={
-                            "request_id": f"req-worker-{worker_id}",
-                            "status": "pending",
-                        }
-                    ),
-                ):
-                    loop = asyncio.new_event_loop()
-                    result = loop.run_until_complete(command_bus.execute(Mock()))
-                    loop.close()
-                    results.append(result)
+                # Each thread uses its own independent bus mock. Patching a
+                # shared object with patch.object is not thread-safe: one
+                # thread's teardown removes the attribute while another is
+                # mid-call, causing spurious AttributeErrors.
+                local_bus = Mock(spec=CommandBus)
+                local_bus.execute = AsyncMock(
+                    return_value={
+                        "request_id": f"req-worker-{worker_id}",
+                        "status": "pending",
+                    }
+                )
+                loop = asyncio.new_event_loop()
+                result = loop.run_until_complete(local_bus.execute(Mock()))
+                loop.close()
+                results.append(result)
             except Exception as e:
                 errors.append(e)
 
@@ -457,20 +459,24 @@ class TestPerformanceIntegration:
         """Test performance with concurrent requests."""
         app, _, _ = await _init_app()
 
-        query_bus = app.get_query_bus()
+        # Confirm the application exposes a query bus with an execute_sync API.
+        assert hasattr(app.get_query_bus(), "execute_sync")
         results = []
 
         def worker(worker_id):
-            with patch.object(
-                query_bus,
-                "execute_sync",
+            # Each thread uses its own independent bus mock. Patching a
+            # shared object with patch.object is not thread-safe: one
+            # thread's teardown removes the attribute while another is
+            # mid-call, causing spurious AttributeErrors.
+            local_bus = Mock(spec=QueryBus)
+            local_bus.execute_sync = Mock(
                 return_value={
                     "request_id": f"req-{worker_id}",
                     "status": "completed",
-                },
-            ):
-                result = query_bus.execute_sync(Mock())
-                results.append(result)
+                }
+            )
+            result = local_bus.execute_sync(Mock())
+            results.append(result)
 
         overall_start = time.time()
         threads = [threading.Thread(target=worker, args=(i,)) for i in range(50)]

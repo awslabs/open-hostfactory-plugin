@@ -378,6 +378,9 @@ class SDKMethodDiscovery:
         """Create SDK method for query handler using direct CQRS bus."""
 
         async def sdk_method(**kwargs):
+            # Default so the error path can reference it even if mapping itself
+            # raises before the assignment below.
+            mapped_kwargs = kwargs
             try:
                 # Extract serialization options before CQRS mapping
                 raw_response = kwargs.pop("raw_response", False)
@@ -419,7 +422,7 @@ class SDKMethodDiscovery:
                     details={
                         "query_type": query_type.__name__,
                         "original_kwargs": kwargs,
-                        "mapped_kwargs": ParameterMapper.map_parameters(query_type, kwargs),
+                        "mapped_kwargs": mapped_kwargs,
                     },
                 ) from e
 
@@ -506,6 +509,9 @@ class SDKMethodDiscovery:
         """Create SDK method for command handler using direct CQRS bus."""
 
         async def sdk_method(**kwargs):
+            # Default so the error path can reference it even if mapping itself
+            # raises before the assignment below.
+            mapped_kwargs = kwargs
             try:
                 # Extract serialization options before CQRS mapping
                 raw_response = kwargs.pop("raw_response", False)
@@ -550,7 +556,7 @@ class SDKMethodDiscovery:
                     details={
                         "command_type": command_type.__name__,
                         "original_kwargs": kwargs,
-                        "mapped_kwargs": ParameterMapper.map_parameters(command_type, kwargs),
+                        "mapped_kwargs": mapped_kwargs,
                     },
                 )
 

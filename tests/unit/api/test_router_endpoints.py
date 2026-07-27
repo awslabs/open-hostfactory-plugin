@@ -446,7 +446,7 @@ class TestRequestsRouter:
 
     def test_get_request_details(self, requests_app):
         # GET /requests/{id} (without /status) is now re-added; expect 200
-        output = GetRequestStatusOutput(requests=[])
+        output = GetRequestStatusOutput(requests=[{"request_id": "req-456", "status": "running"}])
         self._override_status(requests_app, output)
         self._set_scheduler(requests_app)
         client = TestClient(requests_app, raise_server_exceptions=False)

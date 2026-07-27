@@ -152,12 +152,8 @@ class TestRequestLifecycle:
 
     def test_get_request_status_returns_status(self, app, client: TestClient):
         """GET /api/v1/requests/{id}/status returns request status."""
-        mock_req = Mock()
-        mock_req.to_dict = Mock(
-            return_value={"request_id": "req-acquire-abc123", "status": "running"}
-        )
         mock_result = Mock()
-        mock_result.requests = [mock_req]
+        mock_result.requests = [{"request_id": "req-acquire-abc123", "status": "running"}]
         mock_orchestrator = AsyncMock()
         mock_orchestrator.execute = AsyncMock(return_value=mock_result)
 
@@ -259,9 +255,7 @@ class TestRequestLifecycle:
         assert create_resp.status_code == 202
 
         def _make_status_req(rid, status):
-            m = Mock()
-            m.to_dict = Mock(return_value={"request_id": rid, "status": status})
-            return m
+            return {"request_id": rid, "status": status}
 
         mock_status_orchestrator = AsyncMock()
 
@@ -322,11 +316,7 @@ class TestRequestLifecycle:
         machine_ids = ["i-lifecycle-001", "i-lifecycle-002"]
 
         def _make_status_req(rid, status, machines=None):
-            m = Mock()
-            m.to_dict = Mock(
-                return_value={"request_id": rid, "status": status, "machines": machines or []}
-            )
-            return m
+            return {"request_id": rid, "status": status, "machines": machines or []}
 
         # Step 1: create request
         mock_create_result = Mock()

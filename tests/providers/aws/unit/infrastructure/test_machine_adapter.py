@@ -416,3 +416,58 @@ class TestHealthChecksSynthesis:
         hc = result["provider_data"]["health_checks"]
         assert hc["status"] == "impaired"
         assert hc["details"]["state_reason"] == "Host failure"
+
+
+# ---------------------------------------------------------------------------
+# _extract_status_reason direct unit tests
+# ---------------------------------------------------------------------------
+
+
+class TestExtractStatusReason:
+    """Direct tests for the static _extract_status_reason helper.
+
+    It accepts both PascalCase (StateReason.Message, StateTransitionReason) and
+    snake_case (state_reason.message, state_transition_reason) shapes.
+    """
+
+    def test_pascal_state_reason_message(self):
+        """PascalCase StateReason dict → its Message string."""
+        reason = AWSMachineAdapter._extract_status_reason(
+            {"StateReason": {"Code": "Server.InternalError", "Message": "Host failure"}}
+        )
+        assert reason == "Host failure"
+
+    def test_pascal_state_transition_reason_fallback(self):
+        """No StateReason → falls back to StateTransitionReason."""
+        reason = AWSMachineAdapter._extract_status_reason(
+            {"StateTransitionReason": "User initiated (2026-01-01)"}
+        )
+        assert reason == "User initiated (2026-01-01)"
+
+    def test_snake_state_reason_message(self):
+        """snake_case state_reason dict → its message string."""
+        reason = AWSMachineAdapter._extract_status_reason(
+            {"state_reason": {"code": "Server.InternalError", "message": "Disk failure"}}
+        )
+        assert reason == "Disk failure"
+
+    def test_snake_state_transition_reason_fallback(self):
+        """No state_reason message → falls back to state_transition_reason."""
+        reason = AWSMachineAdapter._extract_status_reason(
+            {"state_transition_reason": "User initiated shutdown"}
+        )
+        assert reason == "User initiated shutdown"
+
+    def test_state_reason_takes_priority_over_transition_reason(self):
+        """StateReason.Message wins over StateTransitionReason when both present."""
+        reason = AWSMachineAdapter._extract_status_reason(
+            {
+                "StateReason": {"Message": "Primary reason"},
+                "StateTransitionReason": "Secondary reason",
+            }
+        )
+        assert reason == "Primary reason"
+
+    def test_no_reason_returns_none(self):
+        """Empty instance data → None."""
+        assert AWSMachineAdapter._extract_status_reason({}) is None

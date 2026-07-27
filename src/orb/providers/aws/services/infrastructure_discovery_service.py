@@ -69,11 +69,10 @@ class AWSInfrastructureDiscoveryService:
         self._console = console or NullConsoleAdapter()
 
         # Create AWS session and clients
-        from botocore.config import Config
-
         from orb.providers.aws.session_factory import AWSSessionFactory
+        from orb.providers.aws.utilities.boto_config import get_boto3_config
 
-        _config = Config(connect_timeout=10, read_timeout=30, retries={"max_attempts": 3})
+        _config = get_boto3_config()
         session = AWSSessionFactory.create_session(profile=profile, region=region)
         self.ec2_client = session.client("ec2", config=_config)
         self.iam_client = session.client("iam", config=_config)

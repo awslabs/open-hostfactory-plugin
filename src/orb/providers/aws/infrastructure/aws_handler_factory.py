@@ -88,14 +88,17 @@ class AWSHandlerFactory:
                 config_port=config_port,
             )
 
-        # Lazy container resolution as last resort
+        # Lazy container resolution as last resort. Resolve via the domain
+        # NativeSpecPort so the providers layer never imports the concrete
+        # application service — the app service is registered under the port
+        # during DI bootstrap.
         try:
-            from orb.application.services.native_spec_service import NativeSpecService
+            from orb.domain.base.ports.native_spec_port import NativeSpecPort
             from orb.infrastructure.di.container import get_container
 
             container = get_container()
             return AWSNativeSpecService(
-                native_spec_service=container.get(NativeSpecService),
+                native_spec_service=container.get(NativeSpecPort),
                 config_port=config_port,
             )
         except Exception as e:

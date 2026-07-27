@@ -166,20 +166,18 @@ def create_k8s_strategy(provider_config: Any) -> Any:
         except Exception as exc:
             logger.debug("Could not get console port from DI container: %s", exc)
 
-        # Resolve NativeSpecService at strategy construction time so the
-        # strategy does not need to import from orb.application at call time.
-        # This keeps the providers→application dependency out of method bodies
-        # and contained to DI wiring only.
+        # Resolve the native-spec service via the domain NativeSpecPort at
+        # strategy construction time.  Resolving through the port keeps the
+        # providers layer free of any orb.application import — the concrete
+        # application service is registered under the port during DI bootstrap.
         native_spec_service = None
         try:
-            from orb.application.services.native_spec_service import (
-                NativeSpecService,
-            )
+            from orb.domain.base.ports.native_spec_port import NativeSpecPort
             from orb.infrastructure.di.container import get_container
 
-            native_spec_service = get_container().get(NativeSpecService)
+            native_spec_service = get_container().get(NativeSpecPort)
         except Exception as exc:
-            logger.debug("Could not get NativeSpecService from DI container: %s", exc)
+            logger.debug("Could not get native spec service from DI container: %s", exc)
 
         strategy = K8sProviderStrategy(
             config=k8s_config,
@@ -701,15 +699,13 @@ def register_k8s_services_with_di(container) -> None:
         )
 
         def _create_k8s_native_spec_service(_container) -> K8sNativeSpecService:
-            # NativeSpecService lives in the application layer; import is deferred
-            # to this factory closure so the providers layer does not carry a
-            # static providers→application dependency.
-            from orb.application.services.native_spec_service import (
-                NativeSpecService,
-            )
+            # Resolve the generic native-spec service via the domain
+            # NativeSpecPort so the providers layer carries no dependency on
+            # the concrete application service.
+            from orb.domain.base.ports.native_spec_port import NativeSpecPort
 
             return K8sNativeSpecService(
-                native_spec_service=_container.get(NativeSpecService),
+                native_spec_service=_container.get(NativeSpecPort),
                 config_port=_container.get(ConfigurationPort),
             )
 

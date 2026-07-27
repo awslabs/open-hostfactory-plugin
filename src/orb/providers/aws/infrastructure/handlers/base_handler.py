@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar
 
 from botocore.exceptions import ClientError
 
-from orb.application.base.provider_handlers import BaseProviderHandler
 from orb.domain.base.exceptions import InfrastructureError
+from orb.domain.base.provider_handler_base import BaseProviderHandler
 from orb.infrastructure.di.injectable import injectable
 
 if TYPE_CHECKING:

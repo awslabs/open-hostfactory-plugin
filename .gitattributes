@@ -4,7 +4,3 @@
 
 # Enforce LF line endings for shell scripts
 *.sh text eol=lf
-
-# Legacy k8s-legacy/tools/ are shell scripts without .sh extension
-# (executed by kubelet via PATH lookup inside pods).
-k8s-legacy/tools/* text eol=lf

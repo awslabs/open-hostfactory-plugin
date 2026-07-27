@@ -1,305 +1,139 @@
-# MCP Tools Mode - Direct Integration
+# MCP Tools
 
-MCP Tools Mode provides direct integration with AI assistants without requiring a separate server process. This is the simplest way to integrate Host Factory operations into AI workflows.
+The broker exposes its operations to AI assistants as MCP tools through a
+single catalog-driven server. There is no separate "tools mode" library and no
+in-process tools object: the server started by `orb mcp serve` is the one and
+only MCP surface, and its tool set is derived from the operation catalog.
 
-## Overview
+## How tools are derived
 
-MCP Tools Mode automatically discovers all SDK methods and exposes them as MCP tools with appropriate JSON schemas for AI assistant consumption.
+Every operation the broker declares in its operation catalog and marks as
+exposed on the MCP interface becomes a tool automatically:
 
-## Key Features
+- the **tool name** is the catalog key (for example `list_templates`);
+- the **input schema** is generated from the operation's input type — each
+  field becomes a JSON-Schema property, and a field without a default is marked
+  required;
+- the **result** is the operation output rendered through the shared response
+  formatting seam, so a tool's body stays in lockstep with the CLI, REST, and
+  SDK bodies for the same operation.
 
-- **Automatic Tool Discovery**: All 51+ CQRS handlers automatically exposed as MCP tools
-- **Direct Integration**: No separate server process required
-- **JSON Schema Generation**: Automatic schema generation for tool parameters
-- **Error Handling**: Comprehensive error handling for AI assistant consumption
-- **Type Safety**: Full type validation and conversion
+Because the tool set is generated from the catalog, adding an MCP-exposed
+operation to the catalog adds a tool with no further wiring, and the tool set
+can never drift from the operations the broker actually supports.
 
-## Usage
+## Listing and validating tools
 
-### Direct Integration in AI Assistants
-
-```python
-from orb.mcp import OpenResourceBrokerMCPTools
-
-# Initialize MCP tools
-async with OpenResourceBrokerMCPTools(provider="aws") as tools:
-    # List all available tools
-    available_tools = tools.list_tools()
-    print(f"Available tools: {len(available_tools)}")
-
-    # Call a tool
-    result = await tools.call_tool("list_templates", {
-        "active_only": True
-    })
-
-    if result.get("success"):
-        templates = result["data"]
-        print(f"Found {len(templates)} templates")
-    else:
-        print(f"Error: {result.get('error', {}).get('message')}")
-```
-
-### CLI Testing and Discovery
+Use `orb mcp validate` to build the tool set offline (no server or client is
+started) and confirm every MCP-exposed operation yields a valid object input
+schema. It prints the tool count and names and exits non-zero on any problem,
+so it is safe to run in CI:
 
 ```bash
-# List all available MCP tools
-orb mcp tools list
-
-# List only query tools
-orb mcp tools list --type query
-
-# List only command tools
-orb mcp tools list --type command
-
-# Get information about a specific tool
-orb mcp tools info list_templates
-```
-
-## Complete Examples
-
-For working implementations, see:
-
-- **Python Client**: [examples/mcp/python/client_example.py](#python-client-example)
-- **Node.js Client**: [examples/mcp/nodejs/client_example.js](#nodejs-client-example)
-
-These examples demonstrate:
-- Async context management
-- Error handling
-- Multiple tool usage
-
-# Call a tool directly for testing
-orb mcp tools call list_templates --args '{"active_only": true}'
-
-# Call a tool with arguments from file
-orb mcp tools call create_request --file request_args.json
-
-# Validate MCP configuration
 orb mcp validate
 ```
 
-## Tool Discovery
+From a connected client, the standard `tools/list` request returns the same set
+with each tool's `inputSchema`.
 
-MCP tools are automatically discovered from SDK methods:
+## Calling a tool
+
+Tools are invoked with the standard MCP `tools/call` request. The result is a
+single text content block whose text is the operation's canonical JSON body.
 
 ```python
-async with OpenResourceBrokerMCPTools() as tools:
-    # Get tools by type
-    query_tools = tools.get_tools_by_type("query")
-    command_tools = tools.get_tools_by_type("command")
+import asyncio
+import json
 
-    print(f"Query tools: {query_tools}")
-    print(f"Command tools: {command_tools}")
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
 
-    # Get detailed tool information
-    tool_info = tools.get_tool_info("list_templates")
-    print(f"Tool schema: {tool_info.input_schema}")
+server_params = StdioServerParameters(command="orb", args=["mcp", "serve"])
+
+
+async def main():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            result = await session.call_tool("list_templates", {"active_only": True})
+            body = json.loads(result.content[0].text)
+            print(f"Found {len(body.get('templates', []))} templates")
+
+
+asyncio.run(main())
 ```
 
-## Available Tools
+## Tool schema format
 
-All SDK methods are automatically exposed as MCP tools:
-
-### Template Operations
-- `list_templates` - List available machine templates
-- `get_template` - Get specific template details
-- `validate_template` - Validate template configuration
-
-### Machine Operations
-- `create_request` - Create new machine provisioning request
-- `get_request_status` - Get status of provisioning request
-- `list_machines` - List provisioned machines
-- `create_return_request` - Return/terminate machines
-
-### Provider Operations
-- `get_provider_health` - Check provider health status
-- `list_providers` - List available providers
-- `get_provider_metrics` - Get provider performance metrics
-
-### System Operations
-- `get_system_status` - Get system status information
-- `validate_configuration` - Validate system configuration
-
-## Tool Schema Format
-
-Each tool includes a JSON schema for parameter validation:
+Each tool carries a JSON-Schema `inputSchema` describing its arguments:
 
 ```json
 {
   "name": "list_templates",
-  "description": "List Templates - Query operation",
+  "description": "list_templates — dispatched through ListTemplatesOrchestrator. Returns the operation result rendered as the broker's canonical body.",
   "inputSchema": {
     "type": "object",
     "properties": {
-      "active_only": {
-        "type": "boolean",
-        "description": "Only return active templates"
-      },
-      "provider_api": {
-        "type": "string",
-        "description": "Filter by provider API type"
-      }
+      "active_only": { "type": "boolean" },
+      "provider_api": { "type": "string" }
     },
-    "required": []
+    "additionalProperties": true
   }
 }
 ```
 
-## Response Format
+Extra keys a caller passes that do not name an input field are ignored, so
+clients can send additional properties safely.
 
-Tool responses follow a consistent format:
+## Result format
 
-### Success Response
+A successful call returns the operation's JSON body as text content:
+
 ```json
 {
-  "success": true,
-  "data": {
-    "templates": [
-      {
-        "templateId": "basic-template",
-        "name": "Basic Template",
-        "description": "Basic machine template",
-        "providerType": "aws"
-      }
-    ]
-  },
-  "tool": "list_templates"
-}
-```
-
-### Error Response
-```json
-{
-  "error": {
-    "type": "SDKError",
-    "message": "Failed to list templates: Provider not available",
-    "tool": "list_templates",
-    "arguments": {"active_only": true}
-  }
-}
-```
-
-## Configuration
-
-### Environment Variables
-```bash
-export ORB_PROVIDER=aws
-export ORB_REGION=us-east-1
-export ORB_PROFILE=default
-```
-
-### Configuration File
-```python
-# Load MCP tools with custom configuration
-tools = OpenResourceBrokerMCPTools(
-    provider="aws",
-    config={
-        "region": "us-west-2",
-        "timeout": 600
+  "templates": [
+    {
+      "templateId": "RunInstances-OnDemand",
+      "name": "Run Instances On-Demand",
+      "providerType": "aws"
     }
-)
-```
-
-## Error Handling
-
-MCP tools provide comprehensive error handling:
-
-```python
-async with OpenResourceBrokerMCPTools() as tools:
-    try:
-        result = await tools.call_tool("create_request", {
-            "template_id": "invalid-template",
-            "machine_count": 5
-        })
-
-        if "error" in result:
-            error = result["error"]
-            print(f"Tool error: {error['message']}")
-            print(f"Error type: {error['type']}")
-        else:
-            print(f"Success: {result['data']}")
-
-    except ValueError as e:
-        print(f"Validation error: {e}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-```
-
-## Performance Considerations
-
-- **Initialization**: Tools initialize once and can be reused
-- **Context Manager**: Use async context manager for automatic cleanup
-- **Caching**: Tool definitions are cached after discovery
-- **Concurrent Calls**: Multiple tools can be called concurrently
-
-## Integration Examples
-
-### Claude Desktop Integration
-```json
-{
-  "mcpServers": {
-    "hostfactory": {
-      "command": "python",
-      "args": ["-c", "
-        from orb.mcp import OpenResourceBrokerMCPTools
-        import asyncio
-        import json
-
-        async def main():
-            async with OpenResourceBrokerMCPTools() as tools:
-                # Your integration logic here
-                pass
-
-        asyncio.run(main())
-      "]
-    }
-  }
+  ],
+  "total_count": 1
 }
 ```
 
-### Custom AI Assistant Integration
-```python
-class HostFactoryAssistant:
-    def __init__(self):
-        self.mcp_tools = None
+A failed call — an unknown tool name, or an operation that raises — is returned
+as a tool result with `isError` set and the failure message in the text block,
+rather than as a protocol-level exception. A conformant client checks `isError`
+before parsing the body.
 
-    async def initialize(self):
-        self.mcp_tools = OpenResourceBrokerMCPTools()
-        await self.mcp_tools.initialize()
+## Selected tools
 
-    async def handle_request(self, tool_name: str, args: dict):
-        if not self.mcp_tools:
-            await self.initialize()
+The tool set is authoritative from `orb mcp validate`. Commonly exposed
+operations:
 
-        return await self.mcp_tools.call_tool(tool_name, args)
+### Template operations
+- `list_templates` — list available templates
+- `get_template` — get a specific template
+- `validate_template` — validate a template configuration
 
-    async def cleanup(self):
-        if self.mcp_tools:
-            await self.mcp_tools.cleanup()
-```
+### Request and machine operations
+- `request_machines` — request instances (`requested_count`)
+- `get_request_status` — status of one or more requests (`request_ids`)
+- `list_requests` — list provisioning requests
+- `list_machines` — list provisioned machines
+- `return_machines` — return instances (`machine_ids`)
+- `list_return_requests` — list return requests
+- `start_machines` / `stop_machines` — start or stop machines
 
-## Troubleshooting
+### Provider operations
+- `list_providers` — list configured providers
+- `get_provider_health` — provider health
+- `get_provider_config` — provider configuration
+- `get_provider_metrics` — provider performance metrics
 
-### Common Issues
+## Next steps
 
-1. **Tools not discovered**: Ensure SDK is properly initialized
-2. **Tool execution fails**: Check provider configuration and credentials
-3. **Schema validation errors**: Verify tool arguments match schema
-4. **Performance issues**: Use context manager for resource cleanup
-
-### Debug Mode
-```python
-# Enable debug logging
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-async with OpenResourceBrokerMCPTools() as tools:
-    # Debug information
-    stats = tools.get_stats()
-    print(f"Debug stats: {stats}")
-```
-
-## Next Steps
-
-- [MCP Server Mode](#server-mode) - Standalone server for multiple clients
-- [CLI Reference](#cli-reference) - Complete CLI command reference
-- [Integration Examples](examples/) - More integration examples
+- [MCP Integration Guide](#integration-guide) — transports, client examples, and assistant configuration
+- [CLI Reference](#cli-reference) — complete CLI command reference

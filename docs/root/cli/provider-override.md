@@ -308,7 +308,7 @@ Provider override works with MCP server:
 
 ```bash
 # Start MCP server with specific provider context
-orb --provider-name aws-prod mcp serve --stdio
+orb --provider-name aws-prod mcp serve
 ```
 
 ### API Server Mode

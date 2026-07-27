@@ -232,3 +232,43 @@ class TestDiscoverCaching:
 
         assert body["cached"] is False
         assert strategy.list_resources.call_count == 2
+
+    def test_genuinely_empty_account_is_cached(self):
+        # An account that legitimately has no resources returns [] with no error.
+        # That empty result is a real success and should be cached for the TTL.
+        strategy = MagicMock()
+        strategy.list_resources.return_value = []
+        app = _make_app()
+        with _patch_registry(strategy):
+            client = TestClient(app, raise_server_exceptions=False)
+            first = client.get("/providers/discover/aws/vpcs").json()
+            second = client.get("/providers/discover/aws/vpcs").json()
+
+        assert first["resources"] == []
+        assert first["cached"] is False
+        assert second["cached"] is True
+        strategy.list_resources.assert_called_once()
+
+    def test_error_empty_is_not_cached_and_next_call_retries(self):
+        # A swallowed AWS error must NOT be served as a cached empty result:
+        # the first call errors (503), nothing is cached, and a subsequent call
+        # re-attempts discovery rather than returning a stale empty answer.
+        strategy = MagicMock()
+        strategy.list_resources.side_effect = [
+            RuntimeError("throttled: Rate exceeded"),
+            [{"id": "vpc-1"}],
+        ]
+        app = _make_app()
+        with _patch_registry(strategy):
+            client = TestClient(app, raise_server_exceptions=False)
+            first = client.get("/providers/discover/aws/vpcs")
+            # The error must not have been cached as an empty success.
+            assert ("aws", "vpcs", "") not in providers_module._discovery_cache
+            second = client.get("/providers/discover/aws/vpcs")
+
+        assert first.status_code >= 500
+        assert second.status_code == 200
+        body = second.json()
+        assert body["resources"] == [{"id": "vpc-1"}]
+        assert body["cached"] is False
+        assert strategy.list_resources.call_count == 2

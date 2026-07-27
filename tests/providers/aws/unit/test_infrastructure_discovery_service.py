@@ -227,6 +227,12 @@ class TestDiscoverVpcs:
         svc.ec2_client.describe_vpcs.side_effect = RuntimeError("API error")
         assert svc.discover_vpcs() == []
 
+    def test_raises_on_error_when_requested(self):
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.side_effect = RuntimeError("API error")
+        with pytest.raises(RuntimeError):
+            svc.discover_vpcs(raise_on_error=True)
+
 
 # ---------------------------------------------------------------------------
 # discover_subnets
@@ -587,3 +593,27 @@ class TestListResources:
         svc = _make_service()
         with pytest.raises(ValueError, match="Unsupported resource type"):
             svc.list_resources("gateways")
+
+    def test_propagates_aws_error_instead_of_returning_empty(self):
+        # An empty account genuinely returns []; a swallowed error would too.
+        # list_resources must NOT hide the error behind an empty list, so the
+        # REST endpoint can avoid caching a transient failure as a stale-empty
+        # success. Applies to vpcs / subnets / security_groups.
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.side_effect = RuntimeError("throttled")
+        with pytest.raises(RuntimeError):
+            svc.list_resources("vpcs")
+
+        svc.ec2_client.describe_subnets.side_effect = RuntimeError("throttled")
+        with pytest.raises(RuntimeError):
+            svc.list_resources("subnets", vpc_id="vpc-001")
+
+        svc.ec2_client.describe_security_groups.side_effect = RuntimeError("throttled")
+        with pytest.raises(RuntimeError):
+            svc.list_resources("security_groups", vpc_id="vpc-001")
+
+    def test_genuinely_empty_account_returns_empty_without_error(self):
+        # No resources + no error → real empty result (cacheable), not an error.
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.return_value = {"Vpcs": []}
+        assert svc.list_resources("vpcs") == []

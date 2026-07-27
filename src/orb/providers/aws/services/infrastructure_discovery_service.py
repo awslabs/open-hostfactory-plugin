@@ -84,8 +84,15 @@ class AWSInfrastructureDiscoveryService:
         self.iam_client = session.client("iam", config=_config)
         self.sts_client = session.client("sts", config=_config)
 
-    def discover_vpcs(self) -> list[VPCInfo]:
-        """Discover VPCs with name tags and CIDR blocks."""
+    def discover_vpcs(self, raise_on_error: bool = False) -> list[VPCInfo]:
+        """Discover VPCs with name tags and CIDR blocks.
+
+        By default AWS errors are swallowed and an empty list is returned, which
+        suits the interactive/CLI console paths that degrade to "no VPCs found".
+        Set ``raise_on_error=True`` (used by :meth:`list_resources`) to let the
+        error propagate so callers can distinguish a genuinely-empty account from
+        a failed lookup and avoid caching an error as an empty success.
+        """
         try:
             response = self.ec2_client.describe_vpcs()
             vpcs = []
@@ -105,10 +112,15 @@ class AWSInfrastructureDiscoveryService:
 
         except Exception as e:
             self._logger.error("Failed to discover VPCs: %s", e)
+            if raise_on_error:
+                raise
             return []
 
-    def discover_subnets(self, vpc_id: str) -> list[SubnetInfo]:
-        """Discover subnets with AZ, type (public/private), CIDR."""
+    def discover_subnets(self, vpc_id: str, raise_on_error: bool = False) -> list[SubnetInfo]:
+        """Discover subnets with AZ, type (public/private), CIDR.
+
+        See :meth:`discover_vpcs` for the ``raise_on_error`` semantics.
+        """
         try:
             response = self.ec2_client.describe_subnets(
                 Filters=[{"Name": "vpc-id", "Values": [vpc_id]}]
@@ -149,10 +161,17 @@ class AWSInfrastructureDiscoveryService:
 
         except Exception as e:
             self._logger.error("Failed to discover subnets: %s", e)
+            if raise_on_error:
+                raise
             return []
 
-    def discover_security_groups(self, vpc_id: str) -> list[SecurityGroupInfo]:
-        """Discover security groups with descriptions and rule summaries."""
+    def discover_security_groups(
+        self, vpc_id: str, raise_on_error: bool = False
+    ) -> list[SecurityGroupInfo]:
+        """Discover security groups with descriptions and rule summaries.
+
+        See :meth:`discover_vpcs` for the ``raise_on_error`` semantics.
+        """
         try:
             response = self.ec2_client.describe_security_groups(
                 Filters=[{"Name": "vpc-id", "Values": [vpc_id]}]
@@ -176,6 +195,8 @@ class AWSInfrastructureDiscoveryService:
 
         except Exception as e:
             self._logger.error("Failed to discover security groups: %s", e)
+            if raise_on_error:
+                raise
             return []
 
     def list_resources(
@@ -193,21 +214,29 @@ class AWSInfrastructureDiscoveryService:
                 lookup to a single VPC.
 
         Returns:
-            A list of dicts, one per resource. Empty when nothing is found or
-            when a ``vpc_id`` is required but not supplied.
+            A list of dicts, one per resource. Empty when the account genuinely
+            has no such resources, or when a ``vpc_id`` is required but not
+            supplied.
 
         Raises:
             ValueError: When ``resource_type`` is not supported.
+            Exception: Propagates any underlying AWS/EC2 error. Unlike the CLI
+                discovery paths, this entry point does not swallow errors to an
+                empty list — callers (the REST endpoint) must be able to tell a
+                genuinely-empty account apart from a failed lookup so that a
+                transient error is never cached as an empty success.
         """
         if resource_type == VPCS:
-            return [asdict(v) for v in self.discover_vpcs()]
+            return [asdict(v) for v in self.discover_vpcs(raise_on_error=True)]
 
         if resource_type in (SUBNETS, SECURITY_GROUPS):
             if not vpc_id:
                 return []
             if resource_type == SUBNETS:
-                return [asdict(s) for s in self.discover_subnets(vpc_id)]
-            return [asdict(sg) for sg in self.discover_security_groups(vpc_id)]
+                return [asdict(s) for s in self.discover_subnets(vpc_id, raise_on_error=True)]
+            return [
+                asdict(sg) for sg in self.discover_security_groups(vpc_id, raise_on_error=True)
+            ]
 
         raise ValueError(
             f"Unsupported resource type '{resource_type}'. "

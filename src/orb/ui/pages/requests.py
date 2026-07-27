@@ -1263,13 +1263,65 @@ class RequestsState(AppState):
             status = str(data.get("new_status") or data.get("status") or "")
         return rid, status.lower()
 
-    def _apply_request_status_event(self, event_type: str, data: dict[str, Any]) -> bool:
-        """Patch the matching request row's status from an SSE event.
+    # Raw-request fields that feed the row's count columns and progress bar
+    # (see ``request_rows``). When an SSE event carries any of these, patching
+    # them keeps the counts/progress consistent with the new status instead of
+    # leaving stale values behind until the next full load.
+    _ROW_COUNT_FIELDS: tuple[str, ...] = (
+        "requested_count",
+        "successful_count",
+        "failed_count",
+        "returned_count",
+        "running_count",
+        "pending_count",
+        "desired_capacity",
+        "fulfilled_units",
+        "target_units",
+        "success_rate",
+        "machines",
+        "machine_ids",
+        "resource_ids",
+    )
 
-        Matches on ``request_id`` and rewrites only the ``status`` field of
-        that row (the status badge and progress-bar colour derive from it).
-        Rows for requests not currently loaded — e.g. filtered out by the
-        active tab — are ignored; they surface on the next full load.
+    @classmethod
+    def _row_updates_from_event(
+        cls, event_type: str, data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Return the raw-request fields to patch from an SSE event payload.
+
+        Beyond ``status``, this pulls through any count/progress source fields
+        the payload carries (see ``_ROW_COUNT_FIELDS``) so the row's counts and
+        progress bar move in step with the status transition — matching what a
+        full refresh would render rather than only repainting the badge.
+
+        A ``RequestCompletedEvent`` carries ``machine_ids`` but no explicit
+        count; the fulfilled count is derived from it so the progress bar
+        reaches its final value on completion.
+        """
+        updates: dict[str, Any] = {}
+        for field in cls._ROW_COUNT_FIELDS:
+            if field in data and data[field] is not None:
+                updates[field] = data[field]
+        # Completed events report the fulfilled machines as a list; derive the
+        # fulfilled count from it when the payload does not carry one directly.
+        machine_ids = data.get("machine_ids")
+        if (
+            event_type == "RequestCompletedEvent"
+            and isinstance(machine_ids, list)
+            and "successful_count" not in updates
+        ):
+            updates["successful_count"] = len(machine_ids)
+        return updates
+
+    def _apply_request_status_event(self, event_type: str, data: dict[str, Any]) -> bool:
+        """Patch the matching request row from an SSE event.
+
+        Matches on ``request_id`` and rewrites the ``status`` field plus any
+        count/progress source fields the event carries (see
+        ``_row_updates_from_event``) so the status badge, counts columns and
+        progress bar all move together. Rows for requests not currently loaded
+        — e.g. filtered out by the active tab — are ignored; they surface on
+        the next full load.
 
         Returns True when a row was actually changed so callers/tests can
         assert the list was patched. Reassigns ``self.requests`` to a new
@@ -1278,14 +1330,25 @@ class RequestsState(AppState):
         rid, status = self._status_from_event(event_type, data)
         if not rid or not status:
             return False
+        extra = self._row_updates_from_event(event_type, data)
         updated = False
         new_rows: list[dict[str, Any]] = []
         for r in self.requests:
-            if r.get("request_id") == rid and (r.get("status") or "").lower() != status:
-                patched = dict(r)
+            if r.get("request_id") != rid:
+                new_rows.append(r)
+                continue
+            patched = dict(r)
+            row_changed = False
+            if (patched.get("status") or "").lower() != status:
                 patched["status"] = status
-                new_rows.append(patched)
+                row_changed = True
+            for key, value in extra.items():
+                if patched.get(key) != value:
+                    patched[key] = value
+                    row_changed = True
+            if row_changed:
                 updated = True
+                new_rows.append(patched)
             else:
                 new_rows.append(r)
         if updated:

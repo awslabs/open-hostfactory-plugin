@@ -274,6 +274,90 @@ class TestRequestsStateSseLiveUpdates:
         assert changed is False
         assert s.requests[0]["status"] == "pending"
 
+    def test_apply_updates_counts_and_progress_not_just_status(self):
+        """A status-transition event must refresh count/progress fields too.
+
+        The row's progress bar and counts columns derive from
+        ``successful_count`` / ``requested_count`` (see ``request_rows``).
+        Patching only ``status`` would leave those stale, so the event's
+        count fields must flow through to the row.
+        """
+        s = self._make_state(
+            [
+                {
+                    "request_id": "req-1",
+                    "status": "pending",
+                    "requested_count": 4,
+                    "successful_count": 0,
+                }
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {
+                "request_id": "req-1",
+                "new_status": "in_progress",
+                "successful_count": 3,
+                "requested_count": 4,
+            },
+        )
+        assert changed is True
+        row = s.requests[0]
+        assert row["status"] == "in_progress"
+        # Counts advanced with the status transition — not left at 0.
+        assert row["successful_count"] == 3
+        assert row["requested_count"] == 4
+
+    def test_apply_completed_event_derives_fulfilled_count_from_machine_ids(self):
+        """A completed event without an explicit count derives it from machine_ids."""
+        s = self._make_state(
+            [
+                {
+                    "request_id": "req-1",
+                    "status": "in_progress",
+                    "requested_count": 2,
+                    "successful_count": 0,
+                }
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestCompletedEvent",
+            {
+                "request_id": "req-1",
+                "completion_status": "complete",
+                "machine_ids": ["m-1", "m-2"],
+            },
+        )
+        assert changed is True
+        row = s.requests[0]
+        assert row["status"] == "complete"
+        # Progress reaches its final value: 2 machines fulfilled.
+        assert row["successful_count"] == 2
+        assert row["machine_ids"] == ["m-1", "m-2"]
+
+    def test_apply_counts_only_change_patches_row_even_if_status_same(self):
+        """When only counts change (status unchanged), the row is still patched."""
+        s = self._make_state(
+            [
+                {
+                    "request_id": "req-1",
+                    "status": "in_progress",
+                    "requested_count": 4,
+                    "successful_count": 1,
+                }
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {
+                "request_id": "req-1",
+                "new_status": "in_progress",
+                "successful_count": 2,
+            },
+        )
+        assert changed is True
+        assert s.requests[0]["successful_count"] == 2
+
     # --- stream_status_events (drains the SSE generator) -------------------
 
     @pytest.mark.asyncio

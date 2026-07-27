@@ -25,7 +25,7 @@ _DEV_TOOLS_PATH = str(Path(__file__).parents[2] / "dev-tools" / "setup")
 if _DEV_TOOLS_PATH not in sys.path:
     sys.path.insert(0, _DEV_TOOLS_PATH)
 
-from install_dev_tools import DevToolsInstaller  # noqa: E402
+from install_dev_tools import DevToolsInstaller  # type: ignore[import]
 
 
 @pytest.mark.unit

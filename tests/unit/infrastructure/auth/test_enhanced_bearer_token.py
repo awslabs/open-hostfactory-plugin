@@ -164,6 +164,25 @@ async def test_enhanced_bearer_revoke_token():
     assert await denylist.is_denylisted(token) is True
 
 
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_enhanced_bearer_revoke_token_audits_event(monkeypatch: Any):
+    """A successful revocation emits a TOKEN_REVOKED audit event with the user id."""
+    strategy = _make_strategy()
+    token = _make_token(user_id="revoked-user")
+
+    calls: list[dict[str, Any]] = []
+    monkeypatch.setattr(
+        strategy.audit_logger,
+        "log_token_revoked",
+        lambda **kwargs: calls.append(kwargs),
+    )
+
+    assert await strategy.revoke_token(token) is True
+    assert len(calls) == 1
+    assert calls[0]["user_id"] == "revoked-user"
+
+
 # ---------------------------------------------------------------------------
 # validate_token() — invalid signature
 # ---------------------------------------------------------------------------

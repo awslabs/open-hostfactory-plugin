@@ -14,7 +14,7 @@ from orb.infrastructure.adapters.ports.auth import (
     AuthResult,
     AuthStatus,
 )
-from orb.infrastructure.logging.logger import get_logger
+from orb.infrastructure.logging.logger import AuthAuditLogger, get_logger
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -27,6 +27,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         excluded_paths: Optional[list[str]] = None,
         require_auth: bool = True,
         trusted_proxies: Optional[list[str]] = None,
+        audit_logger: Optional[AuthAuditLogger] = None,
     ) -> None:
         """
         Initialize authentication middleware.
@@ -39,9 +40,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
             trusted_proxies: IP addresses of trusted reverse proxies. X-Forwarded-For is
                 only read when the direct client IP is in this list. Empty list (default)
                 means always use the direct connection IP.
+            audit_logger: Structured security audit logger. A default
+                ``AuthAuditLogger`` is created when not supplied so that
+                authentication events are always recorded.
         """
         super().__init__(app)
         self.auth_port = auth_port
+        self.audit_logger = audit_logger or AuthAuditLogger()
         # Normalize excluded paths (remove trailing slashes, convert to lowercase)
         self.excluded_paths = [
             self._normalize_path(p)
@@ -93,7 +98,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
             # Handle authentication result
             if not auth_result.is_authenticated:
-                return self._handle_auth_failure(auth_result)
+                return self._handle_auth_failure(auth_result, auth_context)
 
             # Add authentication info to request state
             request.state.auth_result = auth_result
@@ -106,9 +111,28 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 auth_result.user_id,
                 auth_context.client_ip,
             )
+            self.audit_logger.log_auth_success(
+                user_id=auth_result.user_id,
+                client_ip=auth_context.client_ip,
+                path=auth_context.path,
+                method=auth_context.method,
+                auth_strategy=self._strategy_name(),
+            )
 
             # Continue to next middleware/handler
             response = await call_next(request)
+
+            # A downstream route dependency may reject an authenticated principal
+            # with a 403 (insufficient permission). Audit that as PERMISSION_DENIED
+            # so authorization failures are captured alongside authentication ones.
+            if response.status_code == status.HTTP_403_FORBIDDEN:
+                self.audit_logger.log_permission_denied(
+                    user_id=auth_result.user_id,
+                    client_ip=auth_context.client_ip,
+                    path=auth_context.path,
+                    method=auth_context.method,
+                    auth_strategy=self._strategy_name(),
+                )
 
             # The token is not echoed back — it was supplied by the client in the
             # Authorization request header and reflecting it in responses would expose
@@ -202,12 +226,24 @@ class AuthMiddleware(BaseHTTPMiddleware):
         """
         return get_real_client_ip(request, self.trusted_proxies)
 
-    def _handle_auth_failure(self, auth_result: AuthResult) -> Response:
+    def _strategy_name(self) -> str:
+        """Return the auth strategy name for audit records, tolerant of failures."""
+        try:
+            return self.auth_port.get_strategy_name()
+        except Exception:
+            return "unknown"
+
+    def _handle_auth_failure(
+        self, auth_result: AuthResult, auth_context: Optional[AuthContext] = None
+    ) -> Response:
         """
         Handle authentication failure with sanitized error messages.
 
         Args:
             auth_result: Failed authentication result
+            auth_context: Request context used to enrich the structured audit
+                record (client IP, path, method). May be ``None`` in unusual
+                error paths, in which case those fields default to unknown.
 
         Returns:
             HTTP error response
@@ -219,19 +255,47 @@ class AuthMiddleware(BaseHTTPMiddleware):
             auth_result.error_message,
         )
 
-        # Return generic error messages to prevent information disclosure
+        client_ip = auth_context.client_ip if auth_context else None
+        path = auth_context.path if auth_context else None
+        method = auth_context.method if auth_context else None
+        strategy = self._strategy_name()
+
+        # Return generic error messages to prevent information disclosure.
+        # Audit each outcome with a generic reason — never token content.
         if auth_result.status == AuthStatus.INSUFFICIENT_PERMISSIONS:
+            self.audit_logger.log_permission_denied(
+                user_id=auth_result.user_id,
+                client_ip=client_ip,
+                path=path,
+                method=method,
+                auth_strategy=strategy,
+            )
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
                 content={"detail": "Access denied"},
             )
         elif auth_result.status == AuthStatus.EXPIRED:
+            self.audit_logger.log_auth_expired(
+                user_id=auth_result.user_id,
+                client_ip=client_ip,
+                path=path,
+                method=method,
+                auth_strategy=strategy,
+            )
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Authentication expired"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
         else:
+            self.audit_logger.log_auth_failure(
+                user_id=auth_result.user_id,
+                client_ip=client_ip,
+                path=path,
+                method=method,
+                reason=auth_result.status.value,
+                auth_strategy=strategy,
+            )
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Invalid credentials"},

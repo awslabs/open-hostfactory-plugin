@@ -30,6 +30,7 @@ The DI system follows correct dependency direction:
 # [[]] Clean Architecture compliant
 from src.domain.base.dependency_injection import injectable
 
+
 @injectable
 class ApplicationService:
     def __init__(self, logger: LoggingPort, config: ConfigurationPort):
@@ -102,14 +103,17 @@ The `DIContainer` class implements domain contracts:
 ```python
 from src.domain.base.dependency_injection import injectable
 
+
 @injectable
 class ApplicationService:
     def __init__(self, logger: LoggingPort, config: ConfigurationPort):
         self.logger = logger
         self.config = config
 
+
 # Container automatically resolves dependencies
 from src.infrastructure.di.container import get_container
+
 container = get_container()
 app_service = container.get(ApplicationService)
 ```
@@ -118,6 +122,7 @@ app_service = container.get(ApplicationService)
 
 ```python
 from src.domain.base.dependency_injection import injectable, singleton
+
 
 @singleton
 @injectable
@@ -128,6 +133,7 @@ class ConfigurationService:
     def load_config(self):
         # Load configuration logic
         return {}
+
 
 # Only one instance created
 config1 = container.get(ConfigurationService)
@@ -149,12 +155,14 @@ class CreateMachineRequestHandler:
         self.repository = repository
         self.logger = logger
 
+
 # From src/application/commands/template_handlers.py
 @injectable
 class CreateTemplateHandler:
     def handle(self, command):
         # Handle template creation
         pass
+
 
 # From src/application/commands/system_handlers.py
 @injectable
@@ -174,12 +182,14 @@ class SyncAndGetRequestHandler:
         # Handle sync-and-get request retrieval
         pass
 
+
 # From src/application/queries/system_handlers.py
 @injectable
 class GetProviderConfigHandler:
     def handle(self, query):
         # Handle provider config retrieval
         pass
+
 
 # From src/application/queries/specialized_handlers.py
 @injectable
@@ -200,15 +210,18 @@ class CreateRequestCommand(Command, BaseModel):
     count: int
     # ... other fields
 
+
 class UpdateRequestStatusCommand(Command, BaseModel):
     request_id: str
     status: str
     # ... other fields
 
+
 # From src/application/dto/queries.py
 class SyncAndGetRequestQuery(Query, BaseModel):
     request_id: str
     # ... other fields
+
 
 class ListActiveRequestsQuery(Query, BaseModel):
     limit: Optional[int] = None
@@ -255,10 +268,11 @@ def create_scheduler_port(container):
 
     config_manager = get_config_manager()
     scheduler_config = config_manager.get_scheduler_config()
-    scheduler_type = scheduler_config.get('strategy', 'hostfactory')
+    scheduler_type = scheduler_config.get("strategy", "hostfactory")
 
     registry = get_scheduler_registry()
     return registry.get_active_strategy(scheduler_type, scheduler_config)
+
 
 # Usage - transparent to consumers
 from src.domain.base.ports import SchedulerPort
@@ -312,8 +326,7 @@ def _register_template_configuration_services(container: DIContainer) -> None:
 
     # Factory-based singleton registration with complex initialization
     container.register_singleton(
-        TemplateConfigurationManager,
-        create_template_configuration_manager
+        TemplateConfigurationManager, create_template_configuration_manager
     )
 ```
 
@@ -344,6 +357,7 @@ Use domain DI imports for new classes:
 ```python
 from src.domain.base.dependency_injection import injectable
 
+
 @injectable
 class NewService:
     def __init__(self, dependency: SomeDependency):
@@ -354,6 +368,7 @@ class NewService:
 
 ```python
 from src.infrastructure.di.container import DIContainer
+
 
 def test_service():
     # Create test container
@@ -398,6 +413,7 @@ The DI system is optimized for performance:
 class Service:
     def __init__(self, dependency):  # No type annotation
         pass
+
 
 # Solution
 @injectable

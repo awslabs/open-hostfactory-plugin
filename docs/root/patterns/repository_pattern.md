@@ -22,7 +22,8 @@ Repository interfaces are defined in the domain layer and implemented in the inf
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any, TypeVar, Generic
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class Repository(ABC, Generic[T]):
     """Base repository interface for all domain entities."""
@@ -33,10 +34,12 @@ class Repository(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    async def get_all(self,
-                     filters: Optional[Dict[str, Any]] = None,
-                     limit: Optional[int] = None,
-                     offset: Optional[int] = None) -> List[T]:
+    async def get_all(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[T]:
         """Retrieve all entities with optional filtering."""
         pass
 
@@ -64,14 +67,17 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 from .aggregate import Template
 
+
 class TemplateRepository(ABC):
     """Repository interface for template entities."""
 
     @abstractmethod
-    async def get_all(self,
-                     filters: Optional[Dict[str, Any]] = None,
-                     limit: Optional[int] = None,
-                     offset: Optional[int] = None) -> List[Template]:
+    async def get_all(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[Template]:
         """Retrieve all templates with optional filtering."""
         pass
 
@@ -110,14 +116,17 @@ from typing import List, Optional, Dict, Any
 from .aggregate import Request
 from .value_objects import RequestStatus
 
+
 class RequestRepository(ABC):
     """Repository interface for request entities."""
 
     @abstractmethod
-    async def get_all(self,
-                     filters: Optional[Dict[str, Any]] = None,
-                     limit: Optional[int] = None,
-                     offset: Optional[int] = None) -> List[Request]:
+    async def get_all(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[Request]:
         """Retrieve all requests with optional filtering."""
         pass
 
@@ -161,14 +170,17 @@ from typing import List, Optional, Dict, Any
 from .aggregate import Machine
 from .machine_status import MachineStatus
 
+
 class MachineRepository(ABC):
     """Repository interface for machine entities."""
 
     @abstractmethod
-    async def get_all(self,
-                     filters: Optional[Dict[str, Any]] = None,
-                     limit: Optional[int] = None,
-                     offset: Optional[int] = None) -> List[Machine]:
+    async def get_all(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[Machine]:
         """Retrieve all machines with optional filtering."""
         pass
 
@@ -223,14 +235,17 @@ from src.domain.template.repository import TemplateRepository
 from src.domain.template.aggregate import Template
 from src.domain.base.ports import LoggingPort
 
+
 class DynamoDBTemplateRepository(TemplateRepository):
     """DynamoDB implementation of template repository."""
 
-    def __init__(self,
-                 table_name: str,
-                 region: str,
-                 profile: Optional[str] = None,
-                 logger: LoggingPort = None):
+    def __init__(
+        self,
+        table_name: str,
+        region: str,
+        profile: Optional[str] = None,
+        logger: LoggingPort = None,
+    ):
         self._table_name = table_name
         self._region = region
         self._profile = profile
@@ -238,13 +253,15 @@ class DynamoDBTemplateRepository(TemplateRepository):
 
         # Initialize DynamoDB resources
         session = boto3.Session(profile_name=profile) if profile else boto3.Session()
-        self._dynamodb = session.resource('dynamodb', region_name=region)
+        self._dynamodb = session.resource("dynamodb", region_name=region)
         self._table = self._dynamodb.Table(table_name)
 
-    async def get_all(self,
-                     filters: Optional[Dict[str, Any]] = None,
-                     limit: Optional[int] = None,
-                     offset: Optional[int] = None) -> List[Template]:
+    async def get_all(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[Template]:
         """Retrieve all templates from DynamoDB."""
         self._logger.info("Retrieving all templates from DynamoDB")
 
@@ -253,26 +270,26 @@ class DynamoDBTemplateRepository(TemplateRepository):
             scan_params = {}
 
             if limit:
-                scan_params['Limit'] = limit
+                scan_params["Limit"] = limit
 
             # Apply filters
             if filters:
                 filter_expression = self._build_filter_expression(filters)
                 if filter_expression:
-                    scan_params['FilterExpression'] = filter_expression
+                    scan_params["FilterExpression"] = filter_expression
 
             # Handle pagination
             if offset:
                 # DynamoDB uses LastEvaluatedKey for pagination
                 # This is a simplified implementation
-                scan_params['ExclusiveStartKey'] = {'template_id': str(offset)}
+                scan_params["ExclusiveStartKey"] = {"template_id": str(offset)}
 
             # Perform scan
             response = self._table.scan(**scan_params)
 
             # Convert items to domain objects
             templates = []
-            for item in response.get('Items', []):
+            for item in response.get("Items", []):
                 template = self._item_to_template(item)
                 templates.append(template)
 
@@ -288,15 +305,13 @@ class DynamoDBTemplateRepository(TemplateRepository):
         self._logger.info(f"Retrieving template: {template_id}")
 
         try:
-            response = self._table.get_item(
-                Key={'template_id': template_id}
-            )
+            response = self._table.get_item(Key={"template_id": template_id})
 
-            if 'Item' not in response:
+            if "Item" not in response:
                 self._logger.info(f"Template not found: {template_id}")
                 return None
 
-            template = self._item_to_template(response['Item'])
+            template = self._item_to_template(response["Item"])
             self._logger.info(f"Retrieved template: {template_id}")
             return template
 
@@ -325,11 +340,10 @@ class DynamoDBTemplateRepository(TemplateRepository):
 
         try:
             response = self._table.delete_item(
-                Key={'template_id': template_id},
-                ReturnValues='ALL_OLD'
+                Key={"template_id": template_id}, ReturnValues="ALL_OLD"
             )
 
-            deleted = 'Attributes' in response
+            deleted = "Attributes" in response
 
             if deleted:
                 self._logger.info(f"Deleted template: {template_id}")
@@ -350,7 +364,7 @@ class DynamoDBTemplateRepository(TemplateRepository):
             # Build filter expression for attributes
             filter_expressions = []
             for key, value in attributes.items():
-                filter_expressions.append(Attr(f'attributes.{key}').eq(value))
+                filter_expressions.append(Attr(f"attributes.{key}").eq(value))
 
             if not filter_expressions:
                 return []
@@ -365,7 +379,7 @@ class DynamoDBTemplateRepository(TemplateRepository):
 
             # Convert to domain objects
             templates = []
-            for item in response.get('Items', []):
+            for item in response.get("Items", []):
                 template = self._item_to_template(item)
                 templates.append(template)
 
@@ -378,22 +392,22 @@ class DynamoDBTemplateRepository(TemplateRepository):
 
     async def get_by_provider_type(self, provider_type: str) -> List[Template]:
         """Get templates for specific provider type."""
-        return await self.find_by_attributes({'provider_type': provider_type})
+        return await self.find_by_attributes({"provider_type": provider_type})
 
     def _item_to_template(self, item: Dict[str, Any]) -> Template:
         """Convert DynamoDB item to Template domain object."""
         return Template(
-            template_id=item['template_id'],
-            max_number=int(item['max_number']),
-            attributes=item.get('attributes', {})
+            template_id=item["template_id"],
+            max_number=int(item["max_number"]),
+            attributes=item.get("attributes", {}),
         )
 
     def _template_to_item(self, template: Template) -> Dict[str, Any]:
         """Convert Template domain object to DynamoDB item."""
         return {
-            'template_id': template.template_id,
-            'max_number': template.max_number,
-            'attributes': template.attributes
+            "template_id": template.template_id,
+            "max_number": template.max_number,
+            "attributes": template.attributes,
         }
 
     def _build_filter_expression(self, filters: Dict[str, Any]):
@@ -403,10 +417,10 @@ class DynamoDBTemplateRepository(TemplateRepository):
 
         filter_expressions = []
         for key, value in filters.items():
-            if key == 'max_number_gte':
-                filter_expressions.append(Attr('max_number').gte(value))
-            elif key == 'max_number_lte':
-                filter_expressions.append(Attr('max_number').lte(value))
+            if key == "max_number_gte":
+                filter_expressions.append(Attr("max_number").gte(value))
+            elif key == "max_number_lte":
+                filter_expressions.append(Attr("max_number").lte(value))
             else:
                 filter_expressions.append(Attr(key).eq(value))
 
@@ -434,6 +448,7 @@ from src.domain.template.repository import TemplateRepository
 from src.domain.template.aggregate import Template
 from src.domain.base.ports import LoggingPort
 
+
 class InMemoryTemplateRepository(TemplateRepository):
     """In-memory implementation of template repository."""
 
@@ -441,10 +456,12 @@ class InMemoryTemplateRepository(TemplateRepository):
         self._templates: Dict[str, Template] = {}
         self._logger = logger
 
-    async def get_all(self,
-                     filters: Optional[Dict[str, Any]] = None,
-                     limit: Optional[int] = None,
-                     offset: Optional[int] = None) -> List[Template]:
+    async def get_all(
+        self,
+        filters: Optional[Dict[str, Any]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> List[Template]:
         """Retrieve all templates from memory."""
         self._logger.info("Retrieving all templates from memory")
 
@@ -512,7 +529,7 @@ class InMemoryTemplateRepository(TemplateRepository):
 
     async def get_by_provider_type(self, provider_type: str) -> List[Template]:
         """Get templates for specific provider type."""
-        return await self.find_by_attributes({'provider_type': provider_type})
+        return await self.find_by_attributes({"provider_type": provider_type})
 
     def _apply_filters(self, templates: List[Template], filters: Dict[str, Any]) -> List[Template]:
         """Apply filters to template list."""
@@ -527,10 +544,10 @@ class InMemoryTemplateRepository(TemplateRepository):
     def _template_matches_filters(self, template: Template, filters: Dict[str, Any]) -> bool:
         """Check if template matches filter criteria."""
         for key, value in filters.items():
-            if key == 'max_number_gte':
+            if key == "max_number_gte":
                 if template.max_number < value:
                     return False
-            elif key == 'max_number_lte':
+            elif key == "max_number_lte":
                 if template.max_number > value:
                     return False
             elif hasattr(template, key):
@@ -571,9 +588,10 @@ def register_repository_services(container: DIContainer) -> None:
     else:
         raise ValueError(f"Unsupported storage type: {storage_type}")
 
-def _register_dynamodb_repositories(container: DIContainer,
-                                   config: ConfigurationPort,
-                                   logger: LoggingPort) -> None:
+
+def _register_dynamodb_repositories(
+    container: DIContainer, config: ConfigurationPort, logger: LoggingPort
+) -> None:
     """Register DynamoDB repository implementations."""
 
     dynamodb_config = config.get_section("storage.dynamodb")
@@ -585,8 +603,8 @@ def _register_dynamodb_repositories(container: DIContainer,
             table_name=dynamodb_config.get("templates_table", "templates"),
             region=dynamodb_config.get("region", "us-east-1"),
             profile=dynamodb_config.get("profile"),
-            logger=logger
-        )
+            logger=logger,
+        ),
     )
 
     # Register request repository
@@ -596,8 +614,8 @@ def _register_dynamodb_repositories(container: DIContainer,
             table_name=dynamodb_config.get("requests_table", "requests"),
             region=dynamodb_config.get("region", "us-east-1"),
             profile=dynamodb_config.get("profile"),
-            logger=logger
-        )
+            logger=logger,
+        ),
     )
 
     # Register machine repository
@@ -607,26 +625,24 @@ def _register_dynamodb_repositories(container: DIContainer,
             table_name=dynamodb_config.get("machines_table", "machines"),
             region=dynamodb_config.get("region", "us-east-1"),
             profile=dynamodb_config.get("profile"),
-            logger=logger
-        )
+            logger=logger,
+        ),
     )
+
 
 def _register_memory_repositories(container: DIContainer, logger: LoggingPort) -> None:
     """Register in-memory repository implementations."""
 
     container.register_singleton(
-        TemplateRepository,
-        lambda c: InMemoryTemplateRepository(logger=logger)
+        TemplateRepository, lambda c: InMemoryTemplateRepository(logger=logger)
     )
 
     container.register_singleton(
-        RequestRepository,
-        lambda c: InMemoryRequestRepository(logger=logger)
+        RequestRepository, lambda c: InMemoryRequestRepository(logger=logger)
     )
 
     container.register_singleton(
-        MachineRepository,
-        lambda c: InMemoryMachineRepository(logger=logger)
+        MachineRepository, lambda c: InMemoryMachineRepository(logger=logger)
     )
 ```
 
@@ -637,9 +653,7 @@ def _register_memory_repositories(container: DIContainer, logger: LoggingPort) -
 class GetTemplatesHandler:
     """Handler for retrieving templates."""
 
-    def __init__(self,
-                 template_repo: TemplateRepository,
-                 logger: LoggingPort):
+    def __init__(self, template_repo: TemplateRepository, logger: LoggingPort):
         self._template_repo = template_repo
         self._logger = logger
 
@@ -649,16 +663,11 @@ class GetTemplatesHandler:
 
         # Use repository to get templates
         templates = await self._template_repo.get_all(
-            filters=query.filters,
-            limit=query.limit,
-            offset=query.offset
+            filters=query.filters, limit=query.limit, offset=query.offset
         )
 
         # Convert to response DTOs
-        responses = [
-            TemplateResponse.from_domain(template)
-            for template in templates
-        ]
+        responses = [TemplateResponse.from_domain(template) for template in templates]
 
         return responses
 ```

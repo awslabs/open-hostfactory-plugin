@@ -488,13 +488,13 @@ Configure syslog forwarding:
 ```python
 # In logging configuration
 {
-  "logging": {
-    "level": "INFO",
-    "file_path": "logs/orb.log",
-    "console_enabled": true,
-    "syslog_enabled": true,
-    "syslog_facility": "local0"
-  }
+    "logging": {
+        "level": "INFO",
+        "file_path": "logs/orb.log",
+        "console_enabled": true,
+        "syslog_enabled": true,
+        "syslog_facility": "local0",
+    }
 }
 ```
 

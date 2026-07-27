@@ -25,6 +25,7 @@ from src.domain.request.aggregate import Request
 from src.domain.machine.aggregate import Machine
 from src.domain.template.aggregate import Template
 
+
 class ProviderStrategy(ABC):
     """Abstract base class for provider strategies."""
 
@@ -77,6 +78,7 @@ from src.providers.aws.configuration.config import AWSProviderConfig
 from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFactory
 
+
 @injectable
 class AWSProviderStrategy(ProviderStrategy):
     """AWS implementation of the provider strategy."""
@@ -106,11 +108,11 @@ class AWSProviderStrategy(ProviderStrategy):
         self._logger.info(f"Terminating {len(instance_ids)} instances")
 
         try:
-            ec2_client = self._aws_client.get_client('ec2')
+            ec2_client = self._aws_client.get_client("ec2")
             response = ec2_client.terminate_instances(InstanceIds=instance_ids)
 
             # Check termination status
-            terminating_instances = response.get('TerminatingInstances', [])
+            terminating_instances = response.get("TerminatingInstances", [])
             success = len(terminating_instances) == len(instance_ids)
 
             if success:
@@ -129,14 +131,14 @@ class AWSProviderStrategy(ProviderStrategy):
         self._logger.info(f"Getting status for {len(instance_ids)} instances")
 
         try:
-            ec2_client = self._aws_client.get_client('ec2')
+            ec2_client = self._aws_client.get_client("ec2")
             response = ec2_client.describe_instances(InstanceIds=instance_ids)
 
             status_map = {}
-            for reservation in response['Reservations']:
-                for instance in reservation['Instances']:
-                    instance_id = instance['InstanceId']
-                    state = instance['State']['Name']
+            for reservation in response["Reservations"]:
+                for instance in reservation["Instances"]:
+                    instance_id = instance["InstanceId"]
+                    state = instance["State"]["Name"]
                     status_map[instance_id] = state
 
             return status_map
@@ -180,15 +182,15 @@ class AWSProviderStrategy(ProviderStrategy):
                 "ec2_fleet",
                 "spot_fleet",
                 "auto_scaling_group",
-                "run_instances"
-            ]
+                "run_instances",
+            ],
         }
 
     async def health_check(self) -> bool:
         """Check AWS provider health."""
         try:
             # Test AWS connectivity
-            sts_client = self._aws_client.get_client('sts')
+            sts_client = self._aws_client.get_client("sts")
             response = sts_client.get_caller_identity()
 
             self._logger.info(f"AWS health check passed for account {response.get('Account')}")
@@ -208,6 +210,7 @@ The provider context manages strategy selection and execution:
 from typing import Dict, List, Optional, Any
 from src.domain.base.ports import LoggingPort
 from src.providers.base.strategy.provider_strategy import ProviderStrategy
+
 
 class ProviderContext:
     """Context for managing provider strategies."""
@@ -289,12 +292,11 @@ from src.providers.base.strategy.provider_strategy import ProviderStrategy
 from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 from src.providers.aws.configuration.config import AWSProviderConfig
 
+
 class ProviderStrategyFactory:
     """Factory for creating provider strategies."""
 
-    def __init__(self,
-                 config_manager: ConfigurationPort,
-                 logger: LoggingPort):
+    def __init__(self, config_manager: ConfigurationPort, logger: LoggingPort):
         self._config_manager = config_manager
         self._logger = logger
 
@@ -314,10 +316,7 @@ class ProviderStrategyFactory:
         aws_config = AWSProviderConfig(**aws_config_data)
 
         # Create strategy
-        strategy = AWSProviderStrategy(
-            config=aws_config,
-            logger=self._logger
-        )
+        strategy = AWSProviderStrategy(config=aws_config, logger=self._logger)
 
         return strategy
 
@@ -394,14 +393,12 @@ from typing import List, Dict, Any
 from src.domain.request.aggregate import Request
 from src.domain.machine.aggregate import Machine
 
+
 @injectable
 class AWSHandler(ABC):
     """Abstract base class for AWS handlers."""
 
-    def __init__(self,
-                 aws_client: AWSClient,
-                 logger: LoggingPort,
-                 config: ConfigurationPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
         self._aws_client = aws_client
         self._logger = logger
         self._config = config
@@ -438,13 +435,14 @@ class EC2FleetHandler(AWSHandler):
         fleet_config = self._build_fleet_config(request)
 
         # Create fleet
-        ec2_client = self._aws_client.get_client('ec2')
+        ec2_client = self._aws_client.get_client("ec2")
         response = ec2_client.create_fleet(**fleet_config)
 
         # Process response and create machine objects
         machines = self._process_fleet_response(response, request)
 
         return machines
+
 
 # src/providers/aws/infrastructure/handlers/spot_fleet_handler.py
 @injectable
@@ -459,7 +457,7 @@ class SpotFleetHandler(AWSHandler):
         spot_config = self._build_spot_fleet_config(request)
 
         # Create spot fleet
-        ec2_client = self._aws_client.get_client('ec2')
+        ec2_client = self._aws_client.get_client("ec2")
         response = ec2_client.request_spot_fleet(**spot_config)
 
         # Process response and create machine objects
@@ -476,10 +474,7 @@ class SpotFleetHandler(AWSHandler):
 class AWSHandlerFactory:
     """Factory for creating AWS handlers based on strategy."""
 
-    def __init__(self,
-                 aws_client: AWSClient,
-                 logger: LoggingPort,
-                 config: ConfigurationPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
         self._aws_client = aws_client
         self._logger = logger
         self._config = config
@@ -497,7 +492,7 @@ class AWSHandlerFactory:
             "ec2_fleet": EC2FleetHandler,
             "spot_fleet": SpotFleetHandler,
             "auto_scaling_group": ASGHandler,
-            "run_instances": RunInstancesHandler
+            "run_instances": RunInstancesHandler,
         }
 
     def create_handler(self, handler_type: str) -> AWSHandler:

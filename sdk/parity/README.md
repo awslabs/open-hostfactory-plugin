@@ -97,7 +97,10 @@ Suggested test file: `sdk/python/tests/parity/test_parity_scenario.py`
 import json, pytest
 from pathlib import Path
 
-SCENARIO = json.loads((Path(__file__).parent.parent.parent / "parity" / "scenario.json").read_text())
+SCENARIO = json.loads(
+    (Path(__file__).parent.parent.parent / "parity" / "scenario.json").read_text()
+)
+
 
 @pytest.mark.integration
 async def test_parity_scenario(orb_client):

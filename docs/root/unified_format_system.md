@@ -24,9 +24,7 @@ The Open Resource Broker implements a comprehensive format system that handles b
 
 ```python
 def convert_templates(
-    templates: list[Template],
-    include_full_config: bool = False,
-    use_camel_case: bool = False
+    templates: list[Template], include_full_config: bool = False, use_camel_case: bool = False
 ) -> Dict[str, Any]:
     """
     Template conversion method.
@@ -72,8 +70,8 @@ When `use_camel_case=True`:
 Business logic mappings that don't follow standard conversion:
 ```python
 special_mappings = {
-    'max_instances': 'maxNumber',    # Business logic
-    'instance_type': 'vmType',       # Domain-specific naming
+    "max_instances": "maxNumber",  # Business logic
+    "instance_type": "vmType",  # Domain-specific naming
 }
 ```
 

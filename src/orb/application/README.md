@@ -119,12 +119,12 @@ class MachineDTO(BaseDTO):
     created_at: datetime = Field(description="Creation timestamp")
 
     @classmethod
-    def from_domain(cls, machine: Machine) -> 'MachineDTO':
+    def from_domain(cls, machine: Machine) -> "MachineDTO":
         return cls(
             machine_id=machine.id,
             status=machine.status.value,
             template_id=machine.template_id,
-            created_at=machine.created_at
+            created_at=machine.created_at,
         )
 ```
 
@@ -136,8 +136,7 @@ All handlers use `BaseHandler.handle_with_error_management()`:
 ```python
 async def handle(self, command: MyCommand) -> MyResponse:
     return await self.handle_with_error_management(
-        lambda: self.execute_command(command),
-        context=f"command_handling_{self.__class__.__name__}"
+        lambda: self.execute_command(command), context=f"command_handling_{self.__class__.__name__}"
     )
 ```
 
@@ -159,10 +158,7 @@ Services are injected through constructor parameters:
 
 ```python
 class MyCommandHandler(BaseCommandHandler):
-    def __init__(self, 
-                 repository: MyRepositoryPort,
-                 service: MyDomainService,
-                 logger: LoggingPort):
+    def __init__(self, repository: MyRepositoryPort, service: MyDomainService, logger: LoggingPort):
         super().__init__(logger)
         self.repository = repository
         self.service = service
@@ -177,6 +173,7 @@ Test handlers in isolation with mocked dependencies:
 @pytest.fixture
 def handler(mock_repository, mock_logger):
     return MyCommandHandler(mock_repository, mock_logger)
+
 
 async def test_command_execution(handler):
     command = MyCommand(data="test")
@@ -262,6 +259,7 @@ async def execute_command(self, command: MyCommand) -> MyResponse:
 ```python
 def get_cache_key(self, query: MyQuery) -> Optional[str]:
     return f"my_query_{query.filter_id}_{query.page}"
+
 
 def is_cacheable(self, query: MyQuery, result: MyResult) -> bool:
     return len(result.items) > 0  # Only cache non-empty results

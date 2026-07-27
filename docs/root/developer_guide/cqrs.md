@@ -26,9 +26,11 @@ Commands represent intentions to change system state:
 from dataclasses import dataclass
 from src.application.dto.commands import BaseCommand
 
+
 @dataclass
 class RequestMachinesCommand(BaseCommand):
     """Command to request new machines."""
+
     template_name: str
     machine_count: int
     user_id: str
@@ -40,6 +42,7 @@ class RequestMachinesCommand(BaseCommand):
 ```python
 from src.domain.base.dependency_injection import command_handler
 from src.application.dto.commands import RequestMachinesCommand
+
 
 @command_handler(RequestMachinesCommand)
 class RequestMachinesHandler:
@@ -58,9 +61,11 @@ class RequestMachinesHandler:
 from dataclasses import dataclass
 from src.application.dto.queries import BaseQuery
 
+
 @dataclass
 class GetMachineStatusQuery(BaseQuery):
     """Query to get machine status."""
+
     request_id: str
 ```
 
@@ -69,6 +74,7 @@ class GetMachineStatusQuery(BaseQuery):
 ```python
 from src.domain.base.dependency_injection import query_handler
 from src.application.dto.queries import GetMachineStatusQuery
+
 
 @query_handler(GetMachineStatusQuery)
 class GetMachineStatusHandler:
@@ -121,6 +127,7 @@ Commands represent write operations that change system state:
 @dataclass(frozen=True)
 class CreateRequestCommand:
     """Command to create a new machine request."""
+
     template_id: str
     machine_count: int
     tags: Optional[Dict[str, str]] = None
@@ -135,9 +142,11 @@ class CreateRequestCommand:
         if self.machine_count > 100:
             raise ValidationError("machine_count cannot exceed 100")
 
+
 @dataclass(frozen=True)
 class UpdateRequestStatusCommand:
     """Command to update request status."""
+
     request_id: str
     new_status: RequestStatus
     reason: Optional[str] = None
@@ -157,10 +166,12 @@ Command handlers execute business logic and modify domain state:
 class CreateRequestCommandHandler:
     """Handles request creation commands."""
 
-    def __init__(self,
-                 request_repository: RequestRepository,
-                 template_repository: TemplateRepository,
-                 event_publisher: EventPublisher):
+    def __init__(
+        self,
+        request_repository: RequestRepository,
+        template_repository: TemplateRepository,
+        event_publisher: EventPublisher,
+    ):
         self._request_repository = request_repository
         self._template_repository = template_repository
         self._event_publisher = event_publisher
@@ -182,7 +193,7 @@ class CreateRequestCommandHandler:
                 template_id=command.template_id,
                 machine_count=command.machine_count,
                 tags=command.tags,
-                priority=command.priority
+                priority=command.priority,
             )
 
             # Save to repository
@@ -247,15 +258,18 @@ Queries represent read operations that don't change system state:
 @dataclass(frozen=True)
 class SyncAndGetRequestQuery:
     """Query to sync provider state and get a specific request."""
+
     request_id: str
 
     def validate(self) -> None:
         if not self.request_id:
             raise ValidationError("request_id is required")
 
+
 @dataclass(frozen=True)
 class ListRequestsQuery:
     """Query to list requests with filtering."""
+
     status: Optional[RequestStatus] = None
     template_id: Optional[str] = None
     limit: int = 50
@@ -267,9 +281,11 @@ class ListRequestsQuery:
         if self.offset < 0:
             raise ValidationError("offset must be non-negative")
 
+
 @dataclass(frozen=True)
 class GetRequestStatusQuery:
     """Query to get request status information."""
+
     request_id: str
     include_machines: bool = False
 
@@ -306,6 +322,7 @@ class SyncAndGetRequestHandler:
             self._logger.error(f"Failed to get request {query.request_id}: {str(e)}")
             raise
 
+
 class ListRequestsQueryHandler:
     """Handles request listing queries."""
 
@@ -320,14 +337,12 @@ class ListRequestsQueryHandler:
 
             filters = {}
             if query.status:
-                filters['status'] = query.status.value
+                filters["status"] = query.status.value
             if query.template_id:
-                filters['template_id'] = query.template_id
+                filters["template_id"] = query.template_id
 
             requests_data = await self._read_model.list_requests(
-                filters=filters,
-                limit=query.limit,
-                offset=query.offset
+                filters=filters, limit=query.limit, offset=query.offset
             )
 
             return [RequestDto.from_dict(data) for data in requests_data]
@@ -396,10 +411,9 @@ class RequestReadModel:
             self._logger.error(f"Failed to get request {request_id}: {str(e)}")
             raise
 
-    async def list_requests(self,
-                          filters: Dict[str, Any] = None,
-                          limit: int = 50,
-                          offset: int = 0) -> List[Dict[str, Any]]:
+    async def list_requests(
+        self, filters: Dict[str, Any] = None, limit: int = 50, offset: int = 0
+    ) -> List[Dict[str, Any]]:
         """List requests with filtering and pagination."""
         try:
             return await self._storage.query_documents(
@@ -408,7 +422,7 @@ class RequestReadModel:
                 limit=limit,
                 offset=offset,
                 sort_by="created_at",
-                sort_order="desc"
+                sort_order="desc",
             )
         except Exception as e:
             self._logger.error(f"Failed to list requests: {str(e)}")
@@ -423,6 +437,7 @@ class RequestReadModel:
 @dataclass
 class RequestDto:
     """Data transfer object for request data."""
+
     request_id: str
     template_id: str
     machine_count: int
@@ -435,19 +450,23 @@ class RequestDto:
     machine_ids: Optional[List[str]] = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'RequestDto':
+    def from_dict(cls, data: Dict[str, Any]) -> "RequestDto":
         """Create DTO from dictionary."""
         return cls(
-            request_id=data['request_id'],
-            template_id=data['template_id'],
-            machine_count=data['machine_count'],
-            status=data['status'],
-            created_at=datetime.fromisoformat(data['created_at']),
-            updated_at=datetime.fromisoformat(data['updated_at']) if data.get('updated_at') else None,
-            completed_at=datetime.fromisoformat(data['completed_at']) if data.get('completed_at') else None,
-            tags=data.get('tags'),
-            priority=data.get('priority'),
-            machine_ids=data.get('machine_ids', [])
+            request_id=data["request_id"],
+            template_id=data["template_id"],
+            machine_count=data["machine_count"],
+            status=data["status"],
+            created_at=datetime.fromisoformat(data["created_at"]),
+            updated_at=datetime.fromisoformat(data["updated_at"])
+            if data.get("updated_at")
+            else None,
+            completed_at=datetime.fromisoformat(data["completed_at"])
+            if data.get("completed_at")
+            else None,
+            tags=data.get("tags"),
+            priority=data.get("priority"),
+            machine_ids=data.get("machine_ids", []),
         )
 ```
 
@@ -473,14 +492,11 @@ def configure_cqrs(container: DIContainer) -> Tuple[CommandBus, QueryBus]:
     # Register command handlers
     command_bus.register_handler(
         CreateRequestCommand,
-        CreateRequestCommandHandler(request_repository, template_repository, event_publisher)
+        CreateRequestCommandHandler(request_repository, template_repository, event_publisher),
     )
 
     # Register query handlers
-    query_bus.register_handler(
-        SyncAndGetRequestQuery,
-        SyncAndGetRequestHandler(request_read_model)
-    )
+    query_bus.register_handler(SyncAndGetRequestQuery, SyncAndGetRequestHandler(request_read_model))
 
     return command_bus, query_bus
 ```
@@ -492,9 +508,7 @@ def configure_cqrs(container: DIContainer) -> Tuple[CommandBus, QueryBus]:
 ```python
 # Create a new request
 command = CreateRequestCommand(
-    template_id="template-1",
-    machine_count=3,
-    tags={"environment": "production", "team": "backend"}
+    template_id="template-1", machine_count=3, tags={"environment": "production", "team": "backend"}
 )
 
 request_id = await command_bus.dispatch(command)

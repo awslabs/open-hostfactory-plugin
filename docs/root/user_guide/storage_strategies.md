@@ -322,10 +322,7 @@ sql_strategy = SQLStorageStrategy(config)
 ```python
 # Optimized queries with indexes
 requests = storage.query_entities(
-    "requests",
-    filters={"status": "PENDING"},
-    order_by="created_at",
-    limit=50
+    "requests", filters={"status": "PENDING"}, order_by="created_at", limit=50
 )
 ```
 
@@ -412,7 +409,7 @@ requests = storage.query_by_gsi(
     "requests",
     index_name="template_id-created_at-index",
     key_condition="template_id = :template_id",
-    expression_values={":template_id": "template-1"}
+    expression_values={":template_id": "template-1"},
 )
 ```
 
@@ -424,7 +421,7 @@ storage.update_entity(
     request_id,
     updated_data,
     condition_expression="attribute_exists(request_id) AND version = :expected_version",
-    expression_values={":expected_version": current_version}
+    expression_values={":expected_version": current_version},
 )
 ```
 
@@ -446,8 +443,7 @@ class RepositoryInterface:
         """Retrieve an entity by ID."""
         pass
 
-    def update_entity(self, collection: str, entity_id: str,
-                     entity_data: Dict[str, Any]) -> None:
+    def update_entity(self, collection: str, entity_id: str, entity_data: Dict[str, Any]) -> None:
         """Update an existing entity."""
         pass
 
@@ -455,10 +451,13 @@ class RepositoryInterface:
         """Delete an entity."""
         pass
 
-    def query_entities(self, collection: str,
-                      filters: Dict[str, Any] = None,
-                      order_by: str = None,
-                      limit: int = None) -> List[Dict[str, Any]]:
+    def query_entities(
+        self,
+        collection: str,
+        filters: Dict[str, Any] = None,
+        order_by: str = None,
+        limit: int = None,
+    ) -> List[Dict[str, Any]]:
         """Query entities with filters."""
         pass
 ```
@@ -486,7 +485,7 @@ def create_request(repository: RepositoryInterface, request_data: Dict[str, Any]
             "machine_id": f"machine-{uuid.uuid4()}",
             "request_id": request_data["request_id"],
             "template_id": request_data["template_id"],
-            "status": "PENDING"
+            "status": "PENDING",
         }
         repository.save_entity("machines", machine_data)
 
@@ -527,8 +526,7 @@ migration_tool.validate_schema_compatibility()
 ```python
 # Automatic backup before migration
 backup_path = migration_tool.create_backup(
-    source_type="json",
-    backup_location="backups/migration_backup_20250630.json"
+    source_type="json", backup_location="backups/migration_backup_20250630.json"
 )
 ```
 
@@ -625,12 +623,7 @@ All strategies support optimistic locking:
 ```python
 # Version-based concurrency control
 try:
-    storage.update_entity(
-        "requests",
-        request_id,
-        updated_data,
-        expected_version=current_version
-    )
+    storage.update_entity("requests", request_id, updated_data, expected_version=current_version)
 except ConcurrencyConflictError as e:
     # Handle version conflict
     latest_data = storage.get_entity("requests", request_id)
@@ -653,10 +646,7 @@ with storage.acquire_write_lock():
 #### Database Locking (SQL)
 ```python
 # Database-level locking
-storage.execute_with_lock(
-    "SELECT * FROM requests WHERE id = ? FOR UPDATE",
-    [request_id]
-)
+storage.execute_with_lock("SELECT * FROM requests WHERE id = ? FOR UPDATE", [request_id])
 ```
 
 ## Performance Considerations

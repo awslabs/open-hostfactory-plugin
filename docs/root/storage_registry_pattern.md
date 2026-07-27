@@ -63,6 +63,7 @@ class RepositoryFactory:
 class RedisStorageStrategy(BaseStorageStrategy):
     def __init__(self, connection_string: str):
         self.connection_string = connection_string
+
     # ... implement storage methods
 ```
 
@@ -72,11 +73,14 @@ class RedisStorageStrategy(BaseStorageStrategy):
 def create_redis_strategy(config: Any) -> RedisStorageStrategy:
     return RedisStorageStrategy(config.redis_strategy.connection_string)
 
+
 def create_redis_config(data: Dict[str, Any]) -> Any:
     return RedisStrategyConfig(**data)
 
+
 def create_redis_unit_of_work(config: Any) -> Any:
     return RedisUnitOfWork(config)
+
 
 def register_redis_storage() -> None:
     registry = get_storage_registry()
@@ -84,7 +88,7 @@ def register_redis_storage() -> None:
         storage_type="redis",
         strategy_factory=create_redis_strategy,
         config_factory=create_redis_config,
-        unit_of_work_factory=create_redis_unit_of_work
+        unit_of_work_factory=create_redis_unit_of_work,
     )
 ```
 
@@ -97,6 +101,7 @@ def register_all_storage_types() -> None:
     # Add Redis registration
     try:
         from src.infrastructure.storage.redis.registration import register_redis_storage
+
         register_redis_storage()
         registered_types.append("redis")
     except Exception as e:
@@ -156,8 +161,9 @@ def _register_repository_services(container: DIContainer) -> None:
     container.register_singleton(RepositoryFactory, ...)
 
     # Register repositories using the factory
-    container.register_singleton(RequestRepositoryInterface, 
-                                lambda c: c.get(RepositoryFactory).create_request_repository())
+    container.register_singleton(
+        RequestRepositoryInterface, lambda c: c.get(RepositoryFactory).create_request_repository()
+    )
 ```
 
 ### Configuration Support

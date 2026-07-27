@@ -64,11 +64,14 @@ from typing import Optional, Dict, Any, Callable
 import time
 from src.infrastructure.resilience.exceptions import CircuitBreakerOpenError
 
+
 class CircuitState(Enum):
     """Circuit breaker states."""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Failing fast
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Failing fast
     HALF_OPEN = "half_open"  # Testing recovery
+
 
 class CircuitBreakerStrategy:
     """Circuit breaker implementation for preventing cascading failures."""
@@ -76,11 +79,13 @@ class CircuitBreakerStrategy:
     # Class-level storage for circuit states (shared across instances)
     _circuit_states: Dict[str, Dict[str, Any]] = {}
 
-    def __init__(self,
-                 service_name: str,
-                 failure_threshold: int = 5,
-                 reset_timeout: int = 60,
-                 half_open_timeout: int = 30):
+    def __init__(
+        self,
+        service_name: str,
+        failure_threshold: int = 5,
+        reset_timeout: int = 60,
+        half_open_timeout: int = 30,
+    ):
         """
         Initialize circuit breaker.
 
@@ -98,21 +103,21 @@ class CircuitBreakerStrategy:
         # Initialize circuit state if not exists
         if service_name not in self._circuit_states:
             self._circuit_states[service_name] = {
-                'state': CircuitState.CLOSED,
-                'failure_count': 0,
-                'last_failure_time': None,
-                'last_success_time': None,
-                'state_changed_time': time.time()
+                "state": CircuitState.CLOSED,
+                "failure_count": 0,
+                "last_failure_time": None,
+                "last_success_time": None,
+                "state_changed_time": time.time(),
             }
 
     def call(self, func: Callable, *args, **kwargs) -> Any:
         """Execute function with circuit breaker protection."""
         state_info = self._circuit_states[self.service_name]
-        current_state = state_info['state']
+        current_state = state_info["state"]
 
         # Check if circuit should transition states
         self._update_state()
-        current_state = state_info['state']
+        current_state = state_info["state"]
 
         if current_state == CircuitState.OPEN:
             raise CircuitBreakerOpenError(
@@ -136,63 +141,67 @@ class CircuitBreakerStrategy:
     def _update_state(self) -> None:
         """Update circuit breaker state based on current conditions."""
         state_info = self._circuit_states[self.service_name]
-        current_state = state_info['state']
+        current_state = state_info["state"]
         current_time = time.time()
 
         if current_state == CircuitState.OPEN:
             # Check if reset timeout has elapsed
-            if (state_info['last_failure_time'] and
-                current_time - state_info['last_failure_time'] >= self.reset_timeout):
+            if (
+                state_info["last_failure_time"]
+                and current_time - state_info["last_failure_time"] >= self.reset_timeout
+            ):
                 self._transition_to_half_open()
 
         elif current_state == CircuitState.HALF_OPEN:
             # Check if half-open timeout has elapsed without success
-            if (current_time - state_info['state_changed_time'] >= self.half_open_timeout):
+            if current_time - state_info["state_changed_time"] >= self.half_open_timeout:
                 self._transition_to_open()
 
     def _record_success(self) -> None:
         """Record successful operation."""
         state_info = self._circuit_states[self.service_name]
-        state_info['failure_count'] = 0
-        state_info['last_success_time'] = time.time()
+        state_info["failure_count"] = 0
+        state_info["last_success_time"] = time.time()
 
-        if state_info['state'] == CircuitState.HALF_OPEN:
+        if state_info["state"] == CircuitState.HALF_OPEN:
             self._transition_to_closed()
 
     def _record_failure(self) -> None:
         """Record failed operation."""
         state_info = self._circuit_states[self.service_name]
-        state_info['failure_count'] += 1
-        state_info['last_failure_time'] = time.time()
+        state_info["failure_count"] += 1
+        state_info["last_failure_time"] = time.time()
 
-        if (state_info['state'] == CircuitState.CLOSED and
-            state_info['failure_count'] >= self.failure_threshold):
+        if (
+            state_info["state"] == CircuitState.CLOSED
+            and state_info["failure_count"] >= self.failure_threshold
+        ):
             self._transition_to_open()
-        elif state_info['state'] == CircuitState.HALF_OPEN:
+        elif state_info["state"] == CircuitState.HALF_OPEN:
             self._transition_to_open()
 
     def _transition_to_open(self) -> None:
         """Transition circuit to OPEN state."""
         state_info = self._circuit_states[self.service_name]
-        state_info['state'] = CircuitState.OPEN
-        state_info['state_changed_time'] = time.time()
+        state_info["state"] = CircuitState.OPEN
+        state_info["state_changed_time"] = time.time()
 
         logger.warning(f"Circuit breaker OPENED for service: {self.service_name}")
 
     def _transition_to_half_open(self) -> None:
         """Transition circuit to HALF_OPEN state."""
         state_info = self._circuit_states[self.service_name]
-        state_info['state'] = CircuitState.HALF_OPEN
-        state_info['state_changed_time'] = time.time()
+        state_info["state"] = CircuitState.HALF_OPEN
+        state_info["state_changed_time"] = time.time()
 
         logger.info(f"Circuit breaker HALF_OPEN for service: {self.service_name}")
 
     def _transition_to_closed(self) -> None:
         """Transition circuit to CLOSED state."""
         state_info = self._circuit_states[self.service_name]
-        state_info['state'] = CircuitState.CLOSED
-        state_info['state_changed_time'] = time.time()
-        state_info['failure_count'] = 0
+        state_info["state"] = CircuitState.CLOSED
+        state_info["state_changed_time"] = time.time()
+        state_info["failure_count"] = 0
 
         logger.info(f"Circuit breaker CLOSED for service: {self.service_name}")
 ```
@@ -202,32 +211,24 @@ class CircuitBreakerStrategy:
 ```python
 # Protect AWS EC2 operations
 ec2_circuit_breaker = CircuitBreakerStrategy(
-    service_name="aws_ec2",
-    failure_threshold=3,
-    reset_timeout=30
+    service_name="aws_ec2", failure_threshold=3, reset_timeout=30
 )
+
 
 def provision_ec2_instances(template, count):
     """Provision EC2 instances with circuit breaker protection."""
-    return ec2_circuit_breaker.call(
-        aws_operations.run_instances,
-        template=template,
-        count=count
-    )
+    return ec2_circuit_breaker.call(aws_operations.run_instances, template=template, count=count)
+
 
 # Protect Auto Scaling operations
 asg_circuit_breaker = CircuitBreakerStrategy(
-    service_name="aws_autoscaling",
-    failure_threshold=5,
-    reset_timeout=60
+    service_name="aws_autoscaling", failure_threshold=5, reset_timeout=60
 )
+
 
 def create_auto_scaling_group(config):
     """Create ASG with circuit breaker protection."""
-    return asg_circuit_breaker.call(
-        aws_operations.create_auto_scaling_group,
-        config=config
-    )
+    return asg_circuit_breaker.call(aws_operations.create_auto_scaling_group, config=config)
 ```
 
 ## Retry Strategies
@@ -239,16 +240,19 @@ import random
 import time
 from typing import List, Type, Callable, Any
 
+
 class ExponentialBackoffStrategy:
     """Exponential backoff retry strategy with jitter."""
 
-    def __init__(self,
-                 max_attempts: int = 3,
-                 base_delay: float = 1.0,
-                 max_delay: float = 60.0,
-                 exponential_base: float = 2.0,
-                 jitter: bool = True,
-                 retryable_exceptions: List[Type[Exception]] = None):
+    def __init__(
+        self,
+        max_attempts: int = 3,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0,
+        exponential_base: float = 2.0,
+        jitter: bool = True,
+        retryable_exceptions: List[Type[Exception]] = None,
+    ):
         """
         Initialize exponential backoff strategy.
 
@@ -295,13 +299,12 @@ class ExponentialBackoffStrategy:
         if not self.retryable_exceptions:
             return True  # Retry all exceptions if none specified
 
-        return any(isinstance(exception, exc_type)
-                  for exc_type in self.retryable_exceptions)
+        return any(isinstance(exception, exc_type) for exc_type in self.retryable_exceptions)
 
     def _calculate_delay(self, attempt: int) -> float:
         """Calculate delay for the given attempt."""
         # Calculate exponential delay
-        delay = self.base_delay * (self.exponential_base ** attempt)
+        delay = self.base_delay * (self.exponential_base**attempt)
 
         # Apply maximum delay limit
         delay = min(delay, self.max_delay)
@@ -320,37 +323,33 @@ class ExponentialBackoffStrategy:
 ```python
 from botocore.exceptions import ClientError, BotoCoreError
 
+
 class AWSRetryStrategy(ExponentialBackoffStrategy):
     """AWS-specific retry strategy with error classification."""
 
     def __init__(self, **kwargs):
         # AWS-specific retryable exceptions
-        retryable_exceptions = [
-            ClientError,
-            BotoCoreError,
-            ConnectionError,
-            TimeoutError
-        ]
+        retryable_exceptions = [ClientError, BotoCoreError, ConnectionError, TimeoutError]
 
         super().__init__(retryable_exceptions=retryable_exceptions, **kwargs)
 
     def _is_retryable_exception(self, exception: Exception) -> bool:
         """Check if AWS exception should trigger a retry."""
         if isinstance(exception, ClientError):
-            error_code = exception.response['Error']['Code']
+            error_code = exception.response["Error"]["Code"]
 
             # Retryable AWS error codes
             retryable_codes = [
-                'ThrottlingException',
-                'RequestLimitExceeded',
-                'ServiceUnavailable',
-                'InternalServerError',
-                'InternalError',
-                'RequestTimeout',
-                'RequestTimeoutException',
-                'PriorRequestNotComplete',
-                'ConnectionError',
-                'RequestTimeTooSkewed'
+                "ThrottlingException",
+                "RequestLimitExceeded",
+                "ServiceUnavailable",
+                "InternalServerError",
+                "InternalError",
+                "RequestTimeout",
+                "RequestTimeoutException",
+                "PriorRequestNotComplete",
+                "ConnectionError",
+                "RequestTimeTooSkewed",
             ]
 
             return error_code in retryable_codes
@@ -364,11 +363,14 @@ class AWSRetryStrategy(ExponentialBackoffStrategy):
 from functools import wraps
 from typing import Callable, Any
 
-def retry_with_backoff(max_attempts: int = 3,
-                      base_delay: float = 1.0,
-                      max_delay: float = 60.0,
-                      exponential_base: float = 2.0,
-                      jitter: bool = True):
+
+def retry_with_backoff(
+    max_attempts: int = 3,
+    base_delay: float = 1.0,
+    max_delay: float = 60.0,
+    exponential_base: float = 2.0,
+    jitter: bool = True,
+):
     """Decorator for adding retry logic with exponential backoff."""
 
     def decorator(func: Callable) -> Callable:
@@ -379,7 +381,7 @@ def retry_with_backoff(max_attempts: int = 3,
                 base_delay=base_delay,
                 max_delay=max_delay,
                 exponential_base=exponential_base,
-                jitter=jitter
+                jitter=jitter,
             )
 
             return retry_strategy.execute(func, *args, **kwargs)
@@ -388,15 +390,16 @@ def retry_with_backoff(max_attempts: int = 3,
 
     return decorator
 
+
 # Usage example
 @retry_with_backoff(max_attempts=3, base_delay=2.0)
 def create_ec2_instances(template, count):
     """Create EC2 instances with automatic retry."""
     return ec2_client.run_instances(
-        ImageId=template['image_id'],
+        ImageId=template["image_id"],
         MinCount=count,
         MaxCount=count,
-        InstanceType=template['instance_type']
+        InstanceType=template["instance_type"],
     )
 ```
 
@@ -407,34 +410,49 @@ def create_ec2_instances(template, count):
 ```python
 class ResilienceError(Exception):
     """Base exception for resilience-related errors."""
+
     pass
+
 
 class RetryableError(ResilienceError):
     """Exception that should trigger retry logic."""
+
     pass
+
 
 class NonRetryableError(ResilienceError):
     """Exception that should not trigger retry logic."""
+
     pass
+
 
 class CircuitBreakerOpenError(ResilienceError):
     """Exception raised when circuit breaker is open."""
+
     pass
+
 
 class TimeoutError(RetryableError):
     """Exception raised when operation times out."""
+
     pass
+
 
 class RateLimitError(RetryableError):
     """Exception raised when rate limit is exceeded."""
+
     pass
+
 
 class AuthenticationError(NonRetryableError):
     """Exception raised for authentication failures."""
+
     pass
+
 
 class AuthorizationError(NonRetryableError):
     """Exception raised for authorization failures."""
+
     pass
 ```
 
@@ -444,31 +462,32 @@ class AuthorizationError(NonRetryableError):
 from src.domain.base.exceptions import DomainException
 from botocore.exceptions import ClientError
 
+
 class ErrorClassifier:
     """Classifies errors for appropriate handling."""
 
     @staticmethod
     def classify_aws_error(exception: ClientError) -> str:
         """Classify AWS ClientError for handling strategy."""
-        error_code = exception.response['Error']['Code']
+        error_code = exception.response["Error"]["Code"]
 
         # Retryable errors
         retryable_codes = {
-            'ThrottlingException': 'rate_limit',
-            'RequestLimitExceeded': 'rate_limit',
-            'ServiceUnavailable': 'service_unavailable',
-            'InternalServerError': 'internal_error',
-            'RequestTimeout': 'timeout',
-            'InsufficientInstanceCapacity': 'capacity_issue'
+            "ThrottlingException": "rate_limit",
+            "RequestLimitExceeded": "rate_limit",
+            "ServiceUnavailable": "service_unavailable",
+            "InternalServerError": "internal_error",
+            "RequestTimeout": "timeout",
+            "InsufficientInstanceCapacity": "capacity_issue",
         }
 
         # Non-retryable errors
         non_retryable_codes = {
-            'InvalidUserID.NotFound': 'authentication',
-            'UnauthorizedOperation': 'authorization',
-            'InvalidParameterValue': 'validation',
-            'InvalidAMIID.NotFound': 'validation',
-            'InvalidSubnetID.NotFound': 'validation'
+            "InvalidUserID.NotFound": "authentication",
+            "UnauthorizedOperation": "authorization",
+            "InvalidParameterValue": "validation",
+            "InvalidAMIID.NotFound": "validation",
+            "InvalidSubnetID.NotFound": "validation",
         }
 
         if error_code in retryable_codes:
@@ -507,6 +526,7 @@ from typing import Dict, Optional
 import asyncio
 import signal
 
+
 class TimeoutManager:
     """Manages operation timeouts."""
 
@@ -523,8 +543,7 @@ class TimeoutManager:
         """Get timeout for specific operation."""
         return self.operation_timeouts.get(operation, self.default_timeout)
 
-    def execute_with_timeout(self, func: Callable, operation: str,
-                           *args, **kwargs) -> Any:
+    def execute_with_timeout(self, func: Callable, operation: str, *args, **kwargs) -> Any:
         """Execute function with timeout."""
         timeout = self.get_operation_timeout(operation)
 
@@ -543,6 +562,7 @@ class TimeoutManager:
             signal.alarm(0)
             signal.signal(signal.SIGALRM, old_handler)
 
+
 # Configure operation-specific timeouts
 timeout_manager = TimeoutManager(default_timeout=30)
 timeout_manager.set_operation_timeout("ec2_run_instances", 180)
@@ -557,10 +577,10 @@ timeout_manager.set_operation_timeout("spot_fleet_request", 300)
 import asyncio
 from typing import Awaitable, TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
-async def execute_with_async_timeout(coro: Awaitable[T],
-                                   timeout: float) -> T:
+
+async def execute_with_async_timeout(coro: Awaitable[T], timeout: float) -> T:
     """Execute coroutine with timeout."""
     try:
         return await asyncio.wait_for(coro, timeout=timeout)
@@ -663,30 +683,29 @@ class ResilientAWSProvider(AWSProvider):
         # Circuit breakers for different services
         self.ec2_circuit_breaker = CircuitBreakerStrategy(
             service_name="aws_ec2",
-            **self.resilience_config['circuit_breaker']['services']['aws_ec2']
+            **self.resilience_config["circuit_breaker"]["services"]["aws_ec2"],
         )
 
         self.asg_circuit_breaker = CircuitBreakerStrategy(
             service_name="aws_autoscaling",
-            **self.resilience_config['circuit_breaker']['services']['aws_autoscaling']
+            **self.resilience_config["circuit_breaker"]["services"]["aws_autoscaling"],
         )
 
         # Retry strategies
-        self.retry_strategy = AWSRetryStrategy(
-            **self.resilience_config['retry']
-        )
+        self.retry_strategy = AWSRetryStrategy(**self.resilience_config["retry"])
 
         # Timeout manager
         self.timeout_manager = TimeoutManager(
-            default_timeout=self.resilience_config['timeout']['default_timeout']
+            default_timeout=self.resilience_config["timeout"]["default_timeout"]
         )
 
         # Set operation timeouts
-        for operation, timeout in self.resilience_config['timeout']['operations'].items():
+        for operation, timeout in self.resilience_config["timeout"]["operations"].items():
             self.timeout_manager.set_operation_timeout(operation, timeout)
 
     def provision_machines(self, request: Request) -> List[Machine]:
         """Provision machines with full resilience protection."""
+
         def _provision():
             return super().provision_machines(request)
 
@@ -699,10 +718,7 @@ class ResilientAWSProvider(AWSProvider):
             return self.retry_strategy.execute(_with_circuit_breaker)
 
         # Apply timeout
-        return self.timeout_manager.execute_with_timeout(
-            _with_retry,
-            "ec2_run_instances"
-        )
+        return self.timeout_manager.execute_with_timeout(_with_retry, "ec2_run_instances")
 ```
 
 ### Monitoring Resilience Patterns
@@ -713,50 +729,50 @@ class ResilienceMonitor:
 
     def __init__(self):
         self.metrics = {
-            'circuit_breaker_opens': 0,
-            'circuit_breaker_closes': 0,
-            'retry_attempts': 0,
-            'retry_successes': 0,
-            'timeout_errors': 0,
-            'total_operations': 0,
-            'successful_operations': 0
+            "circuit_breaker_opens": 0,
+            "circuit_breaker_closes": 0,
+            "retry_attempts": 0,
+            "retry_successes": 0,
+            "timeout_errors": 0,
+            "total_operations": 0,
+            "successful_operations": 0,
         }
 
     def record_circuit_breaker_open(self, service_name: str) -> None:
         """Record circuit breaker opening."""
-        self.metrics['circuit_breaker_opens'] += 1
+        self.metrics["circuit_breaker_opens"] += 1
         logger.warning(f"Circuit breaker opened for {service_name}")
 
     def record_retry_attempt(self, operation: str, attempt: int) -> None:
         """Record retry attempt."""
-        self.metrics['retry_attempts'] += 1
+        self.metrics["retry_attempts"] += 1
         logger.debug(f"Retry attempt {attempt} for {operation}")
 
     def record_operation_success(self, operation: str) -> None:
         """Record successful operation."""
-        self.metrics['successful_operations'] += 1
-        self.metrics['total_operations'] += 1
+        self.metrics["successful_operations"] += 1
+        self.metrics["total_operations"] += 1
 
     def record_operation_failure(self, operation: str, error: str) -> None:
         """Record failed operation."""
-        self.metrics['total_operations'] += 1
+        self.metrics["total_operations"] += 1
         logger.error(f"Operation {operation} failed: {error}")
 
     def get_success_rate(self) -> float:
         """Calculate operation success rate."""
-        if self.metrics['total_operations'] == 0:
+        if self.metrics["total_operations"] == 0:
             return 0.0
 
-        return self.metrics['successful_operations'] / self.metrics['total_operations']
+        return self.metrics["successful_operations"] / self.metrics["total_operations"]
 
     def get_metrics_summary(self) -> Dict[str, Any]:
         """Get resilience metrics summary."""
         return {
-            'success_rate': self.get_success_rate(),
-            'circuit_breaker_opens': self.metrics['circuit_breaker_opens'],
-            'retry_attempts': self.metrics['retry_attempts'],
-            'timeout_errors': self.metrics['timeout_errors'],
-            'total_operations': self.metrics['total_operations']
+            "success_rate": self.get_success_rate(),
+            "circuit_breaker_opens": self.metrics["circuit_breaker_opens"],
+            "retry_attempts": self.metrics["retry_attempts"],
+            "timeout_errors": self.metrics["timeout_errors"],
+            "total_operations": self.metrics["total_operations"],
         }
 ```
 

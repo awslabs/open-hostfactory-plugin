@@ -26,11 +26,13 @@ class TemplateConfigurationManager:
     treats templates as configuration data rather than transactional entities.
     """
 
-    def __init__(self, 
-                 config_manager: ConfigurationManager,
-                 scheduler_strategy: SchedulerPort,
-                 logger: LoggingPort,
-                 event_publisher: Optional[EventPublisherPort] = None):
+    def __init__(
+        self,
+        config_manager: ConfigurationManager,
+        scheduler_strategy: SchedulerPort,
+        logger: LoggingPort,
+        event_publisher: Optional[EventPublisherPort] = None,
+    ):
         self.config_manager = config_manager
         self.scheduler_strategy = scheduler_strategy
         self.logger = logger
@@ -54,9 +56,7 @@ Repository pattern implementation for template persistence:
 class TemplateRepositoryImpl(TemplateRepositoryPort):
     """Template repository implementation using configuration manager."""
 
-    def __init__(self, 
-                 config_manager: TemplateConfigurationManager,
-                 logger: LoggingPort):
+    def __init__(self, config_manager: TemplateConfigurationManager, logger: LoggingPort):
         self.config_manager = config_manager
         self.logger = logger
 
@@ -124,6 +124,7 @@ Each discovered template file includes comprehensive metadata:
 @dataclass
 class TemplateFileMetadata:
     """Metadata for template files in the hierarchy."""
+
     path: Path
     provider: str
     file_type: str  # 'instance', 'type', 'main', 'legacy'
@@ -169,7 +170,7 @@ async def load_templates(self, force_refresh: bool = False) -> List[TemplateDTO]
                 all_templates[template_id] = template
             else:
                 # Check priority for override
-                existing_priority = getattr(all_templates[template_id], '_source_priority', 999)
+                existing_priority = getattr(all_templates[template_id], "_source_priority", 999)
                 if file_metadata.priority < existing_priority:
                     all_templates[template_id] = template
 
@@ -198,7 +199,7 @@ async def save_template(self, template: TemplateDTO) -> None:
     templates to the appropriate provider-specific files.
     """
     # Determine target file based on template provider
-    provider = getattr(template, '_source_provider', 'aws')
+    provider = getattr(template, "_source_provider", "aws")
     target_file = await self._determine_target_file(template, provider)
 
     # Load existing templates from target file
@@ -207,7 +208,7 @@ async def save_template(self, template: TemplateDTO) -> None:
     # Update or add the template
     template_found = False
     for i, existing_template in enumerate(existing_templates):
-        if existing_template.get('template_id') == template.template_id:
+        if existing_template.get("template_id") == template.template_id:
             existing_templates[i] = template.configuration
             template_found = True
             break
@@ -237,15 +238,16 @@ async def delete_template(self, template_id: str) -> None:
     if not template:
         raise ValueError(f"Template {template_id} not found")
 
-    source_file = getattr(template, '_source_file', None)
+    source_file = getattr(template, "_source_file", None)
     if not source_file:
         raise ValueError(f"Cannot determine source file for template {template_id}")
 
     # Load, modify, and save
     existing_templates = await self._load_templates_from_file_path(Path(source_file))
     existing_templates = [
-        t for t in existing_templates 
-        if t.get('template_id') != template_id and t.get('templateId') != template_id
+        t
+        for t in existing_templates
+        if t.get("template_id") != template_id and t.get("templateId") != template_id
     ]
 
     await self._write_templates_to_file(Path(source_file), existing_templates)
@@ -286,18 +288,20 @@ async def save_template(self, template: TemplateDTO) -> None:
                     template_id=template.template_id,
                     template_name=template.name or template.template_id,
                     changes=self._calculate_changes(existing_template, template),
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.utcnow(),
                 )
             else:
                 event = TemplateCreatedEvent(
                     template_id=template.template_id,
                     template_name=template.name or template.template_id,
-                    template_type=template.provider_api or 'aws',
-                    timestamp=datetime.utcnow()
+                    template_type=template.provider_api or "aws",
+                    timestamp=datetime.utcnow(),
                 )
 
             self.event_publisher.publish(event)
-            self.logger.debug(f"Published {event.__class__.__name__} for template {template.template_id}")
+            self.logger.debug(
+                f"Published {event.__class__.__name__} for template {template.template_id}"
+            )
 
     except Exception as e:
         self.logger.error(f"Failed to save template {template.template_id}: {e}")
@@ -316,8 +320,7 @@ class TemplateCreatedHandler(BaseEventHandler):
     async def handle(self, event: TemplateCreatedEvent) -> None:
         # Send notifications
         await self.notification_service.notify_template_created(
-            template_id=event.template_id,
-            template_name=event.template_name
+            template_id=event.template_id, template_name=event.template_name
         )
 
         # Update metrics
@@ -325,10 +328,9 @@ class TemplateCreatedHandler(BaseEventHandler):
 
         # Audit logging
         self.audit_logger.log_template_operation(
-            operation="CREATE",
-            template_id=event.template_id,
-            timestamp=event.timestamp
+            operation="CREATE", template_id=event.template_id, timestamp=event.timestamp
         )
+
 
 @event_handler("TemplateUpdatedEvent")
 class TemplateUpdatedHandler(BaseEventHandler):
@@ -340,8 +342,7 @@ class TemplateUpdatedHandler(BaseEventHandler):
 
         # Notify dependent systems
         await self.dependency_service.notify_template_changed(
-            template_id=event.template_id,
-            changes=event.changes
+            template_id=event.template_id, changes=event.changes
         )
 ```
 
@@ -368,8 +369,8 @@ def register_template_services(container: DIContainer) -> None:
             config_manager=c.get(ConfigurationManager),
             scheduler_strategy=c.get(SchedulerPort),
             logger=c.get(LoggingPort),
-            event_publisher=event_publisher  # Optional event publishing
-        )
+            event_publisher=event_publisher,  # Optional event publishing
+        ),
     )
 ```
 
@@ -418,7 +419,7 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateDT
             template_id=command.template_id,
             name=command.name,
             provider_api=command.provider_api,
-            configuration=command.configuration
+            configuration=command.configuration,
         )
 
         # Save using configuration manager
@@ -450,14 +451,19 @@ class CreateTemplateHandler(BaseCommandHandler[CreateTemplateCommand, TemplateDT
 ```python
 class TemplateConfigurationError(InfrastructureError):
     """Template configuration specific errors."""
+
     pass
+
 
 class TemplateNotFoundError(TemplateConfigurationError):
     """Template not found in configuration."""
+
     pass
+
 
 class TemplateValidationError(TemplateConfigurationError):
     """Template validation failed."""
+
     pass
 ```
 
@@ -476,11 +482,11 @@ class TemplateValidationError(TemplateConfigurationError):
 def get_cache_stats(self) -> Dict[str, Any]:
     """Get cache statistics for monitoring."""
     return {
-        'template_cache_size': len(self._template_cache),
-        'file_cache_size': len(self._file_cache),
-        'last_discovery': self._last_discovery.discovery_time if self._last_discovery else None,
-        'cache_timestamp': self._cache_timestamp,
-        'cache_ttl_seconds': self._cache_ttl_seconds
+        "template_cache_size": len(self._template_cache),
+        "file_cache_size": len(self._file_cache),
+        "last_discovery": self._last_discovery.discovery_time if self._last_discovery else None,
+        "cache_timestamp": self._cache_timestamp,
+        "cache_ttl_seconds": self._cache_ttl_seconds,
     }
 ```
 
@@ -496,7 +502,9 @@ def _create_hf_attributes(self, template_data: Dict[str, Any]) -> Dict[str, Any]
     CPU and RAM specifications based on instance type.
     """
     # Handle both snake_case and camelCase field names
-    instance_type = template_data.get('instance_type') or template_data.get('instanceType', 't2.micro')
+    instance_type = template_data.get("instance_type") or template_data.get(
+        "instanceType", "t2.micro"
+    )
 
     # CPU/RAM mapping for common instance types
     cpu_ram_mapping = {
@@ -521,7 +529,7 @@ def _create_hf_attributes(self, template_data: Dict[str, Any]) -> Dict[str, Any]
     return {
         "type": ["String", "X86_64"],
         "ncpus": ["Numeric", specs["ncpus"]],
-        "nram": ["Numeric", specs["nram"]]
+        "nram": ["Numeric", specs["nram"]],
     }
 ```
 

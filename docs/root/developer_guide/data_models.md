@@ -103,6 +103,7 @@ All models inherit from a configured Pydantic BaseModel:
 from pydantic import BaseModel, ConfigDict
 from typing import Any, Dict
 
+
 class BaseValidatedModel(BaseModel):
     """Base model with common configuration for all validated models."""
 
@@ -110,24 +111,19 @@ class BaseValidatedModel(BaseModel):
         # Validation settings
         validate_assignment=True,
         validate_default=True,
-        extra='forbid',
-
+        extra="forbid",
         # Serialization settings
         use_enum_values=True,
         populate_by_name=True,
-
         # Performance settings
         arbitrary_types_allowed=True,
-
         # JSON schema settings
-        json_schema_extra={
-            "examples": []
-        }
+        json_schema_extra={"examples": []},
     )
 
     def model_dump_safe(self) -> Dict[str, Any]:
         """Safely dump model excluding sensitive fields."""
-        return self.model_dump(exclude={'password', 'secret_key', 'token'})
+        return self.model_dump(exclude={"password", "secret_key", "token"})
 ```
 
 ## Domain Layer Models
@@ -141,12 +137,14 @@ from pydantic import Field, field_validator
 import re
 from typing import ClassVar
 
+
 class ResourceId(BaseValidatedModel):
     """Base class for resource identifiers with validation."""
+
     value: str = Field(..., min_length=1, max_length=255)
     resource_type: ClassVar[str] = "Resource"
 
-    @field_validator('value')
+    @field_validator("value")
     @classmethod
     def validate_format(cls, v: str) -> str:
         """Validate resource ID format."""
@@ -157,41 +155,47 @@ class ResourceId(BaseValidatedModel):
     def __str__(self) -> str:
         return self.value
 
+
 class TemplateId(ResourceId):
     """Template identifier with specific validation."""
+
     resource_type: ClassVar[str] = "Template"
 
-    @field_validator('value')
+    @field_validator("value")
     @classmethod
     def validate_template_format(cls, v: str) -> str:
         """Validate template ID format."""
-        pattern = r'^template-[a-zA-Z0-9_-]+$'
+        pattern = r"^template-[a-zA-Z0-9_-]+$"
         if not re.match(pattern, v):
             raise ValueError(f"Template ID must match pattern: {pattern}")
         return v
 
+
 class RequestId(ResourceId):
     """Request identifier with UUID validation."""
+
     resource_type: ClassVar[str] = "Request"
 
-    @field_validator('value')
+    @field_validator("value")
     @classmethod
     def validate_request_format(cls, v: str) -> str:
         """Validate request ID format."""
-        pattern = r'^(req|ret)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        pattern = r"^(req|ret)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         if not re.match(pattern, v):
             raise ValueError(f"Request ID must match pattern: {pattern}")
         return v
 
+
 class MachineId(ResourceId):
     """Machine identifier with validation."""
+
     resource_type: ClassVar[str] = "Machine"
 
-    @field_validator('value')
+    @field_validator("value")
     @classmethod
     def validate_machine_format(cls, v: str) -> str:
         """Validate machine ID format."""
-        pattern = r'^machine-[a-zA-Z0-9_-]+$'
+        pattern = r"^machine-[a-zA-Z0-9_-]+$"
         if not re.match(pattern, v):
             raise ValueError(f"Machine ID must match pattern: {pattern}")
         return v
@@ -206,17 +210,22 @@ from datetime import datetime
 from typing import Optional, Dict, Any, List
 from enum import Enum
 
+
 class RequestStatus(str, Enum):
     """Request status enumeration."""
+
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
 
+
 class RequestType(str, Enum):
     """Request type enumeration."""
+
     PROVISION = "PROVISION"
     RETURN = "RETURN"
+
 
 class Request(BaseValidatedModel):
     """Request aggregate with comprehensive validation."""
@@ -233,18 +242,20 @@ class Request(BaseValidatedModel):
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     machine_ids: List[MachineId] = Field(default_factory=list)
 
-    @field_validator('machine_count')
+    @field_validator("machine_count")
     @classmethod
     def validate_machine_count(cls, v: int, info) -> int:
         """Validate machine count based on request type."""
-        if hasattr(info, 'data') and info.data.get('request_type') == RequestType.RETURN:
+        if hasattr(info, "data") and info.data.get("request_type") == RequestType.RETURN:
             # For return requests, machine_count should match machine_ids length
-            machine_ids = info.data.get('machine_ids', [])
+            machine_ids = info.data.get("machine_ids", [])
             if machine_ids and len(machine_ids) != v:
-                raise ValueError("Machine count must match number of machine IDs for return requests")
+                raise ValueError(
+                    "Machine count must match number of machine IDs for return requests"
+                )
         return v
 
-    @field_validator('tags')
+    @field_validator("tags")
     @classmethod
     def validate_tags(cls, v: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
         """Validate tag format."""
@@ -252,19 +263,19 @@ class Request(BaseValidatedModel):
             return v
 
         for key, value in v.items():
-            if not re.match(r'^[a-zA-Z0-9_.-]{1,128}$', key):
+            if not re.match(r"^[a-zA-Z0-9_.-]{1,128}$", key):
                 raise ValueError(f"Invalid tag key format: {key}")
             if len(value) > 256:
                 raise ValueError(f"Tag value too long: {key}")
 
         return v
 
-    @field_validator('completed_at')
+    @field_validator("completed_at")
     @classmethod
     def validate_completion_time(cls, v: Optional[datetime], info) -> Optional[datetime]:
         """Validate completion time logic."""
-        if v and hasattr(info, 'data'):
-            created_at = info.data.get('created_at')
+        if v and hasattr(info, "data"):
+            created_at = info.data.get("created_at")
             if created_at and v < created_at:
                 raise ValueError("Completion time cannot be before creation time")
         return v
@@ -290,6 +301,7 @@ class Request(BaseValidatedModel):
 ```python
 from typing import Optional, List, Dict, Any
 
+
 class RequestDTO(BaseValidatedModel):
     """Request data transfer object."""
 
@@ -305,7 +317,7 @@ class RequestDTO(BaseValidatedModel):
     machine_ids: Optional[List[str]] = None
 
     @classmethod
-    def from_domain(cls, request: Request) -> 'RequestDTO':
+    def from_domain(cls, request: Request) -> "RequestDTO":
         """Create DTO from domain model."""
         return cls(
             request_id=request.request_id.value,
@@ -317,7 +329,7 @@ class RequestDTO(BaseValidatedModel):
             updated_at=request.updated_at,
             completed_at=request.completed_at,
             tags=request.tags,
-            machine_ids=[mid.value for mid in request.machine_ids] if request.machine_ids else None
+            machine_ids=[mid.value for mid in request.machine_ids] if request.machine_ids else None,
         )
 
     def to_domain(self) -> Request:
@@ -332,16 +344,14 @@ class RequestDTO(BaseValidatedModel):
             updated_at=self.updated_at,
             completed_at=self.completed_at,
             tags=self.tags or {},
-            machine_ids=[MachineId(value=mid) for mid in (self.machine_ids or [])]
+            machine_ids=[MachineId(value=mid) for mid in (self.machine_ids or [])],
         )
+
 
 class TemplateDTO(BaseValidatedModel):
     """Infrastructure DTO for template data transfer and persistence."""
-    model_config = ConfigDict(
-        frozen=False,
-        validate_assignment=True,
-        populate_by_name=True
-    )
+
+    model_config = ConfigDict(frozen=False, validate_assignment=True, populate_by_name=True)
 
     # Core template identification
     template_id: str = Field(description="Unique template identifier")
@@ -354,7 +364,9 @@ class TemplateDTO(BaseValidatedModel):
     provider_name: Optional[str] = Field(default=None, description="Provider instance name")
 
     # Template configuration data
-    configuration: Dict[str, Any] = Field(default_factory=dict, description="Template configuration")
+    configuration: Dict[str, Any] = Field(
+        default_factory=dict, description="Template configuration"
+    )
 
     # Metadata and status
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Template metadata")
@@ -374,11 +386,11 @@ class TemplateDTO(BaseValidatedModel):
         return self.model_dump(exclude_none=True)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'TemplateDTO':
+    def from_dict(cls, data: Dict[str, Any]) -> "TemplateDTO":
         """Create DTO from dictionary data."""
         return cls(**data)
 
-    def to_domain(self) -> 'Template':
+    def to_domain(self) -> "Template":
         """Convert infrastructure DTO to domain Template aggregate."""
         from src.domain.template.aggregate import Template
 
@@ -394,29 +406,31 @@ class TemplateDTO(BaseValidatedModel):
             tags=self.tags,
             is_active=self.is_active,
             created_at=self.created_at,
-            updated_at=self.updated_at
+            updated_at=self.updated_at,
         )
 
     @classmethod
-    def from_domain(cls, template: 'Template') -> 'TemplateDTO':
+    def from_domain(cls, template: "Template") -> "TemplateDTO":
         """Create infrastructure DTO from domain Template aggregate."""
         return cls(
             template_id=template.template_id,
             name=template.name,
             description=template.description,
-            provider_api=template.provider_api or 'aws',
+            provider_api=template.provider_api or "aws",
             provider_type=template.provider_type,
             provider_name=template.provider_name,
-            configuration=template.configuration if hasattr(template, 'configuration') else {},
-            metadata=template.metadata if hasattr(template, 'metadata') else {},
-            tags=template.tags if hasattr(template, 'tags') else {},
-            is_active=template.is_active if hasattr(template, 'is_active') else True,
-            created_at=template.created_at if hasattr(template, 'created_at') else None,
-            updated_at=template.updated_at if hasattr(template, 'updated_at') else None
+            configuration=template.configuration if hasattr(template, "configuration") else {},
+            metadata=template.metadata if hasattr(template, "metadata") else {},
+            tags=template.tags if hasattr(template, "tags") else {},
+            is_active=template.is_active if hasattr(template, "is_active") else True,
+            created_at=template.created_at if hasattr(template, "created_at") else None,
+            updated_at=template.updated_at if hasattr(template, "updated_at") else None,
         )
+
 
 class TemplateCacheEntryDTO(BaseValidatedModel):
     """DTO for template cache entries with metadata."""
+
     model_config = ConfigDict(frozen=True)
 
     template: TemplateDTO = Field(description="Cached template data")
@@ -435,8 +449,10 @@ class TemplateCacheEntryDTO(BaseValidatedModel):
         """Get age of cache entry in seconds."""
         return (datetime.now() - self.cached_at).total_seconds()
 
+
 class TemplateValidationResultDTO(BaseValidatedModel):
     """DTO for template validation results."""
+
     model_config = ConfigDict(frozen=True)
 
     template_id: str = Field(description="Template identifier")
@@ -444,8 +460,12 @@ class TemplateValidationResultDTO(BaseValidatedModel):
     errors: List[str] = Field(default_factory=list, description="Validation errors")
     warnings: List[str] = Field(default_factory=list, description="Validation warnings")
     supported_features: List[str] = Field(default_factory=list, description="Supported features")
-    validation_time: datetime = Field(default_factory=datetime.now, description="Validation timestamp")
-    provider_instance: Optional[str] = Field(default=None, description="Provider instance validated against")
+    validation_time: datetime = Field(
+        default_factory=datetime.now, description="Validation timestamp"
+    )
+    provider_instance: Optional[str] = Field(
+        default=None, description="Provider instance validated against"
+    )
 ```
 
 ### Command and Query Models
@@ -460,14 +480,15 @@ class CreateRequestCommand(BaseValidatedModel):
     priority: Optional[int] = Field(None, ge=1, le=10)
     timeout: Optional[int] = Field(None, ge=60, le=3600)
 
-    @field_validator('template_id')
+    @field_validator("template_id")
     @classmethod
     def validate_template_id(cls, v: str) -> str:
         """Validate template ID exists."""
         # This would typically check against a repository
-        if not v.startswith('template-'):
+        if not v.startswith("template-"):
             raise ValueError("Template ID must start with 'template-'")
         return v
+
 
 class GetRequestStatusQuery(BaseValidatedModel):
     """Query to get request status."""
@@ -476,30 +497,31 @@ class GetRequestStatusQuery(BaseValidatedModel):
     include_machines: bool = Field(default=False)
     include_history: bool = Field(default=False)
 
-    @field_validator('request_id')
+    @field_validator("request_id")
     @classmethod
     def validate_request_id_format(cls, v: str) -> str:
         """Validate request ID format."""
-        pattern = r'^(req|ret)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+        pattern = r"^(req|ret)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         if not re.match(pattern, v):
             raise ValueError(f"Invalid request ID format: {v}")
         return v
 
+
 class ListRequestsQuery(BaseValidatedModel):
     """Query to list requests with filtering."""
 
-    status: Optional[str] = Field(None, regex=r'^(PENDING|IN_PROGRESS|COMPLETED|FAILED)$')
+    status: Optional[str] = Field(None, regex=r"^(PENDING|IN_PROGRESS|COMPLETED|FAILED)$")
     template_id: Optional[str] = None
     limit: int = Field(default=50, ge=1, le=1000)
     offset: int = Field(default=0, ge=0)
-    order_by: str = Field(default="created_at", regex=r'^(created_at|updated_at|status)$')
-    order_direction: str = Field(default="desc", regex=r'^(asc|desc)$')
+    order_by: str = Field(default="created_at", regex=r"^(created_at|updated_at|status)$")
+    order_direction: str = Field(default="desc", regex=r"^(asc|desc)$")
 
-    @field_validator('template_id')
+    @field_validator("template_id")
     @classmethod
     def validate_template_id_filter(cls, v: Optional[str]) -> Optional[str]:
         """Validate template ID filter."""
-        if v and not v.startswith('template-'):
+        if v and not v.startswith("template-"):
             raise ValueError("Template ID must start with 'template-'")
         return v
 ```
@@ -522,14 +544,12 @@ class CreateRequestRequest(BaseValidatedModel):
             "example": {
                 "template_id": "template-web-server",
                 "machine_count": 3,
-                "tags": {
-                    "environment": "production",
-                    "team": "backend"
-                },
-                "priority": 5
+                "tags": {"environment": "production", "team": "backend"},
+                "priority": 5,
             }
         }
     )
+
 
 class RequestStatusResponse(BaseValidatedModel):
     """API response model for request status."""
@@ -546,15 +566,16 @@ class RequestStatusResponse(BaseValidatedModel):
     estimated_completion: Optional[datetime] = None
     machines: Optional[List[Dict[str, Any]]] = None
 
-    @field_validator('machines_ready', 'machines_pending', 'machines_failed')
+    @field_validator("machines_ready", "machines_pending", "machines_failed")
     @classmethod
     def validate_machine_counts(cls, v: int, info) -> int:
         """Validate machine counts are consistent."""
-        if hasattr(info, 'data'):
-            machine_count = info.data.get('machine_count', 0)
+        if hasattr(info, "data"):
+            machine_count = info.data.get("machine_count", 0)
             if v > machine_count:
                 raise ValueError(f"Machine count cannot exceed total: {machine_count}")
         return v
+
 
 class ErrorResponse(BaseValidatedModel):
     """Standard error response model."""
@@ -572,9 +593,7 @@ class ErrorResponse(BaseValidatedModel):
                 "error_code": "TEMPLATE_NOT_FOUND",
                 "timestamp": "2025-06-30T12:00:00Z",
                 "request_id": "req-12345678-1234-1234-1234-123456789012",
-                "details": {
-                    "template_id": "template-invalid"
-                }
+                "details": {"template_id": "template-invalid"},
             }
         }
     )
@@ -588,59 +607,70 @@ class ErrorResponse(BaseValidatedModel):
 class AWSConfig(BaseValidatedModel):
     """AWS provider configuration with validation."""
 
-    region: str = Field(default="us-east-1", regex=r'^[a-z]{2}-[a-z]+-\d$')
+    region: str = Field(default="us-east-1", regex=r"^[a-z]{2}-[a-z]+-\d$")
     profile: Optional[str] = Field(default="default")
     access_key_id: Optional[str] = Field(None, min_length=16, max_length=32)
     secret_access_key: Optional[str] = Field(None, min_length=40)
     session_token: Optional[str] = None
-    endpoint_url: Optional[str] = Field(None, regex=r'^https?://.+')
+    endpoint_url: Optional[str] = Field(None, regex=r"^https?://.+")
 
-    @field_validator('region')
+    @field_validator("region")
     @classmethod
     def validate_aws_region(cls, v: str) -> str:
         """Validate AWS region format."""
         valid_regions = [
-            'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
-            'eu-west-1', 'eu-west-2', 'eu-central-1',
-            'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1'
+            "us-east-1",
+            "us-east-2",
+            "us-west-1",
+            "us-west-2",
+            "eu-west-1",
+            "eu-west-2",
+            "eu-central-1",
+            "ap-southeast-1",
+            "ap-southeast-2",
+            "ap-northeast-1",
         ]
         if v not in valid_regions:
             raise ValueError(f"Invalid AWS region: {v}")
         return v
 
+
 class StorageConfig(BaseValidatedModel):
     """Storage configuration with strategy validation."""
 
-    strategy: str = Field(..., regex=r'^(json|sql|dynamodb)$')
+    strategy: str = Field(..., regex=r"^(json|sql|dynamodb)$")
     json_strategy: Optional[Dict[str, Any]] = None
     sql_strategy: Optional[Dict[str, Any]] = None
     dynamodb_strategy: Optional[Dict[str, Any]] = None
 
-    @field_validator('json_strategy', 'sql_strategy', 'dynamodb_strategy')
+    @field_validator("json_strategy", "sql_strategy", "dynamodb_strategy")
     @classmethod
-    def validate_strategy_config(cls, v: Optional[Dict[str, Any]], info) -> Optional[Dict[str, Any]]:
+    def validate_strategy_config(
+        cls, v: Optional[Dict[str, Any]], info
+    ) -> Optional[Dict[str, Any]]:
         """Validate strategy configuration matches selected strategy."""
-        if not hasattr(info, 'data'):
+        if not hasattr(info, "data"):
             return v
 
-        strategy = info.data.get('strategy')
+        strategy = info.data.get("strategy")
         field_name = info.field_name
 
         # Check if the correct strategy config is provided
-        if strategy == 'json' and field_name == 'json_strategy' and not v:
+        if strategy == "json" and field_name == "json_strategy" and not v:
             raise ValueError("json_strategy is required when strategy is 'json'")
-        elif strategy == 'sql' and field_name == 'sql_strategy' and not v:
+        elif strategy == "sql" and field_name == "sql_strategy" and not v:
             raise ValueError("sql_strategy is required when strategy is 'sql'")
-        elif strategy == 'dynamodb' and field_name == 'dynamodb_strategy' and not v:
+        elif strategy == "dynamodb" and field_name == "dynamodb_strategy" and not v:
             raise ValueError("dynamodb_strategy is required when strategy is 'dynamodb'")
 
         return v
 
+
 class AppConfig(BaseValidatedModel):
     """Complete application configuration."""
 
-    version: str = Field(default="2.0.0", regex=r'^\d+\.\d+\.\d+$')
-    environment: str = Field(default="development", regex=r'^(development|staging|production)$')
+    version: str = Field(default="2.0.0", regex=r"^\d+\.\d+\.\d+$")
+    environment: str = Field(default="development", regex=r"^(development|staging|production)$")
     debug: bool = Field(default=False)
     provider: Dict[str, Any] = Field(...)
     storage: StorageConfig = Field(...)
@@ -650,13 +680,13 @@ class AppConfig(BaseValidatedModel):
     naming: Dict[str, Any] = Field(default_factory=dict)
     resilience: Dict[str, Any] = Field(default_factory=dict)
 
-    @field_validator('debug')
+    @field_validator("debug")
     @classmethod
     def validate_debug_environment(cls, v: bool, info) -> bool:
         """Validate debug setting for production."""
-        if hasattr(info, 'data'):
-            environment = info.data.get('environment')
-            if environment == 'production' and v:
+        if hasattr(info, "data"):
+            environment = info.data.get("environment")
+            if environment == "production" and v:
                 raise ValueError("Debug mode should not be enabled in production")
         return v
 ```
@@ -676,7 +706,9 @@ class ModelValidator:
 
         # Check machine count doesn't exceed template maximum
         if request.machine_count > template.max_number:
-            errors.append(f"Machine count {request.machine_count} exceeds template maximum {template.max_number}")
+            errors.append(
+                f"Machine count {request.machine_count} exceeds template maximum {template.max_number}"
+            )
 
         # Check template is active
         if not template.is_active:
@@ -691,13 +723,18 @@ class ModelValidator:
 
         # Check machine belongs to request
         if machine.request_id != request.request_id:
-            errors.append(f"Machine {machine.machine_id} does not belong to request {request.request_id}")
+            errors.append(
+                f"Machine {machine.machine_id} does not belong to request {request.request_id}"
+            )
 
         # Check template consistency
         if machine.template_id != request.template_id:
-            errors.append(f"Machine template {machine.template_id} does not match request template {request.template_id}")
+            errors.append(
+                f"Machine template {machine.template_id} does not match request template {request.template_id}"
+            )
 
         return errors
+
 
 class ValidationService:
     """Service for comprehensive validation across layers."""
@@ -736,6 +773,7 @@ class ValidationService:
 from pydantic import field_validator, model_validator
 from typing import Any, Dict
 
+
 class BusinessRuleValidator:
     """Custom validators for business rules."""
 
@@ -743,11 +781,11 @@ class BusinessRuleValidator:
     def validate_aws_resource_id(resource_type: str, resource_id: str) -> str:
         """Validate AWS resource ID format."""
         patterns = {
-            'instance': r'^i-[a-f0-9]{8,17}$',
-            'ami': r'^ami-[a-f0-9]{8,17}$',
-            'subnet': r'^subnet-[a-f0-9]{8,17}$',
-            'security_group': r'^sg-[a-f0-9]{8,17}$',
-            'vpc': r'^vpc-[a-f0-9]{8,17}$'
+            "instance": r"^i-[a-f0-9]{8,17}$",
+            "ami": r"^ami-[a-f0-9]{8,17}$",
+            "subnet": r"^subnet-[a-f0-9]{8,17}$",
+            "security_group": r"^sg-[a-f0-9]{8,17}$",
+            "vpc": r"^vpc-[a-f0-9]{8,17}$",
         }
 
         pattern = patterns.get(resource_type)
@@ -760,7 +798,9 @@ class BusinessRuleValidator:
         return resource_id
 
     @staticmethod
-    def validate_machine_count_limits(machine_count: int, template_max: int, global_max: int) -> int:
+    def validate_machine_count_limits(
+        machine_count: int, template_max: int, global_max: int
+    ) -> int:
         """Validate machine count against multiple limits."""
         if machine_count <= 0:
             raise ValueError("Machine count must be positive")
@@ -773,6 +813,7 @@ class BusinessRuleValidator:
 
         return machine_count
 
+
 # Usage in models
 class ValidatedTemplate(BaseValidatedModel):
     """Template with business rule validation."""
@@ -783,26 +824,28 @@ class ValidatedTemplate(BaseValidatedModel):
     security_group_ids: List[str]
     max_number: int = Field(..., ge=1, le=1000)
 
-    @field_validator('image_id')
+    @field_validator("image_id")
     @classmethod
     def validate_ami_id(cls, v: str) -> str:
         """Validate AMI ID format."""
-        return BusinessRuleValidator.validate_aws_resource_id('ami', v)
+        return BusinessRuleValidator.validate_aws_resource_id("ami", v)
 
-    @field_validator('subnet_ids')
+    @field_validator("subnet_ids")
     @classmethod
     def validate_subnet_ids(cls, v: List[str]) -> List[str]:
         """Validate subnet ID formats."""
-        return [BusinessRuleValidator.validate_aws_resource_id('subnet', sid) for sid in v]
+        return [BusinessRuleValidator.validate_aws_resource_id("subnet", sid) for sid in v]
 
-    @field_validator('security_group_ids')
+    @field_validator("security_group_ids")
     @classmethod
     def validate_sg_ids(cls, v: List[str]) -> List[str]:
         """Validate security group ID formats."""
-        return [BusinessRuleValidator.validate_aws_resource_id('security_group', sgid) for sgid in v]
+        return [
+            BusinessRuleValidator.validate_aws_resource_id("security_group", sgid) for sgid in v
+        ]
 
-    @model_validator(mode='after')
-    def validate_template_consistency(self) -> 'ValidatedTemplate':
+    @model_validator(mode="after")
+    def validate_template_consistency(self) -> "ValidatedTemplate":
         """Validate template internal consistency."""
         # Business rule: templates with high machine counts need multiple subnets
         if self.max_number > 50 and len(self.subnet_ids) < 2:
@@ -834,6 +877,7 @@ class ValidatedTemplate(BaseValidatedModel):
 import pytest
 from pydantic import ValidationError
 
+
 class TestRequestValidation:
     """Test request model validation."""
 
@@ -842,7 +886,7 @@ class TestRequestValidation:
         request_data = {
             "request_id": "req-12345678-1234-1234-1234-123456789012",
             "template_id": "template-web-server",
-            "machine_count": 3
+            "machine_count": 3,
         }
 
         request = Request(**request_data)
@@ -854,7 +898,7 @@ class TestRequestValidation:
         request_data = {
             "request_id": "req-12345678-1234-1234-1234-123456789012",
             "template_id": "template-web-server",
-            "machine_count": 0  # Invalid
+            "machine_count": 0,  # Invalid
         }
 
         with pytest.raises(ValidationError) as exc_info:
@@ -867,7 +911,7 @@ class TestRequestValidation:
         request_data = {
             "request_id": "invalid-id",  # Invalid format
             "template_id": "template-web-server",
-            "machine_count": 3
+            "machine_count": 3,
         }
 
         with pytest.raises(ValidationError) as exc_info:

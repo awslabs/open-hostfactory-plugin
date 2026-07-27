@@ -23,6 +23,7 @@ Infrastructure <--------+
 class NewFeatureCommand(BaseCommand):
     parameter: str
 
+
 # 2. Create handler with domain dependencies
 @command_handler(NewFeatureCommand)
 class NewFeatureHandler:
@@ -40,6 +41,7 @@ class NewFeatureHandler:
 @dataclass
 class GetFeatureStatusQuery(BaseQuery):
     feature_id: str
+
 
 @query_handler(GetFeatureStatusQuery)
 class GetFeatureStatusHandler:

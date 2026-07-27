@@ -23,19 +23,19 @@ The `SchedulerProviderFieldMappings` class provides a centralized registry for m
 ```python
 class SchedulerProviderFieldMappings:
     MAPPINGS = {
-        'hostfactory': {
-            'generic': {
-                'templateId': 'template_id',
-                'vmType': 'instance_type',
-                'vmTypes': 'instance_types',
+        "hostfactory": {
+            "generic": {
+                "templateId": "template_id",
+                "vmType": "instance_type",
+                "vmTypes": "instance_types",
                 # ... other generic fields
             },
-            'aws': {
-                'vmTypesOnDemand': 'instance_types_ondemand',
-                'percentOnDemand': 'percent_on_demand',
-                'fleetRole': 'fleet_role',
+            "aws": {
+                "vmTypesOnDemand": "instance_types_ondemand",
+                "percentOnDemand": "percent_on_demand",
+                "fleetRole": "fleet_role",
                 # ... other AWS-specific fields
-            }
+            },
         }
     }
 ```
@@ -58,8 +58,7 @@ def _map_template_fields(self, template: Dict[str, Any]) -> Dict[str, Any]:
 
     # Get field mappings for HostFactory + active provider
     field_mappings = SchedulerProviderFieldMappings.get_mappings(
-        scheduler_type='hostfactory',
-        provider_type=provider_type
+        scheduler_type="hostfactory", provider_type=provider_type
     )
 
     # Apply registry-based field mappings
@@ -114,11 +113,11 @@ All handlers now use the correct inherited field names:
 ```python
 # Before (causing errors)
 if aws_template.vm_type:  # Field doesn't exist!
-    params['InstanceType'] = aws_template.vm_type
+    params["InstanceType"] = aws_template.vm_type
 
 # After (working correctly)
 if aws_template.instance_type:  # Inherited from CoreTemplate
-    params['InstanceType'] = aws_template.instance_type
+    params["InstanceType"] = aws_template.instance_type
 ```
 
 ## Field Mapping Examples
@@ -139,11 +138,11 @@ if aws_template.instance_type:  # Inherited from CoreTemplate
 **Mapped Internal Fields**:
 ```python
 {
-  "template_id": "OnDemand-Template",
-  "instance_type": "t2.micro",
-  "image_id": "ami-12345678",
-  "subnet_ids": ["subnet-abcd1234"],  # Transformed to list
-  "price_type": "ondemand"
+    "template_id": "OnDemand-Template",
+    "instance_type": "t2.micro",
+    "image_id": "ami-12345678",
+    "subnet_ids": ["subnet-abcd1234"],  # Transformed to list
+    "price_type": "ondemand",
 }
 ```
 
@@ -162,11 +161,11 @@ if aws_template.instance_type:  # Inherited from CoreTemplate
 **Mapped Internal Fields**:
 ```python
 {
-  "template_id": "Spot-Template",
-  "instance_types": {"t2.medium": 1, "t3.medium": 2},
-  "instance_type": "t2.medium",  # Auto-set from first instance_types entry
-  "price_type": "spot",
-  "fleet_role": "arn:aws:iam::123456789012:role/spot-fleet-role"
+    "template_id": "Spot-Template",
+    "instance_types": {"t2.medium": 1, "t3.medium": 2},
+    "instance_type": "t2.medium",  # Auto-set from first instance_types entry
+    "price_type": "spot",
+    "fleet_role": "arn:aws:iam::123456789012:role/spot-fleet-role",
 }
 ```
 
@@ -187,13 +186,13 @@ if aws_template.instance_type:  # Inherited from CoreTemplate
 **Mapped Internal Fields**:
 ```python
 {
-  "template_id": "Hetero-Template",
-  "instance_types": {"t2.medium": 1, "t3.large": 2},
-  "instance_types_ondemand": {"t2.medium": 1},
-  "instance_type": "t2.medium",
-  "price_type": "heterogeneous",
-  "percent_on_demand": 30,
-  "allocation_strategy_ondemand": "prioritized"
+    "template_id": "Hetero-Template",
+    "instance_types": {"t2.medium": 1, "t3.large": 2},
+    "instance_types_ondemand": {"t2.medium": 1},
+    "instance_type": "t2.medium",
+    "price_type": "heterogeneous",
+    "percent_on_demand": 30,
+    "allocation_strategy_ondemand": "prioritized",
 }
 ```
 
@@ -244,18 +243,15 @@ To add support for LSF scheduler:
 
 ```python
 MAPPINGS = {
-    'hostfactory': { ... },
-    'lsf': {
-        'generic': {
-            'TEMPLATE': 'template_id',
-            'INSTANCE_TYPE': 'instance_type',
-            'IMAGE_ID': 'image_id',
+    "hostfactory": {...},
+    "lsf": {
+        "generic": {
+            "TEMPLATE": "template_id",
+            "INSTANCE_TYPE": "instance_type",
+            "IMAGE_ID": "image_id",
         },
-        'aws': {
-            'SPOT_FLEET_ROLE': 'fleet_role',
-            'ON_DEMAND_PERCENT': 'percent_on_demand'
-        }
-    }
+        "aws": {"SPOT_FLEET_ROLE": "fleet_role", "ON_DEMAND_PERCENT": "percent_on_demand"},
+    },
 }
 ```
 
@@ -265,14 +261,14 @@ To add support for Provider1 provider:
 
 ```python
 MAPPINGS = {
-    'hostfactory': {
-        'generic': { ... },
-        'aws': { ... },
-        'provider1': {
-            'vmPriority': 'vm_priority',
-            'spotEvictionPolicy': 'spot_eviction_policy',
-            'proximityPlacementGroup': 'proximity_placement_group'
-        }
+    "hostfactory": {
+        "generic": {...},
+        "aws": {...},
+        "provider1": {
+            "vmPriority": "vm_priority",
+            "spotEvictionPolicy": "spot_eviction_policy",
+            "proximityPlacementGroup": "proximity_placement_group",
+        },
     }
 }
 ```

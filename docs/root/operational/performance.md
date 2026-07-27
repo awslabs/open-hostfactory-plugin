@@ -263,12 +263,12 @@ from src.monitoring.metrics import MetricsCollector
 metrics = MetricsCollector()
 
 # Monitor operation performance
-with metrics.timer('request_processing'):
+with metrics.timer("request_processing"):
     result = process_request(request)
 
 # Monitor resource usage
-metrics.gauge('memory_usage', get_memory_usage())
-metrics.counter('requests_processed').increment()
+metrics.gauge("memory_usage", get_memory_usage())
+metrics.counter("requests_processed").increment()
 ```
 
 #### Custom Metrics
@@ -282,19 +282,16 @@ class PerformanceMetrics:
 
     def record_request_time(self, operation: str, duration: float):
         """Record operation duration."""
-        self.request_times.append({
-            'operation': operation,
-            'duration': duration,
-            'timestamp': time.time()
-        })
+        self.request_times.append(
+            {"operation": operation, "duration": duration, "timestamp": time.time()}
+        )
 
     def get_average_response_time(self, operation: str = None) -> float:
         """Calculate average response time."""
         if operation:
-            times = [r['duration'] for r in self.request_times
-                    if r['operation'] == operation]
+            times = [r["duration"] for r in self.request_times if r["operation"] == operation]
         else:
-            times = [r['duration'] for r in self.request_times]
+            times = [r["duration"] for r in self.request_times]
 
         return sum(times) / len(times) if times else 0.0
 ```
@@ -336,6 +333,7 @@ import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+
 async def load_test_requests():
     """Load test request processing."""
 
@@ -345,18 +343,14 @@ async def load_test_requests():
 
     # Create test requests
     test_requests = [
-        {"template_id": f"test-template-{i}", "machine_count": 1}
-        for i in range(total_requests)
+        {"template_id": f"test-template-{i}", "machine_count": 1} for i in range(total_requests)
     ]
 
     # Execute concurrent requests
     start_time = time.time()
 
     with ThreadPoolExecutor(max_workers=concurrent_requests) as executor:
-        futures = [
-            executor.submit(process_request, request)
-            for request in test_requests
-        ]
+        futures = [executor.submit(process_request, request) for request in test_requests]
 
         # Wait for completion
         results = [future.result() for future in futures]

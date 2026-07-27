@@ -31,9 +31,9 @@ class Template(AggregateRoot):
         # Only contains business validation logic
         # No infrastructure, persistence, or UI concerns
         return (
-            self._validate_max_number() and
-            self._validate_required_attributes() and
-            self._validate_business_constraints()
+            self._validate_max_number()
+            and self._validate_required_attributes()
+            and self._validate_business_constraints()
         )
 
     def _validate_max_number(self) -> bool:
@@ -42,14 +42,15 @@ class Template(AggregateRoot):
 
     def _validate_required_attributes(self) -> bool:
         """Business rule: required attribute validation."""
-        required_attrs = ['vm_type', 'image_id']
+        required_attrs = ["vm_type", "image_id"]
         return all(attr in self.attributes for attr in required_attrs)
 
     def calculate_estimated_cost(self) -> float:
         """Business concern: Cost calculation logic."""
         # Pure business logic - no external dependencies
-        base_cost = self.attributes.get('hourly_rate', 0.10)
+        base_cost = self.attributes.get("hourly_rate", 0.10)
         return base_cost * self.max_number
+
 
 # src/domain/request/aggregate.py
 class Request(AggregateRoot):
@@ -68,11 +69,13 @@ class Request(AggregateRoot):
             RequestStatus.PROCESSING: [RequestStatus.COMPLETED, RequestStatus.FAILED],
             RequestStatus.COMPLETED: [],
             RequestStatus.FAILED: [RequestStatus.PENDING],
-            RequestStatus.CANCELLED: []
+            RequestStatus.CANCELLED: [],
         }
 
         if new_status not in valid_transitions.get(self.status, []):
-            raise InvalidStateTransitionError(f"Cannot transition from {self.status} to {new_status}")
+            raise InvalidStateTransitionError(
+                f"Cannot transition from {self.status} to {new_status}"
+            )
 
         self.status = new_status
         self.add_domain_event(RequestStatusChangedEvent(self.id, new_status))
@@ -87,10 +90,12 @@ The application layer is concerned with use cases and orchestration:
 class CreateRequestHandler:
     """Application concern: Request creation use case."""
 
-    def __init__(self,
-                 request_repo: RequestRepository,
-                 template_repo: TemplateRepository,
-                 logger: LoggingPort):
+    def __init__(
+        self,
+        request_repo: RequestRepository,
+        template_repo: TemplateRepository,
+        logger: LoggingPort,
+    ):
         # Application layer dependencies - no infrastructure details
         self._request_repo = request_repo
         self._template_repo = template_repo
@@ -107,13 +112,15 @@ class CreateRequestHandler:
 
         # Application logic: validate template can fulfill request
         if not template.can_fulfill_request(command.max_number):
-            raise InsufficientCapacityError(f"Template cannot fulfill {command.max_number} instances")
+            raise InsufficientCapacityError(
+                f"Template cannot fulfill {command.max_number} instances"
+            )
 
         # Domain logic: create request
         request = Request.create(
             template_id=command.template_id,
             max_number=command.max_number,
-            attributes=command.attributes
+            attributes=command.attributes,
         )
 
         # Application logic: persist request
@@ -122,13 +129,12 @@ class CreateRequestHandler:
         self._logger.info(f"Request created: {request.id}")
         return request.id
 
+
 # src/application/queries/template_handlers.py
 class GetTemplatesHandler:
     """Application concern: Template retrieval use case."""
 
-    def __init__(self,
-                 template_repo: TemplateRepository,
-                 logger: LoggingPort):
+    def __init__(self, template_repo: TemplateRepository, logger: LoggingPort):
         self._template_repo = template_repo
         self._logger = logger
 
@@ -138,9 +144,7 @@ class GetTemplatesHandler:
 
         # Application logic: retrieve templates with filters
         templates = await self._template_repo.get_all(
-            filters=query.filters,
-            limit=query.limit,
-            offset=query.offset
+            filters=query.filters, limit=query.limit, offset=query.offset
         )
 
         # Application logic: convert to response DTOs
@@ -150,7 +154,7 @@ class GetTemplatesHandler:
                 template_id=template.template_id,
                 max_number=template.max_number,
                 attributes=template.attributes,
-                estimated_cost=template.calculate_estimated_cost()  # Uses domain logic
+                estimated_cost=template.calculate_estimated_cost(),  # Uses domain logic
             )
             responses.append(response)
 
@@ -171,20 +175,20 @@ class DynamoDBTemplateRepository(TemplateRepository):
         self._table_name = table_name
         self._region = region
         self._logger = logger
-        self._dynamodb = boto3.resource('dynamodb', region_name=region)
+        self._dynamodb = boto3.resource("dynamodb", region_name=region)
         self._table = self._dynamodb.Table(table_name)
 
     async def get_by_id(self, template_id: str) -> Optional[Template]:
         """Infrastructure concern: DynamoDB data retrieval."""
         try:
             # Infrastructure logic: DynamoDB operations
-            response = self._table.get_item(Key={'template_id': template_id})
+            response = self._table.get_item(Key={"template_id": template_id})
 
-            if 'Item' not in response:
+            if "Item" not in response:
                 return None
 
             # Infrastructure concern: Data transformation
-            return self._item_to_domain_object(response['Item'])
+            return self._item_to_domain_object(response["Item"])
 
         except ClientError as e:
             # Infrastructure concern: AWS error handling
@@ -194,10 +198,11 @@ class DynamoDBTemplateRepository(TemplateRepository):
     def _item_to_domain_object(self, item: Dict[str, Any]) -> Template:
         """Infrastructure concern: DynamoDB to domain object conversion."""
         return Template(
-            template_id=item['template_id'],
-            max_number=int(item['max_number']),
-            attributes=item.get('attributes', {})
+            template_id=item["template_id"],
+            max_number=int(item["max_number"]),
+            attributes=item.get("attributes", {}),
         )
+
 
 # src/providers/aws/infrastructure/aws_client.py
 class AWSClient:
@@ -215,9 +220,7 @@ class AWSClient:
         if service_name not in self._clients:
             # Infrastructure logic: AWS client creation
             self._clients[service_name] = self._session.client(
-                service_name,
-                region_name=self._config.region,
-                config=self._get_client_config()
+                service_name, region_name=self._config.region, config=self._get_client_config()
             )
             self._logger.debug(f"Created AWS {service_name} client")
 
@@ -242,7 +245,7 @@ async def get_templates(
     limit: Optional[int] = Query(None, ge=1, le=100),
     offset: Optional[int] = Query(None, ge=0),
     provider_type: Optional[str] = Query(None),
-    app_service: ApplicationService = Depends(get_application_service)
+    app_service: ApplicationService = Depends(get_application_service),
 ) -> List[TemplateResponse]:
     """Interface concern: HTTP API endpoint for template retrieval."""
 
@@ -250,14 +253,10 @@ async def get_templates(
         # Interface concern: HTTP parameter validation and conversion
         filters = {}
         if provider_type:
-            filters['provider_type'] = provider_type
+            filters["provider_type"] = provider_type
 
         # Interface concern: Call application layer
-        query = GetTemplatesQuery(
-            filters=filters,
-            limit=limit,
-            offset=offset
-        )
+        query = GetTemplatesQuery(filters=filters, limit=limit, offset=offset)
 
         templates = await app_service.get_templates(query)
 
@@ -271,6 +270,7 @@ async def get_templates(
         # Interface concern: HTTP validation error handling
         raise HTTPException(status_code=400, detail=str(e))
 
+
 # src/cli/formatters.py
 class TemplateFormatter:
     """Interface concern: CLI output formatting."""
@@ -278,10 +278,9 @@ class TemplateFormatter:
     def __init__(self, field_mapper: FieldMapper):
         self._field_mapper = field_mapper
 
-    def format_templates(self,
-                        templates: List[Dict[str, Any]],
-                        output_format: str,
-                        long_format: bool = False) -> str:
+    def format_templates(
+        self, templates: List[Dict[str, Any]], output_format: str, long_format: bool = False
+    ) -> str:
         """Interface concern: CLI output formatting logic."""
 
         if output_format == "table":
@@ -325,6 +324,7 @@ class ConfigurationManager:
         # Only handles file loading and parsing
         pass
 
+
 # src/config/validation/validator.py
 class ConfigurationValidator:
     """Single concern: Configuration validation."""
@@ -338,6 +338,7 @@ class ConfigurationValidator:
         """Single concern: Storage configuration validation."""
         # Only handles storage validation
         pass
+
 
 # src/config/schemas/provider_schema.py
 class ProviderConfigSchema:
@@ -357,6 +358,7 @@ def get_logger(name: str) -> logging.Logger:
     # Only handles logger setup and configuration
     pass
 
+
 # src/infrastructure/adapters/logging_adapter.py
 class LoggingAdapter(LoggingPort):
     """Single concern: Logging port implementation."""
@@ -365,6 +367,7 @@ class LoggingAdapter(LoggingPort):
         """Single concern: Info level logging."""
         # Only handles logging operation
         pass
+
 
 # src/infrastructure/logging/formatters.py
 class StructuredFormatter(logging.Formatter):
@@ -382,20 +385,28 @@ class StructuredFormatter(logging.Formatter):
 # src/domain/base/exceptions.py
 class DomainException(Exception):
     """Domain concern: Domain-specific exceptions."""
+
     pass
+
 
 class TemplateValidationError(DomainException):
     """Domain concern: Template validation errors."""
+
     pass
+
 
 # src/infrastructure/error/exceptions.py
 class InfrastructureException(Exception):
     """Infrastructure concern: Infrastructure-specific exceptions."""
+
     pass
+
 
 class RepositoryError(InfrastructureException):
     """Infrastructure concern: Repository operation errors."""
+
     pass
+
 
 # src/infrastructure/error/exception_handler.py
 class ExceptionHandler:
@@ -427,6 +438,7 @@ class LoggingPort(ABC):
     def info(self, message: str) -> None:
         pass
 
+
 # src/domain/base/ports/configuration_port.py
 class ConfigurationPort(ABC):
     """Single concern: Configuration access."""
@@ -434,6 +446,7 @@ class ConfigurationPort(ABC):
     @abstractmethod
     def get(self, key: str, default: Any = None) -> Any:
         pass
+
 
 # src/domain/base/ports/container_port.py
 class ContainerPort(ABC):
@@ -443,12 +456,15 @@ class ContainerPort(ABC):
     def get(self, interface: Type[T]) -> T:
         pass
 
+
 # Components depend only on their specific concerns
 class ApplicationService:
-    def __init__(self,
-                 logger: LoggingPort,        # Only logging concern
-                 config: ConfigurationPort,  # Only configuration concern
-                 container: ContainerPort):  # Only DI concern
+    def __init__(
+        self,
+        logger: LoggingPort,  # Only logging concern
+        config: ConfigurationPort,  # Only configuration concern
+        container: ContainerPort,
+    ):  # Only DI concern
         # Each dependency addresses a single concern
         pass
 ```
@@ -470,6 +486,7 @@ class Reader(ABC, Generic[T]):
     async def get_all(self) -> List[T]:
         pass
 
+
 class Writer(ABC, Generic[T]):
     """Single concern: Write operations."""
 
@@ -481,6 +498,7 @@ class Writer(ABC, Generic[T]):
     async def delete(self, entity_id: str) -> bool:
         pass
 
+
 class Searcher(ABC, Generic[T]):
     """Single concern: Search operations."""
 
@@ -488,14 +506,17 @@ class Searcher(ABC, Generic[T]):
     async def find_by_criteria(self, criteria: Dict[str, Any]) -> List[T]:
         pass
 
+
 # Components depend only on needed concerns
 class TemplateQueryHandler:
     def __init__(self, reader: Reader[Template]):  # Only needs read access
         self._reader = reader
 
+
 class TemplateCommandHandler:
     def __init__(self, writer: Writer[Template]):  # Only needs write access
         self._writer = writer
+
 
 class TemplateSearchHandler:
     def __init__(self, searcher: Searcher[Template]):  # Only needs search access

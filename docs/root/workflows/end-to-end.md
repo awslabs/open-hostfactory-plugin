@@ -114,25 +114,34 @@ from orb import ORBClient as orb
 
 # Mode 1 — default: reads env vars (ORB_CONFIG_FILE, ORB_PROVIDER, ORB_REGION, …)
 #           or built-in defaults
-async with orb() as sdk: ...
+async with orb() as sdk:
+    ...
 
 # Mode 2 — SDK config dict: tune provider, region, timeout, log_level, etc.
-async with orb(config={"provider": "aws", "region": "us-west-2"}) as sdk: ...
+async with orb(config={"provider": "aws", "region": "us-west-2"}) as sdk:
+    ...
 
 # Mode 3 — config file on disk
-async with orb(config_path="/etc/orb/config.json") as sdk: ...
+async with orb(config_path="/etc/orb/config.json") as sdk:
+    ...
 
 # Mode 4 — full app config in memory (Lambda, CI, notebooks — no filesystem)
 app_cfg = {
     "scheduler": {"type": "default"},
     "provider": {
         "providers": [
-            {"name": "default", "type": "aws", "enabled": True,
-             "config": {"region": "us-east-1"}, "default": True}
+            {
+                "name": "default",
+                "type": "aws",
+                "enabled": True,
+                "config": {"region": "us-east-1"},
+                "default": True,
+            }
         ]
-    }
+    },
 }
-async with orb(app_config=app_cfg) as sdk: ...
+async with orb(app_config=app_cfg) as sdk:
+    ...
 ```
 
 ### REST API and MCP
@@ -369,7 +378,6 @@ from orb import ORBClient as orb
 async def full_lifecycle() -> None:
     # ORBClient as a context manager handles initialize() and cleanup() automatically.
     async with orb() as sdk:
-
         # 1. List available templates
         result = await sdk.list_templates(active_only=True)
         templates = result if isinstance(result, list) else result.get("templates", [])

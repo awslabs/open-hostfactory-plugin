@@ -60,8 +60,7 @@ class Template(BaseModel):
         if isinstance(data, dict):
             if "instance_type" in data and "machine_type" not in data:
                 logger.warning(
-                    "Template field 'instance_type' is deprecated; "
-                    "use 'machine_type' instead."
+                    "Template field 'instance_type' is deprecated; use 'machine_type' instead."
                 )
         return data
 ```
@@ -120,8 +119,7 @@ the body on every call:
 ```python
 def register_all_provider_types() -> None:
     warnings.warn(
-        "register_all_provider_types() is deprecated; "
-        "call register_all_providers() instead.",
+        "register_all_provider_types() is deprecated; call register_all_providers() instead.",
         DeprecationWarning,
         stacklevel=2,
     )

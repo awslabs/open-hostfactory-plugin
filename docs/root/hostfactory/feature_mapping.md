@@ -151,23 +151,16 @@ This document maps IBM Spectrum Symphony Host Factory features to Open Resource 
 ```python
 # HostFactory format
 {
-  "templateId": "basic-template",
-  "maxNumber": 10,
-  "attributes": {
-    "type": ["String", "X86_64"],
-    "ncpus": ["Numeric", "2"]
-  }
+    "templateId": "basic-template",
+    "maxNumber": 10,
+    "attributes": {"type": ["String", "X86_64"], "ncpus": ["Numeric", "2"]},
 }
 
 # Plugin internal format
 {
-  "template_id": "basic-template",
-  "max_number": 10,
-  "attributes": {
-    "vm_type": "t3.medium",
-    "cpu_count": 2,
-    "memory_gb": 4
-  }
+    "template_id": "basic-template",
+    "max_number": 10,
+    "attributes": {"vm_type": "t3.medium", "cpu_count": 2, "memory_gb": 4},
 }
 ```
 

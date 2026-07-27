@@ -71,11 +71,7 @@ graph TD
 # Using the API
 request_data = {
     "method": "requestMachines",
-    "params": {
-        "templateId": "standard-compute",
-        "machineCount": 3,
-        "timeout": 600
-    }
+    "params": {"templateId": "standard-compute", "machineCount": 3, "timeout": 600},
 }
 
 response = api_client.call(request_data)
@@ -97,14 +93,10 @@ request_data = {
             "project": "data-processing",
             "environment": "production",
             "owner": "team-alpha",
-            "cost-center": "engineering"
+            "cost-center": "engineering",
         },
-        "metadata": {
-            "jobId": "job-789",
-            "priority": "high",
-            "requester": "user@company.com"
-        }
-    }
+        "metadata": {"jobId": "job-789", "priority": "high", "requester": "user@company.com"},
+    },
 }
 ```
 
@@ -115,14 +107,10 @@ request_data = {
 return_request = {
     "method": "requestReturnMachines",
     "params": {
-        "machineIds": [
-            "i-1234567890abcdef0",
-            "i-0987654321fedcba0",
-            "i-abcdef1234567890"
-        ],
+        "machineIds": ["i-1234567890abcdef0", "i-0987654321fedcba0", "i-abcdef1234567890"],
         "requestId": "return-req-12345",
-        "force": false  # Graceful shutdown
-    }
+        "force": false,  # Graceful shutdown
+    },
 }
 ```
 
@@ -132,12 +120,7 @@ return_request = {
 
 ```python
 # Get detailed request status
-status_request = {
-    "method": "getRequestStatus",
-    "params": {
-        "requestId": "req-12345"
-    }
-}
+status_request = {"method": "getRequestStatus", "params": {"requestId": "req-12345"}}
 
 response = api_client.call(status_request)
 status = response["result"]
@@ -186,12 +169,7 @@ print(f"Progress: {len(status['machines'])}/{status['machineCount']} machines")
 
 ```python
 # Check return request status
-return_status = {
-    "method": "getReturnRequests",
-    "params": {
-        "requestId": "return-req-12345"
-    }
-}
+return_status = {"method": "getReturnRequests", "params": {"requestId": "return-req-12345"}}
 
 response = api_client.call(return_status)
 ```
@@ -238,9 +216,7 @@ if not template:
 
 # Template capacity limits
 if machine_count > template.max_count:
-    raise InsufficientCapacityError(
-        f"Requested {machine_count}, maximum {template.max_count}"
-    )
+    raise InsufficientCapacityError(f"Requested {machine_count}, maximum {template.max_count}")
 
 # Provider compatibility
 if not template.is_compatible_with(provider):
@@ -338,11 +314,7 @@ for key, value in tags.items():
 #### Automatic Retry
 ```python
 # Transient errors are automatically retried
-RETRYABLE_ERRORS = [
-    "INSUFFICIENT_CAPACITY",
-    "THROTTLING",
-    "SERVICE_UNAVAILABLE"
-]
+RETRYABLE_ERRORS = ["INSUFFICIENT_CAPACITY", "THROTTLING", "SERVICE_UNAVAILABLE"]
 
 if error_code in RETRYABLE_ERRORS:
     retry_request_with_backoff(request)
@@ -372,7 +344,7 @@ For large-scale provisioning, use batch strategies:
 # Instead of one large request
 large_request = {
     "templateId": "standard-compute",
-    "machineCount": 100  # May fail due to limits
+    "machineCount": 100,  # May fail due to limits
 }
 
 # Use multiple smaller requests
@@ -385,8 +357,8 @@ for i in range(0, total_machines, batch_size):
     request = {
         "templateId": "standard-compute",
         "machineCount": count,
-        "requestId": f"batch-{i//batch_size + 1}",
-        "tags": {"batch": str(i//batch_size + 1)}
+        "requestId": f"batch-{i // batch_size + 1}",
+        "tags": {"batch": str(i // batch_size + 1)},
     }
     requests.append(request)
 ```
@@ -401,11 +373,8 @@ priority_request = {
         "templateId": "standard-compute",
         "machineCount": 5,
         "priority": "high",
-        "metadata": {
-            "urgency": "critical",
-            "sla": "15-minutes"
-        }
-    }
+        "metadata": {"urgency": "critical", "sla": "15-minutes"},
+    },
 }
 ```
 
@@ -418,15 +387,9 @@ spot_request = {
     "params": {
         "templateId": "cost-optimized-spot",
         "machineCount": 10,
-        "tags": {
-            "cost-optimization": "spot-instances",
-            "fault-tolerance": "high"
-        },
-        "metadata": {
-            "max-spot-price": "0.10",
-            "interruption-handling": "graceful"
-        }
-    }
+        "tags": {"cost-optimization": "spot-instances", "fault-tolerance": "high"},
+        "metadata": {"max-spot-price": "0.10", "interruption-handling": "graceful"},
+    },
 }
 ```
 
@@ -442,8 +405,8 @@ def submit_async_request(template_id, machine_count):
         "params": {
             "templateId": template_id,
             "machineCount": machine_count,
-            "timeout": 1800  # 30 minutes
-        }
+            "timeout": 1800,  # 30 minutes
+        },
     }
 
     response = api_client.call(request)
@@ -488,9 +451,9 @@ def submit_request_with_callback(template_id, machine_count, callback_url):
             "machineCount": machine_count,
             "metadata": {
                 "callback_url": callback_url,
-                "callback_events": ["COMPLETED", "FAILED", "TIMEOUT"]
-            }
-        }
+                "callback_events": ["COMPLETED", "FAILED", "TIMEOUT"],
+            },
+        },
     }
 
     return api_client.call(request)
@@ -526,19 +489,19 @@ alert_config = {
         "condition": "status == 'FAILED'",
         "notification": "email",
         "recipients": ["ops-team@company.com"],
-        "severity": "high"
+        "severity": "high",
     },
     "request_timeout": {
         "condition": "status == 'TIMEOUT'",
         "notification": "slack",
         "channel": "#infrastructure-alerts",
-        "severity": "medium"
+        "severity": "medium",
     },
     "long_running_request": {
         "condition": "duration > 1800",  # 30 minutes
         "notification": "dashboard",
-        "severity": "low"
-    }
+        "severity": "low",
+    },
 }
 ```
 
@@ -566,7 +529,7 @@ def analyze_request_performance(time_period="24h"):
         "success_rate": calculate_success_rate(requests),
         "average_duration": calculate_average_duration(requests),
         "failure_breakdown": categorize_failures(requests),
-        "peak_hours": identify_peak_usage(requests)
+        "peak_hours": identify_peak_usage(requests),
     }
 
     return metrics

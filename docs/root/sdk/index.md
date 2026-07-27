@@ -41,6 +41,7 @@ uv tool install orb-py
 import asyncio
 from orb import ORBClient
 
+
 async def main():
     async with ORBClient(provider="aws") as client:
         templates = await client.list_templates(active_only=True)
@@ -54,6 +55,7 @@ async def main():
         print(f"Request submitted: {req['request_id']}")
         status = await client.get_request_status(request_id=req["request_id"])
         print(f"Status: {status}")
+
 
 asyncio.run(main())
 ```

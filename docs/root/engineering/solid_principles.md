@@ -40,15 +40,17 @@ The ApplicationService (high-level module) depends only on abstractions:
 class ApplicationService:
     """High-level module - depends only on abstractions."""
 
-    def __init__(self,
-                 provider_type: str,
-                 command_bus: CommandBus,           # Abstraction
-                 query_bus: QueryBus,               # Abstraction
-                 logger: LoggingPort,               # Abstraction
-                 container: ContainerPort,          # Abstraction
-                 config: ConfigurationPort,         # Abstraction
-                 error_handler: ErrorHandlingPort,  # Abstraction
-                 provider_context: ProviderContext): # Abstraction
+    def __init__(
+        self,
+        provider_type: str,
+        command_bus: CommandBus,  # Abstraction
+        query_bus: QueryBus,  # Abstraction
+        logger: LoggingPort,  # Abstraction
+        container: ContainerPort,  # Abstraction
+        config: ConfigurationPort,  # Abstraction
+        error_handler: ErrorHandlingPort,  # Abstraction
+        provider_context: ProviderContext,
+    ):  # Abstraction
         """All dependencies are abstractions, not concrete implementations."""
 
         # High-level module doesn't know about:
@@ -75,6 +77,7 @@ The plugin defines abstractions in the domain layer:
 # src/domain/ports/logging_port.py
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
+
 
 class LoggingPort(ABC):
     """Abstraction for logging functionality."""
@@ -104,6 +107,7 @@ Concrete implementations are provided in the infrastructure layer:
 import logging
 from typing import Any, Dict, Optional
 from src.domain.ports.logging_port import LoggingPort
+
 
 class PythonLoggingAdapter(LoggingPort):
     """Concrete implementation using Python's logging module."""
@@ -147,17 +151,20 @@ class ProviderContext:
     def execute_request(self, request: MachineRequest) -> MachineResponse:
         return self._strategy.handle_request(request)
 
+
 # Abstraction
 class ProviderStrategy(ABC):
     @abstractmethod
     def handle_request(self, request: MachineRequest) -> MachineResponse:
         pass
 
+
 # Concrete implementations
 class AWSProviderStrategy(ProviderStrategy):
     def handle_request(self, request: MachineRequest) -> MachineResponse:
         # AWS-specific implementation
         pass
+
 
 class Provider1ProviderStrategy(ProviderStrategy):
     def handle_request(self, request: MachineRequest) -> MachineResponse:
@@ -180,6 +187,7 @@ class MachineRequestValidator:
         # Validation logic only
         pass
 
+
 class MachineRequestProcessor:
     """Only responsible for processing machine requests."""
 
@@ -199,6 +207,7 @@ class BaseHandler(ABC):
     def handle(self, request: Any) -> Any:
         pass
 
+
 # Extended through inheritance, not modification
 class MachineRequestHandler(BaseHandler):
     def handle(self, request: MachineRequest) -> MachineResponse:
@@ -217,11 +226,13 @@ class ProviderStrategy(ABC):
     def handle_request(self, request: MachineRequest) -> MachineResponse:
         pass
 
+
 # Derived classes are fully substitutable
 class AWSProviderStrategy(ProviderStrategy):
     def handle_request(self, request: MachineRequest) -> MachineResponse:
         # AWS implementation - fully compatible with base contract
         return MachineResponse(...)
+
 
 class Provider1ProviderStrategy(ProviderStrategy):
     def handle_request(self, request: MachineRequest) -> MachineResponse:
@@ -240,15 +251,18 @@ class ReadablePort(ABC):
     def read(self) -> Any:
         pass
 
+
 class WritablePort(ABC):
     @abstractmethod
     def write(self, data: Any) -> None:
         pass
 
+
 # Clients depend only on what they need
 class Reader:
     def __init__(self, readable: ReadablePort):  # Only needs read capability
         self._readable = readable
+
 
 class Writer:
     def __init__(self, writable: WritablePort):  # Only needs write capability

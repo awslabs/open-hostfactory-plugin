@@ -123,6 +123,7 @@ The migration system uses the application's existing configuration and provides 
 from typing import List, Dict, Any, Callable, Iterator
 from src.infrastructure.utilities.common.collections import batch_processor
 
+
 class BatchProcessor:
     """Framework for batch processing operations."""
 
@@ -131,10 +132,12 @@ class BatchProcessor:
         self.parallel_workers = parallel_workers
         self.logger = get_logger(__name__)
 
-    def process_in_batches(self,
-                          items: List[Any],
-                          processor: Callable[[List[Any]], None],
-                          progress_callback: Callable[[int, int], None] = None) -> Dict[str, Any]:
+    def process_in_batches(
+        self,
+        items: List[Any],
+        processor: Callable[[List[Any]], None],
+        progress_callback: Callable[[int, int], None] = None,
+    ) -> Dict[str, Any]:
         """Process items in batches."""
         total_items = len(items)
         processed_items = 0
@@ -150,24 +153,25 @@ class BatchProcessor:
 
             except Exception as e:
                 error_info = {
-                    'batch_start': processed_items,
-                    'batch_size': len(batch),
-                    'error': str(e)
+                    "batch_start": processed_items,
+                    "batch_size": len(batch),
+                    "error": str(e),
                 }
                 errors.append(error_info)
                 self.logger.error(f"Batch processing error: {e}")
 
         return {
-            'total_items': total_items,
-            'processed_items': processed_items,
-            'errors': errors,
-            'success_rate': processed_items / total_items if total_items > 0 else 0
+            "total_items": total_items,
+            "processed_items": processed_items,
+            "errors": errors,
+            "success_rate": processed_items / total_items if total_items > 0 else 0,
         }
 
     def _create_batches(self, items: List[Any]) -> Iterator[List[Any]]:
         """Create batches from items."""
         for i in range(0, len(items), self.batch_size):
-            yield items[i:i + self.batch_size]
+            yield items[i : i + self.batch_size]
+
 
 # Usage examples
 def batch_update_requests():
@@ -178,18 +182,15 @@ def batch_update_requests():
     request_repo = container.get(RequestRepositoryInterface)
 
     # Get all pending requests
-    pending_requests = request_repo.query_entities(
-        "requests",
-        filters={"status": "PENDING"}
-    )
+    pending_requests = request_repo.query_entities("requests", filters={"status": "PENDING"})
 
     def update_batch(batch):
         """Update a batch of requests."""
         for request_data in batch:
             # Update request status
-            request_data['status'] = 'IN_PROGRESS'
-            request_data['updated_at'] = datetime.utcnow().isoformat()
-            request_repo.update_entity("requests", request_data['request_id'], request_data)
+            request_data["status"] = "IN_PROGRESS"
+            request_data["updated_at"] = datetime.utcnow().isoformat()
+            request_repo.update_entity("requests", request_data["request_id"], request_data)
 
     def progress_callback(processed, total):
         """Progress reporting callback."""
@@ -198,11 +199,7 @@ def batch_update_requests():
 
     # Process in batches
     processor = BatchProcessor(batch_size=50)
-    result = processor.process_in_batches(
-        pending_requests,
-        update_batch,
-        progress_callback
-    )
+    result = processor.process_in_batches(pending_requests, update_batch, progress_callback)
 
     print(f"Batch update completed: {result}")
 ```
@@ -265,23 +262,23 @@ from src.infrastructure.utilities.common.file_utils import (
     safe_read,
     backup_file,
     compress_file,
-    validate_json_file
+    validate_json_file,
 )
 
 # Atomic file operations
-atomic_write('data/important.json', json_data)
+atomic_write("data/important.json", json_data)
 
 # Safe file reading with error handling
-data = safe_read('config/config.json', default={})
+data = safe_read("config/config.json", default={})
 
 # File backup with timestamp
-backup_path = backup_file('data/database.json')
+backup_path = backup_file("data/database.json")
 
 # File compression
-compressed_path = compress_file('logs/orb.log')
+compressed_path = compress_file("logs/orb.log")
 
 # JSON validation
-is_valid, errors = validate_json_file('config/templates.json')
+is_valid, errors = validate_json_file("config/templates.json")
 ```
 
 ### Collection Utilities
@@ -293,33 +290,30 @@ from src.infrastructure.utilities.common.collections import (
     grouping,
     filtering,
     transforming,
-    validation
+    validation,
 )
 
 # Group requests by status
-requests_by_status = grouping.group_by_field(requests, 'status')
+requests_by_status = grouping.group_by_field(requests, "status")
 
 # Filter active machines
 active_machines = filtering.filter_by_criteria(
-    machines,
-    lambda m: m['status'] in ['RUNNING', 'PENDING']
+    machines, lambda m: m["status"] in ["RUNNING", "PENDING"]
 )
 
 # Transform machine data
 transformed_machines = transforming.transform_collection(
     machines,
     lambda m: {
-        'id': m['machine_id'],
-        'status': m['status'].lower(),
-        'ip': m.get('private_ip', 'unknown')
-    }
+        "id": m["machine_id"],
+        "status": m["status"].lower(),
+        "ip": m.get("private_ip", "unknown"),
+    },
 )
 
 # Validate collection consistency
 validation_errors = validation.validate_collection_consistency(
-    requests,
-    machines,
-    relationship_field='request_id'
+    requests, machines, relationship_field="request_id"
 )
 ```
 
@@ -332,21 +326,21 @@ from src.infrastructure.utilities.common.date_utils import (
     format_timestamp,
     parse_iso_date,
     calculate_duration,
-    get_time_ranges
+    get_time_ranges,
 )
 
 # Format timestamps consistently
-formatted_time = format_timestamp(datetime.utcnow(), 'iso')
+formatted_time = format_timestamp(datetime.utcnow(), "iso")
 
 # Parse various date formats
-parsed_date = parse_iso_date('2025-06-30T12:00:00Z')
+parsed_date = parse_iso_date("2025-06-30T12:00:00Z")
 
 # Calculate operation duration
 duration = calculate_duration(start_time, end_time)
 
 # Get time ranges for reporting
-today_range = get_time_ranges('today')
-week_range = get_time_ranges('week')
+today_range = get_time_ranges("today")
+week_range = get_time_ranges("week")
 ```
 
 ### String Utilities
@@ -358,23 +352,23 @@ from src.infrastructure.utilities.common.string_utils import (
     sanitize_filename,
     validate_pattern,
     template_substitute,
-    generate_id
+    generate_id,
 )
 
 # Sanitize filenames for safe storage
 safe_filename = sanitize_filename(user_input)
 
 # Validate against patterns
-is_valid_id = validate_pattern(resource_id, r'^[a-zA-Z0-9_-]+$')
+is_valid_id = validate_pattern(resource_id, r"^[a-zA-Z0-9_-]+$")
 
 # Template substitution
 result = template_substitute(
-    'Request {request_id} has {machine_count} machines',
-    {'request_id': 'req-123', 'machine_count': 3}
+    "Request {request_id} has {machine_count} machines",
+    {"request_id": "req-123", "machine_count": 3},
 )
 
 # Generate unique IDs
-unique_id = generate_id('req')  # Returns: req-12345678-1234-1234-1234-123456789012
+unique_id = generate_id("req")  # Returns: req-12345678-1234-1234-1234-123456789012
 ```
 
 ## Resource Naming Tools
@@ -385,19 +379,19 @@ unique_id = generate_id('req')  # Returns: req-12345678-1234-1234-1234-123456789
 from src.infrastructure.utilities.common.resource_naming import (
     validate_resource_name,
     generate_resource_name,
-    parse_resource_name
+    parse_resource_name,
 )
 
 # Validate resource names against patterns
-is_valid = validate_resource_name('template-web-server', 'template')
-is_valid_ec2 = validate_resource_name('i-1234567890abcdef0', 'ec2_instance')
+is_valid = validate_resource_name("template-web-server", "template")
+is_valid_ec2 = validate_resource_name("i-1234567890abcdef0", "ec2_instance")
 
 # Generate compliant resource names
-template_name = generate_resource_name('template', 'web-server')
-request_name = generate_resource_name('request', prefix='prod')
+template_name = generate_resource_name("template", "web-server")
+request_name = generate_resource_name("request", prefix="prod")
 
 # Parse resource names
-parsed = parse_resource_name('req-12345678-1234-1234-1234-123456789012')
+parsed = parse_resource_name("req-12345678-1234-1234-1234-123456789012")
 # Returns: {'type': 'request', 'id': '12345678-1234-1234-1234-123456789012'}
 ```
 
@@ -436,16 +430,16 @@ Resource naming is fully configurable:
 from src.infrastructure.utilities.performance import (
     PerformanceMonitor,
     OperationTimer,
-    ResourceMonitor
+    ResourceMonitor,
 )
 
 # Monitor operation performance
 monitor = PerformanceMonitor()
 
-with OperationTimer('request_creation') as timer:
+with OperationTimer("request_creation") as timer:
     # Perform operation
     result = create_request(template_id, machine_count)
-    timer.add_metadata({'template_id': template_id, 'machine_count': machine_count})
+    timer.add_metadata({"template_id": template_id, "machine_count": machine_count})
 
 # Get performance metrics
 metrics = monitor.get_metrics()

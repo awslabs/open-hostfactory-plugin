@@ -67,13 +67,15 @@ class Request(AggregateRoot):
         self.completed_at = datetime.utcnow()
 
         # Generate domain event
-        self._add_domain_event(RequestCompletedEvent(
-            request_id=self.request_id,
-            machine_ids=machine_ids,
-            completed_at=self.completed_at,
-            template_id=self.template_id,
-            machine_count=len(machine_ids)
-        ))
+        self._add_domain_event(
+            RequestCompletedEvent(
+                request_id=self.request_id,
+                machine_ids=machine_ids,
+                completed_at=self.completed_at,
+                template_id=self.template_id,
+                machine_count=len(machine_ids),
+            )
+        )
 ```
 
 ### Event Types
@@ -90,6 +92,7 @@ class TemplateCreatedEvent(DomainEvent):
     template_type: str
     timestamp: datetime
 
+
 @dataclass(frozen=True)
 class TemplateUpdatedEvent(DomainEvent):
     template_id: str
@@ -97,11 +100,13 @@ class TemplateUpdatedEvent(DomainEvent):
     changes: Dict[str, Any]
     timestamp: datetime
 
+
 @dataclass(frozen=True)
 class TemplateDeletedEvent(DomainEvent):
     template_id: str
     deletion_reason: str
     timestamp: datetime
+
 
 @dataclass(frozen=True)
 class TemplateValidatedEvent(DomainEvent):
@@ -117,11 +122,13 @@ The `TemplateConfigurationManager` supports optional event publishing for templa
 
 ```python
 class TemplateConfigurationManager:
-    def __init__(self,
-                 config_manager: ConfigurationManager,
-                 scheduler_strategy: SchedulerPort,
-                 logger: LoggingPort,
-                 event_publisher: Optional[EventPublisherPort] = None):
+    def __init__(
+        self,
+        config_manager: ConfigurationManager,
+        scheduler_strategy: SchedulerPort,
+        logger: LoggingPort,
+        event_publisher: Optional[EventPublisherPort] = None,
+    ):
         self.event_publisher = event_publisher
         # ... other initialization
 
@@ -140,14 +147,14 @@ class TemplateConfigurationManager:
                     template_id=template.template_id,
                     template_name=template.name or template.template_id,
                     changes=self._calculate_changes(existing_template, template),
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.utcnow(),
                 )
             else:
                 event = TemplateCreatedEvent(
                     template_id=template.template_id,
                     template_name=template.name or template.template_id,
-                    template_type=template.provider_api or 'aws',
-                    timestamp=datetime.utcnow()
+                    template_type=template.provider_api or "aws",
+                    timestamp=datetime.utcnow(),
                 )
 
             self.event_publisher.publish(event)
@@ -167,6 +174,7 @@ class MachineCreatedEvent(DomainEvent):
     provider_instance_id: str
     created_at: datetime
 
+
 @dataclass(frozen=True)
 class MachineStatusChangedEvent(DomainEvent):
     machine_id: str
@@ -174,6 +182,7 @@ class MachineStatusChangedEvent(DomainEvent):
     new_status: MachineStatus
     changed_at: datetime
     reason: Optional[str] = None
+
 
 @dataclass(frozen=True)
 class MachineTerminatedEvent(DomainEvent):
@@ -197,6 +206,7 @@ class RequestCreatedEvent(DomainEvent):
     created_at: datetime
     tags: Optional[Dict[str, str]] = None
 
+
 @dataclass(frozen=True)
 class RequestStatusChangedEvent(DomainEvent):
     request_id: str
@@ -204,6 +214,7 @@ class RequestStatusChangedEvent(DomainEvent):
     new_status: RequestStatus
     changed_at: datetime
     reason: Optional[str] = None
+
 
 @dataclass(frozen=True)
 class RequestCompletedEvent(DomainEvent):
@@ -283,8 +294,8 @@ class RequestAuditHandler(BaseEventHandler):
                 "machine_count": event.machine_count,
                 "request_type": event.request_type.value,
                 "created_at": event.created_at.isoformat(),
-                "tags": event.tags or {}
-            }
+                "tags": event.tags or {},
+            },
         )
 
     async def _handle_request_status_changed(self, event: RequestStatusChangedEvent) -> None:
@@ -295,8 +306,8 @@ class RequestAuditHandler(BaseEventHandler):
                 "old_status": event.old_status.value,
                 "new_status": event.new_status.value,
                 "changed_at": event.changed_at.isoformat(),
-                "reason": event.reason
-            }
+                "reason": event.reason,
+            },
         )
 ```
 
@@ -327,8 +338,8 @@ class MachineAuditHandler(BaseEventHandler):
                 "request_id": event.request_id,
                 "instance_type": event.instance_type,
                 "provider_instance_id": event.provider_instance_id,
-                "created_at": event.created_at.isoformat()
-            }
+                "created_at": event.created_at.isoformat(),
+            },
         )
 ```
 
@@ -359,8 +370,8 @@ class TemplateAuditHandler(BaseEventHandler):
             details={
                 "template_name": event.template_name,
                 "template_type": event.template_type,
-                "created_at": event.timestamp.isoformat()
-            }
+                "created_at": event.timestamp.isoformat(),
+            },
         )
 
     async def _handle_template_updated(self, event: TemplateUpdatedEvent) -> None:
@@ -370,8 +381,8 @@ class TemplateAuditHandler(BaseEventHandler):
             details={
                 "template_name": event.template_name,
                 "changes": event.changes,
-                "updated_at": event.timestamp.isoformat()
-            }
+                "updated_at": event.timestamp.isoformat(),
+            },
         )
 
     async def _handle_template_deleted(self, event: TemplateDeletedEvent) -> None:
@@ -380,8 +391,8 @@ class TemplateAuditHandler(BaseEventHandler):
             resource_id=event.template_id,
             details={
                 "deletion_reason": event.deletion_reason,
-                "deleted_at": event.timestamp.isoformat()
-            }
+                "deleted_at": event.timestamp.isoformat(),
+            },
         )
 
     async def _handle_template_validated(self, event: TemplateValidatedEvent) -> None:
@@ -391,8 +402,8 @@ class TemplateAuditHandler(BaseEventHandler):
             details={
                 "template_name": event.template_name,
                 "validation_result": event.validation_result,
-                "validated_at": event.timestamp.isoformat()
-            }
+                "validated_at": event.timestamp.isoformat(),
+            },
         )
 ```
 
@@ -411,7 +422,10 @@ class RequestNotificationHandler(BaseEventHandler):
     async def handle(self, event: DomainEvent) -> None:
         if isinstance(event, RequestCompletedEvent):
             await self._handle_request_completed(event)
-        elif isinstance(event, RequestStatusChangedEvent) and event.new_status == RequestStatus.FAILED:
+        elif (
+            isinstance(event, RequestStatusChangedEvent)
+            and event.new_status == RequestStatus.FAILED
+        ):
             await self._handle_request_failed(event)
 
     async def _handle_request_completed(self, event: RequestCompletedEvent) -> None:
@@ -423,9 +437,9 @@ class RequestNotificationHandler(BaseEventHandler):
                     "request_id": event.request_id,
                     "machine_ids": event.machine_ids,
                     "duration": f"{event.duration_seconds}s",
-                    "template_id": event.template_id
+                    "template_id": event.template_id,
                 },
-                severity="info"
+                severity="info",
             )
 
     async def _handle_request_failed(self, event: RequestStatusChangedEvent) -> None:
@@ -435,9 +449,9 @@ class RequestNotificationHandler(BaseEventHandler):
             details={
                 "request_id": event.request_id,
                 "failure_reason": event.reason,
-                "failed_at": event.changed_at.isoformat()
+                "failed_at": event.changed_at.isoformat(),
             },
-            severity="error"
+            severity="error",
         )
 ```
 
@@ -456,9 +470,7 @@ class ErrorNotificationHandler(BaseEventHandler):
             await self._handle_error_event(event)
 
     def _is_error_event(self, event: DomainEvent) -> bool:
-        error_indicators = [
-            'Failed', 'Error', 'Timeout', 'Exception'
-        ]
+        error_indicators = ["Failed", "Error", "Timeout", "Exception"]
         return any(indicator in event.event_type for indicator in error_indicators)
 
     async def _handle_error_event(self, event: DomainEvent) -> None:
@@ -469,7 +481,7 @@ class ErrorNotificationHandler(BaseEventHandler):
             severity=severity,
             message=f"Error event detected: {event.event_type}",
             details=event.to_dict(),
-            timestamp=event.occurred_at
+            timestamp=event.occurred_at,
         )
 ```
 
@@ -497,7 +509,7 @@ class RequestWorkflowHandler(BaseEventHandler):
         command = StartProvisioningCommand(
             request_id=event.request_id,
             template_id=event.template_id,
-            machine_count=event.machine_count
+            machine_count=event.machine_count,
         )
 
         await self._command_bus.dispatch(command)
@@ -533,8 +545,7 @@ class MachineWorkflowHandler(BaseEventHandler):
 
         # Configure machine if needed
         await self._machine_service.configure_machine(
-            machine_id=event.machine_id,
-            template_id=event.template_id
+            machine_id=event.machine_id, template_id=event.template_id
         )
 
     async def _handle_machine_status_changed(self, event: MachineStatusChangedEvent) -> None:
@@ -561,8 +572,7 @@ class MetricsCollectionHandler(BaseEventHandler):
     async def handle(self, event: DomainEvent) -> None:
         # Collect general event metrics
         await self._metrics_service.increment_counter(
-            "domain_events_total",
-            tags={"event_type": event.event_type}
+            "domain_events_total", tags={"event_type": event.event_type}
         )
 
         # Collect specific metrics based on event type
@@ -576,28 +586,24 @@ class MetricsCollectionHandler(BaseEventHandler):
     async def _collect_request_metrics(self, event: RequestCreatedEvent) -> None:
         await self._metrics_service.increment_counter(
             "requests_created_total",
-            tags={
-                "template_id": event.template_id,
-                "request_type": event.request_type.value
-            }
+            tags={"template_id": event.template_id, "request_type": event.request_type.value},
         )
 
         await self._metrics_service.record_histogram(
             "request_machine_count",
             value=event.machine_count,
-            tags={"template_id": event.template_id}
+            tags={"template_id": event.template_id},
         )
 
     async def _collect_completion_metrics(self, event: RequestCompletedEvent) -> None:
         await self._metrics_service.record_histogram(
             "request_duration_seconds",
             value=event.duration_seconds,
-            tags={"template_id": event.template_id}
+            tags={"template_id": event.template_id},
         )
 
         await self._metrics_service.increment_counter(
-            "requests_completed_total",
-            tags={"template_id": event.template_id}
+            "requests_completed_total", tags={"template_id": event.template_id}
         )
 ```
 
@@ -618,7 +624,7 @@ class PerformanceMonitoringHandler(BaseEventHandler):
         await self._performance_service.record_latency(
             "event_processing_latency",
             latency_ms=processing_time.total_seconds() * 1000,
-            tags={"event_type": event.event_type}
+            tags={"event_type": event.event_type},
         )
 
         # Detect slow operations
@@ -626,10 +632,7 @@ class PerformanceMonitoringHandler(BaseEventHandler):
             await self._performance_service.record_slow_operation(
                 operation_type="event_processing",
                 duration_seconds=processing_time.total_seconds(),
-                details={
-                    "event_type": event.event_type,
-                    "event_id": event.event_id
-                }
+                details={"event_type": event.event_type, "event_id": event.event_id},
             )
 ```
 
@@ -645,10 +648,9 @@ class EventStore:
         self._storage = storage_strategy
         self._logger = get_logger(__name__)
 
-    async def append_events(self,
-                          aggregate_id: str,
-                          events: List[DomainEvent],
-                          expected_version: int) -> None:
+    async def append_events(
+        self, aggregate_id: str, events: List[DomainEvent], expected_version: int
+    ) -> None:
         """Append events to the store with optimistic concurrency control."""
         try:
             # Check for concurrent modifications
@@ -670,14 +672,10 @@ class EventStore:
             self._logger.error(f"Failed to append events: {str(e)}")
             raise
 
-    async def get_events(self,
-                        aggregate_id: str,
-                        from_version: int = 0) -> List[DomainEvent]:
+    async def get_events(self, aggregate_id: str, from_version: int = 0) -> List[DomainEvent]:
         """Retrieve events for an aggregate from a specific version."""
         try:
-            events = await self._storage.get_events_for_aggregate(
-                aggregate_id, from_version
-            )
+            events = await self._storage.get_events_for_aggregate(aggregate_id, from_version)
 
             return [self._deserialize_event(event_data) for event_data in events]
 
@@ -685,8 +683,7 @@ class EventStore:
             self._logger.error(f"Failed to get events for {aggregate_id}: {str(e)}")
             raise
 
-    async def get_all_events(self,
-                           from_timestamp: Optional[datetime] = None) -> List[DomainEvent]:
+    async def get_all_events(self, from_timestamp: Optional[datetime] = None) -> List[DomainEvent]:
         """Retrieve all events from a specific timestamp."""
         try:
             events = await self._storage.get_all_events(from_timestamp)
@@ -708,10 +705,12 @@ class EventReplayer:
         self._event_handlers = event_handlers
         self._logger = get_logger(__name__)
 
-    async def replay_events(self,
-                          from_timestamp: datetime,
-                          to_timestamp: Optional[datetime] = None,
-                          event_types: Optional[List[str]] = None) -> None:
+    async def replay_events(
+        self,
+        from_timestamp: datetime,
+        to_timestamp: Optional[datetime] = None,
+        event_types: Optional[List[str]] = None,
+    ) -> None:
         """Replay events within a time range."""
         try:
             events = await self._event_store.get_all_events(from_timestamp)
@@ -742,7 +741,9 @@ class EventReplayer:
                 try:
                     await handler.handle(event)
                 except Exception as e:
-                    self._logger.error(f"Handler {handler.__class__.__name__} failed to replay event {event.event_id}: {str(e)}")
+                    self._logger.error(
+                        f"Handler {handler.__class__.__name__} failed to replay event {event.event_id}: {str(e)}"
+                    )
 ```
 
 ## Event Publishing
@@ -782,9 +783,7 @@ class EventPublisher:
         tasks = []
         for handler in handlers:
             if handler.can_handle(event):
-                task = asyncio.create_task(
-                    handler.handle_with_error_recovery(event)
-                )
+                task = asyncio.create_task(handler.handle_with_error_recovery(event))
                 tasks.append(task)
 
         if tasks:
@@ -797,10 +796,12 @@ class EventPublisher:
 ### Event Handler Registration
 
 ```python
-def register_event_handlers(event_publisher: EventPublisher,
-                          audit_service: AuditService,
-                          notification_service: NotificationService,
-                          metrics_service: MetricsService) -> None:
+def register_event_handlers(
+    event_publisher: EventPublisher,
+    audit_service: AuditService,
+    notification_service: NotificationService,
+    metrics_service: MetricsService,
+) -> None:
     """Register all event handlers with the event publisher."""
 
     # Audit handlers
@@ -855,7 +856,7 @@ class TestRequestAuditHandler:
             template_id="template-1",
             machine_count=2,
             request_type=RequestType.PROVISION,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
         # Act
@@ -882,10 +883,7 @@ async def test_event_flow_integration():
     event_publisher.register_handler("RequestCreatedEvent", handler)
 
     # Act - Create request (generates event)
-    request = Request.create_new_request(
-        template_id="template-1",
-        machine_count=2
-    )
+    request = Request.create_new_request(template_id="template-1", machine_count=2)
 
     # Extract and publish events
     events = request.get_domain_events()

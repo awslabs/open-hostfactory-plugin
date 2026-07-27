@@ -39,12 +39,10 @@ class SQLMachineRepository(MachineRepositoryPort):
                 status = excluded.status,
                 updated_at = CURRENT_TIMESTAMP
         """
-        await self.connection.execute(query, [
-            machine.id.value,
-            machine.template_id.value,
-            machine.status.value,
-            machine.created_at
-        ])
+        await self.connection.execute(
+            query,
+            [machine.id.value, machine.template_id.value, machine.status.value, machine.created_at],
+        )
 
     async def find_by_id(self, machine_id: MachineId) -> Optional[Machine]:
         """Find machine by ID from SQL database."""
@@ -55,10 +53,10 @@ class SQLMachineRepository(MachineRepositoryPort):
             return None
 
         return Machine.from_persistence(
-            machine_id=MachineId(row['id']),
-            template_id=TemplateId(row['template_id']),
-            status=MachineStatus(row['status']),
-            created_at=row['created_at']
+            machine_id=MachineId(row["id"]),
+            template_id=TemplateId(row["template_id"]),
+            status=MachineStatus(row["status"]),
+            created_at=row["created_at"],
         )
 ```
 
@@ -80,16 +78,14 @@ class AWSProviderAdapter(CloudProviderPort):
                 MinCount=1,
                 MaxCount=1,
                 SecurityGroupIds=config.security_groups,
-                SubnetId=config.subnet_id
+                SubnetId=config.subnet_id,
             )
 
-            instance_id = response['Instances'][0]['InstanceId']
+            instance_id = response["Instances"][0]["InstanceId"]
             self.logger.info(f"Provisioned EC2 instance: {instance_id}")
 
             return ProvisionResult(
-                instance_id=instance_id,
-                status="pending",
-                provider_data=response['Instances'][0]
+                instance_id=instance_id, status="pending", provider_data=response["Instances"][0]
             )
 
         except Exception as e:
@@ -166,6 +162,7 @@ class StorageStrategy(ABC):
     async def load(self, key: str) -> Optional[Dict[str, Any]]:
         pass
 
+
 class JSONStorageStrategy(StorageStrategy):
     def __init__(self, file_path: str):
         self.file_path = file_path
@@ -173,6 +170,7 @@ class JSONStorageStrategy(StorageStrategy):
     async def save(self, key: str, data: Dict[str, Any]) -> None:
         """Save data to JSON file."""
         # Implementation
+
 
 class DynamoDBStorageStrategy(StorageStrategy):
     def __init__(self, table_name: str, dynamodb_client: DynamoDBClient):
@@ -214,10 +212,7 @@ Comprehensive AWS integration:
 
 ```python
 class AWSProviderStrategy(ProviderStrategyPort):
-    def __init__(self, 
-                 ec2_client: EC2Client,
-                 ssm_client: SSMClient,
-                 config: AWSConfiguration):
+    def __init__(self, ec2_client: EC2Client, ssm_client: SSMClient, config: AWSConfiguration):
         self.ec2_client = ec2_client
         self.ssm_client = ssm_client
         self.config = config
@@ -235,11 +230,7 @@ class AWSProviderStrategy(ProviderStrategyPort):
         # Provision instances
         instances = await self._provision_instances(launch_config, request.count)
 
-        return ProvisionResult(
-            request_id=request.id,
-            instances=instances,
-            provider="aws"
-        )
+        return ProvisionResult(request_id=request.id, instances=instances, provider="aws")
 
     async def _resolve_ami(self, ami_spec: AMISpecification) -> str:
         """Resolve AMI ID from specification."""
@@ -249,19 +240,19 @@ class AWSProviderStrategy(ProviderStrategyPort):
         # Query AWS for latest AMI matching criteria
         response = await self.ec2_client.describe_images(
             Filters=[
-                {'Name': 'name', 'Values': [ami_spec.name_pattern]},
-                {'Name': 'state', 'Values': ['available']},
-                {'Name': 'architecture', 'Values': [ami_spec.architecture]}
+                {"Name": "name", "Values": [ami_spec.name_pattern]},
+                {"Name": "state", "Values": ["available"]},
+                {"Name": "architecture", "Values": [ami_spec.architecture]},
             ],
-            Owners=[ami_spec.owner_id]
+            Owners=[ami_spec.owner_id],
         )
 
-        if not response['Images']:
+        if not response["Images"]:
             raise InfrastructureError(f"No AMI found matching: {ami_spec}")
 
         # Return most recent AMI
-        latest_ami = max(response['Images'], key=lambda x: x['CreationDate'])
-        return latest_ami['ImageId']
+        latest_ami = max(response["Images"], key=lambda x: x["CreationDate"])
+        return latest_ami["ImageId"]
 ```
 
 ### Multi-Provider Support
@@ -272,9 +263,9 @@ class ProviderFactory:
     def __init__(self, container: DIContainer):
         self.container = container
         self._strategies: Dict[str, Type[ProviderStrategyPort]] = {
-            'aws': AWSProviderStrategy,
-            'provider1': Provider1Strategy,
-            'provider2': Provider2Strategy
+            "aws": AWSProviderStrategy,
+            "provider1": Provider1Strategy,
+            "provider2": Provider2Strategy,
         }
 
     def create_provider(self, provider_type: str) -> ProviderStrategyPort:
@@ -294,18 +285,25 @@ Standardized error handling for infrastructure concerns:
 ```python
 class InfrastructureError(Exception):
     """Base infrastructure error."""
+
     pass
+
 
 class PersistenceError(InfrastructureError):
     """Database/storage related errors."""
+
     pass
+
 
 class ExternalServiceError(InfrastructureError):
     """External service integration errors."""
+
     pass
+
 
 class ConfigurationError(InfrastructureError):
     """Configuration related errors."""
+
     pass
 ```
 
@@ -316,11 +314,11 @@ class InfrastructureErrorResponse:
     def from_exception(error: Exception, context: str) -> Dict[str, Any]:
         """Create standardized error response."""
         return {
-            'error': True,
-            'error_type': error.__class__.__name__,
-            'message': str(error),
-            'context': context,
-            'timestamp': datetime.utcnow().isoformat()
+            "error": True,
+            "error_type": error.__class__.__name__,
+            "message": str(error),
+            "context": context,
+            "timestamp": datetime.utcnow().isoformat(),
         }
 ```
 
@@ -351,10 +349,10 @@ class ConfigurationManager:
     def get_provider_config(self) -> ProviderConfiguration:
         """Get provider-specific configuration."""
         return ProviderConfiguration(
-            provider_type=self.get('PROVIDER_TYPE', 'aws'),
-            region=self.get('AWS_REGION', 'us-east-1'),
-            profile=self.get('AWS_PROFILE', 'default'),
-            dry_run=self.get('DRY_RUN', False)
+            provider_type=self.get("PROVIDER_TYPE", "aws"),
+            region=self.get("AWS_REGION", "us-east-1"),
+            profile=self.get("AWS_PROFILE", "default"),
+            dry_run=self.get("DRY_RUN", False),
         )
 ```
 
@@ -369,11 +367,8 @@ Infrastructure layer DTOs for template data transfer and persistence:
 ```python
 class TemplateDTO(BaseModel):
     """Infrastructure DTO for template data transfer and persistence."""
-    model_config = ConfigDict(
-        frozen=False,
-        validate_assignment=True,
-        populate_by_name=True
-    )
+
+    model_config = ConfigDict(frozen=False, validate_assignment=True, populate_by_name=True)
 
     # Core template identification
     template_id: str = Field(description="Unique template identifier")
@@ -386,7 +381,9 @@ class TemplateDTO(BaseModel):
     provider_name: Optional[str] = Field(default=None, description="Provider instance name")
 
     # Template configuration data
-    configuration: Dict[str, Any] = Field(default_factory=dict, description="Template configuration")
+    configuration: Dict[str, Any] = Field(
+        default_factory=dict, description="Template configuration"
+    )
 
     # Metadata and status
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Template metadata")
@@ -401,7 +398,7 @@ class TemplateDTO(BaseModel):
     source_file: Optional[str] = Field(default=None, description="Source file path")
     file_priority: Optional[int] = Field(default=None, description="File priority in hierarchy")
 
-    def to_domain(self) -> 'Template':
+    def to_domain(self) -> "Template":
         """Convert infrastructure DTO to domain Template aggregate."""
         from src.domain.template.aggregate import Template
 
@@ -417,25 +414,25 @@ class TemplateDTO(BaseModel):
             tags=self.tags,
             is_active=self.is_active,
             created_at=self.created_at,
-            updated_at=self.updated_at
+            updated_at=self.updated_at,
         )
 
     @classmethod
-    def from_domain(cls, template: 'Template') -> 'TemplateDTO':
+    def from_domain(cls, template: "Template") -> "TemplateDTO":
         """Create infrastructure DTO from domain Template aggregate."""
         return cls(
             template_id=template.template_id,
             name=template.name,
             description=template.description,
-            provider_api=template.provider_api or 'aws',
+            provider_api=template.provider_api or "aws",
             provider_type=template.provider_type,
             provider_name=template.provider_name,
-            configuration=template.configuration if hasattr(template, 'configuration') else {},
-            metadata=template.metadata if hasattr(template, 'metadata') else {},
-            tags=template.tags if hasattr(template, 'tags') else {},
-            is_active=template.is_active if hasattr(template, 'is_active') else True,
-            created_at=template.created_at if hasattr(template, 'created_at') else None,
-            updated_at=template.updated_at if hasattr(template, 'updated_at') else None
+            configuration=template.configuration if hasattr(template, "configuration") else {},
+            metadata=template.metadata if hasattr(template, "metadata") else {},
+            tags=template.tags if hasattr(template, "tags") else {},
+            is_active=template.is_active if hasattr(template, "is_active") else True,
+            created_at=template.created_at if hasattr(template, "created_at") else None,
+            updated_at=template.updated_at if hasattr(template, "updated_at") else None,
         )
 ```
 
@@ -445,6 +442,7 @@ DTO for template cache entries with metadata and expiration tracking:
 ```python
 class TemplateCacheEntryDTO(BaseModel):
     """DTO for template cache entries with metadata."""
+
     model_config = ConfigDict(frozen=True)
 
     template: TemplateDTO = Field(description="Cached template data")
@@ -470,6 +468,7 @@ DTO for template validation results with comprehensive error and warning trackin
 ```python
 class TemplateValidationResultDTO(BaseModel):
     """DTO for template validation results."""
+
     model_config = ConfigDict(frozen=True)
 
     template_id: str = Field(description="Template identifier")
@@ -477,8 +476,12 @@ class TemplateValidationResultDTO(BaseModel):
     errors: List[str] = Field(default_factory=list, description="Validation errors")
     warnings: List[str] = Field(default_factory=list, description="Validation warnings")
     supported_features: List[str] = Field(default_factory=list, description="Supported features")
-    validation_time: datetime = Field(default_factory=datetime.now, description="Validation timestamp")
-    provider_instance: Optional[str] = Field(default=None, description="Provider instance validated against")
+    validation_time: datetime = Field(
+        default_factory=datetime.now, description="Validation timestamp"
+    )
+    provider_instance: Optional[str] = Field(
+        default=None, description="Provider instance validated against"
+    )
 ```
 
 #### Template Configuration Manager
@@ -502,10 +505,12 @@ class TemplateConfigurationManager:
     - Provides configuration-driven template discovery and management
     """
 
-    def __init__(self, 
-                 config_manager: ConfigurationManager,
-                 scheduler_strategy: SchedulerPort,
-                 logger: LoggingPort):
+    def __init__(
+        self,
+        config_manager: ConfigurationManager,
+        scheduler_strategy: SchedulerPort,
+        logger: LoggingPort,
+    ):
         self.config_manager = config_manager
         self.scheduler_strategy = scheduler_strategy
         self.logger = logger
@@ -516,7 +521,7 @@ class TemplateConfigurationManager:
 
         Provider-specific file hierarchy (priority order):
         1. Instance files: {provider}inst_templates.{ext}
-        2. Type files: {provider}type_templates.{ext}  
+        2. Type files: {provider}type_templates.{ext}
         3. Main templates: {provider}prov_templates.{ext}
         4. Legacy files: templates.{ext}
         """
@@ -538,9 +543,7 @@ Repository pattern implementation for template persistence with full AggregateRe
 class TemplateRepositoryImpl(TemplateRepository):
     """Template repository implementation for configuration-based template management."""
 
-    def __init__(self, 
-                 template_manager: TemplateConfigurationManager,
-                 logger: LoggingPort):
+    def __init__(self, template_manager: TemplateConfigurationManager, logger: LoggingPort):
         """Initialize repository with template configuration manager."""
         self._template_manager = template_manager
         self._logger = logger
@@ -676,11 +679,11 @@ class RepositoryFactory:
 
     def create_machine_repository(self) -> MachineRepositoryPort:
         """Create machine repository based on configuration."""
-        storage_type = self.container.get(ConfigurationManager).get('STORAGE_TYPE')
+        storage_type = self.container.get(ConfigurationManager).get("STORAGE_TYPE")
 
-        if storage_type == 'sql':
+        if storage_type == "sql":
             return self.container.get(SQLMachineRepository)
-        elif storage_type == 'json':
+        elif storage_type == "json":
             return self.container.get(JSONMachineRepository)
         else:
             raise ConfigurationError(f"Unsupported storage type: {storage_type}")
@@ -703,9 +706,7 @@ class MockCloudProvider(CloudProviderPort):
         self.provisioned_instances.append(instance_id)
 
         return ProvisionResult(
-            instance_id=instance_id,
-            status="running",
-            provider_data={"mock": True}
+            instance_id=instance_id, status="running", provider_data={"mock": True}
         )
 ```
 
@@ -748,10 +749,9 @@ class DatabaseConnectionPool:
 ### Caching Strategies
 ```python
 class CachingRepository(Generic[T]):
-    def __init__(self, 
-                 base_repository: Repository[T],
-                 cache: CacheStrategy,
-                 ttl_seconds: int = 300):
+    def __init__(
+        self, base_repository: Repository[T], cache: CacheStrategy, ttl_seconds: int = 300
+    ):
         self.base_repository = base_repository
         self.cache = cache
         self.ttl_seconds = ttl_seconds

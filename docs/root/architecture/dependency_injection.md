@@ -73,7 +73,7 @@ class DIContainer:
             return self._create_instance(implementation)
 
         # Try to create directly if it has @injectable decorator
-        if hasattr(interface, '__injectable__'):
+        if hasattr(interface, "__injectable__"):
             return self._create_instance(interface)
 
         raise DependencyNotFoundError(f"No registration found for {interface}")
@@ -87,7 +87,7 @@ class DIContainer:
         # Resolve constructor dependencies
         kwargs = {}
         for param_name, param in parameters.items():
-            if param_name == 'self':
+            if param_name == "self":
                 continue
 
             param_type = param.annotation
@@ -108,13 +108,11 @@ def injectable(cls):
     cls.__injectable__ = True
     return cls
 
+
 # Usage example
 @injectable
 class ApplicationService:
-    def __init__(self,
-                 command_bus: CommandBus,
-                 query_bus: QueryBus,
-                 logger: LoggingPort):
+    def __init__(self, command_bus: CommandBus, query_bus: QueryBus, logger: LoggingPort):
         self._command_bus = command_bus
         self._query_bus = query_bus
         self._logger = logger
@@ -134,6 +132,7 @@ def register_all_services(container: Optional[DIContainer] = None) -> DIContaine
 
     # 1. Register scheduler strategies first (needed by port adapters)
     from src.infrastructure.scheduler.registration import register_all_scheduler_types
+
     register_all_scheduler_types()
 
     # 2. Register core services (includes SchedulerPort registration)
@@ -141,10 +140,12 @@ def register_all_services(container: Optional[DIContainer] = None) -> DIContaine
 
     # 3. Register port adapters (uses SchedulerPort from core services)
     from src.infrastructure.di.port_registrations import register_port_adapters
+
     register_port_adapters(container)
 
     # 4. Setup CQRS infrastructure (handlers and buses)
     from src.infrastructure.di.container import _setup_cqrs_infrastructure
+
     _setup_cqrs_infrastructure(container)
 
     # 5. Register provider services (needed by infrastructure services)
@@ -195,42 +196,28 @@ def register_core_services(container: DIContainer) -> None:
     """Register core application services."""
 
     # Register logging port
-    container.register_singleton(
-        LoggingPort,
-        lambda c: LoggingAdapter()
-    )
+    container.register_singleton(LoggingPort, lambda c: LoggingAdapter())
 
     # Register configuration port
     container.register_singleton(
-        ConfigurationPort,
-        lambda c: ConfigurationAdapter(get_config_manager())
+        ConfigurationPort, lambda c: ConfigurationAdapter(get_config_manager())
     )
 
     # Register error handling port
     container.register_singleton(
-        ErrorHandlingPort,
-        lambda c: ErrorHandlingAdapter(c.get(LoggingPort))
+        ErrorHandlingPort, lambda c: ErrorHandlingAdapter(c.get(LoggingPort))
     )
 
     # Register container port
-    container.register_singleton(
-        ContainerPort,
-        lambda c: ContainerAdapter(c)
-    )
+    container.register_singleton(ContainerPort, lambda c: ContainerAdapter(c))
 
     # Register CQRS buses
     container.register_singleton(
         CommandBus,
-        lambda c: CommandBus(
-            logger=c.get(LoggingPort),
-            event_publisher=c.get(EventPublisherPort)
-        )
+        lambda c: CommandBus(logger=c.get(LoggingPort), event_publisher=c.get(EventPublisherPort)),
     )
 
-    container.register_singleton(
-        QueryBus,
-        lambda c: QueryBus(logger=c.get(LoggingPort))
-    )
+    container.register_singleton(QueryBus, lambda c: QueryBus(logger=c.get(LoggingPort)))
 
     # Register application service
     container.register_singleton(ApplicationService)
@@ -253,6 +240,7 @@ def register_provider_services(container: DIContainer) -> None:
     config_manager = container.get(ConfigurationManager)
     if _is_aws_provider_configured(config_manager):
         _register_aws_services(container)
+
 
 def _register_aws_services(container: DIContainer) -> None:
     """Register AWS-specific services."""
@@ -304,6 +292,7 @@ def register_command_handlers(container: DIContainer) -> None:
     container.register_singleton(UpdateMachineStatusCommandHandler)
     container.register_singleton(CleanupMachineResourcesCommandHandler)
 
+
 # src/infrastructure/di/query_handler_services.py
 def register_query_handlers(container: DIContainer) -> None:
     """Register query handlers."""
@@ -349,6 +338,7 @@ class LoggingPort(ABC):
     def warning(self, message: str) -> None:
         pass
 
+
 # src/domain/base/ports/configuration_port.py
 class ConfigurationPort(ABC):
     """Abstract configuration interface."""
@@ -381,6 +371,7 @@ class LoggingAdapter(LoggingPort):
     def warning(self, message: str) -> None:
         self._logger.warning(message)
 
+
 # src/infrastructure/adapters/configuration_adapter.py
 class ConfigurationAdapter(ConfigurationPort):
     """Concrete configuration implementation."""
@@ -406,9 +397,7 @@ The DI container supports factory patterns for complex object creation:
 class StorageStrategyFactory:
     """Factory for creating storage strategies."""
 
-    def __init__(self,
-                 config_manager: ConfigurationPort,
-                 logger: LoggingPort):
+    def __init__(self, config_manager: ConfigurationPort, logger: LoggingPort):
         self._config_manager = config_manager
         self._logger = logger
 
@@ -422,17 +411,14 @@ class StorageStrategyFactory:
     def _create_json_strategy(self) -> JSONStorageStrategy:
         """Create JSON storage strategy."""
         json_config = self._config_manager.get_section("json")
-        return JSONStorageStrategy(
-            config=JSONStorageConfig(**json_config),
-            logger=self._logger
-        )
+        return JSONStorageStrategy(config=JSONStorageConfig(**json_config), logger=self._logger)
+
 
 # Factory registration
 def create_storage_strategy_factory(container: DIContainer) -> StorageStrategyFactory:
     """Factory function for storage strategy factory."""
     return StorageStrategyFactory(
-        config_manager=container.get(ConfigurationPort),
-        logger=container.get(LoggingPort)
+        config_manager=container.get(ConfigurationPort), logger=container.get(LoggingPort)
     )
 ```
 
@@ -469,8 +455,7 @@ assert handler1 is not handler2  # True
 ```python
 # Factory function called for each request
 container.register_factory(
-    DatabaseConnection,
-    lambda c: create_database_connection(c.get(ConfigurationPort))
+    DatabaseConnection, lambda c: create_database_connection(c.get(ConfigurationPort))
 )
 ```
 
@@ -513,10 +498,7 @@ def test_with_real_dependencies():
     container = DIContainer()
 
     # Register real implementations with test configuration
-    container.register_singleton(
-        ConfigurationPort,
-        lambda c: TestConfigurationAdapter()
-    )
+    container.register_singleton(ConfigurationPort, lambda c: TestConfigurationAdapter())
 
     # Register other services normally
     register_core_services(container)
@@ -538,15 +520,9 @@ def register_storage_services(container: DIContainer) -> None:
     storage_type = config.get("storage.type", "memory")
 
     if storage_type == "dynamodb":
-        container.register_singleton(
-            TemplateRepository,
-            DynamoDBTemplateRepository
-        )
+        container.register_singleton(TemplateRepository, DynamoDBTemplateRepository)
     elif storage_type == "memory":
-        container.register_singleton(
-            TemplateRepository,
-            InMemoryTemplateRepository
-        )
+        container.register_singleton(TemplateRepository, InMemoryTemplateRepository)
     else:
         raise ConfigurationError(f"Unsupported storage type: {storage_type}")
 ```
@@ -571,15 +547,12 @@ def register_port_adapters(container):
 
         config_manager = get_config_manager()
         scheduler_config = config_manager.get_scheduler_config()
-        scheduler_type = scheduler_config.get('strategy', 'hostfactory')
+        scheduler_type = scheduler_config.get("strategy", "hostfactory")
 
         registry = get_scheduler_registry()
         return registry.get_active_strategy(scheduler_type, scheduler_config)
 
-    container.register_singleton(
-        SchedulerPort,
-        create_scheduler_port
-    )
+    container.register_singleton(SchedulerPort, create_scheduler_port)
 ```
 
 This pattern provides several benefits:
@@ -612,18 +585,25 @@ The DI system provides comprehensive error handling:
 ```python
 class DependencyInjectionError(Exception):
     """Base exception for DI errors."""
+
     pass
+
 
 class DependencyNotFoundError(DependencyInjectionError):
     """Raised when a dependency cannot be resolved."""
+
     pass
+
 
 class CircularDependencyError(DependencyInjectionError):
     """Raised when circular dependencies are detected."""
+
     pass
+
 
 class RegistrationError(DependencyInjectionError):
     """Raised when service registration fails."""
+
     pass
 ```
 

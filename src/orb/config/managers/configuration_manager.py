@@ -433,6 +433,10 @@ class ConfigurationManager:
                 try:
                     os.unlink(tmp_name)
                 except OSError:
+                    # Best-effort cleanup: the temp file may already be gone
+                    # (e.g. the failure was os.replace succeeding partially, or
+                    # the file was never created). Swallow the unlink error so
+                    # the original write failure below is the one propagated.
                     pass
                 raise
             logger.info("Configuration saved to %s", config_path)

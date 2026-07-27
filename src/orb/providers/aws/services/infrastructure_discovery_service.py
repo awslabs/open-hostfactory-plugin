@@ -220,14 +220,16 @@ class AWSInfrastructureDiscoveryService:
                 f"arn:aws:iam::{account_id}:role/aws-service-role"
                 f"/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet"
             )
-            # Best-effort IAM role verification — failure is intentionally ignored
-            # as the ARN can still be constructed without confirming the role exists
+            # Best-effort IAM role verification — failure is intentionally
+            # non-fatal, as the ARN can still be constructed without confirming
+            # the role exists. Log at debug so the skipped check is visible.
             try:
                 self.iam_client.get_role(RoleName="AWSServiceRoleForEC2SpotFleet")
-            except Exception:
-                pass  # intentional best-effort check
+            except Exception as e:
+                self._logger.debug("SpotFleet IAM role verification failed: %s", e)
             return arn
-        except Exception:
+        except Exception as e:
+            self._logger.debug("Could not construct SpotFleet role ARN via STS: %s", e)
             return None
 
     def discover_infrastructure(self, provider_config: dict[str, Any]) -> dict[str, Any]:

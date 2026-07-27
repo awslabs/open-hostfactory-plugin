@@ -281,7 +281,13 @@ class AWSProviderConfig(BaseSettings, BaseProviderConfig):  # type: ignore[misc]
         updated = dict(data)
         try:
             updated["aws_connect_timeout"] = int(float(raw_timeout) / 1000)
-        except Exception:
+        except Exception as e:
+            logger.debug(
+                "Could not convert legacy timeout %r to seconds; passing value "
+                "through unchanged: %s",
+                raw_timeout,
+                e,
+            )
             updated["aws_connect_timeout"] = raw_timeout
 
         return updated

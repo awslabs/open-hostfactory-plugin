@@ -7,6 +7,7 @@ discover_infrastructure, and _discover_infrastructure_summary.
 All AWS client calls are replaced with MagicMock — no real connections.
 """
 
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -403,11 +404,15 @@ class TestDiscoverSpotfleetRole:
         svc.iam_client.get_role.side_effect = RuntimeError("not found")
         arn = svc._discover_spotfleet_role()
         assert arn is not None
+        # The best-effort IAM check is non-fatal but must not be swallowed silently.
+        cast(MagicMock, svc._logger).debug.assert_called()
 
     def test_returns_none_when_sts_fails(self):
         svc = _make_service()
         svc.sts_client.get_caller_identity.side_effect = RuntimeError("sts down")
         assert svc._discover_spotfleet_role() is None
+        # STS failure means the ARN cannot be constructed; the reason must be logged.
+        cast(MagicMock, svc._logger).debug.assert_called()
 
 
 # ---------------------------------------------------------------------------

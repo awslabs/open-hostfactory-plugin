@@ -294,9 +294,13 @@ class CognitoAuthStrategy(AuthPort):
                 decoded_payload = json.loads(base64.urlsafe_b64decode(payload_part))
                 token_use = decoded_payload.get("token_use")
                 expires_at = decoded_payload.get("exp")
-            except Exception:
+            except Exception as e:
                 # Malformed token: proceed with denylist insertion using no expiry.
-                pass
+                self._logger.debug(
+                    "Could not decode token payload for revocation hint; "
+                    "proceeding with no expiry: %s",
+                    e,
+                )
 
             # Step 1: ALWAYS insert into denylist regardless of token_use.
             # This prevents a forged token_use claim from bypassing denylist enforcement.

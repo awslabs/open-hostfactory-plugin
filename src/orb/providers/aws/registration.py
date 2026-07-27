@@ -12,9 +12,12 @@ if TYPE_CHECKING:
 
 # Template extension imports for our new functionality
 from orb.domain.template.factory import TemplateFactory
+from orb.infrastructure.logging.logger import get_logger
 from orb.infrastructure.registry.template_extension_registry import TemplateExtensionRegistry
 from orb.providers.aws.configuration.template_extension import AWSTemplateExtensionConfig
 from orb.providers.aws.domain.template.aws_template_dto_config import AWSTemplateDTOConfig
+
+_module_logger = get_logger(__name__)
 
 
 def create_aws_strategy(provider_config: Any) -> Any:
@@ -224,7 +227,8 @@ def _load_aws_default_api() -> Optional[str]:
             .get("template_defaults", {})
             .get("provider_api")
         )
-    except Exception:
+    except Exception as e:
+        _module_logger.debug("Could not read AWS default provider API from defaults file: %s", e)
         return None
 
 

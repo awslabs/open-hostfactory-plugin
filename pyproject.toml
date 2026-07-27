@@ -151,6 +151,13 @@ api = [
     "jinja2>=3.1.0",
 ]
 
+# Model Context Protocol server. The <2 cap holds to the stable 1.x line; the
+# 2.0 rewrite renames the server class and changes the handler surface, so the
+# upgrade is a deliberate migration rather than an implicit resolve.
+mcp = [
+    "mcp>=1.28,<2",
+]
+
 # OTel API only — for embedders that want instrumentation without the SDK weight.
 # Libraries should depend on [otel]; applications depend on [monitoring].
 otel = [
@@ -187,7 +194,7 @@ monitoring-aws = [
 # groups (reflex→click>=8.2 vs semgrep→click<8.2), so never combine
 # `--extra all` with `--group ci`/`--group dev`; use `--no-dev` when syncing it.
 all = [
-    "orb-py[cli,api,sql,monitoring,monitoring-aws,all-providers,ui]",
+    "orb-py[cli,api,mcp,sql,monitoring,monitoring-aws,all-providers,ui]",
 ]
 
 # ── Test extras ────────────────────────────────────────────────────────────

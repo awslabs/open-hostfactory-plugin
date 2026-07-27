@@ -60,7 +60,6 @@ _KNOWN_VIOLATIONS: frozenset[tuple[str, str]] = frozenset(
         ("interface/init_command_handler.py", "orb.providers.registry"),
         ("interface/init_command_handler.py", "orb.providers.factory"),
         ("interface/machine_command_handlers.py", "orb.providers.base.strategy"),
-        ("interface/mcp/server/core.py", "orb.providers.registry"),
         ("config/managers/provider_manager.py", "orb.providers.registry"),
         ("application/services/provider_registry_service.py", "orb.providers.registry"),
         ("infrastructure/template/configuration_manager.py", "orb.providers.base.strategy"),

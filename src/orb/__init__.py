@@ -4,7 +4,6 @@ Open Resource Broker (ORB) - Cloud resource orchestration platform.
 Usage:
     from orb import ORBClient
     from orb.sdk import ORBClient, SDKConfig
-    from orb.mcp import OpenResourceBrokerMCPTools
 
     async with ORBClient(provider="aws") as client:
         templates = await client.list_templates()

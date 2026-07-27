@@ -91,30 +91,10 @@ def build_registry() -> None:
     register("init", "*", handle_init)
 
     # --- mcp ---
-    from orb.interface.mcp.server.handler import handle_mcp_serve
-    from orb.interface.mcp_command_handlers import handle_mcp_validate
+    from orb.interface.mcp.catalog_server import handle_mcp_serve, handle_mcp_validate
 
     register("mcp", "serve", handle_mcp_serve)
     register("mcp", "validate", handle_mcp_validate)
-
-    async def _handle_mcp_tools(args: argparse.Namespace) -> Any:
-        from orb.interface.mcp_command_handlers import (
-            handle_mcp_tools_call,
-            handle_mcp_tools_info,
-            handle_mcp_tools_list,
-        )
-
-        tools_action = getattr(args, "tools_action", None)
-        if tools_action == "list":
-            return await handle_mcp_tools_list(args)
-        elif tools_action == "call":
-            return await handle_mcp_tools_call(args)
-        elif tools_action == "info":
-            return await handle_mcp_tools_info(args)
-        else:
-            raise ValueError(f"Unknown MCP tools action: {tools_action}")
-
-    register("mcp", "tools", _handle_mcp_tools)
 
     # --- infrastructure ---
     from orb.interface.infrastructure_command_handler import (

@@ -40,7 +40,6 @@ _KNOWN_VIOLATIONS: frozenset[tuple[str, str]] = frozenset(
         ("interface/init_command_handler.py", "orb.providers.registry"),
         ("interface/init_command_handler.py", "orb.providers.factory"),
         ("interface/machine_command_handlers.py", "orb.providers.base.strategy"),
-        ("interface/mcp/server/core.py", "orb.providers.registry"),
         # CLI spec bootstrap: build_parser triggers lightweight CLI-spec registration
         # so that provider flags (e.g. --aws-profile) are available before app init.
         ("cli/args.py", "orb.providers.registration"),

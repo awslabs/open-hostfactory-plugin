@@ -2,7 +2,6 @@
 
 Covers:
 - infrastructure_command_handler.py: no hardcoded 'us-east-1' or 'default' profile
-- mcp/server/core.py: no 'ec2' default for template_type
 - sdk/client.py: no 'aws' sentinel in provider parameter
 - input_validator.py: validate_aws_region removed from generic layer
 - providers/aws/validation/region_validator.py: validate_aws_region exists there
@@ -78,42 +77,6 @@ class TestInfrastructureCommandHandlerNoAWSLeaks:
         assert "profile" not in providers[0].get("config", {}), (
             "Fallback provider config must not contain a hardcoded 'profile'"
         )
-
-
-# ---------------------------------------------------------------------------
-# mcp/server/core.py — no 'ec2' default for template_type
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-class TestMCPServerCoreNoEC2Default:
-    def _source(self) -> str:
-        return (SRC / "interface" / "mcp" / "server" / "core.py").read_text()
-
-    def test_no_ec2_default_in_generate_provision_prompt(self):
-        source = self._source()
-        # The literal default "ec2" must not appear as a .get() fallback
-        assert '.get("template_type", "ec2")' not in source, (
-            "_generate_provision_prompt must not default template_type to 'ec2'"
-        )
-        assert ".get('template_type', 'ec2')" not in source, (
-            "_generate_provision_prompt must not default template_type to 'ec2'"
-        )
-
-    def test_provision_prompt_uses_generic_label_when_no_type(self):
-        from orb.interface.mcp.server.core import OpenResourceBrokerMCPServer
-
-        server = OpenResourceBrokerMCPServer()
-        # Call with no template_type argument — must not produce 'ec2' in output
-        prompt = server._generate_provision_prompt({})
-        assert "ec2" not in prompt, "Provision prompt with no template_type must not mention 'ec2'"
-
-    def test_provision_prompt_uses_provided_type(self):
-        from orb.interface.mcp.server.core import OpenResourceBrokerMCPServer
-
-        server = OpenResourceBrokerMCPServer()
-        prompt = server._generate_provision_prompt({"template_type": "spot_fleet"})
-        assert "spot_fleet" in prompt
 
 
 # ---------------------------------------------------------------------------

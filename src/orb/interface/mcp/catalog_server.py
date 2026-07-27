@@ -137,6 +137,16 @@ def _mcp_entries() -> list[CatalogEntry[Any, Any]]:
     ]
 
 
+def list_catalog_tools() -> list[mcp_types.Tool]:
+    """Return the MCP tool definitions derived from the operation catalog.
+
+    Pure catalog derivation with no container or transport: building each tool
+    resolves its input DTO into a JSON schema, so this doubles as an offline
+    check that every MCP-exposed operation yields a valid tool definition.
+    """
+    return [_tool_for(entry) for entry in _mcp_entries()]
+
+
 def _tool_for(entry: CatalogEntry[Any, Any]) -> mcp_types.Tool:
     """Build the MCP tool definition for a catalog entry."""
     orchestrator_name = entry.orchestrator.__name__
@@ -171,7 +181,7 @@ def build_server(container: Any) -> Server:
 
     @server.list_tools()
     async def list_tools() -> list[mcp_types.Tool]:
-        return [_tool_for(entry) for entry in _mcp_entries()]
+        return list_catalog_tools()
 
     @server.call_tool()
     async def call_tool(
@@ -209,12 +219,14 @@ async def run_stdio(container: Any) -> None:
         )
 
 
-def run_streamable_http(container: Any, host: str = "127.0.0.1", port: int = 8080) -> None:
+def run_streamable_http(
+    container: Any, host: str = "127.0.0.1", port: int = 8080, path: str = "/mcp"
+) -> None:
     """Serve the catalog MCP server over Streamable HTTP.
 
     Wraps the SDK's :class:`StreamableHTTPSessionManager` in a minimal Starlette
-    app mounted at ``/mcp`` and runs it under uvicorn. Blocks until the server
-    is stopped.
+    app mounted at ``path`` (default ``/mcp``) and runs it under uvicorn. Blocks
+    until the server is stopped.
     """
     import contextlib
     from collections.abc import AsyncIterator
@@ -237,7 +249,100 @@ def run_streamable_http(container: Any, host: str = "127.0.0.1", port: int = 808
             yield
 
     app = Starlette(
-        routes=[Mount("/mcp", app=handle_mcp)],
+        routes=[Mount(path, app=handle_mcp)],
         lifespan=lifespan,
     )
     uvicorn.run(app, host=host, port=port)
+
+
+def _flush_telemetry() -> None:
+    """Flush OTel providers on MCP server shutdown (best-effort, idempotent)."""
+    from orb.infrastructure.logging.logger import get_logger
+
+    try:
+        from orb.bootstrap.telemetry import shutdown_telemetry
+
+        shutdown_telemetry()
+    except Exception as exc:  # noqa: BLE001 — cleanup must never block shutdown
+        get_logger(__name__).debug(
+            "telemetry flush during MCP shutdown failed: %s (ignored, best-effort cleanup)",
+            exc,
+            exc_info=True,
+        )
+
+
+async def handle_mcp_serve(args: Any) -> dict[str, Any]:
+    """Start the catalog-driven MCP server over the requested transport.
+
+    Bootstraps the application so the DI container has every provider, handler,
+    and configuration registered, then serves the catalog tools over stdio or
+    Streamable HTTP. The ``http`` transport blocks in a worker thread (uvicorn
+    manages its own event loop) so it does not collide with the CLI's loop.
+    """
+    import asyncio
+
+    from orb.bootstrap import Application
+    from orb.infrastructure.logging.logger import get_logger
+
+    logger = get_logger(__name__)
+
+    transport = getattr(args, "transport", "stdio")
+    if transport == "streamable-http":
+        transport = "http"
+    host = getattr(args, "host", "127.0.0.1")
+    port = getattr(args, "port", 8000)
+    path = getattr(args, "path", "/mcp")
+
+    app = Application()
+    if not await app.initialize():
+        raise RuntimeError("Failed to initialize ORB application for MCP server")
+    # Reuse the wired container from the Application instance rather than calling
+    # get_container() again (service-locator avoided).
+    app._ensure_container()
+    container = app._container
+
+    try:
+        if transport == "http":
+            logger.info("Starting MCP server over Streamable HTTP on %s:%s%s", host, port, path)
+            await asyncio.get_running_loop().run_in_executor(
+                None, run_streamable_http, container, host, port, path
+            )
+            return {"message": f"MCP server stopped ({host}:{port}{path})"}
+        logger.info("Starting MCP server over stdio")
+        await run_stdio(container)
+        return {"message": "MCP server stopped (stdio)"}
+    finally:
+        _flush_telemetry()
+
+
+async def handle_mcp_validate(args: Any) -> Any:
+    """Offline check that every MCP-exposed catalog entry yields a valid tool.
+
+    Builds the tool set straight from the catalog — no client or server is spun
+    up — and verifies each tool has a resolvable object input schema. Prints a
+    summary of the tool count and names on success (exit 0) or lists the
+    problems and returns a non-zero exit code, so it is safe to run in CI.
+    """
+    from orb.application.dto.interface_response import InterfaceResponse
+
+    del args  # offline: no arguments influence the catalog-derived tool set
+
+    problems: list[str] = []
+    tools = list_catalog_tools()
+    for tool in tools:
+        schema = tool.inputSchema
+        if not isinstance(schema, dict) or schema.get("type") != "object":
+            problems.append(f"{tool.name}: input schema is not a JSON object schema")
+        elif not isinstance(schema.get("properties"), dict):
+            problems.append(f"{tool.name}: input schema has no properties object")
+
+    tool_names = [tool.name for tool in tools]
+    valid = not problems
+    result: dict[str, Any] = {
+        "valid": valid,
+        "tool_count": len(tools),
+        "tools": tool_names,
+    }
+    if problems:
+        result["problems"] = problems
+    return InterfaceResponse(data=result, exit_code=0 if valid else 1)

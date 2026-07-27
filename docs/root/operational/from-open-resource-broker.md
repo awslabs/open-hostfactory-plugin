@@ -56,11 +56,11 @@ The `utils` server takes its configuration via flags (`--host`, `--port`, `--wor
 
 The five HostFactory provider scripts at `${HF_CONFDIR}/providers/k8s-hf/scripts/` now call `orb k8s-legacy <verb>` internally instead of `hostfactory <verb>` (or `open-resource-broker <verb>`).
 
-These scripts are repository artefacts, not Python package data, and are not bundled in the `orb-py` wheel.  After upgrading, replace your deployed copies with the updated versions from the repository at `k8s-legacy/hostfactory/providers/k8s-hf/scripts/`:
+These scripts are repository artefacts, not Python package data, and are not bundled in the `orb-py` wheel.  After upgrading, replace your deployed copies with the updated versions from the repository at `deployment/hostfactory/k8s-hf/`:
 
 ```bash
 # From a checkout of finos/open-resource-broker at the release tag:
-cp k8s-legacy/hostfactory/providers/k8s-hf/scripts/*.sh "${HF_CONFDIR}/providers/k8s-hf/scripts/"
+cp deployment/hostfactory/k8s-hf/*.sh "${HF_CONFDIR}/providers/k8s-hf/scripts/"
 ```
 
 Or fetch the five scripts (`requestMachines.sh`, `getRequestStatus.sh`, `requestReturnMachines.sh`, `getReturnRequests.sh`, `getAvailableTemplates.sh`) individually from the release tarball or the GitHub source tree.

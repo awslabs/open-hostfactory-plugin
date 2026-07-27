@@ -436,7 +436,6 @@ orb k8s-legacy get-available-templates
 The plugin is in maintenance mode.  A modern Kubernetes provider with native ORB integration is in development; existing deployments remain fully supported.
 
 - **Upgrading from `open-resource-broker`?** See the [migration guide](docs/root/operational/from-open-resource-broker.md).
-- **Deploying the Symphony HF plugin?** See the [k8s-legacy deployment guide](k8s-legacy/README.md).
 
 </details>
 

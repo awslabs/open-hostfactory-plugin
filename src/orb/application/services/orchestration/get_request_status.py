@@ -8,6 +8,7 @@ from orb.application.dto.queries import SyncAndGetRequestQuery, SyncAndListActiv
 from orb.application.ports.command_bus_port import CommandBusPort
 from orb.application.ports.query_bus_port import QueryBusPort
 from orb.application.services.orchestration.base import (
+    MAX_CONSECUTIVE_POLL_ERRORS as _MAX_CONSECUTIVE_POLL_ERRORS,
     TERMINAL_STATUSES as _TERMINAL_STATUSES,
     OrchestratorBase,
 )
@@ -107,22 +108,72 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
         ``input.timeout_seconds``; the last snapshot is returned when the cap is
         reached even if some requests are still non-terminal, so callers always
         get the freshest known state.
+
+        A transient sync error (an ``error`` entry with no terminal status and
+        no ``not_found`` flag) does NOT immediately end the poll — the provider
+        may simply have blipped. Up to ``_MAX_CONSECUTIVE_POLL_ERRORS``
+        consecutive polls carrying such a transient error are tolerated (in
+        line with the acquire/return sibling loops) before the poll gives up
+        and returns the last snapshot. A genuine terminal state (a real
+        ``failed``/``complete`` status, or ``not_found``) still stops the poll
+        immediately.
         """
         elapsed = 0
         request_dicts = await self._fetch_once(input)
+        consecutive_errors = 1 if self._has_transient_error(request_dicts) else 0
         while not self._all_terminal(request_dicts) and elapsed < input.timeout_seconds:
+            if consecutive_errors >= _MAX_CONSECUTIVE_POLL_ERRORS:
+                # Persistent transient failures — stop retrying and surface the
+                # last snapshot rather than blocking until timeout.
+                break
             await asyncio.sleep(_POLL_INTERVAL_SECONDS)
             elapsed += _POLL_INTERVAL_SECONDS
             request_dicts = await self._fetch_once(input)
+            if self._has_transient_error(request_dicts):
+                consecutive_errors += 1
+            else:
+                consecutive_errors = 0
         return request_dicts
 
     @staticmethod
-    def _all_terminal(request_dicts: list[dict]) -> bool:
-        """Return True once every entry is terminal, errored, or not found."""
+    def _has_transient_error(request_dicts: list[dict]) -> bool:
+        """Return True if any entry is a transient sync error.
+
+        A transient sync error is an ``error`` entry that is neither a
+        ``not_found`` (a genuine 404) nor accompanied by a terminal status (a
+        genuine request failure). Those two cases are real terminal outcomes
+        and must not be treated as retryable blips.
+        """
         for entry in request_dicts:
-            if entry.get("not_found") or entry.get("error"):
+            if entry.get("not_found"):
+                continue
+            if not entry.get("error"):
                 continue
             status = str(entry.get("status", "")).lower()
+            if status not in _TERMINAL_STATUSES:
+                return True
+        return False
+
+    @staticmethod
+    def _all_terminal(request_dicts: list[dict]) -> bool:
+        """Return True once every entry reaches a terminal outcome.
+
+        Terminal outcomes are: ``not_found`` (a genuine 404), an entry carrying
+        a real terminal ``status`` (e.g. ``failed``/``complete``), or a
+        non-error entry whose status is terminal. A transient sync error (an
+        ``error`` entry with no terminal status) is NOT terminal, so polling
+        continues and can recover once the provider responds again.
+        """
+        for entry in request_dicts:
+            if entry.get("not_found"):
+                continue
+            status = str(entry.get("status", "")).lower()
+            if entry.get("error"):
+                # Only a terminal status makes an errored entry terminal;
+                # a bare transient error keeps the poll going.
+                if status in _TERMINAL_STATUSES:
+                    continue
+                return False
             if status not in _TERMINAL_STATUSES:
                 return False
         return True

@@ -354,10 +354,73 @@ class TestGetRequestStatusOrchestratorWait:
         assert mock_query_bus.execute.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_wait_treats_error_entry_as_terminal(self, orchestrator, mock_query_bus):
-        mock_query_bus.execute.side_effect = Exception("boom")
+    async def test_wait_tolerates_transient_error_then_returns_terminal(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """A transient sync error on the first poll must NOT abort the wait.
+
+        The provider blips on the first fetch (raises), then recovers and
+        returns a terminal ``complete``. The loop must keep polling past the
+        transient error and return the terminal result, not the error entry.
+        """
+        done = MagicMock(spec=["model_dump"])
+        done.model_dump.return_value = {"request_id": "req-1", "status": "complete"}
+        # First fetch blips; subsequent fetches succeed terminally.
+        mock_query_bus.execute.side_effect = [Exception("transient blip"), done, done]
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
         input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
         result = await orchestrator.execute(input)
-        # An errored entry short-circuits polling so the caller is not stuck.
+
+        assert mock_query_bus.execute.call_count >= 2, "poll must continue past the transient error"
+        assert result.requests[0]["status"] == "complete"
+        assert "error" not in result.requests[0]
+
+    @pytest.mark.asyncio
+    async def test_wait_aborts_after_max_consecutive_transient_errors(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """More than N consecutive transient errors stops the poll with the last snapshot."""
+        from orb.application.services.orchestration.base import MAX_CONSECUTIVE_POLL_ERRORS
+
+        mock_query_bus.execute.side_effect = Exception("still blipping")
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+
+        # Initial fetch + retries up to the consecutive-error cap, then stop —
+        # well short of the 300s / 2s = 150 polls a timeout-only bound implies.
+        assert mock_query_bus.execute.call_count == MAX_CONSECUTIVE_POLL_ERRORS
+        assert result.requests[0]["error"] == "still blipping"
+
+    @pytest.mark.asyncio
+    async def test_wait_stops_immediately_on_genuine_terminal_failure(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """A real terminal FAILED status (not a sync blip) stops the poll at once."""
+        failed = MagicMock(spec=["model_dump"])
+        failed.model_dump.return_value = {"request_id": "req-1", "status": "failed"}
+        mock_query_bus.execute.return_value = failed
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+
         assert mock_query_bus.execute.call_count == 1
-        assert result.requests[0]["error"] == "boom"
+        assert result.requests[0]["status"] == "failed"

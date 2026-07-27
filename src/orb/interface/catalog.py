@@ -47,12 +47,20 @@ from orb.application.services.orchestration.dtos import (
     DeleteTemplateOutput,
     GetMachineInput,
     GetMachineOutput,
+    GetProviderConfigInput,
+    GetProviderConfigOutput,
+    GetProviderHealthInput,
+    GetProviderHealthOutput,
+    GetProviderMetricsInput,
+    GetProviderMetricsOutput,
     GetRequestStatusInput,
     GetRequestStatusOutput,
     GetTemplateInput,
     GetTemplateOutput,
     ListMachinesInput,
     ListMachinesOutput,
+    ListProvidersInput,
+    ListProvidersOutput,
     ListRequestsInput,
     ListRequestsOutput,
     ListReturnRequestsInput,
@@ -75,9 +83,19 @@ from orb.application.services.orchestration.dtos import (
     ValidateTemplateOutput,
 )
 from orb.application.services.orchestration.get_machine import GetMachineOrchestrator
+from orb.application.services.orchestration.get_provider_config import (
+    GetProviderConfigOrchestrator,
+)
+from orb.application.services.orchestration.get_provider_health import (
+    GetProviderHealthOrchestrator,
+)
+from orb.application.services.orchestration.get_provider_metrics import (
+    GetProviderMetricsOrchestrator,
+)
 from orb.application.services.orchestration.get_request_status import GetRequestStatusOrchestrator
 from orb.application.services.orchestration.get_template import GetTemplateOrchestrator
 from orb.application.services.orchestration.list_machines import ListMachinesOrchestrator
+from orb.application.services.orchestration.list_providers import ListProvidersOrchestrator
 from orb.application.services.orchestration.list_requests import ListRequestsOrchestrator
 from orb.application.services.orchestration.list_return_requests import (
     ListReturnRequestsOrchestrator,
@@ -296,7 +314,7 @@ OPERATION_CATALOG: dict[str, CatalogEntry[Any, Any]] = {
         input_dto=GetMachineInput,
         output_dto=GetMachineOutput,
         render=_render_machine_detail,
-        exposed_on=frozenset({_CLI, _REST, _SDK}),
+        exposed_on=frozenset({_CLI, _REST, _SDK, _MCP}),
         render_overrides={_CLI: _render_machine_operation},
     ),
     "sync_machine": CatalogEntry(
@@ -422,5 +440,44 @@ OPERATION_CATALOG: dict[str, CatalogEntry[Any, Any]] = {
         output_dto=RefreshTemplatesOutput,
         render=lambda rfs, out: rfs.format_template_list(out.templates),
         exposed_on=frozenset({_CLI, _REST, _SDK}),
+    ),
+    "get_provider_health": CatalogEntry(
+        key="get_provider_health",
+        orchestrator=GetProviderHealthOrchestrator,
+        input_dto=GetProviderHealthInput,
+        output_dto=GetProviderHealthOutput,
+        render=lambda rfs, out: rfs.format_config({"health": out.health, "message": out.message}),
+        exposed_on=frozenset({_CLI, _MCP}),
+    ),
+    "list_providers": CatalogEntry(
+        key="list_providers",
+        orchestrator=ListProvidersOrchestrator,
+        input_dto=ListProvidersInput,
+        output_dto=ListProvidersOutput,
+        render=lambda rfs, out: rfs.format_config(
+            {
+                "providers": out.providers,
+                "count": out.count,
+                "selection_policy": out.selection_policy,
+                "message": out.message,
+            }
+        ),
+        exposed_on=frozenset({_CLI, _MCP}),
+    ),
+    "get_provider_config": CatalogEntry(
+        key="get_provider_config",
+        orchestrator=GetProviderConfigOrchestrator,
+        input_dto=GetProviderConfigInput,
+        output_dto=GetProviderConfigOutput,
+        render=lambda rfs, out: rfs.format_config({"config": out.config, "message": out.message}),
+        exposed_on=frozenset({_CLI, _MCP}),
+    ),
+    "get_provider_metrics": CatalogEntry(
+        key="get_provider_metrics",
+        orchestrator=GetProviderMetricsOrchestrator,
+        input_dto=GetProviderMetricsInput,
+        output_dto=GetProviderMetricsOutput,
+        render=lambda rfs, out: rfs.format_config({"metrics": out.metrics, "message": out.message}),
+        exposed_on=frozenset({_CLI, _MCP}),
     ),
 }

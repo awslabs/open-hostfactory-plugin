@@ -40,6 +40,11 @@ def _make_formatter() -> MagicMock:
     return fmt
 
 
+def _real_formatter() -> ResponseFormattingService:
+    """A real formatter whose format_config echoes the body without a scheduler."""
+    return ResponseFormattingService(MagicMock())
+
+
 @pytest.mark.unit
 class TestHandleProviderHealth:
     """Tests for handle_provider_health."""
@@ -55,9 +60,11 @@ class TestHandleProviderHealth:
             health={"status": "healthy"}, message="ok"
         )
 
+        formatter = _real_formatter()
         container = MagicMock()
         container.get.side_effect = lambda t: {
             GetProviderHealthOrchestrator: orch,
+            ResponseFormattingService: formatter,
         }.get(t, MagicMock())
 
         args = Namespace(_container=container, provider_name="aws-1", provider_type="aws")
@@ -66,8 +73,8 @@ class TestHandleProviderHealth:
         orch.execute.assert_awaited_once()
         call_input = orch.execute.call_args[0][0]
         assert call_input.provider_name == "aws-1"
-        assert result["message"] == "ok"
-        assert "health" in result
+        assert result.data["message"] == "ok"
+        assert "health" in result.data
 
     @pytest.mark.asyncio
     async def test_no_provider_filter_still_calls_orchestrator(self):
@@ -78,16 +85,18 @@ class TestHandleProviderHealth:
         orch = AsyncMock(spec=GetProviderHealthOrchestrator)
         orch.execute.return_value = GetProviderHealthOutput(health={}, message="all healthy")
 
+        formatter = _real_formatter()
         container = MagicMock()
         container.get.side_effect = lambda t: {
             GetProviderHealthOrchestrator: orch,
+            ResponseFormattingService: formatter,
         }.get(t, MagicMock())
 
         args = Namespace(_container=container)
         result = await handle_provider_health(args)
 
         orch.execute.assert_awaited_once()
-        assert "health" in result
+        assert "health" in result.data
 
 
 @pytest.mark.unit
@@ -106,9 +115,11 @@ class TestHandleListProviders:
             message="ok",
         )
 
+        formatter = _real_formatter()
         container = MagicMock()
         container.get.side_effect = lambda t: {
             ListProvidersOrchestrator: orch,
+            ResponseFormattingService: formatter,
         }.get(t, MagicMock())
 
         args = Namespace(
@@ -120,8 +131,8 @@ class TestHandleListProviders:
         result = await handle_list_providers(args)
 
         orch.execute.assert_awaited_once()
-        assert result["count"] == 1
-        assert "providers" in result
+        assert result.data["count"] == 1
+        assert "providers" in result.data
 
     @pytest.mark.asyncio
     async def test_filter_expressions_forwarded(self):
@@ -163,17 +174,19 @@ class TestHandleProviderConfig:
             config={"providers": []}, message="config loaded"
         )
 
+        formatter = _real_formatter()
         container = MagicMock()
-        container.get.side_effect = lambda t: {GetProviderConfigOrchestrator: orch}.get(
-            t, MagicMock()
-        )
+        container.get.side_effect = lambda t: {
+            GetProviderConfigOrchestrator: orch,
+            ResponseFormattingService: formatter,
+        }.get(t, MagicMock())
 
         args = Namespace(_container=container)
         result = await handle_provider_config(args)
 
         orch.execute.assert_awaited_once()
-        assert "config" in result
-        assert result["message"] == "config loaded"
+        assert "config" in result.data
+        assert result.data["message"] == "config loaded"
 
 
 @pytest.mark.unit
@@ -218,10 +231,12 @@ class TestHandleProviderMetrics:
         orch = AsyncMock(spec=GetProviderMetricsOrchestrator)
         orch.execute.return_value = GetProviderMetricsOutput(metrics={"requests": 5}, message="ok")
 
+        formatter = _real_formatter()
         container = MagicMock()
-        container.get.side_effect = lambda t: {GetProviderMetricsOrchestrator: orch}.get(
-            t, MagicMock()
-        )
+        container.get.side_effect = lambda t: {
+            GetProviderMetricsOrchestrator: orch,
+            ResponseFormattingService: formatter,
+        }.get(t, MagicMock())
 
         args = Namespace(_container=container, provider_name="aws-1", timeframe="1h")
         result = await handle_provider_metrics(args)
@@ -230,7 +245,7 @@ class TestHandleProviderMetrics:
         call_input = orch.execute.call_args[0][0]
         assert call_input.provider_name == "aws-1"
         assert call_input.timeframe == "1h"
-        assert "metrics" in result
+        assert "metrics" in result.data
 
     @pytest.mark.asyncio
     async def test_default_timeframe_is_24h(self):

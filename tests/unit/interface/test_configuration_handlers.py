@@ -54,21 +54,28 @@ class TestProviderConfigHandlers:
         """Test handle_provider_config function - takes only args, no app param."""
         args = Namespace(resource="provider", action="config")
 
-        mock_container = Mock()
-
         from unittest.mock import MagicMock
+
+        from orb.application.dto.interface_response import InterfaceResponse
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
+        mock_container = Mock()
 
         mock_orchestrator = AsyncMock()
         mock_orchestrator.execute = AsyncMock(
             return_value=MagicMock(config={"provider": "aws"}, message="ok")
         )
-        mock_container.get.return_value = mock_orchestrator
+        formatter = ResponseFormattingService(MagicMock())
+        mock_container.get.side_effect = lambda t: (
+            formatter if t is ResponseFormattingService else mock_orchestrator
+        )
 
         # handle_provider_config takes only args (no app parameter)
         args._container = mock_container
         result = await handle_provider_config(args)
 
-        assert isinstance(result, dict)
+        assert isinstance(result, InterfaceResponse)
+        assert result.data["config"] == {"provider": "aws"}
 
     @pytest.mark.asyncio
     async def test_handle_validate_provider_config(self):

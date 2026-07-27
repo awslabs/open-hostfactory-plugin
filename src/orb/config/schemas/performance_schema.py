@@ -66,22 +66,6 @@ class AdaptiveBatchSizingConfig(BaseModel):
         return self
 
 
-class AMIResolutionCacheConfig(BaseModel):
-    """AMI resolution caching configuration."""
-
-    enabled: bool = Field(True, description="Enable AMI resolution caching")
-    ttl_seconds: int = Field(3600, description="AMI cache TTL in seconds")
-    file: str = Field("ami_cache.json", description="AMI cache filename")
-
-    @field_validator("ttl_seconds")
-    @classmethod
-    def validate_ttl_seconds(cls, v: int) -> int:
-        """Validate AMI cache TTL."""
-        if v < 0:
-            raise ValueError("AMI cache TTL must be non-negative")
-        return v
-
-
 class HandlerDiscoveryCacheConfig(BaseModel):
     """Handler discovery caching configuration."""
 
@@ -105,11 +89,12 @@ class RequestStatusCacheConfig(BaseModel):
 
 
 class CachingConfig(BaseModel):
-    """Caching configuration for performance optimization."""
+    """Caching configuration for performance optimization.
 
-    ami_resolution: AMIResolutionCacheConfig = Field(
-        default_factory=lambda: AMIResolutionCacheConfig()  # type: ignore[call-arg]
-    )
+    Provider-specific caches are configured through the owning provider's
+    configuration, not here.
+    """
+
     handler_discovery: HandlerDiscoveryCacheConfig = Field(
         default_factory=lambda: HandlerDiscoveryCacheConfig()  # type: ignore[call-arg]
     )

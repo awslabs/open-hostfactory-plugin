@@ -264,13 +264,13 @@ class TestCacheConfigValidators:
     """Cache TTL field validators."""
 
     def test_ami_cache_negative_ttl_rejected(self):
-        from orb.config.schemas.performance_schema import AMIResolutionCacheConfig
+        from orb.providers.aws.configuration.caching_config import AMIResolutionCacheConfig
 
         with pytest.raises(ValidationError, match="AMI cache TTL must be non-negative"):
             AMIResolutionCacheConfig(ttl_seconds=-1)  # type: ignore[call-arg]
 
     def test_ami_cache_zero_ttl_is_valid(self):
-        from orb.config.schemas.performance_schema import AMIResolutionCacheConfig
+        from orb.providers.aws.configuration.caching_config import AMIResolutionCacheConfig
 
         cfg = AMIResolutionCacheConfig(ttl_seconds=0)  # type: ignore[call-arg]
         assert cfg.ttl_seconds == 0

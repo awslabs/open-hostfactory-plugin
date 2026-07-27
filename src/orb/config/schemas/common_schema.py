@@ -2,31 +2,25 @@
 
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ResourcePrefixConfig(BaseModel):
     """Resource prefix configuration.
 
-    The generic keys (default, request, return_prefix, tag) are provider-agnostic.
-    The AWS-specific keys (launch_template, instance, fleet, spot_fleet, asg) are
-    kept here because ``ConfigurationAdapter.get_resource_prefix(key)`` dispatches
-    through ``hasattr(prefixes, key)`` and AWS handler code passes AWS resource-type
-    strings.  Their default values are empty strings and they are absent from the
-    packaged default_config.json.
-    TODO: move launch_template/instance/fleet/spot_fleet/asg to AWSNamingConfig
-    and replace ``get_resource_prefix`` with an AWS-specific accessor so this
-    shared schema is free of AWS vocabulary.
+    Only provider-agnostic keys (default, request, return_prefix, tag) are declared.
+    Provider-specific resource-type prefixes are supplied by config and captured as
+    extra fields (``extra="allow"``), so ``ConfigurationAdapter.get_resource_prefix(key)``
+    can still dispatch through ``hasattr(prefixes, key)`` without this shared schema
+    encoding any provider vocabulary.  Keys absent from config fall back to
+    ``default_prefix``.
     """
+
+    model_config = ConfigDict(extra="allow")
 
     default: str = Field("", description="Default prefix for all resources")
     request: str = Field("req-", description="Prefix for acquire request IDs")
     return_prefix: str = Field("ret-", description="Prefix for return request IDs")
-    launch_template: str = Field("", description="Prefix for launch template names")
-    instance: str = Field("", description="Prefix for instance names")
-    fleet: str = Field("", description="Prefix for EC2 Fleet names")
-    spot_fleet: str = Field("", description="Prefix for Spot Fleet names")
-    asg: str = Field("", description="Prefix for Auto Scaling group names")
     tag: str = Field("", description="Prefix for resource tags")
 
 
@@ -47,23 +41,18 @@ class ResourceConfig(BaseModel):
 class PrefixConfig(BaseModel):
     """Naming prefix configuration used by the shared NamingConfig.
 
-    The generic keys (default, request, return_prefix, tag) are provider-agnostic.
-    The AWS-specific keys (launch_template, instance, fleet, asg) are kept for the
-    same reason as ResourcePrefixConfig: the hasattr-based dispatch in
-    ConfigurationAdapter.get_resource_prefix requires them as typed fields.
-    Their default values are empty strings and they are absent from the packaged
-    default_config.json.
-    TODO: remove launch_template/instance/fleet/asg once get_resource_prefix
-    gains an AWS-specific code path.
+    Only provider-agnostic keys (default, request, return_prefix, tag) are declared.
+    Provider-specific resource-type prefixes are captured as extra fields
+    (``extra="allow"``) for the same reason as ResourcePrefixConfig: the
+    hasattr-based dispatch in ConfigurationAdapter.get_resource_prefix reads them
+    when present and falls back to ``default_prefix`` otherwise.
     """
+
+    model_config = ConfigDict(extra="allow")
 
     default: str = Field("", description="Default prefix for all resources")
     request: str = Field("req-", description="Prefix for acquire request IDs")
     return_prefix: str = Field("ret-", description="Prefix for return request IDs")
-    launch_template: str = Field("", description="Prefix for launch template names")
-    instance: str = Field("", description="Prefix for instance names")
-    fleet: str = Field("", description="Prefix for fleet names")
-    asg: str = Field("", description="Prefix for Auto Scaling group names")
     tag: str = Field("", description="Prefix for resource tags")
 
 
@@ -134,19 +123,16 @@ class NamingConfig(BaseModel):
     statuses: StatusValuesConfig = Field(default_factory=lambda: StatusValuesConfig())
     patterns: dict[str, str] = Field(
         default_factory=lambda: {
-            # No shared "region" pattern: region format varies by provider
-            # (AWS: us-east-1, GCP: us-central1, Azure: eastus).
-            # Providers that need region validation contribute their own pattern.
+            # No shared "region" pattern: region format varies by provider, so
+            # providers that need region validation contribute their own pattern.
             "request_id": r"^(req|ret)-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
             "tag_key": r"^[\w\s+=.@-]+$",
             "cidr_block": r"^(\d{1,3}\.){3}\d{1,3}/\d{1,2}$",
-            # AWS-specific patterns (spot_fleet, ec2_fleet, asg, ec2_instance,
-            # instance_type) belong on AWSNamingConfig, not here.
         },
         description=(
             "Provider-agnostic validation patterns for shared resource identifiers. "
-            "AWS-specific patterns (spot_fleet, ec2_fleet, asg, ec2_instance, "
-            "instance_type) belong on the AWS provider's AWSNamingConfig, not here."
+            "Provider-specific identifier patterns are contributed by each provider's "
+            "own naming configuration, not declared here."
         ),
     )
     prefixes: PrefixConfig = Field(default_factory=lambda: PrefixConfig())  # type: ignore[call-arg]

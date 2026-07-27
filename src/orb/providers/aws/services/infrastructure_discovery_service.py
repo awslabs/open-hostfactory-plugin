@@ -234,9 +234,7 @@ class AWSInfrastructureDiscoveryService:
                 return []
             if resource_type == SUBNETS:
                 return [asdict(s) for s in self.discover_subnets(vpc_id, raise_on_error=True)]
-            return [
-                asdict(sg) for sg in self.discover_security_groups(vpc_id, raise_on_error=True)
-            ]
+            return [asdict(sg) for sg in self.discover_security_groups(vpc_id, raise_on_error=True)]
 
         raise ValueError(
             f"Unsupported resource type '{resource_type}'. "

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -222,10 +223,15 @@ class TestDiscoverCaching:
             client = TestClient(app, raise_server_exceptions=False)
             client.get("/providers/discover/aws/vpcs")
             # Force expiry by rewinding the stored timestamp beyond the TTL.
+            # Timestamps use time.monotonic(), whose reference point is
+            # arbitrary, so the rewind must be relative to "now" rather than a
+            # fixed value like 0.0 (which is not necessarily past the TTL on a
+            # freshly-booted host where monotonic() is still small).
             key = ("aws", "vpcs", "")
             _, value = providers_module._discovery_cache[key]
+            expired_at = time.monotonic() - providers_module._DISCOVERY_CACHE_TTL_SECONDS - 1
             providers_module._discovery_cache[key] = (
-                0.0,
+                expired_at,
                 value,
             )
             body = client.get("/providers/discover/aws/vpcs").json()

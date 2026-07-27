@@ -82,10 +82,12 @@ class AzurePlugin(ProviderPlugin):
 
     def strategy_factory(self) -> Any:
         from orb.providers.azure.registration import create_azure_strategy
+
         return create_azure_strategy
 
     def config_factory(self) -> Any:
         from orb.providers.azure.registration import create_azure_config
+
         return create_azure_config
 
     def template_dto_config(self) -> Any:
@@ -93,6 +95,7 @@ class AzurePlugin(ProviderPlugin):
             from orb.providers.azure.domain.template.azure_template_dto_config import (
                 AzureTemplateDTOConfig,
             )
+
             return AzureTemplateDTOConfig
         except ImportError:
             return None
@@ -100,6 +103,7 @@ class AzurePlugin(ProviderPlugin):
     def cli_spec(self) -> Any:
         try:
             from orb.providers.azure.cli.azure_cli_spec import AzureCLISpec
+
             return AzureCLISpec()
         except ImportError:
             return None
@@ -109,6 +113,7 @@ class AzurePlugin(ProviderPlugin):
             from orb.providers.azure.scheduler.hostfactory_field_mapping import (
                 AzureFieldMapping,
             )
+
             return AzureFieldMapping()
         except ImportError:
             return None
@@ -116,6 +121,7 @@ class AzurePlugin(ProviderPlugin):
     def defaults_loader(self) -> Any:
         try:
             from orb.providers.azure.defaults_loader import AzureDefaultsLoader
+
             return AzureDefaultsLoader()
         except ImportError:
             return None
@@ -125,6 +131,7 @@ class AzurePlugin(ProviderPlugin):
             from orb.providers.azure.adapters.template_example_generator_adapter import (
                 AzureTemplateExampleGeneratorAdapter,
             )
+
             return AzureTemplateExampleGeneratorAdapter()
         except ImportError:
             return None
@@ -202,13 +209,16 @@ Each registry is a class-level singleton. Register during startup; never registe
 ```python
 # src/orb/providers/azure/registration.py
 
+
 def create_azure_strategy(provider_config):
     from orb.providers.azure.strategy.azure_provider_strategy import AzureProviderStrategy
+
     return AzureProviderStrategy(config=provider_config)
 
 
 def create_azure_config(raw: dict):
     from orb.providers.azure.configuration.config import AzureProviderConfig
+
     return AzureProviderConfig(**raw)
 ```
 
@@ -262,6 +272,7 @@ class AzureCLISpec:
 ```python
 from pydantic import BaseModel, Field
 
+
 class AzureTemplateDTOConfig(BaseModel):
     vm_size: str = Field("Standard_D2s_v3", description="Azure VM size")
     location: str = Field("eastus", description="Azure region")
@@ -291,14 +302,17 @@ class AzureTemplateDTOConfig(BaseModel):
 ```python
 def register_auth_strategies(self, logger=None) -> None:
     from orb.infrastructure.auth.registry import get_auth_registry
+
     registry = get_auth_registry()
 
     if not registry.is_registered("azure_ad"):
         from orb.providers.azure.auth.azure_ad_strategy import AzureADAuthStrategy
+
         registry.register_strategy("azure_ad", AzureADAuthStrategy)
 
     if not registry.is_registered("managed_identity"):
         from orb.providers.azure.auth.managed_identity_strategy import ManagedIdentityAuthStrategy
+
         registry.register_strategy("managed_identity", ManagedIdentityAuthStrategy)
 ```
 
@@ -343,10 +357,12 @@ class AzureFieldMapping:
 # src/orb/providers/azure/defaults_loader.py
 from orb.domain.base.ports.provider_defaults_loader_port import ProviderDefaultsLoaderPort
 
+
 class AzureDefaultsLoader(ProviderDefaultsLoaderPort):
     def load_defaults(self) -> dict:
         import json
         import importlib.resources as pkg
+
         with pkg.open_text("orb.providers.azure.config", "azure_defaults.json") as f:
             return json.load(f)
 ```
@@ -374,6 +390,7 @@ def register_additional_services(self, container, logger=None) -> None:
 
     def create_azure_template_adapter(c):
         from orb.domain.base.ports import LoggingPort, ConfigurationPort
+
         return AzureTemplateAdapter(
             logger=c.get(LoggingPort),
             config=c.get(ConfigurationPort),
@@ -402,6 +419,7 @@ def template_example_generator(self, container: Any) -> Any:
         from orb.providers.azure.adapters.template_example_generator_adapter import (
             AzureTemplateExampleGeneratorAdapter,
         )
+
         return AzureTemplateExampleGeneratorAdapter()
     except ImportError:
         return None
@@ -448,9 +466,7 @@ EC2 Fleet, SpotFleet, and RunInstances all accept the request immediately and le
 Azure resource deletion may trigger a long-running ARM operation that requires a separate status poll URL:
 
 ```python
-async def return_machines(
-    self, machine_ids: list[str], request: Request
-) -> OperationOutcome:
+async def return_machines(self, machine_ids: list[str], request: Request) -> OperationOutcome:
     response = await self._arm_client.begin_delete(resource_ids=machine_ids)
     if response.needs_follow_up:
         return RequiresFollowUp(
@@ -483,6 +499,7 @@ The following patterns must not appear in new provider code. Each one creates a 
 ```python
 # Wrong — in src/orb/cli/args.py
 parser.add_argument("--azure-subscription-id", ...)
+
 
 # Right — in src/orb/providers/azure/cli/azure_cli_spec.py
 class AzureCLISpec:
@@ -529,6 +546,7 @@ The domain template aggregate is provider-agnostic. Adding an `azure_resource_gr
 ```python
 # Wrong — in src/orb/domain/template/template_aggregate.py
 azure_resource_group: str | None = None
+
 
 # Right — in AzureTemplateDTOConfig (a Pydantic model inside the Azure package)
 class AzureTemplateDTOConfig(BaseModel):
@@ -603,6 +621,7 @@ Gate live tests with a custom pytest marker:
 # tests/providers/<name>/live/conftest.py
 import pytest
 
+
 def pytest_collection_modifyitems(config, items):
     if not config.getoption("--live", default=False):
         skip = pytest.mark.skip(reason="pass --live to run real-cloud tests")
@@ -615,6 +634,7 @@ Add a smoke test to verify entry-point wiring:
 
 ```python
 import importlib.metadata as md
+
 
 def test_entry_point_is_discoverable() -> None:
     eps = md.entry_points(group="orb.providers")

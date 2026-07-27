@@ -70,7 +70,7 @@ Shutdown wiring:
   - ``Application.cleanup()``           → ``bootstrap/__init__.py``
   - SDK ``ORBClient.cleanup()``          → ``sdk/client.py``
   - CLI entrypoint ``main()``            → ``cli/main.py``
-  - MCP server entrypoint               → ``interface/mcp/server/handler.py``
+  - MCP server entrypoint               → ``interface/mcp/catalog_server.py``
 """
 
 from __future__ import annotations

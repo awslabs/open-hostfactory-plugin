@@ -328,8 +328,10 @@ def create_request(template_id: str, machine_count: int) -> str:
     """Create a new machine request."""
     pass
 
+
 # Use flexible typing for CLI argument handling
 from typing import Any
+
 
 def convert_cli_args_to_hostfactory_input(self, operation: str, args: Any) -> Dict[str, Any]:
     """Convert CLI arguments to HostFactory JSON input format.
@@ -339,6 +341,7 @@ def convert_cli_args_to_hostfactory_input(self, operation: str, args: Any) -> Di
     """
     pass
 
+
 # Use dataclasses for DTOs
 @dataclass
 class RequestDto:
@@ -346,12 +349,14 @@ class RequestDto:
     template_id: str
     machine_count: int
 
+
 # Use enums for constants
 class RequestStatus(Enum):
     PENDING = "PENDING"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
+
 
 # Use dependency injection
 class RequestService:
@@ -492,28 +497,25 @@ from src.infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 
+
 def create_request(template_id: str, machine_count: int) -> str:
-    logger.info("Creating request", extra={
-        "template_id": template_id,
-        "machine_count": machine_count
-    })
+    logger.info(
+        "Creating request", extra={"template_id": template_id, "machine_count": machine_count}
+    )
 
     try:
         # Business logic
         request_id = "req-123"
 
-        logger.info("Request created successfully", extra={
-            "request_id": request_id
-        })
+        logger.info("Request created successfully", extra={"request_id": request_id})
 
         return request_id
 
     except Exception as e:
-        logger.error("Failed to create request", extra={
-            "template_id": template_id,
-            "machine_count": machine_count,
-            "error": str(e)
-        })
+        logger.error(
+            "Failed to create request",
+            extra={"template_id": template_id, "machine_count": machine_count, "error": str(e)},
+        )
         raise
 ```
 
@@ -586,18 +588,21 @@ def create_request(template_id: str, machine_count: int) -> str:
     if machine_count <= 0 or machine_count > 1000:
         raise ValidationError("machine_count must be between 1 and 1000")
 
+
 # Secure credential handling
 import os
 from src.infrastructure.config import get_config
+
 
 def get_aws_credentials():
     # Never hardcode credentials
     config = get_config()
     return {
-        'access_key': os.environ.get('AWS_ACCESS_KEY_ID'),
-        'secret_key': os.environ.get('AWS_SECRET_ACCESS_KEY'),
-        'region': config.aws.region
+        "access_key": os.environ.get("AWS_ACCESS_KEY_ID"),
+        "secret_key": os.environ.get("AWS_SECRET_ACCESS_KEY"),
+        "region": config.aws.region,
     }
+
 
 # SQL injection prevention (using parameterized queries)
 def get_requests_by_status(status: str) -> List[Request]:

@@ -48,7 +48,16 @@ class TestCLIIntegration:
 
         mock_orchestrator = Mock()
         mock_orchestrator.execute = mock_execute
-        mock_container.get.return_value = mock_orchestrator
+
+        # The handler renders through the catalog, so it resolves both the
+        # orchestrator and the response formatter from the container.
+        from orb.infrastructure.scheduler.default.default_strategy import DefaultSchedulerStrategy
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
+        formatter = ResponseFormattingService(DefaultSchedulerStrategy(logger=Mock()))
+        mock_container.get.side_effect = lambda cls: (
+            formatter if cls is ResponseFormattingService else mock_orchestrator
+        )
 
         # Test async function-based handler
         from orb.interface.command_handlers import handle_provider_config
@@ -59,8 +68,8 @@ class TestCLIIntegration:
 
         result = await handle_provider_config(mock_command)
 
-        assert result["message"] == "Provider configuration retrieved successfully"
-        assert result["config"] == expected_config
+        assert result.data["message"] == "Provider configuration retrieved successfully"
+        assert result.data["config"] == expected_config
 
     @pytest.mark.asyncio
     @patch("orb.bootstrap.services.register_all_services")

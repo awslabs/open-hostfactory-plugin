@@ -28,12 +28,13 @@ Components are created only when first accessed, not during application startup.
 # Before: Eager initialization
 def __init__(self):
     self._container = get_container()  # Heavy operation
-    self._config = load_config()       # I/O operation
+    self._config = load_config()  # I/O operation
+
 
 # After: Lazy initialization
 def __init__(self):
     self._container = None  # Deferred
-    self._config = None     # Deferred
+    self._config = None  # Deferred
 ```
 
 ### 2. On-Demand Registration
@@ -42,8 +43,8 @@ Services and components are registered with the DI container only when needed.
 
 ```python
 # Minimal upfront registration
-register_minimal_storage_types()    # JSON only
-register_active_scheduler_only()    # Active scheduler only
+register_minimal_storage_types()  # JSON only
+register_active_scheduler_only()  # Active scheduler only
 
 # Full registration triggered on first access
 container.register_on_demand(QueryBus, setup_cqrs_lazy)
@@ -55,7 +56,7 @@ Once created, components are cached to avoid repeated initialization overhead.
 
 ```python
 def get_query_bus(self):
-    if not hasattr(self, '_query_bus'):
+    if not hasattr(self, "_query_bus"):
         self._query_bus = self._container.get(QueryBus)
     return self._query_bus  # Cached instance
 ```
@@ -99,8 +100,8 @@ def _register_services_lazy(container):
     register_core_services(container)
 
     # Minimal component registration
-    register_minimal_storage_types()    # JSON only
-    register_active_scheduler_only()    # Active scheduler only
+    register_minimal_storage_types()  # JSON only
+    register_active_scheduler_only()  # Active scheduler only
     register_provider_services(container)  # Immediate (prevents errors)
 
     # Lazy factories for non-essential services
@@ -154,6 +155,7 @@ def register_minimal_storage_types():
     """Register only JSON storage initially."""
     register_json_storage()  # Lightweight, always available
 
+
 def register_storage_type_on_demand(storage_type):
     """Register specific storage type when needed."""
     if storage_type == "sql":
@@ -180,7 +182,7 @@ def register_active_scheduler_only(scheduler_type="default"):
 ```python
 def register_json_storage():
     """Idempotent registration prevents conflicts."""
-    if hasattr(registry, 'is_registered') and registry.is_registered("json"):
+    if hasattr(registry, "is_registered") and registry.is_registered("json"):
         logger.debug("JSON storage type already registered, skipping")
         return
     # Proceed with registration...
@@ -259,6 +261,7 @@ def register_json_storage():
 def register_my_component_lazy(container):
     container.register_lazy_factory(MyComponent, create_my_component)
 
+
 # Configure on-demand loading
 container.register_on_demand(MyComponent, register_my_component_lazy)
 
@@ -283,6 +286,7 @@ def register_component_with_fallback():
 
 ```python
 import time
+
 
 def measure_component_load():
     start_time = time.time()
@@ -318,7 +322,7 @@ logger.debug(f"Loading {component_name}...")
 **Solution**: Ensure appropriate cleanup
 ```python
 def cleanup_component(self):
-    if hasattr(self, '_cached_component'):
+    if hasattr(self, "_cached_component"):
         del self._cached_component
 ```
 
@@ -376,8 +380,8 @@ def test_lazy_loading_functionality():
 
 ```python
 def track_component_usage():
-    metrics.increment('component.loaded', tags={'type': component_type})
-    metrics.timing('component.load_time', load_time)
+    metrics.increment("component.loaded", tags={"type": component_type})
+    metrics.timing("component.load_time", load_time)
 ```
 
 ---

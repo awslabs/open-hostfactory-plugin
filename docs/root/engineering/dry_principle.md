@@ -39,6 +39,7 @@ class Entity(BaseModel):
         """Each entity defines its identity."""
         pass
 
+
 class AggregateRoot(Entity):
     """Base aggregate root with event handling."""
 
@@ -58,6 +59,7 @@ class AggregateRoot(Entity):
         """Common event clearing - not repeated in each aggregate."""
         self._domain_events.clear()
 
+
 # Domain entities inherit common behavior
 class Template(AggregateRoot):
     """Template entity - inherits common functionality."""
@@ -69,6 +71,7 @@ class Template(AggregateRoot):
     def get_identity(self) -> str:
         """Only defines identity - other behavior inherited."""
         return self.template_id
+
 
 class Request(AggregateRoot):
     """Request entity - inherits same common functionality."""
@@ -114,13 +117,17 @@ class Repository(ABC, Generic[T]):
         """Common not found handling."""
         raise EntityNotFoundError(f"{entity_type} with ID {entity_id} not found")
 
+
 # Specific repositories inherit common behavior
 class TemplateRepository(Repository[Template]):
     """Template repository - inherits common operations."""
+
     pass
+
 
 class RequestRepository(Repository[Request]):
     """Request repository - inherits same common operations."""
+
     pass
 ```
 
@@ -243,7 +250,9 @@ class AWSOperations:
     """Shared AWS operations - eliminates duplication across handlers."""
 
     @staticmethod
-    def build_tags(base_tags: Dict[str, str], additional_tags: Dict[str, str] = None) -> List[Dict[str, str]]:
+    def build_tags(
+        base_tags: Dict[str, str], additional_tags: Dict[str, str] = None
+    ) -> List[Dict[str, str]]:
         """Common tag building logic - used by all handlers."""
         tags = base_tags.copy()
         if additional_tags:
@@ -256,16 +265,18 @@ class AWSOperations:
         """Common response parsing - used by all handlers."""
         instances = []
 
-        for reservation in response.get('Reservations', []):
-            for instance in reservation.get('Instances', []):
-                instances.append({
-                    'instance_id': instance['InstanceId'],
-                    'state': instance['State']['Name'],
-                    'instance_type': instance['InstanceType'],
-                    'launch_time': instance.get('LaunchTime'),
-                    'private_ip': instance.get('PrivateIpAddress'),
-                    'public_ip': instance.get('PublicIpAddress')
-                })
+        for reservation in response.get("Reservations", []):
+            for instance in reservation.get("Instances", []):
+                instances.append(
+                    {
+                        "instance_id": instance["InstanceId"],
+                        "state": instance["State"]["Name"],
+                        "instance_type": instance["InstanceType"],
+                        "launch_time": instance.get("LaunchTime"),
+                        "private_ip": instance.get("PrivateIpAddress"),
+                        "public_ip": instance.get("PublicIpAddress"),
+                    }
+                )
 
         return instances
 
@@ -276,8 +287,9 @@ class AWSOperations:
             raise ValueError("Instance IDs list cannot be empty")
 
         for instance_id in instance_ids:
-            if not instance_id.startswith('i-'):
+            if not instance_id.startswith("i-"):
                 raise ValueError(f"Invalid instance ID format: {instance_id}")
+
 
 # Handlers use shared utilities instead of duplicating logic
 class EC2FleetHandler(AWSHandler):
@@ -285,7 +297,7 @@ class EC2FleetHandler(AWSHandler):
         # Uses shared utility instead of duplicating tag logic
         tags = AWSOperations.build_tags(
             base_tags={"RequestId": request.id, "Handler": "EC2Fleet"},
-            additional_tags=request.template.attributes.get("tags", {})
+            additional_tags=request.template.attributes.get("tags", {}),
         )
 
         # Launch instances with common tags
@@ -296,12 +308,13 @@ class EC2FleetHandler(AWSHandler):
 
         return self._convert_to_machines(instances, request)
 
+
 class SpotFleetHandler(AWSHandler):
     async def provision_instances(self, request: Request) -> List[Machine]:
         # Same shared utilities - no duplication
         tags = AWSOperations.build_tags(
             base_tags={"RequestId": request.id, "Handler": "SpotFleet"},
-            additional_tags=request.template.attributes.get("tags", {})
+            additional_tags=request.template.attributes.get("tags", {}),
         )
 
         response = await self._launch_spot_fleet(request, tags)
@@ -318,8 +331,9 @@ class ConfigurationUtils:
     """Shared configuration utilities - eliminates duplication."""
 
     @staticmethod
-    def merge_configurations(base_config: Dict[str, Any],
-                           override_config: Dict[str, Any]) -> Dict[str, Any]:
+    def merge_configurations(
+        base_config: Dict[str, Any], override_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Common configuration merging - used throughout the system."""
         merged = base_config.copy()
 
@@ -332,9 +346,9 @@ class ConfigurationUtils:
         return merged
 
     @staticmethod
-    def validate_required_fields(config: Dict[str, Any],
-                                required_fields: List[str],
-                                config_name: str) -> None:
+    def validate_required_fields(
+        config: Dict[str, Any], required_fields: List[str], config_name: str
+    ) -> None:
         """Common validation - used by all configuration classes."""
         missing_fields = []
 
@@ -343,16 +357,12 @@ class ConfigurationUtils:
                 missing_fields.append(field)
 
         if missing_fields:
-            raise ConfigurationError(
-                f"Missing required fields in {config_name}: {missing_fields}"
-            )
+            raise ConfigurationError(f"Missing required fields in {config_name}: {missing_fields}")
 
     @staticmethod
-    def get_nested_value(config: Dict[str, Any],
-                        key_path: str,
-                        default: Any = None) -> Any:
+    def get_nested_value(config: Dict[str, Any], key_path: str, default: Any = None) -> Any:
         """Common nested value retrieval - used throughout configuration system."""
-        keys = key_path.split('.')
+        keys = key_path.split(".")
         value = config
 
         for key in keys:
@@ -363,29 +373,21 @@ class ConfigurationUtils:
 
         return value
 
+
 # Configuration classes use shared utilities
 class AWSProviderConfig:
     def __init__(self, config_data: Dict[str, Any]):
         # Uses shared validation instead of duplicating
-        ConfigurationUtils.validate_required_fields(
-            config_data,
-            ['region'],
-            'AWS Provider'
-        )
+        ConfigurationUtils.validate_required_fields(config_data, ["region"], "AWS Provider")
 
         # Uses shared merging for defaults
         self._config = ConfigurationUtils.merge_configurations(
-            self._get_default_config(),
-            config_data
+            self._get_default_config(), config_data
         )
 
     def get_handler_config(self, handler_type: str) -> Dict[str, Any]:
         # Uses shared nested value retrieval
-        return ConfigurationUtils.get_nested_value(
-            self._config,
-            f'handlers.{handler_type}',
-            {}
-        )
+        return ConfigurationUtils.get_nested_value(self._config, f"handlers.{handler_type}", {})
 ```
 
 ## Template-Based Code Generation
@@ -399,18 +401,14 @@ Instead of duplicating similar patterns, the plugin uses templates and generator
 class CommandHandlerTemplate:
     """Template for command handlers - eliminates duplication."""
 
-    def __init__(self,
-                 repository: Repository,
-                 logger: LoggingPort,
-                 validator: Validator = None):
+    def __init__(self, repository: Repository, logger: LoggingPort, validator: Validator = None):
         self._repository = repository
         self._logger = logger
         self._validator = validator
 
-    async def handle_command(self,
-                           command: Any,
-                           entity_factory: Callable,
-                           success_message: str) -> Any:
+    async def handle_command(
+        self, command: Any, entity_factory: Callable, success_message: str
+    ) -> Any:
         """Template method - common command handling pattern."""
 
         # Common validation pattern
@@ -437,6 +435,7 @@ class CommandHandlerTemplate:
             self._logger.error(f"Command handling failed: {e}")
             raise
 
+
 # Specific handlers use template instead of duplicating patterns
 class CreateTemplateHandler:
     def __init__(self, template_repo: TemplateRepository, logger: LoggingPort):
@@ -447,12 +446,11 @@ class CreateTemplateHandler:
         return await self._template.handle_command(
             command=command,
             entity_factory=lambda cmd: Template(
-                template_id=cmd.template_id,
-                max_number=cmd.max_number,
-                attributes=cmd.attributes
+                template_id=cmd.template_id, max_number=cmd.max_number, attributes=cmd.attributes
             ),
-            success_message="Template created: {entity_id}"
+            success_message="Template created: {entity_id}",
         )
+
 
 class CreateRequestHandler:
     def __init__(self, request_repo: RequestRepository, logger: LoggingPort):
@@ -466,9 +464,9 @@ class CreateRequestHandler:
                 request_id=generate_id(),
                 template_id=cmd.template_id,
                 max_number=cmd.max_number,
-                status=RequestStatus.PENDING
+                status=RequestStatus.PENDING,
             ),
-            success_message="Request created: {entity_id}"
+            success_message="Request created: {entity_id}",
         )
 ```
 
@@ -497,6 +495,7 @@ class SystemConstants:
     COMPLETED_STATUS = "completed"
     FAILED_STATUS = "failed"
 
+
 # src/domain/base/field_mappings.py
 class FieldMappings:
     """Common field mappings - eliminates duplication across formatters."""
@@ -507,7 +506,7 @@ class FieldMappings:
         "maxNumber": "max_number",
         "requestId": "request_id",
         "machineId": "machine_id",
-        "instanceType": "instance_type"
+        "instanceType": "instance_type",
     }
 
     # AWS-specific field mappings
@@ -516,7 +515,7 @@ class FieldMappings:
         "InstanceType": "instance_type",
         "State": "status",
         "LaunchTime": "created_at",
-        "PrivateIpAddress": "private_ip"
+        "PrivateIpAddress": "private_ip",
     }
 
     @classmethod
@@ -524,6 +523,7 @@ class FieldMappings:
         """Common field mapping logic - used by all formatters."""
         mappings = getattr(cls, f"{mapping_type.upper()}_FIELD_MAPPINGS", {})
         return mappings.get(source_field, source_field)
+
 
 # Usage throughout the system
 class TemplateFormatter:
@@ -534,6 +534,7 @@ class TemplateFormatter:
             if hasattr(template, internal_field):
                 result[hf_field] = getattr(template, internal_field)
         return result
+
 
 class MachineFormatter:
     def format_aws_response(self, aws_data: Dict[str, Any]) -> Dict[str, Any]:

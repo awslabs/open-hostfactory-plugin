@@ -289,6 +289,7 @@ metrics.set_meter_provider(provider)
 
 # ORB instruments now emit to the above provider
 from orb.sdk import ORBClient
+
 client = ORBClient(...)
 ```
 

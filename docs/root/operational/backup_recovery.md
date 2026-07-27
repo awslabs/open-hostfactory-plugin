@@ -263,31 +263,30 @@ gunzip -c backups/json/backup_20250630_120000.json.gz > data/request_database.js
 import json
 import gzip
 
+
 def restore_templates_only(backup_path, target_path):
     """Restore only templates from backup."""
 
     # Load backup data
-    with gzip.open(backup_path, 'rt') as f:
+    with gzip.open(backup_path, "rt") as f:
         backup_data = json.load(f)
 
     # Load current data
-    with open(target_path, 'r') as f:
+    with open(target_path, "r") as f:
         current_data = json.load(f)
 
     # Restore only templates
-    current_data['templates'] = backup_data.get('templates', {})
+    current_data["templates"] = backup_data.get("templates", {})
 
     # Save updated data
-    with open(target_path, 'w') as f:
+    with open(target_path, "w") as f:
         json.dump(current_data, f, indent=2)
 
     print(f"Restored {len(current_data['templates'])} templates")
 
+
 # Usage
-restore_templates_only(
-    'backups/json/backup_20250630_120000.json.gz',
-    'data/request_database.json'
-)
+restore_templates_only("backups/json/backup_20250630_120000.json.gz", "data/request_database.json")
 ```
 
 ### SQL Storage Recovery
@@ -471,6 +470,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+
 class BackupMonitor:
     def __init__(self, config_path="config/backup_config.json"):
         with open(config_path) as f:
@@ -480,16 +480,16 @@ class BackupMonitor:
         """Check if backups are recent enough."""
         issues = []
 
-        for backup_type, config in self.config['backup_types'].items():
-            backup_dir = Path(config['directory'])
-            max_age_hours = config['max_age_hours']
+        for backup_type, config in self.config["backup_types"].items():
+            backup_dir = Path(config["directory"])
+            max_age_hours = config["max_age_hours"]
 
             if not backup_dir.exists():
                 issues.append(f"Backup directory missing: {backup_dir}")
                 continue
 
             # Find most recent backup
-            backup_files = list(backup_dir.glob(config['pattern']))
+            backup_files = list(backup_dir.glob(config["pattern"]))
             if not backup_files:
                 issues.append(f"No backup files found in {backup_dir}")
                 continue
@@ -500,8 +500,7 @@ class BackupMonitor:
 
             if backup_age_hours > max_age_hours:
                 issues.append(
-                    f"Backup too old: {latest_backup} "
-                    f"({backup_age_hours:.1f}h > {max_age_hours}h)"
+                    f"Backup too old: {latest_backup} ({backup_age_hours:.1f}h > {max_age_hours}h)"
                 )
 
         return issues
@@ -514,9 +513,10 @@ class BackupMonitor:
         json_backups = Path("backups/json").glob("*.json*")
         for backup_file in json_backups:
             try:
-                if backup_file.suffix == '.gz':
+                if backup_file.suffix == ".gz":
                     import gzip
-                    with gzip.open(backup_file, 'rt') as f:
+
+                    with gzip.open(backup_file, "rt") as f:
                         json.load(f)
                 else:
                     with open(backup_file) as f:
@@ -525,6 +525,7 @@ class BackupMonitor:
                 issues.append(f"Corrupt backup: {backup_file} - {e}")
 
         return issues
+
 
 if __name__ == "__main__":
     monitor = BackupMonitor()

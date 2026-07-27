@@ -25,12 +25,11 @@ from src.providers.base.strategy.provider_strategy import ProviderStrategy
 from src.providers.aws.strategy.aws_provider_strategy import AWSProviderStrategy
 from src.providers.aws.configuration.config import AWSProviderConfig
 
+
 class ProviderStrategyFactory:
     """Factory for creating provider strategies from configuration."""
 
-    def __init__(self,
-                 config_manager: ConfigurationPort,
-                 logger: LoggingPort):
+    def __init__(self, config_manager: ConfigurationPort, logger: LoggingPort):
         self._config_manager = config_manager
         self._logger = logger
         self._strategy_registry: Dict[str, callable] = {}
@@ -45,13 +44,17 @@ class ProviderStrategyFactory:
             # "provider2": self._create_provider2_strategy,
         }
 
-    def create_strategy(self, provider_type: str, config_override: Dict[str, Any] = None) -> ProviderStrategy:
+    def create_strategy(
+        self, provider_type: str, config_override: Dict[str, Any] = None
+    ) -> ProviderStrategy:
         """Create provider strategy based on type and configuration."""
         self._logger.info(f"Creating provider strategy: {provider_type}")
 
         if provider_type not in self._strategy_registry:
             available_types = list(self._strategy_registry.keys())
-            raise ValueError(f"Unsupported provider type: {provider_type}. Available: {available_types}")
+            raise ValueError(
+                f"Unsupported provider type: {provider_type}. Available: {available_types}"
+            )
 
         creator_func = self._strategy_registry[provider_type]
         strategy = creator_func(config_override)
@@ -75,10 +78,7 @@ class ProviderStrategyFactory:
         aws_config = AWSProviderConfig(**aws_config_data)
 
         # Create and return strategy
-        return AWSProviderStrategy(
-            config=aws_config,
-            logger=self._logger
-        )
+        return AWSProviderStrategy(config=aws_config, logger=self._logger)
 
     def _validate_aws_config(self, config: Dict[str, Any]) -> None:
         """Validate AWS configuration parameters."""
@@ -95,7 +95,7 @@ class ProviderStrategyFactory:
         """Get information about available providers."""
         return {
             "available_providers": self.get_available_providers(),
-            "default_provider": self._config_manager.get("provider.default", "aws")
+            "default_provider": self._config_manager.get("provider.default", "aws"),
         }
 ```
 
@@ -106,9 +106,9 @@ class ProviderStrategyFactory:
 def create_provider_strategy_factory(container: DIContainer) -> ProviderStrategyFactory:
     """Factory function for provider strategy factory."""
     return ProviderStrategyFactory(
-        config_manager=container.get(ConfigurationPort),
-        logger=container.get(LoggingPort)
+        config_manager=container.get(ConfigurationPort), logger=container.get(LoggingPort)
     )
+
 
 # Registration in DI container
 container.register_factory(ProviderStrategyFactory, create_provider_strategy_factory)
@@ -133,14 +133,12 @@ from src.providers.aws.infrastructure.aws_client import AWSClient
 from src.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 from src.domain.template.aggregate import Template
 
+
 @injectable
 class AWSHandlerFactory:
     """Factory for creating AWS handlers based on template requirements."""
 
-    def __init__(self,
-                 aws_client: AWSClient,
-                 logger: LoggingPort,
-                 config: ConfigurationPort):
+    def __init__(self, aws_client: AWSClient, logger: LoggingPort, config: ConfigurationPort):
         self._aws_client = aws_client
         self._logger = logger
         self._config = config
@@ -153,13 +151,15 @@ class AWSHandlerFactory:
         from src.providers.aws.infrastructure.handlers.ec2_fleet_handler import EC2FleetHandler
         from src.providers.aws.infrastructure.handlers.spot_fleet_handler import SpotFleetHandler
         from src.providers.aws.infrastructure.handlers.asg_handler import ASGHandler
-        from src.providers.aws.infrastructure.handlers.run_instances_handler import RunInstancesHandler
+        from src.providers.aws.infrastructure.handlers.run_instances_handler import (
+            RunInstancesHandler,
+        )
 
         self._handler_registry = {
             "ec2_fleet": EC2FleetHandler,
             "spot_fleet": SpotFleetHandler,
             "auto_scaling_group": ASGHandler,
-            "run_instances": RunInstancesHandler
+            "run_instances": RunInstancesHandler,
         }
 
         self._logger.info(f"Registered {len(self._handler_registry)} handler types")
@@ -171,7 +171,9 @@ class AWSHandlerFactory:
         # Check if handler type is supported
         if handler_type not in self._handler_registry:
             available_types = list(self._handler_registry.keys())
-            raise ValueError(f"Unsupported handler type: {handler_type}. Available: {available_types}")
+            raise ValueError(
+                f"Unsupported handler type: {handler_type}. Available: {available_types}"
+            )
 
         # Check cache first
         if handler_type in self._handler_cache:
@@ -180,9 +182,7 @@ class AWSHandlerFactory:
         # Create new handler instance
         handler_class = self._handler_registry[handler_type]
         handler = handler_class(
-            aws_client=self._aws_client,
-            logger=self._logger,
-            config=self._config
+            aws_client=self._aws_client, logger=self._logger, config=self._config
         )
 
         # Cache for reuse
@@ -229,7 +229,7 @@ class AWSHandlerFactory:
         return {
             "available_handlers": self.get_available_handlers(),
             "cached_handlers": list(self._handler_cache.keys()),
-            "default_handler": self._config.get("aws.handlers.default", "ec2_fleet")
+            "default_handler": self._config.get("aws.handlers.default", "ec2_fleet"),
         }
 ```
 
@@ -247,12 +247,11 @@ from src.domain.template.repository import TemplateRepository
 from src.domain.request.repository import RequestRepository
 from src.domain.machine.repository import MachineRepository
 
+
 class RepositoryFactory:
     """Factory for creating repository implementations based on storage type."""
 
-    def __init__(self,
-                 config: ConfigurationPort,
-                 logger: LoggingPort):
+    def __init__(self, config: ConfigurationPort, logger: LoggingPort):
         self._config = config
         self._logger = logger
         self._repository_registry: Dict[str, Dict[str, Type]] = {}
@@ -261,7 +260,9 @@ class RepositoryFactory:
     def _register_repository_implementations(self):
         """Register available repository implementations."""
         # Import implementations
-        from src.infrastructure.storage.dynamodb.template_repository import DynamoDBTemplateRepository
+        from src.infrastructure.storage.dynamodb.template_repository import (
+            DynamoDBTemplateRepository,
+        )
         from src.infrastructure.storage.dynamodb.request_repository import DynamoDBRequestRepository
         from src.infrastructure.storage.dynamodb.machine_repository import DynamoDBMachineRepository
         from src.infrastructure.storage.memory.template_repository import InMemoryTemplateRepository
@@ -272,16 +273,18 @@ class RepositoryFactory:
             "dynamodb": {
                 "template": DynamoDBTemplateRepository,
                 "request": DynamoDBRequestRepository,
-                "machine": DynamoDBMachineRepository
+                "machine": DynamoDBMachineRepository,
             },
             "memory": {
                 "template": InMemoryTemplateRepository,
                 "request": InMemoryRequestRepository,
-                "machine": InMemoryMachineRepository
-            }
+                "machine": InMemoryMachineRepository,
+            },
         }
 
-        self._logger.info(f"Registered repository implementations for storage types: {list(self._repository_registry.keys())}")
+        self._logger.info(
+            f"Registered repository implementations for storage types: {list(self._repository_registry.keys())}"
+        )
 
     def create_template_repository(self) -> TemplateRepository:
         """Create template repository based on configuration."""
@@ -305,13 +308,17 @@ class RepositoryFactory:
         # Validate storage type
         if storage_type not in self._repository_registry:
             available_types = list(self._repository_registry.keys())
-            raise ValueError(f"Unsupported storage type: {storage_type}. Available: {available_types}")
+            raise ValueError(
+                f"Unsupported storage type: {storage_type}. Available: {available_types}"
+            )
 
         # Validate repository type
         storage_implementations = self._repository_registry[storage_type]
         if repo_type not in storage_implementations:
             available_repos = list(storage_implementations.keys())
-            raise ValueError(f"Repository type {repo_type} not available for storage {storage_type}. Available: {available_repos}")
+            raise ValueError(
+                f"Repository type {repo_type} not available for storage {storage_type}. Available: {available_repos}"
+            )
 
         # Get repository class
         repo_class = storage_implementations[repo_type]
@@ -332,7 +339,7 @@ class RepositoryFactory:
             table_name=dynamodb_config.get("table_name"),
             region=dynamodb_config.get("region"),
             profile=dynamodb_config.get("profile"),
-            logger=self._logger
+            logger=self._logger,
         )
 
     def _create_memory_repository(self, repo_class: Type) -> Any:
@@ -360,6 +367,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 from src.domain.base.ports import LoggingPort, ConfigurationPort
 
+
 class ProviderComponentFactory(ABC):
     """Abstract factory for creating provider-specific components."""
 
@@ -383,36 +391,39 @@ class ProviderComponentFactory(ABC):
         """Create provider-specific template adapter."""
         pass
 
+
 class AWSComponentFactory(ProviderComponentFactory):
     """Concrete factory for AWS components."""
 
-    def __init__(self,
-                 config: ConfigurationPort,
-                 logger: LoggingPort):
+    def __init__(self, config: ConfigurationPort, logger: LoggingPort):
         self._config = config
         self._logger = logger
 
     def create_client(self) -> AWSClient:
         """Create AWS client."""
         from src.providers.aws.infrastructure.aws_client import AWSClient
+
         aws_config = self._config.get_section("aws")
         return AWSClient(aws_config, self._logger)
 
     def create_instance_manager(self) -> AWSInstanceManager:
         """Create AWS instance manager."""
         from src.providers.aws.managers.aws_instance_manager import AWSInstanceManager
+
         client = self.create_client()
         return AWSInstanceManager(client, self._config, self._logger)
 
     def create_resource_manager(self) -> AWSResourceManagerImpl:
         """Create AWS resource manager."""
         from src.providers.aws.managers.aws_resource_manager import AWSResourceManagerImpl
+
         client = self.create_client()
         return AWSResourceManagerImpl(client, self._config, self._logger)
 
     def create_template_adapter(self) -> AWSTemplateAdapter:
         """Create AWS template adapter."""
         from src.providers.aws.infrastructure.adapters.template_adapter import AWSTemplateAdapter
+
         client = self.create_client()
         return AWSTemplateAdapter(client, self._logger, self._config)
 ```
@@ -456,18 +467,14 @@ def register_factory_services(container: DIContainer) -> None:
     container.register_factory(
         ProviderStrategyFactory,
         lambda c: ProviderStrategyFactory(
-            config_manager=c.get(ConfigurationPort),
-            logger=c.get(LoggingPort)
-        )
+            config_manager=c.get(ConfigurationPort), logger=c.get(LoggingPort)
+        ),
     )
 
     # Register repository factory
     container.register_singleton(
         RepositoryFactory,
-        lambda c: RepositoryFactory(
-            config=c.get(ConfigurationPort),
-            logger=c.get(LoggingPort)
-        )
+        lambda c: RepositoryFactory(config=c.get(ConfigurationPort), logger=c.get(LoggingPort)),
     )
 
     # Register AWS handler factory (if AWS provider is configured)

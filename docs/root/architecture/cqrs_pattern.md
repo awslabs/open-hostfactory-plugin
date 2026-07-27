@@ -32,9 +32,11 @@ Commands represent intentions to change system state.
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
+
 @dataclass
 class BaseCommand:
     """Base class for all commands."""
+
     correlation_id: Optional[str] = None
     user_id: Optional[str] = None
 ```
@@ -44,13 +46,16 @@ class BaseCommand:
 @dataclass
 class CreateRequestCommand(BaseCommand):
     """Command to create a new request."""
+
     template_id: str
     max_number: int
     attributes: Optional[Dict[str, Any]] = None
 
+
 @dataclass
 class UpdateMachineStatusCommand(BaseCommand):
     """Command to update machine status."""
+
     machine_id: str
     status: str
     metadata: Optional[Dict[str, Any]] = None
@@ -64,12 +69,11 @@ class UpdateMachineStatusCommand(BaseCommand):
 from src.domain.template.repository import TemplateRepository
 from src.domain.base.ports import LoggingPort
 
+
 class ValidateTemplateHandler:
     """Handle template validation commands."""
 
-    def __init__(self,
-                 template_repo: TemplateRepository,
-                 logger: LoggingPort):
+    def __init__(self, template_repo: TemplateRepository, logger: LoggingPort):
         self._template_repo = template_repo
         self._logger = logger
 
@@ -97,11 +101,13 @@ class ValidateTemplateHandler:
 class CreateRequestHandler:
     """Handle request creation commands."""
 
-    def __init__(self,
-                 request_repo: RequestRepository,
-                 template_repo: TemplateRepository,
-                 provider_context: ProviderContext,
-                 logger: LoggingPort):
+    def __init__(
+        self,
+        request_repo: RequestRepository,
+        template_repo: TemplateRepository,
+        provider_context: ProviderContext,
+        logger: LoggingPort,
+    ):
         self._request_repo = request_repo
         self._template_repo = template_repo
         self._provider_context = provider_context
@@ -120,7 +126,7 @@ class CreateRequestHandler:
         request = Request.create(
             template_id=command.template_id,
             max_number=command.max_number,
-            attributes=command.attributes or {}
+            attributes=command.attributes or {},
         )
 
         # Save request
@@ -145,9 +151,11 @@ Queries represent requests for system state information.
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, List
 
+
 @dataclass
 class BaseQuery:
     """Base class for all queries."""
+
     correlation_id: Optional[str] = None
     user_id: Optional[str] = None
 ```
@@ -157,13 +165,16 @@ class BaseQuery:
 @dataclass
 class GetTemplatesQuery(BaseQuery):
     """Query to retrieve templates."""
+
     filters: Optional[Dict[str, Any]] = None
     limit: Optional[int] = None
     offset: Optional[int] = None
 
+
 @dataclass
 class GetRequestStatusQuery(BaseQuery):
     """Query to get request status."""
+
     request_id: str
     include_machines: bool = False
 ```
@@ -176,9 +187,7 @@ class GetRequestStatusQuery(BaseQuery):
 class GetTemplatesHandler:
     """Handle template retrieval queries."""
 
-    def __init__(self,
-                 template_repo: TemplateRepository,
-                 logger: LoggingPort):
+    def __init__(self, template_repo: TemplateRepository, logger: LoggingPort):
         self._template_repo = template_repo
         self._logger = logger
 
@@ -188,16 +197,11 @@ class GetTemplatesHandler:
 
         # Apply filters
         templates = await self._template_repo.get_all(
-            filters=query.filters,
-            limit=query.limit,
-            offset=query.offset
+            filters=query.filters, limit=query.limit, offset=query.offset
         )
 
         # Convert to response DTOs
-        responses = [
-            TemplateResponse.from_domain(template)
-            for template in templates
-        ]
+        responses = [TemplateResponse.from_domain(template) for template in templates]
 
         self._logger.info(f"Retrieved {len(responses)} templates")
         return responses
@@ -209,10 +213,9 @@ class GetTemplatesHandler:
 class GetRequestStatusHandler:
     """Handle request status queries."""
 
-    def __init__(self,
-                 request_repo: RequestRepository,
-                 machine_repo: MachineRepository,
-                 logger: LoggingPort):
+    def __init__(
+        self, request_repo: RequestRepository, machine_repo: MachineRepository, logger: LoggingPort
+    ):
         self._request_repo = request_repo
         self._machine_repo = machine_repo
         self._logger = logger
@@ -236,7 +239,7 @@ class GetRequestStatusHandler:
             request_id=request.id,
             status=request.status,
             created_at=request.created_at,
-            machines=[MachineResponse.from_domain(m) for m in machines]
+            machines=[MachineResponse.from_domain(m) for m in machines],
         )
 
         return response
@@ -252,6 +255,7 @@ The buses route commands and queries to their appropriate handlers.
 # src/application/base/commands.py
 from typing import Dict, Type, Any
 from src.domain.base.ports import LoggingPort
+
 
 class CommandBus:
     """Bus for routing commands to handlers."""
@@ -329,20 +333,14 @@ The ApplicationService coordinates CQRS operations.
 class ApplicationService:
     """Main application service using CQRS."""
 
-    def __init__(self,
-                 command_bus: CommandBus,
-                 query_bus: QueryBus,
-                 logger: LoggingPort):
+    def __init__(self, command_bus: CommandBus, query_bus: QueryBus, logger: LoggingPort):
         self._command_bus = command_bus
         self._query_bus = query_bus
         self._logger = logger
 
     async def create_request(self, template_id: str, max_number: int) -> str:
         """Create a new request using CQRS."""
-        command = CreateRequestCommand(
-            template_id=template_id,
-            max_number=max_number
-        )
+        command = CreateRequestCommand(template_id=template_id, max_number=max_number)
 
         request_id = await self._command_bus.execute(command)
         return request_id
@@ -373,8 +371,7 @@ class RequestCommandHandler:
         """Handle create request CLI command."""
         try:
             request_id = await self._app_service.create_request(
-                template_id=args.template_id,
-                max_number=args.count
+                template_id=args.template_id, max_number=args.count
             )
 
             print(f"Request created: {request_id}")
@@ -389,14 +386,12 @@ class RequestCommandHandler:
 # src/api/routers/requests.py
 @router.post("/requests")
 async def create_request(
-    request: CreateRequestModel,
-    app_service: ApplicationService = Depends(get_application_service)
+    request: CreateRequestModel, app_service: ApplicationService = Depends(get_application_service)
 ):
     """Create request via REST API using CQRS."""
     try:
         request_id = await app_service.create_request(
-            template_id=request.template_id,
-            max_number=request.max_number
+            template_id=request.template_id, max_number=request.max_number
         )
 
         return {"request_id": request_id}

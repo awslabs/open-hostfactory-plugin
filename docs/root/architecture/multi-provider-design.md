@@ -36,9 +36,9 @@ The `Template` aggregate has been extended with multi-provider fields:
 ```python
 class Template:
     template_id: str
-    provider_type: Optional[str]      # NEW: Provider type (aws)
-    provider_name: Optional[str]      # NEW: Provider instance name (aws-us-east-1)
-    provider_api: Optional[str]       # NEW: Specific API to use (EC2Fleet, SpotFleet)
+    provider_type: Optional[str]  # NEW: Provider type (aws)
+    provider_name: Optional[str]  # NEW: Provider instance name (aws-us-east-1)
+    provider_api: Optional[str]  # NEW: Specific API to use (EC2Fleet, SpotFleet)
     # ... existing fields
 ```
 

@@ -32,10 +32,7 @@ async with orb(provider="aws") as sdk:
 
     # Create machines using the orchestrator method
     if templates:
-        request = await sdk.request_machines(
-            template_id=templates[0]["template_id"],
-            count=5
-        )
+        request = await sdk.request_machines(template_id=templates[0]["template_id"], count=5)
         print(f"Created request: {request['request_id']}")
 
         # Check status
@@ -154,13 +151,9 @@ For environments without a config file on disk (Lambda functions, Jupyter notebo
 app_config = {
     "provider": {
         "type": "aws",
-        "providers": [{
-            "name": "default",
-            "type": "aws",
-            "region": "us-east-1"
-        }]
+        "providers": [{"name": "default", "type": "aws", "region": "us-east-1"}],
     },
-    "storage": {"type": "json"}
+    "storage": {"type": "json"},
 }
 
 async with orb(app_config=app_config) as sdk:
@@ -180,8 +173,24 @@ Each `ORBClient` instance creates its own isolated DI container. Multiple client
 
 ```python
 # Two clients with different regions — fully isolated
-async with orb(app_config={"provider": {"type": "aws", "providers": [{"name": "east", "type": "aws", "region": "us-east-1"}]}, "storage": {"type": "json"}}) as east_client:
-    async with orb(app_config={"provider": {"type": "aws", "providers": [{"name": "west", "type": "aws", "region": "us-west-2"}]}, "storage": {"type": "json"}}) as west_client:
+async with orb(
+    app_config={
+        "provider": {
+            "type": "aws",
+            "providers": [{"name": "east", "type": "aws", "region": "us-east-1"}],
+        },
+        "storage": {"type": "json"},
+    }
+) as east_client:
+    async with orb(
+        app_config={
+            "provider": {
+                "type": "aws",
+                "providers": [{"name": "west", "type": "aws", "region": "us-west-2"}],
+            },
+            "storage": {"type": "json"},
+        }
+    ) as west_client:
         # Each client operates independently
         east_templates = await east_client.list_templates()
         west_templates = await west_client.list_templates()
@@ -213,11 +222,7 @@ async with orb(provider="aws") as sdk:
 # CQRS methods (more explicit, full parameter control)
 async with orb(provider="aws") as sdk:
     template = await sdk.get_template(template_id="my-template")
-    request = await sdk.create_request(
-        template_id="my-template",
-        count=3,
-        timeout=1800
-    )
+    request = await sdk.create_request(template_id="my-template", count=3, timeout=1800)
     health = await sdk.get_provider_health()
 ```
 
@@ -253,6 +258,7 @@ The SDK provides `ORBClientProtocol` for IDE autocompletion and type checking:
 ```python
 from orb.sdk import ORBClientProtocol
 
+
 async def provision_machines(client: ORBClientProtocol, template_id: str, count: int):
     """Type-safe function accepting any ORBClient-compatible object."""
     request = await client.create_request(template_id=template_id, count=count)
@@ -280,14 +286,14 @@ async with orb(provider="aws") as sdk:
         name="New Template",
         provider_api="aws",
         image_id="ami-12345678",
-        configuration={"machine_types": {"t3.medium": 1}}
+        configuration={"machine_types": {"t3.medium": 1}},
     )
 
     # Update template
     updated_template = await sdk.update_template(
         template_id="my-template",
         name="Updated Template",
-        configuration={"machine_types": {"t3.large": 1}}
+        configuration={"machine_types": {"t3.large": 1}},
     )
 
     # Delete template
@@ -302,11 +308,7 @@ async with orb(provider="aws") as sdk:
 ```python
 async with orb(provider="aws") as sdk:
     # Create machine request
-    request = await sdk.create_request(
-        template_id="basic-template",
-        count=3,
-        timeout=1800
-    )
+    request = await sdk.create_request(template_id="basic-template", count=3, timeout=1800)
 
     # Monitor request status
     status = await sdk.get_request(request_id=request["created_request_id"])
@@ -315,9 +317,7 @@ async with orb(provider="aws") as sdk:
     requests = await sdk.list_active_requests()
 
     # Return machines when done
-    return_request = await sdk.create_return_request(
-        machine_ids=["i-1234567890abcdef0"]
-    )
+    return_request = await sdk.create_return_request(machine_ids=["i-1234567890abcdef0"])
 ```
 
 ### Request Management
@@ -389,12 +389,14 @@ except SDKError as e:
 from orb import ORBClient as orb
 from orb.sdk import SDKMiddleware
 
+
 class LoggingMiddleware(SDKMiddleware):
     async def process(self, method_name, args, kwargs, next_handler):
         print(f"Calling {method_name} with kwargs={kwargs}")
         result = await next_handler(args, kwargs)
         print(f"{method_name} returned: {result}")
         return result
+
 
 async with orb(provider="aws") as sdk:
     sdk.add_middleware(LoggingMiddleware())
@@ -406,11 +408,13 @@ async with orb(provider="aws") as sdk:
 ```python
 async with orb(provider="aws") as sdk:
     # Create multiple machines in different regions
-    results = await sdk.batch([
-        sdk.create_request("template-us-east", 2),
-        sdk.create_request("template-us-west", 3),
-        sdk.create_request("template-eu-west", 1)
-    ])
+    results = await sdk.batch(
+        [
+            sdk.create_request("template-us-east", 2),
+            sdk.create_request("template-us-west", 3),
+            sdk.create_request("template-eu-west", 1),
+        ]
+    )
 
     for result in results:
         print(f"Request ID: {result['created_request_id']}")
@@ -419,11 +423,13 @@ async with orb(provider="aws") as sdk:
 Failed operations do not raise — the exception instance is returned at that index instead. Always check before accessing result fields:
 
 ```python
-results = await sdk.batch([
-    sdk.create_request("template-us-east", 2),
-    sdk.create_request("template-invalid", 1),  # will fail
-    sdk.create_request("template-eu-west", 1)
-])
+results = await sdk.batch(
+    [
+        sdk.create_request("template-us-east", 2),
+        sdk.create_request("template-invalid", 1),  # will fail
+        sdk.create_request("template-eu-west", 1),
+    ]
+)
 
 for i, result in enumerate(results):
     if isinstance(result, Exception):

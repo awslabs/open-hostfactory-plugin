@@ -59,9 +59,7 @@ from infrastructure.auth.token_blacklist import InMemoryTokenBlacklist
 
 blacklist = InMemoryTokenBlacklist()
 strategy = EnhancedBearerTokenStrategy(
-    secret_key="your-256-bit-secret-key",
-    blacklist=blacklist,
-    rate_limit_enabled=True
+    secret_key="your-256-bit-secret-key", blacklist=blacklist, rate_limit_enabled=True
 )
 ```
 
@@ -96,10 +94,7 @@ from infrastructure.validation import secure_input, validate_aws_region
 
 # Secure user input
 region = secure_input(
-    "Enter AWS region: ",
-    default="us-east-1",
-    validator=validate_aws_region,
-    max_length=50
+    "Enter AWS region: ", default="us-east-1", validator=validate_aws_region, max_length=50
 )
 ```
 
@@ -139,7 +134,7 @@ app.add_middleware(
     EnhancedAuthMiddleware,
     auth_port=auth_strategy,
     excluded_paths=["/health", "/docs"],
-    require_auth=True
+    require_auth=True,
 )
 ```
 
@@ -235,11 +230,7 @@ region = input("Enter region: ").strip() or "us-east-1"
 ```python
 from infrastructure.validation import secure_input, validate_aws_region
 
-region = secure_input(
-    "Enter region: ",
-    default="us-east-1",
-    validator=validate_aws_region
-)
+region = secure_input("Enter region: ", default="us-east-1", validator=validate_aws_region)
 ```
 
 ### Enabling Token Blacklist
@@ -256,8 +247,7 @@ from infrastructure.auth.strategy.bearer_token_strategy_enhanced import Enhanced
 
 blacklist = InMemoryTokenBlacklist()
 strategy = EnhancedBearerTokenStrategy(
-    secret_key="your-strong-secret-key-at-least-32-bytes",
-    blacklist=blacklist
+    secret_key="your-strong-secret-key-at-least-32-bytes", blacklist=blacklist
 )
 ```
 

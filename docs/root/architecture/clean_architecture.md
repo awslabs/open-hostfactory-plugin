@@ -27,6 +27,7 @@ The domain layer contains the core business logic and has no external dependenci
 # src/domain/template/aggregate.py
 class Template(BaseModel):
     """Template configuration representing VM template."""
+
     template_id: str
     max_number: int
     attributes: Dict[str, Any]
@@ -41,6 +42,7 @@ class Template(BaseModel):
 # src/domain/machine/machine_status.py
 class MachineStatus(Enum):
     """Machine status value object."""
+
     PENDING = "pending"
     RUNNING = "running"
     TERMINATED = "terminated"
@@ -121,6 +123,7 @@ class TemplateQueryHandler:
 # src/application/dto/commands.py
 class CreateRequestCommand:
     """Command for creating requests."""
+
     template_id: str
     max_number: int
 ```
@@ -328,9 +331,11 @@ def test_create_request_handler():
 ```python
 @injectable
 class ApplicationService:
-    def __init__(self,
-                 template_repo: TemplateRepository,      # Abstraction, not implementation
-                 logger: LoggingPort):                   # Abstraction, not implementation
+    def __init__(
+        self,
+        template_repo: TemplateRepository,  # Abstraction, not implementation
+        logger: LoggingPort,
+    ):  # Abstraction, not implementation
         self._template_repo = template_repo
         self._logger = logger
 ```
@@ -342,6 +347,7 @@ class LoggingPort(ABC):
     @abstractmethod
     def info(self, message: str) -> None:
         pass
+
 
 class ConfigurationPort(ABC):
     @abstractmethod

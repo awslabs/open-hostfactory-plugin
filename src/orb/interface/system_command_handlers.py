@@ -18,32 +18,36 @@ async def handle_system_health(args) -> InterfaceResponse:
 
 
 @handle_interface_exceptions(context="provider_health", interface_type="cli")
-async def handle_provider_health(args) -> dict[str, Any]:
+async def handle_provider_health(args) -> InterfaceResponse:
     """Check health status of cloud providers, optionally filtered by name or type."""
     from orb.application.services.orchestration.dtos import GetProviderHealthInput
-    from orb.application.services.orchestration.get_provider_health import (
-        GetProviderHealthOrchestrator,
-    )
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
+    from orb.interface.response_formatting_service import ResponseFormattingService
 
+    entry = OPERATION_CATALOG["get_provider_health"]
     container = args._container
-    orchestrator = container.get(GetProviderHealthOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
+    formatter = container.get(ResponseFormattingService)
     result = await orchestrator.execute(
         GetProviderHealthInput(
             provider_name=getattr(args, "provider_name", None),
             provider_type=getattr(args, "provider_type", None),
         )
     )
-    return {"health": result.health, "message": result.message}
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="list_providers", interface_type="cli")
-async def handle_list_providers(args) -> dict[str, Any]:
+async def handle_list_providers(args) -> InterfaceResponse:
     """List configured cloud providers with their capabilities and selection policy."""
     from orb.application.services.orchestration.dtos import ListProvidersInput
-    from orb.application.services.orchestration.list_providers import ListProvidersOrchestrator
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
+    from orb.interface.response_formatting_service import ResponseFormattingService
 
+    entry = OPERATION_CATALOG["list_providers"]
     container = args._container
-    orchestrator = container.get(ListProvidersOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
+    formatter = container.get(ResponseFormattingService)
     result = await orchestrator.execute(
         ListProvidersInput(
             provider_name=getattr(args, "provider_name", None),
@@ -51,26 +55,22 @@ async def handle_list_providers(args) -> dict[str, Any]:
             filter_expressions=getattr(args, "filter", None) or [],
         )
     )
-    return {
-        "providers": result.providers,
-        "count": result.count,
-        "selection_policy": result.selection_policy,
-        "message": result.message,
-    }
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="provider_config", interface_type="cli")
-async def handle_provider_config(args) -> dict[str, Any]:
+async def handle_provider_config(args) -> InterfaceResponse:
     """Retrieve the current provider configuration."""
     from orb.application.services.orchestration.dtos import GetProviderConfigInput
-    from orb.application.services.orchestration.get_provider_config import (
-        GetProviderConfigOrchestrator,
-    )
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
+    from orb.interface.response_formatting_service import ResponseFormattingService
 
+    entry = OPERATION_CATALOG["get_provider_config"]
     container = args._container
-    orchestrator = container.get(GetProviderConfigOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
+    formatter = container.get(ResponseFormattingService)
     result = await orchestrator.execute(GetProviderConfigInput())
-    return {"config": result.config, "message": result.message}
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="validate_provider_config", interface_type="cli")
@@ -102,22 +102,23 @@ async def handle_execute_provider_operation(args) -> dict[str, Any]:
 
 
 @handle_interface_exceptions(context="provider_metrics", interface_type="cli")
-async def handle_provider_metrics(args) -> dict[str, Any]:
+async def handle_provider_metrics(args) -> InterfaceResponse:
     """Retrieve provider usage metrics for a given timeframe, optionally filtered by provider."""
     from orb.application.services.orchestration.dtos import GetProviderMetricsInput
-    from orb.application.services.orchestration.get_provider_metrics import (
-        GetProviderMetricsOrchestrator,
-    )
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
+    from orb.interface.response_formatting_service import ResponseFormattingService
 
+    entry = OPERATION_CATALOG["get_provider_metrics"]
     container = args._container
-    orchestrator = container.get(GetProviderMetricsOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
+    formatter = container.get(ResponseFormattingService)
     result = await orchestrator.execute(
         GetProviderMetricsInput(
             provider_name=getattr(args, "provider_name", None),
             timeframe=getattr(args, "timeframe", "24h"),
         )
     )
-    return {"metrics": result.metrics, "message": result.message}
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="reload_provider_config", interface_type="cli")

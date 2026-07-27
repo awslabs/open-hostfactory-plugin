@@ -55,6 +55,7 @@ class MachineId:
         if not self.value or len(self.value) < 3:
             raise ValueError("Machine ID must be at least 3 characters")
 
+
 @dataclass(frozen=True)
 class InstanceConfiguration:
     instance_type: str
@@ -78,6 +79,7 @@ class MachineStartedEvent(DomainEvent):
     @property
     def event_type(self) -> str:
         return "MachineStarted"
+
 
 @dataclass(frozen=True)
 class TemplateValidatedEvent(DomainEvent):
@@ -253,20 +255,24 @@ class MachineCreatedEvent(DomainEvent):
     machine_id: MachineId
     template_id: TemplateId
 
+
 class MachineStatusChangedEvent(DomainEvent):
     machine_id: MachineId
     old_status: MachineStatus
     new_status: MachineStatus
 
-# Template Events  
+
+# Template Events
 class TemplateCreatedEvent(DomainEvent):
     template_id: TemplateId
     template_name: str
+
 
 class TemplateValidatedEvent(DomainEvent):
     template_id: TemplateId
     is_valid: bool
     validation_errors: List[str]
+
 
 # Request Events
 class RequestSubmittedEvent(DomainEvent):
@@ -281,18 +287,25 @@ class RequestSubmittedEvent(DomainEvent):
 ```python
 class DomainError(Exception):
     """Base class for domain errors."""
+
     pass
+
 
 class BusinessRuleViolationError(DomainError):
     """Raised when business rules are violated."""
+
     pass
+
 
 class InvalidStateTransitionError(DomainError):
     """Raised when invalid state transitions are attempted."""
+
     pass
+
 
 class ResourceNotFoundError(DomainError):
     """Raised when required resources are not found."""
+
     pass
 ```
 
@@ -313,6 +326,7 @@ class NotificationPort(ABC):
     @abstractmethod
     async def send_notification(self, message: str) -> None:
         pass
+
 
 # Infrastructure implements the interface
 class EmailNotificationAdapter(NotificationPort):
@@ -337,6 +351,7 @@ def test_machine_start():
     events = machine.get_domain_events()
     assert len(events) == 1
     assert isinstance(events[0], MachineStartedEvent)
+
 
 def test_business_rule_violation():
     # Arrange

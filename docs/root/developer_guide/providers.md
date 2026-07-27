@@ -55,6 +55,7 @@ from orb.domain.machine import Machine
 from orb.domain.request import Request
 from orb.domain.template import Template
 
+
 class ProviderInterface(ABC):
     """Abstract interface for cloud providers."""
 
@@ -107,6 +108,7 @@ The provider factory creates provider instances dynamically:
 from typing import Dict, Type, Optional
 from orb.infrastructure.logging.logger import get_logger
 
+
 class ProviderFactory:
     """Factory for creating provider instances."""
 
@@ -132,8 +134,10 @@ class ProviderFactory:
         """Get list of available provider types."""
         return list(cls._providers.keys())
 
+
 # Register AWS provider
 from orb.providers.aws.aws_provider import AWSProvider
+
 ProviderFactory.register_provider("aws", AWSProvider)
 ```
 
@@ -190,6 +194,7 @@ from orb.providers.aws.infrastructure.aws_handler_factory import AWSHandlerFacto
 from orb.providers.aws.configuration.config import AWSConfig
 from orb.providers.aws.utilities.aws_operations import AWSOperations
 
+
 class AWSProvider(ProviderInterface):
     """AWS cloud provider implementation."""
 
@@ -236,10 +241,10 @@ class AWSProvider(ProviderInterface):
                 "status": "healthy" if ec2_health and asg_health else "degraded",
                 "services": {
                     "ec2": "healthy" if ec2_health else "unhealthy",
-                    "autoscaling": "healthy" if asg_health else "unhealthy"
+                    "autoscaling": "healthy" if asg_health else "unhealthy",
                 },
                 "region": self.config.region,
-                "account_id": self.aws_operations.get_account_id()
+                "account_id": self.aws_operations.get_account_id(),
             }
 
         except Exception as e:
@@ -255,6 +260,7 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 from orb.providers.aws.utilities.aws_operations import AWSOperations
 
+
 class BaseAWSHandler(ABC):
     """Base class for all AWS handlers."""
 
@@ -269,8 +275,9 @@ class BaseAWSHandler(ABC):
         pass
 
     @abstractmethod
-    def provision_machines(self, template: Dict[str, Any],
-                          machine_count: int) -> List[Dict[str, Any]]:
+    def provision_machines(
+        self, template: Dict[str, Any], machine_count: int
+    ) -> List[Dict[str, Any]]:
         """Provision machines using this handler."""
         pass
 
@@ -289,10 +296,10 @@ class BaseAWSHandler(ABC):
         errors = []
 
         # Common validation
-        if not template.get('vm_type'):
+        if not template.get("vm_type"):
             errors.append("vm_type is required")
 
-        if not template.get('image_id'):
+        if not template.get("image_id"):
             errors.append("image_id is required")
 
         return errors
@@ -307,8 +314,9 @@ class EC2FleetHandler(BaseAWSHandler):
     def get_handler_type(self) -> str:
         return "EC2Fleet"
 
-    def provision_machines(self, template: Dict[str, Any],
-                          machine_count: int) -> List[Dict[str, Any]]:
+    def provision_machines(
+        self, template: Dict[str, Any], machine_count: int
+    ) -> List[Dict[str, Any]]:
         """Provision machines using EC2 Fleet."""
         try:
             # Create fleet configuration
@@ -318,20 +326,22 @@ class EC2FleetHandler(BaseAWSHandler):
             fleet_response = self.aws_operations.create_ec2_fleet(fleet_config)
 
             # Wait for instances to be created
-            instance_ids = self._wait_for_fleet_instances(fleet_response['FleetId'])
+            instance_ids = self._wait_for_fleet_instances(fleet_response["FleetId"])
 
             # Get instance details
             machines = []
             for instance_id in instance_ids:
                 instance_details = self.aws_operations.get_instance_details(instance_id)
-                machines.append({
-                    'machine_id': f"machine-{instance_id}",
-                    'provider_instance_id': instance_id,
-                    'status': 'PENDING',
-                    'instance_type': instance_details.get('InstanceType'),
-                    'private_ip': instance_details.get('PrivateIpAddress'),
-                    'public_ip': instance_details.get('PublicIpAddress')
-                })
+                machines.append(
+                    {
+                        "machine_id": f"machine-{instance_id}",
+                        "provider_instance_id": instance_id,
+                        "status": "PENDING",
+                        "instance_type": instance_details.get("InstanceType"),
+                        "private_ip": instance_details.get("PrivateIpAddress"),
+                        "public_ip": instance_details.get("PublicIpAddress"),
+                    }
+                )
 
             return machines
 
@@ -339,27 +349,31 @@ class EC2FleetHandler(BaseAWSHandler):
             self.logger.error(f"Failed to provision machines with EC2 Fleet: {e}")
             raise
 
-    def _build_fleet_config(self, template: Dict[str, Any],
-                           machine_count: int) -> Dict[str, Any]:
+    def _build_fleet_config(self, template: Dict[str, Any], machine_count: int) -> Dict[str, Any]:
         """Build EC2 Fleet configuration."""
         return {
-            'LaunchTemplateConfigs': [{
-                'LaunchTemplateSpecification': {
-                    'LaunchTemplateName': template.get('launch_template_name'),
-                    'Version': template.get('launch_template_version', '$Latest')
-                },
-                'Overrides': [{
-                    'InstanceType': template['vm_type'],
-                    'SubnetId': subnet_id,
-                    'AvailabilityZone': self.aws_operations.get_subnet_az(subnet_id)
-                } for subnet_id in template.get('subnet_ids', [])]
-            }],
-            'TargetCapacitySpecification': {
-                'TotalTargetCapacity': machine_count,
-                'OnDemandTargetCapacity': machine_count,
-                'DefaultTargetCapacityType': 'on-demand'
+            "LaunchTemplateConfigs": [
+                {
+                    "LaunchTemplateSpecification": {
+                        "LaunchTemplateName": template.get("launch_template_name"),
+                        "Version": template.get("launch_template_version", "$Latest"),
+                    },
+                    "Overrides": [
+                        {
+                            "InstanceType": template["vm_type"],
+                            "SubnetId": subnet_id,
+                            "AvailabilityZone": self.aws_operations.get_subnet_az(subnet_id),
+                        }
+                        for subnet_id in template.get("subnet_ids", [])
+                    ],
+                }
+            ],
+            "TargetCapacitySpecification": {
+                "TotalTargetCapacity": machine_count,
+                "OnDemandTargetCapacity": machine_count,
+                "DefaultTargetCapacityType": "on-demand",
             },
-            'Type': 'instant'
+            "Type": "instant",
         }
 ```
 
@@ -372,8 +386,9 @@ class ASGHandler(BaseAWSHandler):
     def get_handler_type(self) -> str:
         return "ASG"
 
-    def provision_machines(self, template: Dict[str, Any],
-                          machine_count: int) -> List[Dict[str, Any]]:
+    def provision_machines(
+        self, template: Dict[str, Any], machine_count: int
+    ) -> List[Dict[str, Any]]:
         """Provision machines using Auto Scaling Group."""
         try:
             # Create launch template if needed
@@ -381,8 +396,9 @@ class ASGHandler(BaseAWSHandler):
 
             # Create Auto Scaling Group
             asg_name = f"hostfactory-{template['template_id']}-{int(time.time())}"
-            asg_config = self._build_asg_config(template, machine_count,
-                                              launch_template['LaunchTemplateName'])
+            asg_config = self._build_asg_config(
+                template, machine_count, launch_template["LaunchTemplateName"]
+            )
 
             self.aws_operations.create_auto_scaling_group(asg_name, asg_config)
 
@@ -393,14 +409,16 @@ class ASGHandler(BaseAWSHandler):
             machines = []
             for instance_id in instance_ids:
                 instance_details = self.aws_operations.get_instance_details(instance_id)
-                machines.append({
-                    'machine_id': f"machine-{instance_id}",
-                    'provider_instance_id': instance_id,
-                    'status': 'PENDING',
-                    'instance_type': instance_details.get('InstanceType'),
-                    'private_ip': instance_details.get('PrivateIpAddress'),
-                    'asg_name': asg_name
-                })
+                machines.append(
+                    {
+                        "machine_id": f"machine-{instance_id}",
+                        "provider_instance_id": instance_id,
+                        "status": "PENDING",
+                        "instance_type": instance_details.get("InstanceType"),
+                        "private_ip": instance_details.get("PrivateIpAddress"),
+                        "asg_name": asg_name,
+                    }
+                )
 
             return machines
 
@@ -429,7 +447,7 @@ class AWSOperations:
         try:
             response = self.ec2_client.create_fleet(**fleet_config)
 
-            if response.get('Errors'):
+            if response.get("Errors"):
                 error_msg = f"EC2 Fleet creation errors: {response['Errors']}"
                 self.logger.error(error_msg)
                 raise AWSProviderError(error_msg)
@@ -437,8 +455,8 @@ class AWSOperations:
             return response
 
         except ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code in ['InsufficientInstanceCapacity', 'RequestLimitExceeded']:
+            error_code = e.response["Error"]["Code"]
+            if error_code in ["InsufficientInstanceCapacity", "RequestLimitExceeded"]:
                 # Retryable errors
                 raise RetryableAWSError(f"AWS API error: {error_code}")
             else:
@@ -454,10 +472,11 @@ class AWSOperations:
             response = self.ec2_client.terminate_instances(InstanceIds=instance_ids)
 
             # Check for termination errors
-            terminating_instances = response.get('TerminatingInstances', [])
+            terminating_instances = response.get("TerminatingInstances", [])
             failed_instances = [
-                inst for inst in terminating_instances
-                if inst.get('CurrentState', {}).get('Name') not in ['shutting-down', 'terminated']
+                inst
+                for inst in terminating_instances
+                if inst.get("CurrentState", {}).get("Name") not in ["shutting-down", "terminated"]
             ]
 
             if failed_instances:
@@ -475,18 +494,18 @@ class AWSOperations:
         try:
             response = self.ec2_client.describe_instances(InstanceIds=[instance_id])
 
-            if not response['Reservations']:
+            if not response["Reservations"]:
                 raise AWSProviderError(f"Instance {instance_id} not found")
 
-            instance = response['Reservations'][0]['Instances'][0]
+            instance = response["Reservations"][0]["Instances"][0]
             return {
-                'InstanceId': instance['InstanceId'],
-                'InstanceType': instance['InstanceType'],
-                'State': instance['State']['Name'],
-                'PrivateIpAddress': instance.get('PrivateIpAddress'),
-                'PublicIpAddress': instance.get('PublicIpAddress'),
-                'LaunchTime': instance.get('LaunchTime'),
-                'Tags': {tag['Key']: tag['Value'] for tag in instance.get('Tags', [])}
+                "InstanceId": instance["InstanceId"],
+                "InstanceType": instance["InstanceType"],
+                "State": instance["State"]["Name"],
+                "PrivateIpAddress": instance.get("PrivateIpAddress"),
+                "PublicIpAddress": instance.get("PublicIpAddress"),
+                "LaunchTime": instance.get("LaunchTime"),
+                "Tags": {tag["Key"]: tag["Value"] for tag in instance.get("Tags", [])},
             }
 
         except ClientError as e:
@@ -501,6 +520,7 @@ class AWSOperations:
 ```python
 # src/providers/provider1/provider1_provider.py
 from orb.infrastructure.interfaces.provider import ProviderInterface
+
 
 class Provider1Provider(ProviderInterface):
     """Provider1 cloud provider implementation."""
@@ -528,29 +548,30 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from orb.infrastructure.interfaces.provider import BaseProviderConfig
 
+
 class Provider1ProviderConfig(BaseSettings, BaseProviderConfig):
     """Provider1 provider configuration with automatic environment variable support."""
-    
+
     model_config = SettingsConfigDict(
-        env_prefix='ORB_PROVIDER1_',
+        env_prefix="ORB_PROVIDER1_",
         case_sensitive=False,
         populate_by_name=True,
-        env_nested_delimiter='__'
+        env_nested_delimiter="__",
     )
-    
+
     # Provider identification
     provider_type: str = "provider1"
-    
+
     # Provider1 Authentication - automatically mapped to ORB_PROVIDER1_* env vars
     account_id: str = Field(..., description="Provider1 account ID")
     tenant_id: str = Field(..., description="Provider1 tenant ID")
     client_id: str = Field(..., description="Provider1 client ID")
     client_secret: str = Field(..., description="Provider1 client secret")
-    
+
     # Provider1 Settings
     resource_group: str = Field(..., description="Provider1 resource group")
     location: str = Field("Region A", description="Provider1 location")
-    
+
     # Optional settings
     endpoint_url: Optional[str] = Field(None, description="Provider1 endpoint URL")
     max_retries: int = Field(3, description="Maximum retries for Provider1 API calls")
@@ -573,6 +594,7 @@ ProviderSettingsRegistry.register_provider_settings("provider1", Provider1Provid
 ```python
 # Register Provider1 provider
 from orb.providers.provider1.provider1_provider import Provider1Provider
+
 ProviderFactory.register_provider("provider1", Provider1Provider)
 ```
 
@@ -621,28 +643,30 @@ The Open Resource Broker uses Pydantic BaseSettings for provider configuration, 
 ```python
 class AWSProviderConfig(BaseSettings, BaseProviderConfig):
     """AWS provider configuration with automatic environment variable support."""
-    
+
     model_config = SettingsConfigDict(
-        env_prefix='ORB_AWS_',
+        env_prefix="ORB_AWS_",
         case_sensitive=False,
         populate_by_name=True,
-        env_nested_delimiter='__'
+        env_nested_delimiter="__",
     )
-    
+
     # Authentication - automatically mapped to ORB_AWS_* env vars
     region: str = Field("us-east-1", description="AWS region")
     profile: Optional[str] = Field(None, description="AWS profile")
     role_arn: Optional[str] = Field(None, description="AWS role ARN")
     access_key_id: Optional[str] = Field(None, description="AWS access key ID")
     secret_access_key: Optional[str] = Field(None, description="AWS secret access key")
-    
+
     # Service settings
     aws_max_retries: int = Field(3, description="Maximum retries for AWS API calls")
     aws_read_timeout: int = Field(30, description="Read timeout in seconds")
-    
+
     # Complex nested objects support JSON environment variables
     handlers: HandlersConfig = Field(default_factory=HandlersConfig)
-    launch_template: LaunchTemplateConfiguration = Field(default_factory=LaunchTemplateConfiguration)
+    launch_template: LaunchTemplateConfiguration = Field(
+        default_factory=LaunchTemplateConfiguration
+    )
 ```
 
 ### Environment Variable Support

@@ -1,10 +1,8 @@
-"""Unit tests for orb.cli.registry — _make_bus_handler and coverage of
-line ranges 41-78, 101-115.
+"""Unit tests for orb.cli.registry — _make_bus_handler and registration.
 
 Covers:
 - _make_bus_handler() naming, async nature, ValueError on missing factory
 - All major (resource, action) pairs registered after build_registry()
-- MCP tools dispatch sub-action routing
 
 Isolates from the module-level _built singleton so tests are independent.
 """
@@ -202,65 +200,3 @@ class TestMakeBusHandler:
                 loop.close()
 
         assert captured_kwargs.get("template_id") == "my-template"
-
-
-# ---------------------------------------------------------------------------
-# MCP tools sub-dispatch
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-class TestMCPToolsDispatch:
-    """The _handle_mcp_tools async handler routes tools_action correctly."""
-
-    def _get_mcp_tools_handler(self):
-        import orb.cli.registry as reg
-
-        orig_registry = dict(reg._REGISTRY)
-        orig_built = reg._built
-        reg._REGISTRY.clear()
-        reg._built = False
-        reg.build_registry()
-        handler = reg.lookup("mcp", "tools")
-        # Restore
-        reg._REGISTRY.clear()
-        reg._REGISTRY.update(orig_registry)
-        reg._built = orig_built
-        return handler
-
-    def test_mcp_tools_handler_registered(self):
-        import orb.cli.registry as reg
-
-        reg.build_registry()
-        assert reg.lookup("mcp", "tools") is not None
-
-    def test_mcp_tools_unknown_action_raises(self):
-        handler = self._get_mcp_tools_handler()
-        assert handler is not None, "mcp tools handler must be registered"
-        args = argparse.Namespace(tools_action="bogus")
-
-        loop = asyncio.new_event_loop()
-        try:
-            with (
-                patch("orb.interface.mcp_command_handlers.handle_mcp_tools_list", AsyncMock()),
-                patch("orb.interface.mcp_command_handlers.handle_mcp_tools_call", AsyncMock()),
-            ):
-                with pytest.raises(ValueError, match="Unknown MCP tools action"):
-                    loop.run_until_complete(handler(args))
-        finally:
-            loop.close()
-
-    def test_mcp_tools_list_dispatches(self):
-        handler = self._get_mcp_tools_handler()
-        assert handler is not None, "mcp tools handler must be registered"
-        args = argparse.Namespace(tools_action="list")
-
-        mock_list = AsyncMock(return_value={"tools": []})
-        loop = asyncio.new_event_loop()
-        try:
-            with patch("orb.interface.mcp_command_handlers.handle_mcp_tools_list", mock_list):
-                loop.run_until_complete(handler(args))
-        finally:
-            loop.close()
-
-        mock_list.assert_called_once_with(args)

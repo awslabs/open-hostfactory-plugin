@@ -4,314 +4,158 @@ This guide explains how to integrate the Open Resource Broker with AI assistants
 
 ## Overview
 
-The Open Resource Broker provides direct MCP integration through its tools implementation, allowing AI assistants to:
+The broker ships a catalog-driven MCP server. Every operation the broker
+declares once in its operation catalog and marks as exposed on the MCP
+interface becomes an MCP tool automatically: the tool name is the catalog key,
+its input schema is derived from the operation's input type, and its result is
+rendered through the same formatting seam the CLI, REST, and SDK use. The tool
+set therefore never drifts from the catalog.
 
-1. Discover available cloud infrastructure operations
-2. Execute infrastructure provisioning commands
-3. Access resource information
-4. Provide infrastructure guidance
+An AI assistant connected to the server can:
 
-## Integration Methods
+1. Discover the available infrastructure operations (`tools/list`)
+2. Execute an operation (`tools/call`)
+3. Receive the operation's canonical JSON body as the tool result
 
-### Direct Tools Integration
+## Starting the server
 
-The Open Resource Broker implements direct MCP tools integration without requiring a separate server process:
-
-```python
-from orb.mcp import OpenResourceBrokerMCPTools
-
-async with OpenResourceBrokerMCPTools(provider="aws") as mcp_tools:
-    # List available tools
-    tools = mcp_tools.list_tools()
-
-    # Call a specific tool
-    result = await mcp_tools.call_tool(
-        "list_templates",
-        {"active_only": True}
-    )
-```
-
-### CLI-Based Integration
-
-For AI assistants that support external tool execution, you can use the CLI-based MCP integration:
+The server is launched through the CLI:
 
 ```bash
-# Start MCP server in stdio mode (recommended for AI assistants)
-orb mcp serve --stdio
+# Serve over stdio (the default transport, recommended for local AI assistants)
+orb mcp serve
 
-# Start MCP server as TCP server (for development/testing)
-orb mcp serve --port 3000 --host localhost
+# Serve over Streamable HTTP for networked clients
+orb mcp serve --transport http --host 127.0.0.1 --port 8000 --path /mcp
 ```
 
-## Available MCP Tools
+### `orb mcp serve` flags
 
-The MCP integration exposes the following tools:
+| Flag | Default | Purpose |
+|------|---------|---------|
+| `--transport {stdio,http,streamable-http}` | `stdio` | Transport to serve over. `streamable-http` is an alias for `http`. |
+| `--host HOST` | `127.0.0.1` | Host to bind (http transport only). |
+| `--port PORT` | `8000` | Port to bind (http transport only). |
+| `--path PATH` | `/mcp` | URL path to mount (http transport only). |
 
-### Provider Management Tools
+When the transport is `stdio`, the `--host`/`--port`/`--path` flags are ignored;
+the client speaks JSON-RPC over the process's standard input and output.
 
-- `check_provider_health`: Check cloud provider health status
-- `list_providers`: List available cloud providers
-- `get_provider_config`: Get provider configuration details
-- `get_provider_metrics`: Get provider performance metrics
+### Validating the tool set offline
 
-### Template Operations Tools
+`orb mcp validate` builds the tool set straight from the catalog — no server or
+client is spun up — and checks that every MCP-exposed operation yields a valid
+object input schema. It prints the tool count and names, exiting non-zero if any
+operation fails to resolve, so it is safe to run in CI.
+
+```bash
+orb mcp validate
+```
+
+## Available MCP tools
+
+Tools are derived from the catalog at runtime; run `orb mcp validate` (or
+`tools/list` from a connected client) for the authoritative set. The operations
+typically exposed include:
+
+### Template operations
 
 - `list_templates`: List available compute templates
-- `get_template`: Get specific template details
-- `validate_template`: Validate template configuration
+- `get_template`: Get a specific template's details
+- `validate_template`: Validate a template configuration
 
-### Infrastructure Request Tools
+### Request and machine operations
 
-- `request_machines`: Request new compute instances
-- `get_request_status`: Check provisioning request status
+- `request_machines`: Request new compute instances (`requested_count` selects how many)
+- `get_request_status`: Check the status of one or more requests (`request_ids`)
+- `list_requests`: List provisioning requests
+- `list_machines`: List provisioned machines
+- `return_machines`: Return compute instances (`machine_ids`)
 - `list_return_requests`: List machine return requests
-- `return_machines`: Return compute instances
+- `start_machines` / `stop_machines`: Start or stop machines
 
-## MCP Resources
+### Provider operations
 
-The MCP integration provides access to the following resources:
+- `list_providers`: List configured providers
+- `get_provider_health`: Check provider health
+- `get_provider_config`: Get provider configuration
+- `get_provider_metrics`: Get provider performance metrics
 
-### templates://
+## Tool results
 
-Access available compute templates.
+Every tool result is a single text content block whose text is the operation's
+canonical JSON body — the same body the CLI would emit for that operation. A
+failed call (unknown tool, or an operation that raises) is returned as a tool
+result with `isError` set, not as a protocol-level exception, so a conformant
+client can surface the failure to the user.
 
-**URI Pattern**: `templates://[template-id]`
+## AI assistant integration examples
 
-**Content Type**: `application/json`
-
-**Structure**:
-```json
-{
-  "templates": [
-    {
-      "id": "template-id",
-      "provider": "provider-name",
-      "instances": 2,
-      "type": "instant|maintain|request"
-    }
-  ],
-  "count": 1
-}
-```
-
-### requests://
-
-Access provisioning requests.
-
-**URI Pattern**: `requests://[request-id]`
-
-**Content Type**: `application/json`
-
-**Structure**:
-```json
-{
-  "requests": [
-    {
-      "id": "request-id",
-      "status": "pending|running|completed|failed",
-      "template": "template-id",
-      "count": 3,
-      "created": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "count": 1
-}
-```
-
-### machines://
-
-Access compute instances.
-
-**URI Pattern**: `machines://[machine-id]`
-
-**Content Type**: `application/json`
-
-**Structure**:
-```json
-{
-  "machines": [
-    {
-      "id": "machine-id",
-      "status": "running|stopped|terminated",
-      "template": "template-id",
-      "provider": "provider-name",
-      "created": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "count": 1
-}
-```
-
-### providers://
-
-Access cloud providers.
-
-**URI Pattern**: `providers://[provider-name]`
-
-**Content Type**: `application/json`
-
-**Structure**:
-```json
-{
-  "providers": [
-    {
-      "name": "provider-name",
-      "type": "cloud",
-      "status": "active|inactive|error",
-      "capabilities": ["ec2", "spot_fleet", "auto_scaling"],
-      "region": "us-east-1"
-    }
-  ],
-  "count": 1
-}
-```
-
-## AI Assistant Integration Examples
-
-### Claude Desktop Configuration
+### Claude Desktop configuration
 
 ```json
 {
   "mcpServers": {
     "open-resource-broker": {
       "command": "orb",
-      "args": ["mcp", "serve", "--stdio"]
+      "args": ["mcp", "serve"]
     }
   }
 }
 ```
 
-### Python MCP Client
+### Python MCP client
 
 ```python
 import asyncio
+import json
+
 from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
 
-async def use_hostfactory():
-    server_params = StdioServerParameters(
-        command="orb",
-        args=["mcp", "serve", "--stdio"]
-    )
+server_params = StdioServerParameters(command="orb", args=["mcp", "serve"])
 
-    async with ClientSession(server_params) as session:
-        # List available tools
-        tools = await session.list_tools()
 
-        # Request infrastructure
-        result = await session.call_tool(
-            "request_machines",
-            {"template_id": "EC2FleetInstant", "count": 3}
-        )
+async def main():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
 
-        print(f"Request result: {result}")
+            tools = await session.list_tools()
+            print("tools:", [t.name for t in tools.tools])
+
+            result = await session.call_tool("list_templates", {"active_only": True})
+            body = json.loads(result.content[0].text)
+            print("templates:", body.get("templates"))
+
+
+asyncio.run(main())
 ```
 
-## Complete Examples
+## Complete examples
 
 For working implementations, see:
 
-- **Python Client**: [examples/mcp/python/client_example.py](#python-client-example)
-- **Node.js Client**: [examples/mcp/nodejs/client_example.js](#nodejs-client-example)
+- **Python client**: [examples/mcp/python/client_example.py](#python-client-example)
+- **Node.js client**: [examples/mcp/nodejs/client_example.js](#nodejs-client-example)
 
-These examples include:
-- Error handling
-- Async context management
-- Multiple tool usage patterns
-
-### OpenAI Function Calling
-
-```python
-import openai
-import json
-import subprocess
-
-# Define the function schema
-functions = [
-    {
-        "name": "request_machines",
-        "description": "Request new compute instances",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "template_id": {
-                    "type": "string",
-                    "description": "Template to use"
-                },
-                "count": {
-                    "type": "integer",
-                    "description": "Number of instances"
-                }
-            },
-            "required": ["template_id", "count"]
-        }
-    }
-]
-
-# Call the OpenAI API with function calling
-response = openai.ChatCompletion.create(
-    model="gpt-4",
-    messages=[
-        {"role": "user", "content": "I need 3 EC2 instances for my project."}
-    ],
-    functions=functions,
-    function_call="auto"
-)
-
-# Extract the function call
-function_call = response.choices[0].message.function_call
-if function_call and function_call.name == "request_machines":
-    args = json.loads(function_call.arguments)
-
-    # Execute the MCP tool via CLI
-    result = subprocess.run(
-        ["orb", "mcp", "call", "request_machines",
-         "--args", json.dumps(args)],
-        capture_output=True, text=True
-    )
-
-    print(f"Machines requested: {result.stdout}")
-```
-
-## Error Handling
-
-The MCP integration provides standardized error handling:
-
-```json
-{
-  "error": true,
-  "error_type": "validation_error",
-  "message": "Invalid template ID: template-id-not-found",
-  "details": {
-    "available_templates": ["aws-basic", "aws-spot"]
-  }
-}
-```
-
-## Best Practices
-
-1. **Tool Discovery**: Always use tool discovery to get the latest available tools
-2. **Error Handling**: Implement appropriate error handling for all tool calls
-3. **Resource Access**: Use resource URIs for efficient data access
-4. **Caching**: Cache resource data when appropriate to reduce API calls
-5. **Validation**: Validate inputs before making tool calls
+These examples include error handling, async context management, and multiple
+tool-usage patterns over the stdio transport.
 
 ## Troubleshooting
 
-### Common Issues
+### Common issues
 
-1. **Tool Not Found**: Ensure the tool name is correct and the MCP server is running
-2. **Invalid Arguments**: Check the tool's parameter requirements
-3. **Connection Issues**: Verify the MCP server is running and accessible
-4. **Permission Issues**: Ensure the user has the necessary permissions
+1. **Tool not found**: The tool name must match a catalog key exposed on the MCP interface. Run `orb mcp validate` to list the current tool set.
+2. **Invalid arguments**: Check the tool's `inputSchema` from `tools/list`; required fields are the input type's fields without defaults.
+3. **Connection issues (http)**: Verify the server is reachable at `http://<host>:<port><path>`.
 
 ### Debugging
 
-For debugging MCP integration issues:
-
 ```bash
-# Enable debug logging
-orb mcp serve --stdio --log-level DEBUG
+# Verbose server logging
+orb mcp serve --verbose
 
-# Test a specific tool call
-orb mcp call list_templates --args '{"active_only": true}'
+# List the tool set without starting a server
+orb mcp validate
 ```

@@ -31,9 +31,7 @@ There’s no special handling beyond the generic flow: it calls describe_fleet_h
   ASG does not have an equivalent of the fleet submition time, so we check the time when ASG was created by itself.
 
 ```python
-response = asg_client.describe_auto_scaling_groups(
-    AutoScalingGroupNames=[resource_id]
-)
+response = asg_client.describe_auto_scaling_groups(AutoScalingGroupNames=[resource_id])
 groups = response.get("AutoScalingGroups", [])
 created_at: datetime | None = groups[0].get("CreatedTime") if groups else None
 ```

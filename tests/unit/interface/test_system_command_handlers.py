@@ -88,61 +88,71 @@ class TestStubHandlers:
 class TestHandleProviderHealth:
     @pytest.mark.asyncio
     async def test_dispatches_get_system_status_query(self):
+        from orb.interface.response_formatting_service import ResponseFormattingService
         from orb.interface.system_command_handlers import handle_provider_health
 
         orchestrator = AsyncMock()
         orchestrator.execute = AsyncMock(
             return_value=MagicMock(health={"status": "ok"}, message="ok")
         )
+        formatter = ResponseFormattingService(MagicMock())
         container = MagicMock()
-        container.get.return_value = orchestrator
+        container.get.side_effect = lambda t: (
+            formatter if t is ResponseFormattingService else orchestrator
+        )
 
         result = await handle_provider_health(_ns(_container=container))
 
         orchestrator.execute.assert_awaited_once()
-        assert isinstance(result, dict)
-        assert "health" in result
+        assert "health" in result.data
 
 
 @pytest.mark.unit
 class TestHandleProviderConfig:
     @pytest.mark.asyncio
     async def test_dispatches_get_provider_config_query(self):
+        from orb.interface.response_formatting_service import ResponseFormattingService
         from orb.interface.system_command_handlers import handle_provider_config
 
         orchestrator = AsyncMock()
         orchestrator.execute = AsyncMock(
             return_value=MagicMock(config={"provider": "aws"}, message="ok")
         )
+        formatter = ResponseFormattingService(MagicMock())
         container = MagicMock()
-        container.get.return_value = orchestrator
+        container.get.side_effect = lambda t: (
+            formatter if t is ResponseFormattingService else orchestrator
+        )
 
         result = await handle_provider_config(_ns(_container=container))
 
         orchestrator.execute.assert_awaited_once()
-        assert isinstance(result, dict)
-        assert "config" in result
+        assert "config" in result.data
 
 
 @pytest.mark.unit
 class TestHandleProviderMetrics:
     @pytest.mark.asyncio
     async def test_dispatches_get_provider_metrics_query_with_provider_name(self):
+        from orb.interface.response_formatting_service import ResponseFormattingService
         from orb.interface.system_command_handlers import handle_provider_metrics
 
         orchestrator = AsyncMock()
         orchestrator.execute = AsyncMock(
             return_value=MagicMock(metrics={"latency_ms": 42}, message="ok")
         )
+        formatter = ResponseFormattingService(MagicMock())
         container = MagicMock()
-        container.get.return_value = orchestrator
+        container.get.side_effect = lambda t: (
+            formatter if t is ResponseFormattingService else orchestrator
+        )
 
         result = await handle_provider_metrics(_ns(provider_name="aws", _container=container))
 
         orchestrator.execute.assert_awaited_once()
         call_input = orchestrator.execute.call_args[0][0]
         assert call_input.provider_name == "aws"
-        assert "metrics" in result
+        assert "metrics" in result.data
 
     @pytest.mark.asyncio
     async def test_dispatches_with_no_provider_name(self):
@@ -225,17 +235,22 @@ class TestHandleListProviders:
         mock_result.selection_policy = "round-robin"
         mock_result.message = ""
 
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
         mock_orchestrator = AsyncMock()
         mock_orchestrator.execute.return_value = mock_result
 
+        formatter = ResponseFormattingService(MagicMock())
         container = MagicMock()
-        container.get.return_value = mock_orchestrator
+        container.get.side_effect = lambda t: (
+            formatter if t is ResponseFormattingService else mock_orchestrator
+        )
 
         result = await handle_list_providers(_ns(_container=container))
 
-        assert result["count"] == 1
-        assert result["providers"][0]["name"] == "aws-default"
-        assert result["providers"][0]["type"] == "aws"
+        assert result.data["count"] == 1
+        assert result.data["providers"][0]["name"] == "aws-default"
+        assert result.data["providers"][0]["type"] == "aws"
 
     @pytest.mark.asyncio
     async def test_no_provider_config_returns_empty_list(self):
@@ -247,16 +262,21 @@ class TestHandleListProviders:
         mock_result.selection_policy = ""
         mock_result.message = ""
 
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
         mock_orchestrator = AsyncMock()
         mock_orchestrator.execute.return_value = mock_result
 
+        formatter = ResponseFormattingService(MagicMock())
         container = MagicMock()
-        container.get.return_value = mock_orchestrator
+        container.get.side_effect = lambda t: (
+            formatter if t is ResponseFormattingService else mock_orchestrator
+        )
 
         result = await handle_list_providers(_ns(_container=container))
 
-        assert result["count"] == 0
-        assert result["providers"] == []
+        assert result.data["count"] == 0
+        assert result.data["providers"] == []
 
     @pytest.mark.asyncio
     async def test_exception_raises(self):

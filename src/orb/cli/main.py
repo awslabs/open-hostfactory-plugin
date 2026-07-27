@@ -163,6 +163,22 @@ async def main() -> None:
             result = await handle_init(args)
             sys.exit(result)
 
+        # mcp validate: offline catalog check — no config file or Application
+        # bootstrap required, so it stays CI-friendly.
+        if args.resource == "mcp" and args.action == "validate":
+            from orb.cli.formatters import format_output
+            from orb.interface.mcp.catalog_server import handle_mcp_validate
+
+            response = await handle_mcp_validate(args)
+            # The validation summary is a structured object, not tabular rows, so
+            # render it as json/yaml; table/list have no meaningful shape here and
+            # fall back to json rather than crashing on a non-row payload.
+            output_format = getattr(args, "format", "json")
+            if output_format not in ("json", "yaml"):
+                output_format = "json"
+            print(format_output(response.data, output_format))
+            sys.exit(response.exit_code)
+
         # k8s-legacy: bypass application init, delegate straight to legacy click groups.
         # handle_k8s_legacy() always calls sys.exit() and never returns.
         if args.resource == "k8s-legacy":

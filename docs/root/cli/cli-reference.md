@@ -1086,79 +1086,15 @@ orb scheduler validate [OPTIONS]
 
 MCP operations for AI assistant integration.
 
-#### `mcp tools list`
-
-List available MCP tools.
-
-**Usage:**
-```bash
-orb mcp tools list [OPTIONS]
-```
-
-**Options:**
-| Flag | Description | Default | Example |
-|------|-------------|---------|---------|
-| `--format` | Output format | `table` | `--format json` |
-| `--type` | Filter tools by handler type | | `--type command` |
-
-#### `mcp tools call`
-
-Call MCP tool directly.
-
-**Usage:**
-```bash
-orb mcp tools call TOOL_NAME [OPTIONS]
-```
-
-**Arguments:**
-| Argument | Description | Required |
-|----------|-------------|----------|
-| `TOOL_NAME` | Name of tool to call | Yes |
-
-**Options:**
-| Flag | Description | Default | Example |
-|------|-------------|---------|---------|
-| `--args` | Tool arguments as JSON string | | `--args '{"template_id":"aws-basic"}'` |
-| `--file` | Tool arguments from JSON file | | `--file args.json` |
-| `--format` | Output format | `json` | `--format yaml` |
-
-#### `mcp tools info`
-
-Get information about MCP tool.
-
-**Usage:**
-```bash
-orb mcp tools info TOOL_NAME [OPTIONS]
-```
-
-**Arguments:**
-| Argument | Description | Required |
-|----------|-------------|----------|
-| `TOOL_NAME` | Name of tool to get info for | Yes |
-
-**Options:**
-| Flag | Description | Default | Example |
-|------|-------------|---------|---------|
-| `--format` | Output format | `table` | `--format json` |
-
-#### `mcp validate`
-
-Validate MCP configuration.
-
-**Usage:**
-```bash
-orb mcp validate [OPTIONS]
-```
-
-**Options:**
-| Flag | Description | Default | Example |
-|------|-------------|---------|---------|
-| `--config` | MCP configuration file to validate | | `--config mcp.json` |
-| `--format` | Output format | `table` | `--format json` |
+The MCP tools are derived from the operation catalog, so the same operations
+the CLI, REST, and SDK expose are available to MCP clients. Introspecting the
+live tool set (listing and calling tools interactively) is the job of an MCP
+client or the MCP Inspector, not a server-side command.
 
 #### `mcp serve`
 
-Start MCP server.
+Start the MCP server. Defaults to stdio, the transport local MCP clients expect;
+pass `--transport http` to serve over Streamable HTTP.
 
 **Usage:**
 ```bash
@@ -1168,10 +1104,23 @@ orb mcp serve [OPTIONS]
 **Options:**
 | Flag | Description | Default | Example |
 |------|-------------|---------|---------|
-| `--port` | Server port | `3000` | `--port 4000` |
-| `--host` | Server host | `localhost` | `--host 0.0.0.0` |
-| `--stdio` | Run in stdio mode for direct MCP client communication | `false` | `--stdio` |
-| `--log-level` | Logging level for MCP server | `INFO` | `--log-level DEBUG` |
+| `--transport` | Transport to serve over (`stdio`, `http`; `streamable-http` is an alias for `http`) | `stdio` | `--transport http` |
+| `--host` | Host to bind for the http transport | `127.0.0.1` | `--host 0.0.0.0` |
+| `--port` | Port to bind for the http transport | `8000` | `--port 4000` |
+| `--path` | URL path to mount for the http transport | `/mcp` | `--path /mcp` |
+
+#### `mcp validate`
+
+Check the MCP tool set offline: verifies every catalog operation exposed on the
+MCP interface produces a tool with a resolvable input schema. Runs without
+starting a server or client, so it is safe in CI.
+
+**Usage:**
+```bash
+orb mcp validate
+```
+
+Reports the tool count and names, exiting non-zero if any tool fails to resolve.
 
 ### Infrastructure
 

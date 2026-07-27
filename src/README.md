@@ -65,6 +65,7 @@ from src.domain...  # invalid
 class MyCommandHandler(BaseCommandHandler[MyCommand, MyResponse]):
     async def execute_command(self, command: MyCommand) -> MyResponse: ...
 
+
 @query_handler(MyQuery)
 class MyQueryHandler(BaseQueryHandler[MyQuery, MyResult]):
     async def execute_query(self, query: MyQuery) -> MyResult: ...

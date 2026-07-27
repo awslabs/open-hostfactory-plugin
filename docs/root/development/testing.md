@@ -246,9 +246,11 @@ def application_service() -> ApplicationService
 class TestTemplateAggregate:
     """Test cases for Template aggregate."""
 
+
 # Test methods
 def test_template_creation(self):
     """Test basic template creation."""
+
 
 def test_template_validation_invalid_provider_api(self):
     """Test template validation with invalid provider API."""
@@ -282,10 +284,7 @@ class TestTemplateAggregate:
 
 ```python
 def test_application_service_request_machines(
-    self,
-    application_service: ApplicationService,
-    mock_command_bus: Mock,
-    sample_template: Template
+    self, application_service: ApplicationService, mock_command_bus: Mock, sample_template: Template
 ):
     """Test requesting machines through application service."""
     # Setup
@@ -293,9 +292,7 @@ def test_application_service_request_machines(
 
     # Execute
     result = application_service.request_machines(
-        template_id=sample_template.id,
-        machine_count=2,
-        requester_id="test-user"
+        template_id=sample_template.id, machine_count=2, requester_id="test-user"
     )
 
     # Verify
@@ -311,7 +308,7 @@ def test_aws_provider_provision_instances(
     self,
     aws_config: AWSConfig,
     aws_mocks,  # Enables moto mocking
-    mock_ec2_resources
+    mock_ec2_resources,
 ):
     """Test AWS provider instance provisioning."""
     provider = AWSProvider(config=aws_config)
@@ -323,8 +320,8 @@ def test_aws_provider_provision_instances(
         count=2,
         configuration={
             "subnet_id": mock_ec2_resources["subnet_id"],
-            "security_group_ids": [mock_ec2_resources["security_group_id"]]
-        }
+            "security_group_ids": [mock_ec2_resources["security_group_id"]],
+        },
     )
 
     assert "instance_ids" in result
@@ -333,9 +330,7 @@ def test_aws_provider_provision_instances(
 ### Parametrized Tests
 
 ```python
-@pytest.mark.parametrize("machine_type", [
-    "t2.micro", "t2.small", "t3.medium", "m5.large"
-])
+@pytest.mark.parametrize("machine_type", ["t2.micro", "t2.small", "t3.medium", "m5.large"])
 def test_machine_type_validation(self, machine_type: str):
     """Test instance type validation with various types."""
     machine_type_obj = MachineType(machine_type)

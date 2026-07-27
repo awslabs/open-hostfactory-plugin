@@ -173,9 +173,7 @@ class CloudOperations:
     async def terminate_instances(self, instance_ids: List[str]) -> Dict[str, Any]:
         """Integrated instance termination across all handlers."""
         try:
-            response = await self._cloud_client.terminate_instances(
-                instance_ids=instance_ids
-            )
+            response = await self._cloud_client.terminate_instances(instance_ids=instance_ids)
 
             self._logger.info(f"Terminated {len(instance_ids)} instances")
             return self._standardize_termination_response(response)
@@ -203,7 +201,7 @@ class FleetHandler:
             response = await self._cloud_client.create_fleet(
                 launch_templates=fleet_config.launch_templates,
                 target_capacity=fleet_config.target_capacity,
-                fleet_type='instant'
+                fleet_type="instant",
             )
 
             instance_ids = self._extract_instance_ids(response)
@@ -240,7 +238,7 @@ class AutoScalingHandler:
                 min_size=asg_config.min_size,
                 max_size=asg_config.max_size,
                 desired_capacity=asg_config.desired_capacity,
-                subnets=asg_config.subnet_ids
+                subnets=asg_config.subnet_ids,
             )
 
             self._logger.info(f"Created auto scaling group: {asg_config.name}")
@@ -262,6 +260,7 @@ class AutoScalingHandler:
 @dataclass
 class CloudProviderConfig:
     """Generic cloud provider configuration."""
+
     region: str = "default-region"
     profile: Optional[str] = None
     access_key: Optional[str] = None
@@ -282,34 +281,24 @@ def register_cloud_provider(container: DIContainer, config: CloudProviderConfig)
     """Register cloud provider services with DI container."""
 
     # Register cloud client
-    container.register_singleton(
-        CloudClient, 
-        lambda: CloudClient(config)
-    )
+    container.register_singleton(CloudClient, lambda: CloudClient(config))
 
     # Register cloud operations utility
     container.register_singleton(
         CloudOperations,
-        lambda: CloudOperations(
-            container.resolve(CloudClient),
-            get_logger("cloud.operations")
-        )
+        lambda: CloudOperations(container.resolve(CloudClient), get_logger("cloud.operations")),
     )
 
     # Register resource managers
     container.register_singleton(
         CloudResourceManager,
         lambda: CloudResourceManager(
-            container.resolve(CloudClient),
-            container.resolve(CloudOperations)
-        )
+            container.resolve(CloudClient), container.resolve(CloudOperations)
+        ),
     )
 
     # Register provider
-    container.register_singleton(
-        ProviderInterface,
-        lambda: CloudProvider(config)
-    )
+    container.register_singleton(ProviderInterface, lambda: CloudProvider(config))
 ```
 
 ## Error Handling
@@ -318,22 +307,31 @@ def register_cloud_provider(container: DIContainer, config: CloudProviderConfig)
 ```python
 class CloudProviderError(Exception):
     """Base cloud provider exception."""
+
     pass
+
 
 class CloudOperationError(CloudProviderError):
     """Cloud operation failed."""
+
     pass
+
 
 class CloudFleetError(CloudProviderError):
     """Cloud fleet operation failed."""
+
     pass
+
 
 class CloudASGError(CloudProviderError):
     """Cloud auto scaling group operation failed."""
+
     pass
+
 
 class CloudSpotFleetError(CloudProviderError):
     """Cloud spot fleet operation failed."""
+
     pass
 ```
 
@@ -342,23 +340,14 @@ class CloudSpotFleetError(CloudProviderError):
 class CloudErrorClassifier:
     """Classify cloud errors for appropriate handling."""
 
-    TRANSIENT_ERRORS = [
-        'RequestLimitExceeded',
-        'Throttling',
-        'ServiceUnavailable',
-        'InternalError'
-    ]
+    TRANSIENT_ERRORS = ["RequestLimitExceeded", "Throttling", "ServiceUnavailable", "InternalError"]
 
-    PERMANENT_ERRORS = [
-        'InvalidParameterValue',
-        'UnauthorizedOperation',
-        'InvalidResourceID'
-    ]
+    PERMANENT_ERRORS = ["InvalidParameterValue", "UnauthorizedOperation", "InvalidResourceID"]
 
     def is_transient_error(self, error: Exception) -> bool:
         """Check if error is transient and should be retried."""
-        if hasattr(error, 'response'):
-            error_code = error.response.get('Error', {}).get('Code', '')
+        if hasattr(error, "response"):
+            error_code = error.response.get("Error", {}).get("Code", "")
             return error_code in self.TRANSIENT_ERRORS
         return False
 ```
@@ -375,16 +364,16 @@ class SpotFleetHandler:
         try:
             response = await self._cloud_client.request_spot_fleet(
                 fleet_config={
-                    'iam_fleet_role': spot_config.iam_fleet_role,
-                    'allocation_strategy': 'diversified',
-                    'target_capacity': spot_config.target_capacity,
-                    'max_spot_price': spot_config.max_spot_price,
-                    'launch_specifications': spot_config.launch_specifications,
-                    'fleet_type': 'request'
+                    "iam_fleet_role": spot_config.iam_fleet_role,
+                    "allocation_strategy": "diversified",
+                    "target_capacity": spot_config.target_capacity,
+                    "max_spot_price": spot_config.max_spot_price,
+                    "launch_specifications": spot_config.launch_specifications,
+                    "fleet_type": "request",
                 }
             )
 
-            fleet_id = response['fleet_id']
+            fleet_id = response["fleet_id"]
             self._logger.info(f"Created spot fleet: {fleet_id}")
 
             return fleet_id
@@ -406,8 +395,7 @@ class CloudRegionManager:
         self._fallback_regions = fallback_regions
         self._region_clients: Dict[str, CloudClient] = {}
 
-    async def provision_with_fallback(self, 
-                                    provision_request: ProvisionRequest) -> List[str]:
+    async def provision_with_fallback(self, provision_request: ProvisionRequest) -> List[str]:
         """Provision resources with region fallback."""
         regions_to_try = [self._primary_region] + self._fallback_regions
 
@@ -436,20 +424,20 @@ class MockCloudClient:
 
     async def run_instances(self, **kwargs) -> Dict[str, Any]:
         """Mock compute instance creation operation."""
-        instance_count = kwargs.get('instance_count', 1)
+        instance_count = kwargs.get("instance_count", 1)
         instances = []
 
         for i in range(instance_count):
             instance_id = f"instance-{uuid.uuid4().hex[:8]}"
             instance = {
-                'instance_id': instance_id,
-                'state': {'name': 'running'},
-                'instance_type': kwargs.get('instance_type', 'standard.small')
+                "instance_id": instance_id,
+                "state": {"name": "running"},
+                "instance_type": kwargs.get("instance_type", "standard.small"),
             }
             instances.append(instance)
             self._instances[instance_id] = instance
 
-        return {'instances': instances}
+        return {"instances": instances}
 ```
 
 ## Provider Extension Guidelines
@@ -491,15 +479,18 @@ providers/
 # src/orb/providers/azure/provider_plugin.py
 from orb.providers.base.provider_plugin import ProviderPlugin
 
+
 class AzurePlugin(ProviderPlugin):
     provider_name = "azure"
 
     def strategy_factory(self):
         from orb.providers.azure.registration import create_azure_strategy
+
         return create_azure_strategy
 
     def config_factory(self):
         from orb.providers.azure.registration import create_azure_config
+
         return create_azure_config
 
     def template_dto_config(self):
@@ -507,6 +498,7 @@ class AzurePlugin(ProviderPlugin):
             from orb.providers.azure.domain.template.azure_template_dto_config import (
                 AzureTemplateDTOConfig,
             )
+
             return AzureTemplateDTOConfig
         except ImportError:
             return None
@@ -514,6 +506,7 @@ class AzurePlugin(ProviderPlugin):
     def cli_spec(self):
         try:
             from orb.providers.azure.cli.azure_cli_spec import AzureCLISpec
+
             return AzureCLISpec()
         except ImportError:
             return None
@@ -523,6 +516,7 @@ class AzurePlugin(ProviderPlugin):
             from orb.providers.azure.scheduler.hostfactory_field_mapping import (
                 AzureFieldMapping,
             )
+
             return AzureFieldMapping()
         except ImportError:
             return None
@@ -530,6 +524,7 @@ class AzurePlugin(ProviderPlugin):
     def defaults_loader(self):
         try:
             from orb.providers.azure.defaults_loader import AzureDefaultsLoader
+
             return AzureDefaultsLoader()
         except ImportError:
             return None
@@ -539,6 +534,7 @@ class AzurePlugin(ProviderPlugin):
             from orb.providers.azure.adapters.template_example_generator_adapter import (
                 AzureTemplateExampleGeneratorAdapter,
             )
+
             return AzureTemplateExampleGeneratorAdapter()
         except ImportError:
             return None

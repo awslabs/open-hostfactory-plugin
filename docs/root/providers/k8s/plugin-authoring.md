@@ -168,9 +168,7 @@ class KubernetesMPIJobHandler(K8sHandlerBase):
         self._pod_state_cache = pod_state_cache
         self._cache_alive = cache_alive
 
-    async def acquire_hosts(
-        self, request: Request, template: Template
-    ) -> dict[str, Any]:
+    async def acquire_hosts(self, request: Request, template: Template) -> dict[str, Any]:
         namespace = self.resolve_namespace(template)
         body = self._build_mpijob_body(request, template)
         api = self.client.custom_objects_api  # provided by K8sClient
@@ -185,8 +183,7 @@ class KubernetesMPIJobHandler(K8sHandlerBase):
         )
         # Machine IDs follow the launcher / worker pod naming convention.
         machine_ids = [f"{body['metadata']['name']}-launcher"] + [
-            f"{body['metadata']['name']}-worker-{i}"
-            for i in range(request.requested_count - 1)
+            f"{body['metadata']['name']}-worker-{i}" for i in range(request.requested_count - 1)
         ]
         return {
             "resource_ids": [body["metadata"]["name"]],
@@ -204,19 +201,14 @@ class KubernetesMPIJobHandler(K8sHandlerBase):
         # that carry the request-id label we stamped at acquire time.
         ...  # delegate to a shared helper or inline the list_namespaced_pod call
 
-    async def release_hosts(
-        self, machine_ids: list[str], request: Request
-    ) -> None:
+    async def release_hosts(self, machine_ids: list[str], request: Request) -> None:
         # MPIJob, like Job, is run-to-completion.  Selective release is
         # not meaningful - delete the MPIJob and let the CRD controller
         # cascade-delete pods.
-        namespace = (
-            (request.provider_data or {}).get("k8s", {}).get("namespace")
-            or self._config.namespace
-        )
-        mpijob_name = (
-            (request.provider_data or {}).get("k8s", {}).get("mpijob_name")
-        )
+        namespace = (request.provider_data or {}).get("k8s", {}).get(
+            "namespace"
+        ) or self._config.namespace
+        mpijob_name = (request.provider_data or {}).get("k8s", {}).get("mpijob_name")
         if not mpijob_name:
             return
         api = self.client.custom_objects_api
@@ -235,9 +227,7 @@ class KubernetesMPIJobHandler(K8sHandlerBase):
         # Return a single example so `orb templates generate` can emit a stub.
         return []
 
-    def _build_mpijob_body(
-        self, request: Request, template: Template
-    ) -> dict[str, Any]:
+    def _build_mpijob_body(self, request: Request, template: Template) -> dict[str, Any]:
         # Stamp the canonical ORB labels so the orphan reconciler picks the
         # MPIJob up.  Use the base class's label_prefix.
         labels = {
@@ -387,6 +377,7 @@ A quick smoke test for entry-point wiring:
 
 ```python
 import importlib.metadata as md
+
 
 def test_entry_point_is_discoverable() -> None:
     eps = md.entry_points(group="orb.providers")

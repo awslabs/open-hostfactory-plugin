@@ -88,16 +88,16 @@ All configuration uses Pydantic BaseSettings with comprehensive validation:
 
 ```python
 # Valid configuration
-ORB_LOG_LEVEL=DEBUG                    # ✅ Valid log level
-ORB_AWS_REGION=us-east-1               # ✅ Valid AWS region
-ORB_REQUEST_TIMEOUT=300                # ✅ Valid timeout (1-3600 seconds)
-ORB_AWS_SUBNET_IDS='["subnet-123"]'    # ✅ Valid JSON array
+ORB_LOG_LEVEL = DEBUG  # ✅ Valid log level
+ORB_AWS_REGION = us - east - 1  # ✅ Valid AWS region
+ORB_REQUEST_TIMEOUT = 300  # ✅ Valid timeout (1-3600 seconds)
+ORB_AWS_SUBNET_IDS = '["subnet-123"]'  # ✅ Valid JSON array
 
 # Invalid configuration (validation errors)
-ORB_LOG_LEVEL=INVALID                  # ❌ Invalid log level
-ORB_AWS_REGION=invalid-region          # ❌ Invalid AWS region format
-ORB_REQUEST_TIMEOUT=-1                 # ❌ Negative timeout not allowed
-ORB_AWS_SUBNET_IDS='invalid-json'      # ❌ Invalid JSON format
+ORB_LOG_LEVEL = INVALID  # ❌ Invalid log level
+ORB_AWS_REGION = invalid - region  # ❌ Invalid AWS region format
+ORB_REQUEST_TIMEOUT = -1  # ❌ Negative timeout not allowed
+ORB_AWS_SUBNET_IDS = "invalid-json"  # ❌ Invalid JSON format
 ```
 
 ### Configuration Scenarios

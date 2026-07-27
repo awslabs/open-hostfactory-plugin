@@ -948,46 +948,29 @@ For more information, visit: {DOCS_URL}
     resource_parsers["mcp"] = mcp_parser
     mcp_subparsers = mcp_parser.add_subparsers(dest="action", help="MCP actions", required=True)
 
-    mcp_tools = mcp_subparsers.add_parser("tools", help="MCP tools management")
-    mcp_tools_sub = mcp_tools.add_subparsers(dest="tools_action", required=True)
-
-    mcp_tools_list = mcp_tools_sub.add_parser(
-        "list", help="List MCP tools", parents=[pp.common, pp.list, pp.provider_scope]
+    mcp_subparsers.add_parser(
+        "validate",
+        help="Validate the MCP tool set offline (no server)",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
-    mcp_tools_list.add_argument(
-        "--type", choices=["command", "query"], help="Filter tools by handler type"
-    )
-
-    mcp_tools_call = mcp_tools_sub.add_parser(
-        "call", help="Call MCP tool", parents=[pp.common, pp.list, pp.provider_scope]
-    )
-    mcp_tools_call.add_argument("tool_name", help="Name of tool to call")
-    mcp_tools_call.add_argument("--args", help="Tool arguments as JSON string")
-    mcp_tools_call.add_argument("--file", help="Tool arguments from JSON file")
-
-    mcp_tools_info = mcp_tools_sub.add_parser(
-        "info", help="Show MCP tool details", parents=[pp.common, pp.list, pp.provider_scope]
-    )
-    mcp_tools_info.add_argument("tool_name", help="Name of tool to get info for")
-
-    mcp_validate = mcp_subparsers.add_parser(
-        "validate", help="Validate MCP", parents=[pp.common, pp.list, pp.provider_scope]
-    )
-    mcp_validate.add_argument("--config", help="MCP configuration file to validate")
 
     mcp_serve = mcp_subparsers.add_parser(
         "serve", help="Start MCP server", parents=[pp.common, pp.list, pp.provider_scope]
     )
-    mcp_serve.add_argument("--port", type=int, default=3000, help="Server port (default: 3000)")
-    mcp_serve.add_argument("--host", default="localhost", help="Server host (default: localhost)")
     mcp_serve.add_argument(
-        "--stdio", action="store_true", help="Run in stdio mode for direct MCP client communication"
+        "--transport",
+        choices=["stdio", "http", "streamable-http"],
+        default="stdio",
+        help="Transport to serve over (default: stdio; 'streamable-http' aliases 'http')",
     )
     mcp_serve.add_argument(
-        "--log-level",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        default="INFO",
-        help="Logging level for MCP server",
+        "--host", default="127.0.0.1", help="Host to bind for http transport (default: 127.0.0.1)"
+    )
+    mcp_serve.add_argument(
+        "--port", type=int, default=8000, help="Port to bind for http transport (default: 8000)"
+    )
+    mcp_serve.add_argument(
+        "--path", default="/mcp", help="URL path to mount for http transport (default: /mcp)"
     )
 
     # k8s-legacy — optional plugin; lazy-imports orb_k8s_legacy only when invoked

@@ -51,13 +51,14 @@ When adding new components to the system, follow these patterns to maintain perf
 # PASS Good: Lazy registration
 def register_my_service_lazy(container):
     """Register service with lazy loading support."""
+
     def create_my_service():
         return MyService(
-            dependency1=container.get(Dependency1),
-            dependency2=container.get(Dependency2)
+            dependency1=container.get(Dependency1), dependency2=container.get(Dependency2)
         )
 
     container.register_factory(MyService, create_my_service)
+
 
 # Register for on-demand loading
 container.register_on_demand(MyService, register_my_service_lazy)
@@ -70,7 +71,8 @@ container.register_on_demand(MyService, register_my_service_lazy)
 class MyComponent:
     def __init__(self):
         self.heavy_resource = create_heavy_resource()  # Blocks startup
-        self.database = connect_to_database()          # I/O operation
+        self.database = connect_to_database()  # I/O operation
+
 
 # PASS Good: Lazy initialization
 class MyComponent:
@@ -98,24 +100,21 @@ class MyComponent:
 ```python
 # config/performance_config.json
 {
-  "performance": {
-    "lazy_loading": {
-      "enabled": true,
-      "cache_instances": true,
-      "discovery_mode": "lazy",
-      "connection_mode": "lazy",
-      "debug_timing": false,
-      "preload_critical": [
-        "LoggingPort",
-        "ConfigurationPort"
-      ]
-    },
-    "startup": {
-      "minimal_registration": true,
-      "defer_heavy_operations": true,
-      "background_loading": false
+    "performance": {
+        "lazy_loading": {
+            "enabled": true,
+            "cache_instances": true,
+            "discovery_mode": "lazy",
+            "connection_mode": "lazy",
+            "debug_timing": false,
+            "preload_critical": ["LoggingPort", "ConfigurationPort"],
+        },
+        "startup": {
+            "minimal_registration": true,
+            "defer_heavy_operations": true,
+            "background_loading": false,
+        },
     }
-  }
 }
 ```
 
@@ -139,6 +138,7 @@ export PERFORMANCE_LOG_LEVEL=DEBUG
 ```python
 import time
 import pytest
+
 
 class TestMyComponentPerformance:
     def test_creation_is_fast(self):
@@ -180,9 +180,9 @@ def test_end_to_end_performance():
     import sys
 
     start_time = time.time()
-    result = subprocess.run([
-        sys.executable, "src/run.py", "templates", "list"
-    ], capture_output=True, text=True)
+    result = subprocess.run(
+        [sys.executable, "src/run.py", "templates", "list"], capture_output=True, text=True
+    )
     total_time = (time.time() - start_time) * 1000
 
     assert result.returncode == 0
@@ -203,15 +203,19 @@ from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 def profile_function(func):
     """Decorator to profile function execution time."""
+
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)
         execution_time = (time.time() - start_time) * 1000
         logger.info(f"{func.__name__} executed in {execution_time:.1f}ms")
         return result
+
     return wrapper
+
 
 # Usage
 @profile_function
@@ -226,8 +230,10 @@ def expensive_operation():
 import psutil
 import os
 
+
 def profile_memory(func):
     """Decorator to profile memory usage."""
+
     def wrapper(*args, **kwargs):
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB
@@ -239,6 +245,7 @@ def profile_memory(func):
 
         logger.info(f"{func.__name__} memory increase: {memory_increase:.1f}MB")
         return result
+
     return wrapper
 ```
 
@@ -249,17 +256,14 @@ def profile_memory(func):
 ```python
 # config/debug_config.json
 {
-  "logging": {
-    "level": "DEBUG",
-    "performance_timing": true
-  },
-  "performance": {
-    "lazy_loading": {
-      "debug_timing": true,
-      "log_component_loads": true,
-      "track_memory_usage": true
-    }
-  }
+    "logging": {"level": "DEBUG", "performance_timing": true},
+    "performance": {
+        "lazy_loading": {
+            "debug_timing": true,
+            "log_component_loads": true,
+            "track_memory_usage": true,
+        }
+    },
 }
 ```
 
@@ -269,6 +273,7 @@ def profile_memory(func):
 from src.infrastructure.logging.logger import get_logger
 
 logger = get_logger(__name__)
+
 
 def debug_lazy_loading():
     """Enable debug logging for lazy loading."""
@@ -292,6 +297,7 @@ def debug_lazy_loading():
 ```python
 # Add timing to identify bottlenecks
 import time
+
 
 def diagnose_startup():
     start_time = time.time()
@@ -318,6 +324,7 @@ def diagnose_startup():
 ```python
 import gc
 import psutil
+
 
 def diagnose_memory():
     process = psutil.Process(os.getpid())
@@ -404,6 +411,7 @@ class OptimizedComponent:
 from functools import lru_cache
 import time
 
+
 class CachedComponent:
     @lru_cache(maxsize=128)
     def expensive_computation(self, input_data):
@@ -449,13 +457,13 @@ def register_components_selectively(container, config):
     register_core_services(container)
 
     # Conditionally register optional components
-    if config.get('features', {}).get('aws_integration', False):
+    if config.get("features", {}).get("aws_integration", False):
         register_aws_services(container)
 
-    if config.get('features', {}).get('database_support', False):
+    if config.get("features", {}).get("database_support", False):
         register_database_services(container)
 
-    if config.get('features', {}).get('monitoring', False):
+    if config.get("features", {}).get("monitoring", False):
         register_monitoring_services(container)
 ```
 
@@ -488,34 +496,20 @@ def register_services_in_batches(container, services):
 ```python
 # config/performance_tuning.json
 {
-  "performance": {
-    "lazy_loading": {
-      "enabled": true,
-      "cache_instances": true,
-      "preload_critical": [
-        "LoggingPort",
-        "ConfigurationPort"
-      ],
-      "background_loading": {
-        "enabled": false,
-        "thread_pool_size": 2,
-        "preload_common": [
-          "TemplateService",
-          "RequestService"
-        ]
-      }
-    },
-    "caching": {
-      "component_cache_size": 100,
-      "result_cache_ttl": 300,
-      "memory_limit_mb": 500
-    },
-    "optimization": {
-      "batch_size": 10,
-      "concurrent_loads": 3,
-      "timeout_seconds": 30
+    "performance": {
+        "lazy_loading": {
+            "enabled": true,
+            "cache_instances": true,
+            "preload_critical": ["LoggingPort", "ConfigurationPort"],
+            "background_loading": {
+                "enabled": false,
+                "thread_pool_size": 2,
+                "preload_common": ["TemplateService", "RequestService"],
+            },
+        },
+        "caching": {"component_cache_size": 100, "result_cache_ttl": 300, "memory_limit_mb": 500},
+        "optimization": {"batch_size": 10, "concurrent_loads": 3, "timeout_seconds": 30},
     }
-  }
 }
 ```
 
@@ -563,6 +557,7 @@ def setup_performance_monitoring():
 
     # Monitor component access
     original_get = container.get
+
     def monitored_get(service_type):
         start_time = time.time()
         result = original_get(service_type)
@@ -581,30 +576,27 @@ def setup_performance_monitoring():
 ```python
 def performance_health_check():
     """Check system performance health."""
-    health = {
-        'status': 'healthy',
-        'checks': {}
-    }
+    health = {"status": "healthy", "checks": {}}
 
     # Check startup time
     start_time = time.time()
     app = Application()
     startup_time = (time.time() - start_time) * 1000
 
-    health['checks']['startup_time'] = {
-        'status': 'healthy' if startup_time < 500 else 'unhealthy',
-        'value': f"{startup_time:.1f}ms",
-        'threshold': '500ms'
+    health["checks"]["startup_time"] = {
+        "status": "healthy" if startup_time < 500 else "unhealthy",
+        "value": f"{startup_time:.1f}ms",
+        "threshold": "500ms",
     }
 
     # Check memory usage
     process = psutil.Process(os.getpid())
     memory_mb = process.memory_info().rss / 1024 / 1024
 
-    health['checks']['memory_usage'] = {
-        'status': 'healthy' if memory_mb < 200 else 'warning',
-        'value': f"{memory_mb:.1f}MB",
-        'threshold': '200MB'
+    health["checks"]["memory_usage"] = {
+        "status": "healthy" if memory_mb < 200 else "warning",
+        "value": f"{memory_mb:.1f}MB",
+        "threshold": "200MB",
     }
 
     return health

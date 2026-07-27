@@ -155,12 +155,22 @@ Tests container functionality and configuration:
 ```python
 def test_container_environment_variables(self, built_image):
     """Test container responds to environment variables."""
-    result = subprocess.run([
-        "docker", "run", "--rm",
-        "-e", "HF_SERVER_ENABLED=true",
-        "-e", "HF_AUTH_ENABLED=false",
-        built_image, "version"
-    ], capture_output=True, text=True, timeout=30)
+    result = subprocess.run(
+        [
+            "docker",
+            "run",
+            "--rm",
+            "-e",
+            "HF_SERVER_ENABLED=true",
+            "-e",
+            "HF_AUTH_ENABLED=false",
+            built_image,
+            "version",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
 
     assert result.returncode == 0
 ```
@@ -189,19 +199,23 @@ Common test fixtures in `tests/conftest.py`:
 @pytest.fixture
 def mock_aws_credentials():
     """Mock AWS credentials for testing."""
-    with mock.patch.dict(os.environ, {
-        'AWS_ACCESS_KEY_ID': 'testing',
-        'AWS_SECRET_ACCESS_KEY': 'testing',
-        'AWS_SECURITY_TOKEN': 'testing',
-        'AWS_SESSION_TOKEN': 'testing',
-    }):
+    with mock.patch.dict(
+        os.environ,
+        {
+            "AWS_ACCESS_KEY_ID": "testing",
+            "AWS_SECRET_ACCESS_KEY": "testing",
+            "AWS_SECURITY_TOKEN": "testing",
+            "AWS_SESSION_TOKEN": "testing",
+        },
+    ):
         yield
+
 
 @pytest.fixture
 def mock_ec2():
     """Mock EC2 service for testing."""
     with mock_aws():
-        yield boto3.client('ec2', region_name='us-east-1')
+        yield boto3.client("ec2", region_name="us-east-1")
 ```
 
 ### Test Data Builders
@@ -216,7 +230,7 @@ class TemplateBuilder:
             "templateName": "Test Template",
             "provider_api": "aws",
             "imageId": "ami-12345678",
-            "instanceType": "t3.micro"
+            "instanceType": "t3.micro",
         }
 
     def with_id(self, template_id: str):
@@ -339,6 +353,7 @@ def test_authentication_required():
     """Test that protected endpoints require authentication."""
     response = client.get("/api/v1/templates")
     assert response.status_code == 401
+
 
 def test_invalid_token_rejected():
     """Test that invalid tokens are rejected."""

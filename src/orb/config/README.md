@@ -303,7 +303,7 @@ loader = ConfigurationLoader()
 # Load and migrate legacy configuration
 config_data = loader.load_configuration(
     config_path=None,  # Will search for legacy files
-    legacy_support=True
+    legacy_support=True,
 )
 
 # Legacy fields are automatically converted to new format
@@ -432,18 +432,25 @@ def validate_repository_config(repo_config: RepositoryConfig) -> None:
 ```python
 class ConfigurationError(Exception):
     """Base configuration error."""
+
     pass
+
 
 class ConfigurationNotFoundError(ConfigurationError):
     """Configuration file not found."""
+
     pass
+
 
 class ConfigurationValidationError(ConfigurationError):
     """Configuration validation failed."""
+
     pass
+
 
 class LegacyConfigurationError(ConfigurationError):
     """Legacy configuration processing failed."""
+
     pass
 ```
 
@@ -469,14 +476,12 @@ def load_configuration_with_fallback():
 def test_configuration_loading():
     """Test configuration loading and validation."""
     # Test valid configuration
-    config_data = {
-        "aws": {"region": "us-east-1"},
-        "logging": {"level": "INFO"}
-    }
+    config_data = {"aws": {"region": "us-east-1"}, "logging": {"level": "INFO"}}
 
     config = validate_configuration(config_data)
     assert config.aws.region == "us-east-1"
     assert config.logging.level == "INFO"
+
 
 def test_environment_override():
     """Test environment variable override."""

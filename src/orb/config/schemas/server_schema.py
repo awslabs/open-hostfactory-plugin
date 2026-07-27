@@ -350,6 +350,15 @@ class ServerConfig(BaseModel):
 
     # Security
     require_https: bool = Field(False, description="Require HTTPS for all requests")
+    hsts_max_age: int = Field(
+        31536000,
+        ge=0,
+        description=(
+            "max-age (seconds) for the Strict-Transport-Security header emitted when "
+            "require_https=True. Defaults to 31536000 (1 year). Set to 0 to disable "
+            "the max-age directive while keeping HTTPS enforcement."
+        ),
+    )
     trusted_hosts: list[str] = Field(
         ["localhost", "127.0.0.1", "::1", "testserver", "test"],
         description=(

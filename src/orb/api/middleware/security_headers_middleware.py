@@ -16,11 +16,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         require_https: When True, emit the Strict-Transport-Security header.
             Must only be set when the server is actually serving TLS so
             browsers do not cache an HSTS policy for an HTTP-only origin.
+        hsts_max_age: max-age (seconds) advertised in the Strict-Transport-Security
+            header. Defaults to 31536000 (1 year).
     """
 
-    def __init__(self, app, require_https: bool = False) -> None:
+    def __init__(self, app, require_https: bool = False, hsts_max_age: int = 31536000) -> None:
         super().__init__(app)
         self.require_https = require_https
+        self.hsts_max_age = hsts_max_age
 
     async def dispatch(self, request: Request, call_next) -> Response:
         """Pass the request downstream and attach security headers to the response."""
@@ -49,7 +52,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Sending HSTS on a plain-HTTP origin causes browsers to cache an upgrade
         # policy for a site that cannot serve TLS, breaking all future connections.
         if self.require_https:
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+            response.headers["Strict-Transport-Security"] = (
+                f"max-age={self.hsts_max_age}; includeSubDomains"
+            )
 
         # Content Security Policy — 'unsafe-inline' removed from script-src.
         # If inline scripts are genuinely needed, use nonce-based CSP instead.

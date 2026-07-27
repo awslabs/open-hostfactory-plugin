@@ -6533,38 +6533,28 @@
 <hr />
 <h3 id="cleanup-old-requests">Cleanup Old Requests<a class="headerlink" href="#cleanup-old-requests" title="Permanent link">&para;</a></h3>
 <p>Remove requests older than a given age.</p>
-<p><strong>CQRS command:</strong> <code>CleanupOldRequestsCommand</code></p>
 <table>
 <thead>
 <tr>
 <th>Interface</th>
 <th>Parameter</th>
-<th>CQRS field</th>
 <th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>CQRS</td>
+<td>SDK</td>
 <td><code>older_than_days</code></td>
-<td>—</td>
 <td>optional, default <code>1</code></td>
 </tr>
 <tr>
-<td>CQRS</td>
-<td><code>statuses_to_cleanup</code></td>
-<td>—</td>
-<td>optional list of status strings</td>
-</tr>
-<tr>
 <td>SDK</td>
-<td><code>older_than_days</code></td>
-<td><code>older_than_days</code></td>
-<td></td>
+<td><code>statuses</code></td>
+<td>optional list of status strings; defaults to terminal statuses</td>
 </tr>
 </tbody>
 </table>
-<p><strong>SDK command output fields:</strong></p>
+<p><strong>SDK output fields:</strong></p>
 <table>
 <thead>
 <tr>
@@ -6574,56 +6564,44 @@
 </thead>
 <tbody>
 <tr>
-<td><code>requests_cleaned</code></td>
+<td><code>requests_deleted</code></td>
 <td>Count of requests removed</td>
 </tr>
 <tr>
-<td><code>request_ids_found</code></td>
-<td>List of request IDs that were found for cleanup</td>
+<td><code>machines_deleted</code></td>
+<td>Count of machines removed</td>
+</tr>
+<tr>
+<td><code>details</code></td>
+<td>Per-record cleanup detail</td>
 </tr>
 </tbody>
 </table>
 <hr />
 <h3 id="cleanup-all-resources">Cleanup All Resources<a class="headerlink" href="#cleanup-all-resources" title="Permanent link">&para;</a></h3>
-<p>Remove all stale requests and machines.</p>
-<p><strong>CQRS command:</strong> <code>CleanupAllResourcesCommand</code></p>
+<p>Remove all stale requests and their machines.</p>
 <table>
 <thead>
 <tr>
 <th>Interface</th>
 <th>Parameter</th>
-<th>CQRS field</th>
 <th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>CQRS</td>
+<td>SDK</td>
 <td><code>older_than_days</code></td>
-<td>—</td>
 <td>optional, default <code>1</code></td>
 </tr>
 <tr>
-<td>CQRS</td>
-<td><code>include_pending</code></td>
-<td>—</td>
-<td>optional, default <code>false</code></td>
-</tr>
-<tr>
 <td>SDK</td>
-<td><code>older_than_days</code></td>
-<td><code>older_than_days</code></td>
-<td></td>
-</tr>
-<tr>
-<td>SDK</td>
-<td><code>include_pending</code></td>
-<td><code>include_pending</code></td>
-<td></td>
+<td><code>statuses</code></td>
+<td>optional list of status strings; defaults to terminal statuses</td>
 </tr>
 </tbody>
 </table>
-<p><strong>SDK command output fields:</strong></p>
+<p><strong>SDK output fields:</strong></p>
 <table>
 <thead>
 <tr>
@@ -6633,16 +6611,16 @@
 </thead>
 <tbody>
 <tr>
-<td><code>requests_cleaned</code></td>
+<td><code>requests_deleted</code></td>
 <td>Count of requests removed</td>
 </tr>
 <tr>
-<td><code>machines_cleaned</code></td>
+<td><code>machines_deleted</code></td>
 <td>Count of machines removed</td>
 </tr>
 <tr>
-<td><code>total_cleaned</code></td>
-<td>Combined total</td>
+<td><code>details</code></td>
+<td>Per-record cleanup detail</td>
 </tr>
 </tbody>
 </table>
@@ -6676,14 +6654,6 @@
 <tr>
 <td><code>SyncRequestCommand</code></td>
 <td><code>sync_request</code></td>
-</tr>
-<tr>
-<td><code>CleanupOldRequestsCommand</code></td>
-<td><code>cleanup_old_requests</code></td>
-</tr>
-<tr>
-<td><code>CleanupAllResourcesCommand</code></td>
-<td><code>cleanup_all_resources</code></td>
 </tr>
 <tr>
 <td><code>CleanupTerminatedMachinesCommand</code></td>

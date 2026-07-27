@@ -71,6 +71,13 @@ class ConfigurationManager:
         # top of the user's ORIGINAL config on ``save`` so that the merged,
         # env-expanded runtime config never reaches disk. See ``save``.
         self._pending_edits: Dict[str, Any] = {}
+        # Dot-notation paths recorded via ``set`` (leaf REPLACE semantics).
+        # ``set`` replaces a value outright in memory, so on ``save`` these
+        # paths must OVERWRITE the on-disk value rather than deep-merge into
+        # it. Without this, ``set('provider', {...})`` would leave stale
+        # sibling keys (e.g. an old ``providers`` list) on disk after a
+        # deep-merge, diverging from the in-memory state after reload.
+        self._replace_paths: set[tuple[str, ...]] = set()
         self._type_converter: Optional[ConfigTypeConverter] = None
         self._path_resolver: Optional[ConfigPathResolver] = None
         self._provider_manager: Optional[ProviderConfigManager] = None
@@ -187,6 +194,7 @@ class ConfigurationManager:
             self._cache_manager.clear_cache()
             self._raw_config = None
             self._pending_edits = {}
+            self._replace_paths = set()
             self._app_config = None
             self._type_converter = None
             self._path_resolver = None
@@ -252,7 +260,14 @@ class ConfigurationManager:
         self._cache_manager.clear_cache()
 
     def _record_edit(self, key: str, value: Any) -> None:
-        """Record a single dot-notation edit into the pending-edits overlay."""
+        """Record a single dot-notation edit into the pending-edits overlay.
+
+        ``set`` has REPLACE semantics: the value overwrites whatever was at
+        ``key`` in memory. To keep the persisted config in step with memory,
+        the full dot-notation path is recorded in ``_replace_paths`` so that
+        on ``save`` the on-disk value at that path is overwritten wholesale
+        rather than deep-merged (which would retain stale sibling keys).
+        """
         keys = key.split(".")
         target = self._pending_edits
         for k in keys[:-1]:
@@ -262,13 +277,43 @@ class ConfigurationManager:
                 target[k] = existing
             target = existing
         target[keys[-1]] = value
+        self._replace_paths.add(tuple(keys))
+
+    def _apply_edits(self, base: dict[str, Any], update: dict[str, Any]) -> None:
+        """Apply the pending-edits overlay onto *base* for persistence.
+
+        Deep-merges ``update`` into ``base`` (so ``update`` edits and scalar
+        leaf edits keep their merge/overwrite behaviour), except that any path
+        recorded in ``_replace_paths`` (a ``set``-style REPLACE) overwrites the
+        value at that path outright — matching in-memory semantics and dropping
+        stale sibling keys that a deep-merge would otherwise retain.
+        """
+        self._merge_edits(base, update, replace_paths=self._replace_paths)
 
     @classmethod
-    def _merge_edits(cls, base: dict[str, Any], update: dict[str, Any]) -> None:
-        """Deep-merge *update* into *base* (dicts merge, other values replace)."""
+    def _merge_edits(
+        cls,
+        base: dict[str, Any],
+        update: dict[str, Any],
+        replace_paths: set[tuple[str, ...]] | None = None,
+        _prefix: tuple[str, ...] = (),
+    ) -> None:
+        """Deep-merge *update* into *base* (dicts merge, other values replace).
+
+        When a path (built from ``_prefix`` + key) is in ``replace_paths`` the
+        value overwrites ``base`` wholesale instead of recursing, so a ``set``
+        of a dict subtree does not leave stale sibling keys behind on disk.
+        """
         for key, value in update.items():
-            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
-                cls._merge_edits(base[key], value)
+            path = _prefix + (key,)
+            is_replace = replace_paths is not None and path in replace_paths
+            if (
+                not is_replace
+                and key in base
+                and isinstance(base[key], dict)
+                and isinstance(value, dict)
+            ):
+                cls._merge_edits(base[key], value, replace_paths, path)
             else:
                 base[key] = value
 
@@ -415,7 +460,7 @@ class ConfigurationManager:
 
         try:
             raw_config = self._load_original_user_config()
-            self._merge_edits(raw_config, self._pending_edits)
+            self._apply_edits(raw_config, self._pending_edits)
             target = Path(config_path)
             target.parent.mkdir(parents=True, exist_ok=True)
             fd, tmp_name = tempfile.mkstemp(

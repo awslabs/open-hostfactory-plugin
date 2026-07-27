@@ -98,6 +98,36 @@ async def test_every_tool_input_schema_is_a_serialisable_object_schema() -> None
 
 
 @pytest.mark.asyncio
+@pytest.mark.unit
+async def test_optional_typed_fields_accept_explicit_null() -> None:
+    """An Optional[T] field advertises the null type so an explicit null validates.
+
+    The SDK validates incoming arguments against ``inputSchema`` before the
+    handler runs; a conformant client that serialises an unset optional as an
+    explicit ``null`` must not be rejected. A property whose declared type is a
+    scalar-plus-null therefore accepts null. (A non-optional field with a default,
+    e.g. ``str = ""``, is intentionally not nullable — the DTO rejects None too.)
+    """
+    import jsonschema
+
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
+    from orb.interface.mcp.catalog_server import schema_from_input_dto
+
+    checked = 0
+    for entry in OPERATION_CATALOG.values():
+        if Interface.MCP not in entry.exposed_on:
+            continue
+        schema = schema_from_input_dto(entry.input_dto)
+        for name, prop in schema["properties"].items():
+            declared = prop.get("type")
+            if isinstance(declared, list) and "null" in declared:
+                # This property advertises null; an explicit null must validate.
+                jsonschema.validate({name: None}, {**schema, "required": []})
+                checked += 1
+    assert checked, "no nullable optional properties were exercised"
+
+
+@pytest.mark.asyncio
 async def test_unknown_tool_resolves_to_error_result_not_a_raised_exception() -> None:
     """Calling an unknown tool completes with an isError CallToolResult.
 

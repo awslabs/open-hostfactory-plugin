@@ -170,7 +170,12 @@ async def main() -> None:
             from orb.interface.mcp.catalog_server import handle_mcp_validate
 
             response = await handle_mcp_validate(args)
+            # The validation summary is a structured object, not tabular rows, so
+            # render it as json/yaml; table/list have no meaningful shape here and
+            # fall back to json rather than crashing on a non-row payload.
             output_format = getattr(args, "format", "json")
+            if output_format not in ("json", "yaml"):
+                output_format = "json"
             print(format_output(response.data, output_format))
             sys.exit(response.exit_code)
 

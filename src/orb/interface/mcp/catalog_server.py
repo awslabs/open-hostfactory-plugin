@@ -60,6 +60,19 @@ def _unwrap_optional(annotation: Any) -> Any:
     return annotation
 
 
+def _is_optional(annotation: Any) -> bool:
+    """True when the annotation is a single-``None`` union (``Optional[T]``).
+
+    Such a field legitimately accepts an explicit JSON ``null``, so its schema
+    must advertise the null type — otherwise a client that serialises an unset
+    optional as ``null`` is rejected by input validation before the handler runs.
+    """
+    if get_origin(annotation) is Union:
+        args = get_args(annotation)
+        return type(None) in args and len([a for a in args if a is not type(None)]) == 1
+    return False
+
+
 def _json_type_for(annotation: Any) -> str | None:
     """Map a (possibly Optional/generic) annotation to a JSON-schema type name.
 
@@ -110,7 +123,12 @@ def schema_from_input_dto(input_dto: type) -> dict[str, Any]:
         json_type = _json_type_for(annotation)
         prop: dict[str, Any] = {}
         if json_type is not None:
-            prop["type"] = json_type
+            # An Optional[T] field accepts an explicit null, so advertise both
+            # the scalar type and null; a required field takes the bare type.
+            if _is_optional(annotation):
+                prop["type"] = [json_type, "null"]
+            else:
+                prop["type"] = json_type
             if json_type == "array":
                 prop["items"] = {"type": "string"}
         properties[field.name] = prop

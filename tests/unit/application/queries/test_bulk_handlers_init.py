@@ -1,9 +1,11 @@
-"""Unit tests for bulk query handler construction and include-* branches.
+"""Unit tests for bulk query handler construction and delegation.
 
 Complements test_bulk_handlers.py (which bypasses __init__ via object.__new__)
-by exercising the real __init__ wiring of GetMultipleRequestsHandler and the
-include_machines / include_requests enrichment branches in
-application/queries/bulk_handlers.py.
+by exercising the real __init__ wiring and query-bus delegation of the bulk
+handlers in application/queries/bulk_handlers.py. Constructing the handlers
+through their public constructors here guards against a regression where a
+handler's __init__ referenced a module that does not exist, which the
+object.__new__ tests could never catch.
 """
 
 from __future__ import annotations
@@ -15,10 +17,12 @@ import pytest
 from orb.application.dto.bulk_queries import (
     GetMultipleMachinesQuery,
     GetMultipleRequestsQuery,
+    GetMultipleTemplatesQuery,
 )
 from orb.application.queries.bulk_handlers import (
     GetMultipleMachinesHandler,
     GetMultipleRequestsHandler,
+    GetMultipleTemplatesHandler,
 )
 
 
@@ -82,44 +86,87 @@ class TestGetMultipleRequestsInit:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-class TestGetMultipleMachinesIncludeRequests:
-    """include_requests branch enriches each machine with its owning request."""
+class TestGetMultipleMachinesInit:
+    """Exercise the real __init__ wiring and query-bus delegation.
 
-    def _handler(self) -> GetMultipleMachinesHandler:
-        handler = object.__new__(GetMultipleMachinesHandler)
-        handler.logger = MagicMock()
-        handler.error_handler = MagicMock()
-        handler.uow_factory = MagicMock()
-        handler._container = MagicMock()
-        handler._query_service = MagicMock()
-        handler._dto_factory = MagicMock()
-        return handler
+    These construct the handler through its public constructor (no
+    object.__new__ bypass) so a broken import or a missing collaborator in
+    __init__ surfaces here rather than being silently skipped.
+    """
 
-    async def test_include_requests_fetches_owning_request(self):
-        handler = self._handler()
-        machine = MagicMock(machine_id="mc-a", request_id="req-a")
-        handler._query_service.get_machine = AsyncMock(return_value=machine)
-        handler._dto_factory.create_from_domain.return_value = _make_machine_dto()
+    def _handler(self, query_bus: MagicMock) -> GetMultipleMachinesHandler:
+        return GetMultipleMachinesHandler(
+            uow_factory=MagicMock(),
+            logger=MagicMock(),
+            error_handler=MagicMock(),
+            container=MagicMock(),
+            query_bus=query_bus,
+        )
 
-        with patch("orb.application.services.request_query_service.RequestQueryService") as MockRQS:
-            MockRQS.return_value.get_request = AsyncMock(return_value=MagicMock())
-
-            result = await handler.execute_query(
-                GetMultipleMachinesQuery(machine_ids=["mc-a"], include_requests=True)
-            )
-
-        MockRQS.return_value.get_request.assert_awaited_once_with("req-a")
-        assert result.found_count == 1
-
-    async def test_include_requests_skipped_when_no_request_id(self):
-        handler = self._handler()
-        machine = MagicMock(machine_id="mc-a", request_id=None)
-        handler._query_service.get_machine = AsyncMock(return_value=machine)
-        handler._dto_factory.create_from_domain.return_value = _make_machine_dto()
+    async def test_delegates_to_single_machine_query(self):
+        query_bus = MagicMock()
+        query_bus.execute = AsyncMock(return_value=_make_machine_dto())
+        handler = self._handler(query_bus)
 
         result = await handler.execute_query(
             GetMultipleMachinesQuery(machine_ids=["mc-a"], include_requests=True)
         )
 
-        # DTO built with request=None; no crash and machine is found.
+        query_bus.execute.assert_awaited_once()
         assert result.found_count == 1
+
+    async def test_not_found_reported(self):
+        from orb.domain.base.exceptions import EntityNotFoundError
+
+        query_bus = MagicMock()
+        query_bus.execute = AsyncMock(side_effect=EntityNotFoundError("Machine", "mc-gone"))
+        handler = self._handler(query_bus)
+
+        result = await handler.execute_query(GetMultipleMachinesQuery(machine_ids=["mc-gone"]))
+
+        assert result.found_count == 0
+        assert "mc-gone" in result.not_found_ids
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+class TestGetMultipleTemplatesInit:
+    """Exercise the real __init__ wiring and query-bus delegation for templates.
+
+    Constructing through the public constructor and executing the query proves
+    the handler no longer references a non-existent template query service.
+    """
+
+    def _handler(self, query_bus: MagicMock) -> GetMultipleTemplatesHandler:
+        return GetMultipleTemplatesHandler(
+            uow_factory=MagicMock(),
+            logger=MagicMock(),
+            error_handler=MagicMock(),
+            container=MagicMock(),
+            query_bus=query_bus,
+        )
+
+    async def test_delegates_to_single_template_query(self):
+        query_bus = MagicMock()
+        query_bus.execute = AsyncMock(return_value=MagicMock(is_active=True))
+        handler = self._handler(query_bus)
+
+        result = await handler.execute_query(
+            GetMultipleTemplatesQuery(template_ids=["tmpl-a"], active_only=True)
+        )
+
+        query_bus.execute.assert_awaited_once()
+        assert result.found_count == 1
+        assert result.not_found_ids == []
+
+    async def test_not_found_reported(self):
+        from orb.domain.base.exceptions import EntityNotFoundError
+
+        query_bus = MagicMock()
+        query_bus.execute = AsyncMock(side_effect=EntityNotFoundError("Template", "tmpl-gone"))
+        handler = self._handler(query_bus)
+
+        result = await handler.execute_query(GetMultipleTemplatesQuery(template_ids=["tmpl-gone"]))
+
+        assert result.found_count == 0
+        assert "tmpl-gone" in result.not_found_ids

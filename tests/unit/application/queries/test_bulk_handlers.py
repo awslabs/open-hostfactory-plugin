@@ -49,8 +49,7 @@ def _make_templates_handler() -> GetMultipleTemplatesHandler:
     handler.error_handler = MagicMock()
     handler.uow_factory = MagicMock()
     handler._container = MagicMock()
-    handler._query_service = MagicMock()
-    handler._dto_factory = MagicMock()
+    handler._query_bus = MagicMock()
     return handler
 
 
@@ -60,8 +59,7 @@ def _make_machines_handler() -> GetMultipleMachinesHandler:
     handler.error_handler = MagicMock()
     handler.uow_factory = MagicMock()
     handler._container = MagicMock()
-    handler._query_service = MagicMock()
-    handler._dto_factory = MagicMock()
+    handler._query_bus = MagicMock()
     return handler
 
 
@@ -158,12 +156,9 @@ class TestGetMultipleRequestsHandler:
 class TestGetMultipleTemplatesHandler:
     async def test_all_active_templates_returned(self):
         handler = _make_templates_handler()
-        fake_dto_a = MagicMock()
-        fake_dto_b = MagicMock()
-        handler._query_service.get_template = AsyncMock(
-            side_effect=[MagicMock(active=True), MagicMock(active=True)]
-        )
-        handler._dto_factory.create_from_domain.side_effect = [fake_dto_a, fake_dto_b]
+        fake_dto_a = MagicMock(is_active=True)
+        fake_dto_b = MagicMock(is_active=True)
+        handler._query_bus.execute = AsyncMock(side_effect=[fake_dto_a, fake_dto_b])
 
         result = await handler.execute_query(
             GetMultipleTemplatesQuery(template_ids=["tmpl-a", "tmpl-b"], active_only=True)
@@ -175,7 +170,7 @@ class TestGetMultipleTemplatesHandler:
 
     async def test_inactive_template_excluded_when_active_only(self):
         handler = _make_templates_handler()
-        handler._query_service.get_template = AsyncMock(return_value=MagicMock(active=False))
+        handler._query_bus.execute = AsyncMock(return_value=MagicMock(is_active=False))
 
         result = await handler.execute_query(
             GetMultipleTemplatesQuery(template_ids=["tmpl-inactive"], active_only=True)
@@ -186,8 +181,7 @@ class TestGetMultipleTemplatesHandler:
 
     async def test_inactive_template_included_when_not_active_only(self):
         handler = _make_templates_handler()
-        handler._query_service.get_template = AsyncMock(return_value=MagicMock(active=False))
-        handler._dto_factory.create_from_domain.return_value = MagicMock()
+        handler._query_bus.execute = AsyncMock(return_value=MagicMock(is_active=False))
 
         result = await handler.execute_query(
             GetMultipleTemplatesQuery(template_ids=["tmpl-inactive"], active_only=False)
@@ -198,7 +192,7 @@ class TestGetMultipleTemplatesHandler:
 
     async def test_not_found_template_reported(self):
         handler = _make_templates_handler()
-        handler._query_service.get_template = AsyncMock(
+        handler._query_bus.execute = AsyncMock(
             side_effect=EntityNotFoundError("Template", "tmpl-gone")
         )
 
@@ -230,13 +224,7 @@ class TestGetMultipleMachinesHandler:
         dto_a = MachineDTO.model_validate({"machine_id": "mc-a", **_mc_fields})
         dto_b = MachineDTO.model_validate({"machine_id": "mc-b", **_mc_fields})
 
-        handler._query_service.get_machine = AsyncMock(
-            side_effect=[
-                MagicMock(machine_id="mc-a", request_id=None),
-                MagicMock(machine_id="mc-b", request_id=None),
-            ]
-        )
-        handler._dto_factory.create_from_domain.side_effect = [dto_a, dto_b]
+        handler._query_bus.execute = AsyncMock(side_effect=[dto_a, dto_b])
 
         result = await handler.execute_query(
             GetMultipleMachinesQuery(machine_ids=["mc-a", "mc-b"], include_requests=False)
@@ -248,7 +236,7 @@ class TestGetMultipleMachinesHandler:
 
     async def test_not_found_machine_reported(self):
         handler = _make_machines_handler()
-        handler._query_service.get_machine = AsyncMock(
+        handler._query_bus.execute = AsyncMock(
             side_effect=EntityNotFoundError("Machine", "mc-gone")
         )
 
@@ -260,13 +248,13 @@ class TestGetMultipleMachinesHandler:
 
     async def test_empty_id_list_returns_empty_batch(self):
         handler = _make_machines_handler()
-        handler._query_service.get_machine = AsyncMock()
+        handler._query_bus.execute = AsyncMock()
 
         result = await handler.execute_query(GetMultipleMachinesQuery(machine_ids=[]))
 
         assert result.found_count == 0
         assert result.total_requested == 0
-        handler._query_service.get_machine.assert_not_called()
+        handler._query_bus.execute.assert_not_called()
 
     async def test_partial_found_reports_not_found(self):
         from orb.application.machine.dto import MachineDTO
@@ -281,13 +269,12 @@ class TestGetMultipleMachinesHandler:
         }
         dto_a = MachineDTO.model_validate({"machine_id": "mc-a", **_mc_fields})
 
-        handler._query_service.get_machine = AsyncMock(
+        handler._query_bus.execute = AsyncMock(
             side_effect=[
-                MagicMock(machine_id="mc-a", request_id=None),
+                dto_a,
                 EntityNotFoundError("Machine", "mc-gone"),
             ]
         )
-        handler._dto_factory.create_from_domain.return_value = dto_a
 
         result = await handler.execute_query(
             GetMultipleMachinesQuery(machine_ids=["mc-a", "mc-gone"])

@@ -688,7 +688,7 @@ public sealed class OrbClient : IAsyncDisposable
     }
 
     // ---------------------------------------------------------------------------
-    // Providers — 4 operations
+    // Providers — 5 operations
     // ---------------------------------------------------------------------------
 
     /// <summary>listProviders — GET /api/v1/providers/</summary>
@@ -707,6 +707,22 @@ public sealed class OrbClient : IAsyncDisposable
     /// <summary>getProvidersHealth — GET /api/v1/providers/health</summary>
     public async Task<Dictionary<string, object?>> GetProvidersHealthAsync(CancellationToken ct = default)
         => await GetAsync<Dictionary<string, object?>>("/api/v1/providers/health", ct: ct).ConfigureAwait(false);
+
+    /// <summary>discoverProviderResources — GET /api/v1/providers/discover/{provider_api}/{resource_type}</summary>
+    /// <remarks>
+    /// Discovers infrastructure resources (e.g. vpcs, subnets, security_groups)
+    /// for a provider so callers can offer selection lists instead of free-text
+    /// IDs. The "subnets" and "security_groups" resource types require a
+    /// <paramref name="vpcId"/>; pass null for types that do not.
+    /// </remarks>
+    public async Task<Dictionary<string, object?>> DiscoverProviderResourcesAsync(
+        string providerApi, string resourceType, string? vpcId = null, CancellationToken ct = default)
+    {
+        var q = vpcId != null ? new Dictionary<string, string> { ["vpc_id"] = vpcId } : null;
+        return await GetAsync<Dictionary<string, object?>>(
+            $"/api/v1/providers/discover/{Uri.EscapeDataString(providerApi)}/{Uri.EscapeDataString(resourceType)}",
+            q, ct).ConfigureAwait(false);
+    }
 
     // ---------------------------------------------------------------------------
     // Config — 7 operations

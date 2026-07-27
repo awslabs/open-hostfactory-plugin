@@ -719,7 +719,7 @@ export class OrbClient {
   }
 
   // ---------------------------------------------------------------------------
-  // Providers — 4 operations
+  // Providers — 5 operations
   // ---------------------------------------------------------------------------
 
   /** listProviders — GET /api/v1/providers/ */
@@ -742,6 +742,18 @@ export class OrbClient {
   /** getProvidersHealth — GET /api/v1/providers/health */
   async getProvidersHealth(): Promise<Record<string, unknown>> {
     return this.get<Record<string, unknown>>("/api/v1/providers/health");
+  }
+
+  /** discoverProviderResources — GET /api/v1/providers/discover/{provider_api}/{resource_type} */
+  async discoverProviderResources(
+    providerApi: string,
+    resourceType: string,
+    params?: { vpc_id?: string }
+  ): Promise<unknown> {
+    return this.get<unknown>(
+      `/api/v1/providers/discover/${encodeURIComponent(providerApi)}/${encodeURIComponent(resourceType)}`,
+      params as Record<string, unknown>
+    );
   }
 
   // ---------------------------------------------------------------------------

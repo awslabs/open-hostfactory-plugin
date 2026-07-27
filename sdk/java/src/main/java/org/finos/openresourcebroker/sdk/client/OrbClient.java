@@ -621,7 +621,7 @@ public class OrbClient implements Closeable {
     }
 
     // ======================================================================
-    // Providers — 4 operations
+    // Providers — 5 operations
     // ======================================================================
 
     /** listProviders — GET /api/v1/providers/ */
@@ -643,6 +643,26 @@ public class OrbClient implements Closeable {
     /** getProvidersHealth — GET /api/v1/providers/health */
     public Map<String, Object> getProvidersHealth() throws Exception {
         return get("/api/v1/providers/health", null, new TypeReference<>() {});
+    }
+
+    /**
+     * discoverProviderResources — GET
+     * /api/v1/providers/discover/{provider_api}/{resource_type}
+     *
+     * <p>Discovers infrastructure resources (e.g. vpcs, subnets,
+     * security_groups) for a provider so callers can offer selection lists
+     * instead of free-text IDs. The "subnets" and "security_groups" resource
+     * types require a {@code vpcId}; pass {@code null} for types that do not.
+     */
+    public Map<String, Object> discoverProviderResources(
+            String providerApi, String resourceType, String vpcId) throws Exception {
+        Map<String, String> params = new LinkedHashMap<>();
+        if (vpcId != null) {
+            params.put("vpc_id", vpcId);
+        }
+        return get("/api/v1/providers/discover/" + encode(providerApi) + "/"
+                + encode(resourceType), params.isEmpty() ? null : params,
+                new TypeReference<>() {});
     }
 
     // ======================================================================

@@ -16,7 +16,7 @@ from orb.domain.base.value_objects import (
 )
 
 
-class MockEntity(Entity):
+class FakeEntity(Entity):
     """Test entity for testing base Entity functionality."""
 
     name: str
@@ -29,7 +29,7 @@ class TestBaseEntity:
 
     def test_entity_creation(self):
         """Test basic entity creation."""
-        entity = MockEntity(id="test-1", name="Test Entity", value=42)
+        entity = FakeEntity(id="test-1", name="Test Entity", value=42)
 
         assert entity.id == "test-1"
         assert entity.name == "Test Entity"
@@ -39,9 +39,9 @@ class TestBaseEntity:
 
     def test_entity_equality(self):
         """Test entity equality based on ID and type."""
-        entity1 = MockEntity(id="test-1", name="Entity 1")
-        entity2 = MockEntity(id="test-1", name="Entity 2")  # Different name, same ID
-        entity3 = MockEntity(id="test-2", name="Entity 1")  # Same name, different ID
+        entity1 = FakeEntity(id="test-1", name="Entity 1")
+        entity2 = FakeEntity(id="test-1", name="Entity 2")  # Different name, same ID
+        entity3 = FakeEntity(id="test-2", name="Entity 1")  # Same name, different ID
 
         assert entity1 == entity2  # Same ID and type
         assert entity1 != entity3  # Different ID
@@ -53,16 +53,16 @@ class TestBaseEntity:
         class OtherEntity(Entity):
             name: str
 
-        entity1 = MockEntity(id="test-1", name="Test")
+        entity1 = FakeEntity(id="test-1", name="Test")
         entity2 = OtherEntity(id="test-1", name="Test")
 
         assert entity1 != entity2  # Different types
 
     def test_entity_hash(self):
         """Test entity hashing based on ID and type."""
-        entity1 = MockEntity(id="test-1", name="Entity 1")
-        entity2 = MockEntity(id="test-1", name="Entity 2")
-        entity3 = MockEntity(id="test-2", name="Entity 1")
+        entity1 = FakeEntity(id="test-1", name="Entity 1")
+        entity2 = FakeEntity(id="test-1", name="Entity 2")
+        entity3 = FakeEntity(id="test-2", name="Entity 1")
 
         assert hash(entity1) == hash(entity2)  # Same ID and type
         assert hash(entity1) != hash(entity3)  # Different ID
@@ -70,7 +70,7 @@ class TestBaseEntity:
     def test_entity_validation(self):
         """Test entity validation."""
         # Valid entity
-        entity = MockEntity(id="test-1", name="Valid Entity")
+        entity = FakeEntity(id="test-1", name="Valid Entity")
         assert entity.name == "Valid Entity"
 
         # Test validation on assignment
@@ -80,18 +80,18 @@ class TestBaseEntity:
     def test_entity_with_timestamps(self):
         """Test entity with timestamp fields."""
         now = datetime.now(timezone.utc)
-        entity = MockEntity(id="test-1", name="Timestamped Entity", created_at=now, updated_at=now)
+        entity = FakeEntity(id="test-1", name="Timestamped Entity", created_at=now, updated_at=now)
 
         assert entity.created_at == now
         assert entity.updated_at == now
 
     def test_entity_none_id(self):
         """Test entity with None ID."""
-        entity = MockEntity(name="No ID Entity")
+        entity = FakeEntity(name="No ID Entity")
         assert entity.id is None
 
         # Entities with None ID are considered equal since None == None
-        entity2 = MockEntity(name="Another No ID Entity")
+        entity2 = FakeEntity(name="Another No ID Entity")
         assert entity == entity2
 
 

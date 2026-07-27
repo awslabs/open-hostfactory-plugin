@@ -13,7 +13,7 @@ from orb.domain.base.ports import ConfigurationPort, LoggingPort
 from orb.infrastructure.di.container import DIContainer
 
 
-class MockConfigurationPort(ConfigurationPort):
+class FakeConfigurationPort(ConfigurationPort):
     """Mock implementation of ConfigurationPort for testing."""
 
     def __init__(self):
@@ -189,7 +189,7 @@ class TestInjectableMigration(unittest.TestCase):
         self.container.register_factory(LoggingPort, lambda c: logger)
 
         # Register configuration
-        mock_config = MockConfigurationPort()
+        mock_config = FakeConfigurationPort()
         self.container.register_singleton(ConfigurationPort, lambda c: mock_config)
 
         # Register AWS config with valid authentication

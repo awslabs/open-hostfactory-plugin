@@ -7,14 +7,14 @@ from orb.application.dto.base import BaseDTO, BaseResponse
 from orb.cli.response_formatter import CLIResponseFormatter, create_cli_formatter
 
 
-class MockDTO(BaseDTO):
+class FakeDTO(BaseDTO):
     """Mock DTO for testing."""
 
     name: str
     value: int
 
 
-class MockArgs:
+class FakeArgs:
     """Mock CLI args for testing."""
 
     def __init__(self, format_type="json", resource=None, action=None):
@@ -31,7 +31,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
         formatter = CLIResponseFormatter()
         data = {"message": "success", "count": 5}
 
-        result = formatter.format_response(data, MockArgs("json"))
+        result = formatter.format_response(data, FakeArgs("json"))
 
         self.assertIn('"message": "success"', result)
         self.assertIn('"count": 5', result)
@@ -41,7 +41,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
         formatter = CLIResponseFormatter()
         response = BaseResponse(success=True, message="Operation completed")
 
-        result = formatter.format_response(response, MockArgs("json"))
+        result = formatter.format_response(response, FakeArgs("json"))
 
         self.assertEqual(result, '"Operation completed"')
 
@@ -52,7 +52,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
             success=False, message="Operation failed", error_code="VALIDATION_ERROR"
         )
 
-        result = formatter.format_response(response, MockArgs("json"))
+        result = formatter.format_response(response, FakeArgs("json"))
 
         self.assertIsInstance(result, tuple)
         formatted_output, exit_code = result
@@ -63,9 +63,9 @@ class TestCLIResponseFormatter(unittest.TestCase):
     def test_format_dto(self):
         """Test formatting DTO object."""
         formatter = CLIResponseFormatter()
-        dto = MockDTO(name="test", value=42)
+        dto = FakeDTO(name="test", value=42)
 
-        result = formatter.format_response(dto, MockArgs("json"))
+        result = formatter.format_response(dto, FakeArgs("json"))
 
         self.assertIn('"name": "test"', result)
         self.assertIn('"value": 42', result)
@@ -77,7 +77,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
         data = {"template_id": "test", "instance_type": "t3.micro"}
 
         result = formatter.format_response(
-            data, MockArgs("json", resource="templates", action="show")
+            data, FakeArgs("json", resource="templates", action="show")
         )
 
         self.assertIn('"template_id": "test"', result)
@@ -92,7 +92,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
             "error_code": "INTERNAL_ERROR",
         }
 
-        result = formatter.format_response(error_data, MockArgs("json"))
+        result = formatter.format_response(error_data, FakeArgs("json"))
 
         self.assertIsInstance(result, tuple)
         formatted_output, exit_code = result
@@ -104,7 +104,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
         formatter = CLIResponseFormatter()
         data = {"status": "success", "message": "Completed", "exit_code": 0}
 
-        result = formatter.format_response(data, MockArgs("json"))
+        result = formatter.format_response(data, FakeArgs("json"))
 
         self.assertIsInstance(result, tuple)
         formatted_output, exit_code = result
@@ -121,7 +121,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
             ]
         }
 
-        result = formatter.format_response(data, MockArgs("table"))
+        result = formatter.format_response(data, FakeArgs("table"))
 
         self.assertIn("t1", result)
         self.assertIn("t3.micro", result)
@@ -166,7 +166,7 @@ class TestCLIResponseFormatter(unittest.TestCase):
             def to_dict(self):
                 raise RuntimeError("Formatting failed")
 
-        result = formatter.format_response(BadObject(), MockArgs("json"))
+        result = formatter.format_response(BadObject(), FakeArgs("json"))
 
         self.assertIsInstance(result, tuple)
         formatted_output, exit_code = result

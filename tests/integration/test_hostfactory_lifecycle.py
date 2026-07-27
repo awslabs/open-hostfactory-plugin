@@ -11,8 +11,8 @@ from tests.fixtures.provider_scenarios import (
 )
 
 
-class MockAppService:
-    """Thin adapter wrapping MockProvider with Host Factory-style API."""
+class FakeAppService:
+    """Thin adapter wrapping FakeProvider with Host Factory-style API."""
 
     def __init__(self, provider):
         self._provider = provider
@@ -244,7 +244,7 @@ class TestHostFactoryLifecycle:
         assert status_response["requests"][0]["requestId"] == req_id
 
         # Create another app service instance sharing the same provider (simulating restart)
-        app_service2 = MockAppService(provider)
+        app_service2 = FakeAppService(provider)
         # Copy state to simulate persistence
         app_service2._requests = app_service._requests
 
@@ -300,7 +300,7 @@ class TestHostFactoryLifecycle:
 
     def _create_app_service_with_provider(self, provider_type: str, provider):
         """Create application service with mock provider."""
-        return MockAppService(provider)
+        return FakeAppService(provider)
 
 
 @pytest.mark.integration

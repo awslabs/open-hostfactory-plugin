@@ -5,7 +5,7 @@ from unittest.mock import Mock
 from orb.infrastructure.registry.base_registry import BaseRegistry, RegistryMode
 
 
-class MockStrategy:
+class FakeStrategy:
     """Mock strategy for testing."""
 
     def __init__(self, config=None):
@@ -35,7 +35,7 @@ class TestBaseRegistryConsolidatedMethods:
 
     def test_is_registered_consolidated(self):
         """Test consolidated is_registered method."""
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         # Not registered initially
@@ -47,7 +47,7 @@ class TestBaseRegistryConsolidatedMethods:
 
     def test_get_registered_types_consolidated(self):
         """Test consolidated get_registered_types method."""
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         # Empty initially
@@ -64,7 +64,7 @@ class TestBaseRegistryConsolidatedMethods:
 
     def test_format_not_registered_error_consolidated(self):
         """Test consolidated error formatting method."""
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         # Test with no registrations
@@ -79,7 +79,7 @@ class TestBaseRegistryConsolidatedMethods:
 
     def test_format_registry_error_backward_compatibility(self):
         """Test backward compatibility alias for error formatting."""
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         self.registry.register_type("aws", strategy_factory, config_factory)
@@ -96,7 +96,7 @@ class TestBaseRegistryConsolidatedMethods:
         ConcreteRegistry._instances.clear()
         registry = ConcreteRegistry(mode=RegistryMode.MULTI_CHOICE)
 
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         # Test instance registration and checking
@@ -114,7 +114,7 @@ class TestBaseRegistryConsolidatedMethods:
         ConcreteRegistry._instances.clear()
         registry = ConcreteRegistry(mode=RegistryMode.MULTI_CHOICE)
 
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         # Register both type and instance

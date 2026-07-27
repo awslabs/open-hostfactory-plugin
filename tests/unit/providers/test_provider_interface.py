@@ -4,7 +4,7 @@ import pytest
 
 from orb.domain.machine.machine_identifiers import MachineId
 from orb.infrastructure.interfaces.provider import ProviderConfig
-from tests.fixtures.mock_provider import MockProvider, create_mock_provider
+from tests.fixtures.mock_provider import FakeProvider, create_mock_provider
 
 
 @pytest.mark.unit
@@ -14,7 +14,7 @@ class TestProviderPort:
     @pytest.mark.parametrize(
         "provider_type,provider_class",
         [
-            ("mock", MockProvider),
+            ("mock", FakeProvider),
         ],
     )
     def test_provider_interface_compliance(self, provider_type: str, provider_class):
@@ -42,7 +42,7 @@ class TestProviderPort:
         registry = {}
 
         # Register mock provider
-        registry["mock"] = MockProvider
+        registry["mock"] = FakeProvider
 
         assert "mock" in registry
 
@@ -50,7 +50,7 @@ class TestProviderPort:
         config = ProviderConfig(provider_type="mock")
         provider = registry["mock"]()
         provider.initialize(config)
-        assert isinstance(provider, MockProvider)
+        assert isinstance(provider, FakeProvider)
         assert provider.provider_type == "mock"
 
     def test_provider_configuration_validation(self):
@@ -136,7 +136,7 @@ class TestProviderPort:
         config = ProviderConfig(provider_type="mock")
         provider.initialize(config)
 
-        # MockProvider.validate_template requires both image_id and instance_type
+        # FakeProvider.validate_template requires both image_id and instance_type
         valid_template = {
             "image_id": "ami-12345678",
             "instance_type": "t2.micro",

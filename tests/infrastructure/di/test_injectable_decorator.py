@@ -13,15 +13,15 @@ from orb.infrastructure.di.decorators import get_injectable_info, injectable, is
 
 
 # Test interfaces
-class MockPort:
+class FakePort:
     """Mock port interface."""
 
 
-class MockService:
+class FakeService:
     """Mock service interface."""
 
 
-class MockAdapter(MockPort):
+class FakeAdapter(FakePort):
     """Mock adapter implementation."""
 
     def __init__(self, name: str = "test"):
@@ -29,7 +29,7 @@ class MockAdapter(MockPort):
         self.name = name
 
 
-class MockServiceImpl(MockService):
+class FakeServiceImpl(FakeService):
     """Mock service implementation."""
 
     def __init__(self, value: int = 42):
@@ -42,15 +42,15 @@ class TestInjectableDecorator:
     def setup_method(self):
         """Set up test environment."""
         self.container = DIContainer()
-        self.container.register_singleton(MockPort, lambda c: MockAdapter("injected"))
-        self.container.register_singleton(MockService, lambda c: MockServiceImpl(100))
+        self.container.register_singleton(FakePort, lambda c: FakeAdapter("injected"))
+        self.container.register_singleton(FakeService, lambda c: FakeServiceImpl(100))
 
     def test_injectable_decorator_basic(self):
         """Test basic injectable decorator functionality."""
 
         @injectable
         class BasicService:
-            def __init__(self, port: MockPort):
+            def __init__(self, port: FakePort):
                 self.port = port
 
         # Verify decorator applied
@@ -59,9 +59,9 @@ class TestInjectableDecorator:
         assert hasattr(BasicService, "_original_init")
 
         # Test manual instantiation still works
-        manual_port = MockAdapter("manual")
+        manual_port = FakeAdapter("manual")
         service = BasicService(port=manual_port)
-        assert isinstance(service.port, MockAdapter)
+        assert isinstance(service.port, FakeAdapter)
         assert service.port.name == "manual"
 
     def test_injectable_with_container_resolution(self):
@@ -69,7 +69,7 @@ class TestInjectableDecorator:
 
         @injectable
         class ServiceWithDependency:
-            def __init__(self, port: MockPort, service: MockService):
+            def __init__(self, port: FakePort, service: FakeService):
                 self.port = port
                 self.service = service
 
@@ -77,9 +77,9 @@ class TestInjectableDecorator:
             # Create instance - dependencies should be auto-resolved
             instance = ServiceWithDependency()  # type: ignore[call-arg]
 
-            assert isinstance(instance.port, MockAdapter)
+            assert isinstance(instance.port, FakeAdapter)
             assert instance.port.name == "injected"
-            assert isinstance(instance.service, MockServiceImpl)
+            assert isinstance(instance.service, FakeServiceImpl)
             assert instance.service.value == 100
 
     def test_injectable_with_optional_dependencies(self):
@@ -87,7 +87,7 @@ class TestInjectableDecorator:
 
         @injectable
         class ServiceWithOptional:
-            def __init__(self, port: MockPort, optional_service: Optional[MockService] = None):
+            def __init__(self, port: FakePort, optional_service: Optional[FakeService] = None):
                 self.port = port
                 self.optional_service = optional_service
 
@@ -95,9 +95,9 @@ class TestInjectableDecorator:
             instance = ServiceWithOptional()  # type: ignore[call-arg]
 
             # Required dependency resolved
-            assert isinstance(instance.port, MockAdapter)
+            assert isinstance(instance.port, FakeAdapter)
             # Optional dependency also resolved since it's available
-            assert isinstance(instance.optional_service, MockServiceImpl)
+            assert isinstance(instance.optional_service, FakeServiceImpl)
 
     def test_injectable_with_optional_unavailable(self):
         """Test Optional dependencies when service not available."""
@@ -108,7 +108,7 @@ class TestInjectableDecorator:
 
         @injectable
         class ServiceWithUnavailableOptional:
-            def __init__(self, port: MockPort, unavailable: Optional[UnavailableService] = None):
+            def __init__(self, port: FakePort, unavailable: Optional[UnavailableService] = None):
                 self.port = port
                 self.unavailable = unavailable
 
@@ -116,7 +116,7 @@ class TestInjectableDecorator:
             instance = ServiceWithUnavailableOptional()  # type: ignore[call-arg]
 
             # Required dependency resolved
-            assert isinstance(instance.port, MockAdapter)
+            assert isinstance(instance.port, FakeAdapter)
             # Optional dependency falls back to None when instantiation fails
             assert instance.unavailable is None
 
@@ -125,7 +125,7 @@ class TestInjectableDecorator:
 
         @injectable
         class MixedService:
-            def __init__(self, port: MockPort, manual_param: str, service: MockService):
+            def __init__(self, port: FakePort, manual_param: str, service: FakeService):
                 self.port = port
                 self.manual_param = manual_param
                 self.service = service
@@ -134,8 +134,8 @@ class TestInjectableDecorator:
             instance = MixedService(manual_param="test_value")  # type: ignore[call-arg]
 
             # Auto-resolved dependencies
-            assert isinstance(instance.port, MockAdapter)
-            assert isinstance(instance.service, MockServiceImpl)
+            assert isinstance(instance.port, FakeAdapter)
+            assert isinstance(instance.service, FakeServiceImpl)
             # Manual parameter
             assert instance.manual_param == "test_value"
 
@@ -146,9 +146,9 @@ class TestInjectableDecorator:
         class ServiceWithDefaults:
             def __init__(
                 self,
-                port: MockPort,
+                port: FakePort,
                 default_param: str = "default",
-                service: Optional[MockService] = None,
+                service: Optional[FakeService] = None,
             ):
                 self.port = port
                 self.default_param = default_param
@@ -157,16 +157,16 @@ class TestInjectableDecorator:
         with patch("orb.infrastructure.di.container.get_container", return_value=self.container):
             instance = ServiceWithDefaults()  # type: ignore[call-arg]
 
-            assert isinstance(instance.port, MockAdapter)
+            assert isinstance(instance.port, FakeAdapter)
             assert instance.default_param == "default"
-            assert isinstance(instance.service, MockServiceImpl)
+            assert isinstance(instance.service, FakeServiceImpl)
 
     def test_injectable_error_handling(self):
         """Test error handling in dependency resolution."""
 
         @injectable
         class ServiceWithError:
-            def __init__(self, port: MockPort):
+            def __init__(self, port: FakePort):
                 self.port = port
 
         # Mock container that raises exception
@@ -185,25 +185,25 @@ class TestInjectableDecorator:
         """Test extracting information about injectable classes."""
 
         @injectable
-        class InfoMockService:
+        class InfoFakeService:
             def __init__(
                 self,
-                port: MockPort,
-                optional: Optional[MockService] = None,
+                port: FakePort,
+                optional: Optional[FakeService] = None,
                 manual: str = "default",
             ):
                 self.port = port
                 self.optional = optional
                 self.manual = manual
 
-        info = get_injectable_info(InfoMockService)
+        info = get_injectable_info(InfoFakeService)
 
-        assert info["class_name"] == "InfoMockService"
+        assert info["class_name"] == "InfoFakeService"
         assert info["total_dependencies"] == 3
 
         deps = info["dependencies"]
         assert "port" in deps
-        assert deps["port"]["type"] == MockPort
+        assert deps["port"]["type"] == FakePort
         assert not deps["port"]["optional"]
 
         assert "optional" in deps
@@ -270,7 +270,7 @@ class TestInjectableIntegration:
         """Test the specific CommandBus pattern that was causing issues."""
 
         # Mock the EventPublisherPort
-        class MockEventPublisher:
+        class FakeEventPublisher:
             pass
 
         @injectable
@@ -278,14 +278,14 @@ class TestInjectableIntegration:
             def __init__(
                 self,
                 logger: Optional[LoggingPort] = None,
-                event_publisher: Optional[MockEventPublisher] = None,
+                event_publisher: Optional[FakeEventPublisher] = None,
             ):
                 self.logger = logger
                 self.event_publisher = event_publisher
 
         container = DIContainer()
         container.register_singleton(LoggingPort, lambda c: Mock(spec=LoggingPort))
-        container.register_singleton(MockEventPublisher, lambda c: MockEventPublisher())
+        container.register_singleton(FakeEventPublisher, lambda c: FakeEventPublisher())
 
         with patch("orb.infrastructure.di.container.get_container", return_value=container):
             # This should work without the Optional[LoggingPort] error

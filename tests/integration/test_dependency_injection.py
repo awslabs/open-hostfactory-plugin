@@ -91,14 +91,14 @@ def test_aws_launch_template_manager_registration():
         # Test that the manager can be instantiated (with mocked dependencies)
         try:
             # Create a mock DI container to test registration
-            class MockContainer:
+            class FakeContainer:
                 def __init__(self):
                     self._services = {}
                     self._registered = set()
 
                 def get(self, service_type):
                     if service_type.__name__ == "LoggingPort":
-                        return MockLogger()
+                        return FakeLogger()
                     return None
 
                 def register_singleton(self, service_type, factory=None):
@@ -107,7 +107,7 @@ def test_aws_launch_template_manager_registration():
                 def is_registered(self, service_type):
                     return service_type.__name__ in self._registered
 
-            class MockLogger:
+            class FakeLogger:
                 def debug(self, msg):
                     pass
 
@@ -121,7 +121,7 @@ def test_aws_launch_template_manager_registration():
                     pass
 
             # Test registration
-            mock_container = MockContainer()
+            mock_container = FakeContainer()
             register_aws_services_with_di(mock_container)
 
             # Check if AWSLaunchTemplateManager was registered

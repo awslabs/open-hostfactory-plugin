@@ -11,7 +11,7 @@ from orb.infrastructure.scheduler.hostfactory.hostfactory_strategy import (
 from orb.providers.results import ProviderSelectionResult
 
 
-class MockRequestDTO:
+class FakeRequestDTO:
     """Mock RequestDTO for testing."""
 
     def __init__(self, request_id="test-123", status="completed", machines=None):
@@ -72,7 +72,7 @@ class TestGetRequestStatusFunctionality:
     def test_hostfactory_format_basic(self, scheduler_strategy):
         """Test basic HostFactory formatting for getRequestStatus."""
         # Create test data
-        mock_dto = MockRequestDTO(
+        mock_dto = FakeRequestDTO(
             request_id="test-request-123",
             status="completed",
             machines=[
@@ -112,7 +112,7 @@ class TestGetRequestStatusFunctionality:
 
     def test_hostfactory_format_multiple_machines(self, scheduler_strategy):
         """Test HostFactory formatting with multiple machines."""
-        mock_dto = MockRequestDTO(
+        mock_dto = FakeRequestDTO(
             request_id="multi-test-456",
             status="completed",
             machines=[
@@ -159,7 +159,7 @@ class TestGetRequestStatusFunctionality:
         ]
 
         for domain_status, expected_hf_status in test_cases:
-            mock_dto = MockRequestDTO(status=domain_status)
+            mock_dto = FakeRequestDTO(status=domain_status)
             result = scheduler_strategy.convert_domain_to_hostfactory_output(
                 "getRequestStatus", mock_dto
             )
@@ -178,7 +178,7 @@ class TestGetRequestStatusFunctionality:
         ]
 
         for machine_status, expected_result in test_cases:
-            mock_dto = MockRequestDTO(
+            mock_dto = FakeRequestDTO(
                 machines=[
                     {
                         "instance_id": "i-test",
@@ -197,7 +197,7 @@ class TestGetRequestStatusFunctionality:
 
     def test_empty_machines_list(self, scheduler_strategy):
         """Test handling of empty machines list."""
-        mock_dto = MockRequestDTO(machines=[])
+        mock_dto = FakeRequestDTO(machines=[])
         result = scheduler_strategy.convert_domain_to_hostfactory_output(
             "getRequestStatus", mock_dto
         )

@@ -707,6 +707,17 @@ class AWSProviderStrategy(ProviderStrategy):
         """Validate AWS infrastructure configuration."""
         return self._get_infrastructure_service().validate_infrastructure(provider_config)
 
+    def list_resources(
+        self, resource_type: str, vpc_id: Optional[str] = None
+    ) -> list[dict[str, Any]]:
+        """Return discovered AWS resources of ``resource_type`` as plain dicts.
+
+        Machine-readable discovery used by the REST endpoint; delegates to the
+        infrastructure discovery service. ``vpc_id`` is required for
+        ``subnets`` and ``security_groups``.
+        """
+        return self._get_infrastructure_service().list_resources(resource_type, vpc_id)
+
     # Credential methods — classmethods: read only from the local environment
     # (boto3 credential chain, profile files) and require no instance state.
     @classmethod

@@ -509,3 +509,81 @@ class TestDiscoverInfrastructure:
         cli_args.all = False
         result = svc.discover_infrastructure({"name": "p", "config": {}, "cli_args": cli_args})
         assert "vpcs" in result
+
+
+# ---------------------------------------------------------------------------
+# list_resources — machine-readable discovery used by the REST endpoint
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestListResources:
+    def test_vpcs_returns_dicts(self):
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.return_value = {
+            "Vpcs": [
+                {
+                    "VpcId": "vpc-001",
+                    "CidrBlock": "10.0.0.0/16",
+                    "IsDefault": True,
+                    "Tags": [{"Key": "Name", "Value": "main"}],
+                }
+            ]
+        }
+        result = svc.list_resources("vpcs")
+        assert result == [
+            {
+                "id": "vpc-001",
+                "name": "main",
+                "cidr_block": "10.0.0.0/16",
+                "is_default": True,
+            }
+        ]
+
+    def test_subnets_requires_vpc_id(self):
+        svc = _make_service()
+        assert svc.list_resources("subnets") == []
+
+    def test_subnets_returns_dicts(self):
+        svc = _make_service()
+        svc.ec2_client.describe_subnets.return_value = {
+            "Subnets": [
+                {
+                    "SubnetId": "subnet-001",
+                    "VpcId": "vpc-001",
+                    "AvailabilityZone": "us-east-1a",
+                    "CidrBlock": "10.0.1.0/24",
+                    "Tags": [],
+                }
+            ]
+        }
+        svc.ec2_client.describe_route_tables.return_value = {"RouteTables": []}
+        result = svc.list_resources("subnets", vpc_id="vpc-001")
+        assert result[0]["id"] == "subnet-001"
+        assert result[0]["vpc_id"] == "vpc-001"
+
+    def test_security_groups_requires_vpc_id(self):
+        svc = _make_service()
+        assert svc.list_resources("security_groups") == []
+
+    def test_security_groups_returns_dicts(self):
+        svc = _make_service()
+        svc.ec2_client.describe_security_groups.return_value = {
+            "SecurityGroups": [
+                {
+                    "GroupId": "sg-001",
+                    "GroupName": "web",
+                    "Description": "web sg",
+                    "VpcId": "vpc-001",
+                    "IpPermissions": [],
+                }
+            ]
+        }
+        result = svc.list_resources("security_groups", vpc_id="vpc-001")
+        assert result[0]["id"] == "sg-001"
+        assert result[0]["name"] == "web"
+
+    def test_unsupported_resource_type_raises(self):
+        svc = _make_service()
+        with pytest.raises(ValueError, match="Unsupported resource type"):
+            svc.list_resources("gateways")

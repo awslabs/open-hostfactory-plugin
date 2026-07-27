@@ -1,7 +1,13 @@
 """AWS Infrastructure Discovery Service - Handles infrastructure discovery operations."""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Optional
+
+# Resource types exposed by the discovery REST endpoint / :meth:`list_resources`.
+VPCS = "vpcs"
+SUBNETS = "subnets"
+SECURITY_GROUPS = "security_groups"
+SUPPORTED_RESOURCE_TYPES = (VPCS, SUBNETS, SECURITY_GROUPS)
 
 from orb.domain.base.ports import LoggingPort
 from orb.domain.base.ports.console_port import ConsolePort
@@ -171,6 +177,42 @@ class AWSInfrastructureDiscoveryService:
         except Exception as e:
             self._logger.error("Failed to discover security groups: %s", e)
             return []
+
+    def list_resources(
+        self, resource_type: str, vpc_id: Optional[str] = None
+    ) -> list[dict[str, Any]]:
+        """Return discovered resources of ``resource_type`` as plain dicts.
+
+        This is the machine-readable entry point used by the discovery REST
+        endpoint. Unlike :meth:`discover_infrastructure` (which writes to a
+        console for the CLI), it returns serialisable data with no side effects.
+
+        Args:
+            resource_type: One of ``vpcs``, ``subnets``, ``security_groups``.
+            vpc_id: Required for ``subnets`` / ``security_groups`` to scope the
+                lookup to a single VPC.
+
+        Returns:
+            A list of dicts, one per resource. Empty when nothing is found or
+            when a ``vpc_id`` is required but not supplied.
+
+        Raises:
+            ValueError: When ``resource_type`` is not supported.
+        """
+        if resource_type == VPCS:
+            return [asdict(v) for v in self.discover_vpcs()]
+
+        if resource_type in (SUBNETS, SECURITY_GROUPS):
+            if not vpc_id:
+                return []
+            if resource_type == SUBNETS:
+                return [asdict(s) for s in self.discover_subnets(vpc_id)]
+            return [asdict(sg) for sg in self.discover_security_groups(vpc_id)]
+
+        raise ValueError(
+            f"Unsupported resource type '{resource_type}'. "
+            f"Supported: {', '.join(SUPPORTED_RESOURCE_TYPES)}."
+        )
 
     def _get_name_tag(self, tags: list) -> Optional[str]:
         """Extract Name tag from AWS tags list."""

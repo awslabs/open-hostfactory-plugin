@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+import threading
+import time
+from typing import Any, Optional, cast
 
 try:
-    from fastapi import APIRouter, Depends, HTTPException
+    from fastapi import APIRouter, Depends, HTTPException, Query
+    from fastapi.concurrency import run_in_threadpool
     from fastapi.responses import JSONResponse
 except ImportError:
     raise ImportError("FastAPI routing requires: pip install orb-py[api]") from None
@@ -19,6 +22,46 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/providers", tags=["Providers"])
 
 CONFIG_MANAGER = Depends(get_config_manager)
+
+# Resource types the discovery endpoint accepts, mapped to the identifiers the
+# provider strategy understands.
+_DISCOVERY_RESOURCE_TYPES: dict[str, str] = {
+    "vpcs": "vpcs",
+    "subnets": "subnets",
+    "security_groups": "security_groups",
+}
+
+# Discovery results are cached for 5 minutes: infrastructure topology changes
+# rarely, and each miss issues several EC2 Describe* calls.
+_DISCOVERY_CACHE_TTL_SECONDS = 300
+_discovery_cache: dict[tuple[str, str, str], tuple[float, list[dict[str, Any]]]] = {}
+_discovery_cache_lock = threading.Lock()
+
+VPC_ID_QUERY = Query(
+    None,
+    description="VPC to scope the lookup to. Required for 'subnets' and 'security_groups'.",
+)
+
+
+def _discovery_cache_get(
+    key: tuple[str, str, str],
+) -> Optional[list[dict[str, Any]]]:
+    """Return a non-expired cached discovery result, or ``None`` on miss."""
+    with _discovery_cache_lock:
+        entry = _discovery_cache.get(key)
+        if entry is None:
+            return None
+        cached_at, value = entry
+        if (time.monotonic() - cached_at) >= _DISCOVERY_CACHE_TTL_SECONDS:
+            _discovery_cache.pop(key, None)
+            return None
+        return value
+
+
+def _discovery_cache_put(key: tuple[str, str, str], value: list[dict[str, Any]]) -> None:
+    """Store a discovery result with the current timestamp."""
+    with _discovery_cache_lock:
+        _discovery_cache[key] = (time.monotonic(), value)
 
 
 async def _probe_provider_health(provider_name: str) -> tuple[str, dict[str, Any]]:
@@ -346,6 +389,118 @@ async def get_providers_health(
             "providers": providers_info,
             "active_provider": active_provider_name,
             "default_provider_instance": default_provider_instance or active_provider_name,
+        },
+        status_code=200,
+    )
+
+
+def _discover_resources(
+    provider_api: str, resource_type: str, vpc_id: Optional[str]
+) -> list[dict[str, Any]]:
+    """Resolve the provider strategy and return discovered resources.
+
+    Runs synchronously (issues blocking boto3 EC2 Describe* calls); callers
+    offload it to a worker thread. Raises ``LookupError`` when the provider is
+    not registered and ``NotImplementedError`` when the strategy has no
+    machine-readable discovery.
+    """
+    from orb.providers.registry.provider_registry import get_provider_registry
+
+    registry = get_provider_registry()
+    if not registry.ensure_provider_type_registered(provider_api):
+        raise LookupError(provider_api)
+
+    strategy = registry.get_or_create_strategy(provider_api)
+    if strategy is None:
+        raise LookupError(provider_api)
+
+    list_resources = getattr(strategy, "list_resources", None)
+    if not callable(list_resources):
+        raise NotImplementedError(provider_api)
+
+    return cast("list[dict[str, Any]]", list_resources(resource_type, vpc_id))
+
+
+@router.get(
+    "/discover/{provider_api}/{resource_type}",
+    operation_id="discoverProviderResources",
+    summary="Discover Provider Infrastructure Resources",
+    description=(
+        "Discovers infrastructure resources of the given type for a provider so "
+        "the template form can offer dropdowns instead of free-text IDs. "
+        "Supported resource types: vpcs, subnets, security_groups. "
+        "'subnets' and 'security_groups' require a 'vpc_id' query parameter. "
+        "Results are cached for 5 minutes."
+    ),
+)
+@handle_rest_exceptions(
+    endpoint="/api/v1/providers/discover/{provider_api}/{resource_type}", method="GET"
+)
+async def discover_provider_resources(
+    provider_api: str,
+    resource_type: str,
+    vpc_id: str | None = VPC_ID_QUERY,
+    _user=Depends(require_role("operator")),
+) -> JSONResponse:
+    """Discover VPCs / subnets / security groups for a provider.
+
+    Requires the ``operator`` role: discovery enumerates account infrastructure
+    (VPC/subnet/SG IDs, CIDR blocks) that viewer-role callers must not see.
+    """
+    normalised_type = _DISCOVERY_RESOURCE_TYPES.get(resource_type.lower())
+    if normalised_type is None:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported resource type '{resource_type}'. "
+                f"Supported: {', '.join(sorted(_DISCOVERY_RESOURCE_TYPES))}."
+            ),
+        )
+
+    if normalised_type in ("subnets", "security_groups") and not vpc_id:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Query parameter 'vpc_id' is required for resource type '{normalised_type}'.",
+        )
+
+    provider_api = provider_api.lower()
+    cache_key = (provider_api, normalised_type, vpc_id or "")
+    cached = _discovery_cache_get(cache_key)
+    if cached is not None:
+        return JSONResponse(
+            content={
+                "provider_api": provider_api,
+                "resource_type": normalised_type,
+                "vpc_id": vpc_id,
+                "resources": cached,
+                "cached": True,
+            },
+            status_code=200,
+        )
+
+    try:
+        resources = await run_in_threadpool(
+            _discover_resources, provider_api, normalised_type, vpc_id
+        )
+    except LookupError:
+        raise HTTPException(
+            status_code=404, detail=f"Provider '{provider_api}' is not available."
+        ) from None
+    except NotImplementedError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Provider '{provider_api}' does not support resource discovery.",
+        ) from None
+
+    _discovery_cache_put(cache_key, resources)
+
+    return JSONResponse(
+        content={
+            "provider_api": provider_api,
+            "resource_type": normalised_type,
+            "vpc_id": vpc_id,
+            "resources": resources,
+            "cached": False,
         },
         status_code=200,
     )

@@ -6,10 +6,14 @@ Verifies the full cleanup chain for every resource type:
 One test per resource type:
   - ASG
   - EC2Fleet maintain
-  - EC2Fleet request
+  - EC2Fleet request (parametrised over requested_count [1, 2])
   - EC2Fleet instant
   - SpotFleet maintain
-  - SpotFleet request
+  - SpotFleet request (parametrised over requested_count [1, 2])
+
+The request-type fleets are exercised at requested_count=2 as well as 1 because
+live failures at capacity=2 exposed a fleet-cancellation bug that only triggers
+with 2+ instances; the count=2 variants guard the full-teardown path.
 
 Moto limitations accounted for:
 - SpotFleet: describe_spot_fleet_requests returns empty Tags/TagSpecifications, so
@@ -424,25 +428,36 @@ def test_ec2_fleet_maintain_cleanup_deletes_fleet_and_lt(aws_client, subnet_id, 
 # ---------------------------------------------------------------------------
 
 
-def test_ec2_fleet_request_cleanup_deletes_fleet_and_lt(aws_client, subnet_id, sg_id, ec2):
-    """acquire + cancel_resource deletes a request-type EC2 Fleet and its LT."""
-    req_id = "cleanup-fleet-request-001"
+@pytest.mark.parametrize("requested_count", [1, 2])
+def test_ec2_fleet_request_cleanup_deletes_fleet_and_lt(
+    aws_client, subnet_id, sg_id, ec2, requested_count
+):
+    """acquire + cancel_resource deletes a request-type EC2 Fleet and its LT.
+
+    Parametrised over requested_count [1, 2]: live failures at capacity=2 exposed
+    the fleet-cancellation bug that only triggers with 2+ instances, so the
+    count=2 variant guards that a full cancel still tears the fleet down.
+    """
+    req_id = f"cleanup-fleet-request-{requested_count:03d}"
     logger = _make_logger()
     config_port = _make_cleanup_config_port()
     factory = _make_factory(aws_client, logger, config_port)
 
     handler = factory.create_handler("EC2Fleet")
     template = _ec2_fleet_template(subnet_id, sg_id, fleet_type="request")
-    request = _make_request(request_id=req_id, requested_count=1)
+    request = _make_request(request_id=req_id, requested_count=requested_count)
 
     # Acquire
     result: dict = handler.acquire_hosts(request, template)  # type: ignore[assignment]
     assert result["success"] is True
     fleet_id = result["resource_ids"][0]
 
-    # Verify fleet exists
+    # Verify fleet exists and requested TotalTargetCapacity matches requested_count
     resp = ec2.describe_fleets(FleetIds=[fleet_id])
     assert len(resp["Fleets"]) == 1
+    assert (
+        resp["Fleets"][0]["TargetCapacitySpecification"]["TotalTargetCapacity"] == requested_count
+    )
 
     # Verify LT exists
     lt_resp = ec2.describe_launch_templates(
@@ -454,12 +469,14 @@ def test_ec2_fleet_request_cleanup_deletes_fleet_and_lt(aws_client, subnet_id, s
     cancel_result = handler.cancel_resource(fleet_id, req_id)
     assert cancel_result["status"] == "success"
 
-    # Assert fleet deleted
+    # Assert fleet fully torn down: deleted state OR target capacity driven to 0
     resp = ec2.describe_fleets(FleetIds=[fleet_id])
-    fleet_states = [f["FleetState"] for f in resp["Fleets"]]
-    assert all(s in ("deleted", "deleted_running", "deleted_terminating") for s in fleet_states), (
-        f"Fleet {fleet_id!r} not in deleted state; states: {fleet_states}"
-    )
+    for fleet in resp["Fleets"]:
+        state = fleet["FleetState"]
+        target = fleet.get("TargetCapacitySpecification", {}).get("TotalTargetCapacity")
+        assert state in ("deleted", "deleted_running", "deleted_terminating") or target == 0, (
+            f"Fleet {fleet_id!r} not torn down; state={state!r}, TotalTargetCapacity={target!r}"
+        )
 
     # Assert LT gone
     _assert_no_lt_for_request(ec2, req_id)
@@ -569,20 +586,25 @@ def test_spot_fleet_maintain_cleanup_cancels_fleet_and_deletes_lt(
 # ---------------------------------------------------------------------------
 
 
-def test_spot_fleet_request_cleanup_cancels_fleet_and_deletes_lt(aws_client, subnet_id, sg_id, ec2):
+@pytest.mark.parametrize("requested_count", [1, 2])
+def test_spot_fleet_request_cleanup_cancels_fleet_and_deletes_lt(
+    aws_client, subnet_id, sg_id, ec2, requested_count
+):
     """acquire + cancel_resource + _delete_orb_launch_template cancels a request
     SpotFleet and deletes its LT.
 
+    Parametrised over requested_count [1, 2]: the count=2 variant guards the
+    weighted-capacity cancel path that only real AWS (and capacity>=2) exercises.
     Same moto tag-reading workaround as the maintain variant.
     """
-    req_id = "cleanup-spot-request-001"
+    req_id = f"cleanup-spot-request-{requested_count:03d}"
     logger = _make_logger()
     config_port = _make_cleanup_config_port()
     factory = _make_factory(aws_client, logger, config_port)
 
     handler = factory.create_handler("SpotFleet")
     template = _spot_fleet_template(subnet_id, sg_id, fleet_type="request")
-    request = _make_request(request_id=req_id, requested_count=1)
+    request = _make_request(request_id=req_id, requested_count=requested_count)
 
     # Acquire
     result: dict = handler.acquire_hosts(request, template)  # type: ignore[assignment]
@@ -590,9 +612,13 @@ def test_spot_fleet_request_cleanup_cancels_fleet_and_deletes_lt(aws_client, sub
     fleet_id = result["resource_ids"][0]
     assert fleet_id.startswith("sfr-")
 
-    # Verify fleet exists
+    # Verify fleet exists with the requested target capacity
     resp = ec2.describe_spot_fleet_requests(SpotFleetRequestIds=[fleet_id])
     assert len(resp["SpotFleetRequestConfigs"]) == 1
+    assert (
+        resp["SpotFleetRequestConfigs"][0]["SpotFleetRequestConfig"]["TargetCapacity"]
+        == requested_count
+    )
 
     # Verify LT exists
     lt_resp = ec2.describe_launch_templates(

@@ -12,6 +12,13 @@ This file is the canonical source of:
 
 Individual conftest.py files under moto/ and live/ may import helpers
 defined here or in their own modules but should not duplicate them.
+
+Not every scenario can be tested under moto: several AWS behaviours ORB
+depends on are absent or unrealistic in the simulator (SpotFleet never
+fulfils, no cancelled_running state, synchronous describe_instances, no
+fleet modifying transition, instant ASG teardown).  Those scenarios are
+live-only.  See docs/root/testing/moto-limits.md (L1-L5) before adding a
+moto test, so you don't assert against behaviour AWS does not exhibit.
 """
 
 from __future__ import annotations

@@ -210,6 +210,7 @@ nav:
     - Testing:
       - Testing Guide: testing/readme.md
       - System Tests (onaws): testing/system-tests-onaws.md
+      - Moto Structural Limits: testing/moto-limits.md
     - Guides & Patterns:
       - Native Spec Guide: native-spec-guide.md
       - Provider Strategy: provider_strategy_guide.md

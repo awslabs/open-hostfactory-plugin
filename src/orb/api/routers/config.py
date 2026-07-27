@@ -43,6 +43,7 @@ class SetValueResponse(BaseModel):
     key: str
     value: Any
     persisted: bool = False
+    path: str | None = None
     note: str = (
         "Set in memory only. Call POST /config/save to persist to the loaded "
         "config file, or POST /admin/reload-config to revert to disk."
@@ -259,26 +260,61 @@ async def get_config_value(
 @router.put(
     "/{key:path}",
     operation_id="setConfigValue",
-    summary="Set a configuration value (in-memory only)",
+    summary="Set a configuration value",
     description=(
-        "Sets a configuration value in memory. The change is **not** persisted to disk. "
-        "Reloading from file will revert this change. "
+        "Sets a configuration value in memory. By default the change is **not** "
+        "persisted to disk and reloading from file will revert it. Pass "
+        "``?persist=true`` to also write the updated configuration to the loaded "
+        "config file so the change survives a restart. "
         "Blocked when the server is in read-only mode."
     ),
     responses={
-        200: {"description": "Value set successfully (in-memory)."},
-        400: {"description": "Missing or malformed request body."},
+        200: {"description": "Value set successfully."},
+        400: {"description": "Missing body or no config file to persist to."},
     },
 )
 async def set_config_value(
     key: str,
     body: SetValueRequest,
+    request: Request,
+    persist: bool = Query(
+        default=False,
+        description="Also write the updated config to the loaded config file.",
+    ),
     _user=Depends(require_role("admin")),
     config_manager=CONFIG_MANAGER,
 ) -> JSONResponse:
-    """Set a configuration value in memory and return the new value with a persistence warning."""
+    """Set a configuration value; optionally persist it to disk with ?persist=true."""
     config_manager.set_configuration_value(key, body.value)
     # Read back the value to confirm it was applied
     new_value = config_manager.get_configuration_value(key, body.value)
-    response = SetValueResponse(key=key, value=new_value)
+
+    if not persist:
+        response = SetValueResponse(key=key, value=new_value)
+        return JSONResponse(content=response.model_dump(), status_code=200)
+
+    # Persisting mutates disk — apply the same destructive-admin guard the
+    # dedicated /config/save endpoint uses.
+    _check_destructive_admin_allowed(request)
+    try:
+        written_to = config_manager.save_config(None)
+    except ValueError as exc:
+        logger.warning("Config persist rejected — no config path resolved: %s", exc)
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "NO_CONFIG_PATH",
+                "message": (
+                    "No config file could be resolved to persist to. "
+                    "The value was set in memory only."
+                ),
+            },
+        ) from exc
+    response = SetValueResponse(
+        key=key,
+        value=new_value,
+        persisted=True,
+        path=written_to,
+        note=f"Set in memory and persisted to {written_to}.",
+    )
     return JSONResponse(content=response.model_dump(), status_code=200)

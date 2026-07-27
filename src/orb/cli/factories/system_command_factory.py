@@ -94,10 +94,11 @@ class SystemCommandFactory:
         self,
         key: str,
         value: str,
+        persist: bool = True,
         **kwargs: Any,
     ) -> SetConfigurationCommand:
         """Create command to set configuration value."""
-        return SetConfigurationCommand(key=key, value=value)
+        return SetConfigurationCommand(key=key, value=value, persist=persist)
 
     def create_get_system_config_query(
         self,

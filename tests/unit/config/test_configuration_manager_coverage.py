@@ -450,8 +450,121 @@ class TestSave:
         mgr = ConfigurationManager(config_dict={})
         mgr._raw_config = {"x": 1}
 
-        with pytest.raises(ConfigurationError, match="Failed to save"):
-            mgr.save("/nonexistent_directory_abc/output.json")
+        # A path under a location the process cannot create/write must surface
+        # as a ConfigurationError rather than a raw OSError.
+        with patch("os.replace", side_effect=OSError("boom")):
+            with pytest.raises(ConfigurationError, match="Failed to save"):
+                mgr.save("/nonexistent_directory_abc/output.json")
+
+    def test_save_creates_parent_directories(self, tmp_path):
+        from orb.config.managers.configuration_manager import ConfigurationManager
+
+        raw = {"key": "value"}
+        mgr = ConfigurationManager(config_dict=raw)
+        mgr._raw_config = raw
+
+        out = tmp_path / "nested" / "deeper" / "output.json"
+        mgr.save(str(out))
+
+        assert json.loads(out.read_text()) == raw
+
+    def test_save_is_atomic_no_temp_files_left_on_success(self, tmp_path):
+        from orb.config.managers.configuration_manager import ConfigurationManager
+
+        raw = {"key": "value"}
+        mgr = ConfigurationManager(config_dict=raw)
+        mgr._raw_config = raw
+
+        out = tmp_path / "output.json"
+        mgr.save(str(out))
+
+        # Only the target file should exist — no orphaned .tmp scratch files.
+        remaining = list(tmp_path.iterdir())
+        assert remaining == [out]
+
+    def test_save_leaves_no_temp_file_and_preserves_original_on_failure(self, tmp_path):
+        from orb.config.managers.configuration_manager import ConfigurationManager
+        from orb.domain.base.exceptions import ConfigurationError
+
+        out = tmp_path / "output.json"
+        out.write_text(json.dumps({"original": True}))
+
+        mgr = ConfigurationManager(config_dict={})
+        mgr._raw_config = {"new": True}
+
+        # Fail the atomic rename; the original file must stay intact and no
+        # temp scratch file should be left behind.
+        with patch("os.replace", side_effect=OSError("rename failed")):
+            with pytest.raises(ConfigurationError, match="Failed to save"):
+                mgr.save(str(out))
+
+        assert json.loads(out.read_text()) == {"original": True}
+        assert list(tmp_path.iterdir()) == [out]
+
+
+# ---------------------------------------------------------------------------
+# save() persists the user's OWN config, not the merged/expanded runtime config
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestSavePersistsOnlyUserConfig:
+    """A 'config set' persist must write back the user's original file content
+    with the one edit applied — never the loader-merged, env-expanded runtime
+    config. Regression guard for the persist path baking in package/strategy
+    defaults and replacing ``${VAR}`` placeholders with their plaintext values.
+    """
+
+    def test_set_then_save_preserves_placeholders_and_stays_minimal(self, tmp_path, monkeypatch):
+        from orb.config.managers.configuration_manager import ConfigurationManager
+
+        # A minimal, hand-authored user config with an env-var placeholder for a
+        # secret. The env var is set so the loader WOULD expand it at runtime.
+        monkeypatch.setenv("DB_PASSWORD", "super-secret-plaintext")
+        user_config = {
+            "storage": {"sql_strategy": {"password": "${DB_PASSWORD}"}},
+        }
+        config_path = tmp_path / "config.json"
+        config_path.write_text(json.dumps(user_config))
+        original_text = config_path.read_text()
+
+        # Real load path — no mocking of the loader.
+        mgr = ConfigurationManager(config_file=str(config_path))
+        mgr.set("environment", "staging")
+        mgr.save(str(config_path))
+
+        on_disk = json.loads(config_path.read_text())
+
+        # (1) The ${VAR} placeholder must survive verbatim — the plaintext secret
+        # must never be written to disk.
+        assert on_disk["storage"]["sql_strategy"]["password"] == "${DB_PASSWORD}"
+        assert "super-secret-plaintext" not in config_path.read_text()
+
+        # (2) The file must not have gained package/strategy default keys — it
+        # stays essentially as minimal as the user authored it (their one key
+        # plus the single new key).
+        assert set(on_disk.keys()) == {"storage", "environment"}
+
+        # (3) The new set key was applied and persisted.
+        assert on_disk["environment"] == "staging"
+
+        # Sanity: without the fix the file would balloon far past the original.
+        assert len(config_path.read_text()) < 2 * len(original_text)
+
+    def test_save_from_in_memory_dict_uses_original_not_merged(self, tmp_path):
+        from orb.config.managers.configuration_manager import ConfigurationManager
+
+        user_config = {"request": {"default_timeout": 111}}
+        mgr = ConfigurationManager(config_dict=user_config)
+        mgr.set("request.default_timeout", 222)
+
+        out = tmp_path / "config.json"
+        mgr.save(str(out))
+
+        on_disk = json.loads(out.read_text())
+        # Only the user's own section is written, with the edit applied — no
+        # merged defaults (e.g. no top-level "version", "provider", "logging").
+        assert on_disk == {"request": {"default_timeout": 222}}
 
 
 # ---------------------------------------------------------------------------

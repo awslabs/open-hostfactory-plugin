@@ -167,11 +167,39 @@ class TestSetConfigurationHandler:
 
         await handler.handle(command)
 
-        config_manager.set_configuration_value.assert_called_once_with(
-            "log.level", "DEBUG"
-        )
+        config_manager.set_configuration_value.assert_called_once_with("log.level", "DEBUG")
         assert _res(command)["status"] == "success"
         assert _res(command)["key"] == "log.level"
+
+    @pytest.mark.asyncio
+    async def test_persists_to_disk_by_default(self):
+        config_manager = MagicMock()
+        config_manager.save_config.return_value = "/etc/orb/config.json"
+        container = _container_returning(ConfigurationPort, config_manager)
+
+        handler = SetConfigurationHandler(container=container, **_ports())
+        command = SetConfigurationCommand(key="log.level", value="DEBUG")
+
+        await handler.handle(command)
+
+        config_manager.save_config.assert_called_once_with(None)
+        assert _res(command)["persisted"] is True
+        assert _res(command)["persisted_path"] == "/etc/orb/config.json"
+
+    @pytest.mark.asyncio
+    async def test_no_persist_skips_disk_write(self):
+        config_manager = MagicMock()
+        container = _container_returning(ConfigurationPort, config_manager)
+
+        handler = SetConfigurationHandler(container=container, **_ports())
+        command = SetConfigurationCommand(key="log.level", value="DEBUG", persist=False)
+
+        await handler.handle(command)
+
+        config_manager.set_configuration_value.assert_called_once_with("log.level", "DEBUG")
+        config_manager.save_config.assert_not_called()
+        assert _res(command)["persisted"] is False
+        assert _res(command)["persisted_path"] is None
 
     @pytest.mark.asyncio
     async def test_failure_captured_in_result(self):

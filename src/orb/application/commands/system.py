@@ -47,6 +47,10 @@ class SetConfigurationCommand(BaseCommand):
 
     key: str
     value: str
+    # Persist the change to the loaded config file. Defaults to True because a
+    # CLI process exits immediately after running, so an in-memory-only set
+    # would be lost the moment the command returns.
+    persist: bool = True
 
     # Mutable result fields for CQRS compliance
     result: Optional[dict[str, Any]] = None

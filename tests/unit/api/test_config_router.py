@@ -213,6 +213,62 @@ class TestSetConfigValue:
         body = r.json()
         assert "in-memory" in body["note"].lower() or "revert" in body["note"].lower()
 
+    def test_persist_true_writes_to_disk_and_reports_path(self, config_app):
+        """PUT /config/{key}?persist=true also saves to disk and reports the path."""
+        from unittest.mock import patch
+
+        port = _make_config_port()
+        port.get_configuration_value.side_effect = lambda key, default=None: {
+            "allow_destructive_admin": True,
+            "environment": "development",
+        }.get(key, default)
+        port.save_config.return_value = "/etc/orb/orb.yaml"
+
+        config_app.dependency_overrides[get_config_manager] = lambda: port
+        server_config = MagicMock()
+        server_config.auth.enabled = True
+
+        with patch(
+            "orb.api.dependencies.get_di_container",
+            return_value=MagicMock(**{"get.return_value": port}),
+        ):
+            with patch("orb.api.dependencies.get_server_config", return_value=server_config):
+                client = TestClient(config_app, raise_server_exceptions=False)
+                r = client.put("/config/server.port?persist=true", json={"value": 9090})
+
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["persisted"] is True
+        assert body["path"] == "/etc/orb/orb.yaml"
+        port.set_configuration_value.assert_called_once_with("server.port", 9090)
+        port.save_config.assert_called_once_with(None)
+
+    def test_persist_true_returns_400_when_no_config_file(self, config_app):
+        """PUT /config/{key}?persist=true returns 400 when nothing can be persisted."""
+        from unittest.mock import patch
+
+        port = _make_config_port()
+        port.get_configuration_value.side_effect = lambda key, default=None: {
+            "allow_destructive_admin": True,
+            "environment": "development",
+        }.get(key, default)
+        port.save_config.side_effect = ValueError("no config file loaded")
+
+        config_app.dependency_overrides[get_config_manager] = lambda: port
+        server_config = MagicMock()
+        server_config.auth.enabled = True
+
+        with patch(
+            "orb.api.dependencies.get_di_container",
+            return_value=MagicMock(**{"get.return_value": port}),
+        ):
+            with patch("orb.api.dependencies.get_server_config", return_value=server_config):
+                client = TestClient(config_app, raise_server_exceptions=False)
+                r = client.put("/config/server.port?persist=true", json={"value": 9090})
+
+        assert r.status_code == 400
+        assert r.json()["detail"]["code"] == "NO_CONFIG_PATH"
+
 
 @pytest.mark.unit
 @pytest.mark.api

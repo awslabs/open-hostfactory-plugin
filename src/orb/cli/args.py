@@ -853,6 +853,13 @@ For more information, visit: {DOCS_URL}
     )
     config_set.add_argument("key", help="Configuration key")
     config_set.add_argument("value", help="Configuration value")
+    config_set.add_argument(
+        "--no-persist",
+        dest="persist",
+        action="store_false",
+        default=True,
+        help="Set the value in memory only; do not write it to the config file",
+    )
 
     config_get = config_subparsers.add_parser(
         "get", help="Get configuration", parents=[pp.common, pp.list, pp.provider_scope]

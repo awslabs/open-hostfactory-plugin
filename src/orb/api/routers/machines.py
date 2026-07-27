@@ -53,6 +53,14 @@ STATUS_QUERY = Query(None, description="Filter by machine status")
 REQUEST_ID_QUERY = Query(None, description="Filter by request ID")
 OFFSET_QUERY = Query(0, ge=0, description="Number of results to skip")
 
+# Server-side ceiling for blocking ``?wait=true`` requests, so a client cannot
+# hold a worker connection open indefinitely.
+_MAX_WAIT_TIMEOUT_SECONDS = 600
+WAIT_QUERY = Query(False, description="Block until the request reaches a terminal state")
+WAIT_TIMEOUT_QUERY = Query(
+    300, ge=1, le=_MAX_WAIT_TIMEOUT_SECONDS, description="Max wait duration in seconds"
+)
+
 
 class RequestMachinesRequest(APIRequest):
     """Request for machine provisioning.
@@ -105,6 +113,8 @@ class ReturnMachinesRequest(APIRequest):
 @handle_rest_exceptions(endpoint="/api/v1/machines/request", method="POST")
 async def request_machines(
     request_data: RequestMachinesRequest,
+    wait: bool = WAIT_QUERY,
+    timeout: int = WAIT_TIMEOUT_QUERY,
     _user=Depends(require_role("operator")),
     orchestrator=ACQUIRE_ORCHESTRATOR,
     formatter=FORMATTER,
@@ -115,12 +125,16 @@ async def request_machines(
     - **template_id**: Template to use for machine creation
     - **count**: Number of machines to request (also accepted as machine_count or machineCount)
     - **additional_data**: Optional additional configuration data
+    - **wait**: Block server-side until the request is terminal or ``timeout`` elapses
+    - **timeout**: Maximum seconds to block when ``wait=true`` (server caps at 600)
     """
     result = await orchestrator.execute(
         AcquireMachinesInput(
             template_id=request_data.template_id,
             requested_count=request_data.count,
             additional_data=request_data.additional_data or {},
+            wait=wait,
+            timeout_seconds=min(timeout, _MAX_WAIT_TIMEOUT_SECONDS),
         )
     )
     entry = OPERATION_CATALOG["request_machines"]
@@ -138,6 +152,8 @@ async def request_machines(
 @handle_rest_exceptions(endpoint="/api/v1/machines/return", method="POST")
 async def return_machines(
     request_data: ReturnMachinesRequest,
+    wait: bool = WAIT_QUERY,
+    timeout: int = WAIT_TIMEOUT_QUERY,
     _user=Depends(require_role("operator")),
     orchestrator=RETURN_ORCHESTRATOR,
     formatter=FORMATTER,
@@ -146,6 +162,8 @@ async def return_machines(
     Return machines to the provider.
 
     - **machine_ids**: List of machine IDs to return
+    - **wait**: Block server-side until the return is terminal or ``timeout`` elapses
+    - **timeout**: Maximum seconds to block when ``wait=true`` (server caps at 600)
     """
     result = await orchestrator.execute(
         ReturnMachinesInput(
@@ -153,6 +171,8 @@ async def return_machines(
             request_id=request_data.request_id,
             all_machines=request_data.all_machines,
             force=request_data.force,
+            wait=wait,
+            timeout_seconds=min(timeout, _MAX_WAIT_TIMEOUT_SECONDS),
             provider_name=request_data.provider_name,
             provider_type=request_data.provider_type,
         )

@@ -363,6 +363,12 @@ def add_request_actions(subparsers, pp: "ParentParsers | None" = None):
     requests_status.add_argument(
         "--request-id", "-r", action="append", dest="flag_request_ids", help="Request ID to check"
     )
+    requests_status.add_argument(
+        "--wait", action="store_true", help="Poll until the request reaches a terminal state"
+    )
+    requests_status.add_argument(
+        "--timeout", type=int, default=300, help="Wait timeout in seconds"
+    )
 
     requests_watch = subparsers.add_parser(
         "watch",

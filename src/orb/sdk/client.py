@@ -577,6 +577,8 @@ class ORBClient:
                 request_ids=ids,
                 all_requests=kwargs.get("all_requests", False),
                 verbose=kwargs.get("verbose", False),
+                wait=kwargs.get("wait", False),
+                timeout_seconds=kwargs.get("timeout_seconds", 300),
             ),
         )
 
@@ -615,6 +617,8 @@ class ORBClient:
                 machine_ids=list(machine_ids),
                 all_machines=kwargs.get("all_machines", False),
                 force=kwargs.get("force", False),
+                wait=kwargs.get("wait", False),
+                timeout_seconds=kwargs.get("timeout_seconds", 300),
                 provider_name=kwargs.get("provider_name") or self._config.provider_name,
                 provider_type=kwargs.get("provider_type") or self._config.provider_type,
             ),

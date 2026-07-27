@@ -86,6 +86,8 @@ class GetRequestStatusInput:
     request_ids: list[str] = dataclasses.field(default_factory=list)
     all_requests: bool = False
     verbose: bool = False
+    wait: bool = False
+    timeout_seconds: int = 300
 
 
 @dataclasses.dataclass(frozen=True)

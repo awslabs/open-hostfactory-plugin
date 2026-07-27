@@ -78,6 +78,8 @@ async def handle_get_request_status(
         GetRequestStatusInput(
             request_ids=[str(rid) for rid in request_ids],
             verbose=getattr(args, "verbose", False),
+            wait=bool(getattr(args, "wait", False)),
+            timeout_seconds=int(getattr(args, "timeout", 300)),
         )
     )
     return render(formatter, result)

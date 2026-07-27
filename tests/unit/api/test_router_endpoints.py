@@ -140,6 +140,36 @@ class TestMachinesRouter:
             {"request_id": "req-abc", "status": "pending", "machine_ids": []}, "pending"
         )
 
+    def test_request_machines_wait_query_forwarded(self, machines_app):
+        output = AcquireMachinesOutput(request_id="req-wait", status="complete")
+        orch = self._override_acquire(machines_app, output)
+        self._set_scheduler(machines_app)
+        client = TestClient(machines_app, raise_server_exceptions=False)
+
+        resp = client.post(
+            "/machines/request?wait=true&timeout=120",
+            json={"template_id": "t1", "count": 1},
+        )
+
+        assert resp.status_code == 202
+        inp: AcquireMachinesInput = orch.execute.call_args.args[0]
+        assert inp.wait is True
+        assert inp.timeout_seconds == 120
+
+    def test_request_machines_wait_timeout_capped(self, machines_app):
+        output = AcquireMachinesOutput(request_id="req-cap", status="complete")
+        self._override_acquire(machines_app, output)
+        self._set_scheduler(machines_app)
+        client = TestClient(machines_app, raise_server_exceptions=False)
+
+        # Above the server ceiling → rejected by query validation.
+        resp = client.post(
+            "/machines/request?wait=true&timeout=99999",
+            json={"template_id": "t1", "count": 1},
+        )
+
+        assert resp.status_code == 422
+
     def test_request_machines_camel_case_body(self, machines_app):
         output = AcquireMachinesOutput(request_id="req-camel", status="pending")
         orch = self._override_acquire(machines_app, output)
@@ -193,6 +223,19 @@ class TestMachinesRouter:
         orch.execute.assert_awaited_once()
         inp: ReturnMachinesInput = orch.execute.call_args.args[0]
         assert inp.machine_ids == ["i-123"]
+
+    def test_return_machines_wait_query_forwarded(self, machines_app):
+        output = ReturnMachinesOutput(request_id="ret-wait", status="complete")
+        orch = self._override_return(machines_app, output)
+        self._set_scheduler(machines_app)
+        client = TestClient(machines_app, raise_server_exceptions=False)
+
+        resp = client.post("/machines/return?wait=true&timeout=90", json={"machine_ids": ["i-1"]})
+
+        assert resp.status_code == 200
+        inp: ReturnMachinesInput = orch.execute.call_args.args[0]
+        assert inp.wait is True
+        assert inp.timeout_seconds == 90
 
     def test_return_machines_empty_ids(self, machines_app):
         output = ReturnMachinesOutput(request_id=None, status="pending")

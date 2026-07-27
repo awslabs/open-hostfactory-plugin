@@ -312,6 +312,93 @@ class TestConvenienceMethods:
         assert result == {"request_id": "req-123", "status": "pending", "machine_ids": []}
 
     @pytest.mark.asyncio
+    async def test_request_machines_forwards_wait_kwargs(self):
+        from orb.application.services.orchestration.dtos import AcquireMachinesOutput
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
+        sdk = _initialized_sdk()
+        mock_container = MagicMock()
+        sdk._container = mock_container
+        mock_orchestrator = MagicMock()
+        mock_orchestrator.execute = AsyncMock(
+            return_value=AcquireMachinesOutput(request_id="req-1", status="complete")
+        )
+        mock_scheduler = MagicMock()
+        mock_scheduler.format_request_response.side_effect = lambda raw: raw
+
+        def _get(cls):
+            if cls is ResponseFormattingService:
+                return ResponseFormattingService(mock_scheduler)
+            return mock_orchestrator
+
+        mock_container.get.side_effect = _get
+        mock_container.get_optional.return_value = None
+
+        await sdk.request_machines("tmpl-1", 3, wait=True, timeout_seconds=120)
+
+        dto = mock_orchestrator.execute.call_args[0][0]
+        assert dto.wait is True
+        assert dto.timeout_seconds == 120
+
+    @pytest.mark.asyncio
+    async def test_return_machines_forwards_wait_kwargs(self):
+        from orb.application.services.orchestration.dtos import ReturnMachinesOutput
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
+        sdk = _initialized_sdk()
+        mock_container = MagicMock()
+        sdk._container = mock_container
+        mock_orchestrator = MagicMock()
+        mock_orchestrator.execute = AsyncMock(
+            return_value=ReturnMachinesOutput(request_id="ret-1", status="complete")
+        )
+        mock_scheduler = MagicMock()
+        mock_scheduler.format_request_response.side_effect = lambda raw: raw
+
+        def _get(cls):
+            if cls is ResponseFormattingService:
+                return ResponseFormattingService(mock_scheduler)
+            return mock_orchestrator
+
+        mock_container.get.side_effect = _get
+        mock_container.get_optional.return_value = None
+
+        await sdk.return_machines(["m-1"], wait=True, timeout_seconds=90)
+
+        dto = mock_orchestrator.execute.call_args[0][0]
+        assert dto.wait is True
+        assert dto.timeout_seconds == 90
+
+    @pytest.mark.asyncio
+    async def test_get_request_status_forwards_wait_kwargs(self):
+        from orb.application.services.orchestration.dtos import GetRequestStatusOutput
+        from orb.interface.response_formatting_service import ResponseFormattingService
+
+        sdk = _initialized_sdk()
+        mock_container = MagicMock()
+        sdk._container = mock_container
+        mock_orchestrator = MagicMock()
+        mock_orchestrator.execute = AsyncMock(
+            return_value=GetRequestStatusOutput(requests=[{"request_id": "req-1"}])
+        )
+        mock_scheduler = MagicMock()
+        mock_scheduler.format_request_status_response.side_effect = lambda reqs: {"requests": reqs}
+
+        def _get(cls):
+            if cls is ResponseFormattingService:
+                return ResponseFormattingService(mock_scheduler)
+            return mock_orchestrator
+
+        mock_container.get.side_effect = _get
+        mock_container.get_optional.return_value = None
+
+        await sdk.get_request_status(request_ids=["req-1"], wait=True, timeout_seconds=60)
+
+        dto = mock_orchestrator.execute.call_args[0][0]
+        assert dto.wait is True
+        assert dto.timeout_seconds == 60
+
+    @pytest.mark.asyncio
     async def test_show_template_raises_when_not_initialized(self):
         sdk = _make_sdk()
         with pytest.raises(SDKError, match="not initialized"):

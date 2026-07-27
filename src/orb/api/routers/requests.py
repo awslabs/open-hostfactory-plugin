@@ -70,6 +70,11 @@ STATUS_QUERY = Query(None, description="Filter by request status")
 LIMIT_QUERY = Query(50, description="Limit number of results")
 OFFSET_QUERY = Query(0, ge=0, description="Number of results to skip")
 
+# Server-side ceiling for blocking ``?wait=true`` requests. Callers may pass a
+# smaller ``timeout`` but never a larger one, so a client cannot hold a worker
+# connection open indefinitely.
+_MAX_WAIT_TIMEOUT_SECONDS = 600
+
 
 def _is_terminal_status(status: str) -> bool:
     """Return True when *status* is a terminal RequestStatus value.
@@ -226,6 +231,10 @@ async def get_request(
 async def get_request_status(
     request_id: str,
     verbose: bool = Query(True, description="Include detailed info and refresh provider state"),
+    wait: bool = Query(False, description="Block until the request reaches a terminal state"),
+    timeout: int = Query(
+        300, ge=1, le=_MAX_WAIT_TIMEOUT_SECONDS, description="Max wait duration in seconds"
+    ),
     _user=Depends(require_role("viewer")),
     orchestrator=STATUS_ORCHESTRATOR,
     formatter=FORMATTER,
@@ -235,9 +244,16 @@ async def get_request_status(
 
     - **request_id**: Request identifier
     - **verbose**: Include detailed information about the request
+    - **wait**: Poll server-side until the request is terminal or ``timeout`` elapses
+    - **timeout**: Maximum seconds to block when ``wait=true`` (server caps at 600)
     """
     result = await orchestrator.execute(
-        GetRequestStatusInput(request_ids=[request_id], verbose=verbose)
+        GetRequestStatusInput(
+            request_ids=[request_id],
+            verbose=verbose,
+            wait=wait,
+            timeout_seconds=min(timeout, _MAX_WAIT_TIMEOUT_SECONDS),
+        )
     )
     # The orchestrator tags a genuinely non-existent request with an explicit
     # "not_found" flag (EntityNotFoundError swallowed for batch partial-failure

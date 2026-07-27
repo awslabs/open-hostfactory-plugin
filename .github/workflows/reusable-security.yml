@@ -17,10 +17,10 @@ on:
         type: string
       cache-key:
         description: >-
-          Pre-computed cache key from the caller's setup-cache step.  When
-          provided the job hits the warm cache primed by the caller's
-          cache-management job.  When omitted the job falls back to installing
-          from scratch (always cold).
+          Optional explicit cache key.  When provided the job restores (and, on
+          a miss, repopulates) the environment under this key.  When omitted the
+          job derives its own group-keyed key from the lockfile hash — the first
+          run installs and saves it, later runs hit warm.
         required: false
         type: string
         default: ''
@@ -48,9 +48,9 @@ jobs:
         if: contains('bandit,safety,codeql', inputs.scan-type)
         uses: ./.github/actions/setup-uv-cached
         with:
-          # Use the caller-supplied cache key (keyed to the security group).
-          # Fallback mirrors the canonical group-keyed format so restore-keys
-          # can still provide a partial hit on a first run.
+          # Use the caller-supplied cache key when set; otherwise derive the
+          # canonical security-group key from the lockfile hash.  setup-uv-cached
+          # restores on hit and saves on a miss, so the cache self-warms.
           cache-key: >-
             ${{
               inputs.cache-key != ''

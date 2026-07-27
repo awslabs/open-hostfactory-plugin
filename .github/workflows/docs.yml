@@ -54,18 +54,8 @@ jobs:
       id: config
       uses: ./.github/actions/get-config
 
-  setup-cache:
-    name: Setup Cache
-    needs: config
-    uses: ./.github/workflows/cache-management.yml
-    with:
-      cache-type: dependencies
-      cache-key-base: deps
-      python-version: ${{ needs.config.outputs.default-python-version }}
-      group: docs
-
   build:
-    needs: [config, setup-cache]
+    needs: [config]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -79,7 +69,7 @@ jobs:
       - name: Setup Python and UV
         uses: ./.github/actions/setup-uv-cached
         with:
-          cache-key: ${{ needs.setup-cache.outputs.cache-key }}
+          cache-key: deps-py3.12-docs-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
           group: docs
           fail-on-cache-miss: false
 

@@ -188,6 +188,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_show = subparsers.add_parser(
         "show",
         help="Show machine details",
+        description="Show detailed information about one or more machines.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     machines_show.add_argument("machine_id", nargs="?", help="Machine ID to show")
@@ -198,6 +199,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_request = subparsers.add_parser(
         "request",
         help="Request machines",
+        description="Request machines from a template and provision them via the active provider.",
         parents=[pp.common, pp.list, pp.provider_scope, pp.hf_compat],
     )
     machines_request.add_argument("template_id", nargs="?", help="Template ID to use")
@@ -220,6 +222,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_return = subparsers.add_parser(
         "return",
         help="Return machines",
+        description="Return machines to the provider, releasing the underlying compute resources.",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope, pp.hf_compat],
     )
     machines_return.add_argument(
@@ -246,6 +249,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_terminate = subparsers.add_parser(
         "terminate",
         help="Terminate (return) machines",
+        description="Terminate machines and return them to the provider (alias for return).",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope],
     )
     machines_terminate.add_argument(
@@ -269,6 +273,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_status = subparsers.add_parser(
         "status",
         help="Check machine status",
+        description="Check the current status of one or more machines.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     machines_status.add_argument(
@@ -282,6 +287,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_stop = subparsers.add_parser(
         "stop",
         help="Stop running machines",
+        description="Stop running machines without releasing them from the provider.",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope],
     )
     machines_stop.add_argument(
@@ -295,6 +301,7 @@ def add_machine_actions(subparsers, pp: "ParentParsers | None" = None):
     machines_start = subparsers.add_parser(
         "start",
         help="Start stopped machines",
+        description="Start previously stopped machines for the active provider.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     machines_start.add_argument(
@@ -331,6 +338,7 @@ def add_request_actions(subparsers, pp: "ParentParsers | None" = None):
     requests_show = subparsers.add_parser(
         "show",
         help="Show request details",
+        description="Show detailed information about one or more provisioning requests.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     requests_show.add_argument(
@@ -344,6 +352,7 @@ def add_request_actions(subparsers, pp: "ParentParsers | None" = None):
     requests_cancel = subparsers.add_parser(
         "cancel",
         help="Cancel request",
+        description="Cancel an in-flight provisioning request.",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope],
     )
     requests_cancel.add_argument("request_id", nargs="?", help="Request ID to cancel")
@@ -354,6 +363,7 @@ def add_request_actions(subparsers, pp: "ParentParsers | None" = None):
     requests_status = subparsers.add_parser(
         "status",
         help="Check request status",
+        description="Check the current status of one or more provisioning requests.",
         parents=[pp.common, pp.list, pp.provider_scope, pp.hf_compat],
     )
     requests_status.add_argument(
@@ -366,13 +376,12 @@ def add_request_actions(subparsers, pp: "ParentParsers | None" = None):
     requests_status.add_argument(
         "--wait", action="store_true", help="Poll until the request reaches a terminal state"
     )
-    requests_status.add_argument(
-        "--timeout", type=int, default=300, help="Wait timeout in seconds"
-    )
+    requests_status.add_argument("--timeout", type=int, default=300, help="Wait timeout in seconds")
 
     requests_watch = subparsers.add_parser(
         "watch",
         help="Watch request status in real time",
+        description="Watch a provisioning request and stream status updates until it settles.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     requests_watch.add_argument(
@@ -385,6 +394,7 @@ def add_request_actions(subparsers, pp: "ParentParsers | None" = None):
     requests_list_returns = subparsers.add_parser(
         "list-returns",
         help="List return requests",
+        description="List return requests with filtering support.",
         parents=[pp.common, pp.list, pp.provider_scope, pp.hf_compat],
     )
     requests_list_returns.add_argument("--status", help="Filter by return request status")
@@ -440,6 +450,7 @@ def add_provider_actions(subparsers, pp: "ParentParsers | None" = None):
     providers_show = subparsers.add_parser(
         "show",
         help="Show provider details",
+        description="Show detailed configuration for a provider instance.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_show.add_argument("provider_name", nargs="?", help="Provider name to show")
@@ -447,11 +458,15 @@ def add_provider_actions(subparsers, pp: "ParentParsers | None" = None):
     subparsers.add_parser(
         "health",
         help="Check provider health",
+        description="Check the health of the active or selected provider.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     providers_add = subparsers.add_parser(
-        "add", help="Add new provider", parents=[pp.common, pp.list, pp.provider_scope]
+        "add",
+        help="Add new provider",
+        description="Add a new provider instance to the configuration.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     for _spec in CLISpecRegistry.all().values():
         _spec.add_arguments(providers_add)
@@ -459,13 +474,17 @@ def add_provider_actions(subparsers, pp: "ParentParsers | None" = None):
     providers_add.add_argument("--discover", action="store_true", help="Discover infrastructure")
 
     providers_remove = subparsers.add_parser(
-        "remove", help="Remove provider", parents=[pp.common, pp.list, pp.provider_scope]
+        "remove",
+        help="Remove provider",
+        description="Remove a provider instance from the configuration.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_remove.add_argument("provider_name", help="Provider instance name to remove")
 
     providers_update = subparsers.add_parser(
         "update",
         help="Update provider configuration",
+        description="Update the configuration of an existing provider instance.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_update.add_argument("provider_name", help="Provider instance name")
@@ -475,26 +494,39 @@ def add_provider_actions(subparsers, pp: "ParentParsers | None" = None):
     providers_set_default = subparsers.add_parser(
         "set-default",
         help="Set default provider",
+        description="Set the default provider instance used when none is specified.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_set_default.add_argument("provider_name", help="Provider name to set as default")
 
     providers_get = subparsers.add_parser(
-        "get", help="Get provider details by name", parents=[pp.common, pp.list, pp.provider_scope]
+        "get",
+        help="Get provider details by name",
+        description="Get details for a provider instance by name.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_get.add_argument("name", help="Provider name")
 
     subparsers.add_parser(
-        "get-default", help="Show default provider", parents=[pp.common, pp.list, pp.provider_scope]
+        "get-default",
+        help="Show default provider",
+        description="Show the current default provider instance.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     providers_select = subparsers.add_parser(
-        "select", help="Select provider instance", parents=[pp.common, pp.list, pp.provider_scope]
+        "select",
+        help="Select provider instance",
+        description="Select the active provider instance for the current session.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_select.add_argument("provider_name", help="Provider name to select")
 
     providers_exec = subparsers.add_parser(
-        "exec", help="Execute provider command", parents=[pp.common, pp.list, pp.provider_scope]
+        "exec",
+        help="Execute provider command",
+        description="Execute a raw operation against a provider instance.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_exec.add_argument("operation", help="Operation to execute")
     providers_exec.add_argument(
@@ -502,7 +534,10 @@ def add_provider_actions(subparsers, pp: "ParentParsers | None" = None):
     )
 
     providers_metrics = subparsers.add_parser(
-        "metrics", help="Show provider metrics", parents=[pp.common, pp.list, pp.provider_scope]
+        "metrics",
+        help="Show provider metrics",
+        description="Show operational metrics for a provider instance.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     providers_metrics.add_argument(
         "--timeframe", default="1h", help="Metrics timeframe (e.g., 1h, 24h, 7d)"
@@ -524,6 +559,7 @@ def add_template_actions(subparsers, pp: "ParentParsers | None" = None):
     templates_show = subparsers.add_parser(
         "show",
         help="Show template details",
+        description="Show detailed information about a compute template.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     templates_show.add_argument("template_id", nargs="?", help="Template ID to show")
@@ -534,6 +570,7 @@ def add_template_actions(subparsers, pp: "ParentParsers | None" = None):
     templates_create = subparsers.add_parser(
         "create",
         help="Create template",
+        description="Create a new compute template from a configuration file.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     templates_create.add_argument("--file", required=True, help="Template configuration file")
@@ -544,6 +581,7 @@ def add_template_actions(subparsers, pp: "ParentParsers | None" = None):
     templates_update = subparsers.add_parser(
         "update",
         help="Update template",
+        description="Update an existing compute template from a configuration file.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     templates_update.add_argument("template_id", nargs="?", help="Template ID to update")
@@ -557,6 +595,7 @@ def add_template_actions(subparsers, pp: "ParentParsers | None" = None):
     templates_delete = subparsers.add_parser(
         "delete",
         help="Delete template",
+        description="Delete a compute template by ID.",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope],
     )
     templates_delete.add_argument("template_id", nargs="?", help="Template ID to delete")
@@ -567,6 +606,7 @@ def add_template_actions(subparsers, pp: "ParentParsers | None" = None):
     templates_validate = subparsers.add_parser(
         "validate",
         help="Validate template",
+        description="Validate one or more compute templates for correctness.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     templates_validate.add_argument("--all", action="store_true", help="Validate all templates")
@@ -579,12 +619,14 @@ def add_template_actions(subparsers, pp: "ParentParsers | None" = None):
     subparsers.add_parser(
         "refresh",
         help="Refresh template cache",
+        description="Refresh the cached template list from the provider.",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope],
     )
 
     templates_generate = subparsers.add_parser(
         "generate",
         help="Generate example templates",
+        description="Generate example compute templates for the configured providers.",
         parents=[pp.common, pp.list, pp.write, pp.provider_scope],
     )
     add_multi_provider_arguments(templates_generate)
@@ -666,11 +708,19 @@ For more information, visit: {DOCS_URL}
     resource_parsers = {}
 
     # Templates
-    templates_parser = subparsers.add_parser("templates", help="Compute templates")
+    templates_parser = subparsers.add_parser(
+        "templates",
+        help="Manage compute templates",
+        description="Manage compute templates — list, show, create, update, and validate them.",
+    )
     resource_parsers["templates"] = templates_parser
     templates_subparsers = templates_parser.add_subparsers(dest="action", help="Template actions")
 
-    template_parser = subparsers.add_parser("template")
+    template_parser = subparsers.add_parser(
+        "template",
+        help="Manage compute templates (alias for templates)",
+        description="Manage compute templates (singular alias for templates).",
+    )
     resource_parsers["template"] = template_parser
     template_subparsers = template_parser.add_subparsers(dest="action", help="Template actions")
 
@@ -678,11 +728,19 @@ For more information, visit: {DOCS_URL}
     add_template_actions(template_subparsers, pp)
 
     # Machines
-    machines_parser = subparsers.add_parser("machines", help="Compute instances")
+    machines_parser = subparsers.add_parser(
+        "machines",
+        help="Manage compute instances",
+        description="Manage compute instances — request, list, show, return, and control machines.",
+    )
     resource_parsers["machines"] = machines_parser
     machines_subparsers = machines_parser.add_subparsers(dest="action", help="Machine actions")
 
-    machine_parser = subparsers.add_parser("machine")
+    machine_parser = subparsers.add_parser(
+        "machine",
+        help="Manage compute instances (alias for machines)",
+        description="Manage compute instances (singular alias for machines).",
+    )
     resource_parsers["machine"] = machine_parser
     machine_subparsers = machine_parser.add_subparsers(dest="action", help="Machine actions")
 
@@ -690,11 +748,19 @@ For more information, visit: {DOCS_URL}
     add_machine_actions(machine_subparsers, pp)
 
     # Requests
-    requests_parser = subparsers.add_parser("requests", help="Provisioning requests")
+    requests_parser = subparsers.add_parser(
+        "requests",
+        help="Manage provisioning requests",
+        description="Manage provisioning requests — list, show, cancel, and watch them.",
+    )
     resource_parsers["requests"] = requests_parser
     requests_subparsers = requests_parser.add_subparsers(dest="action", help="Request actions")
 
-    request_parser = subparsers.add_parser("request")
+    request_parser = subparsers.add_parser(
+        "request",
+        help="Manage provisioning requests (alias for requests)",
+        description="Manage provisioning requests (singular alias for requests).",
+    )
     resource_parsers["request"] = request_parser
     request_subparsers = request_parser.add_subparsers(dest="action", help="Request actions")
 
@@ -702,33 +768,48 @@ For more information, visit: {DOCS_URL}
     add_request_actions(request_subparsers, pp)
 
     # System
-    system_parser = subparsers.add_parser("system", help="System operations")
+    system_parser = subparsers.add_parser(
+        "system",
+        help="Inspect system operations",
+        description="Inspect system operations — status, health, metrics, and configuration reload.",
+    )
     resource_parsers["system"] = system_parser
     system_subparsers = system_parser.add_subparsers(
         dest="action", help="System actions", required=True
     )
 
     system_subparsers.add_parser(
-        "status", help="Show system status", parents=[pp.common, pp.list, pp.provider_scope]
+        "status",
+        help="Show system status",
+        description="Show the overall status of the ORB system.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     system_subparsers.add_parser(
-        "health", help="Check system health", parents=[pp.common, pp.list, pp.provider_scope]
+        "health",
+        help="Check system health",
+        description="Check the health of the ORB system and its dependencies.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     system_subparsers.add_parser(
-        "metrics", help="Show system metrics", parents=[pp.common, pp.list, pp.provider_scope]
+        "metrics",
+        help="Show system metrics",
+        description="Show operational metrics for the ORB system.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     system_subparsers.add_parser(
         "reload",
         help="Reload provider configuration",
+        description="Reload provider configuration without restarting the system.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     # Server (process lifecycle — local daemon control)
     server_parser = subparsers.add_parser(
         "server",
-        help="ORB server process lifecycle (start/stop/status/restart/logs/reload)",
+        help="Control the ORB server process lifecycle",
+        description="Control the ORB server process lifecycle — start, stop, status, restart, logs, and reload.",
     )
     resource_parsers["server"] = server_parser
     server_subparsers = server_parser.add_subparsers(
@@ -764,12 +845,16 @@ For more information, visit: {DOCS_URL}
     server_start = server_subparsers.add_parser(
         "start",
         help="Start the ORB server (daemonised by default)",
+        description="Start the ORB server, daemonising it by default.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     _add_server_start_args(server_start)
 
     server_stop = server_subparsers.add_parser(
-        "stop", help="Stop the running ORB server", parents=[pp.common, pp.list, pp.provider_scope]
+        "stop",
+        help="Stop the running ORB server",
+        description="Stop the running ORB server gracefully.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     server_stop.add_argument(
         "--timeout",
@@ -781,11 +866,15 @@ For more information, visit: {DOCS_URL}
     server_subparsers.add_parser(
         "status",
         help="Show ORB server status + health",
+        description="Show the ORB server process status and health.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     server_restart = server_subparsers.add_parser(
-        "restart", help="Restart the ORB server", parents=[pp.common, pp.list, pp.provider_scope]
+        "restart",
+        help="Restart the ORB server",
+        description="Restart the ORB server (stop then start).",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     _add_server_start_args(server_restart)
     server_restart.add_argument(
@@ -797,19 +886,24 @@ For more information, visit: {DOCS_URL}
     )
 
     server_logs = server_subparsers.add_parser(
-        "logs", help="Tail the ORB server log file", parents=[pp.common, pp.list, pp.provider_scope]
+        "logs",
+        help="Tail the ORB server log file",
+        description="Tail the ORB server log file.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     server_logs.add_argument("-n", "--lines", type=int, default=50, help="Lines to tail")
 
     server_subparsers.add_parser(
         "reload",
         help="Send SIGHUP to the running ORB server",
+        description="Send SIGHUP to the running ORB server to reload its configuration.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     server_ui_export = server_subparsers.add_parser(
         "ui-export",
         help="Copy the compiled SPA bundle to a local directory for CDN / static-host serving",
+        description="Copy the compiled SPA bundle to a local directory for CDN or static-host serving.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     server_ui_export.add_argument(
@@ -824,13 +918,21 @@ For more information, visit: {DOCS_URL}
     )
 
     # Infrastructure
-    infrastructure_parser = subparsers.add_parser("infrastructure", help="Infrastructure discovery")
+    infrastructure_parser = subparsers.add_parser(
+        "infrastructure",
+        help="Discover and inspect infrastructure",
+        description="Discover and inspect cloud infrastructure — VPCs, subnets, and security groups.",
+    )
     resource_parsers["infrastructure"] = infrastructure_parser
     infrastructure_subparsers = infrastructure_parser.add_subparsers(
         dest="action", help="Infrastructure actions"
     )
 
-    infra_parser = subparsers.add_parser("infra")
+    infra_parser = subparsers.add_parser(
+        "infra",
+        help="Discover and inspect infrastructure (alias for infrastructure)",
+        description="Discover and inspect cloud infrastructure (alias for infrastructure).",
+    )
     resource_parsers["infra"] = infra_parser
     infra_subparsers = infra_parser.add_subparsers(dest="action", help="Infrastructure actions")
 
@@ -838,18 +940,28 @@ For more information, visit: {DOCS_URL}
     add_infrastructure_actions(infra_subparsers, pp)
 
     # Config
-    config_parser = subparsers.add_parser("config", help="Configuration")
+    config_parser = subparsers.add_parser(
+        "config",
+        help="Manage ORB configuration",
+        description="Manage ORB configuration — show, get, set, validate, and reload settings.",
+    )
     resource_parsers["config"] = config_parser
     config_subparsers = config_parser.add_subparsers(
         dest="action", help="Config actions", required=True
     )
 
     config_subparsers.add_parser(
-        "show", help="Show configuration", parents=[pp.common, pp.list, pp.provider_scope]
+        "show",
+        help="Show configuration",
+        description="Show the current ORB configuration.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     config_set = config_subparsers.add_parser(
-        "set", help="Set configuration", parents=[pp.common, pp.list, pp.provider_scope]
+        "set",
+        help="Set configuration",
+        description="Set a configuration value by key.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     config_set.add_argument("key", help="Configuration key")
     config_set.add_argument("value", help="Configuration value")
@@ -862,27 +974,42 @@ For more information, visit: {DOCS_URL}
     )
 
     config_get = config_subparsers.add_parser(
-        "get", help="Get configuration", parents=[pp.common, pp.list, pp.provider_scope]
+        "get",
+        help="Get configuration",
+        description="Get a configuration value by key.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     config_get.add_argument("key", help="Configuration key")
 
     config_validate = config_subparsers.add_parser(
-        "validate", help="Validate configuration", parents=[pp.common, pp.list, pp.provider_scope]
+        "validate",
+        help="Validate configuration",
+        description="Validate the ORB configuration file for correctness.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     config_validate.add_argument("--file", help="Configuration file to validate")
 
     config_subparsers.add_parser(
         "reload",
         help="Reload provider configuration",
+        description="Reload provider configuration from disk.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     # Providers
-    providers_parser = subparsers.add_parser("providers", help="Cloud providers")
+    providers_parser = subparsers.add_parser(
+        "providers",
+        help="Manage cloud providers",
+        description="Manage cloud providers — list, add, update, remove, and inspect provider instances.",
+    )
     resource_parsers["providers"] = providers_parser
     providers_subparsers = providers_parser.add_subparsers(dest="action", help="Provider actions")
 
-    provider_parser = subparsers.add_parser("provider")
+    provider_parser = subparsers.add_parser(
+        "provider",
+        help="Manage cloud providers (alias for providers)",
+        description="Manage cloud providers (singular alias for providers).",
+    )
     resource_parsers["provider"] = provider_parser
     provider_subparsers = provider_parser.add_subparsers(dest="action", help="Provider actions")
 
@@ -890,43 +1017,66 @@ For more information, visit: {DOCS_URL}
     add_provider_actions(provider_subparsers, pp)
 
     # Storage
-    storage_parser = subparsers.add_parser("storage", help="Storage")
+    storage_parser = subparsers.add_parser(
+        "storage",
+        help="Manage storage backends",
+        description="Manage storage backends — list, inspect, validate, test, and migrate strategies.",
+    )
     resource_parsers["storage"] = storage_parser
     storage_subparsers = storage_parser.add_subparsers(
         dest="action", help="Storage actions", required=True
     )
 
     storage_subparsers.add_parser(
-        "list", help="List storage strategies", parents=[pp.common, pp.list, pp.provider_scope]
+        "list",
+        help="List storage strategies",
+        description="List the available storage strategies.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     storage_show = storage_subparsers.add_parser(
-        "show", help="Show storage configuration", parents=[pp.common, pp.list, pp.provider_scope]
+        "show",
+        help="Show storage configuration",
+        description="Show the configuration of the active or selected storage strategy.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     storage_show.add_argument("--strategy", help="Show specific storage strategy details")
 
     storage_validate = storage_subparsers.add_parser(
-        "validate", help="Validate storage", parents=[pp.common, pp.list, pp.provider_scope]
+        "validate",
+        help="Validate storage",
+        description="Validate the configuration of a storage strategy.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     storage_validate.add_argument("--strategy", help="Validate specific storage strategy")
 
     storage_test = storage_subparsers.add_parser(
-        "test", help="Test storage connectivity", parents=[pp.common, pp.list, pp.provider_scope]
+        "test",
+        help="Test storage connectivity",
+        description="Test connectivity to a storage strategy backend.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     storage_test.add_argument("--strategy", help="Test specific storage strategy")
     storage_test.add_argument("--timeout", type=int, default=30, help="Test timeout in seconds")
 
     storage_subparsers.add_parser(
-        "health", help="Check storage health", parents=[pp.common, pp.list, pp.provider_scope]
+        "health",
+        help="Check storage health",
+        description="Check the health of the active storage backend.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     storage_metrics = storage_subparsers.add_parser(
-        "metrics", help="Show storage metrics", parents=[pp.common, pp.list, pp.provider_scope]
+        "metrics",
+        help="Show storage metrics",
+        description="Show operational metrics for a storage strategy.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     storage_metrics.add_argument("--strategy", help="Show metrics for specific storage strategy")
 
     storage_migrate = storage_subparsers.add_parser(
         "migrate",
         help="Run SQL storage migrations (Alembic). No-op for JSON backend.",
+        description="Run SQL storage migrations via Alembic (no-op for the JSON backend).",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
     storage_migrate.add_argument(
@@ -936,39 +1086,61 @@ For more information, visit: {DOCS_URL}
     )
 
     # Scheduler
-    scheduler_parser = subparsers.add_parser("scheduler", help="Scheduler")
+    scheduler_parser = subparsers.add_parser(
+        "scheduler",
+        help="Manage scheduler strategies",
+        description="Manage scheduler strategies — list, inspect, and validate them.",
+    )
     resource_parsers["scheduler"] = scheduler_parser
     scheduler_subparsers = scheduler_parser.add_subparsers(
         dest="action", help="Scheduler actions", required=True
     )
 
     scheduler_subparsers.add_parser(
-        "list", help="List scheduler strategies", parents=[pp.common, pp.list, pp.provider_scope]
+        "list",
+        help="List scheduler strategies",
+        description="List the available scheduler strategies.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     scheduler_show = scheduler_subparsers.add_parser(
-        "show", help="Show scheduler details", parents=[pp.common, pp.list, pp.provider_scope]
+        "show",
+        help="Show scheduler details",
+        description="Show the configuration of a scheduler strategy.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     scheduler_show.add_argument("--strategy", help="Show specific scheduler strategy details")
 
     scheduler_validate = scheduler_subparsers.add_parser(
-        "validate", help="Validate scheduler", parents=[pp.common, pp.list, pp.provider_scope]
+        "validate",
+        help="Validate scheduler",
+        description="Validate the configuration of a scheduler strategy.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     scheduler_validate.add_argument("--strategy", help="Validate specific scheduler strategy")
 
     # MCP
-    mcp_parser = subparsers.add_parser("mcp", help="MCP (Model Context Protocol) operations")
+    mcp_parser = subparsers.add_parser(
+        "mcp",
+        help="Operate the MCP (Model Context Protocol) interface",
+        description="Operate the MCP (Model Context Protocol) interface — manage tools, validate, and serve.",
+    )
     resource_parsers["mcp"] = mcp_parser
     mcp_subparsers = mcp_parser.add_subparsers(dest="action", help="MCP actions", required=True)
 
     mcp_subparsers.add_parser(
         "validate",
         help="Validate the MCP tool set offline (no server)",
+        description="Validate the MCP tool set offline — build every catalog-derived "
+        "tool and confirm each has a resolvable input schema, without starting a server.",
         parents=[pp.common, pp.list, pp.provider_scope],
     )
 
     mcp_serve = mcp_subparsers.add_parser(
-        "serve", help="Start MCP server", parents=[pp.common, pp.list, pp.provider_scope]
+        "serve",
+        help="Start MCP server",
+        description="Start the MCP server to expose ORB tools to MCP clients.",
+        parents=[pp.common, pp.list, pp.provider_scope],
     )
     mcp_serve.add_argument(
         "--transport",
@@ -992,7 +1164,11 @@ For more information, visit: {DOCS_URL}
     add_k8s_legacy_subparser(subparsers)
 
     # Init
-    init_parser = subparsers.add_parser("init", help="Initialize ORB configuration")
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Initialize ORB configuration",
+        description="Initialize ORB configuration, optionally discovering infrastructure interactively.",
+    )
     add_force_argument(init_parser)
     init_parser.add_argument("--non-interactive", action="store_true", help="Non-interactive mode")
     init_parser.add_argument(

@@ -141,7 +141,7 @@ def _show_provider_infrastructure(provider: Dict[str, Any], container) -> None:
     else:
         console.info("\nNo infrastructure defaults configured")
         console.info("To configure infrastructure defaults:")
-        console.info("  1. Run: orb init --interactive")
+        console.info("  1. Run: orb init")
         console.info("  2. Or run: orb infra discover (to see available infrastructure)")
         console.info("  3. Then manually add template_defaults to your provider config")
 

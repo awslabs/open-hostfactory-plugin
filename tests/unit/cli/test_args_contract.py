@@ -377,3 +377,56 @@ async def test_request_return_machines_uses_machine_ids_flag():
 
     call_input = orch.execute.call_args[0][0]
     assert "i-flag3" in call_input.machine_ids
+
+
+# ---------------------------------------------------------------------------
+# Help text standardization — every subcommand parser must document itself
+# ---------------------------------------------------------------------------
+
+
+def _collect_subparsers() -> list[tuple[str, str | None, argparse.ArgumentParser]]:
+    """Build the real parser and collect every sub-parser with its parent-side help.
+
+    Each entry is ``(command_name, help_text, sub_parser)`` where ``help_text`` is
+    the string shown in the parent's action list (stored on the pseudo-action) and
+    ``sub_parser.description`` is the long-form description shown on ``--help``.
+    """
+    from orb.cli.args import build_parser
+
+    parser, _ = build_parser()
+    collected: list[tuple[str, str | None, argparse.ArgumentParser]] = []
+
+    def walk(p: argparse.ArgumentParser) -> None:
+        for action in p._actions:
+            if isinstance(action, argparse._SubParsersAction):
+                help_by_name = {
+                    ca.dest: ca.help
+                    for ca in action._choices_actions  # type: ignore[attr-defined]
+                }
+                for name, sub in action.choices.items():
+                    collected.append((name, help_by_name.get(name), sub))
+                    walk(sub)
+
+    walk(parser)
+    return collected
+
+
+def test_every_subparser_has_help_and_description():
+    subparsers = _collect_subparsers()
+    assert subparsers, "expected at least one sub-parser"
+    missing_help = [name for name, help_text, _ in subparsers if not help_text]
+    missing_description = [name for name, _, sub in subparsers if not sub.description]
+    assert not missing_description, f"sub-parsers missing description=: {missing_description}"
+    assert not missing_help, f"sub-parsers missing help text: {missing_help}"
+
+
+def test_every_argument_has_help():
+    subparsers = _collect_subparsers()
+    offenders: list[str] = []
+    for name, _help_text, sub in subparsers:
+        for action in sub._actions:
+            if isinstance(action, (argparse._HelpAction, argparse._SubParsersAction)):
+                continue
+            if action.help is None or action.help == "":
+                offenders.append(f"{name}:{action.dest}")
+    assert not offenders, f"add_argument() calls missing help=: {offenders}"

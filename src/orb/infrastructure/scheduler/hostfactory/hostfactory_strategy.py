@@ -198,7 +198,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
         """Convert CLI arguments to HostFactory JSON input format.
 
         This method handles the conversion from CLI arguments to the expected
-        HostFactory API input format as documented in hf_docs/input-output.md.
+        HostFactory API input format as documented in docs/root/hostfactory/input-output.md.
 
         Args:
             operation: The HostFactory operation (requestMachines, getRequestStatus, etc.)
@@ -283,7 +283,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
         """Convert domain objects to HostFactory JSON output format.
 
         This method handles the conversion from internal domain objects to the expected
-        HostFactory API output format as documented in hf_docs/input-output.md.
+        HostFactory API output format as documented in docs/root/hostfactory/input-output.md.
 
         Args:
             operation: The HostFactory operation
@@ -916,7 +916,7 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
     def _format_machines_for_hostfactory(
         self, machines: list[dict[str, Any]], request_type: str | None = None
     ) -> list[dict[str, Any]]:
-        """Format machine data to exact HostFactory format per hf_docs/input-output.md."""
+        """Format machine data to exact HostFactory format per docs/root/hostfactory/input-output.md."""
         formatted_machines = []
 
         for machine in machines:
@@ -985,11 +985,11 @@ class HostFactorySchedulerStrategy(BaseSchedulerStrategy):
     def _map_machine_status_to_result(
         self, status: str | None, request_type: str | None = None
     ) -> str:
-        """Map machine status to HostFactory result field per hf_docs/input-output.md."""
+        """Map machine status to HostFactory result field per docs/root/hostfactory/input-output.md."""
         return map_machine_status_to_result(status, request_type=request_type)
 
     def _map_domain_status_to_hostfactory(self, domain_status: str) -> str:
-        """Map domain status to HostFactory status per hf_docs/input-output.md."""
+        """Map domain status to HostFactory status per docs/root/hostfactory/input-output.md."""
         return map_domain_status_to_hostfactory(domain_status)
 
     def _enrich_message_with_diagnostic(

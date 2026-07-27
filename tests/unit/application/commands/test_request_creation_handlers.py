@@ -462,7 +462,7 @@ class TestFilterMachines:
         self, machines: dict[str, MagicMock]
     ) -> CreateReturnRequestHandler:
         uow = MagicMock()
-        uow.machines.get_by_id.side_effect = lambda mid: machines.get(mid)
+        uow.machines.get_by_id.side_effect = machines.get
 
         @contextmanager
         def _create():
@@ -616,4 +616,165 @@ class TestCreateReturnRequestHandlerExecute:
         with pytest.raises(RuntimeError, match="boom"):
             await handler.execute_command(cmd)
 
-        handler.logger.error.assert_called()  # type: ignore[attr-defined]
+
+# ---------------------------------------------------------------------------
+# CreateReturnRequestHandler — _execute_deprovisioning_for_request
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestExecuteDeprovisioningForRequest:
+    def _handler(
+        self,
+        *,
+        group_by_resource=None,
+        deprovision_result=None,
+        deprovision_side_effect=None,
+        command_bus: AsyncMock | None = None,
+    ) -> CreateReturnRequestHandler:
+        handler = _make_return_handler()
+        grouping = MagicMock()
+        grouping.group_by_resource.return_value = group_by_resource or ([MagicMock()], [])
+        handler._machine_grouping_service = grouping
+        orchestrator = AsyncMock()
+        orchestrator.execute_deprovisioning = AsyncMock(
+            return_value=deprovision_result, side_effect=deprovision_side_effect
+        )
+        handler._deprovisioning_orchestrator = orchestrator
+        container = MagicMock()
+        container.get.return_value = command_bus or AsyncMock()
+        handler._container = container
+        return handler
+
+    @pytest.mark.asyncio
+    async def test_success_no_skipped_marks_terminating(self):
+        handler = self._handler(
+            group_by_resource=([MagicMock()], []),
+            deprovision_result={"success": True},
+        )
+        request = MagicMock()
+        request.request_id = "ret-1"
+
+        with (
+            patch.object(handler, "_update_machines_to_pending") as mock_pending,
+            patch.object(handler, "_update_request_to_terminating", new=AsyncMock()) as mock_term,
+        ):
+            await handler._execute_deprovisioning_for_request([_MACHINE_ID], request, "aws")
+
+        mock_pending.assert_called_once_with([_MACHINE_ID])
+        mock_term.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_success_with_skipped_marks_partial(self):
+        command_bus = AsyncMock()
+        handler = self._handler(
+            group_by_resource=([MagicMock()], ["m-skipped"]),
+            deprovision_result={"success": True},
+            command_bus=command_bus,
+        )
+        request = MagicMock()
+        request.request_id = "ret-1"
+
+        with patch.object(handler, "_update_machines_to_pending"):
+            await handler._execute_deprovisioning_for_request([_MACHINE_ID], request, "aws")
+
+        # A PARTIAL status update is dispatched via the command bus.
+        partial_calls = [
+            c
+            for c in command_bus.execute.await_args_list
+            if getattr(c.args[0], "status", None) == RequestStatus.PARTIAL
+        ]
+        assert partial_calls
+
+    @pytest.mark.asyncio
+    async def test_failure_marks_request_failed(self):
+        handler = self._handler(
+            group_by_resource=([MagicMock()], []),
+            deprovision_result={"success": False, "errors": ["nope"]},
+        )
+        request = MagicMock()
+        request.request_id = "ret-1"
+
+        with patch.object(handler, "_update_request_to_failed", new=AsyncMock()) as mock_failed:
+            await handler._execute_deprovisioning_for_request([_MACHINE_ID], request, "aws")
+
+        mock_failed.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    async def test_orchestrator_exception_marks_failed(self):
+        handler = self._handler(
+            group_by_resource=([MagicMock()], []),
+            deprovision_side_effect=RuntimeError("provider blew up"),
+        )
+        request = MagicMock()
+        request.request_id = "ret-1"
+
+        with patch.object(handler, "_update_request_to_failed", new=AsyncMock()) as mock_failed:
+            await handler._execute_deprovisioning_for_request([_MACHINE_ID], request, "aws")
+
+        mock_failed.assert_awaited_once()
+
+
+# ---------------------------------------------------------------------------
+# CreateReturnRequestHandler — _cancel_validate_and_persist
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestCancelValidateAndPersist:
+    def test_persists_request_and_claims_machines(self):
+        machine = MagicMock()
+        machine.return_request_id = None
+        machine.model_copy.return_value = machine
+
+        uow = MagicMock()
+        uow.machines.get_by_id.return_value = machine
+        uow.requests.save.return_value = []
+
+        @contextmanager
+        def _create():
+            yield uow
+
+        factory = MagicMock()
+        factory.create_unit_of_work.side_effect = _create
+
+        handler = _make_return_handler(uow_factory=factory)
+        request = MagicMock()
+        request.request_id = "ret-1"
+
+        handler._cancel_validate_and_persist([_MACHINE_ID], request, force_return=False)
+
+        uow.requests.save.assert_called_once_with(request)
+        # Machine is claimed with the new return_request_id.
+        machine.model_copy.assert_called_with(update={"return_request_id": "ret-1"})
+        uow.machines.save.assert_called()
+
+    def test_force_cancels_stuck_request(self):
+        machine = MagicMock()
+        machine.return_request_id = "ret-00000000-0000-0000-0000-000000000009"
+        machine.model_copy.return_value = machine
+
+        stuck = MagicMock()
+        cancelled = MagicMock()
+        stuck.cancel.return_value = cancelled
+
+        uow = MagicMock()
+        uow.machines.get_by_id.return_value = machine
+        uow.requests.get_by_id.return_value = stuck
+        uow.requests.save.return_value = []
+
+        @contextmanager
+        def _create():
+            yield uow
+
+        factory = MagicMock()
+        factory.create_unit_of_work.side_effect = _create
+
+        handler = _make_return_handler(uow_factory=factory)
+        request = MagicMock()
+        request.request_id = "ret-1"
+
+        handler._cancel_validate_and_persist([_MACHINE_ID], request, force_return=True)
+
+        stuck.cancel.assert_called_once()
+        uow.requests.save.assert_any_call(cancelled)

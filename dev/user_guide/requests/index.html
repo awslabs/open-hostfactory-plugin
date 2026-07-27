@@ -6644,15 +6644,11 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Using the API</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">request_data</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;requestMachines&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;standard-compute&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">600</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="p">}</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">}</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">request_id</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;requestId&quot;</span><span class="p">]</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;standard-compute&quot;</span><span class="p">,</span> <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">600</span><span class="p">},</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">}</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request_data</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">request_id</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">][</span><span class="s2">&quot;requestId&quot;</span><span class="p">]</span>
 </code></pre></div>
 <h3 id="advanced-provision-request">Advanced Provision Request<a class="headerlink" href="#advanced-provision-request" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># With additional parameters</span>
@@ -6667,46 +6663,33 @@
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>            <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="s2">&quot;data-processing&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>            <span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>            <span class="s2">&quot;owner&quot;</span><span class="p">:</span> <span class="s2">&quot;team-alpha&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="s2">&quot;cost-center&quot;</span><span class="p">:</span> <span class="s2">&quot;engineering&quot;</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>            <span class="s2">&quot;cost-center&quot;</span><span class="p">:</span> <span class="s2">&quot;engineering&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="p">},</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>            <span class="s2">&quot;jobId&quot;</span><span class="p">:</span> <span class="s2">&quot;job-789&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>            <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>            <span class="s2">&quot;requester&quot;</span><span class="p">:</span> <span class="s2">&quot;user@company.com&quot;</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="p">}</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="p">}</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">}</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;jobId&quot;</span><span class="p">:</span> <span class="s2">&quot;job-789&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span> <span class="s2">&quot;requester&quot;</span><span class="p">:</span> <span class="s2">&quot;user@company.com&quot;</span><span class="p">},</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="p">},</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="return-request">Return Request<a class="headerlink" href="#return-request" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Request machine termination</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">return_request</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;requestReturnMachines&quot;</span><span class="p">,</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="s2">&quot;machineIds&quot;</span><span class="p">:</span> <span class="p">[</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>            <span class="s2">&quot;i-1234567890abcdef0&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>            <span class="s2">&quot;i-0987654321fedcba0&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>            <span class="s2">&quot;i-abcdef1234567890&quot;</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        <span class="p">],</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        <span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="s2">&quot;return-req-12345&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        <span class="s2">&quot;force&quot;</span><span class="p">:</span> <span class="n">false</span>  <span class="c1"># Graceful shutdown</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="p">}</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="s2">&quot;machineIds&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;i-1234567890abcdef0&quot;</span><span class="p">,</span> <span class="s2">&quot;i-0987654321fedcba0&quot;</span><span class="p">,</span> <span class="s2">&quot;i-abcdef1234567890&quot;</span><span class="p">],</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="s2">&quot;return-req-12345&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="s2">&quot;force&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>  <span class="c1"># Graceful shutdown</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="p">},</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="request-monitoring">Request Monitoring<a class="headerlink" href="#request-monitoring" title="Permanent link">&para;</a></h2>
 <h3 id="checking-request-status">Checking Request Status<a class="headerlink" href="#checking-request-status" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Get detailed request status</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">status_request</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;getRequestStatus&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="s2">&quot;req-12345&quot;</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="p">}</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">}</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">status_request</span><span class="p">)</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="n">status</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Status: </span><span class="si">{</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Progress: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;machines&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;machineCount&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> machines&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">status_request</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;getRequestStatus&quot;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="s2">&quot;req-12345&quot;</span><span class="p">}}</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">status_request</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">status</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;result&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Status: </span><span class="si">{</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Progress: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;machines&#39;</span><span class="p">])</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">status</span><span class="p">[</span><span class="s1">&#39;machineCount&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> machines&quot;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="status-response-details">Status Response Details<a class="headerlink" href="#status-response-details" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
@@ -6743,14 +6726,9 @@
 </code></pre></div>
 <h3 id="monitoring-return-requests">Monitoring Return Requests<a class="headerlink" href="#monitoring-return-requests" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># Check return request status</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">return_status</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;getReturnRequests&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="s2">&quot;return-req-12345&quot;</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="p">}</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">return_status</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">return_status</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;getReturnRequests&quot;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="s2">&quot;return-req-12345&quot;</span><span class="p">}}</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">return_status</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="request-parameters">Request Parameters<a class="headerlink" href="#request-parameters" title="Permanent link">&para;</a></h2>
 <h3 id="required-parameters">Required Parameters<a class="headerlink" href="#required-parameters" title="Permanent link">&para;</a></h3>
@@ -6792,13 +6770,11 @@
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># Template capacity limits</span>
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">if</span> <span class="n">machine_count</span> <span class="o">&gt;</span> <span class="n">template</span><span class="o">.</span><span class="n">max_count</span><span class="p">:</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="k">raise</span> <span class="n">InsufficientCapacityError</span><span class="p">(</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="sa">f</span><span class="s2">&quot;Requested </span><span class="si">{</span><span class="n">machine_count</span><span class="si">}</span><span class="s2">, maximum </span><span class="si">{</span><span class="n">template</span><span class="o">.</span><span class="n">max_count</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="p">)</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="c1"># Provider compatibility</span>
-<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">template</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">provider</span><span class="p">):</span>
-<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    <span class="k">raise</span> <span class="n">ProviderCompatibilityError</span><span class="p">(</span><span class="n">template_id</span><span class="p">,</span> <span class="n">provider</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="k">raise</span> <span class="n">InsufficientCapacityError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Requested </span><span class="si">{</span><span class="n">machine_count</span><span class="si">}</span><span class="s2">, maximum </span><span class="si">{</span><span class="n">template</span><span class="o">.</span><span class="n">max_count</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Provider compatibility</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">template</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">provider</span><span class="p">):</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="k">raise</span> <span class="n">ProviderCompatibilityError</span><span class="p">(</span><span class="n">template_id</span><span class="p">,</span> <span class="n">provider</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="resource-validation">Resource Validation<a class="headerlink" href="#resource-validation" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Account limits and quotas</span>
@@ -6875,14 +6851,10 @@
 <h3 id="error-recovery-strategies">Error Recovery Strategies<a class="headerlink" href="#error-recovery-strategies" title="Permanent link">&para;</a></h3>
 <h4 id="automatic-retry">Automatic Retry<a class="headerlink" href="#automatic-retry" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Transient errors are automatically retried</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">RETRYABLE_ERRORS</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="s2">&quot;INSUFFICIENT_CAPACITY&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="s2">&quot;THROTTLING&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="s2">&quot;SERVICE_UNAVAILABLE&quot;</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="p">]</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="k">if</span> <span class="n">error_code</span> <span class="ow">in</span> <span class="n">RETRYABLE_ERRORS</span><span class="p">:</span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="n">retry_request_with_backoff</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">RETRYABLE_ERRORS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;INSUFFICIENT_CAPACITY&quot;</span><span class="p">,</span> <span class="s2">&quot;THROTTLING&quot;</span><span class="p">,</span> <span class="s2">&quot;SERVICE_UNAVAILABLE&quot;</span><span class="p">]</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="k">if</span> <span class="n">error_code</span> <span class="ow">in</span> <span class="n">RETRYABLE_ERRORS</span><span class="p">:</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    <span class="n">retry_request_with_backoff</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
 <h4 id="partial-success-handling">Partial Success Handling<a class="headerlink" href="#partial-success-handling" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Handle partial provisioning success</span>
@@ -6902,7 +6874,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Instead of one large request</span>
 <a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">large_request</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;standard-compute&quot;</span><span class="p">,</span>
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="mi">100</span>  <span class="c1"># May fail due to limits</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>  <span class="c1"># May fail due to limits</span>
 <a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="p">}</span>
 <a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
 <a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="c1"># Use multiple smaller requests</span>
@@ -6915,8 +6887,8 @@
 <a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>    <span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
 <a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>        <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;standard-compute&quot;</span><span class="p">,</span>
 <a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>        <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span>
-<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>        <span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;batch-</span><span class="si">{</span><span class="n">i</span><span class="o">//</span><span class="n">batch_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;batch&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">//</span><span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)}</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>        <span class="s2">&quot;requestId&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;batch-</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">//</span><span class="w"> </span><span class="n">batch_size</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;batch&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">//</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)},</span>
 <a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>    <span class="p">}</span>
 <a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>    <span class="n">requests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
@@ -6928,12 +6900,9 @@
 <a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>        <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;standard-compute&quot;</span><span class="p">,</span>
 <a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>        <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
 <a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>        <span class="s2">&quot;priority&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span>
-<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>            <span class="s2">&quot;urgency&quot;</span><span class="p">:</span> <span class="s2">&quot;critical&quot;</span><span class="p">,</span>
-<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>            <span class="s2">&quot;sla&quot;</span><span class="p">:</span> <span class="s2">&quot;15-minutes&quot;</span>
-<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>        <span class="p">}</span>
-<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>    <span class="p">}</span>
-<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="p">}</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;urgency&quot;</span><span class="p">:</span> <span class="s2">&quot;critical&quot;</span><span class="p">,</span> <span class="s2">&quot;sla&quot;</span><span class="p">:</span> <span class="s2">&quot;15-minutes&quot;</span><span class="p">},</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>    <span class="p">},</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="cost-optimization">Cost Optimization<a class="headerlink" href="#cost-optimization" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Use spot instances for cost savings</span>
@@ -6942,16 +6911,10 @@
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
 <a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;cost-optimized-spot&quot;</span><span class="p">,</span>
 <a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>        <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>            <span class="s2">&quot;cost-optimization&quot;</span><span class="p">:</span> <span class="s2">&quot;spot-instances&quot;</span><span class="p">,</span>
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>            <span class="s2">&quot;fault-tolerance&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span>
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>        <span class="p">},</span>
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>            <span class="s2">&quot;max-spot-price&quot;</span><span class="p">:</span> <span class="s2">&quot;0.10&quot;</span><span class="p">,</span>
-<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>            <span class="s2">&quot;interruption-handling&quot;</span><span class="p">:</span> <span class="s2">&quot;graceful&quot;</span>
-<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>        <span class="p">}</span>
-<a id="__codelineno-16-15" name="__codelineno-16-15" href="#__codelineno-16-15"></a>    <span class="p">}</span>
-<a id="__codelineno-16-16" name="__codelineno-16-16" href="#__codelineno-16-16"></a><span class="p">}</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>        <span class="s2">&quot;tags&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;cost-optimization&quot;</span><span class="p">:</span> <span class="s2">&quot;spot-instances&quot;</span><span class="p">,</span> <span class="s2">&quot;fault-tolerance&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">},</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max-spot-price&quot;</span><span class="p">:</span> <span class="s2">&quot;0.10&quot;</span><span class="p">,</span> <span class="s2">&quot;interruption-handling&quot;</span><span class="p">:</span> <span class="s2">&quot;graceful&quot;</span><span class="p">},</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>    <span class="p">},</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="request-patterns">Request Patterns<a class="headerlink" href="#request-patterns" title="Permanent link">&para;</a></h2>
 <h3 id="fire-and-forget-pattern">Fire-and-Forget Pattern<a class="headerlink" href="#fire-and-forget-pattern" title="Permanent link">&para;</a></h3>
@@ -6962,8 +6925,8 @@
 <a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>        <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
 <a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>            <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="n">template_id</span><span class="p">,</span>
 <a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>            <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="n">machine_count</span><span class="p">,</span>
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>            <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">1800</span>  <span class="c1"># 30 minutes</span>
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>        <span class="p">}</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>            <span class="s2">&quot;timeout&quot;</span><span class="p">:</span> <span class="mi">1800</span><span class="p">,</span>  <span class="c1"># 30 minutes</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>        <span class="p">},</span>
 <a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>    <span class="p">}</span>
 <a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>
 <a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -7002,9 +6965,9 @@
 <a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>            <span class="s2">&quot;machineCount&quot;</span><span class="p">:</span> <span class="n">machine_count</span><span class="p">,</span>
 <a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>            <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span>
 <a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a>                <span class="s2">&quot;callback_url&quot;</span><span class="p">:</span> <span class="n">callback_url</span><span class="p">,</span>
-<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>                <span class="s2">&quot;callback_events&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;COMPLETED&quot;</span><span class="p">,</span> <span class="s2">&quot;FAILED&quot;</span><span class="p">,</span> <span class="s2">&quot;TIMEOUT&quot;</span><span class="p">]</span>
-<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>            <span class="p">}</span>
-<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>        <span class="p">}</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>                <span class="s2">&quot;callback_events&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;COMPLETED&quot;</span><span class="p">,</span> <span class="s2">&quot;FAILED&quot;</span><span class="p">,</span> <span class="s2">&quot;TIMEOUT&quot;</span><span class="p">],</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a>            <span class="p">},</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a>        <span class="p">},</span>
 <a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a>    <span class="p">}</span>
 <a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>
 <a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a>    <span class="k">return</span> <span class="n">api_client</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -7033,19 +6996,19 @@
 <a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>        <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="s2">&quot;status == &#39;FAILED&#39;&quot;</span><span class="p">,</span>
 <a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        <span class="s2">&quot;notification&quot;</span><span class="p">:</span> <span class="s2">&quot;email&quot;</span><span class="p">,</span>
 <a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>        <span class="s2">&quot;recipients&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ops-team@company.com&quot;</span><span class="p">],</span>
-<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>        <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>        <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;high&quot;</span><span class="p">,</span>
 <a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    <span class="p">},</span>
 <a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>    <span class="s2">&quot;request_timeout&quot;</span><span class="p">:</span> <span class="p">{</span>
 <a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>        <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="s2">&quot;status == &#39;TIMEOUT&#39;&quot;</span><span class="p">,</span>
 <a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>        <span class="s2">&quot;notification&quot;</span><span class="p">:</span> <span class="s2">&quot;slack&quot;</span><span class="p">,</span>
 <a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>        <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="s2">&quot;#infrastructure-alerts&quot;</span><span class="p">,</span>
-<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>        <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;medium&quot;</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>        <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span>
 <a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    <span class="p">},</span>
 <a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    <span class="s2">&quot;long_running_request&quot;</span><span class="p">:</span> <span class="p">{</span>
 <a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>        <span class="s2">&quot;condition&quot;</span><span class="p">:</span> <span class="s2">&quot;duration &gt; 1800&quot;</span><span class="p">,</span>  <span class="c1"># 30 minutes</span>
 <a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>        <span class="s2">&quot;notification&quot;</span><span class="p">:</span> <span class="s2">&quot;dashboard&quot;</span><span class="p">,</span>
-<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>        <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;low&quot;</span>
-<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>    <span class="p">}</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>        <span class="s2">&quot;severity&quot;</span><span class="p">:</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>    <span class="p">},</span>
 <a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="request-analytics">Request Analytics<a class="headerlink" href="#request-analytics" title="Permanent link">&para;</a></h2>
@@ -7068,7 +7031,7 @@
 <a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>        <span class="s2">&quot;success_rate&quot;</span><span class="p">:</span> <span class="n">calculate_success_rate</span><span class="p">(</span><span class="n">requests</span><span class="p">),</span>
 <a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>        <span class="s2">&quot;average_duration&quot;</span><span class="p">:</span> <span class="n">calculate_average_duration</span><span class="p">(</span><span class="n">requests</span><span class="p">),</span>
 <a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>        <span class="s2">&quot;failure_breakdown&quot;</span><span class="p">:</span> <span class="n">categorize_failures</span><span class="p">(</span><span class="n">requests</span><span class="p">),</span>
-<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>        <span class="s2">&quot;peak_hours&quot;</span><span class="p">:</span> <span class="n">identify_peak_usage</span><span class="p">(</span><span class="n">requests</span><span class="p">)</span>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>        <span class="s2">&quot;peak_hours&quot;</span><span class="p">:</span> <span class="n">identify_peak_usage</span><span class="p">(</span><span class="n">requests</span><span class="p">),</span>
 <a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>    <span class="p">}</span>
 <a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>
 <a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>    <span class="k">return</span> <span class="n">metrics</span>

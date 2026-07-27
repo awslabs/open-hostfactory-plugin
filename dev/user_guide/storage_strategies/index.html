@@ -7240,11 +7240,8 @@
 <h4 id="query-optimization">Query Optimization<a class="headerlink" href="#query-optimization" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Optimized queries with indexes</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">requests</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">query_entities</span><span class="p">(</span>
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="s2">&quot;requests&quot;</span><span class="p">,</span>
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">},</span>
-<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>    <span class="n">order_by</span><span class="o">=</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span>
-<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="n">limit</span><span class="o">=</span><span class="mi">50</span>
-<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="p">)</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="s2">&quot;requests&quot;</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">},</span> <span class="n">order_by</span><span class="o">=</span><span class="s2">&quot;created_at&quot;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">50</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="p">)</span>
 </code></pre></div>
 <h4 id="transaction-support">Transaction Support<a class="headerlink" href="#transaction-support" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Transaction support varies by storage strategy</span>
@@ -7319,7 +7316,7 @@
 <a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="s2">&quot;requests&quot;</span><span class="p">,</span>
 <a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>    <span class="n">index_name</span><span class="o">=</span><span class="s2">&quot;template_id-created_at-index&quot;</span><span class="p">,</span>
 <a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>    <span class="n">key_condition</span><span class="o">=</span><span class="s2">&quot;template_id = :template_id&quot;</span><span class="p">,</span>
-<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="n">expression_values</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;:template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;template-1&quot;</span><span class="p">}</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="n">expression_values</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;:template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;template-1&quot;</span><span class="p">},</span>
 <a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="p">)</span>
 </code></pre></div>
 <h4 id="conditional-updates">Conditional Updates<a class="headerlink" href="#conditional-updates" title="Permanent link">&para;</a></h4>
@@ -7329,7 +7326,7 @@
 <a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="n">request_id</span><span class="p">,</span>
 <a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    <span class="n">updated_data</span><span class="p">,</span>
 <a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="n">condition_expression</span><span class="o">=</span><span class="s2">&quot;attribute_exists(request_id) AND version = :expected_version&quot;</span><span class="p">,</span>
-<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="n">expression_values</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;:expected_version&quot;</span><span class="p">:</span> <span class="n">current_version</span><span class="p">}</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="n">expression_values</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;:expected_version&quot;</span><span class="p">:</span> <span class="n">current_version</span><span class="p">},</span>
 <a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="p">)</span>
 </code></pre></div>
 <h2 id="generic-repository-pattern">Generic Repository Pattern<a class="headerlink" href="#generic-repository-pattern" title="Permanent link">&para;</a></h2>
@@ -7346,21 +7343,23 @@
 <a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve an entity by ID.&quot;&quot;&quot;</span>
 <a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>        <span class="k">pass</span>
 <a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a>
-<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>                     <span class="n">entity_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Update an existing entity.&quot;&quot;&quot;</span>
-<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>        <span class="k">pass</span>
-<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>
-<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">delete_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete an entity.&quot;&quot;&quot;</span>
-<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>        <span class="k">pass</span>
-<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>
-<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">query_entities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>                      <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>                      <span class="n">order_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>                      <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Query entities with filters.&quot;&quot;&quot;</span>
-<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>        <span class="k">pass</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entity_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Update an existing entity.&quot;&quot;&quot;</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>        <span class="k">pass</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">delete_entity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">entity_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete an entity.&quot;&quot;&quot;</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>        <span class="k">pass</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">query_entities</span><span class="p">(</span>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>        <span class="n">collection</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>        <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>        <span class="n">order_by</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a>        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Query entities with filters.&quot;&quot;&quot;</span>
+<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a>        <span class="k">pass</span>
 </code></pre></div>
 <h3 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h3>
 <p>The same code works with any storage strategy:</p>
@@ -7382,7 +7381,7 @@
 <a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>            <span class="s2">&quot;machine_id&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;machine-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
 <a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>            <span class="s2">&quot;request_id&quot;</span><span class="p">:</span> <span class="n">request_data</span><span class="p">[</span><span class="s2">&quot;request_id&quot;</span><span class="p">],</span>
 <a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>            <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="n">request_data</span><span class="p">[</span><span class="s2">&quot;template_id&quot;</span><span class="p">],</span>
-<a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;PENDING&quot;</span>
+<a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>            <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">,</span>
 <a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>        <span class="p">}</span>
 <a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>        <span class="n">repository</span><span class="o">.</span><span class="n">save_entity</span><span class="p">(</span><span class="s2">&quot;machines&quot;</span><span class="p">,</span> <span class="n">machine_data</span><span class="p">)</span>
 <a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>
@@ -7413,9 +7412,8 @@
 <h4 id="2-backup-creation">2. Backup Creation<a class="headerlink" href="#2-backup-creation" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># Automatic backup before migration</span>
 <a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="n">backup_path</span> <span class="o">=</span> <span class="n">migration_tool</span><span class="o">.</span><span class="n">create_backup</span><span class="p">(</span>
-<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>    <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>    <span class="n">backup_location</span><span class="o">=</span><span class="s2">&quot;backups/migration_backup_20250630.json&quot;</span>
-<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="p">)</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>    <span class="n">source_type</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">backup_location</span><span class="o">=</span><span class="s2">&quot;backups/migration_backup_20250630.json&quot;</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="p">)</span>
 </code></pre></div>
 <h4 id="3-batch-migration">3. Batch Migration<a class="headerlink" href="#3-batch-migration" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="c1"># Migrate in configurable batches</span>
@@ -7524,17 +7522,12 @@
 <p>All strategies support optimistic locking:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="c1"># Version-based concurrency control</span>
 <a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>    <span class="n">storage</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span>
-<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>        <span class="s2">&quot;requests&quot;</span><span class="p">,</span>
-<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>        <span class="n">request_id</span><span class="p">,</span>
-<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>        <span class="n">updated_data</span><span class="p">,</span>
-<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>        <span class="n">expected_version</span><span class="o">=</span><span class="n">current_version</span>
-<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>    <span class="p">)</span>
-<a id="__codelineno-32-9" name="__codelineno-32-9" href="#__codelineno-32-9"></a><span class="k">except</span> <span class="n">ConcurrencyConflictError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-32-10" name="__codelineno-32-10" href="#__codelineno-32-10"></a>    <span class="c1"># Handle version conflict</span>
-<a id="__codelineno-32-11" name="__codelineno-32-11" href="#__codelineno-32-11"></a>    <span class="n">latest_data</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">get_entity</span><span class="p">(</span><span class="s2">&quot;requests&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
-<a id="__codelineno-32-12" name="__codelineno-32-12" href="#__codelineno-32-12"></a>    <span class="n">merged_data</span> <span class="o">=</span> <span class="n">merge_changes</span><span class="p">(</span><span class="n">latest_data</span><span class="p">,</span> <span class="n">updated_data</span><span class="p">)</span>
-<a id="__codelineno-32-13" name="__codelineno-32-13" href="#__codelineno-32-13"></a>    <span class="n">storage</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span><span class="s2">&quot;requests&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">merged_data</span><span class="p">)</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>    <span class="n">storage</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span><span class="s2">&quot;requests&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">updated_data</span><span class="p">,</span> <span class="n">expected_version</span><span class="o">=</span><span class="n">current_version</span><span class="p">)</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="k">except</span> <span class="n">ConcurrencyConflictError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>    <span class="c1"># Handle version conflict</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>    <span class="n">latest_data</span> <span class="o">=</span> <span class="n">storage</span><span class="o">.</span><span class="n">get_entity</span><span class="p">(</span><span class="s2">&quot;requests&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>    <span class="n">merged_data</span> <span class="o">=</span> <span class="n">merge_changes</span><span class="p">(</span><span class="n">latest_data</span><span class="p">,</span> <span class="n">updated_data</span><span class="p">)</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a>    <span class="n">storage</span><span class="o">.</span><span class="n">update_entity</span><span class="p">(</span><span class="s2">&quot;requests&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">merged_data</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="lock-management">Lock Management<a class="headerlink" href="#lock-management" title="Permanent link">&para;</a></h3>
 <h4 id="file-based-locking-json">File-Based Locking (JSON)<a class="headerlink" href="#file-based-locking-json" title="Permanent link">&para;</a></h4>
@@ -7547,10 +7540,7 @@
 </code></pre></div>
 <h4 id="database-locking-sql">Database Locking (SQL)<a class="headerlink" href="#database-locking-sql" title="Permanent link">&para;</a></h4>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="c1"># Database-level locking</span>
-<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="n">storage</span><span class="o">.</span><span class="n">execute_with_lock</span><span class="p">(</span>
-<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>    <span class="s2">&quot;SELECT * FROM requests WHERE id = ? FOR UPDATE&quot;</span><span class="p">,</span>
-<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>    <span class="p">[</span><span class="n">request_id</span><span class="p">]</span>
-<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a><span class="p">)</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a><span class="n">storage</span><span class="o">.</span><span class="n">execute_with_lock</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM requests WHERE id = ? FOR UPDATE&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">request_id</span><span class="p">])</span>
 </code></pre></div>
 <h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
 <h3 id="storage-strategy-performance">Storage Strategy Performance<a class="headerlink" href="#storage-strategy-performance" title="Permanent link">&para;</a></h3>

@@ -5671,19 +5671,19 @@
 <p>The <code>SchedulerProviderFieldMappings</code> class provides a centralized registry for mapping scheduler-specific field names to internal domain model fields, with provider-aware conditional mapping.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">SchedulerProviderFieldMappings</span><span class="p">:</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">MAPPINGS</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        <span class="s1">&#39;hostfactory&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>            <span class="s1">&#39;generic&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                <span class="s1">&#39;templateId&#39;</span><span class="p">:</span> <span class="s1">&#39;template_id&#39;</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                <span class="s1">&#39;vmType&#39;</span><span class="p">:</span> <span class="s1">&#39;instance_type&#39;</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                <span class="s1">&#39;vmTypes&#39;</span><span class="p">:</span> <span class="s1">&#39;instance_types&#39;</span><span class="p">,</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        <span class="s2">&quot;hostfactory&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>            <span class="s2">&quot;generic&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                <span class="s2">&quot;templateId&quot;</span><span class="p">:</span> <span class="s2">&quot;template_id&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                <span class="s2">&quot;vmType&quot;</span><span class="p">:</span> <span class="s2">&quot;instance_type&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                <span class="s2">&quot;vmTypes&quot;</span><span class="p">:</span> <span class="s2">&quot;instance_types&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                <span class="c1"># ... other generic fields</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>            <span class="p">},</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="s1">&#39;aws&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                <span class="s1">&#39;vmTypesOnDemand&#39;</span><span class="p">:</span> <span class="s1">&#39;instance_types_ondemand&#39;</span><span class="p">,</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                <span class="s1">&#39;percentOnDemand&#39;</span><span class="p">:</span> <span class="s1">&#39;percent_on_demand&#39;</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                <span class="s1">&#39;fleetRole&#39;</span><span class="p">:</span> <span class="s1">&#39;fleet_role&#39;</span><span class="p">,</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>            <span class="s2">&quot;aws&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                <span class="s2">&quot;vmTypesOnDemand&quot;</span><span class="p">:</span> <span class="s2">&quot;instance_types_ondemand&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                <span class="s2">&quot;percentOnDemand&quot;</span><span class="p">:</span> <span class="s2">&quot;percent_on_demand&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                <span class="s2">&quot;fleetRole&quot;</span><span class="p">:</span> <span class="s2">&quot;fleet_role&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                <span class="c1"># ... other AWS-specific fields</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            <span class="p">}</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            <span class="p">},</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="p">}</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="p">}</span>
 </code></pre></div>
@@ -5700,20 +5700,19 @@
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="c1"># Get field mappings for HostFactory + active provider</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">field_mappings</span> <span class="o">=</span> <span class="n">SchedulerProviderFieldMappings</span><span class="o">.</span><span class="n">get_mappings</span><span class="p">(</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">scheduler_type</span><span class="o">=</span><span class="s1">&#39;hostfactory&#39;</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">provider_type</span><span class="o">=</span><span class="n">provider_type</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="p">)</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="c1"># Apply registry-based field mappings</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">mapped</span> <span class="o">=</span> <span class="p">{}</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="k">for</span> <span class="n">hf_field</span><span class="p">,</span> <span class="n">internal_field</span> <span class="ow">in</span> <span class="n">field_mappings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="k">if</span> <span class="n">hf_field</span> <span class="ow">in</span> <span class="n">template</span><span class="p">:</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>            <span class="n">mapped</span><span class="p">[</span><span class="n">internal_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">template</span><span class="p">[</span><span class="n">hf_field</span><span class="p">]</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="c1"># Apply field transformations</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="n">mapped</span> <span class="o">=</span> <span class="n">FieldTransformationUtils</span><span class="o">.</span><span class="n">apply_field_transformations</span><span class="p">(</span><span class="n">mapped</span><span class="p">)</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>    <span class="k">return</span> <span class="n">mapped</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">scheduler_type</span><span class="o">=</span><span class="s2">&quot;hostfactory&quot;</span><span class="p">,</span> <span class="n">provider_type</span><span class="o">=</span><span class="n">provider_type</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="c1"># Apply registry-based field mappings</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">mapped</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="k">for</span> <span class="n">hf_field</span><span class="p">,</span> <span class="n">internal_field</span> <span class="ow">in</span> <span class="n">field_mappings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        <span class="k">if</span> <span class="n">hf_field</span> <span class="ow">in</span> <span class="n">template</span><span class="p">:</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>            <span class="n">mapped</span><span class="p">[</span><span class="n">internal_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">template</span><span class="p">[</span><span class="n">hf_field</span><span class="p">]</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="c1"># Apply field transformations</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>    <span class="n">mapped</span> <span class="o">=</span> <span class="n">FieldTransformationUtils</span><span class="o">.</span><span class="n">apply_field_transformations</span><span class="p">(</span><span class="n">mapped</span><span class="p">)</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>    <span class="k">return</span> <span class="n">mapped</span>
 </code></pre></div>
 <h3 id="3-field-transformation-utilities">3. Field Transformation Utilities<a class="headerlink" href="#3-field-transformation-utilities" title="Permanent link">&para;</a></h3>
 <p><strong>Location</strong>: <code>src/infrastructure/scheduler/field_mappings.py</code></p>
@@ -5744,11 +5743,11 @@
 <p>All handlers now use the correct inherited field names:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Before (causing errors)</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">if</span> <span class="n">aws_template</span><span class="o">.</span><span class="n">vm_type</span><span class="p">:</span>  <span class="c1"># Field doesn&#39;t exist!</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;InstanceType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_template</span><span class="o">.</span><span class="n">vm_type</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">params</span><span class="p">[</span><span class="s2">&quot;InstanceType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_template</span><span class="o">.</span><span class="n">vm_type</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1"># After (working correctly)</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="k">if</span> <span class="n">aws_template</span><span class="o">.</span><span class="n">instance_type</span><span class="p">:</span>  <span class="c1"># Inherited from CoreTemplate</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;InstanceType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_template</span><span class="o">.</span><span class="n">instance_type</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">params</span><span class="p">[</span><span class="s2">&quot;InstanceType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_template</span><span class="o">.</span><span class="n">instance_type</span>
 </code></pre></div>
 <h2 id="field-mapping-examples">Field Mapping Examples<a class="headerlink" href="#field-mapping-examples" title="Permanent link">&para;</a></h2>
 <h3 id="ondemand-template">OnDemand Template<a class="headerlink" href="#ondemand-template" title="Permanent link">&para;</a></h3>
@@ -5763,11 +5762,11 @@
 </code></pre></div></p>
 <p><strong>Mapped Internal Fields</strong>:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;OnDemand-Template&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t2.micro&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  <span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="s2">&quot;ami-12345678&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  <span class="s2">&quot;subnet_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;subnet-abcd1234&quot;</span><span class="p">],</span>  <span class="c1"># Transformed to list</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  <span class="s2">&quot;price_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ondemand&quot;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;OnDemand-Template&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t2.micro&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="s2">&quot;ami-12345678&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="s2">&quot;subnet_ids&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;subnet-abcd1234&quot;</span><span class="p">],</span>  <span class="c1"># Transformed to list</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="s2">&quot;price_type&quot;</span><span class="p">:</span> <span class="s2">&quot;ondemand&quot;</span><span class="p">,</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">}</span>
 </code></pre></div></p>
 <h3 id="spot-template">Spot Template<a class="headerlink" href="#spot-template" title="Permanent link">&para;</a></h3>
@@ -5781,11 +5780,11 @@
 </code></pre></div></p>
 <p><strong>Mapped Internal Fields</strong>:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;Spot-Template&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  <span class="s2">&quot;instance_types&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;t2.medium&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;t3.medium&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t2.medium&quot;</span><span class="p">,</span>  <span class="c1"># Auto-set from first instance_types entry</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  <span class="s2">&quot;price_type&quot;</span><span class="p">:</span> <span class="s2">&quot;spot&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  <span class="s2">&quot;fleet_role&quot;</span><span class="p">:</span> <span class="s2">&quot;arn:aws:iam::123456789012:role/spot-fleet-role&quot;</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;Spot-Template&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="s2">&quot;instance_types&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;t2.medium&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;t3.medium&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t2.medium&quot;</span><span class="p">,</span>  <span class="c1"># Auto-set from first instance_types entry</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s2">&quot;price_type&quot;</span><span class="p">:</span> <span class="s2">&quot;spot&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="s2">&quot;fleet_role&quot;</span><span class="p">:</span> <span class="s2">&quot;arn:aws:iam::123456789012:role/spot-fleet-role&quot;</span><span class="p">,</span>
 <a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">}</span>
 </code></pre></div></p>
 <h3 id="heterogeneous-template">Heterogeneous Template<a class="headerlink" href="#heterogeneous-template" title="Permanent link">&para;</a></h3>
@@ -5801,13 +5800,13 @@
 </code></pre></div></p>
 <p><strong>Mapped Internal Fields</strong>:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;Hetero-Template&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  <span class="s2">&quot;instance_types&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;t2.medium&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;t3.large&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  <span class="s2">&quot;instance_types_ondemand&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;t2.medium&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t2.medium&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  <span class="s2">&quot;price_type&quot;</span><span class="p">:</span> <span class="s2">&quot;heterogeneous&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>  <span class="s2">&quot;percent_on_demand&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>  <span class="s2">&quot;allocation_strategy_ondemand&quot;</span><span class="p">:</span> <span class="s2">&quot;prioritized&quot;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="s2">&quot;template_id&quot;</span><span class="p">:</span> <span class="s2">&quot;Hetero-Template&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="s2">&quot;instance_types&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;t2.medium&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;t3.large&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="s2">&quot;instance_types_ondemand&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;t2.medium&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;t2.medium&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="s2">&quot;price_type&quot;</span><span class="p">:</span> <span class="s2">&quot;heterogeneous&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="s2">&quot;percent_on_demand&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>    <span class="s2">&quot;allocation_strategy_ondemand&quot;</span><span class="p">:</span> <span class="s2">&quot;prioritized&quot;</span><span class="p">,</span>
 <a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="p">}</span>
 </code></pre></div></p>
 <h2 id="supported-hostfactory-fields">Supported HostFactory Fields<a class="headerlink" href="#supported-hostfactory-fields" title="Permanent link">&para;</a></h2>
@@ -5854,31 +5853,28 @@
 <h3 id="adding-new-schedulers">Adding New Schedulers<a class="headerlink" href="#adding-new-schedulers" title="Permanent link">&para;</a></h3>
 <p>To add support for LSF scheduler:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">MAPPINGS</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="s1">&#39;hostfactory&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="s1">&#39;lsf&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>        <span class="s1">&#39;generic&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>            <span class="s1">&#39;TEMPLATE&#39;</span><span class="p">:</span> <span class="s1">&#39;template_id&#39;</span><span class="p">,</span>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>            <span class="s1">&#39;INSTANCE_TYPE&#39;</span><span class="p">:</span> <span class="s1">&#39;instance_type&#39;</span><span class="p">,</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>            <span class="s1">&#39;IMAGE_ID&#39;</span><span class="p">:</span> <span class="s1">&#39;image_id&#39;</span><span class="p">,</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="s2">&quot;hostfactory&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="s2">&quot;lsf&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>        <span class="s2">&quot;generic&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>            <span class="s2">&quot;TEMPLATE&quot;</span><span class="p">:</span> <span class="s2">&quot;template_id&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>            <span class="s2">&quot;INSTANCE_TYPE&quot;</span><span class="p">:</span> <span class="s2">&quot;instance_type&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>            <span class="s2">&quot;IMAGE_ID&quot;</span><span class="p">:</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
 <a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>        <span class="p">},</span>
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>        <span class="s1">&#39;aws&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>            <span class="s1">&#39;SPOT_FLEET_ROLE&#39;</span><span class="p">:</span> <span class="s1">&#39;fleet_role&#39;</span><span class="p">,</span>
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>            <span class="s1">&#39;ON_DEMAND_PERCENT&#39;</span><span class="p">:</span> <span class="s1">&#39;percent_on_demand&#39;</span>
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>        <span class="p">}</span>
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>    <span class="p">}</span>
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="p">}</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>        <span class="s2">&quot;aws&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;SPOT_FLEET_ROLE&quot;</span><span class="p">:</span> <span class="s2">&quot;fleet_role&quot;</span><span class="p">,</span> <span class="s2">&quot;ON_DEMAND_PERCENT&quot;</span><span class="p">:</span> <span class="s2">&quot;percent_on_demand&quot;</span><span class="p">},</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>    <span class="p">},</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="p">}</span>
 </code></pre></div>
 <h3 id="adding-new-providers">Adding New Providers<a class="headerlink" href="#adding-new-providers" title="Permanent link">&para;</a></h3>
 <p>To add support for Provider1 provider:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">MAPPINGS</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="s1">&#39;hostfactory&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        <span class="s1">&#39;generic&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        <span class="s1">&#39;aws&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        <span class="s1">&#39;provider1&#39;</span><span class="p">:</span> <span class="p">{</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>            <span class="s1">&#39;vmPriority&#39;</span><span class="p">:</span> <span class="s1">&#39;vm_priority&#39;</span><span class="p">,</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="s1">&#39;spotEvictionPolicy&#39;</span><span class="p">:</span> <span class="s1">&#39;spot_eviction_policy&#39;</span><span class="p">,</span>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>            <span class="s1">&#39;proximityPlacementGroup&#39;</span><span class="p">:</span> <span class="s1">&#39;proximity_placement_group&#39;</span>
-<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="p">}</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="s2">&quot;hostfactory&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        <span class="s2">&quot;generic&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        <span class="s2">&quot;aws&quot;</span><span class="p">:</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>        <span class="s2">&quot;provider1&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>            <span class="s2">&quot;vmPriority&quot;</span><span class="p">:</span> <span class="s2">&quot;vm_priority&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="s2">&quot;spotEvictionPolicy&quot;</span><span class="p">:</span> <span class="s2">&quot;spot_eviction_policy&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>            <span class="s2">&quot;proximityPlacementGroup&quot;</span><span class="p">:</span> <span class="s2">&quot;proximity_placement_group&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="p">},</span>
 <a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="p">}</span>
 <a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="p">}</span>
 </code></pre></div>

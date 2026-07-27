@@ -5650,18 +5650,16 @@
 </code></pre></div>
 <h2 id="core-method">Core Method<a class="headerlink" href="#core-method" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">convert_templates</span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Template</span><span class="p">],</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">include_full_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">use_camel_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="sd">    Template conversion method.</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="sd">    Args:</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="sd">        templates: List of Template domain objects</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="sd">        include_full_config: If True, include all fields. If False, include only essential fields (HF minimal)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="sd">        use_camel_case: If True, use camelCase field names. If False, use snake_case</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">templates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Template</span><span class="p">],</span> <span class="n">include_full_config</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">use_camel_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="sd">    Template conversion method.</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="sd">    Args:</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="sd">        templates: List of Template domain objects</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="sd">        include_full_config: If True, include all fields. If False, include only essential fields (HF minimal)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="sd">        use_camel_case: If True, use camelCase field names. If False, use snake_case</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div>
 <h2 id="field-selection-logic">Field Selection Logic<a class="headerlink" href="#field-selection-logic" title="Permanent link">&para;</a></h2>
 <h3 id="minimal-fields-hf-compatible">Minimal Fields (HF Compatible)<a class="headerlink" href="#minimal-fields-hf-compatible" title="Permanent link">&para;</a></h3>
@@ -5689,8 +5687,8 @@
 <h3 id="special-mappings">Special Mappings<a class="headerlink" href="#special-mappings" title="Permanent link">&para;</a></h3>
 <p>Business logic mappings that don't follow standard conversion:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">special_mappings</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="s1">&#39;max_instances&#39;</span><span class="p">:</span> <span class="s1">&#39;maxNumber&#39;</span><span class="p">,</span>    <span class="c1"># Business logic</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="s1">&#39;instance_type&#39;</span><span class="p">:</span> <span class="s1">&#39;vmType&#39;</span><span class="p">,</span>       <span class="c1"># Domain-specific naming</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="s2">&quot;max_instances&quot;</span><span class="p">:</span> <span class="s2">&quot;maxNumber&quot;</span><span class="p">,</span>  <span class="c1"># Business logic</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="s2">&quot;instance_type&quot;</span><span class="p">:</span> <span class="s2">&quot;vmType&quot;</span><span class="p">,</span>  <span class="c1"># Domain-specific naming</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
 </code></pre></div></p>
 <h3 id="automatic-conversion">Automatic Conversion<a class="headerlink" href="#automatic-conversion" title="Permanent link">&para;</a></h3>

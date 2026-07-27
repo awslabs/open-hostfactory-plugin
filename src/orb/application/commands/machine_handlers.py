@@ -41,12 +41,18 @@ class UpdateMachineStatusHandler(BaseCommandHandler[UpdateMachineStatusCommand, 
         machine = self._machine_repository.find_by_id(command.machine_id)
         if not machine:
             raise MachineNotFoundError(command.machine_id)
-        machine.update_status(
+        new_status = (
             MachineStatus.from_str(command.status)
             if isinstance(command.status, str)
             else command.status
-        )  # type: ignore[arg-type]
-        self._machine_repository.save(machine)
+        )
+        # Machine is an immutable aggregate: update_status returns a NEW machine
+        # (with the status change and its MachineStatusChangedEvent) rather than
+        # mutating in place. Persist the returned instance, not the original.
+        updated = machine.update_status(new_status)  # type: ignore[arg-type]
+        events = self._machine_repository.save(updated)
+        for event in events or []:
+            self.event_publisher.publish(event)  # type: ignore[union-attr]
 
 
 @command_handler(CleanupMachineResourcesCommand)  # type: ignore[arg-type]

@@ -99,6 +99,36 @@ class TestUpdateMachineStatusHandler:
         repo.save.assert_called_once()
 
     @pytest.mark.asyncio
+    async def test_saves_machine_with_updated_status(self):
+        # Machine is immutable: update_status returns a new machine and does not
+        # mutate the original. The handler must persist the returned instance,
+        # so the machine handed to save() must carry the NEW status.
+        machine = _make_machine(status=MachineStatus.RUNNING)
+        repo = _make_repo(machine)
+        handler = UpdateMachineStatusHandler(machine_repository=repo, **_ports())
+
+        await handler.handle(UpdateMachineStatusCommand(machine_id="i-abc123", status="stopping"))
+
+        repo.save.assert_called_once()
+        saved = repo.save.call_args.args[0]
+        assert saved.status == MachineStatus.STOPPING
+
+    @pytest.mark.asyncio
+    async def test_publishes_status_changed_event(self):
+        # update_status attaches a MachineStatusChangedEvent to the returned
+        # aggregate; save() extracts it and the handler must publish it.
+        machine = _make_machine(status=MachineStatus.RUNNING)
+        repo = _make_repo(machine)
+        sentinel_event = object()
+        repo.save.return_value = [sentinel_event]
+        ports = _ports()
+        handler = UpdateMachineStatusHandler(machine_repository=repo, **ports)
+
+        await handler.handle(UpdateMachineStatusCommand(machine_id="i-abc123", status="stopping"))
+
+        ports["event_publisher"].publish.assert_called_once_with(sentinel_event)
+
+    @pytest.mark.asyncio
     async def test_not_found_raises(self):
         repo = _make_repo(None)
         handler = UpdateMachineStatusHandler(machine_repository=repo, **_ports())

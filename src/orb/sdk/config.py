@@ -50,6 +50,10 @@ class SDKConfig:
     timeout: int = 300
     retry_attempts: int = 3
 
+    # Dry-run mode: mocks provider operations so nothing is provisioned. Mirrors
+    # the CLI's --dry-run flag and is applied to Application.initialize().
+    dry_run: bool = False
+
     # Logging configuration
     log_level: str = "INFO"
 
@@ -160,6 +164,7 @@ class SDKConfig:
             timeout=int(os.getenv("ORB_TIMEOUT", "300")),
             retry_attempts=int(os.getenv("ORB_RETRY_ATTEMPTS", "3")),
             log_level=os.getenv("ORB_LOG_LEVEL", "INFO"),
+            dry_run=os.getenv("ORB_DRY_RUN", "").lower() in ("1", "true", "yes", "on"),
             config_path=os.getenv("ORB_CONFIG_FILE"),
         )
 
@@ -267,6 +272,7 @@ class SDKConfig:
             "timeout": self.timeout,
             "retry_attempts": self.retry_attempts,
             "log_level": self.log_level,
+            "dry_run": self.dry_run,
         }
 
         if self.provider_config:

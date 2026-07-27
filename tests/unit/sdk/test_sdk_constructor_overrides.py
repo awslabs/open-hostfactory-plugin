@@ -113,3 +113,73 @@ class TestORBClientSchedulerOverride:
 
         mock_cm.override_scheduler_strategy.assert_called_once_with("hostfactory")
         mock_container.register_instance.assert_called_once_with(mock_cm_cls, mock_cm)
+
+
+# ---------------------------------------------------------------------------
+# SDKConfig.dry_run
+# ---------------------------------------------------------------------------
+
+
+class TestSDKConfigDryRun:
+    def test_dry_run_default_is_false(self):
+        assert SDKConfig.from_dict({}).dry_run is False
+
+    def test_dry_run_parsed_from_dict(self):
+        config = SDKConfig.from_dict({"dry_run": True})
+        assert config.dry_run is True
+
+    def test_dry_run_not_in_custom_config(self):
+        config = SDKConfig.from_dict({"dry_run": True})
+        assert "dry_run" not in config.custom_config
+
+    def test_dry_run_round_trips_through_to_dict(self):
+        assert SDKConfig(dry_run=True).to_dict()["dry_run"] is True
+
+    def test_dry_run_from_env(self, monkeypatch):
+        monkeypatch.setenv("ORB_DRY_RUN", "true")
+        assert SDKConfig.from_env().dry_run is True
+
+    def test_dry_run_from_env_default_off(self, monkeypatch):
+        monkeypatch.delenv("ORB_DRY_RUN", raising=False)
+        assert SDKConfig.from_env().dry_run is False
+
+
+# ---------------------------------------------------------------------------
+# ORBClient.initialize() — dry_run override
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+class TestORBClientDryRunOverride:
+    async def _init_client(self, **client_kwargs):
+        mock_app, mock_container, _, mock_cm = _make_initialize_mocks()
+
+        with (
+            patch("orb.sdk.client.create_container", return_value=mock_container),
+            patch("orb.sdk.client.Application", return_value=mock_app),
+            patch("orb.sdk.client.SDKMethodDiscovery") as mock_discovery_cls,
+            patch("orb.sdk.client.ConfigurationManager", return_value=mock_cm),
+        ):
+            mock_discovery = MagicMock()
+            mock_discovery.discover_cqrs_methods = AsyncMock(return_value={})
+            mock_discovery.list_available_methods = MagicMock(return_value=[])
+            mock_discovery_cls.return_value = mock_discovery
+
+            sdk = ORBClient(**client_kwargs)
+            await sdk.initialize()
+
+        return sdk, mock_app
+
+    async def test_dry_run_kwarg_forwarded_to_app_initialize(self):
+        sdk, mock_app = await self._init_client(dry_run=True)
+        assert sdk._config.dry_run is True
+        mock_app.initialize.assert_awaited_once_with(dry_run=True)
+
+    async def test_dry_run_from_config_dict_forwarded(self):
+        _, mock_app = await self._init_client(config={"dry_run": True})
+        mock_app.initialize.assert_awaited_once_with(dry_run=True)
+
+    async def test_no_dry_run_defaults_to_false(self):
+        sdk, mock_app = await self._init_client()
+        assert sdk._config.dry_run is False
+        mock_app.initialize.assert_awaited_once_with(dry_run=False)

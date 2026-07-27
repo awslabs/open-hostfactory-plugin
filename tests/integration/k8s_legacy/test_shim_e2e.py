@@ -28,7 +28,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-HF_SCRIPTS_DIR = REPO_ROOT / "k8s-legacy" / "hostfactory" / "providers" / "k8s-hf" / "scripts"
+HF_SCRIPTS_DIR = REPO_ROOT / "deployment" / "hostfactory" / "k8s-hf"
 
 
 def _run_orb(*args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:

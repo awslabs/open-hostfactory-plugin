@@ -21,8 +21,6 @@ from orb.application.dto.bulk_responses import (
 )
 from orb.application.dto.commands import (
     CancelRequestCommand,
-    CleanupAllResourcesCommand,
-    CleanupOldRequestsCommand,
     CreateRequestCommand,
     CreateReturnRequestCommand,
     UpdateRequestStatusCommand,
@@ -287,43 +285,6 @@ class TestCancelRequestCommand:
         cmd = CancelRequestCommand(request_id="r", reason="test")
         cmd.cancelled = True
         assert cmd.cancelled is True
-
-
-# ---------------------------------------------------------------------------
-# CleanupOldRequestsCommand
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-class TestCleanupOldRequestsCommand:
-    def test_defaults(self):
-        cmd = CleanupOldRequestsCommand()
-        assert cmd.older_than_days == 1
-        assert cmd.statuses_to_cleanup is None
-
-    def test_result_fields_default_none(self):
-        cmd = CleanupOldRequestsCommand()
-        assert cmd.requests_cleaned is None
-
-
-# ---------------------------------------------------------------------------
-# CleanupAllResourcesCommand
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.unit
-class TestCleanupAllResourcesCommand:
-    def test_defaults(self):
-        cmd = CleanupAllResourcesCommand()
-        assert cmd.older_than_days == 1
-        assert cmd.include_pending is False
-
-    def test_result_fields_settable(self):
-        cmd = CleanupAllResourcesCommand()
-        cmd.requests_cleaned = 5
-        cmd.machines_cleaned = 10
-        cmd.total_cleaned = 15
-        assert cmd.total_cleaned == 15
 
 
 # ---------------------------------------------------------------------------

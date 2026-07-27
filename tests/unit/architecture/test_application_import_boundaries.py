@@ -39,10 +39,6 @@ _KNOWN_VIOLATIONS: frozenset[tuple[str, str]] = frozenset(
             "orb.infrastructure.template.dtos",
         ),
         (
-            "application/commands/cleanup_handlers.py",
-            "orb.infrastructure.events.infrastructure_events",
-        ),
-        (
             "application/services/provisioning_orchestration_service.py",
             "orb.infrastructure.resilience.exceptions",
         ),

@@ -24,11 +24,12 @@ async def handle_list_templates(
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle list templates operations using the ListTemplatesOrchestrator."""
     from orb.application.services.orchestration.dtos import ListTemplatesInput
-    from orb.application.services.orchestration.list_templates import ListTemplatesOrchestrator
     from orb.domain.base.ports.console_port import ConsolePort
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["list_templates"]
     container = args._container
-    orchestrator = container.get(ListTemplatesOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     if hasattr(args, "input_data") and args.input_data:
@@ -70,11 +71,7 @@ async def handle_list_templates(
         console.info("")
         print_getting_started_help()
 
-    return formatter.format_template_list(
-        result.templates,
-        total_count=result.total_count,
-        next_cursor=result.next_cursor,
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="get_template", interface_type="cli")
@@ -82,9 +79,8 @@ async def handle_get_template(
     args: argparse.Namespace,
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle get template operations using the GetTemplateOrchestrator."""
-    from orb.application.ports.scheduler_port import SchedulerPort
     from orb.application.services.orchestration.dtos import GetTemplateInput
-    from orb.application.services.orchestration.get_template import GetTemplateOrchestrator
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
     template_id = getattr(args, "template_id", None) or getattr(args, "flag_template_id", None)
     if not template_id:
@@ -93,9 +89,9 @@ async def handle_get_template(
             exit_code=1,
         )
 
+    entry = OPERATION_CATALOG["get_template"]
     container = args._container
-    orchestrator = container.get(GetTemplateOrchestrator)
-    scheduler = container.get(SchedulerPort)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     provider_name = getattr(args, "provider_name", None)
@@ -116,8 +112,7 @@ async def handle_get_template(
             exit_code=1,
         )
 
-    raw = scheduler.format_template_for_display(result.template)
-    return formatter.format_config(raw)
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="create_template", interface_type="cli")
@@ -125,9 +120,9 @@ async def handle_create_template(
     args: argparse.Namespace,
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle create template operations using the CreateTemplateOrchestrator."""
-    from orb.application.services.orchestration.create_template import CreateTemplateOrchestrator
     from orb.application.services.orchestration.dtos import CreateTemplateInput
     from orb.infrastructure.mocking.dry_run_context import is_dry_run_active
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
     if is_dry_run_active():
         return {
@@ -182,8 +177,9 @@ async def handle_create_template(
             "validate_only": True,
         }
 
+    entry = OPERATION_CATALOG["create_template"]
     container = args._container
-    orchestrator = container.get(CreateTemplateOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     try:
@@ -222,14 +218,7 @@ async def handle_create_template(
             exit_code=1,
         )
 
-    return formatter.format_template_mutation(
-        {
-            "template_id": result.template_id,
-            "status": "created" if result.created else "validation_failed",
-            "created": result.created,
-            "validation_errors": result.validation_errors,
-        }
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="update_template", interface_type="cli")
@@ -238,8 +227,8 @@ async def handle_update_template(
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle update template operations using the UpdateTemplateOrchestrator."""
     from orb.application.services.orchestration.dtos import UpdateTemplateInput
-    from orb.application.services.orchestration.update_template import UpdateTemplateOrchestrator
     from orb.infrastructure.mocking.dry_run_context import is_dry_run_active
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
     template_id = getattr(args, "template_id", None) or getattr(args, "flag_template_id", None)
 
@@ -283,8 +272,9 @@ async def handle_update_template(
             exit_code=1,
         )
 
+    entry = OPERATION_CATALOG["update_template"]
     container = args._container
-    orchestrator = container.get(UpdateTemplateOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     try:
@@ -320,14 +310,7 @@ async def handle_update_template(
             exit_code=1,
         )
 
-    return formatter.format_template_mutation(
-        {
-            "template_id": result.template_id,
-            "status": "updated" if result.updated else "validation_failed",
-            "updated": result.updated,
-            "validation_errors": result.validation_errors,
-        }
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="delete_template", interface_type="cli")
@@ -335,9 +318,9 @@ async def handle_delete_template(
     args: argparse.Namespace,
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle delete template operations using the DeleteTemplateOrchestrator."""
-    from orb.application.services.orchestration.delete_template import DeleteTemplateOrchestrator
     from orb.application.services.orchestration.dtos import DeleteTemplateInput
     from orb.infrastructure.mocking.dry_run_context import is_dry_run_active
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
     template_id = getattr(args, "template_id", None) or getattr(args, "flag_template_id", None)
     if not template_id:
@@ -354,6 +337,7 @@ async def handle_delete_template(
             "dry_run": True,
         }
 
+    entry = OPERATION_CATALOG["delete_template"]
     container = args._container
     formatter = container.get(ResponseFormattingService)
 
@@ -362,7 +346,7 @@ async def handle_delete_template(
             "Destructive operation requires --force flag. Use --force to confirm deletion."
         )
 
-    orchestrator = container.get(DeleteTemplateOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
 
     try:
         result = await orchestrator.execute(DeleteTemplateInput(template_id=template_id))
@@ -386,13 +370,7 @@ async def handle_delete_template(
             exit_code=1,
         )
 
-    return formatter.format_template_mutation(
-        {
-            "template_id": result.template_id,
-            "status": "deleted" if result.deleted else "not_found",
-            "deleted": result.deleted,
-        }
-    )
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="validate_template", interface_type="cli")
@@ -401,13 +379,13 @@ async def handle_validate_template(
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle validate template operations using the ValidateTemplateOrchestrator."""
     from orb.application.services.orchestration.dtos import ValidateTemplateInput
-    from orb.application.services.orchestration.validate_template import (
-        ValidateTemplateOrchestrator,
-    )
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["validate_template"]
     container = args._container
-    orchestrator = container.get(ValidateTemplateOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
+    render = entry.renderer_for(Interface.CLI)
 
     if hasattr(args, "all") and args.all:
         from orb.application.services.orchestration.dtos import ListTemplatesInput
@@ -466,15 +444,7 @@ async def handle_validate_template(
         result = await orchestrator.execute(
             ValidateTemplateInput(template_id=template_id, config=template_config)
         )
-        return formatter.format_template_mutation(
-            {
-                "template_id": result.template_id,
-                "status": "validated",
-                "valid": result.valid,
-                "validation_errors": result.errors,
-                "message": result.message,
-            }
-        )
+        return render(formatter, result)
 
     template_id = getattr(args, "template_id", None) or getattr(args, "flag_template_id", None)
     if template_id:
@@ -482,15 +452,7 @@ async def handle_validate_template(
             result = await orchestrator.execute(ValidateTemplateInput(template_id=template_id))
         except EntityNotFoundError:
             return formatter.format_error(f"Template '{template_id}' not found")
-        return formatter.format_template_mutation(
-            {
-                "template_id": result.template_id,
-                "status": "validated",
-                "valid": result.valid,
-                "validation_errors": result.errors,
-                "message": result.message,
-            }
-        )
+        return render(formatter, result)
 
     return InterfaceResponse(
         data={
@@ -508,18 +470,17 @@ async def handle_refresh_templates(
 ) -> dict[str, Any] | InterfaceResponse:
     """Handle refresh templates operations using the RefreshTemplatesOrchestrator."""
     from orb.application.services.orchestration.dtos import RefreshTemplatesInput
-    from orb.application.services.orchestration.refresh_templates import (
-        RefreshTemplatesOrchestrator,
-    )
+    from orb.interface.catalog import OPERATION_CATALOG, Interface
 
+    entry = OPERATION_CATALOG["refresh_templates"]
     container = args._container
-    orchestrator = container.get(RefreshTemplatesOrchestrator)
+    orchestrator = container.get(entry.orchestrator)
     formatter = container.get(ResponseFormattingService)
 
     provider_name = getattr(args, "provider_name", None) or getattr(args, "provider_api", None)
     result = await orchestrator.execute(RefreshTemplatesInput(provider_name=provider_name))
 
-    return formatter.format_template_list(result.templates)
+    return entry.renderer_for(Interface.CLI)(formatter, result)
 
 
 @handle_interface_exceptions(context="get_multiple_templates", interface_type="cli")

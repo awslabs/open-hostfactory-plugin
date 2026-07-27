@@ -37,6 +37,7 @@ from orb.application.services.orchestration.dtos import (
 from orb.domain.base import UnitOfWorkFactory
 from orb.domain.request.request_types import RequestStatus
 from orb.infrastructure.error.decorators import handle_rest_exceptions
+from orb.interface.catalog import OPERATION_CATALOG, Interface
 
 router = APIRouter(prefix="/requests", tags=["Requests"])
 
@@ -108,15 +109,8 @@ async def list_requests(
             filter_expressions=filter_expressions,
         )
     )
-    payload = formatter.format_request_status(result.requests).data
-    if isinstance(payload, dict):
-        payload = {
-            **payload,
-            "total_count": (
-                result.total_count if result.total_count is not None else len(result.requests)
-            ),
-            "next_cursor": result.next_cursor,
-        }
+    entry = OPERATION_CATALOG["list_requests"]
+    payload = entry.renderer_for(Interface.REST)(formatter, result).data
     return JSONResponse(content=payload)
 
 
@@ -154,15 +148,8 @@ async def list_return_requests(
             filter_expressions=filter_expressions,
         )
     )
-    payload = formatter.format_request_status(result.requests).data
-    if isinstance(payload, dict):
-        payload = {
-            **payload,
-            "total_count": (
-                result.total_count if result.total_count is not None else len(result.requests)
-            ),
-            "next_cursor": result.next_cursor,
-        }
+    entry = OPERATION_CATALOG["list_return_requests"]
+    payload = entry.renderer_for(Interface.REST)(formatter, result).data
     return JSONResponse(content=payload)
 
 
@@ -197,7 +184,8 @@ async def get_request(
     result = await orchestrator.execute(
         GetRequestStatusInput(request_ids=[request_id], verbose=verbose)
     )
-    return JSONResponse(content=formatter.format_request_status(result.requests).data)
+    entry = OPERATION_CATALOG["get_request_status"]
+    return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 
 
 @router.get(
@@ -224,7 +212,8 @@ async def get_request_status(
     result = await orchestrator.execute(
         GetRequestStatusInput(request_ids=[request_id], verbose=verbose)
     )
-    return JSONResponse(content=formatter.format_request_status(result.requests).data)
+    entry = OPERATION_CATALOG["get_request_status"]
+    return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 
 
 class BatchRequestStatusBody(APIRequest):
@@ -264,7 +253,8 @@ async def batch_get_request_status(
     result = await orchestrator.execute(
         GetRequestStatusInput(request_ids=body.request_ids, verbose=body.verbose)
     )
-    return JSONResponse(content=formatter.format_request_status(result.requests).data)
+    entry = OPERATION_CATALOG["get_request_status"]
+    return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 
 
 @router.get(
@@ -290,7 +280,8 @@ async def stream_request_status(
                 result = await orchestrator.execute(
                     GetRequestStatusInput(request_ids=[request_id], verbose=False)
                 )
-                formatted = formatter.format_request_status(result.requests).data
+                entry = OPERATION_CATALOG["get_request_status"]
+                formatted = entry.renderer_for(Interface.REST)(formatter, result).data
                 yield f"data: {json.dumps(formatted)}\n\n"
                 requests_list = formatted.get("requests", [])
                 if requests_list:
@@ -333,11 +324,8 @@ async def cancel_request(
             reason=reason or "Cancelled via REST API",
         )
     )
-    return JSONResponse(
-        content=formatter.format_request_operation(
-            {"request_id": result.request_id, "status": result.status}, result.status
-        ).data
-    )
+    entry = OPERATION_CATALOG["cancel_request"]
+    return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 
 
 @router.post(

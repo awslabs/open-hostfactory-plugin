@@ -476,8 +476,6 @@ class SDKMethodDiscovery:
             "processed_machines",
             "skipped_machines",
         ],
-        "CleanupOldRequestsCommand": ["requests_cleaned", "request_ids_found"],
-        "CleanupAllResourcesCommand": ["requests_cleaned", "machines_cleaned", "total_cleaned"],
         "CreateTemplateCommand": ["created", "validation_errors"],
         "UpdateTemplateCommand": ["updated", "validation_errors"],
         "DeleteTemplateCommand": ["deleted"],

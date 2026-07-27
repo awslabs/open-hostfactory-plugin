@@ -127,10 +127,11 @@ class MachineHealthDTO(BaseDTO):
 
     machine_id: str
     overall_status: str
-    system_status: str
-    instance_status: str
+    # Unknown health is reported as "not_available"; never fabricated as "ok".
+    system_status: str = "not_available"
+    instance_status: str = "not_available"
     metrics: list[dict[str, Any]] = Field(default_factory=list)
-    last_check: datetime
+    last_check: Optional[datetime] = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format - returns snake_case for internal use.

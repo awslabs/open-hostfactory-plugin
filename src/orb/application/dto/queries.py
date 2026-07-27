@@ -121,6 +121,19 @@ class GetMachineQuery(Query, BaseModel):
     machine_id: str
 
 
+class GetMachineHealthQuery(Query, BaseModel):
+    """Query to get machine health.
+
+    When ``refresh=True`` the health is refreshed live from the provider;
+    otherwise the persisted health snapshot is returned.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    machine_id: str
+    refresh: bool = False
+
+
 class ListMachinesQuery(Query, BaseModel):
     """Query to list machines."""
 
@@ -179,20 +192,5 @@ class ValidateStorageQuery(Query, BaseModel):
 
 class ValidateMCPQuery(Query, BaseModel):
     """Query to validate MCP configuration."""
-
-    model_config = ConfigDict(frozen=True)
-
-
-# Cleanup Queries for CQRS compliance
-class ListCleanableRequestsQuery(Query, BaseModel):
-    """Query to list requests eligible for cleanup."""
-
-    model_config = ConfigDict(frozen=True)
-
-    older_than_days: int
-
-
-class ListCleanableResourcesQuery(Query, BaseModel):
-    """Query to list resources eligible for cleanup."""
 
     model_config = ConfigDict(frozen=True)

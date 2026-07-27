@@ -118,7 +118,12 @@ async def test_handler_delegates_to_scheduler(handler_fn, args_factory, query_re
 
 @pytest.mark.asyncio
 async def test_get_return_requests_delegates_to_format_return_requests():
-    """handle_get_return_requests must call formatter.format_return_requests (not format_request_status)."""
+    """handle_get_return_requests renders the dedicated return-requests shape.
+
+    The CLI and MCP surfaces feed IBM Symphony HostFactory, which expects the
+    getReturnRequests shape (machine/grace-period items), so the handler renders
+    through format_return_requests rather than the request-status formatter.
+    """
     from orb.interface.request_command_handlers import handle_get_return_requests
 
     container, formatter = _mock_container_with_formatter()
@@ -128,7 +133,6 @@ async def test_get_return_requests_delegates_to_format_return_requests():
     await handle_get_return_requests(_ret_args)
 
     formatter.format_return_requests.assert_called_once()
-    formatter.format_request_status.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

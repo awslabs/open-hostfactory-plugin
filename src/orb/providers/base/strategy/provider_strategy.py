@@ -33,6 +33,8 @@ class ProviderOperationType(str, Enum):
     RESOLVE_IMAGE = "resolve_image"
     START_INSTANCES = "start_instances"
     STOP_INSTANCES = "stop_instances"
+    CLEANUP_MACHINE_RESOURCES = "cleanup_machine_resources"
+    GET_MACHINE_HEALTH = "get_machine_health"
 
 
 @dataclass

@@ -279,6 +279,7 @@ class TestConvenienceMethods:
     @pytest.mark.asyncio
     async def test_request_machines_delegates_to_orchestrator(self):
         from orb.application.services.orchestration.dtos import AcquireMachinesOutput
+        from orb.interface.response_formatting_service import ResponseFormattingService
 
         sdk = _initialized_sdk()
         mock_container = MagicMock()
@@ -291,7 +292,19 @@ class TestConvenienceMethods:
                 status="pending",
             )
         )
-        mock_container.get.return_value = mock_orchestrator
+
+        # The SDK renders the acquire result through the shared formatter, which
+        # delegates to the scheduler's request formatter (identity here) so the
+        # rendered body mirrors the orchestrator output.
+        mock_scheduler = MagicMock()
+        mock_scheduler.format_request_response.side_effect = lambda raw: raw
+
+        def _get(cls):
+            if cls is ResponseFormattingService:
+                return ResponseFormattingService(mock_scheduler)
+            return mock_orchestrator
+
+        mock_container.get.side_effect = _get
         mock_container.get_optional.return_value = None
 
         result = await sdk.request_machines("tmpl-1", 3)

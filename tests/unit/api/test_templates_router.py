@@ -14,6 +14,7 @@ from orb.api.dependencies import (
     get_get_template_orchestrator,
     get_list_templates_orchestrator,
     get_refresh_templates_orchestrator,
+    get_request_formatter,
     get_request_scheduler,
     get_scheduler_strategy,
     get_update_template_orchestrator,
@@ -30,6 +31,7 @@ from orb.application.services.orchestration.dtos import (
     ValidateTemplateOutput,
 )
 from orb.domain.base.exceptions import DuplicateError, EntityNotFoundError
+from orb.interface.response_formatting_service import ResponseFormattingService
 
 
 @pytest.fixture()
@@ -85,6 +87,11 @@ class TestTemplatesRouter:
         scheduler = self._make_scheduler_mock()
         app.dependency_overrides[get_request_scheduler] = lambda: scheduler
         app.dependency_overrides[get_scheduler_strategy] = lambda: scheduler
+        # The template routes render through the ResponseFormattingService, which
+        # delegates to the same scheduler seam the mock stubs above.
+        app.dependency_overrides[get_request_formatter] = lambda: ResponseFormattingService(
+            scheduler
+        )
         for dep, factory in (overrides or {}).items():
             app.dependency_overrides[dep] = factory
         return TestClient(app, raise_server_exceptions=False)
@@ -487,7 +494,9 @@ class TestTemplatesRouter:
 
     def test_list_templates_no_filter(self, templates_app):
         orchestrator = AsyncMock()
-        orchestrator.execute = AsyncMock(return_value=ListTemplatesOutput(templates=[MagicMock()]))
+        orchestrator.execute = AsyncMock(
+            return_value=ListTemplatesOutput(templates=[MagicMock()], total_count=1)
+        )
         client = self._make_client(
             templates_app, {get_list_templates_orchestrator: lambda: orchestrator}
         )
@@ -515,7 +524,9 @@ class TestTemplatesRouter:
 
     def test_list_templates_serializes_correctly(self, templates_app):
         orchestrator = AsyncMock()
-        orchestrator.execute = AsyncMock(return_value=ListTemplatesOutput(templates=[MagicMock()]))
+        orchestrator.execute = AsyncMock(
+            return_value=ListTemplatesOutput(templates=[MagicMock()], total_count=1)
+        )
         client = self._make_client(
             templates_app, {get_list_templates_orchestrator: lambda: orchestrator}
         )
@@ -549,11 +560,18 @@ class TestTemplatesRouteOrder:
         return scheduler
 
     def _make_client(self, app, overrides=None):
-        from orb.api.dependencies import get_request_scheduler, get_scheduler_strategy
+        from orb.api.dependencies import (
+            get_request_formatter,
+            get_request_scheduler,
+            get_scheduler_strategy,
+        )
 
         scheduler = self._make_scheduler_mock()
         app.dependency_overrides[get_request_scheduler] = lambda: scheduler
         app.dependency_overrides[get_scheduler_strategy] = lambda: scheduler
+        app.dependency_overrides[get_request_formatter] = lambda: ResponseFormattingService(
+            scheduler
+        )
         for dep, factory in (overrides or {}).items():
             app.dependency_overrides[dep] = factory
         return TestClient(app, raise_server_exceptions=False)

@@ -36,6 +36,7 @@ from orb.application.services.orchestration.dtos import (
 from orb.domain.base import UnitOfWorkFactory
 from orb.infrastructure.error.decorators import handle_rest_exceptions
 from orb.infrastructure.logging.logger import get_logger
+from orb.interface.catalog import OPERATION_CATALOG, Interface
 
 router = APIRouter(prefix="/machines", tags=["Machines"])
 
@@ -122,16 +123,9 @@ async def request_machines(
             additional_data=request_data.additional_data or {},
         )
     )
-    response_data: dict = {
-        "status": result.status,
-        "machine_ids": result.machine_ids,
-    }
-    if result.request_id:
-        response_data["request_id"] = result.request_id
-    return JSONResponse(
-        content=formatter.format_request_operation(response_data, result.status).data,
-        status_code=202,
-    )
+    entry = OPERATION_CATALOG["request_machines"]
+    body = entry.renderer_for(Interface.REST)(formatter, result).data
+    return JSONResponse(content=body, status_code=202)
 
 
 @router.post(
@@ -163,16 +157,9 @@ async def return_machines(
             provider_type=request_data.provider_type,
         )
     )
-    response_data: dict = {
-        "status": result.status,
-        "message": result.message,
-        "skipped_machines": result.skipped_machines,
-    }
-    if result.request_id:
-        response_data["request_id"] = result.request_id
-    return JSONResponse(
-        content=formatter.format_request_operation(response_data, result.status).data
-    )
+    entry = OPERATION_CATALOG["return_machines"]
+    body = entry.renderer_for(Interface.REST)(formatter, result).data
+    return JSONResponse(content=body)
 
 
 @router.get(
@@ -223,15 +210,8 @@ async def list_machines(
             filter_expressions=filter_expressions,
         )
     )
-    payload = formatter.format_machine_list(result.machines).data
-    if isinstance(payload, dict):
-        payload = {
-            **payload,
-            "total_count": (
-                result.total_count if result.total_count is not None else len(result.machines)
-            ),
-            "next_cursor": result.next_cursor,
-        }
+    entry = OPERATION_CATALOG["list_machines"]
+    payload = entry.renderer_for(Interface.REST)(formatter, result).data
     return JSONResponse(content=payload)
 
 
@@ -258,12 +238,10 @@ async def sync_machine_status(
     result = await orchestrator.execute(SyncMachineInput(machine_id=machine_id))
     if result.machine is None:
         return JSONResponse(content={"detail": f"Machine {machine_id} not found"}, status_code=404)
-    data = result.machine.to_dict()
-    payload = formatter.format_machine_detail(data).data
-    if isinstance(payload, dict):
-        payload = {**payload, "synced": result.synced}
-        if result.error:
-            payload["sync_error"] = result.error
+    # The 404 envelope above is REST-specific; the success body (machine detail
+    # with the sync outcome overlaid) is the shared shape declared in the catalog.
+    entry = OPERATION_CATALOG["sync_machine"]
+    payload = entry.renderer_for(Interface.REST)(formatter, result).data
     return JSONResponse(content=payload)
 
 
@@ -284,11 +262,10 @@ async def get_machine(
     result = await orchestrator.execute(GetMachineInput(machine_id=machine_id))
     if result.machine is None:
         return JSONResponse(content={"detail": f"Machine {machine_id} not found"}, status_code=404)
-    # MachineDTO defines its own ``to_dict`` for the snake_case wire shape;
-    # pydantic's ``model_dump`` would also work but ``to_dict`` is the
-    # explicit API surface and matches the rest of the formatter pipeline.
-    data = result.machine.to_dict()
-    return JSONResponse(content=formatter.format_machine_detail(data).data)
+    # The 404 envelope above is REST-specific; the success body is the shared
+    # canonical machine detail declared in the catalog.
+    entry = OPERATION_CATALOG["get_machine"]
+    return JSONResponse(content=entry.renderer_for(Interface.REST)(formatter, result).data)
 
 
 @router.delete(

@@ -16,8 +16,8 @@ class ORBClientProtocol(Protocol):
     and IDE support — it does not affect runtime behaviour.
 
     Note on collisions: where a query and command share the same derived
-    name (e.g. convert_machine_status), the command handler wins because
-    commands are discovered after queries in SDKMethodDiscovery.
+    name, the command handler wins because commands are discovered after
+    queries in SDKMethodDiscovery.
     """
 
     # --- Template operations ---
@@ -131,14 +131,6 @@ class ORBClientProtocol(Protocol):
     async def update_machine_status(self, *, machine_id: str, **kwargs: Any) -> None:
         pass
 
-    # convert_machine_status, convert_batch_machine_status, validate_provider_state:
-    # command wins over query of the same name at runtime
-    async def convert_machine_status(self, **kwargs: Any) -> None:
-        pass
-
-    async def convert_batch_machine_status(self, **kwargs: Any) -> None:
-        pass
-
     async def stop_machines(
         self,
         machine_ids: list[str],
@@ -159,12 +151,6 @@ class ORBClientProtocol(Protocol):
         pass
 
     async def cleanup_machine_resources(self, **kwargs: Any) -> None:
-        pass
-
-    async def register_machine(self, **kwargs: Any) -> None:
-        pass
-
-    async def deregister_machine(self, *, machine_id: str, **kwargs: Any) -> None:
         pass
 
     # --- Provider operations ---
@@ -209,12 +195,6 @@ class ORBClientProtocol(Protocol):
         pass
 
     # --- Cleanup operations ---
-    async def list_cleanable_requests(self, **kwargs: Any) -> list[dict[str, Any]]:  # type: ignore[return]
-        pass
-
-    async def list_cleanable_resources(self, **kwargs: Any) -> list[dict[str, Any]]:  # type: ignore[return]
-        pass
-
     async def cleanup_old_requests(self, **kwargs: Any) -> dict[str, Any]:  # type: ignore[return]
         pass
 

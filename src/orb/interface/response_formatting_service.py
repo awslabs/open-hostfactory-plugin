@@ -130,6 +130,15 @@ class ResponseFormattingService:
         self._stamp_pagination(data, total_count, next_cursor)
         return InterfaceResponse(data=data)
 
+    def format_template_detail(self, template: Any) -> InterfaceResponse:
+        """Format a single template for detail display.
+
+        Wraps the scheduler's ``format_template_for_display`` so a single-template
+        response has one formatting seam, matching the LIST/mutation methods.
+        """
+        data = self._scheduler.format_template_for_display(template)
+        return InterfaceResponse(data=data)
+
     def format_template_mutation(self, raw: dict[str, Any]) -> InterfaceResponse:
         """Format a template create/update/delete/validate result."""
         data = self._scheduler.format_template_mutation_response(raw)

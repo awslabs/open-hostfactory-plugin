@@ -250,6 +250,65 @@ class TestStopInstances:
 
 
 # ---------------------------------------------------------------------------
+# cleanup_machine_resources
+# ---------------------------------------------------------------------------
+
+
+class TestCleanupMachineResources:
+    def test_returns_error_when_no_machine(self):
+        svc = _make_service()
+        op = _op(ProviderOperationType.CLEANUP_MACHINE_RESOURCES, {})
+        result = svc.cleanup_machine_resources(op)
+        assert not result.success
+        assert result.error_code == "MISSING_MACHINE"
+
+    def test_success_when_all_resources_torn_down(self):
+        svc = _make_service()
+        svc._machine_adapter.cleanup_machine_resources.return_value = {
+            "volumes": {"success": ["vol-1"], "failed": []},
+            "network_interfaces": {"success": ["eni-1"], "failed": []},
+        }
+        op = _op(ProviderOperationType.CLEANUP_MACHINE_RESOURCES, {"machine": MagicMock()})
+        result = svc.cleanup_machine_resources(op)
+        assert result.success
+
+    def test_partial_failure_returns_error_result(self):
+        # The adapter reports a per-resource delete failure inside the returned
+        # dict rather than raising. That is a partial teardown leaving an
+        # orphaned volume, so the service must surface it as a failure instead
+        # of a success result the caller would treat as a clean teardown.
+        svc = _make_service()
+        svc._machine_adapter.cleanup_machine_resources.return_value = {
+            "volumes": {"success": [], "failed": [{"id": "vol-1", "error": "boom"}]},
+            "network_interfaces": {"success": ["eni-1"], "failed": []},
+        }
+        op = _op(ProviderOperationType.CLEANUP_MACHINE_RESOURCES, {"machine": MagicMock()})
+        result = svc.cleanup_machine_resources(op)
+        assert not result.success
+        assert result.error_code == "CLEANUP_MACHINE_RESOURCES_PARTIAL_FAILURE"
+        assert "volumes" in result.error_message
+
+    def test_network_interface_failure_returns_error_result(self):
+        svc = _make_service()
+        svc._machine_adapter.cleanup_machine_resources.return_value = {
+            "volumes": {"success": ["vol-1"], "failed": []},
+            "network_interfaces": {"success": [], "failed": [{"id": "eni-1", "error": "boom"}]},
+        }
+        op = _op(ProviderOperationType.CLEANUP_MACHINE_RESOURCES, {"machine": MagicMock()})
+        result = svc.cleanup_machine_resources(op)
+        assert not result.success
+        assert "network_interfaces" in result.error_message
+
+    def test_returns_error_on_adapter_exception(self):
+        svc = _make_service()
+        svc._machine_adapter.cleanup_machine_resources.side_effect = RuntimeError("aws err")
+        op = _op(ProviderOperationType.CLEANUP_MACHINE_RESOURCES, {"machine": MagicMock()})
+        result = svc.cleanup_machine_resources(op)
+        assert not result.success
+        assert result.error_code == "CLEANUP_MACHINE_RESOURCES_ERROR"
+
+
+# ---------------------------------------------------------------------------
 # create_instances — async
 # ---------------------------------------------------------------------------
 

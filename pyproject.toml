@@ -374,6 +374,8 @@ test = [
     "fastapi>=0.128.0",
     "httpx>=0.27.0",  # Required by FastAPI TestClient
     "jinja2>=3.1.0",
+    # MCP server tests exercise the official SDK, so the test surface needs it.
+    "mcp>=1.28,<2",
     # AWS Testing
     "moto[all]>=5.1.19,<6.0.0",
     "responses>=0.24.0,<1.0.0",

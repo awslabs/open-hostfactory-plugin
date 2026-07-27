@@ -91,10 +91,17 @@ def build_registry() -> None:
     register("init", "*", handle_init)
 
     # --- mcp ---
-    from orb.interface.mcp.catalog_server import handle_mcp_serve, handle_mcp_validate
-
-    register("mcp", "serve", handle_mcp_serve)
-    register("mcp", "validate", handle_mcp_validate)
+    # The MCP server needs the optional ``mcp`` extra. Skip registering its
+    # commands when the extra is not installed so the rest of the CLI still
+    # loads; ``orb mcp`` then reports an unknown command rather than the whole
+    # registry failing to build.
+    try:
+        from orb.interface.mcp.catalog_server import handle_mcp_serve, handle_mcp_validate
+    except ImportError:
+        pass
+    else:
+        register("mcp", "serve", handle_mcp_serve)
+        register("mcp", "validate", handle_mcp_validate)
 
     # --- infrastructure ---
     from orb.interface.infrastructure_command_handler import (

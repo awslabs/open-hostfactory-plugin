@@ -92,7 +92,7 @@ class TestGetMultipleRequestsHandler:
         dto_b = _make_request_dto("req-b")
         handler._query_service.get_request = AsyncMock(side_effect=[MagicMock(), MagicMock()])
         handler._query_service.get_machines_for_request = AsyncMock(return_value=[])
-        handler._dto_factory.create_from_domain.side_effect = [dto_a, dto_b]
+        handler._dto_factory.create_from_domain = MagicMock(side_effect=[dto_a, dto_b])
 
         result = await handler.execute_query(
             GetMultipleRequestsQuery(request_ids=["req-a", "req-b"], include_machines=False)
@@ -110,7 +110,7 @@ class TestGetMultipleRequestsHandler:
             side_effect=[MagicMock(), EntityNotFoundError("Request", "req-missing")]
         )
         handler._query_service.get_machines_for_request = AsyncMock(return_value=[])
-        handler._dto_factory.create_from_domain.return_value = dto_a
+        handler._dto_factory.create_from_domain = MagicMock(return_value=dto_a)
 
         result = await handler.execute_query(
             GetMultipleRequestsQuery(request_ids=["req-a", "req-missing"])

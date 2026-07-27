@@ -420,7 +420,7 @@ class TestSubstateProviderSchemasVisibility:
         from orb.ui.pages.machines import MachinesState
 
         s = self._machines_state()
-        cols = MachinesState.dynamic_columns(s)
+        cols = MachinesState.dynamic_columns(s)  # type: ignore[call-arg]
         assert isinstance(cols, list)
         assert len(cols) >= 1, "Expected at least one dynamic column from AWS schema"
 
@@ -443,7 +443,7 @@ class TestSubstateProviderSchemasVisibility:
         s = RequestsState.__new__(RequestsState)
         s.provider_schemas = schemas
         s.provider_filter = "aws"
-        cols = RequestsState.dynamic_columns(s)
+        cols = RequestsState.dynamic_columns(s)  # type: ignore[call-arg]
         assert isinstance(cols, list)
         assert len(cols) >= 1, "Expected at least one dynamic column from AWS schema"
 
@@ -466,7 +466,7 @@ class TestSubstateProviderSchemasVisibility:
         s = TemplatesState.__new__(TemplatesState)
         s.provider_schemas = schemas
         s.provider_filter = "aws"
-        cols = TemplatesState.dynamic_columns(s)
+        cols = TemplatesState.dynamic_columns(s)  # type: ignore[call-arg]
         assert isinstance(cols, list)
         assert len(cols) >= 1, "Expected at least one dynamic column from AWS schema"
 
@@ -502,8 +502,8 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         # is_collapsed reads sidebar_collapsed; precompute for the var chain
-        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))
-        AppState.toggle_sidebar(s)
+        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))  # type: ignore[call-arg]
+        AppState.toggle_sidebar(s)  # type: ignore[call-arg]
         assert s.sidebar_collapsed == "true"
 
     def test_toggle_sidebar_sets_false_when_true(self):
@@ -512,8 +512,8 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         s.sidebar_collapsed = "true"
-        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))
-        AppState.toggle_sidebar(s)
+        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))  # type: ignore[call-arg]
+        AppState.toggle_sidebar(s)  # type: ignore[call-arg]
         assert s.sidebar_collapsed == "false"
 
     def test_is_collapsed_true_when_sidebar_collapsed_true(self):
@@ -522,14 +522,14 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         s.sidebar_collapsed = "true"
-        assert AppState.is_collapsed(s) is True
+        assert AppState.is_collapsed(s) is True  # type: ignore[call-arg]
 
     def test_is_collapsed_false_when_sidebar_collapsed_false(self):
         """is_collapsed returns False when sidebar_collapsed == 'false'."""
         from orb.ui.state import AppState
 
         s = self._make_state()
-        assert AppState.is_collapsed(s) is False
+        assert AppState.is_collapsed(s) is False  # type: ignore[call-arg]
 
     def test_double_toggle_sidebar_returns_to_original(self):
         """Two toggles must return to the original collapsed state."""
@@ -537,8 +537,8 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         for _ in range(2):
-            object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))
-            AppState.toggle_sidebar(s)
+            object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))  # type: ignore[call-arg]
+            AppState.toggle_sidebar(s)  # type: ignore[call-arg]
         assert s.sidebar_collapsed == "false"
 
     def test_dismiss_onboarding_sets_raw_to_true(self):
@@ -546,7 +546,7 @@ class TestAppStateLocalStorage:
         from orb.ui.state import AppState
 
         s = self._make_state()
-        AppState.dismiss_onboarding(s)
+        AppState.dismiss_onboarding(s)  # type: ignore[call-arg]
         assert s._onboarding_dismissed_raw == "true"
 
     def test_onboarding_dismissed_true_after_dismiss(self):
@@ -554,15 +554,15 @@ class TestAppStateLocalStorage:
         from orb.ui.state import AppState
 
         s = self._make_state()
-        AppState.dismiss_onboarding(s)
-        assert AppState.onboarding_dismissed(s) is True
+        AppState.dismiss_onboarding(s)  # type: ignore[call-arg]
+        assert AppState.onboarding_dismissed(s) is True  # type: ignore[call-arg]
 
     def test_onboarding_dismissed_false_initially(self):
         """onboarding_dismissed returns False before dismiss."""
         from orb.ui.state import AppState
 
         s = self._make_state()
-        assert AppState.onboarding_dismissed(s) is False
+        assert AppState.onboarding_dismissed(s) is False  # type: ignore[call-arg]
 
 
 # ---------------------------------------------------------------------------
@@ -681,7 +681,7 @@ class TestDashboardStateFallback:
 
         from orb.ui.pages.dashboard import DashboardState
 
-        assert DashboardState.total_templates(s) == 7
+        assert DashboardState.total_templates(s) == 7  # type: ignore[call-arg]
         mock_api.list_templates.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -703,7 +703,7 @@ class TestDashboardStateFallback:
 
         from orb.ui.pages.dashboard import DashboardState
 
-        assert DashboardState.total_templates(s) == 4
+        assert DashboardState.total_templates(s) == 4  # type: ignore[call-arg]
 
     @pytest.mark.asyncio
     async def test_both_zero_tile_shows_zero(self):
@@ -724,4 +724,4 @@ class TestDashboardStateFallback:
 
         from orb.ui.pages.dashboard import DashboardState
 
-        assert DashboardState.total_templates(s) == 0
+        assert DashboardState.total_templates(s) == 0  # type: ignore[call-arg]

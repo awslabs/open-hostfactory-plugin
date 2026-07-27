@@ -135,7 +135,7 @@ class TestBaseHandlerSucceededWarning:
                 return []
 
         client = MagicMock()
-        config = K8sProviderConfig(namespace="test")
+        config = K8sProviderConfig(namespace="test")  # type: ignore[call-arg]
         logger = MagicMock()
         return _ConcreteHandler(kubernetes_client=client, config=config, logger=logger), logger
 

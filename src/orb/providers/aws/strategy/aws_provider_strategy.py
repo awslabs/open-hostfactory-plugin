@@ -844,8 +844,7 @@ class AWSProviderStrategy(ProviderStrategy):
                 storage_strategy = self._config_port.get_storage_strategy()
             except Exception as e:
                 self._logger.debug(
-                    "Could not resolve storage strategy from config port; "
-                    "defaulting to %r: %s",
+                    "Could not resolve storage strategy from config port; defaulting to %r: %s",
                     storage_strategy,
                     e,
                 )

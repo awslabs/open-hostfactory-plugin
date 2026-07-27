@@ -261,7 +261,9 @@ class AWSAMIResolver(ImageResolver):
         except Exception as e:
             # Non-fatal: a missing or corrupt persistent cache falls back to
             # live resolution. Log at debug so the failure is not fully silent.
-            _logger.debug("Failed to load persistent AMI cache from %s: %s", self._cache_file_path, e)
+            _logger.debug(
+                "Failed to load persistent AMI cache from %s: %s", self._cache_file_path, e
+            )
 
     def _save_persistent_cache(self) -> None:
         """Save cache to persistent file."""

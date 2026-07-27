@@ -12,8 +12,9 @@ class ResourcePrefixConfig(BaseModel):
     Provider-specific resource-type prefixes are supplied by config and captured as
     extra fields (``extra="allow"``), so ``ConfigurationAdapter.get_resource_prefix(key)``
     can still dispatch through ``hasattr(prefixes, key)`` without this shared schema
-    encoding any provider vocabulary.  Keys absent from config fall back to
-    ``default_prefix``.
+    encoding any provider vocabulary.  A per-type key absent from config resolves to
+    an empty prefix — it does NOT inherit ``default_prefix``, so a global default
+    never silently prefixes per-type resource names.
     """
 
     model_config = ConfigDict(extra="allow")
@@ -45,7 +46,8 @@ class PrefixConfig(BaseModel):
     Provider-specific resource-type prefixes are captured as extra fields
     (``extra="allow"``) for the same reason as ResourcePrefixConfig: the
     hasattr-based dispatch in ConfigurationAdapter.get_resource_prefix reads them
-    when present and falls back to ``default_prefix`` otherwise.
+    when present and resolves to an empty prefix otherwise. An absent per-type key
+    does NOT inherit ``default_prefix``.
     """
 
     model_config = ConfigDict(extra="allow")

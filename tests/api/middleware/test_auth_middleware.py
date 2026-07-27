@@ -353,9 +353,7 @@ class TestAuthMiddlewareAuditLogging:
         auth_port.is_enabled.return_value = True
         auth_port.get_strategy_name = MagicMock(return_value="test_strategy")
         auth_port.authenticate = AsyncMock(
-            return_value=AuthResult(
-                status=AuthStatus.INSUFFICIENT_PERMISSIONS, user_id="u1"
-            )
+            return_value=AuthResult(status=AuthStatus.INSUFFICIENT_PERMISSIONS, user_id="u1")
         )
         audit = MagicMock()
         app.add_middleware(

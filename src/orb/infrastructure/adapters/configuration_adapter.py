@@ -380,12 +380,21 @@ class ConfigurationAdapter(ConfigurationPort):
         self._config_manager.override_scheduler_strategy(strategy)
 
     def get_resource_prefix(self, resource_type: str) -> str:
-        """Get resource naming prefix for the given resource type."""
+        """Get resource naming prefix for the given resource type.
+
+        Returns the explicitly configured prefix for ``resource_type`` when the
+        key is present in ``resource.prefixes`` (including provider-specific keys
+        supplied as extra fields). When the key is absent, the prefix is empty —
+        an unset per-type prefix does NOT inherit ``default_prefix``. Letting a
+        global default silently prefix per-type resource names would rename
+        on-provider resources and tags, breaking prefix-keyed discovery and
+        cleanup and orphaning already-provisioned resources.
+        """
         try:
             resource_config = self._config_manager.app_config.resource
             if hasattr(resource_config.prefixes, resource_type):
                 return getattr(resource_config.prefixes, resource_type)
-            return resource_config.default_prefix
+            return ""
         except Exception as e:
             self._logger.warning(
                 "Failed to get resource prefix for '%s', using empty prefix: %s", resource_type, e

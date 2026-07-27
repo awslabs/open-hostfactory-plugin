@@ -322,8 +322,7 @@ class AWSTemplate(Template):
                 except (ValueError, TypeError):
                     # Let defaulting logic handle invalid values.
                     _logger.debug(
-                        "Ignoring invalid fleet_type %r in metadata; "
-                        "falling back to default",
+                        "Ignoring invalid fleet_type %r in metadata; falling back to default",
                         fleet_type_value,
                     )
         if (

@@ -83,6 +83,52 @@ async def test_enhanced_bearer_authenticate_success():
 
 
 # ---------------------------------------------------------------------------
+# claim extraction — canonical roles/permissions normalisation
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_enhanced_bearer_scalar_roles_claim_normalised():
+    """A bare-string roles claim is coerced to a list, not substring-matchable."""
+    strategy = _make_strategy()
+    now = int(time.time())
+    token = jwt.encode(
+        {"sub": "u", "iat": now, "exp": now + 3600, "roles": "administrator"},
+        _SECRET,
+        algorithm="HS256",
+    )
+
+    result = await strategy.validate_token(token)
+
+    assert result.user_roles == ["administrator"]
+    assert result.has_role("admin") is False
+
+
+@pytest.mark.asyncio
+@pytest.mark.unit
+async def test_enhanced_bearer_permissions_claim_extracted():
+    """Explicit permissions claim is surfaced on the AuthResult."""
+    strategy = _make_strategy()
+    now = int(time.time())
+    token = jwt.encode(
+        {
+            "sub": "u",
+            "iat": now,
+            "exp": now + 3600,
+            "roles": ["operator"],
+            "permissions": ["templates.read"],
+        },
+        _SECRET,
+        algorithm="HS256",
+    )
+
+    result = await strategy.validate_token(token)
+
+    assert result.permissions == ["templates.read"]
+
+
+# ---------------------------------------------------------------------------
 # authenticate() — missing header
 # ---------------------------------------------------------------------------
 

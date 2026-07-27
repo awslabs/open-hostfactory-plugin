@@ -77,7 +77,7 @@ class ListRequestsOrchestrator(OrchestratorBase[ListRequestsInput, ListRequestsO
                 sort=sort,
             )
 
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("ListRequests", self._query_bus.execute(query))
         if isinstance(result, Paginated):
             items = [self._to_dict(r) for r in result.items]
             total_count = result.total_count

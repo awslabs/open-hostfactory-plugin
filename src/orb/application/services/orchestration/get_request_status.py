@@ -39,7 +39,9 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
 
         if input.all_requests:
             query = SyncAndListActiveRequestsQuery(all_resources=True, limit=None)
-            results = await self._query_bus.execute(query)
+            results = await self._dispatch(
+                "GetRequestStatus.listActive", self._query_bus.execute(query)
+            )
             items = results.items if isinstance(results, Paginated) else (results or [])
             return GetRequestStatusOutput(requests=[self._to_dict(r) for r in items])
 
@@ -50,7 +52,15 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
         return GetRequestStatusOutput(requests=await self._fetch_once(input))
 
     async def _fetch_once(self, input: GetRequestStatusInput) -> list[dict]:
-        """Fetch a single status snapshot for every requested ID."""
+        """Fetch a single status snapshot for every requested ID.
+
+        Bulk per-request path: a single bad ID must NOT fail the whole batch,
+        so each request is queried independently and any failure is folded
+        into that request's own result dict rather than re-raised. This is a
+        deliberate divergence from the single-dispatch _dispatch() re-raise
+        pattern used elsewhere — multi-ID callers rely on partial results.
+        Every failure is still logged before being captured (see below).
+        """
         request_dicts = []
         for request_id in input.request_ids:
             try:

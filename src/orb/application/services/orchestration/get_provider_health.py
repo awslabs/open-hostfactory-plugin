@@ -27,7 +27,7 @@ class GetProviderHealthOrchestrator(
             provider_name=input.provider_name,
             provider_type=input.provider_type,
         )
-        health = await self._query_bus.execute(query)
+        health = await self._dispatch("GetProviderHealth", self._query_bus.execute(query))
         return GetProviderHealthOutput(
             health=health if isinstance(health, dict) else {},
             message="Provider health retrieved successfully",

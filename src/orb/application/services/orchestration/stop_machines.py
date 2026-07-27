@@ -48,13 +48,16 @@ class StopMachinesOrchestrator(OrchestratorBase[StopMachinesInput, StopMachinesO
         )
 
         if input.all_machines:
-            result = await self._query_bus.execute(
-                ListMachinesQuery(
-                    status="running",
-                    provider_name=input.provider_name,
-                    provider_type=input.provider_type,
-                    filter_expressions=input.filter_expressions,
-                )
+            result = await self._dispatch(
+                "StopMachines.list",
+                self._query_bus.execute(
+                    ListMachinesQuery(
+                        status="running",
+                        provider_name=input.provider_name,
+                        provider_type=input.provider_type,
+                        filter_expressions=input.filter_expressions,
+                    )
+                ),
             )
             machine_dtos = result.items if isinstance(result, Paginated) else (result or [])
             machine_ids = [m.machine_id for m in machine_dtos]
@@ -123,7 +126,7 @@ class StopMachinesOrchestrator(OrchestratorBase[StopMachinesInput, StopMachinesO
         command = ExecuteProviderOperationCommand(
             operation=operation, strategy_override=strategy_override
         )
-        await self._command_bus.execute(command)
+        await self._dispatch("StopMachines", self._command_bus.execute(command))
 
         if command.result and command.result.get("success"):
             stop_results: dict[str, bool] = command.result.get("data", {}).get("results", {})

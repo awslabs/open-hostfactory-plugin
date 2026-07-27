@@ -86,7 +86,7 @@ class CancelRequestOrchestrator(OrchestratorBase[CancelRequestInput, CancelReque
                 return_message = f"Return failed: {exc}"
 
         command = CancelRequestCommand(request_id=input.request_id, reason=input.reason)
-        await self._command_bus.execute(command)
+        await self._dispatch("CancelRequest", self._command_bus.execute(command))
 
         status = (
             command.final_status

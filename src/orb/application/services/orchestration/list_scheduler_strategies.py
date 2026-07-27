@@ -24,7 +24,7 @@ class ListSchedulerStrategiesOrchestrator(
     async def execute(self, input: ListSchedulerStrategiesInput) -> ListSchedulerStrategiesOutput:  # type: ignore[return]
         self._logger.info("ListSchedulerStrategiesOrchestrator: executing")
         query = ListSchedulerStrategiesQuery()
-        response = await self._query_bus.execute(query)
+        response = await self._dispatch("ListSchedulerStrategies", self._query_bus.execute(query))
         strategies = [s.model_dump() for s in response.strategies]
         return ListSchedulerStrategiesOutput(
             strategies=strategies,

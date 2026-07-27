@@ -63,7 +63,7 @@ class ListMachinesOrchestrator(OrchestratorBase[ListMachinesInput, ListMachinesO
             sort=input.sort if input.sort else _DEFAULT_SORT,
             sync=input.sync,
         )
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("ListMachines", self._query_bus.execute(query))
 
         if isinstance(result, Paginated):
             items: list[MachineDTO] = result.items

@@ -24,6 +24,6 @@ class GetSchedulerConfigOrchestrator(
     async def execute(self, input: GetSchedulerConfigInput) -> GetSchedulerConfigOutput:  # type: ignore[return]
         self._logger.info("GetSchedulerConfigOrchestrator: executing")
         query = GetSchedulerConfigurationQuery()
-        response = await self._query_bus.execute(query)
+        response = await self._dispatch("GetSchedulerConfig", self._query_bus.execute(query))
         config = response.model_dump() if hasattr(response, "model_dump") else {}
         return GetSchedulerConfigOutput(config=config)

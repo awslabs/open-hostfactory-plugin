@@ -32,7 +32,7 @@ class UpdateTemplateOrchestrator(OrchestratorBase[UpdateTemplateInput, UpdateTem
             image_id=input.image_id,
             configuration=input.configuration,
         )
-        await self._command_bus.execute(command)
+        await self._dispatch("UpdateTemplate", self._command_bus.execute(command))
 
         return UpdateTemplateOutput(
             template_id=input.template_id,

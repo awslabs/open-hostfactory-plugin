@@ -24,6 +24,10 @@ class DeleteTemplateOrchestrator(OrchestratorBase[DeleteTemplateInput, DeleteTem
     async def execute(self, input: DeleteTemplateInput) -> DeleteTemplateOutput:  # type: ignore[return]
         self._logger.info("DeleteTemplateOrchestrator: template_id=%s", input.template_id)
 
+        # EntityNotFoundError is a legitimate business outcome here (nothing to
+        # delete → deleted=False), so it is caught and mapped rather than
+        # logged as an error. Any other failure is logged and re-raised,
+        # matching the OrchestratorBase._dispatch contract.
         command = DeleteTemplateCommand(template_id=input.template_id)
         try:
             await self._command_bus.execute(command)
@@ -32,6 +36,9 @@ class DeleteTemplateOrchestrator(OrchestratorBase[DeleteTemplateInput, DeleteTem
                 template_id=input.template_id,
                 deleted=False,
             )
+        except Exception as exc:
+            self._logger.error("DeleteTemplate failed: %s", exc)
+            raise
 
         return DeleteTemplateOutput(
             template_id=input.template_id,

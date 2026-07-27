@@ -40,7 +40,7 @@ class AcquireMachinesOrchestrator(OrchestratorBase[AcquireMachinesInput, Acquire
             requested_count=input.requested_count,
             additional_data=input.additional_data,
         )
-        await self._command_bus.execute(command)
+        await self._dispatch("AcquireMachines", self._command_bus.execute(command))
         request_id: str = command.created_request_id or ""
 
         status = "pending"

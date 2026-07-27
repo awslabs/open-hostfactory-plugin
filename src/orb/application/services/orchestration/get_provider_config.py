@@ -24,7 +24,7 @@ class GetProviderConfigOrchestrator(
     async def execute(self, input: GetProviderConfigInput) -> GetProviderConfigOutput:  # type: ignore[return]
         self._logger.info("GetProviderConfigOrchestrator: executing")
         query = GetProviderConfigQuery()
-        config_dto = await self._query_bus.execute(query)
+        config_dto = await self._dispatch("GetProviderConfig", self._query_bus.execute(query))
         # Convert ProviderConfigDTO to dict
         config_dict = config_dto.model_dump() if hasattr(config_dto, "model_dump") else {}
         return GetProviderConfigOutput(

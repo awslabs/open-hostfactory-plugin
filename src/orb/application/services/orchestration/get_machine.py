@@ -24,9 +24,16 @@ class GetMachineOrchestrator(OrchestratorBase[GetMachineInput, GetMachineOutput]
     async def execute(self, input: GetMachineInput) -> GetMachineOutput:  # type: ignore[return]
         self._logger.info("GetMachineOrchestrator: machine_id=%s", input.machine_id)
 
+        # EntityNotFoundError is a legitimate business outcome here (machine
+        # absent → machine=None), so it is caught and mapped rather than logged
+        # as an error. Any other failure is logged and re-raised, matching the
+        # OrchestratorBase._dispatch contract used by the other orchestrators.
         try:
             query = GetMachineQuery(machine_id=input.machine_id)
             result = await self._query_bus.execute(query)
             return GetMachineOutput(machine=result)
         except EntityNotFoundError:
             return GetMachineOutput(machine=None)
+        except Exception as exc:
+            self._logger.error("GetMachine failed: %s", exc)
+            raise

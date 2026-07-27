@@ -24,7 +24,7 @@ class ListStorageStrategiesOrchestrator(
     async def execute(self, input: ListStorageStrategiesInput) -> ListStorageStrategiesOutput:  # type: ignore[return]
         self._logger.info("ListStorageStrategiesOrchestrator: executing")
         query = ListStorageStrategiesQuery()
-        response = await self._query_bus.execute(query)
+        response = await self._dispatch("ListStorageStrategies", self._query_bus.execute(query))
         strategies = [s.model_dump() for s in response.strategies]
         return ListStorageStrategiesOutput(
             strategies=strategies,

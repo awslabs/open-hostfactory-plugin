@@ -53,7 +53,7 @@ class ListTemplatesOrchestrator(OrchestratorBase[ListTemplatesInput, ListTemplat
             q=input.q,
             sort=input.sort,
         )
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("ListTemplates", self._query_bus.execute(query))
 
         # Handler returns Paginated. Older callers might still see list[T];
         # tolerate both shapes so this lands without flipping every caller.

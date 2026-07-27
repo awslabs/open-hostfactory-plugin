@@ -617,3 +617,32 @@ class TestListResources:
         svc = _make_service()
         svc.ec2_client.describe_vpcs.return_value = {"Vpcs": []}
         assert svc.list_resources("vpcs") == []
+
+    def test_ipv6_only_vpc_without_cidr_block_does_not_raise(self):
+        # An IPv6-only VPC has no IPv4 'CidrBlock'. That is a legitimate AWS
+        # response, not a parse failure — discovery must default the field
+        # rather than raise KeyError (which would surface as a spurious 5xx).
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.return_value = {
+            "Vpcs": [{"VpcId": "vpc-ipv6", "IsDefault": False, "Tags": []}]
+        }
+        result = svc.list_resources("vpcs")
+        assert result[0]["id"] == "vpc-ipv6"
+        assert result[0]["cidr_block"] == ""
+
+    def test_ipv6_only_subnet_without_cidr_block_does_not_raise(self):
+        svc = _make_service()
+        svc.ec2_client.describe_subnets.return_value = {
+            "Subnets": [
+                {
+                    "SubnetId": "subnet-ipv6",
+                    "VpcId": "vpc-001",
+                    "AvailabilityZone": "us-east-1a",
+                    "Tags": [],
+                }
+            ]
+        }
+        svc.ec2_client.describe_route_tables.return_value = {"RouteTables": []}
+        result = svc.list_resources("subnets", vpc_id="vpc-001")
+        assert result[0]["id"] == "subnet-ipv6"
+        assert result[0]["cidr_block"] == ""

@@ -173,6 +173,44 @@ class TestDiscoverValidation:
             resp = client.get("/providers/discover/nope/vpcs")
         assert resp.status_code == 404
 
+    def test_null_strategy_returns_404(self):
+        registry = MagicMock()
+        registry.ensure_provider_type_registered.return_value = True
+        registry.get_or_create_strategy.return_value = None
+        app = _make_app()
+        with patch(
+            "orb.providers.registry.provider_registry.get_provider_registry",
+            return_value=registry,
+        ):
+            client = TestClient(app, raise_server_exceptions=False)
+            resp = client.get("/providers/discover/aws/vpcs")
+        assert resp.status_code == 404
+
+    def test_keyerror_from_discovery_surfaces_as_5xx_not_404(self):
+        # A KeyError raised while parsing an AWS response (e.g. an IPv6-only
+        # subnet with no 'CidrBlock') is a LookupError subclass. It must NOT be
+        # mistaken for provider-not-found (404): a genuine server-side parse
+        # failure has to surface as 5xx so callers can distinguish the two.
+        strategy = MagicMock()
+        strategy.list_resources.side_effect = KeyError("CidrBlock")
+        app = _make_app()
+        with _patch_registry(strategy):
+            client = TestClient(app, raise_server_exceptions=False)
+            resp = client.get("/providers/discover/aws/vpcs")
+        assert resp.status_code >= 500
+        assert resp.status_code != 404
+
+    def test_indexerror_from_discovery_surfaces_as_5xx_not_404(self):
+        # IndexError is also a LookupError subclass — same guarantee as KeyError.
+        strategy = MagicMock()
+        strategy.list_resources.side_effect = IndexError("list index out of range")
+        app = _make_app()
+        with _patch_registry(strategy):
+            client = TestClient(app, raise_server_exceptions=False)
+            resp = client.get("/providers/discover/aws/vpcs")
+        assert resp.status_code >= 500
+        assert resp.status_code != 404
+
     def test_provider_without_discovery_returns_404(self):
         strategy = MagicMock(spec=[])  # no list_resources attribute
         app = _make_app()
@@ -238,6 +276,40 @@ class TestDiscoverCaching:
 
         assert body["cached"] is False
         assert strategy.list_resources.call_count == 2
+
+    def test_cache_is_bounded_and_evicts_oldest(self):
+        # A caller-controlled vpc_id is part of the cache key. Feeding many
+        # distinct vpc_ids must not grow the cache without bound: the size cap
+        # is enforced and the oldest entries are evicted LRU-style.
+        cap = providers_module._DISCOVERY_CACHE_MAX_ENTRIES
+        value = [{"id": "subnet-x"}]
+        # Populate one past the cap.
+        for i in range(cap + 5):
+            providers_module._discovery_cache_put(("aws", "subnets", f"vpc-{i}"), value)
+
+        assert len(providers_module._discovery_cache) == cap
+        # The earliest-inserted keys were evicted; the most recent survive.
+        assert ("aws", "subnets", "vpc-0") not in providers_module._discovery_cache
+        assert ("aws", "subnets", f"vpc-{cap + 4}") in providers_module._discovery_cache
+
+        # A fresh key still works after eviction.
+        assert providers_module._discovery_cache_get(("aws", "subnets", f"vpc-{cap + 4}")) == value
+
+    def test_put_sweeps_expired_entries(self):
+        # Expired entries are otherwise only dropped when re-requested; a put
+        # must proactively sweep them so stale keys never count toward the cap.
+        stale_key = ("aws", "vpcs", "stale")
+        providers_module._discovery_cache_put(stale_key, [{"id": "old"}])
+        # Rewind its timestamp beyond the TTL relative to the monotonic clock.
+        _, value = providers_module._discovery_cache[stale_key]
+        expired_at = time.monotonic() - providers_module._DISCOVERY_CACHE_TTL_SECONDS - 1
+        providers_module._discovery_cache[stale_key] = (expired_at, value)
+
+        # A put for a different key sweeps the expired one.
+        providers_module._discovery_cache_put(("aws", "vpcs", "fresh"), [{"id": "new"}])
+
+        assert stale_key not in providers_module._discovery_cache
+        assert ("aws", "vpcs", "fresh") in providers_module._discovery_cache
 
     def test_genuinely_empty_account_is_cached(self):
         # An account that legitimately has no resources returns [] with no error.

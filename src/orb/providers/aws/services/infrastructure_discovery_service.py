@@ -99,11 +99,14 @@ class AWSInfrastructureDiscoveryService:
 
             for vpc in response["Vpcs"]:
                 name = self._get_name_tag(vpc.get("Tags", []))
+                vpc_id = vpc["VpcId"]
                 vpcs.append(
                     VPCInfo(
-                        id=vpc["VpcId"],
-                        name=name or vpc["VpcId"],
-                        cidr_block=vpc["CidrBlock"],
+                        id=vpc_id,
+                        name=name or vpc_id,
+                        # IPv6-only VPCs have no IPv4 CidrBlock; default to ""
+                        # rather than raising KeyError on a legitimate response.
+                        cidr_block=vpc.get("CidrBlock", ""),
                         is_default=vpc.get("IsDefault", False),
                     )
                 )
@@ -144,15 +147,18 @@ class AWSInfrastructureDiscoveryService:
             subnets = []
             for subnet in response["Subnets"]:
                 name = self._get_name_tag(subnet.get("Tags", []))
-                is_public = subnet_public_map.get(subnet["SubnetId"], False)
+                subnet_id = subnet["SubnetId"]
+                is_public = subnet_public_map.get(subnet_id, False)
 
                 subnets.append(
                     SubnetInfo(
-                        id=subnet["SubnetId"],
-                        name=name or subnet["SubnetId"],
-                        vpc_id=subnet["VpcId"],
-                        availability_zone=subnet["AvailabilityZone"],
-                        cidr_block=subnet["CidrBlock"],
+                        id=subnet_id,
+                        name=name or subnet_id,
+                        vpc_id=subnet.get("VpcId", vpc_id),
+                        availability_zone=subnet.get("AvailabilityZone", ""),
+                        # IPv6-only subnets have no IPv4 CidrBlock; default to ""
+                        # rather than raising KeyError on a legitimate response.
+                        cidr_block=subnet.get("CidrBlock", ""),
                         is_public=is_public,
                     )
                 )
@@ -181,12 +187,13 @@ class AWSInfrastructureDiscoveryService:
             for sg in response["SecurityGroups"]:
                 rule_summary = self._summarize_sg_rules(sg)
 
+                sg_id = sg["GroupId"]
                 security_groups.append(
                     SecurityGroupInfo(
-                        id=sg["GroupId"],
-                        name=sg["GroupName"],
-                        description=sg["Description"],
-                        vpc_id=sg["VpcId"],
+                        id=sg_id,
+                        name=sg.get("GroupName", sg_id),
+                        description=sg.get("Description", ""),
+                        vpc_id=sg.get("VpcId", vpc_id),
                         rule_summary=rule_summary,
                     )
                 )

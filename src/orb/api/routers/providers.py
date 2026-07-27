@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import threading
 import time
+from collections import OrderedDict
 from typing import Any, Optional, cast
 
 try:
@@ -14,6 +15,7 @@ except ImportError:
     raise ImportError("FastAPI routing requires: pip install orb-py[api]") from None
 
 from orb.api.dependencies import get_config_manager, get_di_container, require_role
+from orb.domain.base.exceptions import EntityNotFoundError, InfrastructureError
 from orb.infrastructure.error.decorators import handle_rest_exceptions
 from orb.infrastructure.logging.logger import get_logger
 
@@ -34,7 +36,17 @@ _DISCOVERY_RESOURCE_TYPES: dict[str, str] = {
 # Discovery results are cached for 5 minutes: infrastructure topology changes
 # rarely, and each miss issues several EC2 Describe* calls.
 _DISCOVERY_CACHE_TTL_SECONDS = 300
-_discovery_cache: dict[tuple[str, str, str], tuple[float, list[dict[str, Any]]]] = {}
+# Hard cap on cached entries. The cache key includes the caller-supplied
+# ``vpc_id`` query parameter, and AWS vpc-id filters return an empty-but-
+# successful result for unknown IDs, so an operator issuing many distinct
+# vpc_id values could otherwise grow the cache without bound. Bounding the
+# size (with LRU eviction) keeps memory usage predictable.
+_DISCOVERY_CACHE_MAX_ENTRIES = 512
+# Insertion-ordered so the oldest entry is the first key — enabling O(1)
+# LRU-style eviction once the size cap is reached.
+_discovery_cache: "OrderedDict[tuple[str, str, str], tuple[float, list[dict[str, Any]]]]" = (
+    OrderedDict()
+)
 _discovery_cache_lock = threading.Lock()
 
 VPC_ID_QUERY = Query(
@@ -55,13 +67,37 @@ def _discovery_cache_get(
         if (time.monotonic() - cached_at) >= _DISCOVERY_CACHE_TTL_SECONDS:
             _discovery_cache.pop(key, None)
             return None
+        # Mark as most-recently-used so it survives size-cap eviction.
+        _discovery_cache.move_to_end(key)
         return value
 
 
 def _discovery_cache_put(key: tuple[str, str, str], value: list[dict[str, Any]]) -> None:
-    """Store a discovery result with the current timestamp."""
+    """Store a discovery result, evicting expired and overflowing entries.
+
+    Before inserting, expired entries are swept (they are otherwise only
+    dropped when re-requested) and, once the size cap is reached, the oldest
+    entries are evicted LRU-style. This keeps the cache bounded even when the
+    caller-supplied ``vpc_id`` produces an unbounded set of distinct keys.
+    """
+    now = time.monotonic()
     with _discovery_cache_lock:
-        _discovery_cache[key] = (time.monotonic(), value)
+        # Sweep expired entries so stale keys never count toward the cap.
+        expired = [
+            k
+            for k, (cached_at, _) in _discovery_cache.items()
+            if (now - cached_at) >= _DISCOVERY_CACHE_TTL_SECONDS
+        ]
+        for k in expired:
+            _discovery_cache.pop(k, None)
+
+        # Refresh/insert as most-recently-used.
+        _discovery_cache[key] = (now, value)
+        _discovery_cache.move_to_end(key)
+
+        # Enforce the hard cap by evicting the oldest entries.
+        while len(_discovery_cache) > _DISCOVERY_CACHE_MAX_ENTRIES:
+            _discovery_cache.popitem(last=False)
 
 
 async def _probe_provider_health(provider_name: str) -> tuple[str, dict[str, Any]]:
@@ -400,25 +436,41 @@ def _discover_resources(
     """Resolve the provider strategy and return discovered resources.
 
     Runs synchronously (issues blocking boto3 EC2 Describe* calls); callers
-    offload it to a worker thread. Raises ``LookupError`` when the provider is
-    not registered and ``NotImplementedError`` when the strategy has no
-    machine-readable discovery.
+    offload it to a worker thread. Raises ``EntityNotFoundError`` when the
+    provider is not registered and ``NotImplementedError`` when the strategy
+    has no machine-readable discovery.
+
+    A dedicated ``EntityNotFoundError`` — rather than the broad ``LookupError``
+    — signals the not-registered case, so genuine ``KeyError`` / ``IndexError``
+    (both ``LookupError`` subclasses) raised while parsing an AWS response
+    surface as 5xx instead of being mistaken for provider-not-found (404).
     """
     from orb.providers.registry.provider_registry import get_provider_registry
 
     registry = get_provider_registry()
     if not registry.ensure_provider_type_registered(provider_api):
-        raise LookupError(provider_api)
+        raise EntityNotFoundError("Provider", provider_api)
 
     strategy = registry.get_or_create_strategy(provider_api)
     if strategy is None:
-        raise LookupError(provider_api)
+        raise EntityNotFoundError("Provider", provider_api)
 
     list_resources = getattr(strategy, "list_resources", None)
     if not callable(list_resources):
         raise NotImplementedError(provider_api)
 
-    return cast("list[dict[str, Any]]", list_resources(resource_type, vpc_id))
+    try:
+        return cast("list[dict[str, Any]]", list_resources(resource_type, vpc_id))
+    except Exception as exc:
+        # A failure while issuing the boto3 Describe* calls or parsing their
+        # responses (e.g. a KeyError from an unexpected AWS response shape) is a
+        # server-side problem, not a bad client request. Wrap it as an
+        # InfrastructureError so it surfaces as 5xx — never as a 404
+        # provider-not-found (only the explicit not-registered / null-strategy
+        # cases above yield that) nor a 400 client error.
+        raise InfrastructureError(
+            f"Resource discovery failed for provider '{provider_api}'"
+        ) from exc
 
 
 @router.get(
@@ -482,7 +534,7 @@ async def discover_provider_resources(
         resources = await run_in_threadpool(
             _discover_resources, provider_api, normalised_type, vpc_id
         )
-    except LookupError:
+    except EntityNotFoundError:
         raise HTTPException(
             status_code=404, detail=f"Provider '{provider_api}' is not available."
         ) from None

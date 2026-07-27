@@ -283,6 +283,7 @@ def create_fastapi_app(server_config: Any) -> Any:
     from orb.api.middleware import (
         AuditLogMiddleware,
         AuthMiddleware,
+        ForwardedProtoMiddleware,
         LoggingMiddleware,
         RateLimitMiddleware,
         ReadOnlyMiddleware,
@@ -337,6 +338,32 @@ def create_fastapi_app(server_config: Any) -> Any:
     if _require_https:
         app.add_middleware(cast(Any, HTTPSRedirectMiddleware))
         logger.info("HTTPS redirect middleware enabled (HTTP requests redirect to HTTPS with 307)")
+
+        # Behind a TLS-terminating reverse proxy the connection to ORB is plain
+        # HTTP, so scope["scheme"] is "http" and HTTPSRedirectMiddleware would
+        # 307-redirect every request into an infinite loop (the proxy forwards
+        # the follow-up as HTTP again).  Resolve the real scheme from
+        # X-Forwarded-Proto for configured trusted proxies BEFORE the redirect
+        # middleware runs.  Added after HTTPSRedirectMiddleware so it executes
+        # first (Starlette runs middleware in reverse registration order).
+        # Only trusted proxies are honoured, so HTTPS enforcement is not
+        # weakened for direct/untrusted clients.
+        if server_config.trusted_proxies:
+            app.add_middleware(
+                cast(Any, ForwardedProtoMiddleware),
+                trusted_proxies=server_config.trusted_proxies,
+            )
+            logger.info(
+                "X-Forwarded-Proto resolution enabled for trusted proxies "
+                "(prevents HTTPS redirect loops behind TLS-terminating proxies)"
+            )
+        else:
+            logger.warning(
+                "require_https is enabled but no trusted_proxies are configured. "
+                "If ORB runs behind a reverse proxy that terminates TLS and forwards "
+                "plain HTTP, requests will be caught in an HTTPS redirect loop. Set "
+                "server.trusted_proxies to the proxy IP(s) so X-Forwarded-Proto is honoured."
+            )
 
     # Add trusted host middleware only when a restrictive allowlist is provided.
     # An empty list or a wildcard ('*') disables Host-header validation entirely,

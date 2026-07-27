@@ -68,6 +68,16 @@ MAX_VISIBLE_COLUMNS = 5
 _TERMINAL_STATUSES: set[str] = {"complete", "failed", "cancelled", "timeout", "partial"}
 _FAILURE_LIKE_STATUSES: set[str] = {"failed", "partial", "timeout"}
 
+# Backend SSE event types (domain-event class names emitted by the event-bus
+# bridge in bootstrap.core_services) that carry a request status transition.
+# The request list subscribes to just these so it patches the affected row in
+# place instead of full-reloading on every unrelated machine/template event.
+_REQUEST_STATUS_EVENT_TYPES: set[str] = {
+    "RequestStatusChangedEvent",
+    "RequestCompletedEvent",
+    "RequestFailedEvent",
+}
+
 
 def _empty_request_skeleton() -> dict[str, Any]:
     """UI mirror of REST snake_case response shape.
@@ -1221,6 +1231,95 @@ class RequestsState(AppState):
         yield RequestsState.load
 
     _poll_started: bool = False
+
+    # Single-flight guard for the SSE live-update subscriber. Set True while
+    # ``stream_status_events`` holds an open connection so re-mounting the
+    # page never spawns a second concurrent subscriber writing to the list.
+    _sse_started: bool = False
+
+    @staticmethod
+    def _status_from_event(event_type: str, data: dict[str, Any]) -> tuple[str, str]:
+        """Extract ``(request_id, new_status)`` from an SSE request event payload.
+
+        Handles the three request-event shapes the backend event-bus bridge
+        emits (see ``bootstrap.core_services``):
+
+        - ``RequestStatusChangedEvent`` → ``new_status``
+        - ``RequestCompletedEvent``     → ``completion_status``
+        - ``RequestFailedEvent``        → ``"failed"``
+
+        The wire status is lower-cased to match the list's snake_case wire
+        contract. Returns ``("", "")`` when the payload carries no request id
+        or no derivable status so the caller can skip it.
+        """
+        rid = str(data.get("request_id") or data.get("aggregate_id") or "")
+        if not rid:
+            return "", ""
+        if event_type == "RequestFailedEvent":
+            status = "failed"
+        elif event_type == "RequestCompletedEvent":
+            status = str(data.get("completion_status") or "complete")
+        else:
+            status = str(data.get("new_status") or data.get("status") or "")
+        return rid, status.lower()
+
+    def _apply_request_status_event(self, event_type: str, data: dict[str, Any]) -> bool:
+        """Patch the matching request row's status from an SSE event.
+
+        Matches on ``request_id`` and rewrites only the ``status`` field of
+        that row (the status badge and progress-bar colour derive from it).
+        Rows for requests not currently loaded — e.g. filtered out by the
+        active tab — are ignored; they surface on the next full load.
+
+        Returns True when a row was actually changed so callers/tests can
+        assert the list was patched. Reassigns ``self.requests`` to a new
+        list so Reflex detects the mutation and recomputes ``request_rows``.
+        """
+        rid, status = self._status_from_event(event_type, data)
+        if not rid or not status:
+            return False
+        updated = False
+        new_rows: list[dict[str, Any]] = []
+        for r in self.requests:
+            if r.get("request_id") == rid and (r.get("status") or "").lower() != status:
+                patched = dict(r)
+                patched["status"] = status
+                new_rows.append(patched)
+                updated = True
+            else:
+                new_rows.append(r)
+        if updated:
+            self.requests = new_rows
+        return updated
+
+    @rx.event(background=True)
+    async def stream_status_events(self) -> None:
+        """Subscribe to the backend SSE stream and patch request rows live.
+
+        Consumes ``RequestStatusChanged`` / ``RequestCompleted`` /
+        ``RequestFailed`` events pushed over the global SSE endpoint and
+        patches the affected row in place — no full page reload, so the
+        operator's scroll position, checkbox selection and any open drawer
+        are preserved.
+
+        ``api.subscribe_events`` (via ``sse_client.stream_sse``) already
+        reconnects with exponential backoff (max 30 s) on disconnect, so this
+        loop only needs to drain events. Single-flight guarded by
+        ``_sse_started`` so a page re-mount does not open a second stream.
+        """
+        async with self:
+            if self._sse_started:
+                return
+            self._sse_started = True
+        try:
+            async for event_type, data in api.subscribe_events(
+                event_types=_REQUEST_STATUS_EVENT_TYPES
+            ):
+                async with self:
+                    self._apply_request_status_event(event_type, data)
+        finally:
+            async with self:
+                self._sse_started = False
 
     @rx.event(background=True)
     async def auto_refresh(self) -> None:
@@ -2435,5 +2534,6 @@ def requests_page() -> rx.Component:
             RequestsState.load,
             RequestsState.open_from_query,
             RequestsState.auto_refresh,
+            RequestsState.stream_status_events,
         ],
     )

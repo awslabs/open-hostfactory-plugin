@@ -182,6 +182,145 @@ class TestRequestsStateFilterChaining:
         assert s.provider_filter == "aws"
 
 
+class TestRequestsStateSseLiveUpdates:
+    """RequestsState live-updates request rows from the backend SSE stream.
+
+    Covers ``_status_from_event`` payload extraction, ``_apply_request_status_event``
+    row patching, and ``stream_status_events`` draining events from a mocked
+    ``api.subscribe_events`` async generator.
+    """
+
+    def _make_state(self, requests=None):
+        from orb.ui.pages.requests import RequestsState
+
+        TestableState = _make_testable_subclass(RequestsState)
+        s = TestableState.__new__(TestableState)
+        s.requests = requests if requests is not None else []
+        s._sse_started = False
+        return s
+
+    # --- _status_from_event -------------------------------------------------
+
+    def test_status_from_event_status_changed(self):
+        s = self._make_state()
+        rid, status = s._status_from_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-1", "new_status": "IN_PROGRESS"},
+        )
+        assert rid == "req-1"
+        assert status == "in_progress"
+
+    def test_status_from_event_completed_uses_completion_status(self):
+        s = self._make_state()
+        rid, status = s._status_from_event(
+            "RequestCompletedEvent",
+            {"request_id": "req-2", "completion_status": "complete"},
+        )
+        assert rid == "req-2"
+        assert status == "complete"
+
+    def test_status_from_event_failed_is_failed(self):
+        s = self._make_state()
+        rid, status = s._status_from_event(
+            "RequestFailedEvent",
+            {"request_id": "req-3", "error_message": "boom"},
+        )
+        assert rid == "req-3"
+        assert status == "failed"
+
+    def test_status_from_event_falls_back_to_aggregate_id(self):
+        s = self._make_state()
+        rid, _status = s._status_from_event(
+            "RequestStatusChangedEvent",
+            {"aggregate_id": "req-4", "new_status": "complete"},
+        )
+        assert rid == "req-4"
+
+    def test_status_from_event_no_id_returns_empty(self):
+        s = self._make_state()
+        assert s._status_from_event("RequestStatusChangedEvent", {"new_status": "x"}) == ("", "")
+
+    # --- _apply_request_status_event ---------------------------------------
+
+    def test_apply_patches_matching_row_only(self):
+        s = self._make_state(
+            [
+                {"request_id": "req-1", "status": "pending"},
+                {"request_id": "req-2", "status": "pending"},
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-1", "new_status": "in_progress"},
+        )
+        assert changed is True
+        assert s.requests[0]["status"] == "in_progress"
+        assert s.requests[1]["status"] == "pending"
+
+    def test_apply_noop_when_status_unchanged(self):
+        s = self._make_state([{"request_id": "req-1", "status": "in_progress"}])
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-1", "new_status": "in_progress"},
+        )
+        assert changed is False
+
+    def test_apply_ignores_unknown_request(self):
+        s = self._make_state([{"request_id": "req-1", "status": "pending"}])
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-999", "new_status": "complete"},
+        )
+        assert changed is False
+        assert s.requests[0]["status"] == "pending"
+
+    # --- stream_status_events (drains the SSE generator) -------------------
+
+    @pytest.mark.asyncio
+    async def test_stream_status_events_applies_three_events_in_order(self):
+        """Emit 3 status events; assert all 3 patch the list in order."""
+        s = self._make_state(
+            [
+                {"request_id": "req-1", "status": "pending"},
+                {"request_id": "req-2", "status": "pending"},
+            ]
+        )
+
+        async def _fake_subscribe(event_types=None):
+            yield "RequestStatusChangedEvent", {"request_id": "req-1", "new_status": "in_progress"}
+            yield "RequestStatusChangedEvent", {"request_id": "req-2", "new_status": "in_progress"}
+            yield "RequestCompletedEvent", {"request_id": "req-1", "completion_status": "complete"}
+
+        with patch("orb.ui.pages.requests.api") as mock_api:
+            mock_api.subscribe_events = _fake_subscribe
+            await s.stream_status_events()
+
+        by_id = {r["request_id"]: r["status"] for r in s.requests}
+        assert by_id["req-1"] == "complete"
+        assert by_id["req-2"] == "in_progress"
+        assert s._sse_started is False
+
+    @pytest.mark.asyncio
+    async def test_stream_status_events_single_flight_guard(self):
+        """A second concurrent subscriber returns immediately (guarded)."""
+        s = self._make_state([{"request_id": "req-1", "status": "pending"}])
+        s._sse_started = True
+
+        called = False
+
+        async def _fake_subscribe(event_types=None):
+            nonlocal called
+            called = True
+            if False:  # pragma: no cover - generator with no yields
+                yield
+
+        with patch("orb.ui.pages.requests.api") as mock_api:
+            mock_api.subscribe_events = _fake_subscribe
+            await s.stream_status_events()
+
+        assert called is False, "guarded subscriber must not open a second stream"
+
+
 class TestTemplatesStateFilterChaining:
     """TemplatesState.set_provider_filter triggers load; set_filter is client-side."""
 

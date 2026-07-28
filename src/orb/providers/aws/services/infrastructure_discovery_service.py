@@ -1,7 +1,13 @@
 """AWS Infrastructure Discovery Service - Handles infrastructure discovery operations."""
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Optional
+
+# Resource types exposed by the discovery REST endpoint / :meth:`list_resources`.
+VPCS = "vpcs"
+SUBNETS = "subnets"
+SECURITY_GROUPS = "security_groups"
+SUPPORTED_RESOURCE_TYPES = (VPCS, SUBNETS, SECURITY_GROUPS)
 
 from orb.domain.base.ports import LoggingPort
 from orb.domain.base.ports.console_port import ConsolePort
@@ -78,19 +84,29 @@ class AWSInfrastructureDiscoveryService:
         self.iam_client = session.client("iam", config=_config)
         self.sts_client = session.client("sts", config=_config)
 
-    def discover_vpcs(self) -> list[VPCInfo]:
-        """Discover VPCs with name tags and CIDR blocks."""
+    def discover_vpcs(self, raise_on_error: bool = False) -> list[VPCInfo]:
+        """Discover VPCs with name tags and CIDR blocks.
+
+        By default AWS errors are swallowed and an empty list is returned, which
+        suits the interactive/CLI console paths that degrade to "no VPCs found".
+        Set ``raise_on_error=True`` (used by :meth:`list_resources`) to let the
+        error propagate so callers can distinguish a genuinely-empty account from
+        a failed lookup and avoid caching an error as an empty success.
+        """
         try:
             response = self.ec2_client.describe_vpcs()
             vpcs = []
 
             for vpc in response["Vpcs"]:
                 name = self._get_name_tag(vpc.get("Tags", []))
+                vpc_id = vpc["VpcId"]
                 vpcs.append(
                     VPCInfo(
-                        id=vpc["VpcId"],
-                        name=name or vpc["VpcId"],
-                        cidr_block=vpc["CidrBlock"],
+                        id=vpc_id,
+                        name=name or vpc_id,
+                        # IPv6-only VPCs have no IPv4 CidrBlock; default to ""
+                        # rather than raising KeyError on a legitimate response.
+                        cidr_block=vpc.get("CidrBlock", ""),
                         is_default=vpc.get("IsDefault", False),
                     )
                 )
@@ -99,10 +115,15 @@ class AWSInfrastructureDiscoveryService:
 
         except Exception as e:
             self._logger.error("Failed to discover VPCs: %s", e)
+            if raise_on_error:
+                raise
             return []
 
-    def discover_subnets(self, vpc_id: str) -> list[SubnetInfo]:
-        """Discover subnets with AZ, type (public/private), CIDR."""
+    def discover_subnets(self, vpc_id: str, raise_on_error: bool = False) -> list[SubnetInfo]:
+        """Discover subnets with AZ, type (public/private), CIDR.
+
+        See :meth:`discover_vpcs` for the ``raise_on_error`` semantics.
+        """
         try:
             response = self.ec2_client.describe_subnets(
                 Filters=[{"Name": "vpc-id", "Values": [vpc_id]}]
@@ -126,15 +147,18 @@ class AWSInfrastructureDiscoveryService:
             subnets = []
             for subnet in response["Subnets"]:
                 name = self._get_name_tag(subnet.get("Tags", []))
-                is_public = subnet_public_map.get(subnet["SubnetId"], False)
+                subnet_id = subnet["SubnetId"]
+                is_public = subnet_public_map.get(subnet_id, False)
 
                 subnets.append(
                     SubnetInfo(
-                        id=subnet["SubnetId"],
-                        name=name or subnet["SubnetId"],
-                        vpc_id=subnet["VpcId"],
-                        availability_zone=subnet["AvailabilityZone"],
-                        cidr_block=subnet["CidrBlock"],
+                        id=subnet_id,
+                        name=name or subnet_id,
+                        vpc_id=subnet.get("VpcId", vpc_id),
+                        availability_zone=subnet.get("AvailabilityZone", ""),
+                        # IPv6-only subnets have no IPv4 CidrBlock; default to ""
+                        # rather than raising KeyError on a legitimate response.
+                        cidr_block=subnet.get("CidrBlock", ""),
                         is_public=is_public,
                     )
                 )
@@ -143,10 +167,17 @@ class AWSInfrastructureDiscoveryService:
 
         except Exception as e:
             self._logger.error("Failed to discover subnets: %s", e)
+            if raise_on_error:
+                raise
             return []
 
-    def discover_security_groups(self, vpc_id: str) -> list[SecurityGroupInfo]:
-        """Discover security groups with descriptions and rule summaries."""
+    def discover_security_groups(
+        self, vpc_id: str, raise_on_error: bool = False
+    ) -> list[SecurityGroupInfo]:
+        """Discover security groups with descriptions and rule summaries.
+
+        See :meth:`discover_vpcs` for the ``raise_on_error`` semantics.
+        """
         try:
             response = self.ec2_client.describe_security_groups(
                 Filters=[{"Name": "vpc-id", "Values": [vpc_id]}]
@@ -156,12 +187,13 @@ class AWSInfrastructureDiscoveryService:
             for sg in response["SecurityGroups"]:
                 rule_summary = self._summarize_sg_rules(sg)
 
+                sg_id = sg["GroupId"]
                 security_groups.append(
                     SecurityGroupInfo(
-                        id=sg["GroupId"],
-                        name=sg["GroupName"],
-                        description=sg["Description"],
-                        vpc_id=sg["VpcId"],
+                        id=sg_id,
+                        name=sg.get("GroupName", sg_id),
+                        description=sg.get("Description", ""),
+                        vpc_id=sg.get("VpcId", vpc_id),
                         rule_summary=rule_summary,
                     )
                 )
@@ -170,7 +202,51 @@ class AWSInfrastructureDiscoveryService:
 
         except Exception as e:
             self._logger.error("Failed to discover security groups: %s", e)
+            if raise_on_error:
+                raise
             return []
+
+    def list_resources(
+        self, resource_type: str, vpc_id: Optional[str] = None
+    ) -> list[dict[str, Any]]:
+        """Return discovered resources of ``resource_type`` as plain dicts.
+
+        This is the machine-readable entry point used by the discovery REST
+        endpoint. Unlike :meth:`discover_infrastructure` (which writes to a
+        console for the CLI), it returns serialisable data with no side effects.
+
+        Args:
+            resource_type: One of ``vpcs``, ``subnets``, ``security_groups``.
+            vpc_id: Required for ``subnets`` / ``security_groups`` to scope the
+                lookup to a single VPC.
+
+        Returns:
+            A list of dicts, one per resource. Empty when the account genuinely
+            has no such resources, or when a ``vpc_id`` is required but not
+            supplied.
+
+        Raises:
+            ValueError: When ``resource_type`` is not supported.
+            Exception: Propagates any underlying AWS/EC2 error. Unlike the CLI
+                discovery paths, this entry point does not swallow errors to an
+                empty list — callers (the REST endpoint) must be able to tell a
+                genuinely-empty account apart from a failed lookup so that a
+                transient error is never cached as an empty success.
+        """
+        if resource_type == VPCS:
+            return [asdict(v) for v in self.discover_vpcs(raise_on_error=True)]
+
+        if resource_type in (SUBNETS, SECURITY_GROUPS):
+            if not vpc_id:
+                return []
+            if resource_type == SUBNETS:
+                return [asdict(s) for s in self.discover_subnets(vpc_id, raise_on_error=True)]
+            return [asdict(sg) for sg in self.discover_security_groups(vpc_id, raise_on_error=True)]
+
+        raise ValueError(
+            f"Unsupported resource type '{resource_type}'. "
+            f"Supported: {', '.join(SUPPORTED_RESOURCE_TYPES)}."
+        )
 
     def _get_name_tag(self, tags: list) -> Optional[str]:
         """Extract Name tag from AWS tags list."""

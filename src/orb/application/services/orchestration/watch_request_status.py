@@ -50,7 +50,7 @@ class WatchRequestStatusOrchestrator(
         query = SyncAndGetRequestQuery(
             request_id=input.request_id, lightweight=False, skip_cache=True
         )
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("WatchRequestStatus", self._query_bus.execute(query))
 
         template_id = getattr(result, "template_id", None)
         machine_types: dict[str, int] = {}

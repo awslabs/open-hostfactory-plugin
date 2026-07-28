@@ -67,10 +67,10 @@ on:
         default: 'true'
       cache-key:
         description: >-
-          Pre-computed cache key from the caller's setup-cache step.  When
-          provided (recommended) the job hits the warm cache primed by the
-          caller's cache-management job.  When omitted the job falls back to
-          computing its own key (always cold — deps reinstalled).
+          Optional explicit cache key.  When provided the job restores (and, on
+          a miss, repopulates) the environment under this key.  When omitted the
+          job computes its own group-keyed key from the lockfile hash — the
+          first run on a new key installs and saves it, later runs hit warm.
         required: false
         type: string
         default: ''
@@ -122,10 +122,10 @@ jobs:
       - name: Setup UV with cached environment
         uses: ./.github/actions/setup-uv-cached
         with:
-          # Use the caller-supplied cache key when available so this job hits the
-          # warm cache primed by the caller's cache-management job.  Fallback
-          # mirrors the key format used by cache-management (dependencies type,
-          # group-keyed) so at least restore-keys can provide a partial hit.
+          # Use the caller-supplied cache key when available; otherwise derive
+          # the canonical group-keyed key from the lockfile hash.  setup-uv-cached
+          # restores on hit and saves the populated environment on a miss, so the
+          # cache warms itself with no separate priming job.
           cache-key: >-
             ${{
               inputs.cache-key != ''

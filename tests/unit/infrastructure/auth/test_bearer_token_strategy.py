@@ -162,6 +162,37 @@ class TestValidateToken:
         result = asyncio_run(s.validate_token(token))
         assert "admin" in result.user_roles
 
+    def test_scalar_roles_claim_is_normalised_to_list(self):
+        # A JWT carrying a bare-string roles claim must not be stored as a
+        # string (which would make has_role do substring matching).
+        s = _make_strategy()
+        now = int(time.time())
+        token = jwt.encode(
+            {"sub": "u", "iat": now, "exp": now + 3600, "roles": "administrator"},
+            _SECRET,
+            algorithm="HS256",
+        )
+        result = asyncio_run(s.validate_token(token))
+        assert result.user_roles == ["administrator"]
+        assert result.has_role("admin") is False
+
+    def test_permissions_claim_extracted(self):
+        s = _make_strategy()
+        now = int(time.time())
+        token = jwt.encode(
+            {
+                "sub": "u",
+                "iat": now,
+                "exp": now + 3600,
+                "roles": ["operator"],
+                "permissions": ["templates.read", "machines.create"],
+            },
+            _SECRET,
+            algorithm="HS256",
+        )
+        result = asyncio_run(s.validate_token(token))
+        assert result.permissions == ["templates.read", "machines.create"]
+
 
 # ---------------------------------------------------------------------------
 # refresh_token

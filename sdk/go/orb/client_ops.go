@@ -452,10 +452,33 @@ func (c *Client) GetProviderSchema(ctx context.Context, name string) (ProviderSc
 // ProviderHealth holds health information for all providers.
 type ProviderHealth = map[string]any
 
+// ProviderResources holds the resources discovered for a provider. The shape
+// varies by resource type, so it is left as a decoded JSON document.
+type ProviderResources = any
+
 // GetProvidersHealth returns health status for all registered providers.
 func (c *Client) GetProvidersHealth(ctx context.Context) (ProviderHealth, error) {
 	var resp ProviderHealth
 	if err := c.get(ctx, "/api/v1/providers/health", &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// DiscoverProviderResources discovers infrastructure resources of the given
+// type (e.g. vpcs, subnets, security_groups) for a provider so callers can
+// offer selection lists instead of free-text IDs. The "subnets" and
+// "security_groups" resource types require a vpcID to scope the lookup; pass
+// "" for resource types that do not take one.
+func (c *Client) DiscoverProviderResources(ctx context.Context, providerAPI, resourceType, vpcID string) (ProviderResources, error) {
+	path := "/api/v1/providers/discover/" + url.PathEscape(providerAPI) + "/" + url.PathEscape(resourceType)
+	if vpcID != "" {
+		q := url.Values{}
+		q.Set("vpc_id", vpcID)
+		path += "?" + q.Encode()
+	}
+	var resp ProviderResources
+	if err := c.get(ctx, path, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil

@@ -42,9 +42,9 @@ describe("SDK operation completeness vs OpenAPI spec", () => {
   const clientSource = fs.readFileSync(CLIENT_PATH, "utf8");
 
   it("declares exactly the operations the spec defines (guards against drift)", () => {
-    // Mirrors Go's `if len(ops) != 44` sentinel: if the spec grows or shrinks,
+    // Mirrors Go's operation-count sentinel: if the spec grows or shrinks,
     // this forces a deliberate update rather than silently under-covering.
-    expect(operationIds.length).toBe(45);
+    expect(operationIds.length).toBe(46);
   });
 
   it("covers every spec operationId in the hand-written client", () => {

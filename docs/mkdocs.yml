@@ -193,6 +193,7 @@ nav:
       - Python SDK: sdk/quickstart.md
       - Parameter & Method Reference: sdk/api-reference.md
       - Generate Your Own SDK: sdk/generating-sdks.md
+    - Authorization Claims: security/authorization.md
     - Security Scanning: security/security-scanning.md
   - Reference:
     - API Reference:
@@ -209,6 +210,7 @@ nav:
     - Testing:
       - Testing Guide: testing/readme.md
       - System Tests (onaws): testing/system-tests-onaws.md
+      - Moto Structural Limits: testing/moto-limits.md
     - Guides & Patterns:
       - Native Spec Guide: native-spec-guide.md
       - Provider Strategy: provider_strategy_guide.md

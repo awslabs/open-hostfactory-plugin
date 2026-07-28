@@ -649,7 +649,7 @@ class OrbClient private constructor(
     }
 
     // ---------------------------------------------------------------------------
-    // Providers — 4 operations
+    // Providers — 5 operations
     // ---------------------------------------------------------------------------
 
     /** listProviders — GET /api/v1/providers/ */
@@ -666,6 +666,27 @@ class OrbClient private constructor(
     /** getProvidersHealth — GET /api/v1/providers/health */
     suspend fun getProvidersHealth(): Map<String, Any?> =
         executeRaw(get("/api/v1/providers/health"))
+
+    /**
+     * discoverProviderResources — GET
+     * /api/v1/providers/discover/{provider_api}/{resource_type}
+     *
+     * Discovers infrastructure resources (e.g. vpcs, subnets, security_groups)
+     * for a provider so callers can offer selection lists instead of free-text
+     * IDs. The "subnets" and "security_groups" resource types require a [vpcId];
+     * pass null for types that do not.
+     */
+    suspend fun discoverProviderResources(
+        providerApi: String,
+        resourceType: String,
+        vpcId: String? = null,
+    ): Any? {
+        val params = buildMap<String, String> { vpcId?.let { put("vpc_id", it) } }
+        val json = handleResponse(
+            get("/api/v1/providers/discover/${encode(providerApi)}/${encode(resourceType)}", params),
+        )
+        return gson.fromJson(json, Any::class.java)
+    }
 
     // ---------------------------------------------------------------------------
     // Config — 7 operations

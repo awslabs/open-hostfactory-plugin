@@ -2129,6 +2129,74 @@
         }
       }
     },
+    "/api/v1/providers/discover/{provider_api}/{resource_type}": {
+      "get": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Discover Provider Infrastructure Resources",
+        "description": "Discovers infrastructure resources of the given type for a provider so the template form can offer dropdowns instead of free-text IDs. Supported resource types: vpcs, subnets, security_groups. 'subnets' and 'security_groups' require a 'vpc_id' query parameter. Results are cached for 5 minutes.",
+        "operationId": "discoverProviderResources",
+        "parameters": [
+          {
+            "name": "provider_api",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Provider Api"
+            }
+          },
+          {
+            "name": "resource_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource Type"
+            }
+          },
+          {
+            "name": "vpc_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "VPC to scope the lookup to. Required for 'subnets' and 'security_groups'.",
+              "title": "Vpc Id"
+            },
+            "description": "VPC to scope the lookup to. Required for 'subnets' and 'security_groups'."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/database/wipe": {
       "post": {
         "tags": [

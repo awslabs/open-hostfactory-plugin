@@ -60,7 +60,7 @@ class ListReturnRequestsOrchestrator(
             provider_type=input.provider_type,
             filter_expressions=input.filter_expressions,
         )
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("ListReturnRequests", self._query_bus.execute(query))
 
         if isinstance(result, Paginated):
             items = [self._enrich(self._to_dict(r)) for r in result.items]

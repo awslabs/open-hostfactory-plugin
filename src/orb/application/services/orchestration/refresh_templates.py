@@ -31,7 +31,7 @@ class RefreshTemplatesOrchestrator(OrchestratorBase[RefreshTemplatesInput, Refre
         )
 
         command = RefreshTemplatesCommand(provider_name=input.provider_name)
-        await self._command_bus.execute(command)
+        await self._dispatch("RefreshTemplates", self._command_bus.execute(command))
 
         result = command.result or {}
         raw_templates: list[dict] = result.get("templates", [])

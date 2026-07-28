@@ -25,19 +25,9 @@ jobs:
     name: Get Configuration
     uses: ./.github/workflows/shared-config.yml
 
-  setup-cache:
-    name: Setup Test Cache
-    needs: config
-    uses: ./.github/workflows/cache-management.yml
-    with:
-      cache-type: dependencies
-      cache-key-base: deps
-      python-version: ${{ needs.config.outputs.default-python-version }}
-      group: test
-
   unit-tests:
     name: Unit Tests
-    needs: [config, setup-cache]
+    needs: [config]
     permissions:
       contents: read
     strategy:
@@ -54,7 +44,6 @@ jobs:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       default-python-version: ${{ needs.config.outputs.default-python-version }}
-      cache-key: ${{ needs.setup-cache.outputs.cache-key }}
       artifact-prefix: test-matrix
       aws-region: ${{ needs.config.outputs.aws-region }}
       aws-access-key: ${{ needs.config.outputs.aws-access-key }}
@@ -64,7 +53,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    needs: [config, setup-cache]
+    needs: [config]
     permissions:
       contents: read
     strategy:
@@ -81,7 +70,6 @@ jobs:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       default-python-version: ${{ needs.config.outputs.default-python-version }}
-      cache-key: ${{ needs.setup-cache.outputs.cache-key }}
       artifact-prefix: test-matrix
       aws-region: ${{ needs.config.outputs.aws-region }}
       aws-access-key: ${{ needs.config.outputs.aws-access-key }}
@@ -94,7 +82,7 @@ jobs:
   # causes it to run here across all Python versions with no workflow edit.
   providers-tests:
     name: Providers Tests
-    needs: [config, setup-cache]
+    needs: [config]
     permissions:
       contents: read
     strategy:
@@ -112,7 +100,6 @@ jobs:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       default-python-version: ${{ needs.config.outputs.default-python-version }}
-      cache-key: ${{ needs.setup-cache.outputs.cache-key }}
       artifact-prefix: test-matrix
       aws-region: ${{ needs.config.outputs.aws-region }}
       aws-access-key: ${{ needs.config.outputs.aws-access-key }}
@@ -129,7 +116,7 @@ jobs:
 
   e2e-tests:
     name: End-to-End Tests
-    needs: [config, setup-cache]
+    needs: [config]
     permissions:
       contents: read
     strategy:
@@ -146,7 +133,6 @@ jobs:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       default-python-version: ${{ needs.config.outputs.default-python-version }}
-      cache-key: ${{ needs.setup-cache.outputs.cache-key }}
       artifact-prefix: test-matrix
       aws-region: ${{ needs.config.outputs.aws-region }}
       aws-access-key: ${{ needs.config.outputs.aws-access-key }}

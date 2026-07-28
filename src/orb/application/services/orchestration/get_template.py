@@ -28,6 +28,10 @@ class GetTemplateOrchestrator(OrchestratorBase[GetTemplateInput, GetTemplateOutp
             input.provider_name,
         )
 
+        # EntityNotFoundError is a legitimate business outcome here (template
+        # absent → template=None), so it is caught and mapped rather than
+        # logged as an error. Any other failure is logged and re-raised,
+        # matching the OrchestratorBase._dispatch contract.
         try:
             query = GetTemplateQuery(
                 template_id=input.template_id,
@@ -37,3 +41,6 @@ class GetTemplateOrchestrator(OrchestratorBase[GetTemplateInput, GetTemplateOutp
             return GetTemplateOutput(template=result)
         except EntityNotFoundError:
             return GetTemplateOutput(template=None)
+        except Exception as exc:
+            self._logger.error("GetTemplate failed: %s", exc)
+            raise

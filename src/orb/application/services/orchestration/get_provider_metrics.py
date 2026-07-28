@@ -31,7 +31,7 @@ class GetProviderMetricsOrchestrator(
             provider_name=input.provider_name,
             timeframe=input.timeframe or "24h",
         )
-        metrics_dto = await self._query_bus.execute(query)
+        metrics_dto = await self._dispatch("GetProviderMetrics", self._query_bus.execute(query))
         # Convert ProviderMetricsDTO to dict
         metrics_dict = metrics_dto.model_dump() if hasattr(metrics_dto, "model_dump") else {}
         return GetProviderMetricsOutput(

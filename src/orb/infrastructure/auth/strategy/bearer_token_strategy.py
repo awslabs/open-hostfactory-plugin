@@ -14,6 +14,7 @@ from orb.infrastructure.adapters.ports.auth import (
     AuthResult,
     AuthStatus,
 )
+from orb.infrastructure.auth.claims import extract_authz_claims
 from orb.infrastructure.logging.logger import get_logger
 
 if TYPE_CHECKING:
@@ -106,8 +107,7 @@ class BearerTokenStrategy(AuthPort):
 
             # Extract user information from token
             user_id = payload.get("sub")
-            user_roles = payload.get("roles", [])
-            permissions = payload.get("permissions", [])
+            user_roles, permissions = extract_authz_claims(payload)
 
             if not user_id:
                 return AuthResult(status=AuthStatus.INVALID, error_message="Token missing user ID")
@@ -158,8 +158,7 @@ class BearerTokenStrategy(AuthPort):
 
             # Create new access token
             user_id = payload.get("sub")
-            user_roles = payload.get("roles", [])
-            permissions = payload.get("permissions", [])
+            user_roles, permissions = extract_authz_claims(payload)
 
             new_token = self._create_access_token(user_id or "", user_roles, permissions)
 

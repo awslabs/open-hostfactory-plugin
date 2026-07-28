@@ -72,24 +72,11 @@ jobs:
       run: |
         make get-container-tags >> "$GITHUB_OUTPUT"
 
-  setup-cache:
-    name: Setup Build Cache
-    needs: config
-    uses: ./.github/workflows/cache-management.yml
-    with:
-      # Use "dependencies" so the cache key hashes .project.yml/pyproject.toml/uv.lock
-      # and produces a warm hit for repeated container builds.  The old "build" value
-      # fell through to the SHA-based fallback arm in cache-management.yml, producing
-      # a cold key on every run and forcing a full dep reinstall each time.
-      cache-type: dependencies
-      cache-key-base: container-build
-      python-version: ${{ needs.config.outputs.default-python-version }}
-
   container-pipeline:
     name: Build and Scan Container Images
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: [config, calculate-tags, setup-cache]
+    needs: [config, calculate-tags]
 
     strategy:
       matrix:
@@ -127,7 +114,7 @@ jobs:
     - name: Setup Python and UV
       uses: ./.github/actions/setup-uv-cached
       with:
-        cache-key: ${{ needs.setup-cache.outputs.cache-key }}
+        cache-key: container-build-py3.12-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
         fail-on-cache-miss: false
 
     - name: Setup Bun (for UI static bundle)
@@ -279,7 +266,7 @@ jobs:
     name: Create Multi-Architecture Manifests
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, calculate-tags, setup-cache, container-pipeline]
+    needs: [config, calculate-tags, container-pipeline]
     # 'release' is not a trigger for this workflow so the disjunct was dead; keep only the main-branch guard.
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
 
@@ -331,7 +318,7 @@ jobs:
     name: Validate Container Tags
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, calculate-tags, setup-cache, container-manifest]
+    needs: [config, calculate-tags, container-manifest]
     # 'release' is not a trigger for this workflow so the disjunct was dead; keep only the main-branch guard.
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
 

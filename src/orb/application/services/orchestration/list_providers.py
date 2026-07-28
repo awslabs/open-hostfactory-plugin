@@ -23,7 +23,7 @@ class ListProvidersOrchestrator(OrchestratorBase[ListProvidersInput, ListProvide
             provider_type=input.provider_type,
             filter_expressions=input.filter_expressions,
         )
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("ListProviders", self._query_bus.execute(query))
         if isinstance(result, dict):
             return ListProvidersOutput(
                 providers=result.get("providers", []),

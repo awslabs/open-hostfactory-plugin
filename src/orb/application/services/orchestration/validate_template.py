@@ -33,7 +33,7 @@ class ValidateTemplateOrchestrator(OrchestratorBase[ValidateTemplateInput, Valid
             template_id=input.template_id,
             template_config=input.config or {},
         )
-        result = await self._query_bus.execute(query)
+        result = await self._dispatch("ValidateTemplate", self._query_bus.execute(query))
 
         errors: list[str] = result.get("validation_errors", []) if isinstance(result, dict) else []
         valid: bool = result.get("valid", False) if isinstance(result, dict) else False

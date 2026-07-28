@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+import threading
+import time
+from collections import OrderedDict
+from typing import Any, Optional, cast
 
 try:
-    from fastapi import APIRouter, Depends, HTTPException
+    from fastapi import APIRouter, Depends, HTTPException, Query
+    from fastapi.concurrency import run_in_threadpool
     from fastapi.responses import JSONResponse
 except ImportError:
     raise ImportError("FastAPI routing requires: pip install orb-py[api]") from None
 
 from orb.api.dependencies import get_config_manager, get_di_container, require_role
+from orb.domain.base.exceptions import EntityNotFoundError, InfrastructureError
 from orb.infrastructure.error.decorators import handle_rest_exceptions
 from orb.infrastructure.logging.logger import get_logger
 
@@ -19,6 +24,80 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/providers", tags=["Providers"])
 
 CONFIG_MANAGER = Depends(get_config_manager)
+
+# Resource types the discovery endpoint accepts, mapped to the identifiers the
+# provider strategy understands.
+_DISCOVERY_RESOURCE_TYPES: dict[str, str] = {
+    "vpcs": "vpcs",
+    "subnets": "subnets",
+    "security_groups": "security_groups",
+}
+
+# Discovery results are cached for 5 minutes: infrastructure topology changes
+# rarely, and each miss issues several EC2 Describe* calls.
+_DISCOVERY_CACHE_TTL_SECONDS = 300
+# Hard cap on cached entries. The cache key includes the caller-supplied
+# ``vpc_id`` query parameter, and AWS vpc-id filters return an empty-but-
+# successful result for unknown IDs, so an operator issuing many distinct
+# vpc_id values could otherwise grow the cache without bound. Bounding the
+# size (with LRU eviction) keeps memory usage predictable.
+_DISCOVERY_CACHE_MAX_ENTRIES = 512
+# Insertion-ordered so the oldest entry is the first key — enabling O(1)
+# LRU-style eviction once the size cap is reached.
+_discovery_cache: "OrderedDict[tuple[str, str, str], tuple[float, list[dict[str, Any]]]]" = (
+    OrderedDict()
+)
+_discovery_cache_lock = threading.Lock()
+
+VPC_ID_QUERY = Query(
+    None,
+    description="VPC to scope the lookup to. Required for 'subnets' and 'security_groups'.",
+)
+
+
+def _discovery_cache_get(
+    key: tuple[str, str, str],
+) -> Optional[list[dict[str, Any]]]:
+    """Return a non-expired cached discovery result, or ``None`` on miss."""
+    with _discovery_cache_lock:
+        entry = _discovery_cache.get(key)
+        if entry is None:
+            return None
+        cached_at, value = entry
+        if (time.monotonic() - cached_at) >= _DISCOVERY_CACHE_TTL_SECONDS:
+            _discovery_cache.pop(key, None)
+            return None
+        # Mark as most-recently-used so it survives size-cap eviction.
+        _discovery_cache.move_to_end(key)
+        return value
+
+
+def _discovery_cache_put(key: tuple[str, str, str], value: list[dict[str, Any]]) -> None:
+    """Store a discovery result, evicting expired and overflowing entries.
+
+    Before inserting, expired entries are swept (they are otherwise only
+    dropped when re-requested) and, once the size cap is reached, the oldest
+    entries are evicted LRU-style. This keeps the cache bounded even when the
+    caller-supplied ``vpc_id`` produces an unbounded set of distinct keys.
+    """
+    now = time.monotonic()
+    with _discovery_cache_lock:
+        # Sweep expired entries so stale keys never count toward the cap.
+        expired = [
+            k
+            for k, (cached_at, _) in _discovery_cache.items()
+            if (now - cached_at) >= _DISCOVERY_CACHE_TTL_SECONDS
+        ]
+        for k in expired:
+            _discovery_cache.pop(k, None)
+
+        # Refresh/insert as most-recently-used.
+        _discovery_cache[key] = (now, value)
+        _discovery_cache.move_to_end(key)
+
+        # Enforce the hard cap by evicting the oldest entries.
+        while len(_discovery_cache) > _DISCOVERY_CACHE_MAX_ENTRIES:
+            _discovery_cache.popitem(last=False)
 
 
 async def _probe_provider_health(provider_name: str) -> tuple[str, dict[str, Any]]:
@@ -346,6 +425,134 @@ async def get_providers_health(
             "providers": providers_info,
             "active_provider": active_provider_name,
             "default_provider_instance": default_provider_instance or active_provider_name,
+        },
+        status_code=200,
+    )
+
+
+def _discover_resources(
+    provider_api: str, resource_type: str, vpc_id: Optional[str]
+) -> list[dict[str, Any]]:
+    """Resolve the provider strategy and return discovered resources.
+
+    Runs synchronously (issues blocking boto3 EC2 Describe* calls); callers
+    offload it to a worker thread. Raises ``EntityNotFoundError`` when the
+    provider is not registered and ``NotImplementedError`` when the strategy
+    has no machine-readable discovery.
+
+    A dedicated ``EntityNotFoundError`` — rather than the broad ``LookupError``
+    — signals the not-registered case, so genuine ``KeyError`` / ``IndexError``
+    (both ``LookupError`` subclasses) raised while parsing an AWS response
+    surface as 5xx instead of being mistaken for provider-not-found (404).
+    """
+    from orb.providers.registry.provider_registry import get_provider_registry
+
+    registry = get_provider_registry()
+    if not registry.ensure_provider_type_registered(provider_api):
+        raise EntityNotFoundError("Provider", provider_api)
+
+    strategy = registry.get_or_create_strategy(provider_api)
+    if strategy is None:
+        raise EntityNotFoundError("Provider", provider_api)
+
+    list_resources = getattr(strategy, "list_resources", None)
+    if not callable(list_resources):
+        raise NotImplementedError(provider_api)
+
+    try:
+        return cast("list[dict[str, Any]]", list_resources(resource_type, vpc_id))
+    except Exception as exc:
+        # A failure while issuing the boto3 Describe* calls or parsing their
+        # responses (e.g. a KeyError from an unexpected AWS response shape) is a
+        # server-side problem, not a bad client request. Wrap it as an
+        # InfrastructureError so it surfaces as 5xx — never as a 404
+        # provider-not-found (only the explicit not-registered / null-strategy
+        # cases above yield that) nor a 400 client error.
+        raise InfrastructureError(
+            f"Resource discovery failed for provider '{provider_api}'"
+        ) from exc
+
+
+@router.get(
+    "/discover/{provider_api}/{resource_type}",
+    operation_id="discoverProviderResources",
+    summary="Discover Provider Infrastructure Resources",
+    description=(
+        "Discovers infrastructure resources of the given type for a provider so "
+        "the template form can offer dropdowns instead of free-text IDs. "
+        "Supported resource types: vpcs, subnets, security_groups. "
+        "'subnets' and 'security_groups' require a 'vpc_id' query parameter. "
+        "Results are cached for 5 minutes."
+    ),
+)
+@handle_rest_exceptions(
+    endpoint="/api/v1/providers/discover/{provider_api}/{resource_type}", method="GET"
+)
+async def discover_provider_resources(
+    provider_api: str,
+    resource_type: str,
+    vpc_id: str | None = VPC_ID_QUERY,
+    _user=Depends(require_role("operator")),
+) -> JSONResponse:
+    """Discover VPCs / subnets / security groups for a provider.
+
+    Requires the ``operator`` role: discovery enumerates account infrastructure
+    (VPC/subnet/SG IDs, CIDR blocks) that viewer-role callers must not see.
+    """
+    normalised_type = _DISCOVERY_RESOURCE_TYPES.get(resource_type.lower())
+    if normalised_type is None:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported resource type '{resource_type}'. "
+                f"Supported: {', '.join(sorted(_DISCOVERY_RESOURCE_TYPES))}."
+            ),
+        )
+
+    if normalised_type in ("subnets", "security_groups") and not vpc_id:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Query parameter 'vpc_id' is required for resource type '{normalised_type}'.",
+        )
+
+    provider_api = provider_api.lower()
+    cache_key = (provider_api, normalised_type, vpc_id or "")
+    cached = _discovery_cache_get(cache_key)
+    if cached is not None:
+        return JSONResponse(
+            content={
+                "provider_api": provider_api,
+                "resource_type": normalised_type,
+                "vpc_id": vpc_id,
+                "resources": cached,
+                "cached": True,
+            },
+            status_code=200,
+        )
+
+    try:
+        resources = await run_in_threadpool(
+            _discover_resources, provider_api, normalised_type, vpc_id
+        )
+    except EntityNotFoundError:
+        raise HTTPException(
+            status_code=404, detail=f"Provider '{provider_api}' is not available."
+        ) from None
+    except NotImplementedError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Provider '{provider_api}' does not support resource discovery.",
+        ) from None
+
+    _discovery_cache_put(cache_key, resources)
+
+    return JSONResponse(
+        content={
+            "provider_api": provider_api,
+            "resource_type": normalised_type,
+            "vpc_id": vpc_id,
+            "resources": resources,
+            "cached": False,
         },
         status_code=200,
     )

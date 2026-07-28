@@ -45,38 +45,6 @@ jobs:
     name: Configuration
     uses: ./.github/workflows/shared-config.yml
 
-  # One setup-cache job per group that needs priming.
-  # Each installs only its slice so cache misses are cheap even cold.
-  setup-cache-lint:
-    name: Setup Cache (lint)
-    needs: config
-    uses: ./.github/workflows/cache-management.yml
-    with:
-      cache-type: dependencies
-      cache-key-base: deps
-      python-version: ${{ needs.config.outputs.default-python-version }}
-      group: lint
-
-  setup-cache-typecheck:
-    name: Setup Cache (typecheck)
-    needs: config
-    uses: ./.github/workflows/cache-management.yml
-    with:
-      cache-type: dependencies
-      cache-key-base: deps
-      python-version: ${{ needs.config.outputs.default-python-version }}
-      group: typecheck
-
-  setup-cache-arch:
-    name: Setup Cache (arch)
-    needs: config
-    uses: ./.github/workflows/cache-management.yml
-    with:
-      cache-type: dependencies
-      cache-key-base: deps
-      python-version: ${{ needs.config.outputs.default-python-version }}
-      group: arch
-
   auto-format:
     name: Auto-Format Code
     # Same-repo PRs only. Fork PRs handled by auto-format-suggest below.
@@ -87,7 +55,7 @@ jobs:
       && github.actor != 'open-resource-broker-cicd[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, setup-cache-lint]
+    needs: [config]
     # Override the workflow-level concurrency so this job is never cancelled
     # mid-run.  If it were interrupted after `ruff` rewrites files but before
     # `git push`, the PR branch would be left in a half-formatted state.
@@ -117,7 +85,7 @@ jobs:
       - name: Setup UV with cache
         uses: ./.github/actions/setup-uv-cached
         with:
-          cache-key: ${{ needs.setup-cache-lint.outputs.cache-key }}
+          cache-key: deps-py3.12-lint-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
           group: lint
           fail-on-cache-miss: false
 
@@ -152,7 +120,7 @@ jobs:
       && github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, setup-cache-lint]
+    needs: [config]
     permissions:
       contents: read
       pull-requests: write
@@ -166,7 +134,7 @@ jobs:
       - name: Setup UV with cache
         uses: ./.github/actions/setup-uv-cached
         with:
-          cache-key: ${{ needs.setup-cache-lint.outputs.cache-key }}
+          cache-key: deps-py3.12-lint-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
           group: lint
           fail-on-cache-miss: false
 
@@ -184,7 +152,7 @@ jobs:
     name: Ruff (Code Quality)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, setup-cache-lint]
+    needs: [config]
     permissions:
       contents: read
     steps:
@@ -194,7 +162,7 @@ jobs:
       - name: Setup UV with cache
         uses: ./.github/actions/setup-uv-cached
         with:
-          cache-key: ${{ needs.setup-cache-lint.outputs.cache-key }}
+          cache-key: deps-py3.12-lint-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
           group: lint
           fail-on-cache-miss: false
 
@@ -205,7 +173,7 @@ jobs:
     name: Ruff (Extended Checks)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, setup-cache-lint, lint-ruff]
+    needs: [config, lint-ruff]
     permissions:
       contents: read
     steps:
@@ -215,7 +183,7 @@ jobs:
       - name: Setup UV with cache
         uses: ./.github/actions/setup-uv-cached
         with:
-          cache-key: ${{ needs.setup-cache-lint.outputs.cache-key }}
+          cache-key: deps-py3.12-lint-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
           group: lint
           fail-on-cache-miss: false
 
@@ -227,7 +195,7 @@ jobs:
     name: Type Checking (pyright)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, setup-cache-typecheck, lint-ruff]
+    needs: [config, lint-ruff]
     permissions:
       contents: read
     steps:
@@ -237,7 +205,7 @@ jobs:
     - name: Setup UV with cache
       uses: ./.github/actions/setup-uv-cached
       with:
-        cache-key: ${{ needs.setup-cache-typecheck.outputs.cache-key }}
+        cache-key: deps-py3.12-typecheck-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
         group: typecheck
         fail-on-cache-miss: false
 
@@ -249,7 +217,7 @@ jobs:
     name: Architecture Validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [config, setup-cache-arch, lint-ruff]
+    needs: [config, lint-ruff]
     permissions:
       contents: read
     strategy:
@@ -273,7 +241,7 @@ jobs:
     - name: Setup UV with cache
       uses: ./.github/actions/setup-uv-cached
       with:
-        cache-key: ${{ needs.setup-cache-arch.outputs.cache-key }}
+        cache-key: deps-py3.12-arch-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
         group: arch
         fail-on-cache-miss: false
 
@@ -288,7 +256,7 @@ jobs:
     # pyyaml is available via the project's core [dependencies] so any
     # group that installs the project also provides it.  Use the arch
     # group (smallest group that triggers a uv sync with the project).
-    needs: [config, setup-cache-arch]
+    needs: [config]
     permissions:
       contents: read
     steps:
@@ -298,7 +266,7 @@ jobs:
     - name: Setup UV with cache
       uses: ./.github/actions/setup-uv-cached
       with:
-        cache-key: ${{ needs.setup-cache-arch.outputs.cache-key }}
+        cache-key: deps-py3.12-arch-${{ hashFiles('.project.yml', 'pyproject.toml', 'uv.lock') }}
         group: arch
         fail-on-cache-miss: false
 

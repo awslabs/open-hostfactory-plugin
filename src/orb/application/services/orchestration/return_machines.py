@@ -54,12 +54,15 @@ class ReturnMachinesOrchestrator(OrchestratorBase[ReturnMachinesInput, ReturnMac
         )
 
         if input.all_machines:
-            result = await self._query_bus.execute(
-                ListMachinesQuery(
-                    all_resources=True,
-                    provider_name=input.provider_name,
-                    provider_type=input.provider_type,
-                )
+            result = await self._dispatch(
+                "ReturnMachines.list",
+                self._query_bus.execute(
+                    ListMachinesQuery(
+                        all_resources=True,
+                        provider_name=input.provider_name,
+                        provider_type=input.provider_type,
+                    )
+                ),
             )
             machine_dtos = result.items if isinstance(result, Paginated) else (result or [])
             machine_ids = [dto.machine_id for dto in machine_dtos]
@@ -73,12 +76,15 @@ class ReturnMachinesOrchestrator(OrchestratorBase[ReturnMachinesInput, ReturnMac
                     message="No active machines found",
                 )
         elif input.request_id:
-            result = await self._query_bus.execute(
-                ListMachinesQuery(
-                    request_id=input.request_id,
-                    provider_name=input.provider_name,
-                    provider_type=input.provider_type,
-                )
+            result = await self._dispatch(
+                "ReturnMachines.list",
+                self._query_bus.execute(
+                    ListMachinesQuery(
+                        request_id=input.request_id,
+                        provider_name=input.provider_name,
+                        provider_type=input.provider_type,
+                    )
+                ),
             )
             machine_dtos = result.items if isinstance(result, Paginated) else (result or [])
             machine_ids = [dto.machine_id for dto in machine_dtos]
@@ -99,7 +105,7 @@ class ReturnMachinesOrchestrator(OrchestratorBase[ReturnMachinesInput, ReturnMac
             machine_ids=machine_ids,
             force_return=input.force,
         )
-        await self._command_bus.execute(command)
+        await self._dispatch("ReturnMachines", self._command_bus.execute(command))
 
         if not command.created_request_ids:
             skipped = [str(m) for m in (command.skipped_machines or [])]

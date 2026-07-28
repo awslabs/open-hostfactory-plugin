@@ -32,7 +32,11 @@ runs:
 
     - name: Restore UV environment
       id: restore-cache
-      uses: actions/cache/restore@a7833574556fa59680c1b7cb190c1735db73ebf0  # v5.0.0
+      # Combined restore + post-run save (not restore-only): each job that
+      # installs on a miss saves its populated environment back under this key,
+      # so the cache warms itself with no separate priming job.  On an exact-key
+      # hit the action skips the save automatically.
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v5
       with:
         path: |
           .venv

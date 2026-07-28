@@ -227,6 +227,12 @@ class TestDiscoverVpcs:
         svc.ec2_client.describe_vpcs.side_effect = RuntimeError("API error")
         assert svc.discover_vpcs() == []
 
+    def test_raises_on_error_when_requested(self):
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.side_effect = RuntimeError("API error")
+        with pytest.raises(RuntimeError):
+            svc.discover_vpcs(raise_on_error=True)
+
 
 # ---------------------------------------------------------------------------
 # discover_subnets
@@ -509,3 +515,134 @@ class TestDiscoverInfrastructure:
         cli_args.all = False
         result = svc.discover_infrastructure({"name": "p", "config": {}, "cli_args": cli_args})
         assert "vpcs" in result
+
+
+# ---------------------------------------------------------------------------
+# list_resources — machine-readable discovery used by the REST endpoint
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+class TestListResources:
+    def test_vpcs_returns_dicts(self):
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.return_value = {
+            "Vpcs": [
+                {
+                    "VpcId": "vpc-001",
+                    "CidrBlock": "10.0.0.0/16",
+                    "IsDefault": True,
+                    "Tags": [{"Key": "Name", "Value": "main"}],
+                }
+            ]
+        }
+        result = svc.list_resources("vpcs")
+        assert result == [
+            {
+                "id": "vpc-001",
+                "name": "main",
+                "cidr_block": "10.0.0.0/16",
+                "is_default": True,
+            }
+        ]
+
+    def test_subnets_requires_vpc_id(self):
+        svc = _make_service()
+        assert svc.list_resources("subnets") == []
+
+    def test_subnets_returns_dicts(self):
+        svc = _make_service()
+        svc.ec2_client.describe_subnets.return_value = {
+            "Subnets": [
+                {
+                    "SubnetId": "subnet-001",
+                    "VpcId": "vpc-001",
+                    "AvailabilityZone": "us-east-1a",
+                    "CidrBlock": "10.0.1.0/24",
+                    "Tags": [],
+                }
+            ]
+        }
+        svc.ec2_client.describe_route_tables.return_value = {"RouteTables": []}
+        result = svc.list_resources("subnets", vpc_id="vpc-001")
+        assert result[0]["id"] == "subnet-001"
+        assert result[0]["vpc_id"] == "vpc-001"
+
+    def test_security_groups_requires_vpc_id(self):
+        svc = _make_service()
+        assert svc.list_resources("security_groups") == []
+
+    def test_security_groups_returns_dicts(self):
+        svc = _make_service()
+        svc.ec2_client.describe_security_groups.return_value = {
+            "SecurityGroups": [
+                {
+                    "GroupId": "sg-001",
+                    "GroupName": "web",
+                    "Description": "web sg",
+                    "VpcId": "vpc-001",
+                    "IpPermissions": [],
+                }
+            ]
+        }
+        result = svc.list_resources("security_groups", vpc_id="vpc-001")
+        assert result[0]["id"] == "sg-001"
+        assert result[0]["name"] == "web"
+
+    def test_unsupported_resource_type_raises(self):
+        svc = _make_service()
+        with pytest.raises(ValueError, match="Unsupported resource type"):
+            svc.list_resources("gateways")
+
+    def test_propagates_aws_error_instead_of_returning_empty(self):
+        # An empty account genuinely returns []; a swallowed error would too.
+        # list_resources must NOT hide the error behind an empty list, so the
+        # REST endpoint can avoid caching a transient failure as a stale-empty
+        # success. Applies to vpcs / subnets / security_groups.
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.side_effect = RuntimeError("throttled")
+        with pytest.raises(RuntimeError):
+            svc.list_resources("vpcs")
+
+        svc.ec2_client.describe_subnets.side_effect = RuntimeError("throttled")
+        with pytest.raises(RuntimeError):
+            svc.list_resources("subnets", vpc_id="vpc-001")
+
+        svc.ec2_client.describe_security_groups.side_effect = RuntimeError("throttled")
+        with pytest.raises(RuntimeError):
+            svc.list_resources("security_groups", vpc_id="vpc-001")
+
+    def test_genuinely_empty_account_returns_empty_without_error(self):
+        # No resources + no error → real empty result (cacheable), not an error.
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.return_value = {"Vpcs": []}
+        assert svc.list_resources("vpcs") == []
+
+    def test_ipv6_only_vpc_without_cidr_block_does_not_raise(self):
+        # An IPv6-only VPC has no IPv4 'CidrBlock'. That is a legitimate AWS
+        # response, not a parse failure — discovery must default the field
+        # rather than raise KeyError (which would surface as a spurious 5xx).
+        svc = _make_service()
+        svc.ec2_client.describe_vpcs.return_value = {
+            "Vpcs": [{"VpcId": "vpc-ipv6", "IsDefault": False, "Tags": []}]
+        }
+        result = svc.list_resources("vpcs")
+        assert result[0]["id"] == "vpc-ipv6"
+        assert result[0]["cidr_block"] == ""
+
+    def test_ipv6_only_subnet_without_cidr_block_does_not_raise(self):
+        svc = _make_service()
+        svc.ec2_client.describe_subnets.return_value = {
+            "Subnets": [
+                {
+                    "SubnetId": "subnet-ipv6",
+                    "VpcId": "vpc-001",
+                    "AvailabilityZone": "us-east-1a",
+                    "Tags": [],
+                }
+            ]
+        }
+        svc.ec2_client.describe_route_tables.return_value = {"RouteTables": []}
+        result = svc.list_resources("subnets", vpc_id="vpc-001")
+        assert result[0]["id"] == "subnet-ipv6"
+        assert result[0]["cidr_block"] == ""

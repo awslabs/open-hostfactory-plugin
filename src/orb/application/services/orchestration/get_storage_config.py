@@ -23,6 +23,6 @@ class GetStorageConfigOrchestrator(OrchestratorBase[GetStorageConfigInput, GetSt
         from orb.application.queries.system import GetConfigurationSectionQuery
 
         query = GetConfigurationSectionQuery(section="storage")
-        response = await self._query_bus.execute(query)
+        response = await self._dispatch("GetStorageConfig", self._query_bus.execute(query))
         config = response.config if hasattr(response, "config") else response.model_dump()
         return GetStorageConfigOutput(config=config)

@@ -34,7 +34,7 @@ class CreateTemplateOrchestrator(OrchestratorBase[CreateTemplateInput, CreateTem
             tags=input.tags,
             configuration=input.configuration,
         )
-        await self._command_bus.execute(command)
+        await self._dispatch("CreateTemplate", self._command_bus.execute(command))
 
         return CreateTemplateOutput(
             template_id=input.template_id,

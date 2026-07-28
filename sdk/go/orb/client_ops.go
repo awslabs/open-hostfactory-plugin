@@ -58,6 +58,66 @@ func (c *Client) Health(ctx context.Context) (*HealthResponse, error) {
 	return &out, nil
 }
 
+// LivenessResponse is returned by Liveness.
+type LivenessResponse struct {
+	Status string `json:"status"`
+}
+
+// Liveness checks the ORB server's liveness (operationId livenessCheck).
+//
+// The liveness probe (GET /livez) returns 200 whenever the process is up and
+// never gates on any dependency or provider, so it is safe to poll as a
+// container liveness check.
+func (c *Client) Liveness(ctx context.Context) (*LivenessResponse, error) {
+	var resp LivenessResponse
+	if err := c.get(ctx, "/livez", &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// ReadinessResponse is returned by Readiness.
+type ReadinessResponse struct {
+	Status string `json:"status"`
+}
+
+// Readiness checks the ORB server's readiness (operationId readinessCheck).
+//
+// The readiness probe (GET /readyz) returns 200 unless a core dependency
+// (storage/database) is unhealthy, in which case it returns 503. A 503 is a
+// valid, expected result carrying a parsed readiness body rather than an
+// error — mirroring Health — so a readiness-poll loop observes the not-ready
+// status directly. Other non-2xx statuses are still surfaced as errors.
+func (c *Client) Readiness(ctx context.Context) (*ReadinessResponse, error) {
+	if err := c.checkHealth(); err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/readyz", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	// A 503 (not-ready) must be observed directly rather than retried away.
+	transport.DisableRetry(req)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, mapError(err)
+	}
+	defer resp.Body.Close()
+
+	// 503 is a valid not-ready response, not an error.
+	if resp.StatusCode >= 400 && resp.StatusCode != http.StatusServiceUnavailable {
+		return nil, parseAPIError(resp)
+	}
+
+	var out ReadinessResponse
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // MetricsResponse holds raw Prometheus-style metric text.
 type MetricsResponse struct {
 	Body string

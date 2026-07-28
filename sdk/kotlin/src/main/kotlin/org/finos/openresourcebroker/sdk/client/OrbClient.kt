@@ -349,8 +349,42 @@ class OrbClient private constructor(
     }
 
     // ---------------------------------------------------------------------------
-    // System / Observability — 4 operations
+    // System / Observability — 6 operations
     // ---------------------------------------------------------------------------
+
+    /** livenessCheck — GET /livez
+     *
+     * The liveness probe returns 200 whenever the process is up and never gates
+     * on any dependency or provider, so it is safe to poll as a container
+     * liveness check.
+     */
+    suspend fun liveness(): Map<String, Any?> {
+        val resp = get("/livez")
+        return executeRaw(resp)
+    }
+
+    /** readinessCheck — GET /readyz
+     *
+     * The readiness probe returns 200 unless a core dependency (storage/database)
+     * is unhealthy, in which case it returns 503. The 503 carries a valid
+     * not-ready body rather than an error (mirroring [health]), so [httpNoRetry]
+     * is used and the not-ready status is returned to the caller directly.
+     */
+    suspend fun readiness(): Map<String, Any?> {
+        checkHealth()
+        val req = Request.Builder()
+            .url("$baseUrl/readyz")
+            .get()
+            .header("Accept", "application/json")
+            .also { rb -> schedulerHeaders().forEach { (k, v) -> rb.header(k, v) } }
+            .build()
+        // Use the no-retry client: 503 from /readyz is semantically valid (server
+        // is up but a core dependency is down) and must not cause a retry loop.
+        val resp = httpNoRetry.newCall(req).execute()
+        val body = resp.body?.string() ?: "{}"
+        resp.close()
+        return parseJson(body)
+    }
 
     /** healthCheck — GET /health
      *

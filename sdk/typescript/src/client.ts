@@ -275,8 +275,42 @@ export class OrbClient {
   }
 
   // ---------------------------------------------------------------------------
-  // System / Observability — 4 operations
+  // System / Observability — 6 operations
   // ---------------------------------------------------------------------------
+
+  /**
+   * livenessCheck — GET /livez
+   *
+   * The liveness probe returns 200 whenever the process is up and never gates
+   * on any dependency or provider, so it is safe to poll as a container
+   * liveness check.
+   */
+  async liveness(): Promise<{ status: string }> {
+    return this.get<{ status: string }>("/livez");
+  }
+
+  /**
+   * readinessCheck — GET /readyz
+   *
+   * The readiness probe returns 200 unless a core dependency (storage/database)
+   * is unhealthy, in which case it returns 503. A 503 is a valid not-ready
+   * body rather than an error (mirroring health()), so a readiness-poll loop
+   * observes the not-ready status directly. Other non-2xx statuses still throw.
+   */
+  async readiness(): Promise<{ status: string }> {
+    this.checkHealth();
+    const resp = await this.http.get<{ status: string }>(
+      "/readyz",
+      disableRetry({
+        headers: { Accept: "application/json", ...this.schedulerHeaders() },
+      })
+    );
+    // 503 = not-ready but valid readiness body; do not treat as an error.
+    if (resp.status >= 400 && resp.status !== 503) {
+      throw parseApiError(this.makeAxiosError(resp));
+    }
+    return resp.data;
+  }
 
   /**
    * healthCheck — GET /health

@@ -98,8 +98,42 @@ public class OrbClient implements Closeable {
     }
 
     // ======================================================================
-    // System / Observability — 4 operations
+    // System / Observability — 6 operations
     // ======================================================================
+
+    /**
+     * livenessCheck — GET /livez
+     *
+     * <p>The liveness probe returns {@code 200} whenever the process is up and
+     * never gates on any dependency or provider, so it is safe to poll as a
+     * container liveness check.
+     */
+    public Map<String, Object> liveness() throws Exception {
+        return get("/livez", null, new TypeReference<>() {});
+    }
+
+    /**
+     * readinessCheck — GET /readyz
+     *
+     * <p>The readiness probe returns {@code 200} unless a core dependency
+     * (storage/database) is unhealthy, in which case it returns {@code 503}.
+     * A {@code 503} carries a valid not-ready body and is data, not an error
+     * (mirroring {@link #health()}), so this call never throws on {@code 503}
+     * and is never retry-looped.  Other {@code >= 400} statuses still throw.
+     */
+    public Map<String, Object> readiness() throws Exception {
+        checkHealth();
+        RawHttpClient.HttpResult result = http.getNoRetry("/readyz", null);
+        int status = result.statusCode();
+        // 503 is a valid not-ready response, not an error.
+        if (status >= 400 && status != 503) {
+            throwApiException(status, result.body(), result.headers());
+        }
+        if (result.body() == null || result.body().isBlank()) {
+            return null;
+        }
+        return mapper.readValue(result.body(), new TypeReference<>() {});
+    }
 
     /**
      * healthCheck — GET /health

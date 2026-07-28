@@ -38,6 +38,40 @@ class ColoredFormatter(logging.Formatter):
         return super().format(record)
 
 
+# Attribute names that ``logging`` always sets on a ``LogRecord``.  Anything on
+# a record that is NOT in this set was supplied by the caller via ``extra=`` (or
+# bound context) and therefore represents structured application data that must
+# be preserved in the serialized JSON — most importantly the security fields on
+# audit records (event_type, user_id, client_ip, path, method, reason, ...).
+_STANDARD_LOGRECORD_ATTRS: frozenset[str] = frozenset(
+    {
+        "name",
+        "msg",
+        "args",
+        "levelname",
+        "levelno",
+        "pathname",
+        "filename",
+        "module",
+        "exc_info",
+        "exc_text",
+        "stack_info",
+        "lineno",
+        "funcName",
+        "created",
+        "msecs",
+        "relativeCreated",
+        "thread",
+        "threadName",
+        "processName",
+        "process",
+        "taskName",
+        "message",
+        "asctime",
+    }
+)
+
+
 class JsonFormatter(logging.Formatter):
     """Format log records as JSON."""
 
@@ -78,17 +112,23 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info:
             message["exception"] = self.formatException(record.exc_info)
 
-        if hasattr(record, "request_id"):
-            message["request_id"] = record.request_id  # type: ignore[attr-defined]
+        # Merge any caller-supplied fields.  Fields passed via stdlib ``extra=``
+        # are set directly as (non-standard) attributes on the record, so we
+        # merge every attribute that is not part of the standard LogRecord set.
+        # This preserves structured data such as the security fields on audit
+        # records (event_type, user_id, client_ip, path, method, reason, ...),
+        # which would otherwise be silently dropped.  Values are only included
+        # if they serialize cleanly to avoid corrupting the JSON line.
+        for key, value in record.__dict__.items():
+            if key in _STANDARD_LOGRECORD_ATTRS or key.startswith("_"):
+                continue
+            if key == "extra" and isinstance(value, dict):
+                # Back-compat: a caller may pass ``extra={"extra": {...}}``.
+                message.update(value)
+                continue
+            message[key] = value
 
-        if hasattr(record, "correlation_id"):
-            message["correlation_id"] = record.correlation_id  # type: ignore[attr-defined]
-
-        # Include any extra fields provided in the log call
-        if hasattr(record, "extra"):
-            message.update(record.extra)  # type: ignore[attr-defined]
-
-        return json.dumps(message)
+        return json.dumps(message, default=str)
 
 
 class ContextLogger(logging.Logger):
@@ -318,6 +358,12 @@ def setup_audit_logger(audit_log_file: Optional[str] = None) -> None:
     # Prevent audit records from propagating to the root logger when a
     # dedicated handler is configured — keeps the two streams independent.
     audit_log.propagate = False
+    # Pin the audit logger to INFO regardless of the application's root log
+    # level.  Audit events are emitted at INFO; without this, a production
+    # config of logging.level=WARNING would make orb.audit inherit WARNING as
+    # its effective level and silently discard every audit record (a 0-byte
+    # audit trail).  The audit stream must be independent of the app log level.
+    audit_log.setLevel(logging.INFO)
 
     json_fmt = JsonFormatter(log_type="audit")
 
@@ -339,6 +385,9 @@ def setup_audit_logger(audit_log_file: Optional[str] = None) -> None:
                 encoding="utf-8",
             )
             fh.setFormatter(json_fmt)
+            # The handler must also admit INFO records so nothing is filtered
+            # at the handler stage.
+            fh.setLevel(logging.INFO)
             audit_log.addHandler(fh)
     # Structured stderr handler — only add if no handlers exist yet.
     elif not audit_log.handlers:
@@ -346,6 +395,7 @@ def setup_audit_logger(audit_log_file: Optional[str] = None) -> None:
 
         sh = logging.StreamHandler(sys.stderr)
         sh.setFormatter(json_fmt)
+        sh.setLevel(logging.INFO)
         audit_log.addHandler(sh)
 
 

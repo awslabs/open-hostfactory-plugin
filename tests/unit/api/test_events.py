@@ -359,6 +359,109 @@ class TestSequenceIdAndReplayTruncated:
         # All 50 surviving history entries follow the sentinel.
         assert len(result) == 1 + 50
 
+    def test_cross_restart_cursor_at_boot_base_emits_sentinel_no_silent_drop(self):
+        """Reproduce the cross-restart seq collision the boot-token guard closes.
+
+        This isolates the *generation-floor* branch from the deque-overflow
+        branch.  The new process seeds its counter above ``boot_base``, so the
+        first fresh event is ``boot_base + 1``.  A stale client cursor of exactly
+        ``boot_base`` sits flush against that first id — ``oldest_seq
+        (boot_base+1) <= since_seq(boot_base) + 1`` — so the overflow branch does
+        NOT fire and neither does the client-ahead branch.  ONLY the
+        generation-floor guard can catch it.
+
+        Without the guard, ``filter seq > boot_base`` would return every fresh
+        event with NO sentinel, mirroring the original defect where a restarted
+        counter reissued low ids and the client silently skipped the events
+        published in the collision window.  With the guard, the stale cursor
+        forces a full resync.
+        """
+        boot_base = 5  # highest seq id the previous generation could have issued
+        bus = _SseEventBus(boot_base=boot_base)
+
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        # Fresh generation publishes 5 events: boot_base+1 .. boot_base+5.
+        for i in range(5):
+            bus._record(base, "machine.created", {"i": i}, seq_id=boot_base + 1 + i)
+
+        # oldest_seq = boot_base+1 = since_seq+1 -> overflow branch does NOT fire.
+        since = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        result = bus.history_since_seq(since, since_seq=boot_base)
+
+        assert result, "Expected at least the sentinel"
+        assert result[0][0] == "replay_truncated", (
+            "Stale cross-restart cursor must trigger replay_truncated (the guard "
+            f"is the only branch that can catch this scenario); got {result[0][0]!r}"
+        )
+        assert result[0][1]["since"] == boot_base
+        assert result[0][1]["seq_id"] == 0
+
+    def test_cross_restart_low_cursor_below_boot_base_emits_sentinel(self):
+        """A stale low cursor (since_seq=2) from a prior boot also resyncs.
+
+        Here the overflow branch would also fire, but the guard must catch the
+        stale generation cursor regardless — a cursor at or below ``_boot_base``
+        can never belong to this generation.
+        """
+        boot_base = 10
+        bus = _SseEventBus(boot_base=boot_base)
+
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(5):
+            bus._record(base, "machine.created", {"i": i}, seq_id=boot_base + 1 + i)
+
+        since = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        result = bus.history_since_seq(since, since_seq=2)
+
+        assert result[0][0] == "replay_truncated"
+        assert result[0][1]["since"] == 2
+
+    def test_new_generation_counter_starts_above_boot_base(self):
+        """A restarted bus never reissues low ids that collide with old cursors."""
+
+        async def run():
+            boot_base = 1_000
+            bus = _SseEventBus(boot_base=boot_base)
+            await bus.publish("machine.created", {"id": "m-1"})
+            first_seq = bus._history[0][3]
+            assert first_seq == boot_base + 1, (
+                f"first seq of new generation must be boot_base+1; got {first_seq}"
+            )
+
+        asyncio.run(run())
+
+    def test_cursor_within_current_generation_replays_normally(self):
+        """A cursor issued by THIS generation (> boot_base) replays without a sentinel."""
+
+        async def run():
+            boot_base = 100
+            bus = _SseEventBus(boot_base=boot_base)
+            for i in range(3):
+                await bus.publish("machine.updated", {"i": i})
+            # This generation issued 101, 102, 103.  Client saw 101; reconnect at 101.
+            since = datetime(2025, 1, 1, tzinfo=timezone.utc)
+            result = bus.history_since_seq(since, since_seq=boot_base + 1)
+            types = [et for et, _ in result]
+            assert "replay_truncated" not in types, (
+                f"in-generation cursor must not truncate; got {types!r}"
+            )
+            # Only the two events after the cursor (102, 103) replay.
+            assert len(result) == 2
+
+        asyncio.run(run())
+
+    def test_module_singleton_seeded_with_monotonic_boot_base(self):
+        """The module bus uses a wall-clock-seeded boot base well under 2**53.
+
+        Guards the JS-safe-integer contract: the single-int ``id:`` cursor must
+        remain parseable by every SDK reader, so the boot base (and therefore
+        every issued seq_id) must stay below JavaScript's 2**53 limit.
+        """
+        from orb.api.routers.events import sse_event_bus
+
+        assert sse_event_bus._boot_base > 0, "module singleton must carry a boot floor"
+        assert sse_event_bus._boot_base < 2**53, "seq cursor must stay JS-safe-integer"
+
     def test_since_seq_param_activates_gap_detection_on_stream(self):
         """Route: ?since= + ?since_seq= triggers history_since_seq path.
 
@@ -658,3 +761,156 @@ class TestSseReconnectDequeOverflow:
         assert sentinel_payload["seq_id"] == 0
         # The surviving history follows the sentinel.
         assert len(result) == 1 + deque_maxlen
+
+
+# ---------------------------------------------------------------------------
+# SSE wire-format: id: line (Last-Event-ID) + reconnect replay via ?since_seq=
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.unit
+@pytest.mark.api
+class TestSseWireSeqIdAndReconnect:
+    """The server transmits each event's seq_id on the wire as an SSE ``id:``
+    line so standard clients get Last-Event-ID semantics, and a reconnect with
+    ?since_seq=<n> replays only the events after n.
+    """
+
+    def _seed_bus(self, n: int, *, maxlen: int = 512) -> _SseEventBus:
+        bus = _SseEventBus()
+        bus._history_max = maxlen
+        bus._history = _deque(maxlen=maxlen)
+        ts = datetime(2026, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
+        for i in range(n):
+            bus._record(ts, "RequestStatusChangedEvent", {"idx": i}, seq_id=i + 1)
+        return bus
+
+    def _stream(self, bus: _SseEventBus, query: str) -> str:
+        app = _make_viewer_app()
+        client = TestClient(app, raise_server_exceptions=False)
+        mock_sub = AsyncMock()
+        mock_unsub = AsyncMock()
+        with (
+            patch("orb.api.routers.events.sse_event_bus", bus),
+            patch.object(bus, "subscribe", mock_sub),
+            patch.object(bus, "unsubscribe", mock_unsub),
+        ):
+            q: asyncio.Queue = asyncio.Queue()
+            q.put_nowait(None)  # close after history replay
+            mock_sub.return_value = q
+            resp = client.get(f"/events/{query}")
+        assert resp.status_code == 200
+        return resp.text
+
+    def test_history_replay_emits_id_line_per_event(self):
+        """Replayed events carry an ``id:`` line equal to their seq_id."""
+        bus = self._seed_bus(3)
+        body = self._stream(bus, "?since=2025-01-01T00:00:00Z")
+        # Every real event block starts with its id: line.
+        blocks = [b for b in body.split("\n\n") if "event:" in b]
+        assert len(blocks) == 3
+        for block, expected_id in zip(blocks, (1, 2, 3), strict=True):
+            assert f"id: {expected_id}" in block, (
+                f"Expected 'id: {expected_id}' in block:\n{block!r}"
+            )
+
+    def test_since_seq_alone_replays_after_cursor_with_ids(self):
+        """?since_seq=<n> WITHOUT ?since= replays only events after n, each with id:.
+
+        A standard SSE client resuming from a Last-Event-ID sends only
+        since_seq; the server must still replay from that cursor.
+        """
+        bus = self._seed_bus(5)  # seq_ids 1..5
+        body = self._stream(bus, "?since_seq=3")
+        events = _parse_sse_events(body)
+        # No sentinel (3 is within retained history), only 4 and 5 replayed.
+        assert [e["event"] for e in events] == [
+            "RequestStatusChangedEvent",
+            "RequestStatusChangedEvent",
+        ]
+        assert [e["data"]["idx"] for e in events] == [3, 4]  # idx = seq_id - 1
+        # And each carried its id: line (4 and 5).
+        ids = [line for line in body.splitlines() if line.startswith("id:")]
+        assert ids == ["id: 4", "id: 5"]
+
+    def test_since_seq_alone_too_old_emits_sentinel_without_id(self):
+        """?since_seq= pointing at an evicted event emits the sentinel first,
+        and the sentinel carries NO id: line (seq_id 0 is never a resume cursor).
+        """
+        bus = self._seed_bus(12, maxlen=10)  # oldest surviving seq_id = 3
+        body = self._stream(bus, "?since_seq=1")
+        events = _parse_sse_events(body)
+        assert events[0]["event"] == "replay_truncated"
+        assert events[0]["data"]["seq_id"] == 0
+        # The sentinel block must not carry an id: line.
+        for block in body.split("\n\n"):
+            if "replay_truncated" in block:
+                assert "id:" not in block, f"sentinel must omit id:; got:\n{block!r}"
+                break
+        else:
+            pytest.fail("replay_truncated block not found")
+
+    def test_replay_truncated_passes_narrow_type_filter(self):
+        """The sentinel reaches a client that narrowed ?type= to request events."""
+        bus = self._seed_bus(12, maxlen=10)
+        body = self._stream(
+            bus,
+            "?since_seq=1&type=RequestStatusChangedEvent,RequestCompletedEvent",
+        )
+        events = _parse_sse_events(body)
+        assert events[0]["event"] == "replay_truncated"
+
+    def _stream_with_queue(self, bus: _SseEventBus, query: str, q: asyncio.Queue) -> str:
+        """Like ``_stream`` but with a caller-provided live queue.
+
+        Lets a test seed the live queue with items that overlap the history
+        snapshot to exercise the history/live de-dupe window.
+        """
+        app = _make_viewer_app()
+        client = TestClient(app, raise_server_exceptions=False)
+        mock_sub = AsyncMock(return_value=q)
+        mock_unsub = AsyncMock()
+        with (
+            patch("orb.api.routers.events.sse_event_bus", bus),
+            patch.object(bus, "subscribe", mock_sub),
+            patch.object(bus, "unsubscribe", mock_unsub),
+        ):
+            resp = client.get(f"/events/{query}")
+        assert resp.status_code == 200
+        return resp.text
+
+    def test_history_live_overlap_event_not_emitted_twice(self):
+        """An event present in BOTH the history snapshot and the live queue
+        (published in the subscribe→snapshot window) is emitted exactly ONCE.
+
+        Regression for the duplicate-window bug: subscribe() runs before the
+        history read, so an event landing in that gap is both replayed from
+        history and delivered on the live queue with the same id:. The live loop
+        must skip items whose seq_id <= the max already replayed from history.
+        """
+        bus = self._seed_bus(3)  # history seq_ids 1,2,3
+
+        # Live queue: seq 3 is the overlap (already in history), seq 4 is new.
+        q: asyncio.Queue = asyncio.Queue()
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 2}, 3))  # duplicate of history
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 3}, 4))  # genuinely new
+        q.put_nowait(None)  # close
+
+        body = self._stream_with_queue(bus, "?since=2025-01-01T00:00:00Z", q)
+        ids = [line for line in body.splitlines() if line.startswith("id:")]
+        # History replays 1,2,3; live adds only 4 (3 de-duped). No id appears twice.
+        assert ids == ["id: 1", "id: 2", "id: 3", "id: 4"], f"got {ids!r}"
+        assert len(ids) == len(set(ids)), f"duplicate id: emitted — {ids!r}"
+
+    def test_history_live_no_overlap_all_live_events_pass(self):
+        """When live seq_ids are all above the replayed max, none are skipped."""
+        bus = self._seed_bus(3)  # history 1,2,3
+
+        q: asyncio.Queue = asyncio.Queue()
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 3}, 4))
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 4}, 5))
+        q.put_nowait(None)
+
+        body = self._stream_with_queue(bus, "?since=2025-01-01T00:00:00Z", q)
+        ids = [line for line in body.splitlines() if line.startswith("id:")]
+        assert ids == ["id: 1", "id: 2", "id: 3", "id: 4", "id: 5"], f"got {ids!r}"

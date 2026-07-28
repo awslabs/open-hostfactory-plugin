@@ -78,6 +78,13 @@ _REQUEST_STATUS_EVENT_TYPES: set[str] = {
     "RequestFailedEvent",
 }
 
+# Control sentinel the server emits on reconnect when it could not replay the
+# full gap (the client's last-seen event was already evicted from history).
+# The server always lets this through the ?type= filter; when the row-update
+# path sees it, incremental patches can no longer be trusted so it re-fetches
+# the whole list to self-heal.
+_REPLAY_TRUNCATED_EVENT: str = "replay_truncated"
+
 
 def _empty_request_skeleton() -> dict[str, Any]:
     """UI mirror of REST snake_case response shape.
@@ -1263,13 +1270,63 @@ class RequestsState(AppState):
             status = str(data.get("new_status") or data.get("status") or "")
         return rid, status.lower()
 
-    def _apply_request_status_event(self, event_type: str, data: dict[str, Any]) -> bool:
-        """Patch the matching request row's status from an SSE event.
+    # Raw-request fields that feed the row's count columns and progress bar
+    # (see ``request_rows``). When an SSE event carries any of these, patching
+    # them keeps the counts/progress consistent with the new status instead of
+    # leaving stale values behind until the next full load.
+    _ROW_COUNT_FIELDS: tuple[str, ...] = (
+        "requested_count",
+        "successful_count",
+        "failed_count",
+        "returned_count",
+        "running_count",
+        "pending_count",
+        "desired_capacity",
+        "fulfilled_units",
+        "target_units",
+        "success_rate",
+        "machines",
+        "machine_ids",
+        "resource_ids",
+    )
 
-        Matches on ``request_id`` and rewrites only the ``status`` field of
-        that row (the status badge and progress-bar colour derive from it).
-        Rows for requests not currently loaded — e.g. filtered out by the
-        active tab — are ignored; they surface on the next full load.
+    @classmethod
+    def _row_updates_from_event(cls, event_type: str, data: dict[str, Any]) -> dict[str, Any]:
+        """Return the raw-request fields to patch from an SSE event payload.
+
+        Beyond ``status``, this pulls through any count/progress source fields
+        the payload carries (see ``_ROW_COUNT_FIELDS``) so the row's counts and
+        progress bar move in step with the status transition — matching what a
+        full refresh would render rather than only repainting the badge.
+
+        A ``RequestCompletedEvent`` carries ``machine_ids`` but no explicit
+        count; the fulfilled count is derived from it so the progress bar
+        reaches its final value on completion.
+        """
+        updates: dict[str, Any] = {}
+        for field in cls._ROW_COUNT_FIELDS:
+            if field in data and data[field] is not None:
+                updates[field] = data[field]
+        # Completed events report the fulfilled machines as a list; derive the
+        # fulfilled count from it when the payload does not carry one directly.
+        machine_ids = data.get("machine_ids")
+        if (
+            event_type == "RequestCompletedEvent"
+            and isinstance(machine_ids, list)
+            and "successful_count" not in updates
+        ):
+            updates["successful_count"] = len(machine_ids)
+        return updates
+
+    def _apply_request_status_event(self, event_type: str, data: dict[str, Any]) -> bool:
+        """Patch the matching request row from an SSE event.
+
+        Matches on ``request_id`` and rewrites the ``status`` field plus any
+        count/progress source fields the event carries (see
+        ``_row_updates_from_event``) so the status badge, counts columns and
+        progress bar all move together. Rows for requests not currently loaded
+        — e.g. filtered out by the active tab — are ignored; they surface on
+        the next full load.
 
         Returns True when a row was actually changed so callers/tests can
         assert the list was patched. Reassigns ``self.requests`` to a new
@@ -1278,19 +1335,54 @@ class RequestsState(AppState):
         rid, status = self._status_from_event(event_type, data)
         if not rid or not status:
             return False
+        extra = self._row_updates_from_event(event_type, data)
         updated = False
         new_rows: list[dict[str, Any]] = []
         for r in self.requests:
-            if r.get("request_id") == rid and (r.get("status") or "").lower() != status:
-                patched = dict(r)
+            if r.get("request_id") != rid:
+                new_rows.append(r)
+                continue
+            patched = dict(r)
+            row_changed = False
+            if (patched.get("status") or "").lower() != status:
                 patched["status"] = status
-                new_rows.append(patched)
+                row_changed = True
+            for key, value in extra.items():
+                if patched.get(key) != value:
+                    patched[key] = value
+                    row_changed = True
+            if row_changed:
                 updated = True
+                new_rows.append(patched)
             else:
                 new_rows.append(r)
         if updated:
             self.requests = new_rows
         return updated
+
+    async def _reload_request_rows(self) -> None:
+        """Re-fetch the current tab's rows from the API and replace the list.
+
+        Extracted from ``load`` so the SSE ``replay_truncated`` handler can
+        self-heal after a history gap without duplicating the fetch/sort
+        logic. Assumes the caller does NOT already hold the state lock (it
+        performs its own ``async with self`` around the state mutation) so it
+        is safe to call from a ``background=True`` task.
+        """
+        async with self:
+            tab = self.tab
+            page_size = self.page_size
+        if tab == "returns":
+            res = await api.list_return_requests(limit=page_size)
+        else:
+            status_filter = _TAB_TO_STATUS.get(tab)
+            res = await api.list_requests(status=status_filter, limit=page_size)
+        async with self:
+            raw = res.get("requests", [])
+            self.requests = sorted(raw, key=lambda r: r.get("created_at") or "", reverse=True)
+            self.next_cursor = res.get("next_cursor") or ""
+            self.api_total_count = int(res.get("total_count") or len(raw))
+            self.last_refresh = datetime.datetime.now().strftime("%H:%M:%S")
 
     @rx.event(background=True)
     async def stream_status_events(self) -> None:
@@ -1302,9 +1394,13 @@ class RequestsState(AppState):
         operator's scroll position, checkbox selection and any open drawer
         are preserved.
 
-        ``api.subscribe_events`` (via ``sse_client.stream_sse``) already
-        reconnects with exponential backoff (max 30 s) on disconnect, so this
-        loop only needs to drain events. Single-flight guarded by
+        ``api.subscribe_events`` (via ``sse_client.stream_sse``) reconnects
+        with exponential backoff (max 30 s) on disconnect AND resumes from the
+        last SSE ``id:`` it saw, so status transitions that occurred during a
+        brief outage are replayed rather than lost. When the gap is too large
+        to replay, the server sends a ``replay_truncated`` sentinel; we react
+        by re-fetching the whole list so a stuck row (e.g. left ``in_progress``
+        after a missed terminal event) self-heals. Single-flight guarded by
         ``_sse_started`` so a page re-mount does not open a second stream.
         """
         async with self:
@@ -1315,6 +1411,12 @@ class RequestsState(AppState):
             async for event_type, data in api.subscribe_events(
                 event_types=_REQUEST_STATUS_EVENT_TYPES
             ):
+                if event_type == _REPLAY_TRUNCATED_EVENT:
+                    # History gap too large to replay incrementally — the local
+                    # list may hold stale statuses. Re-fetch everything so any
+                    # row stuck mid-flight is reconciled to its true state.
+                    await self._reload_request_rows()
+                    continue
                 async with self:
                     self._apply_request_status_event(event_type, data)
         finally:

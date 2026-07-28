@@ -15,6 +15,24 @@ from orb.application.services.orchestration.dtos import (
 from orb.application.services.orchestration.get_request_status import GetRequestStatusOrchestrator
 
 
+class _FakeClock:
+    """Deterministic monotonic clock for wall-clock timeout tests.
+
+    ``monotonic()`` returns virtual seconds; ``advance()`` moves it forward.
+    Patching both ``asyncio.sleep`` (to advance) and ``time.monotonic`` (to
+    read) lets the timeout logic be exercised without any real waiting.
+    """
+
+    def __init__(self) -> None:
+        self._now: float = 0.0
+
+    def monotonic(self) -> float:
+        return self._now
+
+    def advance(self, seconds: float) -> None:
+        self._now += seconds
+
+
 @pytest.fixture
 def mock_command_bus():
     bus = MagicMock()
@@ -341,23 +359,145 @@ class TestGetRequestStatusOrchestratorWait:
         pending.model_dump.return_value = {"request_id": "req-1", "status": "pending"}
         mock_query_bus.execute.return_value = pending
 
-        async def _no_sleep(_seconds):
-            return None
+        # Fake monotonic clock: the (no-op) sleep advances virtual wall-clock by
+        # the requested duration, so the timeout is driven by simulated time
+        # rather than real elapsed time — the loop is deterministic.
+        clock = _FakeClock()
+
+        async def _fake_sleep(seconds):
+            clock.advance(seconds)
 
         monkeypatch.setattr(
-            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _fake_sleep
         )
-        # timeout_seconds=2 with a 2s interval → one initial fetch + one poll, then stop.
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.time.monotonic",
+            clock.monotonic,
+        )
+        # timeout_seconds=2 with a 2s interval → initial fetch (t=0), one poll
+        # (sleep advances t to 2), then t-start=2 is not < 2 → stop.
         input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=2)
         result = await orchestrator.execute(input)
         assert result.requests[0]["status"] == "pending"
         assert mock_query_bus.execute.call_count == 2
 
     @pytest.mark.asyncio
-    async def test_wait_treats_error_entry_as_terminal(self, orchestrator, mock_query_bus):
-        mock_query_bus.execute.side_effect = Exception("boom")
+    async def test_wait_timeout_counts_fetch_latency_not_just_intervals(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """Slow fetches consume the wall-clock budget, so the poll stops early.
+
+        Regression for the interval-counting bug: previously ``elapsed`` grew by
+        a constant ``_POLL_INTERVAL_SECONDS`` per loop and ignored how long each
+        ``_fetch_once`` took, so a slow provider could blow past
+        ``timeout_seconds``.  With true monotonic tracking, a fetch that itself
+        consumes the whole budget must terminate the poll after a single extra
+        iteration rather than continuing to poll.
+        """
+        pending = MagicMock(spec=["model_dump"])
+        pending.model_dump.return_value = {"request_id": "req-1", "status": "pending"}
+        mock_query_bus.execute.return_value = pending
+
+        clock = _FakeClock()
+
+        # Each fetch itself takes 10 virtual seconds of wall-clock.
+        original_fetch = orchestrator._fetch_once
+
+        async def _slow_fetch(inp):
+            clock.advance(10)
+            return await original_fetch(inp)
+
+        async def _fake_sleep(seconds):
+            clock.advance(seconds)
+
+        monkeypatch.setattr(orchestrator, "_fetch_once", _slow_fetch)
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _fake_sleep
+        )
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.time.monotonic",
+            clock.monotonic,
+        )
+
+        # timeout=5. start=monotonic() at t=0 (before first fetch).  Initial fetch
+        # advances t to 10. Loop check: 10-0=10 < 5 is False → no further polls.
+        # An interval-only bound (elapsed=0 after the initial fetch) would have
+        # entered the loop and issued more fetches, overshooting the 5s cap.
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=5)
+        result = await orchestrator.execute(input)
+        assert result.requests[0]["status"] == "pending"
+        assert mock_query_bus.execute.call_count == 1, (
+            "fetch latency must count toward the timeout budget"
+        )
+
+    @pytest.mark.asyncio
+    async def test_wait_tolerates_transient_error_then_returns_terminal(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """A transient sync error on the first poll must NOT abort the wait.
+
+        The provider blips on the first fetch (raises), then recovers and
+        returns a terminal ``complete``. The loop must keep polling past the
+        transient error and return the terminal result, not the error entry.
+        """
+        done = MagicMock(spec=["model_dump"])
+        done.model_dump.return_value = {"request_id": "req-1", "status": "complete"}
+        # First fetch blips; subsequent fetches succeed terminally.
+        mock_query_bus.execute.side_effect = [Exception("transient blip"), done, done]
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
         input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
         result = await orchestrator.execute(input)
-        # An errored entry short-circuits polling so the caller is not stuck.
+
+        assert mock_query_bus.execute.call_count >= 2, "poll must continue past the transient error"
+        assert result.requests[0]["status"] == "complete"
+        assert "error" not in result.requests[0]
+
+    @pytest.mark.asyncio
+    async def test_wait_aborts_after_max_consecutive_transient_errors(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """More than N consecutive transient errors stops the poll with the last snapshot."""
+        from orb.application.services.orchestration.base import MAX_CONSECUTIVE_POLL_ERRORS
+
+        mock_query_bus.execute.side_effect = Exception("still blipping")
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+
+        # Initial fetch + retries up to the consecutive-error cap, then stop —
+        # well short of the 300s / 2s = 150 polls a timeout-only bound implies.
+        assert mock_query_bus.execute.call_count == MAX_CONSECUTIVE_POLL_ERRORS
+        assert result.requests[0]["error"] == "still blipping"
+
+    @pytest.mark.asyncio
+    async def test_wait_stops_immediately_on_genuine_terminal_failure(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        """A real terminal FAILED status (not a sync blip) stops the poll at once."""
+        failed = MagicMock(spec=["model_dump"])
+        failed.model_dump.return_value = {"request_id": "req-1", "status": "failed"}
+        mock_query_bus.execute.return_value = failed
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+
         assert mock_query_bus.execute.call_count == 1
-        assert result.requests[0]["error"] == "boom"
+        assert result.requests[0]["status"] == "failed"

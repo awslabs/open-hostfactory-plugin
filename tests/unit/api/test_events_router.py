@@ -81,7 +81,12 @@ class TestSseEventBusSubscribePublish:
         q = asyncio.run(bus.subscribe())
         asyncio.run(bus.publish("machine.created", {"id": "m-1"}))
         item = q.get_nowait()
-        assert item == ("machine.created", {"id": "m-1"})
+        assert item is not None
+        # Queue tuple carries the seq_id so the generator can emit id: lines.
+        event_type, payload, seq_id = item
+        assert event_type == "machine.created"
+        assert payload == {"id": "m-1"}
+        assert seq_id >= 1
 
     def test_publish_enqueues_to_multiple_subscribers(self):
         bus = _SseEventBus()
@@ -126,11 +131,12 @@ class TestSseEventBusFullQueueEviction:
         asyncio.run(bus.publish("new.event", {"fresh": True}))
         # Queue should still be at max (one evicted, one added).
         assert q.qsize() == _QUEUE_MAXSIZE
-        # Last item should be the freshly published event.
+        # Last item should be the freshly published event (now seq-carrying).
         items = []
         while not q.empty():
             items.append(q.get_nowait())
-        assert items[-1] == ("new.event", {"fresh": True})
+        assert items[-1][0] == "new.event"
+        assert items[-1][1] == {"fresh": True}
 
 
 @pytest.mark.unit

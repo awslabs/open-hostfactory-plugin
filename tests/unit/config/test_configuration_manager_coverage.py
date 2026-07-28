@@ -566,6 +566,60 @@ class TestSavePersistsOnlyUserConfig:
         # merged defaults (e.g. no top-level "version", "provider", "logging").
         assert on_disk == {"request": {"default_timeout": 222}}
 
+    def test_set_dict_value_replaces_subtree_on_disk_no_stale_keys(self, tmp_path):
+        """``set`` of a dict must REPLACE the on-disk subtree, not deep-merge it.
+
+        ``set`` has replace semantics in memory: setting ``provider`` to a new
+        dict drops the old ``providers`` sibling. Persistence must match — a
+        deep-merge would retain the stale ``providers`` key on disk, so after a
+        reload the in-memory and on-disk states would diverge.
+        """
+        from orb.config.managers.configuration_manager import ConfigurationManager
+
+        user_config = {
+            "provider": {"active_provider": "aws", "providers": ["old-aws-entry"]},
+        }
+        config_path = tmp_path / "config.json"
+        config_path.write_text(json.dumps(user_config))
+
+        mgr = ConfigurationManager(config_file=str(config_path))
+        # Replace the whole ``provider`` subtree with a value that omits
+        # ``providers`` — the in-memory result no longer has that key.
+        mgr.set("provider", {"active_provider": "gcp"})
+        in_memory = mgr.get("provider")
+        assert in_memory == {"active_provider": "gcp"}
+
+        mgr.save(str(config_path))
+        on_disk = json.loads(config_path.read_text())
+
+        # On disk must match in-memory: the stale ``providers`` key is GONE.
+        assert on_disk["provider"] == {"active_provider": "gcp"}
+        assert "providers" not in on_disk["provider"]
+        assert on_disk["provider"] == in_memory
+
+    def test_update_dict_value_still_deep_merges(self, tmp_path):
+        """``update`` keeps deep-merge semantics — set-replace must not leak into it.
+
+        ``update`` merges into existing dicts, so a partial update of the
+        ``provider`` subtree must preserve sibling keys the update did not
+        mention (unlike ``set``, which replaces wholesale).
+        """
+        from orb.config.managers.configuration_manager import ConfigurationManager
+
+        user_config = {
+            "provider": {"active_provider": "aws", "region": "us-east-1"},
+        }
+        config_path = tmp_path / "config.json"
+        config_path.write_text(json.dumps(user_config))
+
+        mgr = ConfigurationManager(config_file=str(config_path))
+        mgr.update({"provider": {"active_provider": "gcp"}})
+        mgr.save(str(config_path))
+
+        on_disk = json.loads(config_path.read_text())
+        # ``region`` survives the deep-merge; only ``active_provider`` changed.
+        assert on_disk["provider"] == {"active_provider": "gcp", "region": "us-east-1"}
+
 
 # ---------------------------------------------------------------------------
 # get_raw_config

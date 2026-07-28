@@ -7,10 +7,15 @@ from orb.api.server import create_fastapi_app
 from orb.config.schemas.server_schema import ServerConfig
 
 
-def _build_config(require_https: bool, hsts_max_age: int = 31536000) -> ServerConfig:
+def _build_config(
+    require_https: bool,
+    hsts_max_age: int = 31536000,
+    trusted_proxies: list[str] | None = None,
+) -> ServerConfig:
     return ServerConfig(  # type: ignore[call-arg]
         require_https=require_https,
         hsts_max_age=hsts_max_age,
+        trusted_proxies=trusted_proxies or [],
     )
 
 
@@ -40,6 +45,49 @@ class TestHTTPSRedirect:
         assert resp.status_code != 307
         # HSTS must not be advertised for an HTTP-only origin.
         assert "strict-transport-security" not in resp.headers
+
+
+class TestForwardedProtoNoRedirectLoop:
+    """Behind a TLS-terminating trusted proxy, X-Forwarded-Proto=https must not loop.
+
+    The proxy terminates TLS and forwards plain HTTP, so scope["scheme"] is
+    "http".  Without honouring X-Forwarded-Proto the redirect middleware would
+    307 every request into an infinite loop.  The forwarded scheme is only
+    trusted from a configured trusted proxy so genuine HTTP and spoofed headers
+    from untrusted clients still redirect.
+    """
+
+    def test_trusted_proxy_forwarded_https_not_redirected(self):
+        # TestClient's default direct-peer host is 'testclient'; mark it trusted.
+        app = create_fastapi_app(_build_config(require_https=True, trusted_proxies=["testclient"]))
+        client = TestClient(app, base_url="http://testserver")
+        resp = client.get(
+            "/health",
+            headers={"X-Forwarded-Proto": "https"},
+            follow_redirects=False,
+        )
+        assert resp.status_code != 307
+
+    def test_genuine_http_from_trusted_proxy_still_redirects(self):
+        # A trusted proxy that forwards a real HTTP request (no XFP=https)
+        # must still be redirected — HTTPS enforcement is not weakened.
+        app = create_fastapi_app(_build_config(require_https=True, trusted_proxies=["testclient"]))
+        client = TestClient(app, base_url="http://testserver")
+        resp = client.get("/health", follow_redirects=False)
+        assert resp.status_code == 307
+        assert resp.headers["location"].startswith("https://")
+
+    def test_forwarded_proto_ignored_without_trusted_proxies(self):
+        # With no trusted proxies configured, a spoofed X-Forwarded-Proto must
+        # be ignored so the request is still redirected to HTTPS.
+        app = create_fastapi_app(_build_config(require_https=True, trusted_proxies=[]))
+        client = TestClient(app, base_url="http://testserver")
+        resp = client.get(
+            "/health",
+            headers={"X-Forwarded-Proto": "https"},
+            follow_redirects=False,
+        )
+        assert resp.status_code == 307
 
 
 class TestHSTSMaxAgeWiring:

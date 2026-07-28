@@ -274,6 +274,90 @@ class TestRequestsStateSseLiveUpdates:
         assert changed is False
         assert s.requests[0]["status"] == "pending"
 
+    def test_apply_updates_counts_and_progress_not_just_status(self):
+        """A status-transition event must refresh count/progress fields too.
+
+        The row's progress bar and counts columns derive from
+        ``successful_count`` / ``requested_count`` (see ``request_rows``).
+        Patching only ``status`` would leave those stale, so the event's
+        count fields must flow through to the row.
+        """
+        s = self._make_state(
+            [
+                {
+                    "request_id": "req-1",
+                    "status": "pending",
+                    "requested_count": 4,
+                    "successful_count": 0,
+                }
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {
+                "request_id": "req-1",
+                "new_status": "in_progress",
+                "successful_count": 3,
+                "requested_count": 4,
+            },
+        )
+        assert changed is True
+        row = s.requests[0]
+        assert row["status"] == "in_progress"
+        # Counts advanced with the status transition — not left at 0.
+        assert row["successful_count"] == 3
+        assert row["requested_count"] == 4
+
+    def test_apply_completed_event_derives_fulfilled_count_from_machine_ids(self):
+        """A completed event without an explicit count derives it from machine_ids."""
+        s = self._make_state(
+            [
+                {
+                    "request_id": "req-1",
+                    "status": "in_progress",
+                    "requested_count": 2,
+                    "successful_count": 0,
+                }
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestCompletedEvent",
+            {
+                "request_id": "req-1",
+                "completion_status": "complete",
+                "machine_ids": ["m-1", "m-2"],
+            },
+        )
+        assert changed is True
+        row = s.requests[0]
+        assert row["status"] == "complete"
+        # Progress reaches its final value: 2 machines fulfilled.
+        assert row["successful_count"] == 2
+        assert row["machine_ids"] == ["m-1", "m-2"]
+
+    def test_apply_counts_only_change_patches_row_even_if_status_same(self):
+        """When only counts change (status unchanged), the row is still patched."""
+        s = self._make_state(
+            [
+                {
+                    "request_id": "req-1",
+                    "status": "in_progress",
+                    "requested_count": 4,
+                    "successful_count": 1,
+                }
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {
+                "request_id": "req-1",
+                "new_status": "in_progress",
+                "successful_count": 2,
+            },
+        )
+        assert changed is True
+        assert s.requests[0]["successful_count"] == 2
+
     # --- stream_status_events (drains the SSE generator) -------------------
 
     @pytest.mark.asyncio
@@ -299,6 +383,82 @@ class TestRequestsStateSseLiveUpdates:
         assert by_id["req-1"] == "complete"
         assert by_id["req-2"] == "in_progress"
         assert s._sse_started is False
+
+    @pytest.mark.asyncio
+    async def test_stream_status_events_replay_truncated_triggers_full_reload(self):
+        """A replay_truncated sentinel makes the stream re-fetch the whole list.
+
+        On reconnect after a gap too large to replay incrementally, the server
+        sends replay_truncated. The row-update path must full-reload rather than
+        rely on stale incremental state — so a row stuck in_progress after a
+        missed terminal event self-heals to its true (terminal) status.
+        """
+        s = self._make_state(
+            [
+                # Locally stuck in_progress (terminal event was missed).
+                {"request_id": "req-1", "status": "in_progress"},
+            ]
+        )
+        s.tab = "all"
+        s.page_size = 200
+        s.next_cursor = ""
+        s.api_total_count = 0
+        s.last_refresh = ""
+
+        async def _fake_subscribe(event_types=None):
+            yield "replay_truncated", {"type": "replay_truncated", "since": 1, "seq_id": 0}
+
+        async def _fake_list_requests(status=None, limit=200):
+            # Server truth: req-1 actually completed while we were disconnected.
+            return {
+                "requests": [
+                    {"request_id": "req-1", "status": "complete", "created_at": "2026-01-01"}
+                ],
+                "next_cursor": "",
+                "total_count": 1,
+            }
+
+        with patch("orb.ui.pages.requests.api") as mock_api:
+            mock_api.subscribe_events = _fake_subscribe
+            mock_api.list_requests = _fake_list_requests
+            await s.stream_status_events()
+
+        # The stuck row was reconciled to its true terminal status via reload.
+        by_id = {r["request_id"]: r["status"] for r in s.requests}
+        assert by_id["req-1"] == "complete"
+        assert s._sse_started is False
+
+    @pytest.mark.asyncio
+    async def test_reconnect_replay_updates_stuck_row_to_terminal(self):
+        """End-to-end: blip → missed terminal transition → reconnect replay →
+        row moves from in_progress to its terminal status (not left stuck).
+
+        The reconnect replay surfaces the previously-missed terminal event
+        through the same generator the live stream uses, so draining it patches
+        the row exactly as a live event would — the row self-heals without a
+        manual refresh.
+        """
+        s = self._make_state([{"request_id": "req-1", "status": "in_progress"}])
+
+        async def _fake_subscribe(event_types=None):
+            # After reconnect, the server replays the terminal event the client
+            # missed during the outage (it carried an id: so since_seq resumed).
+            yield (
+                "RequestCompletedEvent",
+                {
+                    "request_id": "req-1",
+                    "completion_status": "complete",
+                    "machine_ids": ["m-1"],
+                },
+            )
+
+        with patch("orb.ui.pages.requests.api") as mock_api:
+            mock_api.subscribe_events = _fake_subscribe
+            await s.stream_status_events()
+
+        assert s.requests[0]["status"] == "complete"
+        # Progress reached its final value from the replayed event.
+        assert s.requests[0]["successful_count"] == 1
 
     @pytest.mark.asyncio
     async def test_stream_status_events_single_flight_guard(self):

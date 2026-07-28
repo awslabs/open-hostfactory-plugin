@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 
 from orb.application.dto.queries import SyncAndGetRequestQuery, SyncAndListActiveRequestsQuery
 from orb.application.ports.command_bus_port import CommandBusPort
@@ -104,10 +105,14 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
     async def _poll_until_terminal(self, input: GetRequestStatusInput) -> list[dict]:
         """Poll every requested ID until all reach a terminal state or timeout.
 
-        Wall-clock time is tracked from the first poll against
-        ``input.timeout_seconds``; the last snapshot is returned when the cap is
-        reached even if some requests are still non-terminal, so callers always
-        get the freshest known state.
+        Elapsed time is measured as true wall-clock via ``time.monotonic()``
+        deltas from the first poll against ``input.timeout_seconds``, so the real
+        latency of each ``_fetch_once`` counts toward the budget and the total
+        wait never overruns the caller's cap. (An interval-counting approach that
+        added a constant ``_POLL_INTERVAL_SECONDS`` per loop ignored fetch
+        latency and could overshoot the timeout substantially.) The last snapshot
+        is returned when the cap is reached even if some requests are still
+        non-terminal, so callers always get the freshest known state.
 
         A transient sync error (an ``error`` entry with no terminal status and
         no ``not_found`` flag) does NOT immediately end the poll — the provider
@@ -118,16 +123,18 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
         ``failed``/``complete`` status, or ``not_found``) still stops the poll
         immediately.
         """
-        elapsed = 0
+        start = time.monotonic()
         request_dicts = await self._fetch_once(input)
         consecutive_errors = 1 if self._has_transient_error(request_dicts) else 0
-        while not self._all_terminal(request_dicts) and elapsed < input.timeout_seconds:
+        while (
+            not self._all_terminal(request_dicts)
+            and (time.monotonic() - start) < input.timeout_seconds
+        ):
             if consecutive_errors >= _MAX_CONSECUTIVE_POLL_ERRORS:
                 # Persistent transient failures — stop retrying and surface the
                 # last snapshot rather than blocking until timeout.
                 break
             await asyncio.sleep(_POLL_INTERVAL_SECONDS)
-            elapsed += _POLL_INTERVAL_SECONDS
             request_dicts = await self._fetch_once(input)
             if self._has_transient_error(request_dicts):
                 consecutive_errors += 1

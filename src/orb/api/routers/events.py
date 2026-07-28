@@ -61,6 +61,7 @@ import asyncio
 import itertools
 import json
 import logging
+import time
 from collections import deque
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional
@@ -86,9 +87,24 @@ _QUEUE_MAXSIZE: int = 256  # drop oldest on overflow rather than blocking
 # ?since_seq= but no ?since= timestamp — every recorded event has ts > _EPOCH.
 _EPOCH: datetime = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
-# Monotonic sequence counter — starts at 1.  seq_id 0 is reserved for the
-# replay_truncated sentinel and is never issued by this counter.
-_seq_counter = itertools.count(1)
+
+def _boot_base() -> int:
+    """Return a per-process, monotonic-across-restarts seq_id floor.
+
+    The seq counter must not restart from 1 on every process boot, otherwise a
+    client holding a cursor from a previous generation (e.g. since_seq=2) would
+    match freshly-issued low ids after a restart and silently skip the genuinely
+    new events (the seq 1..5 collision).  Seeding the counter from wall-clock
+    microseconds gives every boot a strictly higher floor than the last, so a
+    stale cross-restart cursor always lands *below* the new generation's ids and
+    is detectable as a gap.
+
+    Microsecond resolution keeps the base (~1.7e15 today) well under JavaScript's
+    2**53 safe-integer limit, so the single-integer ``id:`` wire cursor still
+    round-trips through every SDK reader unchanged — no wire-format, spec, or
+    client change is needed to carry the generation token.
+    """
+    return int(time.time() * 1_000_000)
 
 
 def _drain_one(q: asyncio.Queue) -> bool:
@@ -117,21 +133,32 @@ class _SseEventBus:
     Unsubscribe uses ``set.discard`` which is idempotent — no KeyError if
     the subscriber was already removed.
 
-    Every published event carries a monotonic ``seq_id`` (from the
-    module-level ``_seq_counter``).  The history deque stores
+    Every published event carries a monotonic ``seq_id`` (from this
+    instance's ``_seq_counter``, seeded above the previous boot).  The history deque stores
     ``(ts, event_type, payload, seq_id)`` tuples.  On reconnect the
     caller may pass ``since_seq`` to detect gaps; ``history_since_seq``
     returns a ``replay_truncated`` sentinel when the deque has overflowed
     and the requested range can no longer be served completely.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, boot_base: int = 0) -> None:
         self._subscribers: set[asyncio.Queue[Optional[tuple]]] = set()
         self._subscribers_lock: asyncio.Lock = asyncio.Lock()
         # Store recent events for ?since= replay (capped ring-buffer backed by deque
         # so append is O(1) and maxlen enforces the cap without manual slicing).
         self._history_max: int = 512
         self._history: deque[tuple[datetime, str, dict, int]] = deque(maxlen=self._history_max)
+        # Generation floor: the highest seq_id from a *previous* process boot.
+        # seq_ids issued by this instance are all strictly greater than
+        # ``_boot_base``, so any ``since_seq`` in ``(0, _boot_base]`` belongs to
+        # an earlier generation and must trigger replay_truncated.  Defaults to 0
+        # (no floor) so a directly-constructed bus behaves like a fresh counter
+        # starting at 1 — the module singleton passes a real boot base.
+        self._boot_base: int = boot_base
+        # Monotonic sequence counter for this generation.  Starts at
+        # ``boot_base + 1`` so ids never collide with a prior boot; seq_id 0 stays
+        # reserved for the replay_truncated sentinel and is never issued.
+        self._seq_counter = itertools.count(boot_base + 1)
 
     async def subscribe(self) -> asyncio.Queue[Optional[tuple]]:
         """Register a new subscriber; returns its dedicated queue."""
@@ -165,7 +192,7 @@ class _SseEventBus:
         the queue has slack, avoiding the QueueEmpty / QueueFull race
         windows entirely.
         """
-        seq_id = next(_seq_counter)
+        seq_id = next(self._seq_counter)
         ts = datetime.now(timezone.utc)
         self._record(ts, event_type, payload, seq_id)
         async with self._subscribers_lock:
@@ -220,7 +247,13 @@ class _SseEventBus:
 
         Emits a synthetic ``replay_truncated`` sentinel as the first item
         whenever the caller's ``since_seq`` claim cannot be satisfied by
-        whatever the bus holds today.  This covers two distinct cases:
+        whatever the bus holds today.  This covers three distinct cases:
+
+        0. **Cross-restart generation gap** — ``0 < since_seq <= _boot_base``,
+           i.e. the cursor was issued by a previous process boot.  This
+           instance only issues seq_ids above ``_boot_base``, so such a cursor
+           is stale; without this check a low pre-restart cursor would match
+           the fresh generation's low ids and skip the events in between.
 
         1. **Deque overflow** — the oldest surviving deque entry has a
            ``seq_id`` greater than ``since_seq + 1``, meaning at least one
@@ -274,6 +307,16 @@ class _SseEventBus:
             (et, p, seq) for (ts, et, p, seq) in self._history if ts > since and seq > since_seq
         ]
 
+        # Case 0 (cross-restart generation gap): the client's cursor belongs to a
+        # previous process boot.  This instance only issues seq_ids strictly
+        # greater than ``_boot_base``, so any ``0 < since_seq <= _boot_base`` is a
+        # stale cursor from an earlier generation.  Without this check a client at
+        # since_seq=2 reconnecting after a restart (new events 1..5 in the fresh
+        # deque) would match ``seq > 2`` and receive only 3,4,5 — silently
+        # skipping the genuinely-new seq 1,2.  Force a full resync instead.
+        if 0 < since_seq <= self._boot_base:
+            return [sentinel] + entries
+
         if not self._history:
             # After a restart (or fresh bus): no history at all.  If the
             # caller claims to have seen events (since_seq > 0), we cannot
@@ -304,7 +347,7 @@ class _SseEventBus:
         self._history.append((ts, event_type, payload, seq_id))
 
 
-sse_event_bus = _SseEventBus()
+sse_event_bus = _SseEventBus(boot_base=_boot_base())
 
 
 # ---------------------------------------------------------------------------

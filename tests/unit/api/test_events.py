@@ -359,6 +359,109 @@ class TestSequenceIdAndReplayTruncated:
         # All 50 surviving history entries follow the sentinel.
         assert len(result) == 1 + 50
 
+    def test_cross_restart_cursor_at_boot_base_emits_sentinel_no_silent_drop(self):
+        """Reproduce the cross-restart seq collision the boot-token guard closes.
+
+        This isolates the *generation-floor* branch from the deque-overflow
+        branch.  The new process seeds its counter above ``boot_base``, so the
+        first fresh event is ``boot_base + 1``.  A stale client cursor of exactly
+        ``boot_base`` sits flush against that first id — ``oldest_seq
+        (boot_base+1) <= since_seq(boot_base) + 1`` — so the overflow branch does
+        NOT fire and neither does the client-ahead branch.  ONLY the
+        generation-floor guard can catch it.
+
+        Without the guard, ``filter seq > boot_base`` would return every fresh
+        event with NO sentinel, mirroring the original defect where a restarted
+        counter reissued low ids and the client silently skipped the events
+        published in the collision window.  With the guard, the stale cursor
+        forces a full resync.
+        """
+        boot_base = 5  # highest seq id the previous generation could have issued
+        bus = _SseEventBus(boot_base=boot_base)
+
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        # Fresh generation publishes 5 events: boot_base+1 .. boot_base+5.
+        for i in range(5):
+            bus._record(base, "machine.created", {"i": i}, seq_id=boot_base + 1 + i)
+
+        # oldest_seq = boot_base+1 = since_seq+1 -> overflow branch does NOT fire.
+        since = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        result = bus.history_since_seq(since, since_seq=boot_base)
+
+        assert result, "Expected at least the sentinel"
+        assert result[0][0] == "replay_truncated", (
+            "Stale cross-restart cursor must trigger replay_truncated (the guard "
+            f"is the only branch that can catch this scenario); got {result[0][0]!r}"
+        )
+        assert result[0][1]["since"] == boot_base
+        assert result[0][1]["seq_id"] == 0
+
+    def test_cross_restart_low_cursor_below_boot_base_emits_sentinel(self):
+        """A stale low cursor (since_seq=2) from a prior boot also resyncs.
+
+        Here the overflow branch would also fire, but the guard must catch the
+        stale generation cursor regardless — a cursor at or below ``_boot_base``
+        can never belong to this generation.
+        """
+        boot_base = 10
+        bus = _SseEventBus(boot_base=boot_base)
+
+        base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        for i in range(5):
+            bus._record(base, "machine.created", {"i": i}, seq_id=boot_base + 1 + i)
+
+        since = datetime(2025, 1, 1, tzinfo=timezone.utc)
+        result = bus.history_since_seq(since, since_seq=2)
+
+        assert result[0][0] == "replay_truncated"
+        assert result[0][1]["since"] == 2
+
+    def test_new_generation_counter_starts_above_boot_base(self):
+        """A restarted bus never reissues low ids that collide with old cursors."""
+
+        async def run():
+            boot_base = 1_000
+            bus = _SseEventBus(boot_base=boot_base)
+            await bus.publish("machine.created", {"id": "m-1"})
+            first_seq = bus._history[0][3]
+            assert first_seq == boot_base + 1, (
+                f"first seq of new generation must be boot_base+1; got {first_seq}"
+            )
+
+        asyncio.run(run())
+
+    def test_cursor_within_current_generation_replays_normally(self):
+        """A cursor issued by THIS generation (> boot_base) replays without a sentinel."""
+
+        async def run():
+            boot_base = 100
+            bus = _SseEventBus(boot_base=boot_base)
+            for i in range(3):
+                await bus.publish("machine.updated", {"i": i})
+            # This generation issued 101, 102, 103.  Client saw 101; reconnect at 101.
+            since = datetime(2025, 1, 1, tzinfo=timezone.utc)
+            result = bus.history_since_seq(since, since_seq=boot_base + 1)
+            types = [et for et, _ in result]
+            assert "replay_truncated" not in types, (
+                f"in-generation cursor must not truncate; got {types!r}"
+            )
+            # Only the two events after the cursor (102, 103) replay.
+            assert len(result) == 2
+
+        asyncio.run(run())
+
+    def test_module_singleton_seeded_with_monotonic_boot_base(self):
+        """The module bus uses a wall-clock-seeded boot base well under 2**53.
+
+        Guards the JS-safe-integer contract: the single-int ``id:`` cursor must
+        remain parseable by every SDK reader, so the boot base (and therefore
+        every issued seq_id) must stay below JavaScript's 2**53 limit.
+        """
+        from orb.api.routers.events import sse_event_bus
+
+        assert sse_event_bus._boot_base > 0, "module singleton must carry a boot floor"
+        assert sse_event_bus._boot_base < 2**53, "seq cursor must stay JS-safe-integer"
+
     def test_since_seq_param_activates_gap_detection_on_stream(self):
         """Route: ?since= + ?since_seq= triggers history_since_seq path.
 

@@ -470,7 +470,15 @@ async def stream_events(
                 history = sse_event_bus.history_since_with_seq(since_dt)
             else:
                 history = []
+            # Track the highest seq_id replayed from history so the live loop can
+            # de-dupe. subscribe() runs BEFORE this history snapshot, so any event
+            # published in that window lands in BOTH the history and the live
+            # queue; without this cursor it would be emitted twice with the same
+            # id:. The reserved sentinel seq_id 0 never advances the cursor.
+            max_replayed_seq = 0
             for event_type, payload, seq_id in history:
+                if seq_id and seq_id > max_replayed_seq:
+                    max_replayed_seq = seq_id
                 if _allowed(event_type, type_filter):
                     yield _format_sse(event_type, payload, seq_id)
 
@@ -492,6 +500,11 @@ async def stream_events(
                 # that predates the seq_id contract still streams (id: omitted).
                 event_type, payload = item[0], item[1]
                 seq_id = item[2] if len(item) > 2 else None
+                # De-dupe the history/live overlap: skip any live item whose
+                # seq_id was already replayed from history. Only real events carry
+                # a seq_id; legacy 2-tuples (seq_id=None) always pass through.
+                if seq_id is not None and seq_id <= max_replayed_seq:
+                    continue
                 if _allowed(event_type, type_filter):
                     yield _format_sse(event_type, payload, seq_id)
         finally:

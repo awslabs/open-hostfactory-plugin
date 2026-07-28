@@ -859,3 +859,58 @@ class TestSseWireSeqIdAndReconnect:
         )
         events = _parse_sse_events(body)
         assert events[0]["event"] == "replay_truncated"
+
+    def _stream_with_queue(self, bus: _SseEventBus, query: str, q: asyncio.Queue) -> str:
+        """Like ``_stream`` but with a caller-provided live queue.
+
+        Lets a test seed the live queue with items that overlap the history
+        snapshot to exercise the history/live de-dupe window.
+        """
+        app = _make_viewer_app()
+        client = TestClient(app, raise_server_exceptions=False)
+        mock_sub = AsyncMock(return_value=q)
+        mock_unsub = AsyncMock()
+        with (
+            patch("orb.api.routers.events.sse_event_bus", bus),
+            patch.object(bus, "subscribe", mock_sub),
+            patch.object(bus, "unsubscribe", mock_unsub),
+        ):
+            resp = client.get(f"/events/{query}")
+        assert resp.status_code == 200
+        return resp.text
+
+    def test_history_live_overlap_event_not_emitted_twice(self):
+        """An event present in BOTH the history snapshot and the live queue
+        (published in the subscribe→snapshot window) is emitted exactly ONCE.
+
+        Regression for the duplicate-window bug: subscribe() runs before the
+        history read, so an event landing in that gap is both replayed from
+        history and delivered on the live queue with the same id:. The live loop
+        must skip items whose seq_id <= the max already replayed from history.
+        """
+        bus = self._seed_bus(3)  # history seq_ids 1,2,3
+
+        # Live queue: seq 3 is the overlap (already in history), seq 4 is new.
+        q: asyncio.Queue = asyncio.Queue()
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 2}, 3))  # duplicate of history
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 3}, 4))  # genuinely new
+        q.put_nowait(None)  # close
+
+        body = self._stream_with_queue(bus, "?since=2025-01-01T00:00:00Z", q)
+        ids = [line for line in body.splitlines() if line.startswith("id:")]
+        # History replays 1,2,3; live adds only 4 (3 de-duped). No id appears twice.
+        assert ids == ["id: 1", "id: 2", "id: 3", "id: 4"], f"got {ids!r}"
+        assert len(ids) == len(set(ids)), f"duplicate id: emitted — {ids!r}"
+
+    def test_history_live_no_overlap_all_live_events_pass(self):
+        """When live seq_ids are all above the replayed max, none are skipped."""
+        bus = self._seed_bus(3)  # history 1,2,3
+
+        q: asyncio.Queue = asyncio.Queue()
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 3}, 4))
+        q.put_nowait(("RequestStatusChangedEvent", {"idx": 4}, 5))
+        q.put_nowait(None)
+
+        body = self._stream_with_queue(bus, "?since=2025-01-01T00:00:00Z", q)
+        ids = [line for line in body.splitlines() if line.startswith("id:")]
+        assert ids == ["id: 1", "id: 2", "id: 3", "id: 4", "id: 5"], f"got {ids!r}"

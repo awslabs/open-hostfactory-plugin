@@ -1093,8 +1093,8 @@ class K8sProviderStrategy(ProviderStrategy):
         if self._config_port is not None:
             try:
                 provider_cfg = self._config_port.get_provider_config()
-            except Exception:
-                pass
+            except Exception as e:
+                self._logger.debug("Could not resolve provider config from config port: %s", e)
 
         if not is_default_provider_instance(self._provider_name, provider_cfg):
             return

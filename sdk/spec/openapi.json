@@ -1856,7 +1856,7 @@
           "Events"
         ],
         "summary": "Global Server-Sent Events stream",
-        "description": "Subscribe once per page load. Receives push deltas for machines, requests, templates, and a heartbeat every 15 s.  Supports ?since= for replay and ?type= for filtering.  Add ?since_seq= alongside ?since= to enable gap-detection: if history has overflowed a replay_truncated sentinel is emitted first (seq_id 0).",
+        "description": "Subscribe once per page load. Receives push deltas for machines, requests, templates, and a heartbeat every 15 s.  Supports ?since= for replay and ?type= for filtering.  Add ?since_seq= (the Last-Event-ID of the last event received, sent automatically by standard SSE clients on reconnect) to enable gap-detection: replay resumes after that id, and if history has overflowed a replay_truncated sentinel is emitted first (seq_id 0).  Every real event carries an id: line so clients get Last-Event-ID semantics.",
         "operationId": "streamEvents",
         "parameters": [
           {

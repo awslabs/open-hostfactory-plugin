@@ -540,6 +540,47 @@ class TestHandleGetRequestStatusDetailed:
 
 
 @pytest.mark.unit
+class TestHandleGetRequestStatusWait:
+    """--wait / --timeout must be forwarded into GetRequestStatusInput."""
+
+    @pytest.mark.asyncio
+    async def test_wait_and_timeout_forwarded(self):
+        """--wait set + --timeout value → DTO receives wait=True and the timeout."""
+        from orb.application.dto.interface_response import InterfaceResponse
+
+        container, _scheduler, _, _, status_orch, *_, formatter = _mock_container()
+        status_orch.execute.return_value = GetRequestStatusOutput(requests=[])
+        formatter.format_request_status.return_value = InterfaceResponse(data={"requests": []})
+
+        args = _make_namespace(request_id="req-777", all=False, wait=True, timeout=42)
+
+        args._container = container
+        await handle_get_request_status(args)
+
+        call_input = status_orch.execute.call_args[0][0]
+        assert call_input.wait is True
+        assert call_input.timeout_seconds == 42
+
+    @pytest.mark.asyncio
+    async def test_wait_defaults_false_when_flag_absent(self):
+        """No --wait on args → DTO receives wait=False and default timeout."""
+        from orb.application.dto.interface_response import InterfaceResponse
+
+        container, _scheduler, _, _, status_orch, *_, formatter = _mock_container()
+        status_orch.execute.return_value = GetRequestStatusOutput(requests=[])
+        formatter.format_request_status.return_value = InterfaceResponse(data={"requests": []})
+
+        args = _make_namespace(request_id="req-778", all=False)
+
+        args._container = container
+        await handle_get_request_status(args)
+
+        call_input = status_orch.execute.call_args[0][0]
+        assert call_input.wait is False
+        assert call_input.timeout_seconds == 300
+
+
+@pytest.mark.unit
 class TestHandleGetRequestStatusMultiId:
     """2014: multi-ID paths in handle_get_request_status."""
 

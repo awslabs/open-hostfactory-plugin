@@ -16,7 +16,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from orb.providers.health_scoping import is_default_provider_instance
+from orb.providers.health_scoping import (
+    connectivity_check_kind,
+    count_enabled_provider_instances,
+    is_default_provider_instance,
+)
 
 
 def _provider(name: str, ptype: str, enabled: bool = True):
@@ -83,3 +87,33 @@ class TestIsDefaultProviderInstance:
         """With no resolvable provider config, do not suppress the check —
         fall back to registering so single-provider setups still probe."""
         assert is_default_provider_instance("aws-main", None) is True
+
+
+@pytest.mark.unit
+class TestConnectivityCheckKind:
+    def test_sole_enabled_provider_is_core(self) -> None:
+        """A single enabled provider gates readiness: its connectivity is core."""
+        cfg = _provider_config([_provider("aws-main", "aws")])
+        assert count_enabled_provider_instances(cfg) == 1
+        assert connectivity_check_kind(cfg) == "core"
+
+    def test_multiple_enabled_providers_is_provider(self) -> None:
+        """With multiple enabled providers a single failure must not gate
+        readiness, so connectivity is classified non-core."""
+        cfg = _provider_config([_provider("aws-main", "aws"), _provider("k8s_ms-karpenter", "k8s")])
+        assert count_enabled_provider_instances(cfg) == 2
+        assert connectivity_check_kind(cfg) == "provider"
+
+    def test_sole_enabled_among_disabled_is_core(self) -> None:
+        """Only the enabled count matters: one enabled + one disabled = sole."""
+        cfg = _provider_config(
+            [_provider("aws-main", "aws"), _provider("k8s_old", "k8s", enabled=False)]
+        )
+        assert count_enabled_provider_instances(cfg) == 1
+        assert connectivity_check_kind(cfg) == "core"
+
+    def test_no_config_is_provider(self) -> None:
+        """Unresolved config → non-core, so an unknown config never forces a
+        single-provider-style readiness gate that could wedge a pod."""
+        assert count_enabled_provider_instances(None) == 0
+        assert connectivity_check_kind(None) == "provider"

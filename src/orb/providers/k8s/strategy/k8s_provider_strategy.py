@@ -1065,7 +1065,17 @@ class K8sProviderStrategy(ProviderStrategy):
     # ------------------------------------------------------------------
 
     def register_health_checks(self, health_check: HealthCheck) -> None:
-        """Register Kubernetes-specific health checks if the client is reachable."""
+        """Register Kubernetes health checks if this is the default instance.
+
+        Connectivity-check registration MUST go through the
+        ``is_default_provider_instance`` scoping gate so a secondary k8s
+        instance does not register a check that drags the overall status down,
+        and the readiness ``kind`` is chosen by ``connectivity_check_kind`` so
+        a sole broken provider gates ``/readyz``. This mirrors
+        ``create_k8s_strategy`` (k8s/registration.py). This method has no live
+        caller today, but the gate is applied here so a future re-wire cannot
+        silently reintroduce secondary-provider status drag.
+        """
         try:
             client = self.kubernetes_client
         except Exception as exc:
@@ -1073,7 +1083,25 @@ class K8sProviderStrategy(ProviderStrategy):
                 "Skipping Kubernetes health-check registration: %s", exc, exc_info=True
             )
             return
-        self._health_check_service.register_health_checks(health_check, client)
+
+        from orb.providers.health_scoping import (
+            connectivity_check_kind,
+            is_default_provider_instance,
+        )
+
+        provider_cfg = None
+        if self._config_port is not None:
+            try:
+                provider_cfg = self._config_port.get_provider_config()
+            except Exception:
+                pass
+
+        if not is_default_provider_instance(self._provider_name, provider_cfg):
+            return
+
+        self._health_check_service.register_health_checks(
+            health_check, client, kind=connectivity_check_kind(provider_cfg)
+        )
 
     # ------------------------------------------------------------------
     # Native-spec resolution — kept on the strategy because it owns the

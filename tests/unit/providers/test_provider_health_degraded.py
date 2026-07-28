@@ -55,6 +55,22 @@ class TestAWSHealthDegraded:
         assert result.status == "degraded"
         assert "error" in result.details
 
+    def test_ec2_endpoint_connection_error_is_degraded(self) -> None:
+        """A genuinely unreachable EC2 endpoint raises EndpointConnectionError,
+        which is a BotoCoreError (NOT a ClientError). It must still yield
+        'degraded' so an unreachable endpoint does not force /health to 503."""
+        from botocore.exceptions import EndpointConnectionError
+
+        aws_client = MagicMock()
+        aws_client.ec2_client.describe_instances.side_effect = EndpointConnectionError(
+            endpoint_url="https://ec2.example.com"
+        )
+        captured = self._register_and_capture(aws_client)
+
+        result = captured["ec2"]()
+        assert result.status == "degraded"
+        assert "error" in result.details
+
     def test_aws_success_still_healthy(self) -> None:
         aws_client = MagicMock()
         aws_client.sts_client.get_caller_identity.return_value = {

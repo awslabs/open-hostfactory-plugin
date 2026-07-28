@@ -78,12 +78,15 @@ class TestReadyz:
         resp = client.get("/readyz")
         assert resp.status_code == 200
 
-    def test_readyz_200_when_readiness_degraded(self) -> None:
+    def test_readyz_503_when_readiness_degraded(self) -> None:
+        """get_readiness only reports 'degraded' when a CORE check is degraded
+        (e.g. the sole provider's connectivity, which fails as degraded). A
+        degraded core dependency means not-ready → 503."""
         health_port = MagicMock()
         health_port.get_readiness.return_value = {"status": "degraded"}
         client = _make_client(health_port)
         resp = client.get("/readyz")
-        assert resp.status_code == 200
+        assert resp.status_code == 503
 
     def test_readyz_503_when_core_dependency_unhealthy(self) -> None:
         health_port = MagicMock()

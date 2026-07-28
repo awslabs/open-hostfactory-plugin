@@ -545,11 +545,17 @@ def create_fastapi_app(server_config: Any) -> Any:
     async def readiness_check(health_port: Any = Depends(get_health_check_port)) -> Any:  # type: ignore[misc]
         """Readiness probe.
 
-        Returns 200 unless a CORE dependency (storage/database) is
-        unhealthy, in which case it returns 503. Provider-connectivity
-        checks (aws, ec2, kubernetes_api) do NOT gate readiness, so an
-        unreachable optional provider cannot take the service out of
-        rotation.
+        Returns 503 when a CORE dependency is not fully healthy, otherwise
+        200. Core dependencies are storage/database plus — in a
+        single-provider deployment — the sole provider's connectivity: a
+        broken sole provider means the pod cannot serve provisioning
+        requests, so it must be taken out of rotation. In a multi-provider
+        deployment, provider connectivity is classified non-core, so a single
+        unreachable optional provider does NOT gate readiness.
+
+        Both ``unhealthy`` and ``degraded`` core states map to 503: a
+        connectivity failure surfaces as ``degraded``, and for a sole
+        (core) provider that still means not-ready.
         """
         try:
             health_port.run_all_checks()
@@ -557,7 +563,7 @@ def create_fastapi_app(server_config: Any) -> Any:
         except Exception:
             status = {"status": "unknown"}
 
-        http_status = 503 if status.get("status") == "unhealthy" else 200
+        http_status = 503 if status.get("status") in ("unhealthy", "degraded") else 200
         return JSONResponse(content=status, status_code=http_status)  # type: ignore[misc]
 
     # Add metrics endpoint

@@ -16,7 +16,11 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-__all__ = ["is_default_provider_instance"]
+__all__ = [
+    "connectivity_check_kind",
+    "count_enabled_provider_instances",
+    "is_default_provider_instance",
+]
 
 
 def _resolve_default_instance_name(provider_config: Any) -> Optional[str]:
@@ -65,3 +69,34 @@ def is_default_provider_instance(provider_name: Optional[str], provider_config: 
         return True
 
     return provider_name == default_name
+
+
+def count_enabled_provider_instances(provider_config: Any) -> int:
+    """Return the number of enabled provider instances in *provider_config*.
+
+    Returns ``0`` when the config cannot be resolved. Instances without an
+    explicit ``enabled`` flag are treated as enabled (matching the schema
+    default).
+    """
+    if provider_config is None:
+        return 0
+    providers = getattr(provider_config, "providers", None) or []
+    return sum(1 for instance in providers if getattr(instance, "enabled", True))
+
+
+def connectivity_check_kind(provider_config: Any) -> str:
+    """Return the readiness ``kind`` for a provider-connectivity check.
+
+    When the default provider is the ONLY enabled instance, its connectivity
+    is a core dependency: a broken sole provider means the service cannot serve
+    any provisioning request, so ``/readyz`` must reflect that (returns
+    ``"core"`` → the check gates readiness). When MULTIPLE providers are enabled
+    a single unreachable one must not take the pod out of rotation, so the check
+    is classified ``"provider"`` (surfaced in ``/health`` but excluded from
+    readiness).
+
+    Fails safe: when the enabled-instance count cannot be resolved (0), the
+    check is treated as ``"provider"`` so an unresolved config never forces a
+    single-provider-style readiness gate that could wedge a pod.
+    """
+    return "core" if count_enabled_provider_instances(provider_config) == 1 else "provider"

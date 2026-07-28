@@ -96,7 +96,10 @@ def create_aws_strategy(provider_config: Any) -> Any:
             from orb.domain.base.ports.health_check_port import HealthCheckPort
             from orb.infrastructure.di.container import get_container
             from orb.providers.aws.health import register_aws_health_checks
-            from orb.providers.health_scoping import is_default_provider_instance
+            from orb.providers.health_scoping import (
+                connectivity_check_kind,
+                is_default_provider_instance,
+            )
 
             # Register connectivity checks only for the default/active instance
             # so a secondary AWS instance cannot drag the overall status down.
@@ -109,7 +112,14 @@ def create_aws_strategy(provider_config: Any) -> Any:
                 if config_port is not None:
                     with suppress(Exception):
                         _storage_strategy = config_port.get_storage_strategy()
-                register_aws_health_checks(health_check, strategy.aws_client, _storage_strategy)
+                # When AWS is the sole enabled provider its connectivity gates
+                # readiness (kind="core"); with multiple providers it does not.
+                register_aws_health_checks(
+                    health_check,
+                    strategy.aws_client,
+                    _storage_strategy,
+                    kind=connectivity_check_kind(provider_cfg),
+                )
 
         # Set provider name for identification
         if hasattr(strategy, "name") and provider_name:

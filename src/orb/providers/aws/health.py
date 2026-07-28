@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError
 
 from orb.domain.base.ports.health_check_port import HealthCheckPort
 from orb.monitoring.health import HealthStatus
@@ -15,6 +15,8 @@ def register_aws_health_checks(
     health_check: HealthCheckPort,
     aws_client: "AWSClient",
     storage_strategy: str = "json",  # kept for back-compat with callers
+    *,
+    kind: str = "provider",
 ) -> None:
     """Register AWS-specific health checks (``aws``, ``ec2``).
 
@@ -28,6 +30,10 @@ def register_aws_health_checks(
         health_check: The application HealthCheckPort to register checks on.
         aws_client: Authenticated AWS client used by the checks.
         storage_strategy: Ignored; retained for back-compat.
+        kind: Readiness classification for the connectivity checks
+            (``"core"`` when AWS is the sole enabled provider so a broken
+            provider gates ``/readyz``; ``"provider"`` otherwise). See
+            ``providers.health_scoping.connectivity_check_kind``.
     """
     _ = storage_strategy
 
@@ -65,8 +71,13 @@ def register_aws_health_checks(
                 details={"instance_count": instance_count, "api_status": "available"},
                 dependencies=["aws", "ec2"],
             )
-        except ClientError as e:
-            # Connectivity/permission failure — degraded, not a hard failure.
+        except (ClientError, BotoCoreError) as e:
+            # Both API errors (ClientError, e.g. AuthFailure) and connection
+            # failures (BotoCoreError subclasses such as EndpointConnectionError
+            # / ConnectTimeoutError raised by an unreachable endpoint) are
+            # connectivity/permission signals — degraded, not a hard failure.
+            # /health maps degraded -> 200, so an unreachable EC2 endpoint no
+            # longer forces the endpoint to 503.
             return HealthStatus(
                 name="ec2",
                 status="degraded",
@@ -74,5 +85,5 @@ def register_aws_health_checks(
                 dependencies=["aws", "ec2"],
             )
 
-    health_check.register_check("aws", _check_aws_health, kind="provider")
-    health_check.register_check("ec2", _check_ec2_health, kind="provider")
+    health_check.register_check("aws", _check_aws_health, kind=kind)
+    health_check.register_check("ec2", _check_ec2_health, kind=kind)

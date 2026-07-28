@@ -65,7 +65,7 @@
           "System"
         ],
         "summary": "Readiness Check",
-        "description": "Readiness probe.\n\nReturns 200 unless a CORE dependency (storage/database) is\nunhealthy, in which case it returns 503. Provider-connectivity\nchecks (aws, ec2, kubernetes_api) do NOT gate readiness, so an\nunreachable optional provider cannot take the service out of\nrotation.",
+        "description": "Readiness probe.\n\nReturns 503 when a CORE dependency is not fully healthy, otherwise\n200. Core dependencies are storage/database plus \u2014 in a\nsingle-provider deployment \u2014 the sole provider's connectivity: a\nbroken sole provider means the pod cannot serve provisioning\nrequests, so it must be taken out of rotation. In a multi-provider\ndeployment, provider connectivity is classified non-core, so a single\nunreachable optional provider does NOT gate readiness.\n\nBoth ``unhealthy`` and ``degraded`` core states map to 503: a\nconnectivity failure surfaces as ``degraded``, and for a sole\n(core) provider that still means not-ready.",
         "operationId": "readinessCheck",
         "responses": {
           "200": {

@@ -395,7 +395,15 @@ def register_deserialize_skip_counter_check(
             dependencies=["database"],
         )
 
-    health_check.register_check("storage.deserialize", _check_deserialize_skip_counters, force=True)
+    # Deliberately kind="system" (the default), NOT "core": a non-zero skip
+    # counter means some rows returned incomplete (a data-quality signal), and
+    # the only "unhealthy" path is a transient failure to READ the counter — in
+    # neither case can the storage backend not serve reads (that capability is
+    # covered by the separate "core" ``database`` check). So this must not gate
+    # readiness / take the pod out of rotation.
+    health_check.register_check(
+        "storage.deserialize", _check_deserialize_skip_counters, force=True, kind="system"
+    )
 
 
 def register_storage_health_checks(

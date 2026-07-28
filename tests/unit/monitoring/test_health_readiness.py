@@ -134,3 +134,86 @@ class TestReadinessClassification:
         assert status["status"] == "degraded"
         assert "aws" in status["checks"]
         assert "database" in status["checks"]
+
+
+@pytest.mark.unit
+class TestSoleProviderReadinessGating:
+    """Sole enabled provider gates readiness (kind='core'); multi-provider does not.
+
+    A connectivity failure surfaces as 'degraded'. When the provider is the sole
+    enabled instance its check is registered kind='core', so a degraded sole
+    provider makes readiness 'degraded' (which /readyz maps to 503). With
+    multiple providers the connectivity check is kind='provider' and does not
+    gate readiness.
+    """
+
+    def test_sole_provider_unreachable_makes_readiness_not_ready(self, tmp_path) -> None:
+        hc = _make_health_check(tmp_path)
+        hc.register_check(
+            "database",
+            lambda: HealthStatus("database", "healthy", {}),
+            kind="core",
+            force=True,
+        )
+        # Sole provider → its connectivity is core; unreachable = degraded.
+        hc.register_check(
+            "aws",
+            lambda: HealthStatus("aws", "degraded", {"error": "unreachable"}),
+            kind="core",
+        )
+        hc.run_check("database")
+        hc.run_check("aws")
+
+        readiness = hc.get_readiness()
+        # 'degraded' core dependency → /readyz maps this to 503 (not-ready).
+        assert readiness["status"] == "degraded"
+
+    def test_multi_provider_secondary_unreachable_stays_ready(self, tmp_path) -> None:
+        hc = _make_health_check(tmp_path)
+        hc.register_check(
+            "database",
+            lambda: HealthStatus("database", "healthy", {}),
+            kind="core",
+            force=True,
+        )
+        # Multiple providers: default healthy (core-not; provider), secondary
+        # unreachable (provider). Neither provider check gates readiness.
+        hc.register_check(
+            "aws",
+            lambda: HealthStatus("aws", "healthy", {}),
+            kind="provider",
+        )
+        hc.register_check(
+            "kubernetes_api",
+            lambda: HealthStatus("kubernetes_api", "degraded", {"error": "unreachable"}),
+            kind="provider",
+        )
+        hc.run_check("database")
+        hc.run_check("aws")
+        hc.run_check("kubernetes_api")
+
+        readiness = hc.get_readiness()
+        assert readiness["status"] == "healthy"
+
+    def test_multi_provider_default_unreachable_stays_ready(self, tmp_path) -> None:
+        """Intended: with multiple providers even the DEFAULT provider's
+        connectivity is non-core, so a degraded default does NOT gate readiness.
+        Only a sole-provider deployment gates on provider connectivity."""
+        hc = _make_health_check(tmp_path)
+        hc.register_check(
+            "database",
+            lambda: HealthStatus("database", "healthy", {}),
+            kind="core",
+            force=True,
+        )
+        # Default provider connectivity registered kind='provider' (multi mode).
+        hc.register_check(
+            "aws",
+            lambda: HealthStatus("aws", "degraded", {"error": "unreachable"}),
+            kind="provider",
+        )
+        hc.run_check("database")
+        hc.run_check("aws")
+
+        readiness = hc.get_readiness()
+        assert readiness["status"] == "healthy"

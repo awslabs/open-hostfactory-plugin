@@ -37,6 +37,50 @@
         }
       }
     },
+    "/livez": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Liveness Check",
+        "description": "Liveness probe.\n\nReturns 200 whenever the process is up. Never gates on any\ndependency or provider \u2014 a liveness failure means the process\nshould be restarted, which is not the right response to an\nunreachable downstream dependency.",
+        "operationId": "livenessCheck",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Livenesscheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Readiness Check",
+        "description": "Readiness probe.\n\nReturns 200 unless a CORE dependency (storage/database) is\nunhealthy, in which case it returns 503. Provider-connectivity\nchecks (aws, ec2, kubernetes_api) do NOT gate readiness, so an\nunreachable optional provider cannot take the service out of\nrotation.",
+        "operationId": "readinessCheck",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Readinesscheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/metrics": {
       "get": {
         "tags": [

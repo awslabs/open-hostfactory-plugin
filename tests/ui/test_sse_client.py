@@ -375,6 +375,65 @@ async def test_id_line_tracked_and_replayed_on_reconnect():
 
 
 @pytest.mark.asyncio
+async def test_non_integer_id_line_is_ignored_not_adopted_as_cursor():
+    """A malformed ``id:`` value must not crash and must not advance the cursor.
+
+    The event is still delivered; the bad id is simply discarded so the next
+    reconnect does not resume from a nonsense cursor.
+    """
+    from orb.ui.sse_client import stream_sse
+
+    first = _make_sse_response(
+        [
+            "id: not-a-number",
+            "event: RequestStatusChangedEvent",
+            "data: " + json.dumps({"n": 1}),
+            "",
+        ]
+    )
+    first_client = _make_client(first)
+    bad_client = MagicMock()
+    bad_client.__aenter__ = AsyncMock(side_effect=httpx.ConnectError("blip"))
+    bad_client.__aexit__ = AsyncMock(return_value=False)
+    good = _make_sse_response(["data: " + json.dumps({"n": 2}), ""])
+    good_client = _make_client(good)
+
+    builder_calls: list[int | None] = []
+
+    def _url_builder(last_id: int | None) -> str:
+        builder_calls.append(last_id)
+        return "http://localhost/events"
+
+    clients = [first_client, bad_client, good_client]
+    call_count = 0
+
+    def _factory(*a, **k):
+        nonlocal call_count
+        c = clients[min(call_count, len(clients) - 1)]
+        call_count += 1
+        return c
+
+    events: list[tuple[str, Any]] = []
+    with (
+        patch("orb.ui.sse_client.httpx.AsyncClient", side_effect=_factory),
+        patch("asyncio.sleep", new=AsyncMock()),
+    ):
+        async for evt, data in stream_sse("http://localhost/events", url_builder=_url_builder):
+            events.append((evt, data))
+            if len(events) >= 2:
+                break
+
+    # The event with the bad id was still delivered.
+    assert events[0][1]["n"] == 1
+    # The reconnect after the drop must NOT resume from the malformed id — the
+    # cursor stayed None because the id could not be parsed.
+    assert builder_calls[0] is None
+    assert all(c is None for c in builder_calls), (
+        f"malformed id must never become a resume cursor; got {builder_calls}"
+    )
+
+
+@pytest.mark.asyncio
 async def test_replay_truncated_event_is_yielded_to_caller():
     """The replay_truncated sentinel is passed through so the caller can react
     (e.g. full refresh). It carries no id:, so it never becomes a resume cursor.

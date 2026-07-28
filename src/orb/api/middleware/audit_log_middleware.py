@@ -25,7 +25,17 @@ class AuditLogMiddleware(BaseHTTPMiddleware):
     """
 
     SAFE_PATHS: frozenset[str] = frozenset(
-        {"/health", "/ping", "/info", "/metrics", "/orb/health", "/orb/info", "/orb/metrics"}
+        {
+            "/health",
+            "/livez",
+            "/readyz",
+            "/ping",
+            "/info",
+            "/metrics",
+            "/orb/health",
+            "/orb/info",
+            "/orb/metrics",
+        }
     )
     SAFE_VERBS: frozenset[str] = frozenset({"GET", "HEAD", "OPTIONS"})
 

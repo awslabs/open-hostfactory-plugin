@@ -45,9 +45,12 @@ def register_aws_health_checks(
                 dependencies=["aws"],
             )
         except Exception as e:
+            # An unreachable provider API is a degraded signal, not a hard
+            # failure of the process. /health maps degraded -> 200, so a
+            # single unreachable provider no longer forces the endpoint to 503.
             return HealthStatus(
                 name="aws",
-                status="unhealthy",
+                status="degraded",
                 details={"error": str(e)},
                 dependencies=["aws"],
             )
@@ -63,12 +66,13 @@ def register_aws_health_checks(
                 dependencies=["aws", "ec2"],
             )
         except ClientError as e:
+            # Connectivity/permission failure — degraded, not a hard failure.
             return HealthStatus(
                 name="ec2",
-                status="unhealthy",
+                status="degraded",
                 details={"error": str(e)},
                 dependencies=["aws", "ec2"],
             )
 
-    health_check.register_check("aws", _check_aws_health)
-    health_check.register_check("ec2", _check_ec2_health)
+    health_check.register_check("aws", _check_aws_health, kind="provider")
+    health_check.register_check("ec2", _check_ec2_health, kind="provider")

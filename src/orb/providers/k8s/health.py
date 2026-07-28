@@ -46,11 +46,15 @@ def register_k8s_health_checks(
                 dependencies=["kubernetes_api"],
             )
         except Exception as exc:
+            # An unreachable API server is a degraded signal for this provider,
+            # not a hard failure of the process. /health maps degraded -> 200,
+            # so a single unreachable cluster no longer forces the endpoint to
+            # 503.
             return HealthStatus(
                 name="kubernetes_api",
-                status="unhealthy",
+                status="degraded",
                 details={"error": str(exc)},
                 dependencies=["kubernetes_api"],
             )
 
-    health_check.register_check("kubernetes_api", _check_kubernetes_api_health)
+    health_check.register_check("kubernetes_api", _check_kubernetes_api_health, kind="provider")

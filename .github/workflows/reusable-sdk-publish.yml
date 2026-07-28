@@ -99,10 +99,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-    - name: Set up Node.js 20 (with npm registry auth)
+    - name: Set up Node.js (with npm registry auth)
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
       with:
-        node-version: '20'
+        # npm OIDC trusted publishing requires Node >= 22.14.0 (in addition to
+        # npm CLI >= 11.5.1); on Node 20 the publish never performs the OIDC
+        # exchange and falls back to token auth, failing with ENEEDAUTH on the
+        # trusted path. Token/GitHub-Packages publishing works on any Node, but
+        # the shared setup must satisfy the strictest (trusted) path.
+        node-version: '22'
         # Point npm at the destination registry so setup-node writes the matching
         # auth line into .npmrc for NODE_AUTH_TOKEN.
         #   github            -> npm.pkg.github.com  (GITHUB_TOKEN auth)
@@ -174,6 +179,10 @@ jobs:
         NODE_AUTH_TOKEN: ${{ matrix.destination == 'github' && secrets.GITHUB_TOKEN || (inputs.auth-mode == 'token' && secrets.NODE_AUTH_TOKEN || '') }}
       run: |
         cd sdk/typescript
+        # Record the toolchain versions: trusted publishing needs Node >= 22.14
+        # and npm >= 11.5.1, and an OIDC failure otherwise surfaces only as an
+        # opaque ENEEDAUTH — so make the active versions explicit in the log.
+        echo "node: $(node --version), npm: $(npm --version)"
         if [[ "${{ inputs.dry-run }}" == "true" ]]; then
           npm publish --access public --dry-run
           echo "npm -> ${{ matrix.destination }}: dry-run OK (nothing published)"

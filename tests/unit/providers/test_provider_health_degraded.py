@@ -8,17 +8,20 @@ forcing the whole endpoint to 503.
 
 from __future__ import annotations
 
+from typing import Callable
 from unittest.mock import MagicMock
 
 import pytest
 
+from orb.monitoring.health import HealthStatus
+
 
 @pytest.mark.unit
 class TestAWSHealthDegraded:
-    def _register_and_capture(self, aws_client):
+    def _register_and_capture(self, aws_client) -> dict[str, Callable[[], HealthStatus]]:
         from orb.providers.aws.health import register_aws_health_checks
 
-        captured: dict[str, object] = {}
+        captured: dict[str, Callable[[], HealthStatus]] = {}
 
         health_check = MagicMock()
 
@@ -67,10 +70,10 @@ class TestAWSHealthDegraded:
 
 @pytest.mark.unit
 class TestK8sHealthDegraded:
-    def _register_and_capture(self, kubernetes_client):
+    def _register_and_capture(self, kubernetes_client) -> dict[str, Callable[[], HealthStatus]]:
         from orb.providers.k8s.health import register_k8s_health_checks
 
-        captured: dict[str, object] = {}
+        captured: dict[str, Callable[[], HealthStatus]] = {}
 
         health_check = MagicMock()
 

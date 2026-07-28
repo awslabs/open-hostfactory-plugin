@@ -96,8 +96,14 @@ def create_aws_strategy(provider_config: Any) -> Any:
             from orb.domain.base.ports.health_check_port import HealthCheckPort
             from orb.infrastructure.di.container import get_container
             from orb.providers.aws.health import register_aws_health_checks
+            from orb.providers.health_scoping import is_default_provider_instance
 
-            if strategy.aws_client is not None:
+            # Register connectivity checks only for the default/active instance
+            # so a secondary AWS instance cannot drag the overall status down.
+            provider_cfg = config_port.get_provider_config() if config_port else None
+            if strategy.aws_client is not None and is_default_provider_instance(
+                provider_name, provider_cfg
+            ):
                 health_check = get_container().get(HealthCheckPort)
                 _storage_strategy = "json"
                 if config_port is not None:

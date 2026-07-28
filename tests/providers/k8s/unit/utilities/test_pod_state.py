@@ -12,6 +12,7 @@ Also verifies the unchanged mappings for other phases.
 
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -111,7 +112,7 @@ def test_controller_respawns_set_contains_expected_types() -> None:
 class TestBaseHandlerSucceededWarning:
     """Verify the handler emits a warning for controller-respawned Succeeded pods."""
 
-    def _make_handler(self, provider_api: str) -> object:
+    def _make_handler(self, provider_api: str) -> tuple[Any, MagicMock]:
         """Return a minimal K8sHandlerBase subclass with a mock logger."""
 
         from orb.providers.k8s.configuration.config import K8sProviderConfig
@@ -134,7 +135,7 @@ class TestBaseHandlerSucceededWarning:
                 return []
 
         client = MagicMock()
-        config = K8sProviderConfig(namespace="test")
+        config = K8sProviderConfig(namespace="test")  # type: ignore[call-arg]
         logger = MagicMock()
         return _ConcreteHandler(kubernetes_client=client, config=config, logger=logger), logger
 

@@ -6,7 +6,7 @@ from orb.infrastructure.registry.base_registry import BaseRegistry, RegistryMode
 from orb.infrastructure.registry.registry_factory import RegistryFactory
 
 
-class MockStrategy:
+class FakeStrategy:
     """Mock strategy for testing."""
 
     def __init__(self, config=None):
@@ -54,18 +54,18 @@ class TestBaseRegistryWithFactory:
 
     def test_register_type_uses_factory(self):
         """Test that register_type uses factory for registration."""
-        strategy_factory = Mock(return_value=MockStrategy())
+        strategy_factory = Mock(return_value=FakeStrategy())
         config_factory = Mock()
 
         self.registry.register_type("test", strategy_factory, config_factory)
 
         # Should be able to create instance through factory
         instance = self.factory.create_instance("test")
-        assert isinstance(instance, MockStrategy)
+        assert isinstance(instance, FakeStrategy)
 
     def test_create_strategy_by_type_uses_factory(self):
         """Test that create_strategy_by_type uses factory."""
-        mock_strategy = MockStrategy(config="test")
+        mock_strategy = FakeStrategy(config="test")
         strategy_factory = Mock(return_value=mock_strategy)
         config_factory = Mock()
 

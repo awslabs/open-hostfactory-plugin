@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
+
 from orb.application.dto.queries import SyncAndGetRequestQuery, SyncAndListActiveRequestsQuery
 from orb.application.ports.command_bus_port import CommandBusPort
 from orb.application.ports.query_bus_port import QueryBusPort
-from orb.application.services.orchestration.base import OrchestratorBase
+from orb.application.services.orchestration.base import (
+    TERMINAL_STATUSES as _TERMINAL_STATUSES,
+    OrchestratorBase,
+)
 from orb.application.services.orchestration.dtos import (
     GetRequestStatusInput,
     GetRequestStatusOutput,
@@ -13,6 +18,10 @@ from orb.application.services.orchestration.dtos import (
 )
 from orb.domain.base.exceptions import EntityNotFoundError
 from orb.domain.base.ports.logging_port import LoggingPort
+
+# Interval between status polls when ``wait=True``. Wall-clock time is tracked
+# against ``timeout_seconds`` so the total wait never exceeds the caller's cap.
+_POLL_INTERVAL_SECONDS = 2
 
 
 class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRequestStatusOutput]):
@@ -34,6 +43,14 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
             items = results.items if isinstance(results, Paginated) else (results or [])
             return GetRequestStatusOutput(requests=[self._to_dict(r) for r in items])
 
+        if input.wait and input.request_ids:
+            request_dicts = await self._poll_until_terminal(input)
+            return GetRequestStatusOutput(requests=request_dicts)
+
+        return GetRequestStatusOutput(requests=await self._fetch_once(input))
+
+    async def _fetch_once(self, input: GetRequestStatusInput) -> list[dict]:
+        """Fetch a single status snapshot for every requested ID."""
         request_dicts = []
         for request_id in input.request_ids:
             try:
@@ -71,7 +88,34 @@ class GetRequestStatusOrchestrator(OrchestratorBase[GetRequestStatusInput, GetRe
                 self._logger.error("Failed to get status for %s: %s", request_id, exc)
                 request_dicts.append({"request_id": request_id, "error": str(exc)})
 
-        return GetRequestStatusOutput(requests=request_dicts)
+        return request_dicts
+
+    async def _poll_until_terminal(self, input: GetRequestStatusInput) -> list[dict]:
+        """Poll every requested ID until all reach a terminal state or timeout.
+
+        Wall-clock time is tracked from the first poll against
+        ``input.timeout_seconds``; the last snapshot is returned when the cap is
+        reached even if some requests are still non-terminal, so callers always
+        get the freshest known state.
+        """
+        elapsed = 0
+        request_dicts = await self._fetch_once(input)
+        while not self._all_terminal(request_dicts) and elapsed < input.timeout_seconds:
+            await asyncio.sleep(_POLL_INTERVAL_SECONDS)
+            elapsed += _POLL_INTERVAL_SECONDS
+            request_dicts = await self._fetch_once(input)
+        return request_dicts
+
+    @staticmethod
+    def _all_terminal(request_dicts: list[dict]) -> bool:
+        """Return True once every entry is terminal, errored, or not found."""
+        for entry in request_dicts:
+            if entry.get("not_found") or entry.get("error"):
+                continue
+            status = str(entry.get("status", "")).lower()
+            if status not in _TERMINAL_STATUSES:
+                return False
+        return True
 
     @staticmethod
     def _to_dict(obj: object) -> dict:

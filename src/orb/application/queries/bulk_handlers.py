@@ -12,6 +12,7 @@ from orb.application.dto.bulk_responses import (
     BulkRequestResponse,
     BulkTemplateResponse,
 )
+from orb.application.ports.query_bus_port import QueryBusPort
 from orb.domain.base import UnitOfWorkFactory
 from orb.domain.base.exceptions import EntityNotFoundError
 from orb.domain.base.ports import ContainerPort, ErrorHandlingPort, LoggingPort
@@ -75,35 +76,36 @@ class GetMultipleTemplatesHandler(
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
         container: ContainerPort,
+        query_bus: QueryBusPort,
     ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
         self._container = container
-
-        from orb.application.factories.template_dto_factory import (  # type: ignore
-            TemplateDTOFactory,  # type: ignore[import]
-        )
-        from orb.application.services.template_query_service import (  # type: ignore
-            TemplateQueryService,  # type: ignore[import]
-        )
-
-        self._query_service = TemplateQueryService(uow_factory, logger)
-        self._dto_factory = TemplateDTOFactory()
+        # Reuse the single-template read path (GetTemplateQuery) so bulk
+        # retrieval stays consistent with defaults resolution and DTO shaping
+        # rather than duplicating that logic here.
+        self._query_bus = query_bus
 
     async def execute_query(self, query: GetMultipleTemplatesQuery) -> BulkTemplateResponse:
         """Execute bulk template retrieval."""
+        from orb.application.dto.queries import GetTemplateQuery
+
         templates = []
         not_found_ids = []
 
         for template_id in query.template_ids:
             try:
-                template = await self._query_service.get_template(template_id)
-                if query.active_only and not template.active:
+                template = await self._query_bus.execute(
+                    GetTemplateQuery(
+                        template_id=template_id,
+                        provider_name=query.provider_name,
+                    )
+                )
+                if query.active_only and not getattr(template, "is_active", True):
                     not_found_ids.append(template_id)
                     continue
 
-                template_dto = self._dto_factory.create_from_domain(template)
-                templates.append(template_dto)
+                templates.append(template)
             except EntityNotFoundError:
                 not_found_ids.append(template_id)
 
@@ -125,37 +127,30 @@ class GetMultipleMachinesHandler(BaseQueryHandler[GetMultipleMachinesQuery, Bulk
         logger: LoggingPort,
         error_handler: ErrorHandlingPort,
         container: ContainerPort,
+        query_bus: QueryBusPort,
     ) -> None:
         super().__init__(logger, error_handler)
         self.uow_factory = uow_factory
         self._container = container
-
-        from orb.application.factories.machine_dto_factory import (  # type: ignore
-            MachineDTOFactory,  # type: ignore[import]
-        )
-        from orb.application.services.machine_query_service import (  # type: ignore
-            MachineQueryService,  # type: ignore[import]
-        )
-
-        self._query_service = MachineQueryService(uow_factory, logger)
-        self._dto_factory = MachineDTOFactory()
+        # Reuse the single-machine read path (GetMachineQuery) so bulk
+        # retrieval returns the same MachineDTO shape as the single-fetch path.
+        self._query_bus = query_bus
 
     async def execute_query(self, query: GetMultipleMachinesQuery) -> BulkMachineResponse:
         """Execute bulk machine retrieval."""
+        from orb.application.dto.queries import GetMachineQuery
+
         machines = []
         not_found_ids = []
 
         for machine_id in query.machine_ids:
             try:
-                machine = await self._query_service.get_machine(machine_id)
-                request = None
-                if query.include_requests and machine.request_id:
-                    from orb.application.services.request_query_service import RequestQueryService
-
-                    request_service = RequestQueryService(self.uow_factory, self.logger)
-                    request = await request_service.get_request(machine.request_id)
-
-                machine_dto = self._dto_factory.create_from_domain(machine, request)
+                machine_dto = await self._query_bus.execute(
+                    GetMachineQuery(
+                        machine_id=machine_id,
+                        provider_name=query.provider_name,
+                    )
+                )
                 machines.append(machine_dto)
             except EntityNotFoundError:
                 not_found_ids.append(machine_id)

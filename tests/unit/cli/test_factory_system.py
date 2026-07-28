@@ -124,6 +124,16 @@ class TestCreateSetConfigurationCommand:
         assert cmd.key == "log.level"
         assert cmd.value == "DEBUG"
 
+    def test_persist_defaults_true(self, factory):
+        cmd = factory.create_set_configuration_command(key="log.level", value="DEBUG")
+        assert cmd.persist is True
+
+    def test_persist_can_be_disabled(self, factory):
+        cmd = factory.create_set_configuration_command(
+            key="log.level", value="DEBUG", persist=False
+        )
+        assert cmd.persist is False
+
 
 @pytest.mark.unit
 class TestCreateGetSystemConfigQuery:

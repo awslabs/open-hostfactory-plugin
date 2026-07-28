@@ -1,6 +1,14 @@
-"""Tests for circuit breaker config wiring in AWSHandler._get_circuit_breaker_config."""
+"""Tests for circuit breaker config wiring in AWSHandler._get_circuit_breaker_config.
 
-from unittest.mock import MagicMock
+Also exercises the *runtime* retry / circuit-breaker behaviour of
+``_retry_with_backoff`` (transient-error retry, non-retryable pass-through,
+and circuit opening after the failure threshold) — not just the config wiring.
+"""
+
+from unittest.mock import MagicMock, patch
+
+import pytest
+from botocore.exceptions import ClientError
 
 from orb.providers.aws.infrastructure.handlers.base_handler import AWSHandler
 
@@ -179,3 +187,85 @@ class TestRetryStrategyConfigNonCritical:
 
         assert config["strategy"] == "exponential"
         assert "failure_threshold" not in config
+
+
+# ---------------------------------------------------------------------------
+# Test 6: runtime retry / circuit-breaker behaviour (not just config wiring)
+# ---------------------------------------------------------------------------
+
+
+def _throttle_error() -> ClientError:
+    return ClientError(
+        {"Error": {"Code": "RequestLimitExceeded", "Message": "slow down"}}, "DescribeInstances"
+    )
+
+
+def _service_unavailable() -> ClientError:
+    return ClientError(
+        {"Error": {"Code": "ServiceUnavailable", "Message": "boom"}}, "run_instances"
+    )
+
+
+@pytest.fixture(autouse=True)
+def _reset_circuit_states():
+    """Circuit state is class-level shared — clear it around each runtime test."""
+    from orb.infrastructure.resilience.strategy.circuit_breaker import CircuitBreakerStrategy
+
+    CircuitBreakerStrategy._circuit_states.clear()
+    yield
+    CircuitBreakerStrategy._circuit_states.clear()
+
+
+class TestRetryRuntimeBehaviour:
+    def test_transient_error_is_retried_then_succeeds(self):
+        """A transient throttle is retried and the eventual success is returned."""
+        handler = _make_handler(config_port=None)
+        calls = {"n": 0}
+
+        def flaky():
+            calls["n"] += 1
+            if calls["n"] < 2:
+                raise _throttle_error()
+            return "ok"
+
+        with patch("orb.infrastructure.resilience.retry_decorator.time.sleep") as sleep:
+            result = handler._retry_with_backoff(flaky, operation_type="read_only")
+
+        assert result == "ok"
+        assert calls["n"] == 2  # first attempt failed, retry succeeded
+        assert sleep.call_count == 1  # slept once before the retry
+
+    def test_success_first_call_does_not_sleep(self):
+        """A call that succeeds immediately is not retried and never sleeps."""
+        handler = _make_handler(config_port=None)
+        func = MagicMock(return_value="done")
+
+        with patch("orb.infrastructure.resilience.retry_decorator.time.sleep") as sleep:
+            result = handler._retry_with_backoff(func, operation_type="read_only")
+
+        assert result == "done"
+        assert func.call_count == 1
+        assert sleep.call_count == 0
+
+    def test_circuit_opens_after_failure_threshold(self):
+        """Critical operations trip the circuit breaker OPEN once the threshold is hit."""
+        from orb.infrastructure.resilience.exceptions import CircuitBreakerOpenError
+        from orb.infrastructure.resilience.strategy.circuit_breaker import (
+            CircuitBreakerStrategy,
+            CircuitState,
+        )
+
+        port = _make_config_port(failure_threshold=3, recovery_timeout=60)
+        handler = _make_handler(config_port=port)
+
+        def always_fail():
+            raise _service_unavailable()
+
+        with patch("orb.infrastructure.resilience.retry_decorator.time.sleep"):
+            with pytest.raises(CircuitBreakerOpenError):
+                handler._retry_with_backoff(always_fail, operation_type="critical")
+
+        service = handler._get_service_name()
+        circuit = CircuitBreakerStrategy._circuit_states[service]
+        assert circuit["state"] == CircuitState.OPEN
+        assert circuit["failure_count"] >= 3

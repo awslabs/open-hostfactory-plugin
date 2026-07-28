@@ -709,8 +709,8 @@ class TestAWSPersistenceComprehensive:
     def test_dynamodb_strategy_exists(self):
         """Test that DynamoDB strategy exists."""
         try:
-            from orb.infrastructure.storage.dynamodb.strategy import (
-                DynamoDBStorageStrategy,  # type: ignore[import]
+            from orb.infrastructure.storage.dynamodb.strategy import (  # type: ignore[import]
+                DynamoDBStorageStrategy,
             )
 
             assert DynamoDBStorageStrategy is not None

@@ -414,8 +414,8 @@ class TestCQRSMigrationValidation:
             assert GetTemplateHandler is not None
         except ImportError:
             # Query handlers might be in different location
-            from orb.application.template.query_handlers import (
-                GetTemplateHandler,  # type: ignore[import]
+            from orb.application.template.query_handlers import (  # type: ignore[import]
+                GetTemplateHandler,
             )
 
             assert GetTemplateHandler is not None

@@ -15,7 +15,7 @@ from orb.infrastructure.storage.interfaces import (
 )
 
 
-class MockStorageStrategy(BaseStorageStrategy):
+class FakeStorageStrategy(BaseStorageStrategy):
     """Mock storage strategy for testing."""
 
     def __init__(self):
@@ -151,7 +151,7 @@ class TestStorageStrategyAdapter:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.mock_strategy = MockStorageStrategy()
+        self.mock_strategy = FakeStorageStrategy()
         self.adapter = StorageStrategyAdapter(self.mock_strategy)
 
     def test_adapter_implements_all_interfaces(self):

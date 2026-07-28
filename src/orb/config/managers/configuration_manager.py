@@ -67,6 +67,10 @@ class ConfigurationManager:
         # Initialize component managers
         self._cache_manager = ConfigCacheManager()
         self._raw_config: Optional[Dict[str, Any]] = None
+        # Overlay of edits the caller made via ``set``/``update``. Persisted on
+        # top of the user's ORIGINAL config on ``save`` so that the merged,
+        # env-expanded runtime config never reaches disk. See ``save``.
+        self._pending_edits: Dict[str, Any] = {}
         self._type_converter: Optional[ConfigTypeConverter] = None
         self._path_resolver: Optional[ConfigPathResolver] = None
         self._provider_manager: Optional[ProviderConfigManager] = None
@@ -182,6 +186,7 @@ class ConfigurationManager:
             # Clear all caches
             self._cache_manager.clear_cache()
             self._raw_config = None
+            self._pending_edits = {}
             self._app_config = None
             self._type_converter = None
             self._path_resolver = None
@@ -232,14 +237,40 @@ class ConfigurationManager:
     def set(self, key: str, value: Any) -> None:
         """Set configuration value."""
         self._ensure_type_converter().set(key, value)
+        # Record the edit so ``save`` can apply it to the user's ORIGINAL
+        # config rather than persisting the merged/expanded runtime dict.
+        self._record_edit(key, value)
         # Clear relevant caches
         self._cache_manager.clear_cache()
 
     def update(self, updates: dict[str, Any]) -> None:
         """Update configuration with new values."""
         self._ensure_type_converter().update(updates)
+        # Record the edits (see ``set``).
+        self._merge_edits(self._pending_edits, updates)
         # Clear relevant caches
         self._cache_manager.clear_cache()
+
+    def _record_edit(self, key: str, value: Any) -> None:
+        """Record a single dot-notation edit into the pending-edits overlay."""
+        keys = key.split(".")
+        target = self._pending_edits
+        for k in keys[:-1]:
+            existing = target.get(k)
+            if not isinstance(existing, dict):
+                existing = {}
+                target[k] = existing
+            target = existing
+        target[keys[-1]] = value
+
+    @classmethod
+    def _merge_edits(cls, base: dict[str, Any], update: dict[str, Any]) -> None:
+        """Deep-merge *update* into *base* (dicts merge, other values replace)."""
+        for key, value in update.items():
+            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                cls._merge_edits(base[key], value)
+            else:
+                base[key] = value
 
     # Delegate path resolution methods
     def resolve_path(
@@ -339,12 +370,75 @@ class ConfigurationManager:
         """Get configuration for a specific provider instance."""
         return self._ensure_provider_manager().get_provider_instance_config(provider_name)
 
+    def _load_original_user_config(self) -> dict[str, Any]:
+        """Return the user's OWN config content, before loader merge/expansion.
+
+        This is the raw on-disk file (or the in-memory ``config_dict`` the
+        manager was constructed from) — it contains only what the user
+        authored, with ``${VAR}`` placeholders intact and none of the package
+        or strategy defaults the loader merges in at runtime. It is the correct
+        base to write back on ``save`` so persisting a single edit never bakes
+        the merged/expanded runtime config onto the user's file.
+        """
+        import copy
+
+        if self._config_dict is not None:
+            return copy.deepcopy(self._config_dict)
+        if self._config_file:
+            from pathlib import Path
+
+            path = Path(self._config_file)
+            if path.exists():
+                with path.open() as f:
+                    loaded = json.load(f)
+                    return loaded if isinstance(loaded, dict) else {}
+        return {}
+
     def save(self, config_path: str) -> None:
-        """Save configuration to file."""
+        """Save configuration to file atomically.
+
+        Persists the user's ORIGINAL config (their on-disk file or the
+        in-memory ``config_dict`` the manager was built from) with only the
+        edits recorded via ``set``/``update`` applied on top. The merged,
+        env-expanded runtime config is never written, so ``${VAR}`` placeholders
+        survive verbatim and package/strategy defaults never leak into the
+        user's file.
+
+        Writes to a temporary file in the destination directory and then
+        renames it over the target. ``os.replace`` is atomic on the same
+        filesystem, so a reader never observes a half-written config and a
+        crash mid-write leaves the original file intact.
+        """
+        import os
+        import tempfile
+        from pathlib import Path
+
         try:
-            raw_config = self._ensure_raw_config()
-            with open(config_path, "w") as f:
-                json.dump(raw_config, f, indent=2)
+            raw_config = self._load_original_user_config()
+            self._merge_edits(raw_config, self._pending_edits)
+            target = Path(config_path)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            fd, tmp_name = tempfile.mkstemp(
+                dir=str(target.parent), prefix=f".{target.name}.", suffix=".tmp"
+            )
+            try:
+                with os.fdopen(fd, "w") as f:
+                    json.dump(raw_config, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tmp_name, str(target))
+            except Exception:
+                # Clean up the temp file on any failure so we don't litter
+                # the config directory with orphaned .tmp files.
+                try:
+                    os.unlink(tmp_name)
+                except OSError:
+                    # Best-effort cleanup: the temp file may already be gone
+                    # (e.g. the failure was os.replace succeeding partially, or
+                    # the file was never created). Swallow the unlink error so
+                    # the original write failure below is the one propagated.
+                    pass
+                raise
             logger.info("Configuration saved to %s", config_path)
         except Exception as e:
             logger.error("Failed to save configuration: %s", e, exc_info=True)

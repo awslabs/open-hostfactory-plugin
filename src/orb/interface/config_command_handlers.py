@@ -58,7 +58,8 @@ async def handle_set_configuration(args: Any) -> dict[str, Any] | InterfaceRespo
     value: Any = getattr(args, "value", None)
     if not key or value is None:
         return formatter.format_error("Key and value are required")
-    cmd = factory.create_set_configuration_command(key=key, value=value)
+    persist: bool = getattr(args, "persist", True)
+    cmd = factory.create_set_configuration_command(key=key, value=value, persist=persist)
     result = await container.get(CommandBus).execute(cmd)
     raw: dict[str, Any] = (
         result if isinstance(result, dict) else {"key": key, "value": value, "success": True}

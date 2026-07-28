@@ -6,14 +6,14 @@ from orb.domain.machine.machine_identifiers import MachineId
 from orb.infrastructure.interfaces.provider import ProviderConfig
 
 
-class MockProviderConfig(ProviderConfig):
+class FakeProviderConfig(ProviderConfig):
     """Mock provider configuration."""
 
     provider_type: str = "mock"
     region: Optional[str] = "mock-region"
 
 
-class MockProvider:
+class FakeProvider:
     """Mock provider for testing generic functionality."""
 
     def __init__(self):
@@ -165,6 +165,6 @@ class MockProvider:
         self._instance_counter = 0
 
 
-def create_mock_provider() -> MockProvider:
+def create_mock_provider() -> FakeProvider:
     """Factory function to create a mock provider."""
-    return MockProvider()
+    return FakeProvider()

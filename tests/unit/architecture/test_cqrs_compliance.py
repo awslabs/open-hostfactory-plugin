@@ -55,11 +55,11 @@ class TestCQRSCompliance:
         """Test that command handlers implement correct interface."""
 
         # Mock a command handler
-        class MockCommandHandler(ApplicationCommandHandler):
+        class FakeCommandHandler(ApplicationCommandHandler):
             def handle(self, command):
                 return {"status": "handled"}
 
-        handler = MockCommandHandler()
+        handler = FakeCommandHandler()
 
         # Should have handle method
         assert hasattr(handler, "handle")

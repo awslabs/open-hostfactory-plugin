@@ -6,7 +6,7 @@ def print_getting_started_help():
     from orb.cli.console import print_command, print_info
 
     print_info("To get started:")
-    print_command("  orb init --interactive       # Set up infrastructure discovery")
+    print_command("  orb init                     # Set up infrastructure discovery")
     print_command("  orb templates generate       # Generate example templates")
     print_info("")
 
@@ -16,7 +16,7 @@ def print_getting_started_help():
     print_info("")
 
     print_info("Example workflow:")
-    print_command("  $ orb init --interactive")
+    print_command("  $ orb init")
     print_command("  $ orb templates generate")
     print_command("  $ orb templates list")
     print_command("  $ orb machines request my-template 3")

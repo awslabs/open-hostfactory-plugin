@@ -551,15 +551,43 @@
         "summary": "Request Machines",
         "description": "Request new machines from a template",
         "operationId": "requestMachines",
+        "parameters": [
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Block until the request reaches a terminal state",
+              "default": false,
+              "title": "Wait"
+            },
+            "description": "Block until the request reaches a terminal state"
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 600,
+              "minimum": 1,
+              "description": "Max wait duration in seconds",
+              "default": 300,
+              "title": "Timeout"
+            },
+            "description": "Max wait duration in seconds"
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RequestMachinesRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "202": {
@@ -593,15 +621,43 @@
         "summary": "Return Machines",
         "description": "Return machines to the provider",
         "operationId": "returnMachines",
+        "parameters": [
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Block until the request reaches a terminal state",
+              "default": false,
+              "title": "Wait"
+            },
+            "description": "Block until the request reaches a terminal state"
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 600,
+              "minimum": 1,
+              "description": "Max wait duration in seconds",
+              "default": 300,
+              "title": "Timeout"
+            },
+            "description": "Max wait duration in seconds"
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ReturnMachinesRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -1526,6 +1582,32 @@
               "title": "Verbose"
             },
             "description": "Include detailed info and refresh provider state"
+          },
+          {
+            "name": "wait",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Block until the request reaches a terminal state",
+              "default": false,
+              "title": "Wait"
+            },
+            "description": "Block until the request reaches a terminal state"
+          },
+          {
+            "name": "timeout",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 600,
+              "minimum": 1,
+              "description": "Max wait duration in seconds",
+              "default": 300,
+              "title": "Timeout"
+            },
+            "description": "Max wait duration in seconds"
           }
         ],
         "responses": {
@@ -2394,8 +2476,8 @@
         "tags": [
           "Configuration"
         ],
-        "summary": "Set a configuration value (in-memory only)",
-        "description": "Sets a configuration value in memory. The change is **not** persisted to disk. Reloading from file will revert this change. Blocked when the server is in read-only mode.",
+        "summary": "Set a configuration value",
+        "description": "Sets a configuration value in memory. By default the change is **not** persisted to disk and reloading from file will revert it. Pass ``?persist=true`` to also write the updated configuration to the loaded config file so the change survives a restart. Blocked when the server is in read-only mode.",
         "operationId": "setConfigValue",
         "parameters": [
           {
@@ -2406,6 +2488,18 @@
               "type": "string",
               "title": "Key"
             }
+          },
+          {
+            "name": "persist",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Also write the updated config to the loaded config file.",
+              "default": false,
+              "title": "Persist"
+            },
+            "description": "Also write the updated config to the loaded config file."
           }
         ],
         "requestBody": {
@@ -2420,7 +2514,7 @@
         },
         "responses": {
           "200": {
-            "description": "Value set successfully (in-memory).",
+            "description": "Value set successfully.",
             "content": {
               "application/json": {
                 "schema": {}
@@ -2428,7 +2522,7 @@
             }
           },
           "400": {
-            "description": "Missing or malformed request body."
+            "description": "Missing body or no config file to persist to."
           },
           "422": {
             "description": "Validation Error",

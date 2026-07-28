@@ -287,3 +287,77 @@ class TestGetRequestStatusOrchestrator:
         assert len(result.requests) == 2
         assert result.requests[0]["request_id"] == "req-p1"
         assert result.requests[1]["request_id"] == "req-p2"
+
+
+@pytest.mark.unit
+@pytest.mark.application
+class TestGetRequestStatusOrchestratorWait:
+    """Polling behaviour when ``wait=True``."""
+
+    @pytest.mark.asyncio
+    async def test_wait_false_does_not_poll(self, orchestrator, mock_query_bus):
+        r = MagicMock(spec=["model_dump"])
+        r.model_dump.return_value = {"request_id": "req-1", "status": "pending"}
+        mock_query_bus.execute.return_value = r
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=False)
+        await orchestrator.execute(input)
+        assert mock_query_bus.execute.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_wait_returns_immediately_when_terminal(self, orchestrator, mock_query_bus):
+        r = MagicMock(spec=["model_dump"])
+        r.model_dump.return_value = {"request_id": "req-1", "status": "complete"}
+        mock_query_bus.execute.return_value = r
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+        # Only the initial fetch — already terminal, no extra polls.
+        assert mock_query_bus.execute.call_count == 1
+        assert result.requests[0]["status"] == "complete"
+
+    @pytest.mark.asyncio
+    async def test_wait_polls_until_terminal(self, orchestrator, mock_query_bus, monkeypatch):
+        pending = MagicMock(spec=["model_dump"])
+        pending.model_dump.return_value = {"request_id": "req-1", "status": "pending"}
+        done = MagicMock(spec=["model_dump"])
+        done.model_dump.return_value = {"request_id": "req-1", "status": "complete"}
+        mock_query_bus.execute.side_effect = [pending, pending, done]
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+        assert mock_query_bus.execute.call_count == 3
+        assert result.requests[0]["status"] == "complete"
+
+    @pytest.mark.asyncio
+    async def test_wait_stops_at_timeout_with_last_snapshot(
+        self, orchestrator, mock_query_bus, monkeypatch
+    ):
+        pending = MagicMock(spec=["model_dump"])
+        pending.model_dump.return_value = {"request_id": "req-1", "status": "pending"}
+        mock_query_bus.execute.return_value = pending
+
+        async def _no_sleep(_seconds):
+            return None
+
+        monkeypatch.setattr(
+            "orb.application.services.orchestration.get_request_status.asyncio.sleep", _no_sleep
+        )
+        # timeout_seconds=2 with a 2s interval → one initial fetch + one poll, then stop.
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=2)
+        result = await orchestrator.execute(input)
+        assert result.requests[0]["status"] == "pending"
+        assert mock_query_bus.execute.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_wait_treats_error_entry_as_terminal(self, orchestrator, mock_query_bus):
+        mock_query_bus.execute.side_effect = Exception("boom")
+        input = GetRequestStatusInput(request_ids=["req-1"], wait=True, timeout_seconds=300)
+        result = await orchestrator.execute(input)
+        # An errored entry short-circuits polling so the caller is not stuck.
+        assert mock_query_bus.execute.call_count == 1
+        assert result.requests[0]["error"] == "boom"

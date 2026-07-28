@@ -405,7 +405,9 @@ class TestLoggingComprehensive:
     def test_logger_singleton_exists(self):
         """Test that logger singleton exists."""
         try:
-            from orb.infrastructure.logging.logger_singleton import LoggerSingleton
+            from orb.infrastructure.logging.logger_singleton import (  # type: ignore[import]
+                LoggerSingleton,
+            )
 
             assert LoggerSingleton is not None
         except ImportError:
@@ -451,8 +453,8 @@ class TestTemplateInfrastructureComprehensive:
     def test_format_converter_exists(self):
         """Test that format converter exists."""
         try:
-            from orb.infrastructure.template.format_converter import (
-                FormatConverter,  # type: ignore[import]
+            from orb.infrastructure.template.format_converter import (  # type: ignore[import]
+                FormatConverter,
             )
 
             assert FormatConverter is not None

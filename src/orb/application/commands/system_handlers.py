@@ -191,12 +191,21 @@ class SetConfigurationHandler(BaseCommandHandler[SetConfigurationCommand, None])
             config_manager = self.container.get(ConfigurationPort)
             config_manager.set_configuration_value(command.key, command.value)
 
+            # Persist to disk so the change survives process exit. The CLI
+            # process terminates immediately after this command, so without a
+            # disk write the value would only ever live in memory.
+            persisted_path: str | None = None
+            if command.persist:
+                persisted_path = config_manager.save_config(None)
+
             # Store result in command (CQRS compliance)
             command.result = {
                 "status": "success",
                 "message": f"Configuration '{command.key}' set successfully",
                 "key": command.key,
                 "value": command.value,
+                "persisted": command.persist,
+                "persisted_path": persisted_path,
                 "command_id": command.command_id,
             }
 

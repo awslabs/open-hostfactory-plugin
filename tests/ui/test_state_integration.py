@@ -182,6 +182,145 @@ class TestRequestsStateFilterChaining:
         assert s.provider_filter == "aws"
 
 
+class TestRequestsStateSseLiveUpdates:
+    """RequestsState live-updates request rows from the backend SSE stream.
+
+    Covers ``_status_from_event`` payload extraction, ``_apply_request_status_event``
+    row patching, and ``stream_status_events`` draining events from a mocked
+    ``api.subscribe_events`` async generator.
+    """
+
+    def _make_state(self, requests=None):
+        from orb.ui.pages.requests import RequestsState
+
+        TestableState = _make_testable_subclass(RequestsState)
+        s = TestableState.__new__(TestableState)
+        s.requests = requests if requests is not None else []
+        s._sse_started = False
+        return s
+
+    # --- _status_from_event -------------------------------------------------
+
+    def test_status_from_event_status_changed(self):
+        s = self._make_state()
+        rid, status = s._status_from_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-1", "new_status": "IN_PROGRESS"},
+        )
+        assert rid == "req-1"
+        assert status == "in_progress"
+
+    def test_status_from_event_completed_uses_completion_status(self):
+        s = self._make_state()
+        rid, status = s._status_from_event(
+            "RequestCompletedEvent",
+            {"request_id": "req-2", "completion_status": "complete"},
+        )
+        assert rid == "req-2"
+        assert status == "complete"
+
+    def test_status_from_event_failed_is_failed(self):
+        s = self._make_state()
+        rid, status = s._status_from_event(
+            "RequestFailedEvent",
+            {"request_id": "req-3", "error_message": "boom"},
+        )
+        assert rid == "req-3"
+        assert status == "failed"
+
+    def test_status_from_event_falls_back_to_aggregate_id(self):
+        s = self._make_state()
+        rid, _status = s._status_from_event(
+            "RequestStatusChangedEvent",
+            {"aggregate_id": "req-4", "new_status": "complete"},
+        )
+        assert rid == "req-4"
+
+    def test_status_from_event_no_id_returns_empty(self):
+        s = self._make_state()
+        assert s._status_from_event("RequestStatusChangedEvent", {"new_status": "x"}) == ("", "")
+
+    # --- _apply_request_status_event ---------------------------------------
+
+    def test_apply_patches_matching_row_only(self):
+        s = self._make_state(
+            [
+                {"request_id": "req-1", "status": "pending"},
+                {"request_id": "req-2", "status": "pending"},
+            ]
+        )
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-1", "new_status": "in_progress"},
+        )
+        assert changed is True
+        assert s.requests[0]["status"] == "in_progress"
+        assert s.requests[1]["status"] == "pending"
+
+    def test_apply_noop_when_status_unchanged(self):
+        s = self._make_state([{"request_id": "req-1", "status": "in_progress"}])
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-1", "new_status": "in_progress"},
+        )
+        assert changed is False
+
+    def test_apply_ignores_unknown_request(self):
+        s = self._make_state([{"request_id": "req-1", "status": "pending"}])
+        changed = s._apply_request_status_event(
+            "RequestStatusChangedEvent",
+            {"request_id": "req-999", "new_status": "complete"},
+        )
+        assert changed is False
+        assert s.requests[0]["status"] == "pending"
+
+    # --- stream_status_events (drains the SSE generator) -------------------
+
+    @pytest.mark.asyncio
+    async def test_stream_status_events_applies_three_events_in_order(self):
+        """Emit 3 status events; assert all 3 patch the list in order."""
+        s = self._make_state(
+            [
+                {"request_id": "req-1", "status": "pending"},
+                {"request_id": "req-2", "status": "pending"},
+            ]
+        )
+
+        async def _fake_subscribe(event_types=None):
+            yield "RequestStatusChangedEvent", {"request_id": "req-1", "new_status": "in_progress"}
+            yield "RequestStatusChangedEvent", {"request_id": "req-2", "new_status": "in_progress"}
+            yield "RequestCompletedEvent", {"request_id": "req-1", "completion_status": "complete"}
+
+        with patch("orb.ui.pages.requests.api") as mock_api:
+            mock_api.subscribe_events = _fake_subscribe
+            await s.stream_status_events()
+
+        by_id = {r["request_id"]: r["status"] for r in s.requests}
+        assert by_id["req-1"] == "complete"
+        assert by_id["req-2"] == "in_progress"
+        assert s._sse_started is False
+
+    @pytest.mark.asyncio
+    async def test_stream_status_events_single_flight_guard(self):
+        """A second concurrent subscriber returns immediately (guarded)."""
+        s = self._make_state([{"request_id": "req-1", "status": "pending"}])
+        s._sse_started = True
+
+        called = False
+
+        async def _fake_subscribe(event_types=None):
+            nonlocal called
+            called = True
+            if False:  # pragma: no cover - generator with no yields
+                yield
+
+        with patch("orb.ui.pages.requests.api") as mock_api:
+            mock_api.subscribe_events = _fake_subscribe
+            await s.stream_status_events()
+
+        assert called is False, "guarded subscriber must not open a second stream"
+
+
 class TestTemplatesStateFilterChaining:
     """TemplatesState.set_provider_filter triggers load; set_filter is client-side."""
 
@@ -281,7 +420,7 @@ class TestSubstateProviderSchemasVisibility:
         from orb.ui.pages.machines import MachinesState
 
         s = self._machines_state()
-        cols = MachinesState.dynamic_columns(s)
+        cols = MachinesState.dynamic_columns(s)  # type: ignore[call-arg]
         assert isinstance(cols, list)
         assert len(cols) >= 1, "Expected at least one dynamic column from AWS schema"
 
@@ -304,7 +443,7 @@ class TestSubstateProviderSchemasVisibility:
         s = RequestsState.__new__(RequestsState)
         s.provider_schemas = schemas
         s.provider_filter = "aws"
-        cols = RequestsState.dynamic_columns(s)
+        cols = RequestsState.dynamic_columns(s)  # type: ignore[call-arg]
         assert isinstance(cols, list)
         assert len(cols) >= 1, "Expected at least one dynamic column from AWS schema"
 
@@ -327,7 +466,7 @@ class TestSubstateProviderSchemasVisibility:
         s = TemplatesState.__new__(TemplatesState)
         s.provider_schemas = schemas
         s.provider_filter = "aws"
-        cols = TemplatesState.dynamic_columns(s)
+        cols = TemplatesState.dynamic_columns(s)  # type: ignore[call-arg]
         assert isinstance(cols, list)
         assert len(cols) >= 1, "Expected at least one dynamic column from AWS schema"
 
@@ -363,8 +502,8 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         # is_collapsed reads sidebar_collapsed; precompute for the var chain
-        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))
-        AppState.toggle_sidebar(s)
+        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))  # type: ignore[call-arg]
+        AppState.toggle_sidebar(s)  # type: ignore[call-arg]
         assert s.sidebar_collapsed == "true"
 
     def test_toggle_sidebar_sets_false_when_true(self):
@@ -373,8 +512,8 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         s.sidebar_collapsed = "true"
-        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))
-        AppState.toggle_sidebar(s)
+        object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))  # type: ignore[call-arg]
+        AppState.toggle_sidebar(s)  # type: ignore[call-arg]
         assert s.sidebar_collapsed == "false"
 
     def test_is_collapsed_true_when_sidebar_collapsed_true(self):
@@ -383,14 +522,14 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         s.sidebar_collapsed = "true"
-        assert AppState.is_collapsed(s) is True
+        assert AppState.is_collapsed(s) is True  # type: ignore[call-arg]
 
     def test_is_collapsed_false_when_sidebar_collapsed_false(self):
         """is_collapsed returns False when sidebar_collapsed == 'false'."""
         from orb.ui.state import AppState
 
         s = self._make_state()
-        assert AppState.is_collapsed(s) is False
+        assert AppState.is_collapsed(s) is False  # type: ignore[call-arg]
 
     def test_double_toggle_sidebar_returns_to_original(self):
         """Two toggles must return to the original collapsed state."""
@@ -398,8 +537,8 @@ class TestAppStateLocalStorage:
 
         s = self._make_state()
         for _ in range(2):
-            object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))
-            AppState.toggle_sidebar(s)
+            object.__setattr__(s, "is_collapsed", AppState.is_collapsed(s))  # type: ignore[call-arg]
+            AppState.toggle_sidebar(s)  # type: ignore[call-arg]
         assert s.sidebar_collapsed == "false"
 
     def test_dismiss_onboarding_sets_raw_to_true(self):
@@ -407,7 +546,7 @@ class TestAppStateLocalStorage:
         from orb.ui.state import AppState
 
         s = self._make_state()
-        AppState.dismiss_onboarding(s)
+        AppState.dismiss_onboarding(s)  # type: ignore[call-arg]
         assert s._onboarding_dismissed_raw == "true"
 
     def test_onboarding_dismissed_true_after_dismiss(self):
@@ -415,15 +554,15 @@ class TestAppStateLocalStorage:
         from orb.ui.state import AppState
 
         s = self._make_state()
-        AppState.dismiss_onboarding(s)
-        assert AppState.onboarding_dismissed(s) is True
+        AppState.dismiss_onboarding(s)  # type: ignore[call-arg]
+        assert AppState.onboarding_dismissed(s) is True  # type: ignore[call-arg]
 
     def test_onboarding_dismissed_false_initially(self):
         """onboarding_dismissed returns False before dismiss."""
         from orb.ui.state import AppState
 
         s = self._make_state()
-        assert AppState.onboarding_dismissed(s) is False
+        assert AppState.onboarding_dismissed(s) is False  # type: ignore[call-arg]
 
 
 # ---------------------------------------------------------------------------
@@ -542,7 +681,7 @@ class TestDashboardStateFallback:
 
         from orb.ui.pages.dashboard import DashboardState
 
-        assert DashboardState.total_templates(s) == 7
+        assert DashboardState.total_templates(s) == 7  # type: ignore[call-arg]
         mock_api.list_templates.assert_not_awaited()
 
     @pytest.mark.asyncio
@@ -564,7 +703,7 @@ class TestDashboardStateFallback:
 
         from orb.ui.pages.dashboard import DashboardState
 
-        assert DashboardState.total_templates(s) == 4
+        assert DashboardState.total_templates(s) == 4  # type: ignore[call-arg]
 
     @pytest.mark.asyncio
     async def test_both_zero_tile_shows_zero(self):
@@ -585,4 +724,4 @@ class TestDashboardStateFallback:
 
         from orb.ui.pages.dashboard import DashboardState
 
-        assert DashboardState.total_templates(s) == 0
+        assert DashboardState.total_templates(s) == 0  # type: ignore[call-arg]

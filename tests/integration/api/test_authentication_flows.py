@@ -166,7 +166,7 @@ class TestAuthenticationFlows:
         from orb.api.middleware.auth_middleware import AuthMiddleware
 
         # Create mock request
-        class MockRequest:
+        class FakeRequest:
             def __init__(self):
                 self.method = "GET"
                 self.url = URL("http://testserver/api/v1/templates")
@@ -181,7 +181,7 @@ class TestAuthenticationFlows:
         middleware = AuthMiddleware(app=Mock(), auth_port=auth_strategy, require_auth=False)
 
         # Test context creation
-        request = MockRequest()
+        request = FakeRequest()
         context = middleware._create_auth_context(request)  # type: ignore[arg-type]
 
         assert context.method == "GET"

@@ -150,6 +150,40 @@ class TestHandleGetRequestStatus:
         assert "r-1" in call_input.request_ids
         assert isinstance(result, InterfaceResponse)
 
+    @pytest.mark.asyncio
+    async def test_wait_and_timeout_forwarded_to_orchestrator(self):
+        from orb.application.ports.scheduler_port import SchedulerPort
+        from orb.application.services.orchestration.get_request_status import (
+            GetRequestStatusOrchestrator,
+        )
+
+        fmt = _make_formatter()
+        orch = AsyncMock(spec=GetRequestStatusOrchestrator)
+        orch.execute.return_value = GetRequestStatusOutput(requests=[{"request_id": "r-1"}])
+        scheduler = MagicMock(spec=SchedulerPort)
+
+        container = MagicMock()
+        container.get.side_effect = lambda t: {
+            GetRequestStatusOrchestrator: orch,
+            ResponseFormattingService: fmt,
+            SchedulerPort: scheduler,
+        }.get(t, MagicMock())
+
+        args = Namespace(
+            _container=container,
+            all=False,
+            request_ids=["r-1"],
+            flag_request_ids=None,
+            verbose=False,
+            wait=True,
+            timeout=120,
+        )
+        await handle_get_request_status(args)
+
+        call_input = orch.execute.call_args[0][0]
+        assert call_input.wait is True
+        assert call_input.timeout_seconds == 120
+
 
 @pytest.mark.unit
 class TestHandleRequestMachines:

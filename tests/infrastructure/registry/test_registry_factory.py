@@ -5,7 +5,7 @@ import pytest
 from orb.infrastructure.registry.registry_factory import RegistryFactory
 
 
-class MockService:
+class FakeService:
     """Mock service for testing."""
 
     def __init__(self, config=None):
@@ -21,20 +21,20 @@ class TestRegistryFactory:
 
     def test_register_and_create_instance(self):
         """Test registering constructor and creating instance."""
-        self.factory.register_constructor("mock", MockService, {"config": "test"})
+        self.factory.register_constructor("mock", FakeService, {"config": "test"})
 
         instance = self.factory.create_instance("mock")
 
-        assert isinstance(instance, MockService)
+        assert isinstance(instance, FakeService)
         assert instance.config == "test"
 
     def test_create_instance_with_override_kwargs(self):
         """Test creating instance with override kwargs."""
-        self.factory.register_constructor("mock", MockService, {"config": "default"})
+        self.factory.register_constructor("mock", FakeService, {"config": "default"})
 
         instance = self.factory.create_instance("mock", config="override")
 
-        assert isinstance(instance, MockService)
+        assert isinstance(instance, FakeService)
         assert instance.config == "override"
 
     def test_create_instance_unregistered_raises_error(self):
@@ -44,9 +44,9 @@ class TestRegistryFactory:
 
     def test_register_constructor_without_dependencies(self):
         """Test registering constructor without dependencies."""
-        self.factory.register_constructor("mock", MockService)
+        self.factory.register_constructor("mock", FakeService)
 
         instance = self.factory.create_instance("mock")
 
-        assert isinstance(instance, MockService)
+        assert isinstance(instance, FakeService)
         assert instance.config is None

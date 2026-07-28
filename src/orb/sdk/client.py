@@ -68,6 +68,7 @@ class ORBClient:
         provider_type: Optional[str] = None,
         provider_name: Optional[str] = None,
         provider_config: Optional[dict[str, Any]] = None,
+        dry_run: Optional[bool] = None,
         region: Optional[str] = None,  # DEPRECATED — use provider_config
         profile: Optional[str] = None,  # DEPRECATED — use provider_config
         **kwargs,
@@ -89,6 +90,8 @@ class ORBClient:
                            instance (e.g. ``"my-k8s-cluster"``). Passed through to
                            Input DTOs on each operation.
             provider_config: Provider-specific key/value pairs (e.g. ``{"region": "us-east-1"}``).
+            dry_run: Run in dry-run mode — provider operations are mocked so nothing is
+                     provisioned. Mirrors the CLI ``--dry-run`` flag.
             region: **Deprecated.** Use ``provider_config={"region": ...}`` instead.
             profile: **Deprecated.** Use ``provider_config={"profile": ...}`` instead.
             **kwargs: Additional configuration options
@@ -135,6 +138,8 @@ class ORBClient:
             self._config.provider_name = provider_name
         if provider_config is not None:
             self._config.provider_config = {**self._config.provider_config, **provider_config}
+        if dry_run is not None:
+            self._config.dry_run = dry_run
 
         # Add any additional kwargs to custom config
         if kwargs:
@@ -208,7 +213,7 @@ class ORBClient:
                 container=self._container,
             )
 
-            if not await self._app.initialize():
+            if not await self._app.initialize(dry_run=self._config.dry_run):
                 raise ProviderError(
                     f"Failed to initialize {self._config.provider} provider",
                     provider=self._config.provider,
@@ -577,6 +582,8 @@ class ORBClient:
                 request_ids=ids,
                 all_requests=kwargs.get("all_requests", False),
                 verbose=kwargs.get("verbose", False),
+                wait=kwargs.get("wait", False),
+                timeout_seconds=kwargs.get("timeout_seconds", 300),
             ),
         )
 
@@ -615,6 +622,8 @@ class ORBClient:
                 machine_ids=list(machine_ids),
                 all_machines=kwargs.get("all_machines", False),
                 force=kwargs.get("force", False),
+                wait=kwargs.get("wait", False),
+                timeout_seconds=kwargs.get("timeout_seconds", 300),
                 provider_name=kwargs.get("provider_name") or self._config.provider_name,
                 provider_type=kwargs.get("provider_type") or self._config.provider_type,
             ),

@@ -1,6 +1,6 @@
 # AWS Lambda MicroVM Provider
 
-The MicroVM handler provisions isolated [AWS Lambda MicroVMs](https://aws.amazon.com/blogs/aws/run-isolated-sandboxes-with-full-lifecycle-control-aws-lambda-introduces-microvms/) — lightweight Firecracker-based sandboxes with full lifecycle control. Each MicroVM gets its own dedicated HTTPS endpoint, retains state across idle periods, and can auto-suspend/resume on traffic.
+The MicroVM handler provisions isolated [AWS Lambda MicroVMs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-microvms-guide.html) — lightweight Firecracker-based sandboxes with full lifecycle control.
 
 ## Quick start
 
@@ -18,7 +18,8 @@ aws lambda-microvms create-microvm-image \
   --name my-worker \
   --code-artifact uri=s3://my-bucket/worker.zip \
   --base-image-arn arn:aws:lambda:us-east-1:aws:microvm-image:al2023-1 \
-  --build-role-arn arn:aws:iam::123456789012:role/MicroVMBuildRole
+  --build-role-arn arn:aws:iam::123456789012:role/MicroVMBuildRole \
+  --execution-role-arn arn:aws:iam::123456789012:role/MicroVMExecutionRole
 ```
 
 The build produces an image ARN like `arn:aws:lambda:us-east-1:123456789012:microvm-image:my-worker`.
@@ -35,7 +36,7 @@ The build produces an image ARN like `arn:aws:lambda:us-east-1:123456789012:micr
   "maxNumber": 20,
   "metadata": {
     "image_version": "1",
-    "execution_role_arn": "arn:aws:iam::123456789012:role/MicroVMRole",
+    "execution_role_arn": "arn:aws:iam::123456789012:role/MicroVMExecutionRole",
     "idle_policy": {
       "maxIdleDurationSeconds": 3600,
       "suspendedDurationSeconds": 3600,
@@ -83,12 +84,12 @@ All MicroVM-specific configuration lives in the `metadata` dict:
 | Field | Required | Type | Description |
 |-------|----------|------|-------------|
 | `image_version` | No | `string` | Version of the MicroVM image to use. Omit for the latest version. |
-| `execution_role_arn` | No | `string` | IAM role ARN for the MicroVM. Use the same role as `buildRoleArn` on the image — this single role serves as both the platform identity and the application's runtime identity (see [IAM permissions](#microvm-role)). |
+| `execution_role_arn` | No | `string` | IAM role ARN assumed by the MicroVM at runtime. This is separate from the `buildRoleArn` used during image creation — see [IAM permissions](#iam-permissions). Grant only the permissions your application needs at runtime (e.g. SQS, DynamoDB, CloudWatch Logs). If omitted, the MicroVM has no AWS service access and runtime logs are not emitted to CloudWatch. |
 | `idle_policy` | No | `object` | Controls auto-suspend and auto-resume behavior. See [Idle policy](#idle-policy). |
 | `maximum_duration_in_seconds` | No | `integer` | Maximum lifetime of the MicroVM before platform termination. Range: 1–28800 (8 hours). |
 | `run_hook_payload` | No | `string` | Per-MicroVM initialization data delivered as the request body of the `/run` lifecycle hook. Max 16,384 bytes. Use to pass tenant-specific config (queue URLs, secrets references, session IDs). |
-| `ingress_network_connectors` | No | `list[string]` | Ingress network connector identifiers for the MicroVM. |
-| `egress_network_connectors` | No | `list[string]` | Egress network connector identifiers for the MicroVM. |
+| `ingress_network_connectors` | No | `list[string]` | Ingress network connector ARNs. Controls inbound connectivity — Lambda forwards HTTPS/HTTP2/gRPC/WebSocket traffic from the MicroVM's dedicated endpoint to ports inside the MicroVM. Connectors are AWS-managed; reference them by ARN. See [Network connectors](#network-connectors). |
+| `egress_network_connectors` | No | `list[string]` | Egress network connector ARNs. Controls outbound connectivity — by default MicroVMs have public internet access. To route egress through a VPC (e.g. to reach RDS, ElastiCache, or on-premises systems), create a Lambda Network Connector and reference its ARN here. See [Network connectors](#network-connectors). |
 | `logging` | No | `object` | Logging configuration. Either `{"disabled": {}}` or `{"cloudWatch": {"logGroup": "...", "logStream": "..."}}`. |
 
 ### Idle policy
@@ -141,6 +142,68 @@ To use a specific version of an image, set `image_version` in metadata:
 
 Omit `image_version` to always use the latest published version.
 
+### MicroVM sizing
+
+MicroVM compute resources are configured **at image build time** via the `resources` parameter on `create_microvm_image` — not at run time. ORB does not expose sizing configuration because it is baked into the image. See [MicroVM images](https://docs.aws.amazon.com/lambda/latest/dg/microvms-images.html) for full details.
+
+Lambda MicroVMs use a baseline-peak model. You set the baseline memory; vCPU scales proportionally (2 GB = 1 vCPU). During peak activity, MicroVMs can burst up to 4x the baseline. You pay the baseline rate while running and only for active use above the baseline.
+
+| Baseline | Peak (4x burst) | Max Disk | Max Bandwidth |
+|----------|-----------------|----------|---------------|
+| 0.5 GB / 0.25 vCPU | 2 GB / 1 vCPU | 8 GB | 1 MB/s |
+| 1 GB / 0.5 vCPU | 4 GB / 2 vCPU | 8 GB | 2 MB/s |
+| 2 GB / 1 vCPU (default) | 8 GB / 4 vCPU | 8 GB | 4 MB/s |
+| 4 GB / 2 vCPU | 16 GB / 8 vCPU | 16 GB | 8 MB/s |
+| 8 GB / 4 vCPU | 32 GB / 16 vCPU | 32 GB | 16 MB/s |
+
+To configure sizing, set `resources` when building the image:
+
+```bash
+aws lambda-microvms create-microvm-image \
+  --name my-worker \
+  --code-artifact uri=s3://my-bucket/worker.zip \
+  --base-image-arn arn:aws:lambda:us-east-1:aws:microvm-image:al2023-1 \
+  --build-role-arn arn:aws:iam::123456789012:role/MicroVMBuildRole \
+  --resources '[{"minimumMemoryInMiB": 4096}]'
+```
+
+Disk space and network bandwidth are tied to the memory tier and cannot be configured independently.
+
+### Network connectors
+
+MicroVMs use **network connectors** to control inbound and outbound traffic. Unlike EC2 instances, MicroVMs do not use VPC subnets or security groups directly. See [Networking](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) for full protocol, port routing, and bandwidth details.
+
+#### Ingress (inbound)
+
+Each MicroVM gets a dedicated HTTPS endpoint. Ingress connectors are AWS-managed resources that define what protocols and ports the endpoint supports:
+
+- HTTP/1.1, HTTP/2, gRPC, WebSockets, and Server-Sent Events (SSE)
+- All ports except system-reserved ports (0–1024), except 80 and 443 which are supported
+- Traffic is authenticated via JWE tokens (`X-aws-proxy-auth` header)
+- Target port inside the MicroVM is selected via `X-aws-proxy-port` header (default: 8080)
+
+Reference an AWS-managed ingress connector ARN (e.g. `arn:aws:lambda:us-east-1:aws:network-connector:aws-network-connector:ALL_INGRESS`) in `ingress_network_connectors`.
+
+#### Egress (outbound)
+
+By default, MicroVMs have public internet access. To route outbound traffic through your VPC instead (e.g. to reach RDS, ElastiCache, or on-premises systems via Direct Connect), create a Lambda Network Connector:
+
+```bash
+aws lambda-core create-network-connector \
+  --name my-vpc-connector \
+  --configuration '{
+    "VpcEgressConfiguration": {
+      "SubnetIds": ["subnet-xxx"],
+      "SecurityGroupIds": ["sg-xxx"],
+      "NetworkProtocol": "IPv4",
+      "AssociatedComputeResourceTypes": ["MicroVm"]
+    }
+  }' \
+  --operator-role arn:aws:iam::123456789012:role/ConnectorOperatorRole
+```
+
+Then reference the connector ARN in `egress_network_connectors`. A single connector can be reused across many MicroVMs. When using VPC egress, outbound traffic is subject to security group rules and network ACLs in your VPC.
+
 ## Machine data
 
 When you query machine status, MicroVM machines have a different shape than EC2 instances:
@@ -171,7 +234,7 @@ Key differences from EC2:
 
 ## Connecting to a MicroVM
 
-To send traffic to a running MicroVM, generate a short-lived auth token and include it in the `X-aws-proxy-auth` header:
+To send traffic to a running MicroVM, generate a short-lived auth token and include it in the `X-aws-proxy-auth` header. See [Running and using MicroVMs](https://docs.aws.amazon.com/lambda/latest/dg/microvms-launching.html) for full auth token and connection details.
 
 ```bash
 # Generate token
@@ -229,7 +292,7 @@ This keeps MicroVMs running for up to 1 hour — ORB terminates them earlier via
 
 ### ORB caller permissions
 
-The IAM principal running ORB needs these permissions:
+The IAM principal running ORB needs these permissions (see [RunMicrovm API reference](https://docs.aws.amazon.com/lambda/latest/microvm-api/API_RunMicrovm.html)):
 
 ```json
 {
@@ -248,9 +311,13 @@ The IAM principal running ORB needs these permissions:
 }
 ```
 
-### MicroVM role
+### MicroVM roles
 
-MicroVMs use a single IAM role for all operations — image build, runtime execution, and platform lifecycle. Pass the same role as both `buildRoleArn` (on `create_microvm_image`) and `execution_role_arn` (in the ORB template metadata).
+Lambda MicroVMs use two separate IAM roles, following the principle of least privilege. See [Security and permissions](https://docs.aws.amazon.com/lambda/latest/dg/microvms-security.html) for the full AWS reference.
+
+#### Build role (`buildRoleArn`)
+
+Passed to `create_microvm_image`. Used only during image creation to pull source artifacts and write build logs. This role is not available at runtime.
 
 Trust policy:
 
@@ -267,10 +334,37 @@ Trust policy:
 }
 ```
 
-Attached policies:
-- `AmazonS3ReadOnlyAccess` (required for image build to pull code artifact)
-- `CloudWatchLogsFullAccess` (for application and platform logging)
-- Any permissions your application needs at runtime (e.g. `AmazonSQSFullAccess`, `AmazonDynamoDBFullAccess`)
+Required permissions:
+- `s3:GetObject` on the code artifact bucket (to pull the source archive)
+- `logs:CreateLogGroup`, `logs:CreateLogStream`, `logs:PutLogEvents` (for build logs)
+- `ecr:GetAuthorizationToken` (only if your Dockerfile references private ECR images)
+
+#### Execution role (`execution_role_arn`)
+
+Passed in the ORB template metadata. Assumed by the MicroVM at runtime — this is the identity your application code runs under.
+
+Trust policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {"Service": "lambda.amazonaws.com"},
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+Required permissions:
+- `logs:CreateLogGroup`, `logs:CreateLogStream`, `logs:PutLogEvents` (for runtime logs)
+- Any permissions your application needs (e.g. `sqs:SendMessage`, `sqs:ReceiveMessage`, `dynamodb:GetItem`)
+
+#### Why separate roles?
+
+Separating build and execution roles means the runtime environment has no access to your source artifact bucket, and the build process has no access to your application's runtime resources (queues, databases, etc.). This limits the blast radius if either role is compromised.
 
 ## Status syncing
 

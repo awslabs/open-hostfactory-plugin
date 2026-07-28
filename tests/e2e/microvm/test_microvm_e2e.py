@@ -48,8 +48,8 @@ console = Console() if Console is not None else None
 
 QUEUE_PREFIX = "orb-microvm-test"
 IMAGE_NAME = "orb-microvm-test-worker"
-RUNTIME_ROLE_NAME = "orb-microvm-test-runtime-role"
-PLATFORM_ROLE_NAME = "orb-microvm-test-platform-role"
+BUILD_ROLE_NAME = "orb-microvm-test-build-role"
+EXECUTION_ROLE_NAME = "orb-microvm-test-execution-role"
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +182,7 @@ def ensure_microvm_image(
         s3_client.upload_file(archive_path, artifact_bucket, s3_key)
         console.print(f"  Uploaded artifact to s3://{artifact_bucket}/{s3_key}")
 
-    build_role_arn = f"arn:aws:iam::{account_id}:role/{RUNTIME_ROLE_NAME}"
+    build_role_arn = f"arn:aws:iam::{account_id}:role/{BUILD_ROLE_NAME}"
     artifact_uri = f"s3://{artifact_bucket}/{s3_key}"
 
     resp = microvm_client.create_microvm_image(
@@ -247,28 +247,34 @@ def _ensure_s3_bucket(s3_client, bucket: str, region: str):
 
 
 def ensure_iam_roles(iam_client, region: str, account_id: str):
-    """Create runtime and platform roles if they don't exist."""
+    """Create build and execution roles if they don't exist.
+
+    Follows least-privilege separation:
+    - Build role: only needs S3 read (to pull code artifact) + CloudWatch Logs (build logs).
+    - Execution role: only needs SQS access (the worker's runtime needs) + CloudWatch Logs.
+    """
     console.rule("[bold blue]Phase 2: IAM Roles")
 
-    # Runtime role: used as buildRoleArn — becomes the app's AWS identity at runtime.
-    # Needs: S3 read (for image build artifact) + SQS send/receive/delete + basic logging.
+    # Build role: used as buildRoleArn on create_microvm_image.
+    # Only needs to read the code artifact from S3 and write build logs.
     _ensure_role(
         iam_client,
-        RUNTIME_ROLE_NAME,
+        BUILD_ROLE_NAME,
         trust_service="lambda.amazonaws.com",
         policies=[
             "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",
-            "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
             "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
         ],
     )
 
-    # Platform role: used as executionRoleArn — platform-level operations only.
+    # Execution role: used as executionRoleArn at runtime.
+    # Only needs SQS access (worker polls/sends messages) and CloudWatch Logs.
     _ensure_role(
         iam_client,
-        PLATFORM_ROLE_NAME,
+        EXECUTION_ROLE_NAME,
         trust_service="lambda.amazonaws.com",
         policies=[
+            "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole",
             "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
         ],
     )
@@ -370,7 +376,7 @@ def provision_microvms(
 
     template_id = "microvm-e2e-test"
     metadata = {
-        "execution_role_arn": f"arn:aws:iam::{account_id}:role/{RUNTIME_ROLE_NAME}",
+        "execution_role_arn": f"arn:aws:iam::{account_id}:role/{EXECUTION_ROLE_NAME}",
         "idle_policy": {
             "maxIdleDurationSeconds": 3600,
             "suspendedDurationSeconds": 3600,
@@ -451,7 +457,7 @@ def provision_microvms_manual(image_arn: str, num_microvms: int, region: str, ac
         "maxNumber": num_microvms * 2,
         "tags": {"Environment": "test", "TestRun": "microvm-e2e"},
         "metadata": {
-            "execution_role_arn": f"arn:aws:iam::{account_id}:role/{RUNTIME_ROLE_NAME}",
+            "execution_role_arn": f"arn:aws:iam::{account_id}:role/{EXECUTION_ROLE_NAME}",
             "idle_policy": {
                 "maxIdleDurationSeconds": 3600,
                 "suspendedDurationSeconds": 3600,

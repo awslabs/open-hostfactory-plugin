@@ -5106,6 +5106,56 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#microvm-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MicroVM sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network-connectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network connectors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Network connectors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ingress-inbound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ingress (inbound)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#egress-outbound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Egress (outbound)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -5185,13 +5235,52 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#microvm-role" class="md-nav__link">
+  <a href="#microvm-roles" class="md-nav__link">
     <span class="md-ellipsis">
       
-        MicroVM role
+        MicroVM roles
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="MicroVM roles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-role-buildrolearn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build role (buildRoleArn)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-role-execution_role_arn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution role (execution_role_arn)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-separate-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why separate roles?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -5265,7 +5354,7 @@
 
 
 <h1 id="aws-lambda-microvm-provider">AWS Lambda MicroVM Provider<a class="headerlink" href="#aws-lambda-microvm-provider" title="Permanent link">&para;</a></h1>
-<p>The MicroVM handler provisions isolated <a href="https://aws.amazon.com/blogs/aws/run-isolated-sandboxes-with-full-lifecycle-control-aws-lambda-introduces-microvms/">AWS Lambda MicroVMs</a> — lightweight Firecracker-based sandboxes with full lifecycle control. Each MicroVM gets its own dedicated HTTPS endpoint, retains state across idle periods, and can auto-suspend/resume on traffic.</p>
+<p>The MicroVM handler provisions isolated <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-microvms-guide.html">AWS Lambda MicroVMs</a> — lightweight Firecracker-based sandboxes with full lifecycle control.</p>
 <h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;orb-py[aws]&quot;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>orb<span class="w"> </span>init
@@ -5276,7 +5365,8 @@
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--name<span class="w"> </span>my-worker<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--code-artifact<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>s3://my-bucket/worker.zip<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--base-image-arn<span class="w"> </span>arn:aws:lambda:us-east-1:aws:microvm-image:al2023-1<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>--build-role-arn<span class="w"> </span>arn:aws:iam::123456789012:role/MicroVMBuildRole
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span>--build-role-arn<span class="w"> </span>arn:aws:iam::123456789012:role/MicroVMBuildRole<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span>--execution-role-arn<span class="w"> </span>arn:aws:iam::123456789012:role/MicroVMExecutionRole
 </code></pre></div>
 <p>The build produces an image ARN like <code>arn:aws:lambda:us-east-1:123456789012:microvm-image:my-worker</code>.</p>
 <h3 id="2-create-a-template">2. Create a template<a class="headerlink" href="#2-create-a-template" title="Permanent link">&para;</a></h3>
@@ -5289,7 +5379,7 @@
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">&quot;maxNumber&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nt">&quot;image_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">&quot;execution_role_arn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:iam::123456789012:role/MicroVMRole&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nt">&quot;execution_role_arn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:iam::123456789012:role/MicroVMExecutionRole&quot;</span><span class="p">,</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">&quot;idle_policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">      </span><span class="nt">&quot;maxIdleDurationSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">      </span><span class="nt">&quot;suspendedDurationSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
@@ -5359,7 +5449,7 @@
 <td><code>execution_role_arn</code></td>
 <td>No</td>
 <td><code>string</code></td>
-<td>IAM role ARN for the MicroVM. Use the same role as <code>buildRoleArn</code> on the image — this single role serves as both the platform identity and the application's runtime identity (see <a href="#microvm-role">IAM permissions</a>).</td>
+<td>IAM role ARN assumed by the MicroVM at runtime. This is separate from the <code>buildRoleArn</code> used during image creation — see <a href="#iam-permissions">IAM permissions</a>. Grant only the permissions your application needs at runtime (e.g. SQS, DynamoDB, CloudWatch Logs). If omitted, the MicroVM has no AWS service access and runtime logs are not emitted to CloudWatch.</td>
 </tr>
 <tr>
 <td><code>idle_policy</code></td>
@@ -5383,13 +5473,13 @@
 <td><code>ingress_network_connectors</code></td>
 <td>No</td>
 <td><code>list[string]</code></td>
-<td>Ingress network connector identifiers for the MicroVM.</td>
+<td>Ingress network connector ARNs. Controls inbound connectivity — Lambda forwards HTTPS/HTTP2/gRPC/WebSocket traffic from the MicroVM's dedicated endpoint to ports inside the MicroVM. Connectors are AWS-managed; reference them by ARN. See <a href="#network-connectors">Network connectors</a>.</td>
 </tr>
 <tr>
 <td><code>egress_network_connectors</code></td>
 <td>No</td>
 <td><code>list[string]</code></td>
-<td>Egress network connector identifiers for the MicroVM.</td>
+<td>Egress network connector ARNs. Controls outbound connectivity — by default MicroVMs have public internet access. To route egress through a VPC (e.g. to reach RDS, ElastiCache, or on-premises systems), create a Lambda Network Connector and reference its ARN here. See <a href="#network-connectors">Network connectors</a>.</td>
 </tr>
 <tr>
 <td><code>logging</code></td>
@@ -5455,23 +5545,103 @@
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">}</span>
 </code></pre></div>
 <p>Omit <code>image_version</code> to always use the latest published version.</p>
+<h3 id="microvm-sizing">MicroVM sizing<a class="headerlink" href="#microvm-sizing" title="Permanent link">&para;</a></h3>
+<p>MicroVM compute resources are configured <strong>at image build time</strong> via the <code>resources</code> parameter on <code>create_microvm_image</code> — not at run time. ORB does not expose sizing configuration because it is baked into the image. See <a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-images.html">MicroVM images</a> for full details.</p>
+<p>Lambda MicroVMs use a baseline-peak model. You set the baseline memory; vCPU scales proportionally (2 GB = 1 vCPU). During peak activity, MicroVMs can burst up to 4x the baseline. You pay the baseline rate while running and only for active use above the baseline.</p>
+<table>
+<thead>
+<tr>
+<th>Baseline</th>
+<th>Peak (4x burst)</th>
+<th>Max Disk</th>
+<th>Max Bandwidth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.5 GB / 0.25 vCPU</td>
+<td>2 GB / 1 vCPU</td>
+<td>8 GB</td>
+<td>1 MB/s</td>
+</tr>
+<tr>
+<td>1 GB / 0.5 vCPU</td>
+<td>4 GB / 2 vCPU</td>
+<td>8 GB</td>
+<td>2 MB/s</td>
+</tr>
+<tr>
+<td>2 GB / 1 vCPU (default)</td>
+<td>8 GB / 4 vCPU</td>
+<td>8 GB</td>
+<td>4 MB/s</td>
+</tr>
+<tr>
+<td>4 GB / 2 vCPU</td>
+<td>16 GB / 8 vCPU</td>
+<td>16 GB</td>
+<td>8 MB/s</td>
+</tr>
+<tr>
+<td>8 GB / 4 vCPU</td>
+<td>32 GB / 16 vCPU</td>
+<td>32 GB</td>
+<td>16 MB/s</td>
+</tr>
+</tbody>
+</table>
+<p>To configure sizing, set <code>resources</code> when building the image:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>aws<span class="w"> </span>lambda-microvms<span class="w"> </span>create-microvm-image<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span>--name<span class="w"> </span>my-worker<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span>--code-artifact<span class="w"> </span><span class="nv">uri</span><span class="o">=</span>s3://my-bucket/worker.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span>--base-image-arn<span class="w"> </span>arn:aws:lambda:us-east-1:aws:microvm-image:al2023-1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span>--build-role-arn<span class="w"> </span>arn:aws:iam::123456789012:role/MicroVMBuildRole<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span>--resources<span class="w"> </span><span class="s1">&#39;[{&quot;minimumMemoryInMiB&quot;: 4096}]&#39;</span>
+</code></pre></div>
+<p>Disk space and network bandwidth are tied to the memory tier and cannot be configured independently.</p>
+<h3 id="network-connectors">Network connectors<a class="headerlink" href="#network-connectors" title="Permanent link">&para;</a></h3>
+<p>MicroVMs use <strong>network connectors</strong> to control inbound and outbound traffic. Unlike EC2 instances, MicroVMs do not use VPC subnets or security groups directly. See <a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html">Networking</a> for full protocol, port routing, and bandwidth details.</p>
+<h4 id="ingress-inbound">Ingress (inbound)<a class="headerlink" href="#ingress-inbound" title="Permanent link">&para;</a></h4>
+<p>Each MicroVM gets a dedicated HTTPS endpoint. Ingress connectors are AWS-managed resources that define what protocols and ports the endpoint supports:</p>
+<ul>
+<li>HTTP/1.1, HTTP/2, gRPC, WebSockets, and Server-Sent Events (SSE)</li>
+<li>All ports except system-reserved ports (0–1024), except 80 and 443 which are supported</li>
+<li>Traffic is authenticated via JWE tokens (<code>X-aws-proxy-auth</code> header)</li>
+<li>Target port inside the MicroVM is selected via <code>X-aws-proxy-port</code> header (default: 8080)</li>
+</ul>
+<p>Reference an AWS-managed ingress connector ARN (e.g. <code>arn:aws:lambda:us-east-1:aws:network-connector:aws-network-connector:ALL_INGRESS</code>) in <code>ingress_network_connectors</code>.</p>
+<h4 id="egress-outbound">Egress (outbound)<a class="headerlink" href="#egress-outbound" title="Permanent link">&para;</a></h4>
+<p>By default, MicroVMs have public internet access. To route outbound traffic through your VPC instead (e.g. to reach RDS, ElastiCache, or on-premises systems via Direct Connect), create a Lambda Network Connector:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>aws<span class="w"> </span>lambda-core<span class="w"> </span>create-network-connector<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span>--name<span class="w"> </span>my-vpc-connector<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span>--configuration<span class="w"> </span><span class="s1">&#39;{</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="s1">    &quot;VpcEgressConfiguration&quot;: {</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="s1">      &quot;SubnetIds&quot;: [&quot;subnet-xxx&quot;],</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="s1">      &quot;SecurityGroupIds&quot;: [&quot;sg-xxx&quot;],</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="s1">      &quot;NetworkProtocol&quot;: &quot;IPv4&quot;,</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="s1">      &quot;AssociatedComputeResourceTypes&quot;: [&quot;MicroVm&quot;]</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="s1">    }</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="s1">  }&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">  </span>--operator-role<span class="w"> </span>arn:aws:iam::123456789012:role/ConnectorOperatorRole
+</code></pre></div>
+<p>Then reference the connector ARN in <code>egress_network_connectors</code>. A single connector can be reused across many MicroVMs. When using VPC egress, outbound traffic is subject to security group rules and network ACLs in your VPC.</p>
 <h2 id="machine-data">Machine data<a class="headerlink" href="#machine-data" title="Permanent link">&para;</a></h2>
 <p>When you query machine status, MicroVM machines have a different shape than EC2 instances:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;instance_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;microvm-abc123def456&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nt">&quot;private_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="nt">&quot;public_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="nt">&quot;launch_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-07-13T10:00:00+00:00&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nt">&quot;image_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:lambda:us-east-1:123456789012:microvm-image:my-worker&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MicroVM&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nt">&quot;provider_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://xyz.lambda-microvms.us-east-1.on.aws&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="nt">&quot;image_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="nt">&quot;execution_role_arn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:iam::123456789012:role/MicroVMExecutionRole&quot;</span><span class="p">,</span>
-<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="nt">&quot;maximum_duration_in_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800</span>
-<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;instance_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;microvm-abc123def456&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nt">&quot;private_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="nt">&quot;public_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="nt">&quot;launch_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-07-13T10:00:00+00:00&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="nt">&quot;image_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:lambda:us-east-1:123456789012:microvm-image:my-worker&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;MicroVM&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span><span class="nt">&quot;provider_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">    </span><span class="nt">&quot;endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://xyz.lambda-microvms.us-east-1.on.aws&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">    </span><span class="nt">&quot;image_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="nt">&quot;execution_role_arn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:iam::123456789012:role/MicroVMExecutionRole&quot;</span><span class="p">,</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a><span class="w">    </span><span class="nt">&quot;maximum_duration_in_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800</span>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="p">}</span>
 </code></pre></div>
 <p>Key differences from EC2:</p>
 <ul>
@@ -5480,15 +5650,15 @@
 <li><strong>No instance type</strong> — MicroVMs are sized by the platform (up to 16 vCPU, 32 GB RAM, 32 GB disk).</li>
 </ul>
 <h2 id="connecting-to-a-microvm">Connecting to a MicroVM<a class="headerlink" href="#connecting-to-a-microvm" title="Permanent link">&para;</a></h2>
-<p>To send traffic to a running MicroVM, generate a short-lived auth token and include it in the <code>X-aws-proxy-auth</code> header:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Generate token</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>lambda-microvms<span class="w"> </span>create-microvm-auth-token<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span>--microvm-identifier<span class="w"> </span>microvm-abc123def456<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>--query<span class="w"> </span><span class="s1">&#39;authToken&#39;</span><span class="w"> </span>--output<span class="w"> </span>text<span class="k">)</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1"># Send request</span>
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-aws-proxy-auth: </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span>https://xyz.lambda-microvms.us-east-1.on.aws/my-endpoint
+<p>To send traffic to a running MicroVM, generate a short-lived auth token and include it in the <code>X-aws-proxy-auth</code> header. See <a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-launching.html">Running and using MicroVMs</a> for full auth token and connection details.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># Generate token</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nv">TOKEN</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>lambda-microvms<span class="w"> </span>create-microvm-auth-token<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span>--microvm-identifier<span class="w"> </span>microvm-abc123def456<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span>--query<span class="w"> </span><span class="s1">&#39;authToken&#39;</span><span class="w"> </span>--output<span class="w"> </span>text<span class="k">)</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1"># Send request</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>curl<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;X-aws-proxy-auth: </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span>https://xyz.lambda-microvms.us-east-1.on.aws/my-endpoint
 </code></pre></div>
 <p>Auth token management is an out-of-band concern — ORB provisions and terminates MicroVMs but does not manage auth tokens.</p>
 <h2 id="lifecycle-states">Lifecycle states<a class="headerlink" href="#lifecycle-states" title="Permanent link">&para;</a></h2>
@@ -5542,55 +5712,76 @@
 - A suspended MicroVM cannot poll — it loses its running process state.
 - <code>autoResumeEnabled: true</code> only resumes on <em>inbound</em> traffic, which pull-based workers never receive.</p>
 <p><strong>Recommendation:</strong> For pull-based MicroVMs managed by ORB, set <code>maxIdleDurationSeconds</code> to match <code>maximumDurationInSeconds</code> (the max lifetime). This effectively disables suspend and lets ORB manage the full lifecycle via explicit termination when work is done.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;idle_policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nt">&quot;maxIdleDurationSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="nt">&quot;suspendedDurationSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
-<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="nt">&quot;autoResumeEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
-<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="p">},</span>
-<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="nt">&quot;maximum_duration_in_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span>
-<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;idle_policy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="nt">&quot;maxIdleDurationSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="nt">&quot;suspendedDurationSeconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="nt">&quot;autoResumeEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="nt">&quot;maximum_duration_in_seconds&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="p">}</span>
 </code></pre></div>
 <p>This keeps MicroVMs running for up to 1 hour — ORB terminates them earlier via <code>return_machines</code> when no longer needed.</p>
 <h2 id="iam-permissions">IAM permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h2>
 <h3 id="orb-caller-permissions">ORB caller permissions<a class="headerlink" href="#orb-caller-permissions" title="Permanent link">&para;</a></h3>
-<p>The IAM principal running ORB needs these permissions:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">        </span><span class="s2">&quot;lambda-microvms:RunMicrovm&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">        </span><span class="s2">&quot;lambda-microvms:GetMicrovm&quot;</span><span class="p">,</span>
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">        </span><span class="s2">&quot;lambda-microvms:TerminateMicrovm&quot;</span>
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">      </span><span class="p">],</span>
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
-<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">  </span><span class="p">]</span>
-<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="p">}</span>
+<p>The IAM principal running ORB needs these permissions (see <a href="https://docs.aws.amazon.com/lambda/latest/microvm-api/API_RunMicrovm.html">RunMicrovm API reference</a>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">        </span><span class="s2">&quot;lambda-microvms:RunMicrovm&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="s2">&quot;lambda-microvms:GetMicrovm&quot;</span><span class="p">,</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">        </span><span class="s2">&quot;lambda-microvms:TerminateMicrovm&quot;</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="p">}</span>
 </code></pre></div>
-<h3 id="microvm-role">MicroVM role<a class="headerlink" href="#microvm-role" title="Permanent link">&para;</a></h3>
-<p>MicroVMs use a single IAM role for all operations — image build, runtime execution, and platform lifecycle. Pass the same role as both <code>buildRoleArn</code> (on <code>create_microvm_image</code>) and <code>execution_role_arn</code> (in the ORB template metadata).</p>
+<h3 id="microvm-roles">MicroVM roles<a class="headerlink" href="#microvm-roles" title="Permanent link">&para;</a></h3>
+<p>Lambda MicroVMs use two separate IAM roles, following the principle of least privilege. See <a href="https://docs.aws.amazon.com/lambda/latest/dg/microvms-security.html">Security and permissions</a> for the full AWS reference.</p>
+<h4 id="build-role-buildrolearn">Build role (<code>buildRoleArn</code>)<a class="headerlink" href="#build-role-buildrolearn" title="Permanent link">&para;</a></h4>
+<p>Passed to <code>create_microvm_image</code>. Used only during image creation to pull source artifacts and write build logs. This role is not available at runtime.</p>
 <p>Trust policy:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="p">{</span>
-<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
-<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">      </span><span class="nt">&quot;Principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lambda.amazonaws.com&quot;</span><span class="p">},</span>
-<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sts:AssumeRole&quot;</span>
-<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">  </span><span class="p">]</span>
-<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">      </span><span class="nt">&quot;Principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lambda.amazonaws.com&quot;</span><span class="p">},</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sts:AssumeRole&quot;</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="p">}</span>
 </code></pre></div>
-<p>Attached policies:
-- <code>AmazonS3ReadOnlyAccess</code> (required for image build to pull code artifact)
-- <code>CloudWatchLogsFullAccess</code> (for application and platform logging)
-- Any permissions your application needs at runtime (e.g. <code>AmazonSQSFullAccess</code>, <code>AmazonDynamoDBFullAccess</code>)</p>
+<p>Required permissions:
+- <code>s3:GetObject</code> on the code artifact bucket (to pull the source archive)
+- <code>logs:CreateLogGroup</code>, <code>logs:CreateLogStream</code>, <code>logs:PutLogEvents</code> (for build logs)
+- <code>ecr:GetAuthorizationToken</code> (only if your Dockerfile references private ECR images)</p>
+<h4 id="execution-role-execution_role_arn">Execution role (<code>execution_role_arn</code>)<a class="headerlink" href="#execution-role-execution_role_arn" title="Permanent link">&para;</a></h4>
+<p>Passed in the ORB template metadata. Assumed by the MicroVM at runtime — this is the identity your application code runs under.</p>
+<p>Trust policy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">      </span><span class="nt">&quot;Principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lambda.amazonaws.com&quot;</span><span class="p">},</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sts:AssumeRole&quot;</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="p">}</span>
+</code></pre></div>
+<p>Required permissions:
+- <code>logs:CreateLogGroup</code>, <code>logs:CreateLogStream</code>, <code>logs:PutLogEvents</code> (for runtime logs)
+- Any permissions your application needs (e.g. <code>sqs:SendMessage</code>, <code>sqs:ReceiveMessage</code>, <code>dynamodb:GetItem</code>)</p>
+<h4 id="why-separate-roles">Why separate roles?<a class="headerlink" href="#why-separate-roles" title="Permanent link">&para;</a></h4>
+<p>Separating build and execution roles means the runtime environment has no access to your source artifact bucket, and the build process has no access to your application's runtime resources (queues, databases, etc.). This limits the blast radius if either role is compromised.</p>
 <h2 id="status-syncing">Status syncing<a class="headerlink" href="#status-syncing" title="Permanent link">&para;</a></h2>
 <p><code>orb machines list</code> reads from ORB's local state store — it does not poll AWS. To sync machine statuses with the live MicroVM state, query the request:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>orb<span class="w"> </span>requests<span class="w"> </span>status<span class="w"> </span>&lt;request-id&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>orb<span class="w"> </span>requests<span class="w"> </span>status<span class="w"> </span>&lt;request-id&gt;
 </code></pre></div>
 <p>This triggers a read-through sync: ORB calls <code>get_microvm</code> for each machine, updates the stored status, and returns the current state. After this, <code>orb machines list</code> reflects the live state.</p>
 <h2 id="provisioning-behavior">Provisioning behavior<a class="headerlink" href="#provisioning-behavior" title="Permanent link">&para;</a></h2>

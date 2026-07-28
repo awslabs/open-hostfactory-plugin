@@ -37,6 +37,50 @@
         }
       }
     },
+    "/livez": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Liveness Check",
+        "description": "Liveness probe.\n\nReturns 200 whenever the process is up. Never gates on any\ndependency or provider \u2014 a liveness failure means the process\nshould be restarted, which is not the right response to an\nunreachable downstream dependency.",
+        "operationId": "livenessCheck",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Livenesscheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Readiness Check",
+        "description": "Readiness probe.\n\nReturns 503 when a CORE dependency is not fully healthy, otherwise\n200. Core dependencies are storage/database plus \u2014 in a\nsingle-provider deployment \u2014 the sole provider's connectivity: a\nbroken sole provider means the pod cannot serve provisioning\nrequests, so it must be taken out of rotation. In a multi-provider\ndeployment, provider connectivity is classified non-core, so a single\nunreachable optional provider does NOT gate readiness.\n\nBoth ``unhealthy`` and ``degraded`` core states map to 503: a\nconnectivity failure surfaces as ``degraded``, and for a sole\n(core) provider that still means not-ready.",
+        "operationId": "readinessCheck",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Readinesscheck"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/metrics": {
       "get": {
         "tags": [

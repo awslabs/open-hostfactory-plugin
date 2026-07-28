@@ -65,6 +65,9 @@ class HealthCheck(HealthCheckPort):
         self._logger = logger
         self.config = config
         self.checks: dict[str, Callable[[], HealthStatus]] = {}
+        # Classification of each check for readiness gating. Keyed by check
+        # name; values are "core", "provider", or "system".
+        self.check_kinds: dict[str, str] = {}
         self.status_history: dict[str, list[HealthStatus]] = {}
         self._lock = threading.Lock()
 
@@ -94,18 +97,25 @@ class HealthCheck(HealthCheckPort):
         # Register default health checks
         self._register_default_checks()
 
-    def register_check(self, name: str, check_fn: Any, *, force: bool = False) -> None:
+    def register_check(
+        self, name: str, check_fn: Any, *, force: bool = False, kind: str = "system"
+    ) -> None:
         """Register a named health check function.
 
         First-write-wins by default. Pass ``force=True`` to overwrite an
         existing registration — used by the bootstrap to replace the
         placeholder ``database`` check with a storage-backed one once the
         active StoragePort is resolved.
+
+        ``kind`` classifies the check for readiness gating (``"core"``,
+        ``"provider"``, or ``"system"``). Only ``"core"`` checks gate
+        ``get_readiness``.
         """
         with self._lock:
             if name in self.checks and not force:
                 return
             self.checks[name] = check_fn
+            self.check_kinds[name] = kind
             self.status_history.setdefault(name, [])
 
     def run_check(self, name: str) -> dict[str, Any]:
@@ -128,6 +138,35 @@ class HealthCheck(HealthCheckPort):
             }
 
         # Derive overall status from latest per-check statuses
+        statuses = [v["status"] for v in checks_status.values() if v is not None]
+        if "unhealthy" in statuses:
+            overall = "unhealthy"
+        elif "degraded" in statuses:
+            overall = "degraded"
+        elif statuses:
+            overall = "healthy"
+        else:
+            overall = "unknown"
+
+        return {"status": overall, "checks": checks_status}
+
+    def get_readiness(self) -> dict[str, Any]:
+        """Get readiness derived from core-dependency checks only.
+
+        Only checks registered with ``kind="core"`` (storage/database) gate
+        readiness. Provider-connectivity checks (aws, ec2, kubernetes_api)
+        are excluded, so an unreachable optional provider does not make the
+        service report as not-ready. With no core-check history the status
+        derives to ``"unknown"``.
+        """
+        with self._lock:
+            core_names = {name for name, kind in self.check_kinds.items() if kind == "core"}
+            checks_status = {
+                name: (history[-1].to_dict() if history else None)
+                for name, history in self.status_history.items()
+                if name in core_names
+            }
+
         statuses = [v["status"] for v in checks_status.values() if v is not None]
         if "unhealthy" in statuses:
             overall = "unhealthy"
@@ -169,10 +208,10 @@ class HealthCheck(HealthCheckPort):
 
     def _register_default_checks(self) -> None:
         """Register default health checks. Called from __init__."""
-        self.register_check("system", self._check_system_health)
-        self.register_check("disk", self._check_disk_health)
-        self.register_check("database", self._check_database_health)
-        self.register_check("application", self._check_application_health)
+        self.register_check("system", self._check_system_health, kind="system")
+        self.register_check("disk", self._check_disk_health, kind="system")
+        self.register_check("database", self._check_database_health, kind="core")
+        self.register_check("application", self._check_application_health, kind="system")
 
     def _check_system_health(self) -> HealthStatus:
         """Check CPU and memory pressure.
@@ -356,7 +395,15 @@ def register_deserialize_skip_counter_check(
             dependencies=["database"],
         )
 
-    health_check.register_check("storage.deserialize", _check_deserialize_skip_counters, force=True)
+    # Deliberately kind="system" (the default), NOT "core": a non-zero skip
+    # counter means some rows returned incomplete (a data-quality signal), and
+    # the only "unhealthy" path is a transient failure to READ the counter — in
+    # neither case can the storage backend not serve reads (that capability is
+    # covered by the separate "core" ``database`` check). So this must not gate
+    # readiness / take the pod out of rotation.
+    health_check.register_check(
+        "storage.deserialize", _check_deserialize_skip_counters, force=True, kind="system"
+    )
 
 
 def register_storage_health_checks(
@@ -412,5 +459,6 @@ def register_storage_health_checks(
 
     # Replace the placeholder ``database`` check installed by the
     # HealthCheck constructor. force=True is required because the
-    # default is first-write-wins.
-    health_check.register_check("database", _check_storage_backend_health, force=True)
+    # default is first-write-wins. Storage is a core dependency, so it
+    # gates readiness.
+    health_check.register_check("database", _check_storage_backend_health, force=True, kind="core")

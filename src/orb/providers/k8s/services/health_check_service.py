@@ -134,11 +134,19 @@ class K8sHealthCheckService:
         self,
         health_check: HealthCheck,
         kubernetes_client: K8sClient,
+        *,
+        kind: str = "provider",
     ) -> None:
-        """Register Kubernetes-specific health checks."""
+        """Register Kubernetes-specific health checks.
+
+        ``kind`` is the readiness classification for the connectivity check;
+        the caller (the strategy) decides it via
+        ``providers.health_scoping.connectivity_check_kind`` after applying the
+        default-instance scoping gate.
+        """
         from orb.providers.k8s.health import register_k8s_health_checks
 
-        register_k8s_health_checks(health_check, kubernetes_client)
+        register_k8s_health_checks(health_check, kubernetes_client, kind=kind)
 
 
 __all__ = ["K8sHealthCheckService"]

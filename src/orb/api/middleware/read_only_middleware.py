@@ -11,6 +11,8 @@ _SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 _ALLOWED_PATHS = frozenset(
     {
         "/health",
+        "/livez",
+        "/readyz",
         "/ping",
         "/info",
         "/metrics",

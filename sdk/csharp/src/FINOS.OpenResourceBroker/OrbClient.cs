@@ -326,8 +326,46 @@ public sealed class OrbClient : IAsyncDisposable
     }
 
     // ---------------------------------------------------------------------------
-    // System / Observability — 4 operations
+    // System / Observability — 6 operations
     // ---------------------------------------------------------------------------
+
+    /// <summary>livenessCheck — GET /livez
+    ///
+    /// The liveness probe returns 200 whenever the process is up and never gates
+    /// on any dependency or provider, so it is safe to poll as a container
+    /// liveness check.</summary>
+    public async Task<Dictionary<string, object?>> LivenessAsync(CancellationToken ct = default)
+        => await GetAsync<Dictionary<string, object?>>("/livez", ct: ct).ConfigureAwait(false);
+
+    /// <summary>readinessCheck — GET /readyz
+    ///
+    /// The readiness probe returns 200 unless a core dependency (storage/database)
+    /// is unhealthy, in which case it returns 503. A 503 carries a valid not-ready
+    /// body and is accepted as data rather than an error (mirroring HealthAsync),
+    /// so status-based retry is skipped and the not-ready status is returned
+    /// directly.</summary>
+    public async Task<Dictionary<string, object?>> ReadinessAsync(CancellationToken ct = default)
+    {
+        CheckHealth();
+        using var req = new HttpRequestMessage(HttpMethod.Get, "/readyz");
+        req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        AddSchedulerHeader(req);
+        // 503 (not-ready) is a normal steady-state result we accept as valid data
+        // below; skip status-based retry so it returns immediately. Network-error
+        // retry is intentionally left intact.
+        req.Options.Set(RetryDelegatingHandler.SkipStatusRetryOption, true);
+        var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseContentRead, ct).ConfigureAwait(false);
+        if (resp.StatusCode != System.Net.HttpStatusCode.OK &&
+            resp.StatusCode != System.Net.HttpStatusCode.ServiceUnavailable)
+        {
+            var errBody = await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            throw OrbApiException.ForStatus((int)resp.StatusCode,
+                ExtractErrorMessage(errBody) ?? resp.ReasonPhrase ?? "readiness check failed",
+                ExtractErrorCode(errBody), errBody, ExtractRequestId(resp));
+        }
+        var json = await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+        return JsonSerializer.Deserialize<Dictionary<string, object?>>(json, JsonOpts) ?? [];
+    }
 
     /// <summary>healthCheck — GET /health</summary>
     public async Task<Dictionary<string, object?>> HealthAsync(CancellationToken ct = default)

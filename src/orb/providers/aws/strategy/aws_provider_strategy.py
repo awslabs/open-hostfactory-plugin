@@ -844,11 +844,26 @@ class AWSProviderStrategy(ProviderStrategy):
         return result
 
     def register_health_checks(self, health_check: HealthCheck) -> None:
-        """Register AWS-specific health checks if client is available."""
+        """Register AWS-specific health checks if this is the default instance.
+
+        Connectivity-check registration MUST go through the
+        ``is_default_provider_instance`` scoping gate so a secondary AWS
+        instance does not register a check that drags the overall status down,
+        and the readiness ``kind`` is chosen by ``connectivity_check_kind`` so
+        a sole broken provider gates ``/readyz``. This mirrors
+        ``create_aws_strategy`` (aws/registration.py). This method has no live
+        caller today, but the gate is applied here so a future re-wire cannot
+        silently reintroduce secondary-provider status drag.
+        """
         if self.aws_client is None:
             return
         from orb.providers.aws.health import register_aws_health_checks
+        from orb.providers.health_scoping import (
+            connectivity_check_kind,
+            is_default_provider_instance,
+        )
 
+        provider_cfg = None
         storage_strategy = "json"
         if self._config_port is not None:
             try:
@@ -859,7 +874,20 @@ class AWSProviderStrategy(ProviderStrategy):
                     storage_strategy,
                     e,
                 )
-        register_aws_health_checks(health_check, self.aws_client, storage_strategy)
+            try:
+                provider_cfg = self._config_port.get_provider_config()
+            except Exception as e:
+                self._logger.debug("Could not resolve provider config from config port: %s", e)
+
+        if not is_default_provider_instance(self._provider_name, provider_cfg):
+            return
+
+        register_aws_health_checks(
+            health_check,
+            self.aws_client,
+            storage_strategy,
+            kind=connectivity_check_kind(provider_cfg),
+        )
 
     def cleanup(self) -> None:
         """Clean up AWS provider resources."""

@@ -95,13 +95,13 @@ func (r *recorder) record(method, path string) {
 
 // TestSpecConformance drives every client operation against a recording server
 // and asserts that (a) each issued request matches a spec operation (no wrong
-// verb / stale path), and (b) all 46 spec operations are exercised (no silent
+// verb / stale path), and (b) all 48 spec operations are exercised (no silent
 // under-coverage). This runs without a live orb, closing the static-conformance
 // gap independently of the integration leg.
 func TestSpecConformance(t *testing.T) {
 	ops := specOperations(t)
-	if len(ops) != 46 {
-		t.Fatalf("expected 46 spec operations, got %d (spec changed — update coverage)", len(ops))
+	if len(ops) != 48 {
+		t.Fatalf("expected 48 spec operations, got %d (spec changed — update coverage)", len(ops))
 	}
 
 	rec := &recorder{hits: make(map[string]bool)}
@@ -148,6 +148,8 @@ func TestSpecConformance(t *testing.T) {
 	// Exercise every client operation. Errors are ignored: the recording server
 	// is the assertion surface — we only care about the (method, path) issued.
 	_, _ = c.Health(ctx)
+	_, _ = c.Liveness(ctx)
+	_, _ = c.Readiness(ctx)
 	_, _ = c.Metrics(ctx)
 	_, _ = c.Info(ctx)
 	_, _ = c.GetDashboardSummary(ctx)

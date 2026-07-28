@@ -396,7 +396,8 @@ def create_fastapi_app(server_config: Any) -> Any:
             auth_port: Any = _LoopbackAdminAuthWrapper(auth_strategy)
 
             # Build the excluded-paths list for auth middleware.
-            # /health is always public (liveness probe, no sensitive detail).
+            # /health, /livez, /readyz are always public probe endpoints
+            # (no sensitive detail) so orchestrators can poll them unauthenticated.
             # /favicon.ico is static UI chrome, not sensitive.
             # /docs, /redoc, /openapi.json are excluded ONLY when
             # docs.require_auth=False — by default they are protected so that
@@ -404,7 +405,7 @@ def create_fastapi_app(server_config: Any) -> Any:
             _docs_require_auth: bool = getattr(
                 getattr(server_config, "docs", None), "require_auth", True
             )
-            _excluded: list[str] = ["/health", "/favicon.ico"]
+            _excluded: list[str] = ["/health", "/livez", "/readyz", "/favicon.ico"]
             if not _docs_require_auth:
                 _excluded.extend(["/docs", "/redoc", "/openapi.json"])
             else:
@@ -527,6 +528,42 @@ def create_fastapi_app(server_config: Any) -> Any:
 
         status = {"service": "open-resource-broker", "version": __version__, **status}
         http_status = 503 if status.get("status") == "unhealthy" else 200
+        return JSONResponse(content=status, status_code=http_status)  # type: ignore[misc]
+
+    @app.get("/livez", tags=["System"], operation_id="livenessCheck")
+    async def liveness_check() -> Any:  # type: ignore[misc]
+        """Liveness probe.
+
+        Returns 200 whenever the process is up. Never gates on any
+        dependency or provider — a liveness failure means the process
+        should be restarted, which is not the right response to an
+        unreachable downstream dependency.
+        """
+        return JSONResponse(content={"status": "alive"}, status_code=200)  # type: ignore[misc]
+
+    @app.get("/readyz", tags=["System"], operation_id="readinessCheck")
+    async def readiness_check(health_port: Any = Depends(get_health_check_port)) -> Any:  # type: ignore[misc]
+        """Readiness probe.
+
+        Returns 503 when a CORE dependency is not fully healthy, otherwise
+        200. Core dependencies are storage/database plus — in a
+        single-provider deployment — the sole provider's connectivity: a
+        broken sole provider means the pod cannot serve provisioning
+        requests, so it must be taken out of rotation. In a multi-provider
+        deployment, provider connectivity is classified non-core, so a single
+        unreachable optional provider does NOT gate readiness.
+
+        Both ``unhealthy`` and ``degraded`` core states map to 503: a
+        connectivity failure surfaces as ``degraded``, and for a sole
+        (core) provider that still means not-ready.
+        """
+        try:
+            health_port.run_all_checks()
+            status = health_port.get_readiness()
+        except Exception:
+            status = {"status": "unknown"}
+
+        http_status = 503 if status.get("status") in ("unhealthy", "degraded") else 200
         return JSONResponse(content=status, status_code=http_status)  # type: ignore[misc]
 
     # Add metrics endpoint

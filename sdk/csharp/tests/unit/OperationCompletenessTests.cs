@@ -62,11 +62,11 @@ public class OperationCompletenessTests
     }
 
     [Fact]
-    public void SpecDeclaresExactly46Operations()
+    public void SpecDeclaresExactly48Operations()
     {
         // Mirrors Go's operation-count sentinel: a spec that grows or shrinks
         // forces a deliberate update rather than silently under-covering.
-        Assert.Equal(46, SpecOperationIds().Count);
+        Assert.Equal(48, SpecOperationIds().Count);
     }
 
     [Fact]

@@ -20,6 +20,8 @@ if TYPE_CHECKING:  # pragma: no cover — type-checking only
 def register_k8s_health_checks(
     health_check: HealthCheckPort,
     kubernetes_client: K8sClient,
+    *,
+    kind: str = "provider",
 ) -> None:
     """Register Kubernetes-specific health checks with the given HealthCheck instance.
 
@@ -29,6 +31,10 @@ def register_k8s_health_checks(
     Args:
         health_check: The application HealthCheckPort to register checks on.
         kubernetes_client: Authenticated K8sClient used by the checks.
+        kind: Readiness classification for the connectivity check
+            (``"core"`` when Kubernetes is the sole enabled provider so a
+            broken provider gates ``/readyz``; ``"provider"`` otherwise). See
+            ``providers.health_scoping.connectivity_check_kind``.
     """
 
     def _check_kubernetes_api_health() -> HealthStatus:
@@ -46,11 +52,15 @@ def register_k8s_health_checks(
                 dependencies=["kubernetes_api"],
             )
         except Exception as exc:
+            # An unreachable API server is a degraded signal for this provider,
+            # not a hard failure of the process. /health maps degraded -> 200,
+            # so a single unreachable cluster no longer forces the endpoint to
+            # 503.
             return HealthStatus(
                 name="kubernetes_api",
-                status="unhealthy",
+                status="degraded",
                 details={"error": str(exc)},
                 dependencies=["kubernetes_api"],
             )
 
-    health_check.register_check("kubernetes_api", _check_kubernetes_api_health)
+    health_check.register_check("kubernetes_api", _check_kubernetes_api_health, kind=kind)

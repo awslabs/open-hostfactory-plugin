@@ -195,10 +195,26 @@ def create_k8s_strategy(provider_config: Any) -> Any:
         with suppress(Exception):
             from orb.domain.base.ports.health_check_port import HealthCheckPort
             from orb.infrastructure.di.container import get_container
+            from orb.providers.health_scoping import (
+                connectivity_check_kind,
+                is_default_provider_instance,
+            )
             from orb.providers.k8s.health import register_k8s_health_checks
 
-            health_check = get_container().get(HealthCheckPort)
-            register_k8s_health_checks(health_check, strategy.kubernetes_client)
+            # Register the connectivity check only for the default/active
+            # instance. A secondary k8s instance (e.g. one pointed at an
+            # unreachable cluster) must not register a check that could drag
+            # the overall status down.
+            provider_cfg = config_port.get_provider_config() if config_port else None
+            if is_default_provider_instance(provider_name, provider_cfg):
+                health_check = get_container().get(HealthCheckPort)
+                # When k8s is the sole enabled provider its connectivity gates
+                # readiness (kind="core"); with multiple providers it does not.
+                register_k8s_health_checks(
+                    health_check,
+                    strategy.kubernetes_client,
+                    kind=connectivity_check_kind(provider_cfg),
+                )
 
         if provider_name:
             strategy._provider_name = provider_name  # type: ignore[assignment]

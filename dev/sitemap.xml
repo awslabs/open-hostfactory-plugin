@@ -413,7 +413,15 @@
          <lastmod>2026-07-28</lastmod>
     </url>
     <url>
+         <loc>https://finos.github.io/open-resource-broker/dev/security/authorization/</loc>
+         <lastmod>2026-07-28</lastmod>
+    </url>
+    <url>
          <loc>https://finos.github.io/open-resource-broker/dev/security/security-scanning/</loc>
+         <lastmod>2026-07-28</lastmod>
+    </url>
+    <url>
+         <loc>https://finos.github.io/open-resource-broker/dev/testing/moto-limits/</loc>
          <lastmod>2026-07-28</lastmod>
     </url>
     <url>

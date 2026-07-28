@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/architecture/metadata-vs-provider-data/">
+        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/security/authorization/">
       
       
+        <link rel="prev" href="../../sdk/generating-sdks/">
+      
+      
+        <link rel="next" href="../security-scanning/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>metadata vs provider_data - Open Resource Broker</title>
+        <title>Authorization Claims - Open Resource Broker</title>
       
     
     
@@ -78,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#metadata-vs-provider_data" class="md-skip">
+        <a href="#authorization-claims" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              metadata vs provider_data
+              Authorization Claims
             
           </span>
         </div>
@@ -299,7 +303,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../system_overview/" class="md-tabs__link">
+        <a href="../../architecture/system_overview/" class="md-tabs__link">
           
   
   
@@ -418,6 +422,8 @@
   
   
   
+    
+  
   
     
     
@@ -425,10 +431,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../../sdk/" class="md-tabs__link">
           
   
@@ -1118,7 +1126,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../system_overview/" class="md-nav__link">
+      <a href="../../architecture/system_overview/" class="md-nav__link">
         
   
   
@@ -1146,7 +1154,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clean_architecture/" class="md-nav__link">
+      <a href="../../architecture/clean_architecture/" class="md-nav__link">
         
   
   
@@ -1174,7 +1182,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../template-infrastructure/" class="md-nav__link">
+      <a href="../../architecture/template-infrastructure/" class="md-nav__link">
         
   
   
@@ -1202,7 +1210,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../system_diagrams/" class="md-nav__link">
+      <a href="../../architecture/system_diagrams/" class="md-nav__link">
         
   
   
@@ -1230,7 +1238,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cqrs_pattern/" class="md-nav__link">
+      <a href="../../architecture/cqrs_pattern/" class="md-nav__link">
         
   
   
@@ -1258,7 +1266,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dependency_injection/" class="md-nav__link">
+      <a href="../../architecture/dependency_injection/" class="md-nav__link">
         
   
   
@@ -1286,7 +1294,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lazy-loading-design/" class="md-nav__link">
+      <a href="../../architecture/lazy-loading-design/" class="md-nav__link">
         
   
   
@@ -1314,7 +1322,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../machine-discovery-flow/" class="md-nav__link">
+      <a href="../../architecture/machine-discovery-flow/" class="md-nav__link">
         
   
   
@@ -1342,7 +1350,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multi-provider-design/" class="md-nav__link">
+      <a href="../../architecture/multi-provider-design/" class="md-nav__link">
         
   
   
@@ -1370,7 +1378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../field_mapping_architecture/" class="md-nav__link">
+      <a href="../../architecture/field_mapping_architecture/" class="md-nav__link">
         
   
   
@@ -1398,7 +1406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../metrics_report/" class="md-nav__link">
+      <a href="../../architecture/metrics_report/" class="md-nav__link">
         
   
   
@@ -3824,28 +3832,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
-        
-          
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
             
   
   
@@ -3863,7 +3874,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_9">
             <span class="md-nav__icon md-icon"></span>
             
@@ -3887,10 +3898,13 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
@@ -3899,7 +3913,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_1" >
         
           
-          <label class="md-nav__link" for="__nav_9_1" id="__nav_9_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_9_1" id="__nav_9_1_label" tabindex="">
             
   
   
@@ -4052,10 +4066,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../security/authorization/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authorization Claims
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -4071,6 +4112,65 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#canonical-claim-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canonical claim names
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Canonical claim names">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#claim-normalisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Claim normalisation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-strategy-claim-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider strategy claim sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -4083,7 +4183,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/security-scanning/" class="md-nav__link">
+      <a href="../security-scanning/" class="md-nav__link">
         
   
   
@@ -4979,33 +5079,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#rationale" class="md-nav__link">
+  <a href="#canonical-claim-names" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rationale
+        Canonical claim names
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#the-rule" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The Rule
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Rule">
+    <nav class="md-nav" aria-label="Canonical claim names">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#who-writes-who-reads" class="md-nav__link">
+  <a href="#claim-normalisation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Who writes, who reads
+        Claim normalisation
       
     </span>
   </a>
@@ -5018,43 +5107,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#field-reference" class="md-nav__link">
+  <a href="#provider-strategy-claim-sources" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Field Reference
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#enforcement" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Enforcement
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migration-note" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migration Note
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#exceptions-the-_normalize_on_read-pattern" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Exceptions — the _normalize_on_read pattern
+        Provider strategy claim sources
       
     </span>
   </a>
@@ -5081,156 +5137,64 @@
   
 
 
-<h1 id="metadata-vs-provider_data">metadata vs provider_data<a class="headerlink" href="#metadata-vs-provider_data" title="Permanent link">&para;</a></h1>
-<p><strong>Rule:</strong> provider adapters write to <code>provider_data</code>; the application layer writes to <code>metadata</code>. Neither field is interchangeable with the other.</p>
-<h2 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h2>
-<p><code>Machine</code> and <code>Request</code> aggregates each carry two open-ended dicts: <code>metadata</code> and <code>provider_data</code>. When both fields exist but their purpose is undefined, engineers reach for whichever name feels right in the moment. The result is provider-specific fields (<code>vcpus</code>, <code>availability_zone</code>, <code>fleet_id</code>) scattered across <code>metadata</code>, and application-layer annotations leaking into <code>provider_data</code>. This makes refactoring hard, pollutes the domain model with cloud concepts, and forces every reader to grep both dicts to understand what a field means.</p>
-<p>Defining a clear ownership rule eliminates the ambiguity.</p>
-<h2 id="the-rule">The Rule<a class="headerlink" href="#the-rule" title="Permanent link">&para;</a></h2>
-<p><strong><code>provider_data</code></strong> holds provider-specific fields. Only provider adapters write to it. Schedulers and application services may read from it selectively, with explicit knowledge of the provider. Examples: <code>cloud_host_id</code>, <code>launch_template_id</code>, <code>launch_template_version</code>, <code>health_checks</code>, <code>fleet_id</code>, <code>spot_price</code>, <code>availability_zone</code>, <code>region</code>, <code>vcpus</code>, <code>instance_profile</code>, <code>resource_type</code>.</p>
-<p><strong><code>metadata</code></strong> holds provider-agnostic extensibility data. Only the application layer writes to it. It must never contain provider-specific fields. Examples: correlation IDs, operator annotations, custom labels applied by the application, domain-event payloads, <code>dry_run</code>, <code>timeout</code>, <code>tags</code> (when not AWS tags), <code>fulfillment_config</code>.</p>
-<h3 id="who-writes-who-reads">Who writes, who reads<a class="headerlink" href="#who-writes-who-reads" title="Permanent link">&para;</a></h3>
+<h1 id="authorization-claims">Authorization Claims<a class="headerlink" href="#authorization-claims" title="Permanent link">&para;</a></h1>
+<p>ORB derives a caller's roles and permissions from the authenticated principal.
+Every authentication strategy populates the same two fields on its
+authentication result — <code>user_roles</code> and <code>permissions</code> — so that downstream
+authorization behaves identically regardless of how the caller authenticated.</p>
+<h2 id="canonical-claim-names">Canonical claim names<a class="headerlink" href="#canonical-claim-names" title="Permanent link">&para;</a></h2>
+<p>For token-based strategies (bearer JWT, enhanced bearer JWT), authorization
+claims are read from two canonical, optional claims in the token payload:</p>
 <table>
 <thead>
 <tr>
-<th>Layer</th>
-<th><code>provider_data</code></th>
-<th><code>metadata</code></th>
+<th>Claim</th>
+<th>Type</th>
+<th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Domain aggregate</td>
-<td>owns the field definition; exposes <code>set_provider_data</code> / <code>update_metadata</code></td>
-<td>owns the field definition; exposes <code>update_metadata</code></td>
+<td><code>roles</code></td>
+<td>array of strings</td>
+<td>The principal's role names (e.g. <code>["operator"]</code>).</td>
 </tr>
 <tr>
-<td>Provider adapter (<code>src/orb/providers/</code>)</td>
-<td><strong>writes</strong></td>
-<td>reads only</td>
-</tr>
-<tr>
-<td>Application service / orchestrator</td>
-<td>reads</td>
-<td><strong>writes</strong></td>
-</tr>
-<tr>
-<td>Infrastructure (storage, scheduler)</td>
-<td>reads</td>
-<td>reads</td>
-</tr>
-<tr>
-<td>Interface / API / CLI</td>
-<td>reads</td>
-<td>reads</td>
+<td><code>permissions</code></td>
+<td>array of strings</td>
+<td>Explicitly-granted, two-segment permission strings (e.g. <code>["templates.read"]</code>).</td>
 </tr>
 </tbody>
 </table>
-<h2 id="field-reference">Field Reference<a class="headerlink" href="#field-reference" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Correct bucket</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>cloud_host_id</code></td>
-<td><code>provider_data</code></td>
-<td>AWS EC2 instance ID (HF name)</td>
-</tr>
-<tr>
-<td><code>launch_template_id</code></td>
-<td><code>provider_data</code></td>
-<td>EC2 launch template</td>
-</tr>
-<tr>
-<td><code>launch_template_version</code></td>
-<td><code>provider_data</code></td>
-<td>EC2 launch template version</td>
-</tr>
-<tr>
-<td><code>fleet_id</code></td>
-<td><code>provider_data</code></td>
-<td>EC2 Fleet or Spot Fleet ID</td>
-</tr>
-<tr>
-<td><code>spot_price</code></td>
-<td><code>provider_data</code></td>
-<td>Current spot bid price</td>
-</tr>
-<tr>
-<td><code>health_checks</code></td>
-<td><code>provider_data</code></td>
-<td>Provider-reported health status</td>
-</tr>
-<tr>
-<td><code>availability_zone</code></td>
-<td><code>provider_data</code></td>
-<td>AWS AZ — currently misplaced in <code>metadata</code></td>
-</tr>
-<tr>
-<td><code>vcpus</code></td>
-<td><code>provider_data</code></td>
-<td>Instance vCPU count — currently misplaced in <code>metadata</code></td>
-</tr>
-<tr>
-<td><code>instance_profile</code></td>
-<td><code>provider_data</code></td>
-<td>IAM instance profile ARN</td>
-</tr>
-<tr>
-<td><code>resource_type</code></td>
-<td><code>provider_data</code></td>
-<td>Provider resource kind (e.g. <code>asg</code>, <code>spot_fleet</code>)</td>
-</tr>
-<tr>
-<td><code>dry_run</code></td>
-<td><code>metadata</code></td>
-<td>Application-layer flag; no provider meaning</td>
-</tr>
-<tr>
-<td><code>timeout</code></td>
-<td><code>metadata</code></td>
-<td>Request timeout set by caller</td>
-</tr>
-<tr>
-<td><code>fulfillment_config</code></td>
-<td><code>metadata</code></td>
-<td>Orchestration policy set by application</td>
-</tr>
-<tr>
-<td><code>fulfillment_attempts</code></td>
-<td><code>metadata</code></td>
-<td>Attempt history tracked by orchestrator</td>
-</tr>
-<tr>
-<td><code>correlation_id</code></td>
-<td><code>metadata</code></td>
-<td>Cross-service tracing identifier</td>
-</tr>
-</tbody>
-</table>
-<h2 id="enforcement">Enforcement<a class="headerlink" href="#enforcement" title="Permanent link">&para;</a></h2>
-<p><code>tests/unit/architecture/test_metadata_provider_data_boundary.py</code> enforces this rule with three tests:</p>
+<p>Both claims are optional. A missing claim is treated as an empty list.</p>
+<p>A JWT that carries <code>roles=["operator"]</code> yields <code>user_roles = ["operator"]</code>; a
+JWT that additionally carries <code>permissions=["templates.read"]</code> surfaces that
+list verbatim in <code>permissions</code>. Callers that cannot yet emit a <code>roles</code> claim
+may grant access by supplying an explicit <code>permissions</code> array instead.</p>
+<h3 id="claim-normalisation">Claim normalisation<a class="headerlink" href="#claim-normalisation" title="Permanent link">&para;</a></h3>
+<p>Token payloads are untrusted input, so both claims are normalised before use:</p>
 <ul>
-<li>
-<p><strong><code>test_provider_data_writes_restricted_to_providers</code></strong> — asserts that every write to <code>.provider_data</code> on an object originates inside <code>src/orb/providers/</code> or inside a domain aggregate method (which owns the field definition). Writes from application, infrastructure, interface, or CLI layers fail the test.</p>
-</li>
-<li>
-<p><strong><code>test_metadata_writes_not_in_providers</code></strong> — asserts that no provider adapter writes to aggregate <code>.metadata</code>. Providers must use <code>provider_data</code> for their own fields.</p>
-</li>
-<li>
-<p><strong><code>test_violations_inventory_is_known</code></strong> — compares the current violation set against a frozen baseline in <code>tests/unit/architecture/metadata_provider_data_violations.json</code>. New violations fail loudly. Fixed violations also fail, so the baseline is kept tight and improvements are locked in.</p>
-</li>
+<li>a scalar string (<code>"roles": "operator"</code>) is coerced to a single-element list;</li>
+<li>non-string and empty entries are dropped;</li>
+<li>surrounding whitespace is stripped and duplicates removed;</li>
+<li>any other type (object, number) yields an empty list (fail-closed).</li>
 </ul>
-<h2 id="migration-note">Migration Note<a class="headerlink" href="#migration-note" title="Permanent link">&para;</a></h2>
-<p>A separate ticket migrates legacy fields that are in the wrong bucket. Specifically, <code>vcpus</code> and <code>availability_zone</code> currently live in <code>metadata</code> (written by application-layer DTOs reading from provider results) and will move to <code>provider_data</code>. Until that migration is complete, readers must handle both locations.</p>
-<h2 id="exceptions-the-_normalize_on_read-pattern">Exceptions — the <code>_normalize_on_read</code> pattern<a class="headerlink" href="#exceptions-the-_normalize_on_read-pattern" title="Permanent link">&para;</a></h2>
-<p>Storage round-trips written before this rule was established may have persisted provider-specific fields inside <code>metadata</code>. Readers that encounter such records must migrate them on-read: copy the field to <code>provider_data</code>, remove it from <code>metadata</code>, and continue. This is the <code>_normalize_on_read</code> pattern. Storage writes the corrected layout going forward. Once all records have been rewritten, the on-read migration can be removed.</p>
-<p>Code inside a function named <code>_normalize_on_read</code> is exempt from the architecture test for this reason.</p>
+<p>This prevents a scalar claim from being stored as a bare string, which would
+otherwise make role/permission membership checks perform substring matching
+(for example <code>"adm" in "admin"</code>) — a fail-open authorization bypass.</p>
+<h2 id="provider-strategy-claim-sources">Provider strategy claim sources<a class="headerlink" href="#provider-strategy-claim-sources" title="Permanent link">&para;</a></h2>
+<p>Provider-native strategies map their own identity model onto the same
+<code>user_roles</code> / <code>permissions</code> fields:</p>
+<ul>
+<li><strong>AWS Cognito</strong> maps <code>cognito:groups</code> to ORB roles, then derives permissions
+  from those roles.</li>
+<li><strong>AWS IAM</strong> derives roles from the server principal's ARN. Admin access is
+  granted only via an explicit, exact-match ARN allowlist
+  (<code>provider_auth.iam.admin_arns</code>); no substring or name-pattern match is used
+  when an allowlist is configured.</li>
+<li><strong>Kubernetes</strong> maps the authenticated ServiceAccount principal to ORB roles
+  via the operator-supplied service-account role mapping.</li>
+</ul>
 
 
 

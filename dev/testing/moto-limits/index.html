@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/architecture/metadata-vs-provider-data/">
+        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/testing/moto-limits/">
       
       
+        <link rel="prev" href="../system-tests-onaws/">
+      
+      
+        <link rel="next" href="../../native-spec-guide/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>metadata vs provider_data - Open Resource Broker</title>
+        <title>Moto Structural Limits - Open Resource Broker</title>
       
     
     
@@ -78,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#metadata-vs-provider_data" class="md-skip">
+        <a href="#moto-structural-limits-what-moto-cannot-test" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              metadata vs provider_data
+              Moto Structural Limits
             
           </span>
         </div>
@@ -299,7 +303,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../system_overview/" class="md-tabs__link">
+        <a href="../../architecture/system_overview/" class="md-tabs__link">
           
   
   
@@ -448,6 +452,8 @@
   
   
   
+    
+  
   
     
     
@@ -455,10 +461,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../../api/readme/" class="md-tabs__link">
           
   
@@ -1118,7 +1126,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../system_overview/" class="md-nav__link">
+      <a href="../../architecture/system_overview/" class="md-nav__link">
         
   
   
@@ -1146,7 +1154,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clean_architecture/" class="md-nav__link">
+      <a href="../../architecture/clean_architecture/" class="md-nav__link">
         
   
   
@@ -1174,7 +1182,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../template-infrastructure/" class="md-nav__link">
+      <a href="../../architecture/template-infrastructure/" class="md-nav__link">
         
   
   
@@ -1202,7 +1210,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../system_diagrams/" class="md-nav__link">
+      <a href="../../architecture/system_diagrams/" class="md-nav__link">
         
   
   
@@ -1230,7 +1238,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../cqrs_pattern/" class="md-nav__link">
+      <a href="../../architecture/cqrs_pattern/" class="md-nav__link">
         
   
   
@@ -1258,7 +1266,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dependency_injection/" class="md-nav__link">
+      <a href="../../architecture/dependency_injection/" class="md-nav__link">
         
   
   
@@ -1286,7 +1294,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lazy-loading-design/" class="md-nav__link">
+      <a href="../../architecture/lazy-loading-design/" class="md-nav__link">
         
   
   
@@ -1314,7 +1322,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../machine-discovery-flow/" class="md-nav__link">
+      <a href="../../architecture/machine-discovery-flow/" class="md-nav__link">
         
   
   
@@ -1342,7 +1350,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../multi-provider-design/" class="md-nav__link">
+      <a href="../../architecture/multi-provider-design/" class="md-nav__link">
         
   
   
@@ -1370,7 +1378,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../field_mapping_architecture/" class="md-nav__link">
+      <a href="../../architecture/field_mapping_architecture/" class="md-nav__link">
         
   
   
@@ -1398,7 +1406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../metrics_report/" class="md-nav__link">
+      <a href="../../architecture/metrics_report/" class="md-nav__link">
         
   
   
@@ -4115,28 +4123,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
-        
-          
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
             
   
   
@@ -4154,7 +4165,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
@@ -4178,10 +4189,13 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
@@ -4190,7 +4204,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10_1" >
         
           
-          <label class="md-nav__link" for="__nav_10_1" id="__nav_10_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10_1" id="__nav_10_1_label" tabindex="">
             
   
   
@@ -4324,10 +4338,13 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
@@ -4336,7 +4353,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10_2" >
         
           
-          <label class="md-nav__link" for="__nav_10_2" id="__nav_10_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10_2" id="__nav_10_2_label" tabindex="">
             
   
   
@@ -4545,28 +4562,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
         
           
+          
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10_3" >
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10_3" checked>
         
           
-          <label class="md-nav__link" for="__nav_10_3" id="__nav_10_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10_3" id="__nav_10_3_label" tabindex="">
             
   
   
@@ -4584,7 +4604,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_10_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_10_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -4602,7 +4622,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing/readme/" class="md-nav__link">
+      <a href="../readme/" class="md-nav__link">
         
   
   
@@ -4630,7 +4650,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing/system-tests-onaws/" class="md-nav__link">
+      <a href="../system-tests-onaws/" class="md-nav__link">
         
   
   
@@ -4655,10 +4675,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../testing/moto-limits/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Moto Structural Limits
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -4674,6 +4721,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#l1-spotfleet-never-fulfils" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L1 — SpotFleet never fulfils
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#l2-no-cancelled_running-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L2 — No cancelled_running state
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#l3-synchronous-describe_instances-no-eventual-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L3 — Synchronous describe_instances (no eventual consistency)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#l4-no-fleet-modifying-transition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L4 — No fleet modifying transition
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#l5-instant-asg-instance-state-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        L5 — Instant ASG-instance state transitions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -4700,10 +4833,13 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
@@ -4712,7 +4848,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10_4" >
         
           
-          <label class="md-nav__link" for="__nav_10_4" id="__nav_10_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_10_4" id="__nav_10_4_label" tabindex="">
             
   
   
@@ -4979,10 +5115,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#rationale" class="md-nav__link">
+  <a href="#l1-spotfleet-never-fulfils" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rationale
+        L1 — SpotFleet never fulfils
       
     </span>
   </a>
@@ -4990,38 +5126,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-rule" class="md-nav__link">
+  <a href="#l2-no-cancelled_running-state" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The Rule
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The Rule">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#who-writes-who-reads" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Who writes, who reads
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#field-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Field Reference
+        L2 — No cancelled_running state
       
     </span>
   </a>
@@ -5029,10 +5137,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#enforcement" class="md-nav__link">
+  <a href="#l3-synchronous-describe_instances-no-eventual-consistency" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Enforcement
+        L3 — Synchronous describe_instances (no eventual consistency)
       
     </span>
   </a>
@@ -5040,10 +5148,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#migration-note" class="md-nav__link">
+  <a href="#l4-no-fleet-modifying-transition" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Migration Note
+        L4 — No fleet modifying transition
       
     </span>
   </a>
@@ -5051,10 +5159,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#exceptions-the-_normalize_on_read-pattern" class="md-nav__link">
+  <a href="#l5-instant-asg-instance-state-transitions" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Exceptions — the _normalize_on_read pattern
+        L5 — Instant ASG-instance state transitions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
       
     </span>
   </a>
@@ -5081,156 +5200,130 @@
   
 
 
-<h1 id="metadata-vs-provider_data">metadata vs provider_data<a class="headerlink" href="#metadata-vs-provider_data" title="Permanent link">&para;</a></h1>
-<p><strong>Rule:</strong> provider adapters write to <code>provider_data</code>; the application layer writes to <code>metadata</code>. Neither field is interchangeable with the other.</p>
-<h2 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h2>
-<p><code>Machine</code> and <code>Request</code> aggregates each carry two open-ended dicts: <code>metadata</code> and <code>provider_data</code>. When both fields exist but their purpose is undefined, engineers reach for whichever name feels right in the moment. The result is provider-specific fields (<code>vcpus</code>, <code>availability_zone</code>, <code>fleet_id</code>) scattered across <code>metadata</code>, and application-layer annotations leaking into <code>provider_data</code>. This makes refactoring hard, pollutes the domain model with cloud concepts, and forces every reader to grep both dicts to understand what a field means.</p>
-<p>Defining a clear ownership rule eliminates the ambiguity.</p>
-<h2 id="the-rule">The Rule<a class="headerlink" href="#the-rule" title="Permanent link">&para;</a></h2>
-<p><strong><code>provider_data</code></strong> holds provider-specific fields. Only provider adapters write to it. Schedulers and application services may read from it selectively, with explicit knowledge of the provider. Examples: <code>cloud_host_id</code>, <code>launch_template_id</code>, <code>launch_template_version</code>, <code>health_checks</code>, <code>fleet_id</code>, <code>spot_price</code>, <code>availability_zone</code>, <code>region</code>, <code>vcpus</code>, <code>instance_profile</code>, <code>resource_type</code>.</p>
-<p><strong><code>metadata</code></strong> holds provider-agnostic extensibility data. Only the application layer writes to it. It must never contain provider-specific fields. Examples: correlation IDs, operator annotations, custom labels applied by the application, domain-event payloads, <code>dry_run</code>, <code>timeout</code>, <code>tags</code> (when not AWS tags), <code>fulfillment_config</code>.</p>
-<h3 id="who-writes-who-reads">Who writes, who reads<a class="headerlink" href="#who-writes-who-reads" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Layer</th>
-<th><code>provider_data</code></th>
-<th><code>metadata</code></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Domain aggregate</td>
-<td>owns the field definition; exposes <code>set_provider_data</code> / <code>update_metadata</code></td>
-<td>owns the field definition; exposes <code>update_metadata</code></td>
-</tr>
-<tr>
-<td>Provider adapter (<code>src/orb/providers/</code>)</td>
-<td><strong>writes</strong></td>
-<td>reads only</td>
-</tr>
-<tr>
-<td>Application service / orchestrator</td>
-<td>reads</td>
-<td><strong>writes</strong></td>
-</tr>
-<tr>
-<td>Infrastructure (storage, scheduler)</td>
-<td>reads</td>
-<td>reads</td>
-</tr>
-<tr>
-<td>Interface / API / CLI</td>
-<td>reads</td>
-<td>reads</td>
-</tr>
-</tbody>
-</table>
-<h2 id="field-reference">Field Reference<a class="headerlink" href="#field-reference" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Correct bucket</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>cloud_host_id</code></td>
-<td><code>provider_data</code></td>
-<td>AWS EC2 instance ID (HF name)</td>
-</tr>
-<tr>
-<td><code>launch_template_id</code></td>
-<td><code>provider_data</code></td>
-<td>EC2 launch template</td>
-</tr>
-<tr>
-<td><code>launch_template_version</code></td>
-<td><code>provider_data</code></td>
-<td>EC2 launch template version</td>
-</tr>
-<tr>
-<td><code>fleet_id</code></td>
-<td><code>provider_data</code></td>
-<td>EC2 Fleet or Spot Fleet ID</td>
-</tr>
-<tr>
-<td><code>spot_price</code></td>
-<td><code>provider_data</code></td>
-<td>Current spot bid price</td>
-</tr>
-<tr>
-<td><code>health_checks</code></td>
-<td><code>provider_data</code></td>
-<td>Provider-reported health status</td>
-</tr>
-<tr>
-<td><code>availability_zone</code></td>
-<td><code>provider_data</code></td>
-<td>AWS AZ — currently misplaced in <code>metadata</code></td>
-</tr>
-<tr>
-<td><code>vcpus</code></td>
-<td><code>provider_data</code></td>
-<td>Instance vCPU count — currently misplaced in <code>metadata</code></td>
-</tr>
-<tr>
-<td><code>instance_profile</code></td>
-<td><code>provider_data</code></td>
-<td>IAM instance profile ARN</td>
-</tr>
-<tr>
-<td><code>resource_type</code></td>
-<td><code>provider_data</code></td>
-<td>Provider resource kind (e.g. <code>asg</code>, <code>spot_fleet</code>)</td>
-</tr>
-<tr>
-<td><code>dry_run</code></td>
-<td><code>metadata</code></td>
-<td>Application-layer flag; no provider meaning</td>
-</tr>
-<tr>
-<td><code>timeout</code></td>
-<td><code>metadata</code></td>
-<td>Request timeout set by caller</td>
-</tr>
-<tr>
-<td><code>fulfillment_config</code></td>
-<td><code>metadata</code></td>
-<td>Orchestration policy set by application</td>
-</tr>
-<tr>
-<td><code>fulfillment_attempts</code></td>
-<td><code>metadata</code></td>
-<td>Attempt history tracked by orchestrator</td>
-</tr>
-<tr>
-<td><code>correlation_id</code></td>
-<td><code>metadata</code></td>
-<td>Cross-service tracing identifier</td>
-</tr>
-</tbody>
-</table>
-<h2 id="enforcement">Enforcement<a class="headerlink" href="#enforcement" title="Permanent link">&para;</a></h2>
-<p><code>tests/unit/architecture/test_metadata_provider_data_boundary.py</code> enforces this rule with three tests:</p>
+<h1 id="moto-structural-limits-what-moto-cannot-test">Moto structural limits (what moto cannot test)<a class="headerlink" href="#moto-structural-limits-what-moto-cannot-test" title="Permanent link">&para;</a></h1>
+<p>The AWS provider is tested at two levels:</p>
 <ul>
-<li>
-<p><strong><code>test_provider_data_writes_restricted_to_providers</code></strong> — asserts that every write to <code>.provider_data</code> on an object originates inside <code>src/orb/providers/</code> or inside a domain aggregate method (which owns the field definition). Writes from application, infrastructure, interface, or CLI layers fail the test.</p>
-</li>
-<li>
-<p><strong><code>test_metadata_writes_not_in_providers</code></strong> — asserts that no provider adapter writes to aggregate <code>.metadata</code>. Providers must use <code>provider_data</code> for their own fields.</p>
-</li>
-<li>
-<p><strong><code>test_violations_inventory_is_known</code></strong> — compares the current violation set against a frozen baseline in <code>tests/unit/architecture/metadata_provider_data_violations.json</code>. New violations fail loudly. Fixed violations also fail, so the baseline is kept tight and improvements are locked in.</p>
-</li>
+<li><strong>moto (mocked)</strong> — <code>tests/providers/aws/mocked/</code> and <code>tests/providers/aws/unit/</code>.
+  Fast, deterministic, run in CI on every change.</li>
+<li><strong>live (onaws)</strong> — <code>tests/providers/aws/live/</code>. Slow (~45 min/run), run against
+  a real AWS account. See <a href="../system-tests-onaws/">System Tests (onaws)</a>.</li>
 </ul>
-<h2 id="migration-note">Migration Note<a class="headerlink" href="#migration-note" title="Permanent link">&para;</a></h2>
-<p>A separate ticket migrates legacy fields that are in the wrong bucket. Specifically, <code>vcpus</code> and <code>availability_zone</code> currently live in <code>metadata</code> (written by application-layer DTOs reading from provider results) and will move to <code>provider_data</code>. Until that migration is complete, readers must handle both locations.</p>
-<h2 id="exceptions-the-_normalize_on_read-pattern">Exceptions — the <code>_normalize_on_read</code> pattern<a class="headerlink" href="#exceptions-the-_normalize_on_read-pattern" title="Permanent link">&para;</a></h2>
-<p>Storage round-trips written before this rule was established may have persisted provider-specific fields inside <code>metadata</code>. Readers that encounter such records must migrate them on-read: copy the field to <code>provider_data</code>, remove it from <code>metadata</code>, and continue. This is the <code>_normalize_on_read</code> pattern. Storage writes the corrected layout going forward. Once all records have been rewritten, the on-read migration can be removed.</p>
-<p>Code inside a function named <code>_normalize_on_read</code> is exempt from the architecture test for this reason.</p>
+<p>Moto is a simulator, not AWS. Several behaviours that ORB depends on in production
+either behave differently under moto or are absent entirely. Any scenario that
+turns on one of the limits below is <strong>live-only</strong>: a moto test for it would either
+be impossible to write or would pass against behaviour that AWS does not actually
+exhibit, giving false confidence.</p>
+<p>This page enumerates the five structural limits found while pairing every live
+test with its moto counterpart. For each: what real AWS does, what moto does, and
+where the behaviour is (or must be) covered.</p>
+<h2 id="l1-spotfleet-never-fulfils">L1 — SpotFleet never fulfils<a class="headerlink" href="#l1-spotfleet-never-fulfils" title="Permanent link">&para;</a></h2>
+<p><strong>AWS:</strong> After <code>request_spot_fleet</code>, the fleet transitions to <code>active</code> and
+asynchronously launches instances until <code>FulfilledCapacity</code> reaches
+<code>TargetCapacity</code>. <code>describe_spot_fleet_instances</code> then returns the active
+instances.</p>
+<p><strong>Moto:</strong> The request is recorded and reports <code>active</code>, but moto does not launch
+backing instances to fulfil the target. <code>FulfilledCapacity</code> does not converge and
+<code>describe_spot_fleet_instances</code> stays empty.</p>
+<p><strong>Consequence:</strong> The "wait for SpotFleet to fulfil, then read active instances"
+polling loop and any weighted-capacity fulfilment arithmetic cannot be exercised
+end-to-end under moto.</p>
+<p><strong>Coverage:</strong> Live — <code>tests/providers/aws/live/test_onaws.py</code> (SpotFleet
+scenarios). The weighted-capacity cancellation arithmetic that this fulfilment
+gap otherwise hides is regression-covered at unit level in
+<code>tests/providers/aws/unit/infrastructure/handlers/test_fleet_release_weighted_capacity.py</code>.</p>
+<h2 id="l2-no-cancelled_running-state">L2 — No <code>cancelled_running</code> state<a class="headerlink" href="#l2-no-cancelled_running-state" title="Permanent link">&para;</a></h2>
+<p><strong>AWS:</strong> Cancelling a SpotFleet <em>without</em> terminating instances moves the request
+to <code>cancelled_running</code> — cancelled, but instances still alive — before it later
+settles to <code>cancelled_terminated</code>. ORB distinguishes these to decide whether a
+follow-up terminate is required.</p>
+<p><strong>Moto:</strong> Moto has no <code>cancelled_running</code> transition. A cancel goes straight to a
+terminal <code>cancelled</code> state, so the intermediate window ORB reacts to never
+appears.</p>
+<p><strong>Consequence:</strong> Logic branching on <code>cancelled_running</code> versus
+<code>cancelled_terminated</code> cannot be reached under moto.</p>
+<p><strong>Coverage:</strong> Live — <code>tests/providers/aws/live/test_multi_spot_fleet_termination.py</code>.</p>
+<h2 id="l3-synchronous-describe_instances-no-eventual-consistency">L3 — Synchronous <code>describe_instances</code> (no eventual consistency)<a class="headerlink" href="#l3-synchronous-describe_instances-no-eventual-consistency" title="Permanent link">&para;</a></h2>
+<p><strong>AWS:</strong> State changes are eventually consistent. Immediately after a terminate,
+<code>describe_instances</code> can still report <code>running</code>, and a fleet just emptied can
+still report stale instances for a short window. ORB polls to tolerate this.</p>
+<p><strong>Moto:</strong> State changes are applied synchronously and are visible on the very next
+call. There is no stale-read window.</p>
+<p><strong>Consequence:</strong> Bugs that only surface under eventual consistency — e.g. ORB
+stamping a return request <code>complete</code> while AWS still reports the instance
+<code>running</code>, or cancelling a fleet based on a stale empty <code>describe</code> — are invisible
+under moto because the reads are always immediately correct.</p>
+<p><strong>Coverage:</strong> Live — <code>tests/providers/aws/live/test_sdk_onaws.py</code> and
+<code>test_cleanup_e2e_onaws.py</code>. At moto level the <em>post-return terminal state</em> is
+asserted directly (<code>tests/providers/aws/mocked/test_sdk_onmoto.py</code>,
+<code>test_return_flow.py::test_instances_terminated_in_aws_after_return</code>) so at least
+the final state — not the consistency window — is guarded.</p>
+<h2 id="l4-no-fleet-modifying-transition">L4 — No fleet <code>modifying</code> transition<a class="headerlink" href="#l4-no-fleet-modifying-transition" title="Permanent link">&para;</a></h2>
+<p><strong>AWS:</strong> Changing an EC2 Fleet's <code>TotalTargetCapacity</code> (scale-down on partial
+return) moves the fleet through a <code>modifying</code> state before returning to <code>active</code>.
+ORB tolerates <code>modifying</code> as a non-terminal state while polling.</p>
+<p><strong>Moto:</strong> Capacity changes are applied instantly; the fleet stays <code>active</code> (or
+jumps to a terminal deleted state). The <code>modifying</code> transition never occurs.</p>
+<p><strong>Consequence:</strong> The <code>modifying</code> branch of fleet-state handling cannot be reached
+under moto, and partial-return scale-down cannot be observed mid-flight.</p>
+<p><strong>Coverage:</strong> Live — <code>tests/providers/aws/live/test_multi_ec2_fleet_termination.py</code>.
+The partial-return arithmetic itself (new target capacity computation) is unit
+covered in <code>test_fleet_release_weighted_capacity.py</code> and
+<code>tests/providers/aws/mocked/test_partial_return.py</code>.</p>
+<h2 id="l5-instant-asg-instance-state-transitions">L5 — Instant ASG-instance state transitions<a class="headerlink" href="#l5-instant-asg-instance-state-transitions" title="Permanent link">&para;</a></h2>
+<p><strong>AWS:</strong> Scaling an Auto Scaling Group down (or deleting it) terminates instances
+asynchronously; they pass through <code>shutting-down</code> before <code>terminated</code>, and the ASG
+briefly reports instances in <code>Terminating</code> lifecycle state.</p>
+<p><strong>Moto:</strong> ASG capacity changes and deletions are reflected instantly — instances
+disappear or flip to <code>terminated</code> with no intermediate lifecycle state.</p>
+<p><strong>Consequence:</strong> Any logic that observes the <code>Terminating</code> / <code>shutting-down</code>
+window during ASG teardown cannot be exercised under moto.</p>
+<p><strong>Coverage:</strong> Live — <code>tests/providers/aws/live/test_multi_asg_termination.py</code>.</p>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>AWS behaviour</th>
+<th>Moto behaviour</th>
+<th>Live coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1</td>
+<td>SpotFleet fulfils asynchronously</td>
+<td>Never fulfils</td>
+<td><code>test_onaws.py</code> (SpotFleet)</td>
+</tr>
+<tr>
+<td>L2</td>
+<td><code>cancelled_running</code> before terminal</td>
+<td>No such state</td>
+<td><code>test_multi_spot_fleet_termination.py</code></td>
+</tr>
+<tr>
+<td>L3</td>
+<td>Eventually consistent reads</td>
+<td>Synchronous reads</td>
+<td><code>test_sdk_onaws.py</code>, <code>test_cleanup_e2e_onaws.py</code></td>
+</tr>
+<tr>
+<td>L4</td>
+<td>Fleet <code>modifying</code> on capacity change</td>
+<td>Instant, no <code>modifying</code></td>
+<td><code>test_multi_ec2_fleet_termination.py</code></td>
+</tr>
+<tr>
+<td>L5</td>
+<td>Async ASG-instance teardown</td>
+<td>Instant teardown</td>
+<td><code>test_multi_asg_termination.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>When adding a moto test, check this list first: if the scenario depends on any of
+L1–L5, it belongs in the live suite (or a unit test that isolates the pure logic),
+not in a moto test that would pass against unrealistic simulator behaviour.</p>
 
 
 

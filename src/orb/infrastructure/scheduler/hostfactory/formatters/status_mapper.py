@@ -2,7 +2,7 @@
 
 These three pure functions translate between internal domain status strings
 and the HostFactory API's ``status`` / ``result`` / ``message`` fields as
-specified in ``hf_docs/input-output.md``.
+specified in ``docs/root/hostfactory/input-output.md``.
 
 All functions are module-level (no ``self`` dependency) so they can be
 imported and unit-tested independently of ``HostFactorySchedulerStrategy``.

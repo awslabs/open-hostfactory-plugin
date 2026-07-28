@@ -6,6 +6,9 @@ import time
 from typing import Any, Dict, Optional
 
 from orb.domain.services.image_cache import ImageCache
+from orb.infrastructure.logging.logger import get_logger
+
+_logger = get_logger(__name__)
 
 
 class AWSImageCache(ImageCache):
@@ -56,7 +59,10 @@ class AWSImageCache(ImageCache):
             try:
                 with open(self._cache_file) as f:
                     self._runtime_cache = json.load(f)
-            except (json.JSONDecodeError, IOError):
+            except (json.JSONDecodeError, IOError) as e:
+                # Corrupt or unreadable cache falls back to an empty cache;
+                # log at debug so the reset is not fully silent.
+                _logger.debug("Could not load image cache from %s: %s", self._cache_file, e)
                 self._runtime_cache = {}
 
     def _save_cache(self) -> None:
@@ -65,5 +71,7 @@ class AWSImageCache(ImageCache):
         try:
             with open(self._cache_file, "w") as f:
                 json.dump(self._runtime_cache, f, indent=2)
-        except IOError:
-            pass  # Graceful degradation if cache can't be saved
+        except IOError as e:
+            # Graceful degradation if cache can't be saved; log at debug so
+            # the failed write is not fully silent.
+            _logger.debug("Could not save image cache to %s: %s", self._cache_file, e)

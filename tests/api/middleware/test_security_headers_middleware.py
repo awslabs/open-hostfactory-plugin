@@ -6,9 +6,11 @@ from fastapi.testclient import TestClient
 from orb.api.middleware.security_headers_middleware import SecurityHeadersMiddleware
 
 
-def _make_app(require_https: bool = False) -> FastAPI:
+def _make_app(require_https: bool = False, hsts_max_age: int = 31536000) -> FastAPI:
     app = FastAPI()
-    app.add_middleware(SecurityHeadersMiddleware, require_https=require_https)
+    app.add_middleware(
+        SecurityHeadersMiddleware, require_https=require_https, hsts_max_age=hsts_max_age
+    )
 
     @app.get("/ping")
     def ping():
@@ -58,6 +60,13 @@ class TestSecurityHeadersPresent:
         resp = client.get("/ping")
         hsts = resp.headers.get("strict-transport-security", "")
         assert "max-age=31536000" in hsts
+        assert "includeSubDomains" in hsts
+
+    def test_hsts_max_age_is_configurable(self):
+        client = TestClient(_make_app(require_https=True, hsts_max_age=60))
+        resp = client.get("/ping")
+        hsts = resp.headers.get("strict-transport-security", "")
+        assert "max-age=60" in hsts
         assert "includeSubDomains" in hsts
 
     def test_headers_present_on_404(self):

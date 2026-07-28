@@ -215,12 +215,12 @@ class K8sPlugin(ProviderPlugin):
             )
 
             def _create_k8s_native_spec_service(_container) -> K8sNativeSpecService:
-                from orb.application.services.native_spec_service import (
-                    NativeSpecService,
-                )
+                # Resolve via the domain NativeSpecPort so the providers layer
+                # carries no dependency on the concrete application service.
+                from orb.domain.base.ports.native_spec_port import NativeSpecPort
 
                 return K8sNativeSpecService(
-                    native_spec_service=_container.get(NativeSpecService),
+                    native_spec_service=_container.get(NativeSpecPort),
                     config_port=_container.get(ConfigurationPort),
                 )
 

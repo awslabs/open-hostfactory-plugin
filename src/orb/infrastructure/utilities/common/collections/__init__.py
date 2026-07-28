@@ -28,7 +28,6 @@ from orb.infrastructure.utilities.common.collections.grouping import (
 from orb.infrastructure.utilities.common.collections.transforming import (
     chunk,
     deep_flatten,
-    deep_merge_dicts,
     flatten,
     invert_dict,
     map_keys,
@@ -82,7 +81,6 @@ __all__: list[str] = [
     "count_by",
     "count_occurrences",
     "deep_flatten",
-    "deep_merge_dicts",
     "distinct",
     "distinct_by",
     # Filtering functions

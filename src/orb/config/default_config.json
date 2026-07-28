@@ -124,11 +124,6 @@
       "history_size": 10
     },
     "caching": {
-      "ami_resolution": {
-        "enabled": false,
-        "ttl_seconds": 3600,
-        "file": "ami_cache.json"
-      },
       "handler_discovery": {
         "enabled": false,
         "file": "handler_discovery.json"

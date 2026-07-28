@@ -13,6 +13,7 @@ from pydantic import (
 )
 
 from orb.domain.template.template_aggregate import Template
+from orb.infrastructure.logging.logger import get_logger
 from orb.providers.aws.domain.template.value_objects import (
     AWSConfiguration,
     AWSFleetType,
@@ -23,6 +24,8 @@ from orb.providers.aws.domain.template.value_objects import (
     ProviderApi,
 )
 from orb.providers.aws.value_objects import AWSAllocationStrategy, normalise_allocation_strategy
+
+_logger = get_logger(__name__)
 
 
 class AWSOptionalIntegerRange(BaseModel):
@@ -277,7 +280,11 @@ class AWSTemplate(Template):
                     try:
                         object.__setattr__(self, "fleet_type", AWSFleetType(str(_ft).lower()))
                     except (ValueError, TypeError):
-                        pass
+                        _logger.debug(
+                            "Ignoring invalid fleet_type %r in providerConfig; "
+                            "falling back to default",
+                            _ft,
+                        )
             if not self.fleet_role:
                 _fr = _pc.get("fleet_role")
                 if _fr:
@@ -313,7 +320,11 @@ class AWSTemplate(Template):
                     if normalized_value:
                         object.__setattr__(self, "fleet_type", AWSFleetType(normalized_value))
                 except (ValueError, TypeError):
-                    pass  # Let defaulting logic handle invalid values
+                    # Let defaulting logic handle invalid values.
+                    _logger.debug(
+                        "Ignoring invalid fleet_type %r in metadata; falling back to default",
+                        fleet_type_value,
+                    )
         if (
             not self.fleet_type
             and self.provider_api

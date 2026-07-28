@@ -4,10 +4,11 @@ from typing import Any
 
 from orb.domain.base.ports.configuration_port import ConfigurationPort
 from orb.domain.base.ports.logging_port import LoggingPort
+from orb.domain.base.ports.native_spec_port import NativeSpecPort
 from orb.domain.base.ports.spec_rendering_port import SpecRenderingPort
 
 
-class NativeSpecService:
+class NativeSpecService(NativeSpecPort):
     """Generic native spec processing service - provider agnostic."""
 
     def __init__(

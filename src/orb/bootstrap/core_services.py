@@ -164,8 +164,12 @@ def register_core_services(container: DIContainer) -> None:
         )
 
     from orb.application.services.native_spec_service import NativeSpecService
+    from orb.domain.base.ports.native_spec_port import NativeSpecPort
 
     container.register_factory(NativeSpecService, create_native_spec_service)
+    # Also register under the domain port so provider code can resolve the
+    # native-spec service without importing the concrete application service.
+    container.register_factory(NativeSpecPort, create_native_spec_service)
 
 
 def _create_scheduler_strategy(container: "DIContainer") -> SchedulerPort:

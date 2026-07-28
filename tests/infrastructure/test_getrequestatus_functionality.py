@@ -91,7 +91,7 @@ class TestGetRequestStatusFunctionality:
             "getRequestStatus", mock_dto
         )
 
-        # Verify structure matches hf_docs/input-output.md
+        # Verify structure matches docs/root/hostfactory/input-output.md
         assert "requests" in result
         assert len(result["requests"]) == 1
 

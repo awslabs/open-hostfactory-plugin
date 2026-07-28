@@ -18,7 +18,7 @@ from orb.infrastructure.adapters.ports.auth import (
     AuthStatus,
 )
 from orb.infrastructure.auth.token_denylist import TokenDenylistPort
-from orb.infrastructure.logging.logger import get_logger
+from orb.infrastructure.logging.logger import AuthAuditLogger, get_logger
 
 if TYPE_CHECKING:
     pass
@@ -109,6 +109,7 @@ class EnhancedBearerTokenStrategy(AuthPort):
         self.rate_limit_enabled = rate_limit_enabled
         self.rate_limiter = RateLimiter(max_attempts, rate_window)
         self.logger = get_logger(__name__)
+        self.audit_logger = AuthAuditLogger()
 
         # Validate secret key strength (minimum 256 bits = 32 bytes)
         if len(secret_key.encode()) < 32:
@@ -299,6 +300,7 @@ class EnhancedBearerTokenStrategy(AuthPort):
         try:
             # Extract expiration from JWT payload without verification
             # (token is being revoked, we only need exp for denylist TTL)
+            revoked_user_id: str | None = None
             try:
                 payload_part = token.split(".")[1]
                 # Add padding if needed
@@ -307,6 +309,7 @@ class EnhancedBearerTokenStrategy(AuthPort):
                     payload_part += "=" * padding
                 decoded = json.loads(base64.urlsafe_b64decode(payload_part))
                 expires_at = decoded.get("exp")
+                revoked_user_id = decoded.get("sub")
             except Exception:
                 expires_at = None
 
@@ -315,6 +318,10 @@ class EnhancedBearerTokenStrategy(AuthPort):
 
             if success:
                 self.logger.info("JWT revoked and added to denylist")
+                self.audit_logger.log_token_revoked(
+                    user_id=revoked_user_id,
+                    auth_strategy=self.get_strategy_name(),
+                )
             else:
                 self.logger.error("Failed to add JWT to denylist")
 

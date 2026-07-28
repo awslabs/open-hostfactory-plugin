@@ -286,7 +286,12 @@ class SpotFleetReleaseManager(BaseFleetReleaseManager):
                 try:
                     weight_by_type[itype] = int(float(raw_weight))
                 except (TypeError, ValueError):
-                    pass
+                    self._logger.debug(
+                        "Ignoring non-numeric WeightedCapacity %r for instance "
+                        "type %s; treating its weight as 1",
+                        raw_weight,
+                        itype,
+                    )
         for lt_config in fleet_config.get("LaunchTemplateConfigs", []):
             for override in lt_config.get("Overrides", []):
                 itype = override.get("InstanceType")
@@ -295,7 +300,12 @@ class SpotFleetReleaseManager(BaseFleetReleaseManager):
                     try:
                         weight_by_type[itype] = int(float(raw_weight))
                     except (TypeError, ValueError):
-                        pass
+                        self._logger.debug(
+                            "Ignoring non-numeric WeightedCapacity %r for instance "
+                            "type %s; treating its weight as 1",
+                            raw_weight,
+                            itype,
+                        )
 
         # Fetch the active instance list; the API returns WeightedCapacity per entry.
         weight_by_instance_id: dict[str, int] = {}
@@ -317,7 +327,12 @@ class SpotFleetReleaseManager(BaseFleetReleaseManager):
                         try:
                             weight_by_instance_id[iid] = int(float(raw_weight))
                         except (TypeError, ValueError):
-                            pass
+                            self._logger.debug(
+                                "Ignoring non-numeric WeightedCapacity %r for "
+                                "instance %s; treating its weight as 1",
+                                raw_weight,
+                                iid,
+                            )
         except Exception as exc:
             self._logger.warning(
                 "Could not fetch active instances for Spot Fleet %s to compute "

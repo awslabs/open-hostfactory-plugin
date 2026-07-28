@@ -8,7 +8,7 @@ Coverage targets: lines 38,63-65,102-104,121,123-124,172-174,178,187-189,
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -104,7 +104,7 @@ class TestGetNamingConfig:
         # Fallback defaults must be returned, and the failure must be logged.
         assert result["prefixes"]["request"] == "req-"
         assert result["prefixes"]["return"] == "ret-"
-        adapter._logger.warning.assert_called_once()
+        cast(MagicMock, adapter._logger.warning).assert_called_once()
 
     def test_uses_constant_when_prefixes_attr_missing(self):
         adapter, cm = _make_adapter()
@@ -478,6 +478,48 @@ class TestGetResourcePrefix:
 
         result = adapter.get_resource_prefix("machine")
         assert result == ""
+
+    @pytest.mark.parametrize(
+        "resource_type", ["launch_template", "instance", "fleet", "spot_fleet", "asg"]
+    )
+    def test_global_default_prefix_does_not_bleed_into_aws_per_type_keys(self, resource_type):
+        """A global default prefix must NOT retroactively prefix AWS per-type resources.
+
+        When an operator sets resource.prefixes.default (or resource.default_prefix)
+        but no per-type key, AWS resources must stay unprefixed — otherwise on-AWS
+        names/tags silently change and prefix-keyed discovery/cleanup orphans the
+        existing fleet.
+        """
+        from orb.config.schemas.common_schema import ResourceConfig
+
+        adapter, cm = _make_adapter()
+        cm.app_config.resource = ResourceConfig(prefixes={"default": "prod-"})  # type: ignore[arg-type]
+        assert cm.app_config.resource.default_prefix == "prod-"
+
+        assert adapter.get_resource_prefix(resource_type) == ""
+
+    def test_explicitly_set_per_type_prefix_is_returned(self):
+        """An explicitly configured per-type prefix (extra field) is still honoured."""
+        from orb.config.schemas.common_schema import ResourceConfig
+
+        adapter, cm = _make_adapter()
+        cm.app_config.resource = ResourceConfig(
+            prefixes={"default": "prod-", "asg": "ci-"}  # type: ignore[arg-type]
+        )
+
+        assert adapter.get_resource_prefix("asg") == "ci-"
+        # A sibling per-type key that was NOT set still resolves to empty.
+        assert adapter.get_resource_prefix("fleet") == ""
+
+    def test_packaged_default_leaves_aws_prefixes_empty(self):
+        """The packaged default (no default prefix set) keeps AWS prefixes empty."""
+        from orb.config.schemas.common_schema import ResourceConfig
+
+        adapter, cm = _make_adapter()
+        cm.app_config.resource = ResourceConfig()  # type: ignore[call-arg]
+        assert cm.app_config.resource.default_prefix == ""
+
+        assert adapter.get_resource_prefix("instance") == ""
 
 
 # ---------------------------------------------------------------------------

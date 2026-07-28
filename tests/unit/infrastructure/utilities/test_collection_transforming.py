@@ -5,7 +5,6 @@ import pytest
 from orb.infrastructure.utilities.common.collections.transforming import (
     chunk,
     deep_flatten,
-    deep_merge_dicts,
     flatten,
     invert_dict,
     map_keys,
@@ -150,7 +149,7 @@ class TestInvertDict:
 
 @pytest.mark.unit
 class TestMergeDicts:
-    """Tests for merge_dicts and deep_merge_dicts."""
+    """Tests for merge_dicts (shallow merge)."""
 
     def test_merge_dicts_later_overrides_earlier(self):
         result = merge_dicts({"a": 1, "b": 2}, {"b": 99, "c": 3})
@@ -162,25 +161,3 @@ class TestMergeDicts:
 
     def test_merge_dicts_empty_dicts(self):
         assert merge_dicts({}, {}) == {}
-
-    def test_deep_merge_dicts_merges_nested(self):
-        d1 = {"a": {"x": 1, "y": 2}, "b": 3}
-        d2 = {"a": {"y": 20, "z": 30}}
-        result = deep_merge_dicts(d1, d2)
-        assert result == {"a": {"x": 1, "y": 20, "z": 30}, "b": 3}
-
-    def test_deep_merge_dicts_does_not_mutate_inputs(self):
-        d1 = {"a": {"x": 1}}
-        d2 = {"a": {"x": 99}}
-        deep_merge_dicts(d1, d2)
-        assert d1["a"]["x"] == 1
-
-    def test_deep_merge_dicts_replaces_non_dict(self):
-        d1 = {"a": [1, 2, 3]}
-        d2 = {"a": [4, 5]}
-        result = deep_merge_dicts(d1, d2)
-        assert result["a"] == [4, 5]
-
-    def test_deep_merge_dicts_adds_new_keys(self):
-        result = deep_merge_dicts({"a": 1}, {"b": 2})
-        assert result == {"a": 1, "b": 2}

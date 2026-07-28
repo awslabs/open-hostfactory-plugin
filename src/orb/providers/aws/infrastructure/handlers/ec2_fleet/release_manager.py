@@ -381,7 +381,12 @@ class EC2FleetReleaseManager(BaseFleetReleaseManager):
                     try:
                         weight_by_type[itype] = int(raw_weight)
                     except (TypeError, ValueError):
-                        pass
+                        self._logger.debug(
+                            "Ignoring non-numeric WeightedCapacity %r for instance "
+                            "type %s; treating its weight as 1",
+                            raw_weight,
+                            itype,
+                        )
 
         if not weight_by_type:
             # Fleet has no WeightedCapacity overrides at all — each instance counts as 1.

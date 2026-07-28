@@ -842,8 +842,12 @@ class AWSProviderStrategy(ProviderStrategy):
         if self._config_port is not None:
             try:
                 storage_strategy = self._config_port.get_storage_strategy()
-            except Exception:
-                pass
+            except Exception as e:
+                self._logger.debug(
+                    "Could not resolve storage strategy from config port; defaulting to %r: %s",
+                    storage_strategy,
+                    e,
+                )
         register_aws_health_checks(health_check, self.aws_client, storage_strategy)
 
     def cleanup(self) -> None:

@@ -14,7 +14,10 @@ def get_resource_prefix(resource_type: str, config: Optional[ResourceConfig] = N
         config: Resource configuration. Required — raises if not provided.
 
     Returns:
-        Prefix for the specified resource type
+        The explicitly configured prefix for ``resource_type`` when present,
+        otherwise an empty string. An unset per-type prefix does NOT inherit
+        ``default_prefix`` — a global default must not silently prefix per-type
+        resource names.
 
     Raises:
         ValueError: If config is not provided
@@ -28,4 +31,4 @@ def get_resource_prefix(resource_type: str, config: Optional[ResourceConfig] = N
     if hasattr(config.prefixes, resource_type):
         return getattr(config.prefixes, resource_type)
 
-    return config.default_prefix
+    return ""

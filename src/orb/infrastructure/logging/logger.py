@@ -389,6 +389,155 @@ class AuditLogger:
         )
 
 
+class AuthAuditLogger:
+    """Structured audit logger for security-critical authentication events.
+
+    Emits one structured entry per security event on the dedicated ``orb.audit``
+    logger so audit records can be routed to a separate sink (SIEM, file, etc.)
+    independently of application logs. Five event types are supported:
+
+    - ``AUTH_SUCCESS``     — a request authenticated successfully
+    - ``AUTH_FAILURE``     — an authentication attempt was rejected
+    - ``AUTH_EXPIRED``     — credentials were valid but expired
+    - ``TOKEN_REVOKED``    — a token was explicitly revoked
+    - ``PERMISSION_DENIED``— an authenticated principal lacked permission (403)
+
+    Every entry carries: ``event_type``, ``user_id`` (or ``"anonymous"``),
+    ``client_ip``, ``path``, ``method``, ``timestamp`` and ``auth_strategy``.
+    Failure entries also carry a generic ``reason`` — never token content — so
+    logs cannot leak credential material.
+    """
+
+    def __init__(self) -> None:
+        self.logger = get_logger("orb.audit")
+
+    def _emit(
+        self,
+        event_type: str,
+        *,
+        user_id: Optional[str],
+        client_ip: Optional[str],
+        path: Optional[str],
+        method: Optional[str],
+        auth_strategy: Optional[str],
+        reason: Optional[str] = None,
+    ) -> None:
+        """Emit a single structured audit record at INFO level."""
+        extra: Dict[str, Any] = {
+            "event_type": event_type,
+            "user_id": user_id or "anonymous",
+            "client_ip": client_ip or "unknown",
+            "path": path or "",
+            "method": method or "",
+            "auth_strategy": auth_strategy or "unknown",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        if reason is not None:
+            extra["reason"] = reason
+        self.logger.info("%s", event_type, extra=extra)
+
+    def log_auth_success(
+        self,
+        *,
+        user_id: Optional[str],
+        client_ip: Optional[str],
+        path: Optional[str],
+        method: Optional[str],
+        auth_strategy: Optional[str] = None,
+    ) -> None:
+        """Log a successful authentication."""
+        self._emit(
+            "AUTH_SUCCESS",
+            user_id=user_id,
+            client_ip=client_ip,
+            path=path,
+            method=method,
+            auth_strategy=auth_strategy,
+        )
+
+    def log_auth_failure(
+        self,
+        *,
+        client_ip: Optional[str],
+        path: Optional[str],
+        method: Optional[str],
+        reason: str,
+        user_id: Optional[str] = None,
+        auth_strategy: Optional[str] = None,
+    ) -> None:
+        """Log a rejected authentication attempt with a generic reason.
+
+        ``reason`` must be a short, generic classification (e.g. the auth status
+        name) and must never contain token content or other credential material.
+        """
+        self._emit(
+            "AUTH_FAILURE",
+            user_id=user_id,
+            client_ip=client_ip,
+            path=path,
+            method=method,
+            auth_strategy=auth_strategy,
+            reason=reason,
+        )
+
+    def log_auth_expired(
+        self,
+        *,
+        client_ip: Optional[str],
+        path: Optional[str],
+        method: Optional[str],
+        user_id: Optional[str] = None,
+        auth_strategy: Optional[str] = None,
+    ) -> None:
+        """Log an authentication attempt rejected because credentials expired."""
+        self._emit(
+            "AUTH_EXPIRED",
+            user_id=user_id,
+            client_ip=client_ip,
+            path=path,
+            method=method,
+            auth_strategy=auth_strategy,
+        )
+
+    def log_token_revoked(
+        self,
+        *,
+        user_id: Optional[str],
+        auth_strategy: Optional[str] = None,
+        client_ip: Optional[str] = None,
+        path: Optional[str] = None,
+        method: Optional[str] = None,
+    ) -> None:
+        """Log a successful token revocation."""
+        self._emit(
+            "TOKEN_REVOKED",
+            user_id=user_id,
+            client_ip=client_ip,
+            path=path,
+            method=method,
+            auth_strategy=auth_strategy,
+        )
+
+    def log_permission_denied(
+        self,
+        *,
+        user_id: Optional[str],
+        client_ip: Optional[str],
+        path: Optional[str],
+        method: Optional[str],
+        auth_strategy: Optional[str] = None,
+    ) -> None:
+        """Log a 403 — an authenticated principal lacked the required permission."""
+        self._emit(
+            "PERMISSION_DENIED",
+            user_id=user_id,
+            client_ip=client_ip,
+            path=path,
+            method=method,
+            auth_strategy=auth_strategy,
+        )
+
+
 class MetricsLogger:
     """Logger for application metrics."""
 

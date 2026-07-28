@@ -1,6 +1,5 @@
 """Collection transformation utility functions."""
 
-import copy
 from collections.abc import Iterable
 from typing import Any, Callable, TypeVar
 
@@ -185,26 +184,4 @@ def merge_dicts(*dicts: dict[K, V]) -> dict[K, V]:
     result = {}
     for d in dicts:
         result.update(d)
-    return result
-
-
-def deep_merge_dicts(dict1: dict[K, Any], dict2: dict[K, Any]) -> dict[K, Any]:
-    """
-    Deep merge two dictionaries.
-
-    Args:
-        dict1: First dictionary
-        dict2: Second dictionary
-
-    Returns:
-        Deep merged dictionary
-    """
-    result = copy.deepcopy(dict1)
-
-    for key, value in dict2.items():
-        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-            result[key] = deep_merge_dicts(result[key], value)
-        else:
-            result[key] = copy.deepcopy(value)
-
     return result

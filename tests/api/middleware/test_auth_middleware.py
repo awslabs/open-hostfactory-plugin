@@ -266,6 +266,123 @@ class TestDocsAuthGating:
         assert resp.status_code == 200
 
 
+class TestAuthMiddlewareAuditLogging:
+    """AuthMiddleware emits structured audit events via the injected audit logger."""
+
+    def _make_app_with_audit(self, *, authenticated: bool, status_code: int = 200):
+        app = FastAPI()
+        auth_port = _make_auth_port(authenticated=authenticated)
+        auth_port.get_strategy_name = MagicMock(return_value="test_strategy")
+        audit = MagicMock()
+        app.add_middleware(
+            AuthMiddleware,
+            auth_port=auth_port,
+            require_auth=True,
+            excluded_paths=["/health"],
+            audit_logger=audit,
+        )
+
+        @app.get("/api/data")
+        def data():
+            from fastapi.responses import JSONResponse
+
+            return JSONResponse({"ok": True}, status_code=status_code)
+
+        return app, audit
+
+    def test_auth_success_audited(self):
+        app, audit = self._make_app_with_audit(authenticated=True)
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/api/data")
+        assert resp.status_code == 200
+        audit.log_auth_success.assert_called_once()
+        kwargs = audit.log_auth_success.call_args.kwargs
+        assert kwargs["user_id"] == "test-user"
+        assert kwargs["path"] == "/api/data"
+        assert kwargs["method"] == "GET"
+        assert kwargs["auth_strategy"] == "test_strategy"
+
+    def test_auth_failure_audited(self):
+        app, audit = self._make_app_with_audit(authenticated=False)
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/api/data")
+        assert resp.status_code == 401
+        audit.log_auth_failure.assert_called_once()
+        kwargs = audit.log_auth_failure.call_args.kwargs
+        # Reason must be a generic status classification, never token content.
+        assert kwargs["reason"] == "invalid"
+        assert kwargs["path"] == "/api/data"
+
+    def test_permission_denied_on_403_response(self):
+        # Authenticated principal whose downstream route returns 403.
+        app, audit = self._make_app_with_audit(authenticated=True, status_code=403)
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/api/data")
+        assert resp.status_code == 403
+        audit.log_permission_denied.assert_called_once()
+
+    def test_expired_status_audited_as_expired(self):
+        app = FastAPI()
+        auth_port = MagicMock()
+        auth_port.is_enabled.return_value = True
+        auth_port.get_strategy_name = MagicMock(return_value="test_strategy")
+        auth_port.authenticate = AsyncMock(
+            return_value=AuthResult(status=AuthStatus.EXPIRED, error_message="expired")
+        )
+        audit = MagicMock()
+        app.add_middleware(
+            AuthMiddleware,
+            auth_port=auth_port,
+            require_auth=True,
+            excluded_paths=["/health"],
+            audit_logger=audit,
+        )
+
+        @app.get("/api/data")
+        def data():
+            return {"ok": True}
+
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/api/data")
+        assert resp.status_code == 401
+        audit.log_auth_expired.assert_called_once()
+
+    def test_insufficient_permissions_status_audited_as_denied(self):
+        app = FastAPI()
+        auth_port = MagicMock()
+        auth_port.is_enabled.return_value = True
+        auth_port.get_strategy_name = MagicMock(return_value="test_strategy")
+        auth_port.authenticate = AsyncMock(
+            return_value=AuthResult(status=AuthStatus.INSUFFICIENT_PERMISSIONS, user_id="u1")
+        )
+        audit = MagicMock()
+        app.add_middleware(
+            AuthMiddleware,
+            auth_port=auth_port,
+            require_auth=True,
+            excluded_paths=["/health"],
+            audit_logger=audit,
+        )
+
+        @app.get("/api/data")
+        def data():
+            return {"ok": True}
+
+        client = TestClient(app, raise_server_exceptions=False)
+        resp = client.get("/api/data")
+        assert resp.status_code == 403
+        audit.log_permission_denied.assert_called_once()
+
+    def test_default_audit_logger_created_when_none(self):
+        """An AuthAuditLogger is created by default when none is injected."""
+        from orb.infrastructure.logging.logger import AuthAuditLogger
+
+        app = FastAPI()
+        auth_port = _make_auth_port(authenticated=True)
+        instance = AuthMiddleware(app, auth_port=auth_port, require_auth=False)
+        assert isinstance(instance.audit_logger, AuthAuditLogger)
+
+
 class TestLoopbackTokenNonAscii:
     """Non-ASCII bearer tokens must be denied cleanly without raising UnicodeEncodeError."""
 

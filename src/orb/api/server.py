@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, cast
 try:
     from fastapi import Depends, FastAPI
     from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
     from fastapi.middleware.trustedhost import TrustedHostMiddleware
     from fastapi.responses import JSONResponse, Response
 
@@ -17,6 +18,7 @@ except ImportError:
     Depends = None  # type: ignore[assignment,misc]
     FastAPI = None  # type: ignore[assignment,misc]
     CORSMiddleware = None  # type: ignore[assignment,misc]
+    HTTPSRedirectMiddleware = None  # type: ignore[assignment,misc]
     TrustedHostMiddleware = None  # type: ignore[assignment,misc]
     JSONResponse = None  # type: ignore[assignment,misc]
     Response = None  # type: ignore[assignment,misc]
@@ -24,6 +26,7 @@ except ImportError:
 if TYPE_CHECKING:
     from fastapi import Depends, FastAPI
     from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
     from fastapi.middleware.trustedhost import TrustedHostMiddleware
     from fastapi.responses import JSONResponse, Response
 
@@ -322,11 +325,18 @@ def create_fastapi_app(server_config: Any) -> Any:
 
     # Add security headers middleware unconditionally — all responses, including
     # excluded-auth paths and auth-disabled deployments, must carry hardening headers.
+    _require_https: bool = getattr(server_config, "require_https", False)
+
     app.add_middleware(
         SecurityHeadersMiddleware,
-        require_https=getattr(server_config, "require_https", False),
+        require_https=_require_https,
+        hsts_max_age=getattr(server_config, "hsts_max_age", 31536000),
     )
     logger.info("Security headers middleware enabled")
+
+    if _require_https:
+        app.add_middleware(cast(Any, HTTPSRedirectMiddleware))
+        logger.info("HTTPS redirect middleware enabled (HTTP requests redirect to HTTPS with 307)")
 
     # Add trusted host middleware only when a restrictive allowlist is provided.
     # An empty list or a wildcard ('*') disables Host-header validation entirely,

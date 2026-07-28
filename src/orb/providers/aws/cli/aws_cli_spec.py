@@ -4,6 +4,10 @@ import argparse
 import re
 from typing import Any
 
+from orb.infrastructure.logging.logger import get_logger
+
+_logger = get_logger(__name__)
+
 
 class AWSCLISpec:
     """CLI spec for the AWS provider."""
@@ -45,8 +49,9 @@ class AWSCLISpec:
             region = getattr(args, "aws_region", None) or ""
             sanitized_profile = re.sub(r"[^a-zA-Z0-9\-_]", "-", profile)
             return f"aws_{sanitized_profile}_{region}"
-        except Exception:
-            pass  # best-effort name generation; fall back to "aws_default" on any error
+        except Exception as e:
+            # best-effort name generation; fall back to "aws_default" on any error
+            _logger.debug("Could not generate provider name from args: %s", e)
         return "aws_default"
 
     def format_display(self, config: dict[str, Any]) -> list[tuple[str, str]]:

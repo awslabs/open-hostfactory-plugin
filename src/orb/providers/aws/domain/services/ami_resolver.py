@@ -8,6 +8,9 @@ import time
 from typing import Any, Dict, Optional
 
 from orb.domain.template.image_resolver import ImageResolver
+from orb.infrastructure.logging.logger import get_logger
+
+_logger = get_logger(__name__)
 
 
 class AWSAMIResolver(ImageResolver):
@@ -255,10 +258,12 @@ class AWSAMIResolver(ImageResolver):
                     for key in cache_data.get("failed", []):
                         if self._cache:
                             self._cache.mark_failed(key)
-        except Exception:
-            # Ignore errors loading persistent cache - silently fail
-            # Logging should be injected via constructor if needed
-            pass
+        except Exception as e:
+            # Non-fatal: a missing or corrupt persistent cache falls back to
+            # live resolution. Log at debug so the failure is not fully silent.
+            _logger.debug(
+                "Failed to load persistent AMI cache from %s: %s", self._cache_file_path, e
+            )
 
     def _save_persistent_cache(self) -> None:
         """Save cache to persistent file."""
@@ -273,10 +278,10 @@ class AWSAMIResolver(ImageResolver):
             # In a full implementation, the cache service would provide export/import methods
             with open(self._cache_file_path, "w") as f:
                 json.dump(cache_data, f, indent=2)
-        except Exception:
-            # Ignore errors saving persistent cache - silently fail
-            # Logging should be injected via constructor if needed
-            pass
+        except Exception as e:
+            # Non-fatal: failure to persist the cache only costs a future
+            # cache miss. Log at debug so the failure is not fully silent.
+            _logger.debug("Failed to save persistent AMI cache to %s: %s", self._cache_file_path, e)
 
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""

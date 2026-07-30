@@ -50,7 +50,7 @@ Welcome to the Open Resource Broker documentation. ORB lets you define what comp
 
 ## Features
 
-- **AWS Provider** — EC2 Instances, Auto Scaling Groups, Spot Fleet, EC2 Fleet
+- **AWS Provider** — [EC2 Instances](providers/aws/run-instances.md), [Auto Scaling Groups](providers/aws/asg.md), [Spot Fleet](providers/aws/spot-fleet.md), [EC2 Fleet](providers/aws/ec2-fleet.md), [Lambda MicroVMs](providers/aws/microvm.md)
 - **CLI** — primary interface for all operations
 - **REST API** — HTTP endpoints for service integration
 - **Python SDK** — async-first programmatic access

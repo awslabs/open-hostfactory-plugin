@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/providers/k8s/security-hardening/">
+        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/providers/aws/spot-fleet/">
       
       
+        <link rel="prev" href="../asg/">
+      
+      
+        <link rel="next" href="../ec2-fleet/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>Security hardening - Open Resource Broker</title>
+        <title>Spot Fleet - Open Resource Broker</title>
       
     
     
@@ -78,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#security-hardening" class="md-skip">
+        <a href="#aws-spot-fleet-provider" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Security hardening
+              Spot Fleet
             
           </span>
         </div>
@@ -348,6 +352,8 @@
   
   
   
+    
+  
   
     
     
@@ -355,11 +361,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../aws/run-instances/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../run-instances/" class="md-tabs__link">
           
   
   
@@ -3075,28 +3083,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -3114,7 +3125,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -3129,28 +3140,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
         
           
+          
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" checked>
         
           
-          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="">
             
   
   
@@ -3168,7 +3182,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -3186,7 +3200,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/run-instances/" class="md-nav__link">
+      <a href="../run-instances/" class="md-nav__link">
         
   
   
@@ -3214,7 +3228,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/asg/" class="md-nav__link">
+      <a href="../asg/" class="md-nav__link">
         
   
   
@@ -3239,10 +3253,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../aws/spot-fleet/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Spot Fleet
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -3258,6 +3299,291 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-the-service-linked-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create the service-linked role
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-a-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create a template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-request-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Request capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-check-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Check status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-return-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Return capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#template-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Template configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fleet-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet role
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fleet-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allocation-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Allocation strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overrides-priority-and-per-override-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overrides, priority, and per-override price
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pricing-mix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pricing mix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-expiry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request expiry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attribute-based-instance-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribute-based instance selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native spec
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#machine-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fulfilment-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fulfilment semantics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM permissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-to-ec2-fleet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrating to EC2 Fleet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3270,7 +3596,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/ec2-fleet/" class="md-nav__link">
+      <a href="../ec2-fleet/" class="md-nav__link">
         
   
   
@@ -3298,7 +3624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/microvm/" class="md-nav__link">
+      <a href="../microvm/" class="md-nav__link">
         
   
   
@@ -3340,10 +3666,13 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
@@ -3352,7 +3681,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="">
             
   
   
@@ -3388,7 +3717,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../k8s/" class="md-nav__link">
         
   
   
@@ -3416,7 +3745,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../discovery/" class="md-nav__link">
+      <a href="../../k8s/discovery/" class="md-nav__link">
         
   
   
@@ -3444,7 +3773,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../../k8s/configuration/" class="md-nav__link">
         
   
   
@@ -3472,7 +3801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../handlers/" class="md-nav__link">
+      <a href="../../k8s/handlers/" class="md-nav__link">
         
   
   
@@ -3500,7 +3829,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth/" class="md-nav__link">
+      <a href="../../k8s/auth/" class="md-nav__link">
         
   
   
@@ -3528,7 +3857,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../migrating-from-k8s-legacy/" class="md-nav__link">
+      <a href="../../k8s/migrating-from-k8s-legacy/" class="md-nav__link">
         
   
   
@@ -3556,7 +3885,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plugin-authoring/" class="md-nav__link">
+      <a href="../../k8s/plugin-authoring/" class="md-nav__link">
         
   
   
@@ -5181,44 +5510,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-audited" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What is audited
+        Quick start
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-warnings-fire" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When warnings fire
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
+    <nav class="md-nav" aria-label="Quick start">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#reject-mode-is-on-by-default" class="md-nav__link">
+  <a href="#1-create-the-service-linked-role" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reject mode is on by default
+        1. Create the service-linked role
       
     </span>
   </a>
@@ -5226,10 +5533,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#allow-legitimate-high-risk-fields-disable-reject-mode" class="md-nav__link">
+  <a href="#2-create-a-template" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Allow legitimate high-risk fields (disable reject mode)
+        2. Create a template
       
     </span>
   </a>
@@ -5237,10 +5544,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#disable-warnings-entirely" class="md-nav__link">
+  <a href="#3-request-capacity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Disable warnings entirely
+        3. Request capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-check-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Check status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-return-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Return capacity
       
     </span>
   </a>
@@ -5253,10 +5582,126 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#interaction-with-the-native-spec-escape-hatch" class="md-nav__link">
+  <a href="#template-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interaction with the native-spec escape hatch
+        Template configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Template configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fleet-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet role
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fleet-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fleet types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allocation-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Allocation strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overrides-priority-and-per-override-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overrides, priority, and per-override price
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pricing-mix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pricing mix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-expiry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Request expiry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attribute-based-instance-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribute-based instance selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native spec
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#machine-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine data
       
     </span>
   </a>
@@ -5264,10 +5709,65 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
+  <a href="#fulfilment-semantics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        See also
+        Fulfilment semantics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM permissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#migrating-to-ec2-fleet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migrating to EC2 Fleet
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
       
     </span>
   </a>
@@ -5294,166 +5794,469 @@
   
 
 
-<h1 id="security-hardening">Security hardening<a class="headerlink" href="#security-hardening" title="Permanent link">&para;</a></h1>
-<p>ORB includes a <strong>pod-spec security audit</strong> that inspects every rendered pod
-spec at acquire time and logs a <code>WARNING</code> for each high-risk field it finds.
-The audit is on by default and costs nothing at steady state — most specs are
-clean and the function returns immediately after the field checks.</p>
-<h2 id="what-is-audited">What is audited<a class="headerlink" href="#what-is-audited" title="Permanent link">&para;</a></h2>
-<p>The following fields are inspected for every spec submitted through any of the
-four workload handlers (Pod, Deployment, StatefulSet, Job).</p>
-<table>
-<thead>
-<tr>
-<th>Field path</th>
-<th>Condition</th>
-<th>Risk</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>spec.hostNetwork</code></td>
-<td><code>== true</code></td>
-<td>Shares the host's network namespace; pods can sniff host traffic and bind privileged ports.</td>
-</tr>
-<tr>
-<td><code>spec.hostPID</code></td>
-<td><code>== true</code></td>
-<td>Shares the host PID namespace; processes inside the pod can inspect or signal host processes.</td>
-</tr>
-<tr>
-<td><code>spec.hostIPC</code></td>
-<td><code>== true</code></td>
-<td>Shares the host IPC namespace; enables shared-memory attacks against co-located workloads.</td>
-</tr>
-<tr>
-<td><code>spec.volumes[*].hostPath</code></td>
-<td>any non-empty path</td>
-<td>Mounts a path from the host filesystem; a misconfigured or compromised pod can read or write host files.</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.privileged</code></td>
-<td><code>== true</code></td>
-<td>Grants effectively-root access to the host kernel.</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.allowPrivilegeEscalation</code></td>
-<td><code>== true</code></td>
-<td>Allows a process inside the container to gain more privileges than its parent.</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.runAsUser</code></td>
-<td><code>== 0</code></td>
-<td>Runs the container's primary process as root (UID 0).</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.capabilities.add</code></td>
-<td>contains <code>SYS_ADMIN</code>, <code>NET_ADMIN</code>, or <code>NET_RAW</code></td>
-<td>Grants kernel capabilities that can be used for privilege escalation or network manipulation.</td>
-</tr>
-</tbody>
-</table>
-<p>The same checks are applied to <code>spec.initContainers</code>.</p>
+<h1 id="aws-spot-fleet-provider">AWS Spot Fleet Provider<a class="headerlink" href="#aws-spot-fleet-provider" title="Permanent link">&para;</a></h1>
 <blockquote>
-<p><strong>Note:</strong> The audit is informational.  RBAC on the Kubernetes apiserver
-remains the authoritative enforcement point.  The audit gives operators
-visibility into what they are submitting without blocking workloads at
-the policy level (unless reject mode is enabled — see below).</p>
+<p><strong>AWS discourages Spot Fleet for new work.</strong> In <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/work-with-spot-fleets.html">Work with Spot Fleet</a>, AWS states: "We strongly discourage using Spot Fleet because it uses a legacy API with no planned investment. If you want to manage your instance lifecycle, use EC2 Fleet instead. If you don't want to manage your instance lifecycle, use an Auto Scaling group instead. Use Spot Fleet only if you need console support for a use case where you would use EC2 Fleet."</p>
+<p>ORB continues to support Spot Fleet for existing deployments, and this handler is maintained. For new templates, prefer <a href="../ec2-fleet/">EC2 Fleet</a> — it covers spot provisioning with the same allocation strategies plus <code>instant</code> synchronous fulfilment — or <a href="../asg/">Auto Scaling Groups</a> if you want AWS to maintain capacity for you. See <a href="#migrating-to-ec2-fleet">Migrating to EC2 Fleet</a> below.</p>
 </blockquote>
-<h2 id="when-warnings-fire">When warnings fire<a class="headerlink" href="#when-warnings-fire" title="Permanent link">&para;</a></h2>
-<p>A warning is emitted once per acquire call, before the pod is submitted to
-the apiserver.  Each finding produces one log line at <code>WARNING</code> level:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>WARN: high-risk pod-spec field detected: spec.hostNetwork = True
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>WARN: high-risk pod-spec field detected: spec.volumes[0].hostPath (scratch) = &#39;/var/data&#39;
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>WARN: high-risk pod-spec field detected: spec.containers[0] (worker).securityContext.privileged = True
+<p>The Spot Fleet handler provisions capacity through the <a href="https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RequestSpotFleet.html">EC2 Spot Fleet API</a>. A Spot Fleet request asks EC2 for a target capacity and lets it choose instance types and availability zones according to an allocation strategy, which is how you get spot pricing without pinning yourself to a single capacity pool.</p>
+<p>Use it for interruption-tolerant work: batch processing, CI, and simulation. Spot Fleet's one remaining advantage over EC2 Fleet is its per-override <code>Priority</code> and <code>SpotPrice</code> semantics, which have no direct EC2 Fleet equivalent.</p>
+<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;orb-py[aws]&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>orb<span class="w"> </span>init
 </code></pre></div>
-<p>The log lines appear in the ORB application log (whichever sink the operator
-has configured).  Each line identifies the exact field path, the container or
-volume name, and the value that triggered the warning so the operator can
-locate the relevant template section quickly.</p>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Two fields in <code>K8sProviderConfig</code> control the audit:</p>
+<h3 id="1-create-the-service-linked-role">1. Create the service-linked role<a class="headerlink" href="#1-create-the-service-linked-role" title="Permanent link">&para;</a></h3>
+<p>Spot Fleet needs a service-linked role so EC2 can launch and terminate instances on your behalf. Create it once per account:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>aws<span class="w"> </span>iam<span class="w"> </span>create-service-linked-role<span class="w"> </span>--aws-service-name<span class="w"> </span>spotfleet.amazonaws.com
+</code></pre></div>
+<h3 id="2-create-a-template">2. Create a template<a class="headerlink" href="#2-create-a-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;template_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;batch-spot&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Batch Spot Fleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Diversified spot capacity for batch work&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SpotFleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nt">&quot;image_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">&quot;machine_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;t3.medium&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.large&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.xlarge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">&quot;subnet_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;subnet-0f984e48e6e899311&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;subnet-1a2b3c4d5e6f7a8b9&quot;</span><span class="p">],</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="nt">&quot;security_group_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sg-0528dfedb6d763b16&quot;</span><span class="p">],</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="nt">&quot;price_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spot&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">  </span><span class="nt">&quot;allocation_strategy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;capacityOptimized&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">  </span><span class="nt">&quot;fleet_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;request&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="nt">&quot;fleet_role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:iam::123456789012:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">&quot;max_price&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.10</span><span class="p">,</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">  </span><span class="nt">&quot;max_machines&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev&quot;</span><span class="p">}</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="3-request-capacity">3. Request capacity<a class="headerlink" href="#3-request-capacity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orb<span class="w"> </span>machines<span class="w"> </span>request<span class="w"> </span>batch-spot<span class="w"> </span><span class="m">10</span>
+</code></pre></div>
+<h3 id="4-check-status">4. Check status<a class="headerlink" href="#4-check-status" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orb<span class="w"> </span>requests<span class="w"> </span>status<span class="w"> </span>&lt;request-id&gt;
+</code></pre></div>
+<h3 id="5-return-capacity">5. Return capacity<a class="headerlink" href="#5-return-capacity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>orb<span class="w"> </span>machines<span class="w"> </span><span class="k">return</span><span class="w"> </span>i-0abc1234def567890<span class="w"> </span>i-0def5678abc123456
+</code></pre></div>
+<h2 id="template-configuration">Template configuration<a class="headerlink" href="#template-configuration" title="Permanent link">&para;</a></h2>
+<p>The handler uses <code>provider_api: "SpotFleet"</code>. Each request creates a launch template, then calls <code>request_spot_fleet</code> with a <code>SpotFleetRequestConfig</code>.</p>
+<h3 id="top-level-fields">Top-level fields<a class="headerlink" href="#top-level-fields" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Field</th>
+<th>Required</th>
 <th>Type</th>
-<th>Default</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>audit_high_risk_pod_fields</code></td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-<td>Enable or disable the entire audit.  Set to <code>False</code> to silence all warnings.</td>
+<td><code>provider_api</code></td>
+<td>Yes</td>
+<td><code>string</code></td>
+<td>Must be <code>"SpotFleet"</code></td>
 </tr>
 <tr>
-<td><code>reject_high_risk_pod_fields</code></td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-<td>When <code>True</code> (default), ORB raises a <code>K8sError</code> instead of logging a warning if any findings are present.  Acquire fails before the spec reaches the apiserver.  Set to <code>False</code> to revert to warning-only behaviour — operators must opt out explicitly.</td>
+<td><code>fleet_role</code></td>
+<td>Yes</td>
+<td><code>string</code></td>
+<td>IAM fleet role ARN. Validated before the fleet is created — see <a href="#fleet-role">Fleet role</a>.</td>
+</tr>
+<tr>
+<td><code>image_id</code></td>
+<td>Yes</td>
+<td><code>string</code></td>
+<td>AMI id or SSM parameter path.</td>
+</tr>
+<tr>
+<td><code>fleet_type</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td><code>"request"</code> (default) or <code>"maintain"</code>. See <a href="#fleet-types">Fleet types</a>.</td>
+</tr>
+<tr>
+<td><code>machine_types</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Instance type → weighted capacity. Expanded across subnets into overrides.</td>
+</tr>
+<tr>
+<td><code>subnet_ids</code></td>
+<td>No</td>
+<td><code>list[string]</code></td>
+<td>Target subnets. Each is combined with each instance type.</td>
+</tr>
+<tr>
+<td><code>security_group_ids</code></td>
+<td>No</td>
+<td><code>list[string]</code></td>
+<td>Security groups.</td>
+</tr>
+<tr>
+<td><code>price_type</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td><code>"spot"</code>, <code>"ondemand"</code>, or <code>"heterogeneous"</code>. Validated — any other value is rejected.</td>
+</tr>
+<tr>
+<td><code>percent_on_demand</code></td>
+<td>No</td>
+<td><code>integer</code></td>
+<td>On-demand share. Required when <code>price_type</code> is <code>"heterogeneous"</code>.</td>
+</tr>
+<tr>
+<td><code>allocation_strategy</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td>Spot allocation strategy, camelCase on the wire.</td>
+</tr>
+<tr>
+<td><code>max_price</code></td>
+<td>No</td>
+<td><code>float</code></td>
+<td>Maximum spot price per hour. Must be greater than zero.</td>
+</tr>
+<tr>
+<td><code>spot_fleet_request_expiry</code></td>
+<td>No</td>
+<td><code>integer</code></td>
+<td><strong>Minutes</strong> until the request expires, converted to <code>ValidUntil</code>.</td>
+</tr>
+<tr>
+<td><code>abis_instance_requirements</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Attribute-based instance selection, replacing instance-type overrides.</td>
+</tr>
+<tr>
+<td><code>max_machines</code></td>
+<td>No</td>
+<td><code>integer</code></td>
+<td>Maximum capacity this template may provision.</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td>Passed through as the fleet <code>Context</code> field.</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Tags applied to the <code>spot-fleet-request</code> resource.</td>
+</tr>
+<tr>
+<td><code>provider_api_spec</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Native <code>RequestSpotFleet</code> config. See <a href="#native-spec">Native spec</a>.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="reject-mode-is-on-by-default">Reject mode is on by default<a class="headerlink" href="#reject-mode-is-on-by-default" title="Permanent link">&para;</a></h3>
-<p>Reject mode is enabled in the default configuration.  Workloads that
-contain high-risk fields will be rejected at acquire time unless you
-explicitly opt out.</p>
-<p>When a spec contains one or more flagged fields, the acquire call raises
-<code>K8sError</code> with a message listing every finding:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>K8sError: Acquire rejected: pod spec contains high-risk fields —
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  high-risk pod-spec field detected: spec.hostNetwork = True;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  high-risk pod-spec field detected: spec.volumes[0].hostPath (data) = &#39;/var/data&#39;
-</code></pre></div>
-<p>The request is left in the <code>pending</code> state and no pod is created.</p>
-<h3 id="allow-legitimate-high-risk-fields-disable-reject-mode">Allow legitimate high-risk fields (disable reject mode)<a class="headerlink" href="#allow-legitimate-high-risk-fields-disable-reject-mode" title="Permanent link">&para;</a></h3>
-<p>If your workloads legitimately require one or more of the flagged fields,
-disable reject mode explicitly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;providers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;k8s&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">      </span><span class="nt">&quot;reject_high_risk_pod_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
-</code></pre></div>
-<p>Or via environment variable:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ORB_K8S_REJECT_HIGH_RISK_POD_FIELDS</span><span class="o">=</span><span class="nb">false</span>
-</code></pre></div>
-<p>Audit warnings will still fire unless you also set
-<code>audit_high_risk_pod_fields: false</code>.</p>
-<h3 id="disable-warnings-entirely">Disable warnings entirely<a class="headerlink" href="#disable-warnings-entirely" title="Permanent link">&para;</a></h3>
-<p>If your workloads legitimately require one or more of the flagged fields
-and you do not want any noise:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;providers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;k8s&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="nt">&quot;audit_high_risk_pod_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="nt">&quot;reject_high_risk_pod_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">}</span>
-</code></pre></div>
-<h2 id="interaction-with-the-native-spec-escape-hatch">Interaction with the native-spec escape hatch<a class="headerlink" href="#interaction-with-the-native-spec-escape-hatch" title="Permanent link">&para;</a></h2>
-<p>The audit applies equally to specs built by the typed spec builders
-(the default path) and to specs rendered via the
-<a href="../native-spec/">native-spec escape hatch</a>.  Both paths call
-<code>_audit_spec_body</code> with the final body before it is submitted to the
-apiserver.</p>
-<p>Native-spec dicts use camelCase keys (matching the Kubernetes API JSON
-schema); typed-builder objects use snake_case (matching the Python SDK's
-<code>to_dict()</code> output).  The audit function accepts both formats
-transparently.</p>
-<h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<h3 id="fleet-role">Fleet role<a class="headerlink" href="#fleet-role" title="Permanent link">&para;</a></h3>
+<p>Unlike the other AWS handlers, Spot Fleet will not provision without a fleet role, and the role is validated up front. <code>fleet_role</code> may be set on the template or inherited from the provider's <code>config.fleet_role</code>. In a multi-provider setup the role is read from the provider instance serving the request; with a single unnamed provider, ORB uses that provider's role.</p>
+<p>Accepted forms:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arn:aws:iam::&lt;account&gt;:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet</code></td>
+<td>Used as-is.</td>
+</tr>
+<tr>
+<td><code>arn:aws:iam::&lt;account&gt;:role/aws-ec2-spot-fleet-tagging-role</code></td>
+<td>Used as-is.</td>
+</tr>
+<tr>
+<td><code>AWSServiceRoleForEC2SpotFleet</code> or <code>AmazonEC2SpotFleetTaggingRole</code></td>
+<td>Expanded to the full service-linked role ARN using <code>sts:GetCallerIdentity</code> for the account id.</td>
+</tr>
+<tr>
+<td>An EC2 Fleet service-linked role ARN (<code>ec2fleet.amazonaws.com/AWSServiceRoleForEC2Fleet</code>)</td>
+<td>Converted to the equivalent Spot Fleet role.</td>
+</tr>
+<tr>
+<td>Any other ARN</td>
+<td>Treated as a custom role and verified with <code>iam:GetRole</code>. A lookup failure fails the request.</td>
+</tr>
+</tbody>
+</table>
+<p>An ARN that mentions <code>AWSServiceRoleForEC2SpotFleet</code> but does not match the expected pattern is rejected with an explicit error rather than being passed to AWS.</p>
+<h3 id="fleet-types">Fleet types<a class="headerlink" href="#fleet-types" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th><code>fleet_type</code></th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>request</code> (default)</td>
+<td>One-time request. EC2 fills the target capacity and does not replace interrupted instances.</td>
+</tr>
+<tr>
+<td><code>maintain</code></td>
+<td>EC2 keeps the fleet at target capacity, replacing interrupted or unhealthy instances. Sets <code>ReplaceUnhealthyInstances</code> and <code>TerminateInstancesWithExpiration</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Spot Fleet has no <code>instant</code> type — that is <a href="../ec2-fleet/#fleet-types">EC2 Fleet</a> only. Both Spot Fleet types return only a request id from the create call; instances arrive later.</p>
+<h3 id="allocation-strategies">Allocation strategies<a class="headerlink" href="#allocation-strategies" title="Permanent link">&para;</a></h3>
+<p>Spot Fleet uses camelCase on the wire, so template values pass through nearly unchanged. ORB still normalises hyphenated and snake_case input:</p>
+<table>
+<thead>
+<tr>
+<th>Template value</th>
+<th>Sent to AWS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lowestPrice</code> (default)</td>
+<td><code>lowestPrice</code></td>
+</tr>
+<tr>
+<td><code>capacityOptimized</code></td>
+<td><code>capacityOptimized</code></td>
+</tr>
+<tr>
+<td><code>capacityOptimizedPrioritized</code></td>
+<td><code>capacityOptimizedPrioritized</code></td>
+</tr>
+<tr>
+<td><code>priceCapacityOptimized</code></td>
+<td><code>priceCapacityOptimized</code></td>
+</tr>
+<tr>
+<td><code>diversified</code></td>
+<td><code>diversified</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>prioritized</code> is not a Spot Fleet spot strategy and falls back to <code>lowestPrice</code>.</p>
+<h3 id="overrides-priority-and-per-override-price">Overrides, priority, and per-override price<a class="headerlink" href="#overrides-priority-and-per-override-price" title="Permanent link">&para;</a></h3>
+<p><code>machine_types</code> and <code>subnet_ids</code> are expanded into the cartesian product of instance type and subnet. Spot Fleet overrides additionally carry:</p>
 <ul>
-<li><a href="../rbac.yaml">RBAC example</a> — minimum ServiceAccount permissions; RBAC is
-  the authoritative enforcement layer.</li>
-<li><a href="../native-spec/">Native spec escape hatch</a> — how to supply a full
-  Kubernetes API body when the typed builders do not cover a required field.</li>
-<li><a href="../configuration/">Configuration reference</a> — full list of
-  <code>K8sProviderConfig</code> fields.</li>
+<li><strong><code>Priority</code></strong> — a 1-based index in <code>machine_types</code> order, used by the <code>capacityOptimizedPrioritized</code> strategy.</li>
+<li><strong><code>SpotPrice</code></strong> — <code>max_price</code> repeated per override, when set.</li>
+</ul>
+<p>So <code>{"t3.medium": 2, "t3.large": 2}</code> across two subnets yields four overrides, with <code>t3.medium</code> at priority 1 and <code>t3.large</code> at priority 2 in each subnet.</p>
+<h3 id="pricing-mix">Pricing mix<a class="headerlink" href="#pricing-mix" title="Permanent link">&para;</a></h3>
+<p><code>TargetCapacity</code> is always the requested count. The on-demand portion is derived:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th><code>OnDemandTargetCapacity</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>price_type: "spot"</code></td>
+<td>Not set — all capacity is spot.</td>
+</tr>
+<tr>
+<td><code>price_type: "ondemand"</code></td>
+<td>The full requested count.</td>
+</tr>
+<tr>
+<td><code>price_type: "heterogeneous"</code> with <code>percent_on_demand: N</code></td>
+<td><code>max(1, requested * N / 100)</code> — at least one instance when a non-zero percentage is requested.</td>
+</tr>
+</tbody>
+</table>
+<p><code>percent_on_demand</code> is required for <code>heterogeneous</code> and the request is rejected without it. If <code>machine_types_ondemand</code> is set, <code>machine_types</code> must be set too, and every on-demand weight must be a positive integer.</p>
+<h3 id="request-expiry">Request expiry<a class="headerlink" href="#request-expiry" title="Permanent link">&para;</a></h3>
+<p><code>spot_fleet_request_expiry</code> is in <strong>minutes</strong>, not seconds. It becomes <code>ValidUntil</code> at <code>now + N minutes</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;spot_fleet_request_expiry&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="p">}</span>
+</code></pre></div>
+<p>The shipped provider default is 30 minutes. Combined with <code>maintain</code> and <code>TerminateInstancesWithExpiration</code>, instances are terminated when the request expires — so set this deliberately for long-running work.</p>
+<h3 id="attribute-based-instance-selection">Attribute-based instance selection<a class="headerlink" href="#attribute-based-instance-selection" title="Permanent link">&para;</a></h3>
+<p><code>abis_instance_requirements</code> replaces the instance-type overrides with <code>InstanceRequirements</code>, one override per subnet:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SpotFleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;abis_instance_requirements&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">&quot;vcpu_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">},</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">&quot;memory_mib&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4096</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32768</span><span class="p">},</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">&quot;local_storage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;required&quot;</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>When ABIS is present, <code>machine_types</code> is ignored and no <code>Priority</code> is emitted. See <a href="../../../user_guide/abis/">Attribute-Based Instance Selection</a>.</p>
+<h3 id="native-spec">Native spec<a class="headerlink" href="#native-spec" title="Permanent link">&para;</a></h3>
+<p>A <code>provider_api_spec</code> is rendered and used as the <code>SpotFleetRequestConfig</code>. ORB patches the launch template id and version into every entry of <code>LaunchSpecifications</code>, and injects ABIS <code>InstanceRequirements</code> into <code>LaunchTemplateConfigs[0].Overrides</code> when the spec does not already carry them. See the <a href="../../../api/native-spec-reference/">Native Spec Reference</a>.</p>
+<h2 id="machine-data">Machine data<a class="headerlink" href="#machine-data" title="Permanent link">&para;</a></h2>
+<p>Instances carry the Spot Fleet request id as <code>resource_id</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;instance_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i-0abc1234def567890&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;resource_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sfr-73fbd2ce-aa30-494c-8788-1cee4ffcbc12&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">&quot;private_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.0.1.42&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nt">&quot;instance_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;t3.large&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SpotFleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">&quot;provider_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nt">&quot;cloud_host_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i-0abc1234def567890&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nt">&quot;vcpus&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="nt">&quot;availability_zone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1a&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">    </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1&quot;</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="fulfilment-semantics">Fulfilment semantics<a class="headerlink" href="#fulfilment-semantics" title="Permanent link">&para;</a></h2>
+<p>Spot Fleet uses capacity-unit semantics, identical to EC2 Fleet's maintain and request types: <code>FulfilledCapacity &gt;= TargetCapacity</code> with nothing pending and nothing failed.</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fulfilled capacity meets target, nothing pending, nothing failed</td>
+<td><code>fulfilled</code></td>
+</tr>
+<tr>
+<td>Instances failed, none running, none pending</td>
+<td><code>failed</code></td>
+</tr>
+<tr>
+<td>Anything else</td>
+<td><code>in_progress</code></td>
+</tr>
+</tbody>
+</table>
+<p>Two intermediate cases are reported distinctly while no instances are visible yet: capacity allocated but instances not yet enumerable, and the fleet still waiting for capacity. Both are <code>in_progress</code>.</p>
+<p>Because capacity is measured in weighted units, a fleet with <code>{"t3.xlarge": 4}</code> can fulfil a 4-unit request with a single instance.</p>
+<p>For multi-fleet requests, all fleets must be fulfilled for the request to be fulfilled; any failure makes it failed; any partial makes it partial, and that aggregate is only terminal when every partial contributor is itself terminal.</p>
+<h2 id="release-behaviour">Release behaviour<a class="headerlink" href="#release-behaviour" title="Permanent link">&para;</a></h2>
+<p>Releases follow the shared fleet release flow, with the branch determined by fleet type:</p>
+<ol>
+<li><strong>Fetch fleet details</strong> with <code>describe_spot_fleet_requests</code> when the caller did not supply them.</li>
+<li><strong>Compute the decision</strong> from fleet type, current target capacity, and the summed <code>WeightedCapacity</code> of the instances being returned. Using weighted units rather than a count prevents AWS from refilling capacity that was decremented by the wrong amount.</li>
+<li><strong>Reduce capacity first for <code>maintain</code></strong> fleets, so EC2 does not launch replacements for instances about to be terminated. <code>request</code> fleets skip this — they never replace.</li>
+<li><strong>Terminate the instances.</strong></li>
+<li><strong>Cancel the fleet when empty.</strong> For <code>request</code> fleets ORB re-checks that no instances remain outside the batch before cancelling, guarding against eventual-consistency lag. For <code>maintain</code> fleets a full return cancels directly; a weighted-capacity edge case where arithmetic says partial but the fleet is physically empty triggers a capacity-zero call before cancellation.</li>
+<li><strong>Clean up the launch template</strong> ORB created for the request.</li>
+</ol>
+<p>Cancelling a request with no instances named cancels the whole fleet and terminates whatever it holds.</p>
+<h2 id="iam-permissions">IAM permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="s2">&quot;ec2:RequestSpotFleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="s2">&quot;ec2:CancelSpotFleetRequests&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="s2">&quot;ec2:ModifySpotFleetRequest&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="s2">&quot;ec2:DescribeSpotFleetRequests&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">        </span><span class="s2">&quot;ec2:DescribeSpotFleetInstances&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">        </span><span class="s2">&quot;ec2:DescribeInstances&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">        </span><span class="s2">&quot;ec2:TerminateInstances&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="s2">&quot;sts:GetCallerIdentity&quot;</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>sts:GetCallerIdentity</code> resolves short role names to full ARNs. <code>iam:GetRole</code> is additionally needed when <code>fleet_role</code> is a custom role, since validation calls it. <code>iam:PassRole</code> on the fleet role is required for EC2 to assume it. Launch template, tagging, and SSM permissions are shared across handlers — see the <a href="../../../deployment/iam-permissions/">IAM Permissions Guide</a>.</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Fleet role is mandatory</strong> and validated before provisioning; a bad role fails the request rather than the AWS call.</li>
+<li><strong>No <code>instant</code> fleet type</strong> — provisioning is always asynchronous, so the create call never returns instance ids.</li>
+<li><strong>Expiry is in minutes</strong> and defaults to 30 in the shipped config; combined with <code>maintain</code>, expiry terminates instances.</li>
+<li><strong>Spot interruptions are not surfaced as a distinct state</strong> — an interrupted instance appears as a capacity shortfall.</li>
+<li><strong><code>prioritized</code> allocation is unsupported</strong> and silently falls back to <code>lowestPrice</code>.</li>
+<li><strong>AWS considers the underlying API legacy</strong> with no planned investment — see the note at the top of this page.</li>
+</ul>
+<h2 id="migrating-to-ec2-fleet">Migrating to EC2 Fleet<a class="headerlink" href="#migrating-to-ec2-fleet" title="Permanent link">&para;</a></h2>
+<p>Most Spot Fleet templates convert to <a href="../ec2-fleet/">EC2 Fleet</a> by changing <code>provider_api</code> and adjusting four fields. ORB's template model is shared across both handlers, so <code>image_id</code>, <code>machine_types</code>, <code>subnet_ids</code>, <code>security_group_ids</code>, <code>tags</code>, and <code>abis_instance_requirements</code> carry over unchanged.</p>
+<table>
+<thead>
+<tr>
+<th>Spot Fleet</th>
+<th>EC2 Fleet</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>provider_api: "SpotFleet"</code></td>
+<td><code>provider_api: "EC2Fleet"</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>fleet_role</code> (required)</td>
+<td>Not used</td>
+<td>EC2 Fleet uses the EC2 Spot service-linked role in the account rather than a per-template role. Drop the field.</td>
+</tr>
+<tr>
+<td><code>fleet_type: "request"</code> / <code>"maintain"</code></td>
+<td>Same, plus <code>"instant"</code></td>
+<td>Behaviour is equivalent for the two shared types. <code>instant</code> is new and returns instance ids synchronously.</td>
+</tr>
+<tr>
+<td><code>allocation_strategy: "capacityOptimized"</code></td>
+<td><code>allocation_strategy: "capacityOptimized"</code></td>
+<td>Keep the camelCase value; ORB converts it to the hyphenated form EC2 Fleet expects.</td>
+</tr>
+<tr>
+<td><code>max_price</code> (per-override <code>SpotPrice</code>)</td>
+<td><code>max_price</code> (<code>MaxTotalPrice</code>)</td>
+<td><strong>Semantics change.</strong> A per-instance price cap becomes a total fleet spend cap. Recheck the value.</td>
+</tr>
+<tr>
+<td><code>spot_fleet_request_expiry</code></td>
+<td>Not supported</td>
+<td>EC2 Fleet has no ORB-exposed expiry field. Use a native spec <code>ValidUntil</code> if you need one.</td>
+</tr>
+<tr>
+<td>Per-override <code>Priority</code></td>
+<td>Not supported</td>
+<td>Only relevant with <code>capacityOptimizedPrioritized</code>. Keep Spot Fleet if you depend on it.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>max_price</code> change is the one to look at closely: <code>0.10</code> as a per-instance cap is not the same constraint as <code>0.10</code> as a total fleet cap, and a total cap set too low will throttle the whole fleet.</p>
+<p>Worked example — the Spot Fleet template from <a href="#quick-start">Quick start</a> as an EC2 Fleet template:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;template_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;batch-spot&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Batch Spot Fleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Diversified spot capacity for batch work&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC2Fleet&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span><span class="nt">&quot;image_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="nt">&quot;machine_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;t3.medium&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.large&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.xlarge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span><span class="nt">&quot;subnet_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;subnet-0f984e48e6e899311&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;subnet-1a2b3c4d5e6f7a8b9&quot;</span><span class="p">],</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">  </span><span class="nt">&quot;security_group_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sg-0528dfedb6d763b16&quot;</span><span class="p">],</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">  </span><span class="nt">&quot;price_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;spot&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">  </span><span class="nt">&quot;allocation_strategy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;capacityOptimized&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">  </span><span class="nt">&quot;max_machines&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">  </span><span class="nt">&quot;metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;fleet_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;request&quot;</span><span class="p">},</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev&quot;</span><span class="p">}</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>fleet_role</code> and <code>spot_fleet_request_expiry</code> are gone, and <code>max_price</code> is omitted rather than carried over at its old value. Validate the new template before switching traffic to it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>orb<span class="w"> </span>templates<span class="w"> </span>validate<span class="w"> </span>--file<span class="w"> </span>batch-spot-ec2fleet.json
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>orb<span class="w"> </span>machines<span class="w"> </span>request<span class="w"> </span>batch-spot-ec2fleet<span class="w"> </span><span class="m">1</span>
+</code></pre></div>
+<p>Existing Spot Fleet requests are unaffected by adding an EC2 Fleet template — the two can run side by side while you migrate.</p>
+<h2 id="related">Related<a class="headerlink" href="#related" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../ec2-fleet/">EC2 Fleet</a> — newer fleet API with instant provisioning and richer pricing mixes</li>
+<li><a href="../asg/">Auto Scaling Groups</a> — health-checked, self-replacing capacity</li>
+<li><a href="../run-instances/">EC2 Instances (RunInstances)</a> — synchronous single-type launches</li>
+<li><a href="../../../deployment/iam-permissions/">IAM Permissions Guide</a> — service-linked role setup</li>
 </ul>
 
 

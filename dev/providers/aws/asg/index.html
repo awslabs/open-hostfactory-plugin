@@ -10,9 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/providers/k8s/security-hardening/">
+        <link rel="canonical" href="https://finos.github.io/open-resource-broker/dev/providers/aws/asg/">
       
       
+        <link rel="prev" href="../run-instances/">
+      
+      
+        <link rel="next" href="../spot-fleet/">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>Security hardening - Open Resource Broker</title>
+        <title>Auto Scaling Groups - Open Resource Broker</title>
       
     
     
@@ -78,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#security-hardening" class="md-skip">
+        <a href="#aws-auto-scaling-group-provider" class="md-skip">
           Skip to content
         </a>
       
@@ -115,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Security hardening
+              Auto Scaling Groups
             
           </span>
         </div>
@@ -348,6 +352,8 @@
   
   
   
+    
+  
   
     
     
@@ -355,11 +361,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../aws/run-instances/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../run-instances/" class="md-tabs__link">
           
   
   
@@ -3075,28 +3083,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
-        
-          
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -3114,7 +3125,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -3129,28 +3140,31 @@
                 
   
   
+    
   
   
+  
     
     
     
     
       
       
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
         
           
+          
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1" >
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" checked>
         
           
-          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="">
             
   
   
@@ -3168,7 +3182,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -3186,7 +3200,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/run-instances/" class="md-nav__link">
+      <a href="../run-instances/" class="md-nav__link">
         
   
   
@@ -3211,10 +3225,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../aws/asg/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Auto Scaling Groups
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -3230,6 +3271,247 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-create-a-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Create a template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-request-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Request capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-check-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Check status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-return-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Return capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#template-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Template configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Template configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Group sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weighted-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weighted capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pricing-and-mixed-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pricing and mixed instances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allocation-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Allocation strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attribute-based-instance-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribute-based instance selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native spec
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#machine-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fulfilment-semantics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fulfilment semantics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM permissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -3242,7 +3524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/spot-fleet/" class="md-nav__link">
+      <a href="../spot-fleet/" class="md-nav__link">
         
   
   
@@ -3270,7 +3552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/ec2-fleet/" class="md-nav__link">
+      <a href="../ec2-fleet/" class="md-nav__link">
         
   
   
@@ -3298,7 +3580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws/microvm/" class="md-nav__link">
+      <a href="../microvm/" class="md-nav__link">
         
   
   
@@ -3340,10 +3622,13 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
@@ -3352,7 +3637,7 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="">
             
   
   
@@ -3388,7 +3673,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../k8s/" class="md-nav__link">
         
   
   
@@ -3416,7 +3701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../discovery/" class="md-nav__link">
+      <a href="../../k8s/discovery/" class="md-nav__link">
         
   
   
@@ -3444,7 +3729,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../configuration/" class="md-nav__link">
+      <a href="../../k8s/configuration/" class="md-nav__link">
         
   
   
@@ -3472,7 +3757,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../handlers/" class="md-nav__link">
+      <a href="../../k8s/handlers/" class="md-nav__link">
         
   
   
@@ -3500,7 +3785,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../auth/" class="md-nav__link">
+      <a href="../../k8s/auth/" class="md-nav__link">
         
   
   
@@ -3528,7 +3813,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../migrating-from-k8s-legacy/" class="md-nav__link">
+      <a href="../../k8s/migrating-from-k8s-legacy/" class="md-nav__link">
         
   
   
@@ -3556,7 +3841,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plugin-authoring/" class="md-nav__link">
+      <a href="../../k8s/plugin-authoring/" class="md-nav__link">
         
   
   
@@ -5181,44 +5466,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-audited" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What is audited
+        Quick start
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-warnings-fire" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When warnings fire
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
+    <nav class="md-nav" aria-label="Quick start">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#reject-mode-is-on-by-default" class="md-nav__link">
+  <a href="#1-create-a-template" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reject mode is on by default
+        1. Create a template
       
     </span>
   </a>
@@ -5226,10 +5489,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#allow-legitimate-high-risk-fields-disable-reject-mode" class="md-nav__link">
+  <a href="#2-request-capacity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Allow legitimate high-risk fields (disable reject mode)
+        2. Request capacity
       
     </span>
   </a>
@@ -5237,10 +5500,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#disable-warnings-entirely" class="md-nav__link">
+  <a href="#3-check-status" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Disable warnings entirely
+        3. Check status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-return-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Return capacity
       
     </span>
   </a>
@@ -5253,10 +5527,104 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#interaction-with-the-native-spec-escape-hatch" class="md-nav__link">
+  <a href="#template-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interaction with the native-spec escape hatch
+        Template configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Template configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#top-level-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Top-level fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Group sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weighted-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weighted capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pricing-and-mixed-instances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pricing and mixed instances
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#allocation-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Allocation strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#attribute-based-instance-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attribute-based instance selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-spec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Native spec
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#machine-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Machine data
       
     </span>
   </a>
@@ -5264,10 +5632,54 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
+  <a href="#fulfilment-semantics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        See also
+        Fulfilment semantics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-behaviour" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release behaviour
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#iam-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IAM permissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related
       
     </span>
   </a>
@@ -5294,166 +5706,369 @@
   
 
 
-<h1 id="security-hardening">Security hardening<a class="headerlink" href="#security-hardening" title="Permanent link">&para;</a></h1>
-<p>ORB includes a <strong>pod-spec security audit</strong> that inspects every rendered pod
-spec at acquire time and logs a <code>WARNING</code> for each high-risk field it finds.
-The audit is on by default and costs nothing at steady state — most specs are
-clean and the function returns immediately after the field checks.</p>
-<h2 id="what-is-audited">What is audited<a class="headerlink" href="#what-is-audited" title="Permanent link">&para;</a></h2>
-<p>The following fields are inspected for every spec submitted through any of the
-four workload handlers (Pod, Deployment, StatefulSet, Job).</p>
-<table>
-<thead>
-<tr>
-<th>Field path</th>
-<th>Condition</th>
-<th>Risk</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>spec.hostNetwork</code></td>
-<td><code>== true</code></td>
-<td>Shares the host's network namespace; pods can sniff host traffic and bind privileged ports.</td>
-</tr>
-<tr>
-<td><code>spec.hostPID</code></td>
-<td><code>== true</code></td>
-<td>Shares the host PID namespace; processes inside the pod can inspect or signal host processes.</td>
-</tr>
-<tr>
-<td><code>spec.hostIPC</code></td>
-<td><code>== true</code></td>
-<td>Shares the host IPC namespace; enables shared-memory attacks against co-located workloads.</td>
-</tr>
-<tr>
-<td><code>spec.volumes[*].hostPath</code></td>
-<td>any non-empty path</td>
-<td>Mounts a path from the host filesystem; a misconfigured or compromised pod can read or write host files.</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.privileged</code></td>
-<td><code>== true</code></td>
-<td>Grants effectively-root access to the host kernel.</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.allowPrivilegeEscalation</code></td>
-<td><code>== true</code></td>
-<td>Allows a process inside the container to gain more privileges than its parent.</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.runAsUser</code></td>
-<td><code>== 0</code></td>
-<td>Runs the container's primary process as root (UID 0).</td>
-</tr>
-<tr>
-<td><code>spec.containers[*].securityContext.capabilities.add</code></td>
-<td>contains <code>SYS_ADMIN</code>, <code>NET_ADMIN</code>, or <code>NET_RAW</code></td>
-<td>Grants kernel capabilities that can be used for privilege escalation or network manipulation.</td>
-</tr>
-</tbody>
-</table>
-<p>The same checks are applied to <code>spec.initContainers</code>.</p>
-<blockquote>
-<p><strong>Note:</strong> The audit is informational.  RBAC on the Kubernetes apiserver
-remains the authoritative enforcement point.  The audit gives operators
-visibility into what they are submitting without blocking workloads at
-the policy level (unless reject mode is enabled — see below).</p>
-</blockquote>
-<h2 id="when-warnings-fire">When warnings fire<a class="headerlink" href="#when-warnings-fire" title="Permanent link">&para;</a></h2>
-<p>A warning is emitted once per acquire call, before the pod is submitted to
-the apiserver.  Each finding produces one log line at <code>WARNING</code> level:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>WARN: high-risk pod-spec field detected: spec.hostNetwork = True
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>WARN: high-risk pod-spec field detected: spec.volumes[0].hostPath (scratch) = &#39;/var/data&#39;
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>WARN: high-risk pod-spec field detected: spec.containers[0] (worker).securityContext.privileged = True
+<h1 id="aws-auto-scaling-group-provider">AWS Auto Scaling Group Provider<a class="headerlink" href="#aws-auto-scaling-group-provider" title="Permanent link">&para;</a></h1>
+<p>The ASG handler provisions capacity through an <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html">Auto Scaling Group</a>. Each ORB request creates a dedicated ASG, sized to the requested count, which AWS then keeps at that size — replacing instances that fail EC2 health checks.</p>
+<p>Use it when you want AWS to maintain capacity for you across availability zones. Use <a href="../ec2-fleet/">EC2 Fleet</a> or <a href="../spot-fleet/">Spot Fleet</a> when you want fleet-style provisioning without a long-lived scaling group, or <a href="../run-instances/">RunInstances</a> for one-shot launches.</p>
+<h2 id="quick-start">Quick start<a class="headerlink" href="#quick-start" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;orb-py[aws]&quot;</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>orb<span class="w"> </span>init
 </code></pre></div>
-<p>The log lines appear in the ORB application log (whichever sink the operator
-has configured).  Each line identifies the exact field path, the container or
-volume name, and the value that triggered the warning so the operator can
-locate the relevant template section quickly.</p>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<p>Two fields in <code>K8sProviderConfig</code> control the audit:</p>
+<h3 id="1-create-a-template">1. Create a template<a class="headerlink" href="#1-create-a-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">&quot;template_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;service-tier&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Service Tier ASG&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Long-running workers with health-checked replacement&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASG&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">&quot;image_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nt">&quot;machine_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;t3.medium&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.xlarge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nt">&quot;subnet_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;subnet-0f984e48e6e899311&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;subnet-1a2b3c4d5e6f7a8b9&quot;</span><span class="p">],</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">&quot;security_group_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sg-0528dfedb6d763b16&quot;</span><span class="p">],</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="nt">&quot;price_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ondemand&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="nt">&quot;max_machines&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;Environment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;prod&quot;</span><span class="p">}</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="2-request-capacity">2. Request capacity<a class="headerlink" href="#2-request-capacity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>orb<span class="w"> </span>machines<span class="w"> </span>request<span class="w"> </span>service-tier<span class="w"> </span><span class="m">6</span>
+</code></pre></div>
+<p>With the weights above, six capacity units is satisfied by three <code>t3.medium</code> (2 each), or one <code>t3.medium</code> plus one <code>t3.xlarge</code>, or any other combination summing to 6 — see <a href="#weighted-capacity">Weighted capacity</a>.</p>
+<h3 id="3-check-status">3. Check status<a class="headerlink" href="#3-check-status" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>orb<span class="w"> </span>requests<span class="w"> </span>status<span class="w"> </span>&lt;request-id&gt;
+</code></pre></div>
+<h3 id="4-return-capacity">4. Return capacity<a class="headerlink" href="#4-return-capacity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>orb<span class="w"> </span>machines<span class="w"> </span><span class="k">return</span><span class="w"> </span>i-0abc1234def567890<span class="w"> </span>i-0def5678abc123456
+</code></pre></div>
+<h2 id="template-configuration">Template configuration<a class="headerlink" href="#template-configuration" title="Permanent link">&para;</a></h2>
+<p>The handler uses <code>provider_api: "ASG"</code>. Each request creates a launch template, then calls <code>create_auto_scaling_group</code> with a name of the form <code>&lt;asg prefix&gt;&lt;request-id&gt;</code>, where the prefix comes from <code>resource.prefixes.asg</code> and is empty unless you configure one.</p>
+<h3 id="top-level-fields">Top-level fields<a class="headerlink" href="#top-level-fields" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
 <th>Field</th>
+<th>Required</th>
 <th>Type</th>
-<th>Default</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>audit_high_risk_pod_fields</code></td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-<td>Enable or disable the entire audit.  Set to <code>False</code> to silence all warnings.</td>
+<td><code>provider_api</code></td>
+<td>Yes</td>
+<td><code>string</code></td>
+<td>Must be <code>"ASG"</code></td>
 </tr>
 <tr>
-<td><code>reject_high_risk_pod_fields</code></td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-<td>When <code>True</code> (default), ORB raises a <code>K8sError</code> instead of logging a warning if any findings are present.  Acquire fails before the spec reaches the apiserver.  Set to <code>False</code> to revert to warning-only behaviour — operators must opt out explicitly.</td>
+<td><code>image_id</code></td>
+<td>Yes</td>
+<td><code>string</code></td>
+<td>AMI id or SSM parameter path.</td>
+</tr>
+<tr>
+<td><code>machine_types</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Instance type → weighted capacity. Drives the <code>MixedInstancesPolicy</code> overrides.</td>
+</tr>
+<tr>
+<td><code>subnet_ids</code></td>
+<td>No</td>
+<td><code>list[string]</code></td>
+<td>Becomes <code>VPCZoneIdentifier</code> (comma-joined). Supply subnets in several AZs for multi-AZ placement.</td>
+</tr>
+<tr>
+<td><code>security_group_ids</code></td>
+<td>No</td>
+<td><code>list[string]</code></td>
+<td>Security groups, applied via the launch template.</td>
+</tr>
+<tr>
+<td><code>price_type</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td><code>"ondemand"</code> (default), <code>"spot"</code>, or <code>"heterogeneous"</code>.</td>
+</tr>
+<tr>
+<td><code>percent_on_demand</code></td>
+<td>No</td>
+<td><code>integer</code></td>
+<td>0–100. On-demand share of capacity above the base. Forces a <code>MixedInstancesPolicy</code>.</td>
+</tr>
+<tr>
+<td><code>allocation_strategy</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td>Spot allocation strategy. Converted to the ASG hyphenated form.</td>
+</tr>
+<tr>
+<td><code>max_price</code></td>
+<td>No</td>
+<td><code>float</code></td>
+<td>Maximum spot price per hour.</td>
+</tr>
+<tr>
+<td><code>abis_instance_requirements</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Attribute-based instance selection. Takes precedence over <code>machine_types</code>.</td>
+</tr>
+<tr>
+<td><code>max_machines</code></td>
+<td>No</td>
+<td><code>integer</code></td>
+<td>Maximum capacity this template may provision.</td>
+</tr>
+<tr>
+<td><code>launch_template_id</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td>Pin an existing launch template.</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>No</td>
+<td><code>string</code></td>
+<td>Passed through as the ASG <code>Context</code> field.</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Tags applied to the ASG with <code>PropagateAtLaunch: true</code>.</td>
+</tr>
+<tr>
+<td><code>provider_api_spec</code></td>
+<td>No</td>
+<td><code>object</code></td>
+<td>Native <code>CreateAutoScalingGroup</code> parameters. See <a href="#native-spec">Native spec</a>.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="reject-mode-is-on-by-default">Reject mode is on by default<a class="headerlink" href="#reject-mode-is-on-by-default" title="Permanent link">&para;</a></h3>
-<p>Reject mode is enabled in the default configuration.  Workloads that
-contain high-risk fields will be rejected at acquire time unless you
-explicitly opt out.</p>
-<p>When a spec contains one or more flagged fields, the acquire call raises
-<code>K8sError</code> with a message listing every finding:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>K8sError: Acquire rejected: pod spec contains high-risk fields —
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  high-risk pod-spec field detected: spec.hostNetwork = True;
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  high-risk pod-spec field detected: spec.volumes[0].hostPath (data) = &#39;/var/data&#39;
+<h3 id="group-sizing">Group sizing<a class="headerlink" href="#group-sizing" title="Permanent link">&para;</a></h3>
+<p>ORB derives the group's bounds from the requested count rather than exposing them as template fields:</p>
+<table>
+<thead>
+<tr>
+<th>ASG field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MinSize</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>MaxSize</code></td>
+<td><code>requested_count * 2</code></td>
+</tr>
+<tr>
+<td><code>DesiredCapacity</code></td>
+<td><code>requested_count</code></td>
+</tr>
+<tr>
+<td><code>DefaultCooldown</code></td>
+<td><code>300</code></td>
+</tr>
+<tr>
+<td><code>HealthCheckType</code></td>
+<td><code>EC2</code></td>
+</tr>
+<tr>
+<td><code>HealthCheckGracePeriod</code></td>
+<td><code>300</code></td>
+</tr>
+<tr>
+<td><code>NewInstancesProtectedFromScaleIn</code></td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>MinSize: 0</code> lets ORB scale the group to empty on return instead of fighting a floor. <code>MaxSize</code> is set to twice the request so AWS has headroom to replace unhealthy instances. Scale-in protection is on so AWS does not reclaim instances ORB has handed out to a scheduler.</p>
+<p>Override any of these with a <a href="#native-spec">native spec</a> if your workload needs different bounds, a different health check type, or ELB health checks.</p>
+<h3 id="weighted-capacity">Weighted capacity<a class="headerlink" href="#weighted-capacity" title="Permanent link">&para;</a></h3>
+<p>Values in <code>machine_types</code> become <code>WeightedCapacity</code> on each <code>MixedInstancesPolicy</code> override. <code>DesiredCapacity</code> is then measured in those units, not in instances:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">&quot;machine_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;t3.medium&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.xlarge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">}</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="p">}</span>
 </code></pre></div>
-<p>The request is left in the <code>pending</code> state and no pod is created.</p>
-<h3 id="allow-legitimate-high-risk-fields-disable-reject-mode">Allow legitimate high-risk fields (disable reject mode)<a class="headerlink" href="#allow-legitimate-high-risk-fields-disable-reject-mode" title="Permanent link">&para;</a></h3>
-<p>If your workloads legitimately require one or more of the flagged fields,
-disable reject mode explicitly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;providers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">&quot;k8s&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">      </span><span class="nt">&quot;reject_high_risk_pod_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<p>A request for 8 units can be satisfied by four <code>t3.medium</code>, two <code>t3.xlarge</code>, or one of each plus one more <code>t3.medium</code>. AWS picks the mix. This is why the fulfilment check sums weights rather than counting instances — see <a href="#fulfilment-semantics">Fulfilment semantics</a>.</p>
+<p>Weights of <code>0</code> or omitted values leave <code>WeightedCapacity</code> unset, which AWS treats as 1.</p>
+<h3 id="pricing-and-mixed-instances">Pricing and mixed instances<a class="headerlink" href="#pricing-and-mixed-instances" title="Permanent link">&para;</a></h3>
+<p>The shape of the generated config depends on pricing:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Generated config</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>price_type: "ondemand"</code>, no <code>percent_on_demand</code></td>
+<td><code>MixedInstancesPolicy</code> with instance-type overrides (or a plain <code>LaunchTemplate</code> when neither <code>machine_types</code> nor ABIS is set). No <code>InstancesDistribution</code>.</td>
+</tr>
+<tr>
+<td><code>price_type: "spot"</code></td>
+<td><code>InstancesDistribution</code> with <code>OnDemandPercentageAboveBaseCapacity: 0</code> — all capacity above the base is spot.</td>
+</tr>
+<tr>
+<td><code>price_type: "heterogeneous"</code> or any <code>percent_on_demand</code></td>
+<td><code>InstancesDistribution</code> with <code>OnDemandPercentageAboveBaseCapacity: &lt;percent_on_demand&gt;</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>OnDemandBaseCapacity</code> is always <code>0</code>, so the percentage governs the whole group. When <code>allocation_strategy</code> is set it becomes <code>SpotAllocationStrategy</code>.</p>
+<p>Example 30% on-demand, 70% spot:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">&quot;template_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;mixed-tier&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASG&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">&quot;machine_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;t3.medium&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.large&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;t3.xlarge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">},</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">&quot;price_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;heterogeneous&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">&quot;percent_on_demand&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">&quot;allocation_strategy&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lowestPrice&quot;</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
 </code></pre></div>
-<p>Or via environment variable:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ORB_K8S_REJECT_HIGH_RISK_POD_FIELDS</span><span class="o">=</span><span class="nb">false</span>
+<h3 id="allocation-strategies">Allocation strategies<a class="headerlink" href="#allocation-strategies" title="Permanent link">&para;</a></h3>
+<p>ASG uses the hyphenated wire format. ORB accepts camelCase, hyphenated, or snake_case in templates and converts on the way out:</p>
+<table>
+<thead>
+<tr>
+<th>Template value</th>
+<th>Sent to AWS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lowestPrice</code></td>
+<td><code>lowest-price</code></td>
+</tr>
+<tr>
+<td><code>capacityOptimized</code></td>
+<td><code>capacity-optimized</code></td>
+</tr>
+<tr>
+<td><code>capacityOptimizedPrioritized</code></td>
+<td><code>capacity-optimized-prioritized</code></td>
+</tr>
+<tr>
+<td><code>priceCapacityOptimized</code></td>
+<td><code>price-capacity-optimized</code></td>
+</tr>
+<tr>
+<td><code>diversified</code></td>
+<td><code>diversified</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>lowest-price</code> is the default when no strategy is set. Note that <code>prioritized</code> has no ASG spot equivalent and falls back to the default.</p>
+<h3 id="attribute-based-instance-selection">Attribute-based instance selection<a class="headerlink" href="#attribute-based-instance-selection" title="Permanent link">&para;</a></h3>
+<p>Setting <code>abis_instance_requirements</code> replaces the instance-type overrides with a single <code>InstanceRequirements</code> override, letting AWS choose any matching type:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASG&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">&quot;abis_instance_requirements&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="nt">&quot;vcpu_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">},</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">&quot;memory_mib&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4096</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32768</span><span class="p">},</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">&quot;cpu_manufacturers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;intel&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;amd&quot;</span><span class="p">]</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">}</span>
 </code></pre></div>
-<p>Audit warnings will still fire unless you also set
-<code>audit_high_risk_pod_fields: false</code>.</p>
-<h3 id="disable-warnings-entirely">Disable warnings entirely<a class="headerlink" href="#disable-warnings-entirely" title="Permanent link">&para;</a></h3>
-<p>If your workloads legitimately require one or more of the flagged fields
-and you do not want any noise:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;providers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">&quot;k8s&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="nt">&quot;audit_high_risk_pod_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">      </span><span class="nt">&quot;reject_high_risk_pod_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="p">}</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">}</span>
+<p>When ABIS is present, <code>machine_types</code> is ignored. The requirements are also injected into a native spec that omits them. See <a href="../../../user_guide/abis/">Attribute-Based Instance Selection</a>.</p>
+<h3 id="native-spec">Native spec<a class="headerlink" href="#native-spec" title="Permanent link">&para;</a></h3>
+<p>A <code>provider_api_spec</code> is rendered and merged over the generated config. ORB always enforces <code>AutoScalingGroupName</code>, defaults <code>NewInstancesProtectedFromScaleIn</code> to <code>true</code>, and patches the launch template id and version into either <code>MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification</code> or the top-level <code>LaunchTemplate</code>, whichever the spec uses. See the <a href="../../../api/native-spec-reference/">Native Spec Reference</a>.</p>
+<h2 id="machine-data">Machine data<a class="headerlink" href="#machine-data" title="Permanent link">&para;</a></h2>
+<p>Instances carry the ASG name as <code>resource_id</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;instance_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i-0abc1234def567890&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;resource_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;req-abc123def456&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;running&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">&quot;private_ip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.0.1.42&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nt">&quot;instance_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;t3.medium&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">&quot;provider_api&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASG&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">&quot;provider_data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nt">&quot;cloud_host_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i-0abc1234def567890&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nt">&quot;vcpus&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="nt">&quot;availability_zone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1a&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">    </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1&quot;</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="p">}</span>
 </code></pre></div>
-<h2 id="interaction-with-the-native-spec-escape-hatch">Interaction with the native-spec escape hatch<a class="headerlink" href="#interaction-with-the-native-spec-escape-hatch" title="Permanent link">&para;</a></h2>
-<p>The audit applies equally to specs built by the typed spec builders
-(the default path) and to specs rendered via the
-<a href="../native-spec/">native-spec escape hatch</a>.  Both paths call
-<code>_audit_spec_body</code> with the final body before it is submitted to the
-apiserver.</p>
-<p>Native-spec dicts use camelCase keys (matching the Kubernetes API JSON
-schema); typed-builder objects use snake_case (matching the Python SDK's
-<code>to_dict()</code> output).  The audit function accepts both formats
-transparently.</p>
-<h2 id="see-also">See also<a class="headerlink" href="#see-also" title="Permanent link">&para;</a></h2>
+<p>Instances in <code>Terminating</code>, <code>Terminated</code>, <code>Detaching</code>, and <code>Detached</code> lifecycle states are excluded from the reported set.</p>
+<h2 id="fulfilment-semantics">Fulfilment semantics<a class="headerlink" href="#fulfilment-semantics" title="Permanent link">&para;</a></h2>
+<p>The check is capacity-based, not instance-based: ORB sums <code>WeightedCapacity</code> across <code>InService</code> instances and compares that to <code>DesiredCapacity</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>In-service weighted capacity <code>&gt;= DesiredCapacity</code>, nothing pending, nothing failed</td>
+<td><code>fulfilled</code></td>
+</tr>
+<tr>
+<td>Instances in a failure state, none in service, none pending</td>
+<td><code>failed</code></td>
+</tr>
+<tr>
+<td>Anything else</td>
+<td><code>in_progress</code></td>
+</tr>
+</tbody>
+</table>
+<p>Instances in <code>Pending</code>, <code>Pending:Wait</code>, and <code>Pending:Proceed</code> count as pending. Unweighted groups contribute 1 unit per in-service instance, so the same rule covers both cases.</p>
+<p>Because ASG keeps reconciling toward <code>DesiredCapacity</code>, this handler has no terminal <code>partial</code> state — a shortfall stays <code>in_progress</code> while AWS keeps trying. <code>requires_async_polling</code> is <code>true</code>: the create call returns only the group name, and instances arrive later.</p>
+<p>When one request spans several ASGs, all groups must be fulfilled for the request to be fulfilled; any failure makes it failed, any partial makes it partial, and otherwise it stays in progress.</p>
+<h2 id="release-behaviour">Release behaviour<a class="headerlink" href="#release-behaviour" title="Permanent link">&para;</a></h2>
+<p>Returning instances from an ASG is more involved than terminating them, because AWS would otherwise replace them immediately.</p>
+<ol>
+<li><strong>Group the instances.</strong> ORB maps each instance to its ASG, from the request's stored resource mapping when available, otherwise via <code>describe_auto_scaling_instances</code>. Instances that belong to no ASG are terminated directly.</li>
+<li><strong>Filter to current members.</strong> Only instances in <code>InService</code> or <code>Standby</code> are processed. This is an idempotency guard: an instance already detached or terminated had its capacity decremented on the first call, and counting it again would double-decrement.</li>
+<li><strong>Terminate weight-aware.</strong> Each instance is terminated with <code>terminate_instance_in_auto_scaling_group</code> and <code>ShouldDecrementDesiredCapacity: true</code>. This decrements <code>DesiredCapacity</code> by the instance's <code>WeightedCapacity</code> rather than by 1, which is symmetric with how weighted groups scale up. <code>detach_instances</code> would decrement by count and drift the group's capacity.</li>
+<li><strong>Clamp <code>MinSize</code>.</strong> The group is re-described to read live <code>DesiredCapacity</code>, and <code>MinSize</code> is lowered if it now exceeds it.</li>
+<li><strong>Delete when empty.</strong> <code>DesiredCapacity</code> of zero means the group is empty, so ORB deletes the ASG (<code>ForceDelete: true</code>) and cleans up the launch template.</li>
+</ol>
+<p>Cancelling a request deletes the ASG directly.</p>
+<p>A separate pre-termination path (<code>reduce_capacity</code>) lowers <code>DesiredCapacity</code> and <code>MinSize</code> before instances are terminated by other means. Every failure in that path is warning-only, so a capacity-reduction hiccup never blocks a return.</p>
+<h2 id="iam-permissions">IAM permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="p">{</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="s2">&quot;autoscaling:CreateAutoScalingGroup&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="s2">&quot;autoscaling:UpdateAutoScalingGroup&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="s2">&quot;autoscaling:DeleteAutoScalingGroup&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="s2">&quot;autoscaling:DescribeAutoScalingGroups&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">        </span><span class="s2">&quot;autoscaling:DescribeAutoScalingInstances&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">        </span><span class="s2">&quot;autoscaling:CreateOrUpdateTags&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">        </span><span class="s2">&quot;autoscaling:SetDesiredCapacity&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="s2">&quot;autoscaling:TerminateInstanceInAutoScalingGroup&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="s2">&quot;ec2:DescribeInstances&quot;</span><span class="p">,</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">        </span><span class="s2">&quot;ec2:TerminateInstances&quot;</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">      </span><span class="p">],</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="p">}</span>
+</code></pre></div>
+<p>ASG tagging uses <code>autoscaling:CreateOrUpdateTags</code> rather than <code>ec2:CreateTags</code>. Tag failures are non-fatal: the group is created and the request proceeds without <code>orb:</code> tags. Launch template and SSM permissions are shared with the other handlers — see the <a href="../../../deployment/iam-permissions/">IAM Permissions Guide</a>.</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><a href="../rbac.yaml">RBAC example</a> — minimum ServiceAccount permissions; RBAC is
-  the authoritative enforcement layer.</li>
-<li><a href="../native-spec/">Native spec escape hatch</a> — how to supply a full
-  Kubernetes API body when the typed builders do not cover a required field.</li>
-<li><a href="../configuration/">Configuration reference</a> — full list of
-  <code>K8sProviderConfig</code> fields.</li>
+<li><strong>Group bounds are derived, not configured</strong> — <code>MinSize</code>, <code>MaxSize</code>, cooldown, and health check settings come from the requested count unless you supply a native spec.</li>
+<li><strong>EC2 health checks only</strong> by default; ELB health checks need a native spec.</li>
+<li><strong>No scaling policies or lifecycle hooks</strong> are created. ORB reads <code>instance_protection</code> and <code>lifecycle_hooks</code> attributes if a template carries them, but they are not part of the template schema.</li>
+<li><strong>No terminal partial state</strong> — an under-filled group reports <code>in_progress</code> while AWS keeps reconciling, so a request for capacity that cannot be satisfied will not settle on its own.</li>
+<li><strong>One ASG per request</strong> — ORB does not reuse an existing group across requests.</li>
+</ul>
+<h2 id="related">Related<a class="headerlink" href="#related" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../ec2-fleet/">EC2 Fleet</a> — fleet provisioning with instant, request, and maintain modes</li>
+<li><a href="../spot-fleet/">Spot Fleet</a> — spot-focused diversification</li>
+<li><a href="../run-instances/">EC2 Instances (RunInstances)</a> — synchronous single-type launches</li>
+<li><a href="../../../user_guide/abis/">Attribute-Based Instance Selection</a> — describing requirements instead of instance types</li>
 </ul>
 
 

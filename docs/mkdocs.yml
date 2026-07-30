@@ -166,6 +166,12 @@ nav:
       - Deployment Scenarios: hostfactory/deployment_scenarios.md
       - Supported APIs: hostfactory/supported-apis.md
   - Providers:
+    - AWS:
+      - EC2 Instances (RunInstances): providers/aws/run-instances.md
+      - Auto Scaling Groups: providers/aws/asg.md
+      - Spot Fleet: providers/aws/spot-fleet.md
+      - EC2 Fleet: providers/aws/ec2-fleet.md
+      - Lambda MicroVMs: providers/aws/microvm.md
     - Kubernetes:
       - Overview: providers/k8s/index.md
       - Infrastructure Discovery: providers/k8s/discovery.md
